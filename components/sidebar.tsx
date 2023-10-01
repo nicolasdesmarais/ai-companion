@@ -40,10 +40,17 @@ export const Sidebar = ({
     },
     {
       icon: Settings,
+      href: '/dashboard',
+      label: "Tools",
+      pro: false,
+    },
+    {
+      icon: Settings,
       href: '/settings',
       label: "Settings",
       pro: false,
     },
+    
   ];
 
   return (
