@@ -3,6 +3,7 @@
 import { StreamingTextResponse, LangChainStream } from "ai";
 import { auth, currentUser } from "@clerk/nextjs";
 import { Replicate } from "langchain/llms/replicate";
+import { OpenAI } from "langchain/llms/openai";
 import { CallbackManager } from "langchain/callbacks";
 import { NextResponse } from "next/server";
 
@@ -49,14 +50,13 @@ export async function POST(
       return new NextResponse("Companion not found", { status: 404 });
     }
 
-    console.log(companion)
     const name = companion.id;
     const companion_file_name = name + ".txt";
 
     const companionKey = {
       companionName: name!,
       userId: user.id,
-      modelName: "llama2-13b",
+      modelName: companion.modelId,
     };
     const memoryManager = await MemoryManager.getInstance();
 
@@ -84,16 +84,25 @@ export async function POST(
       relevantHistory = similarDocs.map((doc) => doc.pageContent).join("\n");
     }
     const { handlers } = LangChainStream();
-    // Call Replicate for inference
-    const model = new Replicate({
-      model:
-        "a16z-infra/llama-2-13b-chat:df7690f1994d94e96ad9d568eac121aecf50684a0b0963b25a41cc40061269e5",
-      input: {
-        max_length: 2048,
-      },
-      apiKey: process.env.REPLICATE_API_TOKEN,
-      callbackManager: CallbackManager.fromHandlers(handlers),
-    });
+   
+    let model;
+    if (companion.modelId === "llama2-13b") {
+      model = new Replicate({
+        model:
+          "a16z-infra/llama-2-13b-chat:df7690f1994d94e96ad9d568eac121aecf50684a0b0963b25a41cc40061269e5",
+        input: {
+          max_length: 2048,
+        },
+        apiKey: process.env.REPLICATE_API_TOKEN,
+        callbackManager: CallbackManager.fromHandlers(handlers),
+      });
+    } else {
+      model = new OpenAI({
+        openAIApiKey: process.env.OPENAI_API_KEY,
+        modelName: "gpt-4"
+      });
+    }
+    
 
     // Turn verbose on for debugging
     model.verbose = true;

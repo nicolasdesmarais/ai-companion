@@ -52,7 +52,21 @@ const formSchema = z.object({
   categoryId: z.string().min(1, {
     message: "Category is required",
   }),
+  modelId: z.string().min(1, {
+    message: "Model is required",
+  }),
 });
+
+const models = [
+  {
+    id: "llama2-13b",
+    name: "llama2-13b"
+  },
+  { 
+    id: "gpt-4",
+    name: "gpt-4"
+  }
+];
 
 interface CompanionFormProps {
   categories: Category[];
@@ -75,6 +89,7 @@ export const CompanionForm = ({
       seed: "",
       src: "",
       categoryId: undefined,
+      modelId: undefined,
     },
   });
 
@@ -181,6 +196,31 @@ export const CompanionForm = ({
                   </Select>
                   <FormDescription>
                     Select a category for your AI
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="modelId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>AI Model</FormLabel>
+                  <Select disabled={isLoading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue defaultValue={field.value} placeholder="Select a model" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {models.map((model) => (
+                        <SelectItem key={model.id} value={model.id}>{model.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Select a LLM for your AI
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

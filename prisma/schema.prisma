@@ -33,6 +33,8 @@ model Companion {
 
   messages      Message[]
 
+  modelId       String @default("llama2-13b")
+
   @@index([categoryId])
   @@fulltext([name])
 }
