@@ -19,7 +19,7 @@ export async function POST(
     const { prompt } = await request.json();
     const user = await currentUser();
 
-    if (!user || !user.firstName || !user.id) {
+    if (!user || !user.id) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -49,6 +49,7 @@ export async function POST(
       return new NextResponse("Companion not found", { status: 404 });
     }
 
+    console.log(companion)
     const name = companion.id;
     const companion_file_name = name + ".txt";
 
@@ -76,6 +77,7 @@ export async function POST(
       recentChatHistory,
       companion_file_name
     );
+    console.log('similarDocs', similarDocs)
 
     let relevantHistory = "";
     if (!!similarDocs && similarDocs.length !== 0) {
