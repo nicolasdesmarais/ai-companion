@@ -35,6 +35,8 @@ model Companion {
 
   modelId       String @default("llama2-13b")
 
+  workspaces    WorkspaceCompanion[]
+
   @@index([categoryId])
   @@fulltext([name])
 }
@@ -46,7 +48,7 @@ enum Role {
 
 model Message {
   id          String   @id @default(uuid())
-  role        Role   
+  role        Role
   content     String   @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -55,7 +57,7 @@ model Message {
   userId      String
 
   companion   Companion @relation(fields: [companionId], references: [id], onDelete: Cascade)
-  
+
   @@index([companionId])
 }
 
@@ -66,4 +68,36 @@ model UserSubscription {
   stripeSubscriptionId      String?   @unique @map(name: "stripe_subscription_id")
   stripePriceId             String?   @map(name: "stripe_price_id")
   stripeCurrentPeriodEnd    DateTime? @map(name: "stripe_current_period_end")
+}
+
+model User {
+  id                        String    @id @default(cuid())
+  email                     String    @unique
+  workspaces                WorkspaceUser[]
+}
+
+model Workspace {
+  id                        String    @id @default(cuid())
+  name                      String
+  domain                    String    @unique
+  users                     WorkspaceUser[]
+  companions                WorkspaceCompanion[]
+}
+
+model WorkspaceUser {
+  user                      User      @relation(fields: [userId], references: [id])
+  userId                    String    @map(name: "user_id")
+  workspace                 Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId               String    @map(name: "workspace_id")
+
+  @@id([userId, workspaceId])
+}
+
+model WorkspaceCompanion {
+  workspace                 Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId               String    @map(name: "workspace_id")
+  companion                 Companion @relation(fields: [companionId], references: [id])
+  companionId               String    @map(name: "companion_id")
+
+  @@id([workspaceId, companionId])
 }
