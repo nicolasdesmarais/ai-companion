@@ -119,6 +119,27 @@ export const CompanionForm = ({
     }
   };
 
+  const generateAvatar = async () => {
+    const name = form.getValues('name');
+    const description = form.getValues('description');
+    if (name && description) {
+      const response = await axios.post('/api/image', {
+        prompt: `This is a picture of ${name}, ${description}`,
+        amount: 1,
+        resolution: "512x512"
+      });
+
+      const urls = response.data.map((image: { url: string }) => image.url);
+      form.setValue('src', urls[0])
+    } else {  
+      toast({
+        variant: "destructive",
+        description: "Name and description are required to generate the avatar.",
+        duration: 3000,
+      });
+    }
+  }
+
   return ( 
     <div className="h-full p-4 space-y-2 max-w-3xl mx-auto">
       <Form {...form}>
@@ -139,6 +160,10 @@ export const CompanionForm = ({
                 <FormControl>
                   <ImageUpload disabled={isLoading} onChange={field.onChange} value={field.value} />
                 </FormControl>
+                <Button type="button" disabled={isLoading} variant="outline" onClick={() => generateAvatar()}>
+                  Generate Avatar Image
+                  <Wand2 className="w-4 h-4 ml-2" />
+                </Button>
                 <FormMessage />
               </FormItem>
             )}
@@ -270,7 +295,7 @@ export const CompanionForm = ({
           />
           <div className="w-full flex justify-center">
             <Button size="lg" disabled={isLoading}>
-              {initialData ? "Edit your companion" : "Create your companion"}
+              {initialData ? "Save your companion" : "Create your companion"}
               <Wand2 className="w-4 h-4 ml-2" />
             </Button>
           </div>
