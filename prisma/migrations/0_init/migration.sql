@@ -11,7 +11,7 @@ CREATE TABLE `Companion` (
     `id` VARCHAR(191) NOT NULL,
     `userId` VARCHAR(191) NOT NULL,
     `userName` VARCHAR(191) NOT NULL,
-    `src` VARCHAR(191) NOT NULL,
+    `src` TEXT NOT NULL,
     `name` TEXT NOT NULL,
     `description` VARCHAR(191) NOT NULL,
     `instructions` TEXT NOT NULL,
@@ -19,6 +19,7 @@ CREATE TABLE `Companion` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `categoryId` VARCHAR(191) NOT NULL,
+    `modelId` VARCHAR(191) NOT NULL DEFAULT 'llama2-13b',
 
     INDEX `Companion_categoryId_idx`(`categoryId`),
     FULLTEXT INDEX `Companion_name_idx`(`name`),
