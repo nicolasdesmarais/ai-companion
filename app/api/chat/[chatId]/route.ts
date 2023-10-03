@@ -99,7 +99,8 @@ export async function POST(
     } else {
       model = new OpenAI({
         openAIApiKey: process.env.OPENAI_API_KEY,
-        modelName: "gpt-4"
+        modelName: "gpt-4",
+        maxTokens: -1,
       });
     }
     

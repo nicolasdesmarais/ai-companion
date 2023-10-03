@@ -123,19 +123,26 @@ export const CompanionForm = ({
     const name = form.getValues('name');
     const description = form.getValues('description');
     if (name && description) {
-      const response = await axios.post('/api/image', {
-        prompt: `This is a picture of ${name}, ${description}`,
-        amount: 1,
-        resolution: "512x512"
-      });
-
-      const urls = response.data.map((image: { url: string }) => image.url);
-      form.setValue('src', urls[0])
+      try {
+        const response = await axios.post('/api/image', {
+          prompt: `Image of ${name}, ${description}`,
+          amount: 1,
+          resolution: "512x512"
+        });
+        const urls = response.data.map((image: { url: string }) => image.url);
+        form.setValue('src', urls[0])
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          description: error.response?.data || "Something went wrong.",
+          duration: 6000,
+        });
+      }
     } else {  
       toast({
         variant: "destructive",
         description: "Name and description are required to generate the avatar.",
-        duration: 3000,
+        duration: 6000,
       });
     }
   };
