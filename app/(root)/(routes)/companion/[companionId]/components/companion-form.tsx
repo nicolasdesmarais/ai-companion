@@ -138,7 +138,24 @@ export const CompanionForm = ({
         duration: 3000,
       });
     }
-  }
+  };
+
+  const generateInstruction = async () => {
+    const name = form.getValues('name');
+    const description = form.getValues('description');
+    if (name && description) {
+      const response = await axios.post('/api/generate', {
+        prompt: `Generate an AI agent prompt for ${name}, ${description}.  Prompt should be at least 200 characters long.`,
+      });
+      form.setValue('instructions', response.data)
+    } else {  
+      toast({
+        variant: "destructive",
+        description: "Name and description are required to generate the instruction.",
+        duration: 3000,
+      });
+    }
+  };
 
   return ( 
     <div className="h-full p-4 space-y-2 max-w-3xl mx-auto">
@@ -273,6 +290,10 @@ export const CompanionForm = ({
                 <FormDescription>
                   Describe in detail your companion&apos;s backstory and relevant details.
                 </FormDescription>
+                <Button type="button" disabled={isLoading} variant="outline" onClick={() => generateInstruction()}>
+                  Generate Instruction
+                  <Wand2 className="w-4 h-4 ml-2" />
+                </Button>
                 <FormMessage />
               </FormItem>
             )}
