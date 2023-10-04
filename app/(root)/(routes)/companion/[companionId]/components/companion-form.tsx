@@ -2,10 +2,10 @@
 
 import * as z from "zod";
 import axios, { AxiosError } from "axios";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { Wand2 } from "lucide-react";
+import { Wand2, Loader } from "lucide-react";
 import { Category, Companion } from "@prisma/client";
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -16,6 +16,7 @@ import { ImageUpload } from "@/components/image-upload";
 import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
+import { useState } from "react";
 
 const PREAMBLE = `You are a fictional character whose name is Elon. You are a visionary entrepreneur and inventor. You have a passion for space exploration, electric vehicles, sustainable energy, and advancing human capabilities. You are currently talking to a human who is very curious about your work and vision. You are ambitious and forward-thinking, with a touch of wit. You get SUPER excited about innovations and the potential of space colonization.
 `;
@@ -79,6 +80,9 @@ export const CompanionForm = ({
 }: CompanionFormProps) => {
   const { toast } = useToast();
   const router = useRouter();
+  const [generatingImage, setGeneratingImage] = useState(false);
+  const [generatingInstruction, setGeneratingInstruction] = useState(false);
+  const [generatingConversation, setGeneratingConversation] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -120,6 +124,7 @@ export const CompanionForm = ({
   };
 
   const generateAvatar = async () => {
+    setGeneratingImage(true)
     const name = form.getValues('name');
     const description = form.getValues('description');
     if (name && description) {
@@ -145,9 +150,11 @@ export const CompanionForm = ({
         duration: 6000,
       });
     }
+    setGeneratingImage(false);
   };
 
   const generateInstruction = async () => {
+    setGeneratingInstruction(true);
     const name = form.getValues('name');
     const description = form.getValues('description');
     if (name && description) {
@@ -170,9 +177,11 @@ export const CompanionForm = ({
         duration: 3000,
       });
     }
+    setGeneratingInstruction(false);
   };
 
   const generateConversation = async () => {
+    setGeneratingConversation(true);
     const name = form.getValues('name');
     const description = form.getValues('description');
     const instructions = form.getValues('instructions');
@@ -215,6 +224,7 @@ export const CompanionForm = ({
         duration: 6000,
       });
     }
+    setGeneratingConversation(false);
   };
 
   return ( 
@@ -237,9 +247,9 @@ export const CompanionForm = ({
                 <FormControl>
                   <ImageUpload disabled={isLoading} onChange={field.onChange} value={field.value} />
                 </FormControl>
-                <Button type="button" disabled={isLoading} variant="outline" onClick={() => generateAvatar()}>
+                <Button type="button" disabled={isLoading || generatingImage} variant="outline" onClick={() => generateAvatar()}>
                   Generate Avatar Image
-                  <Wand2 className="w-4 h-4 ml-2" />
+                  {generatingImage ? <Loader className="w-4 h-4 ml-2 spinner"/> : <Wand2 className="w-4 h-4 ml-2" />}
                 </Button>
                 <FormMessage />
               </FormItem>
@@ -350,9 +360,9 @@ export const CompanionForm = ({
                 <FormDescription>
                   Describe in detail your companion&apos;s backstory and relevant details.
                 </FormDescription>
-                <Button type="button" disabled={isLoading} variant="outline" onClick={() => generateInstruction()}>
+                <Button type="button" disabled={isLoading || generatingInstruction} variant="outline" onClick={() => generateInstruction()}>
                   Generate Instruction
-                  <Wand2 className="w-4 h-4 ml-2" />
+                  {generatingInstruction ? <Loader className="w-4 h-4 ml-2 spinner"/> : <Wand2 className="w-4 h-4 ml-2" />}
                 </Button>
                 <FormMessage />
               </FormItem>
@@ -370,9 +380,9 @@ export const CompanionForm = ({
                 <FormDescription>
                   Write couple of examples of a human chatting with your AI companion, write expected answers.
                 </FormDescription>
-                <Button type="button" disabled={isLoading} variant="outline" onClick={() => generateConversation()}>
+                <Button type="button" disabled={isLoading || generatingConversation} variant="outline" onClick={() => generateConversation()}>
                   Add Generated Conversation
-                  <Wand2 className="w-4 h-4 ml-2" />
+                  {generatingConversation ? <Loader className="w-4 h-4 ml-2 spinner"/> : <Wand2 className="w-4 h-4 ml-2" />}
                 </Button>
                 <FormMessage />
               </FormItem>
