@@ -1,9 +1,19 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
-import { WebhookEvent } from '@clerk/nextjs/server'
+import { UserWebhookEvent, UserJSON, User, SessionWebhookEvent, WebhookEvent } from '@clerk/nextjs/server'
+import { clerkClient } from '@clerk/nextjs';
 import { UserService } from '../../../domain/services/UserService'
 import { WorkspaceService } from '../../../domain/services/WorkspaceService'
+import { UserEntity } from '@/domain/entities/UserEntity';
 
+enum SupportedEvents {
+  USER_CREATED_EVENT = 'user.created',
+  SESSION_CREATED_EVENT = 'session.created'
+}
+
+const isSupportedEvent = (eventType: string): eventType is SupportedEvents => {
+  return Object.values(SupportedEvents).includes(eventType as SupportedEvents);
+}
 
 export async function POST(req: Request) {
 
@@ -50,31 +60,86 @@ export async function POST(req: Request) {
     })
   }
 
-  // Get the ID and type
   const data = evt.data;
-  const eventType = evt.type;
+  if (!isSupportedEvent(evt.type)) {
+    console.log(`Unsupported event type: ${evt.type}`)
+    return;
+  }
 
-  console.log(`Webhook with and ID of ${data.id} and type of ${eventType}`)
-  console.log('Webhook body:', body)
-
-  const primaryEmail = getPrimaryEmail(evt.data);
-  console.log('Primary email: ' + primaryEmail);
-  const user = {
-    externalId: data.id,
-    email: primaryEmail
-  };
-
-  const userService = new UserService();
-  const workspaceService = new WorkspaceService();
-
-  const createdUserEntity = await userService.create(user);
-  workspaceService.addUserToNewOrExistingWorkspace(createdUserEntity);
+  const eventType: SupportedEvents = evt.type;
+  switch(eventType) {
+    case SupportedEvents.USER_CREATED_EVENT:
+      await handleUserCreatedEvent(evt as UserWebhookEvent);
+      break;
+    case SupportedEvents.SESSION_CREATED_EVENT:
+      await handleSessionCreatedEvent(evt as SessionWebhookEvent);
+      break;
+  }
 
   return new Response('', { status: 201 })
 }
 
-const getPrimaryEmail  = (data: any): string => {
+async function handleUserCreatedEvent(userEvent: UserWebhookEvent) {
+  const data = userEvent.data;
+  const primaryEmail = getPrimaryEmailFromUserJson(data as UserJSON);
+  if (primaryEmail === null) {
+    console.log('Cannot extract primary email from user data: ' + JSON.stringify(data));
+    return;
+  }
+
+  const userEntity = {
+    externalId: data.id,
+    email: primaryEmail
+  };
+  createUserAndAddToWorkspace(userEntity);
+}
+
+async function handleSessionCreatedEvent(sessionEvent: SessionWebhookEvent) {
+  const data = sessionEvent.data;
+  const userId = data.user_id;
+
+  // Check if user already exists
+  const userService = new UserService();
+  const existingUser = await userService.findUserByExternalId(userId);
+  if (existingUser !== null) {
+    return;
+  }
+
+  // User does not exist, create user
+  const clerkUser = await clerkClient.users.getUser(userId);
+  const primaryEmail = getPrimaryEmailFromClerkUser(clerkUser);
+  if (primaryEmail === null) {
+    console.log('Cannot extract primary email from user data: ' + JSON.stringify(clerkUser));
+    return;
+  }
+
+  const userEntity = {
+    externalId: userId,
+    email: primaryEmail
+  };
+
+  createUserAndAddToWorkspace(userEntity);
+}
+
+
+async function createUserAndAddToWorkspace(userEntity : UserEntity) {
+  const userService = new UserService();
+  const workspaceService = new WorkspaceService();
+
+  const createdUserEntity = await userService.create(userEntity);
+  workspaceService.addUserToNewOrExistingWorkspace(createdUserEntity);
+}
+
+
+const getPrimaryEmailFromUserJson  = (data: UserJSON): string | null => {
   const primaryEmailId = data.primary_email_address_id;
   const primaryEmail = data.email_addresses.find((emailAddress: any) => emailAddress.id === primaryEmailId);
   return primaryEmail ? primaryEmail.email_address : null;
 }
+
+const getPrimaryEmailFromClerkUser  = (clerkUser: User): string | null => {
+  const primaryEmailId = clerkUser.primaryEmailAddressId;
+  const primaryEmail = clerkUser.emailAddresses.find((emailAddress: any) => emailAddress.id === primaryEmailId);
+  return primaryEmail ? primaryEmail.emailAddress : null;
+}
+
