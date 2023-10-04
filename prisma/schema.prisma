@@ -72,8 +72,8 @@ model UserSubscription {
 
 model User {
   id                        String    @id @default(cuid())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt @default(now())
   externalId                String?   @unique
   email                     String    @unique
   workspaces                WorkspaceUser[]
@@ -84,8 +84,8 @@ model User {
 
 model Workspace {
   id                        String    @id @default(cuid())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt @default(now())
   name                      String
   domain                    String?    @unique
   users                     WorkspaceUser[]
@@ -100,8 +100,8 @@ model WorkspaceUser {
   userId                    String    @map(name: "user_id")
   workspace                 Workspace @relation(fields: [workspaceId], references: [id])
   workspaceId               String    @map(name: "workspace_id")
-  createdAt                 DateTime @default(now())
-  updatedAt                 DateTime @updatedAt
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt @default(now())
 
   @@id([userId, workspaceId])
   @@map("workspace_users")
