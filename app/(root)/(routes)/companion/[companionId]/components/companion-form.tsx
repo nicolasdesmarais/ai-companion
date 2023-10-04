@@ -1,7 +1,7 @@
 "use client";
 
 import * as z from "zod";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -134,7 +134,7 @@ export const CompanionForm = ({
       } catch (error) {
         toast({
           variant: "destructive",
-          description: error.response?.data || "Something went wrong.",
+          description: String((error as AxiosError).response?.data) || "Something went wrong.",
           duration: 6000,
         });
       }
@@ -151,15 +151,68 @@ export const CompanionForm = ({
     const name = form.getValues('name');
     const description = form.getValues('description');
     if (name && description) {
-      const response = await axios.post('/api/generate', {
-        prompt: `Generate an AI agent prompt for ${name}, ${description}.  Prompt should be at least 200 characters long.`,
-      });
-      form.setValue('instructions', response.data)
+      try {
+        const response = await axios.post('/api/generate', {
+          prompt: `Generate an AI agent prompt for ${name}, ${description}.  Prompt should be at least 200 characters long.`,
+        });
+        form.setValue('instructions', response.data)
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          description: String((error as AxiosError).response?.data) || "Something went wrong.",
+          duration: 6000,
+        });
+      }
     } else {  
       toast({
         variant: "destructive",
         description: "Name and description are required to generate the instruction.",
         duration: 3000,
+      });
+    }
+  };
+
+  const generateConversation = async () => {
+    const name = form.getValues('name');
+    const description = form.getValues('description');
+    const instructions = form.getValues('instructions');
+    const seed = form.getValues('seed');
+    if (name && description) {
+      try {
+        let history;
+        if (!seed) {
+          history = `Human: Hi ${name}\n`;
+        } else {
+          const question = await axios.post('/api/generate', {
+            prompt: `
+              Pretend you are a human talking to an AI agent ${name}, ${description}.  Continue the conversation below.\n\n
+              ${seed}\nHuman:
+            `,
+          });
+          history = `${seed}Human: ${question.data}\n`;
+        }
+        const response = await axios.post('/api/generate', {
+          prompt: `
+          ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${name}: prefix. 
+
+          ${instructions}
+  
+          Below are relevant details about ${name}'s past and the conversation you are in.
+          ${history}\n${name}:`,
+        });
+        form.setValue('seed', `${history}\n${name}: ${response.data}\n\n`)
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          description: String((error as AxiosError).response?.data) || "Something went wrong.",
+          duration: 6000,
+        });
+      }
+    } else {  
+      toast({
+        variant: "destructive",
+        description: "Name, description and instructions are required to generate the conversation.",
+        duration: 6000,
       });
     }
   };
@@ -317,6 +370,10 @@ export const CompanionForm = ({
                 <FormDescription>
                   Write couple of examples of a human chatting with your AI companion, write expected answers.
                 </FormDescription>
+                <Button type="button" disabled={isLoading} variant="outline" onClick={() => generateConversation()}>
+                  Add Generated Conversation
+                  <Wand2 className="w-4 h-4 ml-2" />
+                </Button>
                 <FormMessage />
               </FormItem>
             )}
