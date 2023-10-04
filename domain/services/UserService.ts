@@ -3,8 +3,12 @@ import prismadb from "@/lib/prismadb";
 
 export class UserService {
 
-    public async create(user: UserEntity){
-        return prismadb.user.create({data: user});
+    public async findUserById(id: string) {
+        return prismadb.user.findFirst({
+            where: {
+                id: id
+            }
+        });
     }
 
     public async findUserByExternalId(externalId: string) {
@@ -13,5 +17,9 @@ export class UserService {
                 externalId: externalId
             }
         });
+    }
+
+    public async create(user: UserEntity){
+        return prismadb.user.create({data: user});
     }
 }

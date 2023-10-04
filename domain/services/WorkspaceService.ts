@@ -3,6 +3,24 @@ import { WorkspaceEntity } from "../entities/WorkspaceEntity";
 import prismadb from "@/lib/prismadb";
 
 export class WorkspaceService {
+    public async getWorkspacesByExternalUserId(externalUserId: string){
+        const user = await prismadb.user.findFirst({
+            where: {
+                externalId: externalUserId
+            },
+            include: {
+                workspaces: {
+                    include: {
+                        workspace: true
+                    }
+                }
+            }
+        });
+
+        const workspaces = user?.workspaces.map(w => w.workspace) || [];
+        return workspaces;
+    }
+
     public async createWorkspace(createdByUserId: string, name: string, domain?: string) {
         return prismadb.workspace.create({
             data: {
