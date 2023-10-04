@@ -3,7 +3,7 @@ import { WorkspaceEntity } from "../entities/WorkspaceEntity";
 import prismadb from "@/lib/prismadb";
 
 export class WorkspaceService {
-    public async createWorkspace(name: string, domain: string, createdByUserId: string) {
+    public async createWorkspace(createdByUserId: string, name: string, domain?: string) {
         return prismadb.workspace.create({
             data: {
                 name: name,
@@ -46,7 +46,7 @@ export class WorkspaceService {
             await this.addUserToWorkspace(user.id, existingWorkspace.id);
         } else {
             // Create workspace
-            await this.createWorkspace(domain, domain, user.id);
+            await this.createWorkspace(user.id, domain, domain);
         }
     }
 
