@@ -3,6 +3,19 @@ import { WorkspaceEntity } from "../entities/WorkspaceEntity";
 import prismadb from "@/lib/prismadb";
 
 export class WorkspaceService {
+    public async createWorkspace(name: string, domain: string, createdByUserId: string) {
+        return prismadb.workspace.create({
+            data: {
+                name: name,
+                domain: domain,
+                users: {
+                    create: {
+                        userId: createdByUserId
+                    }
+                }
+            }
+        });
+    }
 
     public async addUserToNewOrExistingWorkspace(user: UserEntity){
         if (!user.id) {
@@ -33,22 +46,12 @@ export class WorkspaceService {
             await this.addUserToWorkspace(user.id, existingWorkspace.id);
         } else {
             // Create workspace
-            const createdWorkspace = await this.createWorkspace(domain);
-            await this.addUserToWorkspace(user.id, createdWorkspace.id);
+            await this.createWorkspace(domain, domain, user.id);
         }
     }
 
-    async createWorkspace(domain: string) {
-        return prismadb.workspace.create({
-            data: {
-                name: domain,
-                domain: domain
-            }
-        });
-    }
 
-
-    async addUserToWorkspace(userId: string, workspaceId: string) {
+    private async addUserToWorkspace(userId: string, workspaceId: string) {
         return prismadb.workspaceUser.create({
             data: {
                 userId: userId,
