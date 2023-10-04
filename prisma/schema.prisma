@@ -72,6 +72,9 @@ model UserSubscription {
 
 model User {
   id                        String    @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  externalId                String?    @unique
   email                     String    @unique
   workspaces                WorkspaceUser[]
 }
@@ -79,7 +82,7 @@ model User {
 model Workspace {
   id                        String    @id @default(cuid())
   name                      String
-  domain                    String    @unique
+  domain                    String?    @unique
   users                     WorkspaceUser[]
   companions                WorkspaceCompanion[]
 }
@@ -100,4 +103,8 @@ model WorkspaceCompanion {
   companionId               String    @map(name: "companion_id")
 
   @@id([workspaceId, companionId])
+}
+
+model PublicDomain {
+  domain                   String     @id
 }

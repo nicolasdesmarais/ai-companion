@@ -1,6 +1,9 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
+import { UserService } from '../../../domain/services/UserService'
+import { WorkspaceService } from '../../../domain/services/WorkspaceService'
+
 
 export async function POST(req: Request) {
 
@@ -48,12 +51,30 @@ export async function POST(req: Request) {
   }
 
   // Get the ID and type
-  const { id } = evt.data;
+  const data = evt.data;
   const eventType = evt.type;
 
-  // TODO: Handle user creation
-  console.log(`Webhook with and ID of ${id} and type of ${eventType}`)
+  console.log(`Webhook with and ID of ${data.id} and type of ${eventType}`)
   console.log('Webhook body:', body)
 
+  const primaryEmail = getPrimaryEmail(evt.data);
+  console.log('Primary email: ' + primaryEmail);
+  const user = {
+    externalId: data.id,
+    email: primaryEmail
+  };
+
+  const userService = new UserService();
+  const workspaceService = new WorkspaceService();
+
+  const createdUserEntity = await userService.create(user);
+  workspaceService.addUserToNewOrExistingWorkspace(createdUserEntity);
+
   return new Response('', { status: 201 })
+}
+
+const getPrimaryEmail  = (data: any): string => {
+  const primaryEmailId = data.primary_email_address_id;
+  const primaryEmail = data.email_addresses.find((emailAddress: any) => emailAddress.id === primaryEmailId);
+  return primaryEmail ? primaryEmail.email_address : null;
 }
