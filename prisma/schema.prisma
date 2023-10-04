@@ -74,19 +74,23 @@ model User {
   id                        String    @id @default(cuid())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  externalId                String?    @unique
+  externalId                String?   @unique
   email                     String    @unique
   workspaces                WorkspaceUser[]
+  invitations               Invitation[]
 
   @@map("users")
 }
 
 model Workspace {
   id                        String    @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   name                      String
   domain                    String?    @unique
   users                     WorkspaceUser[]
   companions                WorkspaceAI[]
+  invitations               Invitation[]
 
   @@map("workspaces")
 }
@@ -96,6 +100,8 @@ model WorkspaceUser {
   userId                    String    @map(name: "user_id")
   workspace                 Workspace @relation(fields: [workspaceId], references: [id])
   workspaceId               String    @map(name: "workspace_id")
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
 
   @@id([userId, workspaceId])
   @@map("workspace_users")
@@ -115,4 +121,16 @@ model PublicDomain {
   domain                   String     @id
 
   @@map("public_domains")
+}
+
+model Invitation {
+  id                        String    @id @default(cuid())
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+  email                     String
+  invitee                   User      @relation(fields: [inviteeUserId], references: [id])
+  inviteeUserId             String    @map(name: "invitee_user_id")
+  workspace                 Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId               String    @map(name: "workspace_id")
+  isAccepted                Boolean   @default(false) @map(name: "is_accepted")
 }
