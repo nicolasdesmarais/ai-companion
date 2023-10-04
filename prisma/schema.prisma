@@ -35,7 +35,7 @@ model Companion {
 
   modelId       String @default("llama2-13b")
 
-  workspaces    WorkspaceCompanion[]
+  workspaces    WorkspaceAI[]
 
   @@index([categoryId])
   @@fulltext([name])
@@ -77,6 +77,8 @@ model User {
   externalId                String?    @unique
   email                     String    @unique
   workspaces                WorkspaceUser[]
+
+  @@map("users")
 }
 
 model Workspace {
@@ -84,7 +86,9 @@ model Workspace {
   name                      String
   domain                    String?    @unique
   users                     WorkspaceUser[]
-  companions                WorkspaceCompanion[]
+  companions                WorkspaceAI[]
+
+  @@map("workspaces")
 }
 
 model WorkspaceUser {
@@ -94,17 +98,21 @@ model WorkspaceUser {
   workspaceId               String    @map(name: "workspace_id")
 
   @@id([userId, workspaceId])
+  @@map("workspace_users")
 }
 
-model WorkspaceCompanion {
+model WorkspaceAI {
   workspace                 Workspace @relation(fields: [workspaceId], references: [id])
   workspaceId               String    @map(name: "workspace_id")
   companion                 Companion @relation(fields: [companionId], references: [id])
   companionId               String    @map(name: "companion_id")
 
   @@id([workspaceId, companionId])
+  @@map("workspace_ais")
 }
 
 model PublicDomain {
   domain                   String     @id
+
+  @@map("public_domains")
 }
