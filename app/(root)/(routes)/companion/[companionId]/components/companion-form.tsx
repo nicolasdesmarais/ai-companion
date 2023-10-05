@@ -108,6 +108,7 @@ export const CompanionForm = ({
   const [generatingConversation, setGeneratingConversation] = useState(false);
   const initalKnowledge = initialData?.knowledge?.map((item: { knowledge: any }) => item.knowledge) || [];
   const [knowledge, setKnowledge] = useState<Knowledge[]>(initalKnowledge);
+  const [uploading, setUploading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -254,6 +255,7 @@ export const CompanionForm = ({
   };
 
   const uploadDocument = async () => {
+    setUploading(true);
     if (!inputFileRef.current?.files || inputFileRef.current?.files.length === 0) {
       toast({
         variant: "destructive",
@@ -283,6 +285,7 @@ export const CompanionForm = ({
         duration: 6000,
       });
     }
+    setUploading(false);
   };
 
   return ( 
@@ -442,9 +445,9 @@ export const CompanionForm = ({
                 </div>
                 <div className="flex">
                   <Input name="file" ref={inputFileRef} type="file" />
-                  <Button type="button" disabled={isLoading} variant="outline" onClick={() => uploadDocument()}>
+                  <Button type="button" disabled={isLoading || uploading} variant="outline" onClick={() => uploadDocument()}>
                     Upload
-                    <FileText className="w-4 h-4 ml-2" />
+                    {uploading ? <Loader className="w-4 h-4 ml-2 spinner"/> : <FileText className="w-4 h-4 ml-2" />}
                   </Button>
                 </div>
               </div>
