@@ -10,8 +10,8 @@ import { Toaster } from '@/components/ui/toaster';
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'AppDirect Companion AI',
-  description: 'Custom AI assistants for your business.',
+  title: 'AppDirect AI',
+  description: 'Custom AI for your business.',
 }
 
 export default function RootLayout({
