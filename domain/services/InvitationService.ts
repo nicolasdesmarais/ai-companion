@@ -13,6 +13,24 @@ export class InvitationService {
         });
     }
 
+    public async findInvitationsByExternalUserId(externalUserId: string) {
+        const user = await prismadb.user.findFirst({
+            where: {
+                externalId: externalUserId
+            }
+        });
+
+        if (!user?.email) {
+            return;
+        }
+
+        return prismadb.invitation.findMany({
+            where: {
+                email: user?.email
+            }
+        });
+    }
+
     public async create(invitationRequest: CreateInvitationRequest, inviteeUserId: string) {
         const invitationEntity: InvitationEntity = {
             email: invitationRequest.email,

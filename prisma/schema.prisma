@@ -133,4 +133,6 @@ model Invitation {
   workspace                 Workspace @relation(fields: [workspaceId], references: [id])
   workspaceId               String    @map(name: "workspace_id")
   isAccepted                Boolean   @default(false) @map(name: "is_accepted")
+
+  @@map("invitations")
 }
