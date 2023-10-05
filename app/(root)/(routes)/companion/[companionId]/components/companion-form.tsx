@@ -262,6 +262,7 @@ export const CompanionForm = ({
         description: "No file selected.",
         duration: 6000,
       });
+      setUploading(false);
       return;
     }
     const file = inputFileRef.current.files[0];

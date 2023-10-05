@@ -77,6 +77,7 @@ export async function POST(
       recentChatHistory,
       knowledgeIds
     );
+    console.log("similarDocs", similarDocs)
 
     let relevantHistory = "";
     if (!!similarDocs && similarDocs.length !== 0) {
