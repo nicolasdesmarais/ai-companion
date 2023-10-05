@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     }
 
     const invitationService = new InvitationService();
-    const invitation = invitationService.create(invitationRequest, user.id);
+    const invitation = invitationService.createInvitations(invitationRequest, user.id);
     return NextResponse.json(invitation);
   } catch (error) {
     console.log("[INVITATION_POST]", error);

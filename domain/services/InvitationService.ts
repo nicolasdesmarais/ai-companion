@@ -31,18 +31,21 @@ export class InvitationService {
         });
     }
 
-    public async create(invitationRequest: CreateInvitationRequest, inviteeUserId: string) {
-        const invitationEntity: InvitationEntity = {
+    public async createInvitations(invitationRequest: CreateInvitationRequest, inviteeUserId: string) {
+        const invitationEntities = invitationRequest.invitations.map(invitationRequest => ({
             email: invitationRequest.email,
+            inviteeUserId: inviteeUserId,
             workspaceId: invitationRequest.workspaceId,
-            inviteeUserId: inviteeUserId
+        }));
+
+        const invitations = await prismadb.invitation.createMany({data: invitationEntities});
+
+        for (const invitation of invitationRequest.invitations) {
+            // Creating invitation with clerkClient
+            await clerkClient.invitations.createInvitation({
+                emailAddress: invitation.email
+            });
         }
-
-        await prismadb.invitation.create({data: invitationEntity});
-
-        clerkClient.invitations.createInvitation({
-            emailAddress: invitationRequest.email
-        });
     }
 
     public async acceptInvitation(invitation: InvitationEntity, invitedUserExternalId: string) {
