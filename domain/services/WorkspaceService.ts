@@ -69,7 +69,7 @@ export class WorkspaceService {
     }
 
 
-    private async addUserToWorkspace(userId: string, workspaceId: string) {
+    public async addUserToWorkspace(userId: string, workspaceId: string) {
         return prismadb.workspaceUser.create({
             data: {
                 userId: userId,
