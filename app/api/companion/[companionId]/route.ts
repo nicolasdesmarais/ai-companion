@@ -30,6 +30,9 @@ export async function PATCH(
         id: params.companionId,
         userId: user.id,
       },
+      include: {
+        knowledge: true,
+      },
       data: {
         categoryId,
         userId: user.id,
@@ -42,15 +45,16 @@ export async function PATCH(
         modelId,
       }
     });
-
     if (knowledge && knowledge.length > 0) {
       knowledge.forEach(async (item: { id: string; }) => {
-        await prismadb.knowledgeAI.create({
-          data: {
-            companionId: companion.id,
-            knowledgeId: item.id,
-          }
-        });
+        if (!companion.knowledge.find((k: { knowledgeId: string; }) => k.knowledgeId === item.id)) {
+          await prismadb.knowledgeAI.create({
+            data: {
+              companionId: companion.id,
+              knowledgeId: item.id,
+            }
+          });
+        }
       });
     }
 
