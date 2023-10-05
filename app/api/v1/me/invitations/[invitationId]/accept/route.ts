@@ -1,7 +1,6 @@
 import { currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import { InvitationService } from "@/domain/services/InvitationService";
-import { UserService } from "@/domain/services/UserService";
 
 export async function PUT(
   req: Request,
@@ -32,7 +31,7 @@ export async function PUT(
 
     return new NextResponse("", { status: 200 })
   } catch (error) {
-    console.log("[COMPANION_PATCH]", error);
+    console.log("ERROR in [v1/me/invitations/{invitationId}/accept]]]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 };
