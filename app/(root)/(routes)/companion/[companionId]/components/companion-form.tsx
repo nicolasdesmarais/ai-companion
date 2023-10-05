@@ -161,8 +161,7 @@ export const CompanionForm = ({
           amount: 1,
           resolution: "512x512"
         });
-        const urls = response.data.map((image: { url: string }) => image.url);
-        form.setValue('src', urls[0])
+        form.setValue('src', response.data.secure_url)
       } catch (error) {
         toast({
           variant: "destructive",

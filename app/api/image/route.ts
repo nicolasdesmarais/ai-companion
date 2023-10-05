@@ -1,8 +1,7 @@
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import { Configuration, OpenAIApi } from "openai";
-
-import { checkSubscription } from "@/lib/subscription";
+import cloudinary from 'cloudinary';
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -44,7 +43,12 @@ export async function POST(
       size: resolution,
     });
 
-    return NextResponse.json(response.data.data);
+    if (response.data.data && response.data.data.length > 0) {
+      const imageUrl = response.data.data[0].url as string;
+      const data = await cloudinary.v2.uploader.unsigned_upload(imageUrl, 'bawmwjeq');
+      return NextResponse.json(data);
+    }
+    return new NextResponse("AI Error", { status: 500 });
   } catch (error) {
     if (error.response?.data?.error?.message) {
       return new NextResponse(error.response.data.error.message, { status: 422 });
