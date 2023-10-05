@@ -23,11 +23,9 @@ export class AIService {
                             workspace: {
                                 users: {
                                     some: {
-                                        user: {
-                                            externalId: externalUserId
+                                        userId: externalUserId
                                         }
                                     }
-                                }
                             }
                         }
                     }}
