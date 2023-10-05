@@ -10,7 +10,7 @@ const getBlob = async (source: ReadableStream<Uint8Array>) => {
   const stream = new ReadableStream({
     start(controller) {
       return pump();
-      function pump() {
+      function pump(): any {
         return reader.read().then(({ done, value }) => {
           if (done) {
             controller.close();
@@ -65,8 +65,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       doc.metadata.knowledge = knowledge.id
     }
     const memoryManager = await MemoryManager.getInstance();
-    // await memoryManager.vectorUpload(docs);
-    console.log(knowledge)
+    await memoryManager.vectorUpload(docs);
     return NextResponse.json(knowledge);
   } else {
     return NextResponse.json("Missing file", { status: 400 });

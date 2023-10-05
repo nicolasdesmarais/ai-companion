@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { Wand2, Loader, FileText } from "lucide-react";
-import { Category, Companion } from "@prisma/client";
+import { Category, Knowledge, Prisma } from "@prisma/client";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -79,17 +79,21 @@ const supportedUploadFormats = [
   },
 ];
 
+const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
+  include: {
+    knowledge: {
+      include: {
+        knowledge: true,
+      },
+    },
+  }, 
+});
+
+type ExtendedCompanion = Prisma.CompanionGetPayload<typeof extendedCompanion>;
+
 interface CompanionFormProps {
   categories: Category[];
-  initialData: Companion | null;
-};
-
-interface Knowledge {
-  id: string;
-  name: string;
-  type: string;
-  createdAt: string;
-  updatedAt: string;
+  initialData: ExtendedCompanion | null;
 };
 
 export const CompanionForm = ({
@@ -102,7 +106,7 @@ export const CompanionForm = ({
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatingInstruction, setGeneratingInstruction] = useState(false);
   const [generatingConversation, setGeneratingConversation] = useState(false);
-  const initalKnowledge = initialData?.knowledge?.map((item: { knowledge: Knowledge; }) => item.knowledge) || [];
+  const initalKnowledge = initialData?.knowledge?.map((item: { knowledge: any }) => item.knowledge) || [];
   const [knowledge, setKnowledge] = useState<Knowledge[]>(initalKnowledge);
 
   const form = useForm<z.infer<typeof formSchema>>({
