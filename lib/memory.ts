@@ -43,7 +43,7 @@ export class MemoryManager {
 
   public async vectorSearch(
     recentChatHistory: string,
-    companionFileName: string
+    knowledgeIds: string[]
   ) {
     const pineconeClient = <PineconeClient>this.vectorDBClient;
 
@@ -56,9 +56,8 @@ export class MemoryManager {
       { pineconeIndex }
     ); 
 
-    // {"genre": {"$in": ["comedy", "documentary", "drama"]}}
     const similarDocs = await vectorStore
-      .similaritySearch(recentChatHistory, 3, { fileName: companionFileName })
+      .similaritySearch(recentChatHistory, 3, { knowledge: { "$in": knowledgeIds } })
       .catch((err) => {
         console.log("WARNING: failed to get vector search results.", err);
       });

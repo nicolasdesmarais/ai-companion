@@ -35,6 +35,9 @@ export async function POST(
       where: {
         id: params.chatId
       },
+      include: {
+        knowledge: true,
+      },
       data: {
         messages: {
           create: {
@@ -51,7 +54,6 @@ export async function POST(
     }
 
     const name = companion.id;
-    const companion_file_name = name + ".txt";
 
     const companionKey = {
       companionName: name!,
@@ -70,14 +72,11 @@ export async function POST(
 
     const recentChatHistory = await memoryManager.readLatestHistory(companionKey);
 
-    // Right now the preamble is included in the similarity search, but that
-    // shouldn't be an issue
-
+    const knowledgeIds = companion.knowledge.map((item) => item.knowledgeId);
     const similarDocs = await memoryManager.vectorSearch(
       recentChatHistory,
-      companion_file_name
+      knowledgeIds
     );
-    console.log('similarDocs', similarDocs)
 
     let relevantHistory = "";
     if (!!similarDocs && similarDocs.length !== 0) {
