@@ -41,6 +41,8 @@ model Companion {
   knowledge     KnowledgeAI[]
 
   @@index([categoryId])
+  @@index([visibility])
+  @@index([userId])
   @@fulltext([name])
 }
 
