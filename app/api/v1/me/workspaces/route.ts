@@ -10,7 +10,7 @@ export async function GET(req: Request) {
     }
 
     const workspaceService = new WorkspaceService();
-    const workspaces = await workspaceService.getWorkspacesByExternalUserId(user.id)
+    const workspaces = await workspaceService.getWorkspacesByUserId(user.id)
 
     return NextResponse.json(workspaces);
   } catch (error) {

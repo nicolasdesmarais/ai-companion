@@ -24,16 +24,11 @@ export async function PUT(
       return new NextResponse("Invitation not found", { status: 404 });
     }
 
-    const userService = new UserService();
-    const userEntity = await userService.findUserByExternalId(user.id);
-    if (!userEntity) {
-      return new NextResponse("User not found", { status: 404 });
-    }
-    if (userEntity.email !== invitationEntity.email) {
+    if (!user.emailAddresses.some((emailAddress: any) => emailAddress.email === invitationEntity.email)) {
       return new NextResponse("Unauthorized", { status: 401 });
-    }
+  }
 
-    await invitationService.acceptInvitation(invitationEntity, userEntity.id);
+    await invitationService.acceptInvitation(invitationEntity, user.id);
 
     return new NextResponse("", { status: 200 })
   } catch (error) {

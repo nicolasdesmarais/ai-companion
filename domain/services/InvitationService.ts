@@ -48,9 +48,9 @@ export class InvitationService {
         }
     }
 
-    public async acceptInvitation(invitation: InvitationEntity, invitedUserExternalId: string) {
+    public async acceptInvitation(invitation: InvitationEntity, invitedUserId: string) {
         const workspaceService = new WorkspaceService();
-        await workspaceService.addUserToWorkspace(invitedUserExternalId, invitation.workspaceId);
+        await workspaceService.addUserToWorkspace(invitedUserId, invitation.workspaceId);
         prismadb.invitation.update({ where: { id: invitation.id }, data: { isAccepted: true } })
     }
 }

@@ -1,24 +1,16 @@
-import { UserEntity } from "../entities/UserEntity";
-import { WorkspaceEntity } from "../entities/WorkspaceEntity";
 import prismadb from "@/lib/prismadb";
 
 export class WorkspaceService {
-    public async getWorkspacesByExternalUserId(externalUserId: string){
-        const user = await prismadb.user.findFirst({
+    public async getWorkspacesByUserId(userId: string){
+        return await prismadb.workspace.findMany({
             where: {
-                externalId: externalUserId
-            },
-            include: {
-                workspaces: {
-                    include: {
-                        workspace: true
+                users: {
+                    some: {
+                        userId: userId
                     }
                 }
             }
         });
-
-        const workspaces = user?.workspaces.map(w => w.workspace) || [];
-        return workspaces;
     }
 
     public async createWorkspace(createdByUserId: string, name: string, domain?: string) {
@@ -35,14 +27,10 @@ export class WorkspaceService {
         });
     }
 
-    public async addUserToNewOrExistingWorkspace(user: UserEntity){
-        if (!user.id) {
-            return;
-        }
-
-        const domain = this.extractDomain(user.email);
+    public async addUserToNewOrExistingWorkspace(userId: string, email: string){
+        const domain = this.extractDomain(email);
         if (domain === null) {
-            console.log('Cannot extract domain from email address: ' + user.email)
+            console.log('Cannot extract domain from email address: ' + email)
             return;
         }
 
@@ -61,10 +49,10 @@ export class WorkspaceService {
         if (existingWorkspace !== null) {
             // Workspace already exists
             // Add user to workspace
-            await this.addUserToWorkspace(user.id, existingWorkspace.id);
+            await this.addUserToWorkspace(userId, existingWorkspace.id);
         } else {
             // Create workspace
-            await this.createWorkspace(user.id, domain, domain);
+            await this.createWorkspace(userId, domain, domain);
         }
     }
 
