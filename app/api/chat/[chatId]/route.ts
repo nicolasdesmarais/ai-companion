@@ -69,15 +69,13 @@ export async function POST(
     await memoryManager.writeToHistory("User: " + prompt + "\n", companionKey);
 
     // Query Pinecone
-
     const recentChatHistory = await memoryManager.readLatestHistory(companionKey);
-
+    
     const knowledgeIds = companion.knowledge.map((item) => item.knowledgeId);
     const similarDocs = await memoryManager.vectorSearch(
-      recentChatHistory,
+      prompt,
       knowledgeIds
     );
-    console.log("similarDocs", similarDocs)
 
     let relevantHistory = "";
     if (!!similarDocs && similarDocs.length !== 0) {
