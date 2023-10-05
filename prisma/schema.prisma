@@ -24,7 +24,7 @@ model Companion {
   description   String
   instructions  String @db.Text
   seed          String @db.Text
-  visibility    String
+  visibility    String?
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
