@@ -2,6 +2,7 @@ import { Redis } from "@upstash/redis";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { PineconeClient } from "@pinecone-database/pinecone";
 import { PineconeStore } from "langchain/vectorstores/pinecone";
+import { Document } from "langchain/document";
 
 export type CompanionKey = {
   companionName: string;
@@ -28,6 +29,18 @@ export class MemoryManager {
     }
   }
 
+  public async vectorUpload(docs: Document[]) {
+    const pineconeClient = <PineconeClient>this.vectorDBClient;
+
+    const pineconeIndex = pineconeClient.Index(
+      process.env.PINECONE_INDEX! || ""
+    );
+
+    await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
+      pineconeIndex
+    });
+  }
+
   public async vectorSearch(
     recentChatHistory: string,
     companionFileName: string
@@ -43,6 +56,7 @@ export class MemoryManager {
       { pineconeIndex }
     ); 
 
+    // {"genre": {"$in": ["comedy", "documentary", "drama"]}}
     const similarDocs = await vectorStore
       .similaritySearch(recentChatHistory, 3, { fileName: companionFileName })
       .catch((err) => {

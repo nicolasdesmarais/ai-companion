@@ -2,12 +2,11 @@
 
 import * as z from "zod";
 import axios, { AxiosError } from "axios";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { Wand2, Loader } from "lucide-react";
+import { Wand2, Loader, FileText } from "lucide-react";
 import { Category, Companion } from "@prisma/client";
-
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,7 +15,7 @@ import { ImageUpload } from "@/components/image-upload";
 import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const PREAMBLE = `You are a fictional character whose name is Elon. You are a visionary entrepreneur and inventor. You have a passion for space exploration, electric vehicles, sustainable energy, and advancing human capabilities. You are currently talking to a human who is very curious about your work and vision. You are ambitious and forward-thinking, with a touch of wit. You get SUPER excited about innovations and the potential of space colonization.
 `;
@@ -69,9 +68,28 @@ const models = [
   }
 ];
 
+const supportedUploadFormats = [
+  {
+    name: "Text",
+    type: "text/plain"
+  },
+  {
+    name: "CSV",
+    type: "text/csv"
+  },
+];
+
 interface CompanionFormProps {
   categories: Category[];
   initialData: Companion | null;
+};
+
+interface Knowledge {
+  id: string;
+  name: string;
+  type: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export const CompanionForm = ({
@@ -80,9 +98,12 @@ export const CompanionForm = ({
 }: CompanionFormProps) => {
   const { toast } = useToast();
   const router = useRouter();
+  const inputFileRef = useRef<HTMLInputElement>(null);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatingInstruction, setGeneratingInstruction] = useState(false);
   const [generatingConversation, setGeneratingConversation] = useState(false);
+  const initalKnowledge = initialData?.knowledge?.map((item: { knowledge: Knowledge; }) => item.knowledge) || [];
+  const [knowledge, setKnowledge] = useState<Knowledge[]>(initalKnowledge);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -101,10 +122,11 @@ export const CompanionForm = ({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      const data = {knowledge, ...values};
       if (initialData) {
-        await axios.patch(`/api/companion/${initialData.id}`, values);
+        await axios.patch(`/api/companion/${initialData.id}`, data);
       } else {
-        await axios.post("/api/companion", values);
+        await axios.post("/api/companion", data);
       }
 
       toast({
@@ -225,6 +247,38 @@ export const CompanionForm = ({
       });
     }
     setGeneratingConversation(false);
+  };
+
+  const uploadDocument = async () => {
+    if (!inputFileRef.current?.files || inputFileRef.current?.files.length === 0) {
+      toast({
+        variant: "destructive",
+        description: "No file selected.",
+        duration: 6000,
+      });
+      return;
+    }
+    const file = inputFileRef.current.files[0];
+    if (supportedUploadFormats.findIndex((format) => format.type === file.type) === -1) {
+      toast({
+        variant: "destructive",
+        description: "This file format is not supported",
+        duration: 6000,
+      });
+    }
+    try {
+      const response = await axios.post(
+        `/api/knowledge?filename=${file.name}&type=${file.type}`,
+        file,
+      );
+      setKnowledge((current) => [...current, response.data]);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description: String((error as AxiosError).response?.data) || "Something went wrong.",
+        duration: 6000,
+      });
+    }
   };
 
   return ( 
@@ -368,6 +422,34 @@ export const CompanionForm = ({
               </FormItem>
             )}
           />
+          <div>
+            <FormItem>
+              <FormLabel>Custom Knowledge</FormLabel>
+              <div>
+                <div>
+                  {knowledge.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between w-full bg-background rounded-lg p-2 my-2">
+                      <p className="text-sm px-3 py-2">{item.name}</p>
+                      <Button type="button" variant="outline" onClick={() => setKnowledge((current) => current.filter((i) => i.id !== item.id))}>
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex">
+                  <Input name="file" ref={inputFileRef} type="file" />
+                  <Button type="button" disabled={isLoading} variant="outline" onClick={() => uploadDocument()}>
+                    Upload
+                    <FileText className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              </div>
+              <FormDescription>
+                Add custom knowledge to your AI. Max file size: 4.5Mb. The following formats are supported: {supportedUploadFormats.map((format) => format.name).join(", ")}
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          </div>
           <FormField
             name="seed"
             control={form.control}

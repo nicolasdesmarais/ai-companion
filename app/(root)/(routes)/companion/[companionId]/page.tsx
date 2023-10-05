@@ -24,7 +24,14 @@ const CompanionIdPage = async ({
     where: {
       id: params.companionId,
       userId,
-    }
+    },
+    include: {
+      knowledge: {
+        include: {
+          knowledge: true,
+        },
+      },
+    },
   });
 
   const categories = await prismadb.category.findMany();

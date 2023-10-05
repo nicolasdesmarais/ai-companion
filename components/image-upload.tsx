@@ -4,8 +4,6 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { CldUploadButton } from "next-cloudinary";
 
-import { Button } from "@/components/ui/button";
-import { ImageIcon, X } from "lucide-react";
 
 interface ImageUploadProps {
   value: string;

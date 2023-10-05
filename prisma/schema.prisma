@@ -37,6 +37,8 @@ model Companion {
 
   workspaces    WorkspaceAI[]
 
+  knowledge     KnowledgeAI[]
+
   @@index([categoryId])
   @@fulltext([name])
 }
@@ -135,4 +137,26 @@ model Invitation {
   isAccepted                Boolean   @default(false) @map(name: "is_accepted")
 
   @@map("invitations")
+}
+
+model Knowledge {
+  id                        String   @id @default(cuid())
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt @default(now())
+  userId                    String   @map(name: "user_id")
+  name                      String
+  type                      String
+  companions                KnowledgeAI[]
+
+  @@map("knowledge")
+}
+
+model KnowledgeAI {
+  knowledge                 Knowledge @relation(fields: [knowledgeId], references: [id])
+  knowledgeId               String    @map(name: "knowledge_id")
+  companion                 Companion @relation(fields: [companionId], references: [id])
+  companionId               String    @map(name: "companion_id")
+
+  @@id([knowledgeId, companionId])
+  @@map("knowledge_ais")
 }

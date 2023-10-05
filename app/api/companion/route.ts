@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const user = await currentUser();
-    const { src, name, description, instructions, seed, categoryId, modelId } = body;
+    const { src, name, description, instructions, seed, categoryId, modelId, knowledge } = body;
 
     if (!user || !user.id) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -31,6 +31,17 @@ export async function POST(req: Request) {
         modelId,
       }
     });
+
+    if (knowledge && knowledge.length > 0) {
+      knowledge.forEach(async (item: { id: string; }) => {
+        await prismadb.knowledgeAI.create({
+          data: {
+            companionId: companion.id,
+            knowledgeId: item.id,
+          }
+        });
+      });
+    }
 
     return NextResponse.json(companion);
   } catch (error) {

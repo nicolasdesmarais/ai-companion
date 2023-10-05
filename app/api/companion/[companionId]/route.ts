@@ -10,7 +10,7 @@ export async function PATCH(
   try {
     const body = await req.json();
     const user = await currentUser();
-    const { src, name, description, instructions, seed, categoryId, modelId } = body;
+    const { src, name, description, instructions, seed, categoryId, modelId, knowledge } = body;
 
     if (!params.companionId) {
       return new NextResponse("Companion ID required", { status: 400 });
@@ -42,6 +42,17 @@ export async function PATCH(
         modelId,
       }
     });
+
+    if (knowledge && knowledge.length > 0) {
+      knowledge.forEach(async (item: { id: string; }) => {
+        await prismadb.knowledgeAI.create({
+          data: {
+            companionId: companion.id,
+            knowledgeId: item.id,
+          }
+        });
+      });
+    }
 
     return NextResponse.json(companion);
   } catch (error) {
