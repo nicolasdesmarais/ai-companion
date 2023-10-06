@@ -1,6 +1,6 @@
-import { currentUser } from "@clerk/nextjs";
-import { NextRequest, NextResponse  } from "next/server";
 import { AIService } from "@/domain/services/AIService";
+import { currentUser } from "@clerk/nextjs";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   req: NextRequest,
