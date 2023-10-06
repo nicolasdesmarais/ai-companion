@@ -13,20 +13,12 @@ export class InvitationService {
         });
     }
 
-    public async findInvitationsByExternalUserId(externalUserId: string) {
-        const user = await prismadb.user.findFirst({
-            where: {
-                externalId: externalUserId
-            }
-        });
-
-        if (!user?.email) {
-            return;
-        }
-
+    public async findInvitationsByEmailAddresses(emailAddresses: string[]) {
         return prismadb.invitation.findMany({
             where: {
-                email: user?.email
+                email: {
+                    in: emailAddresses
+                }
             }
         });
     }
@@ -38,7 +30,7 @@ export class InvitationService {
             workspaceId: invitationRequest.workspaceId,
         }));
 
-        const invitations = await prismadb.invitation.createMany({data: invitationEntities});
+        await prismadb.invitation.createMany({data: invitationEntities});
 
         for (const invitation of invitationRequest.invitations) {
             // Creating invitation with clerkClient
@@ -48,9 +40,9 @@ export class InvitationService {
         }
     }
 
-    public async acceptInvitation(invitation: InvitationEntity, invitedUserExternalId: string) {
+    public async acceptInvitation(invitation: InvitationEntity, invitedUserId: string) {
         const workspaceService = new WorkspaceService();
-        await workspaceService.addUserToWorkspace(invitedUserExternalId, invitation.workspaceId);
+        await workspaceService.addUserToWorkspace(invitedUserId, invitation.workspaceId);
         prismadb.invitation.update({ where: { id: invitation.id }, data: { isAccepted: true } })
     }
 }

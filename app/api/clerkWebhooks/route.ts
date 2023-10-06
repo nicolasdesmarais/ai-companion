@@ -1,10 +1,7 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { UserWebhookEvent, UserJSON, User, SessionWebhookEvent, WebhookEvent } from '@clerk/nextjs/server'
-import { clerkClient } from '@clerk/nextjs';
-import { UserService } from '../../../domain/services/UserService'
 import { WorkspaceService } from '../../../domain/services/WorkspaceService'
-import { UserEntity } from '@/domain/entities/UserEntity';
 
 enum SupportedEvents {
   USER_CREATED_EVENT = 'user.created',
@@ -60,7 +57,6 @@ export async function POST(req: Request) {
     })
   }
 
-  const data = evt.data;
   if (!isSupportedEvent(evt.type)) {
     console.log(`Unsupported event type: ${evt.type}`)
     return;
@@ -87,49 +83,31 @@ async function handleUserCreatedEvent(userEvent: UserWebhookEvent) {
     return;
   }
 
-  const userEntity = {
-    externalId: data.id,
-    email: primaryEmail
-  };
-  createUserAndAddToWorkspace(userEntity);
+  if (!data.id) {
+    console.log('Cannot extract id from user data: ' + JSON.stringify(data));
+    return;
+  }
+
+  const workspaceService = new WorkspaceService();
+  workspaceService.addUserToNewOrExistingWorkspace(data.id, primaryEmail);
 }
 
 async function handleSessionCreatedEvent(sessionEvent: SessionWebhookEvent) {
-  const data = sessionEvent.data;
-  const userId = data.user_id;
+  // TODO: Remove this function if not needed
+  // const data = sessionEvent.data;
+  // const userId = data.user_id;
 
-  // Check if user already exists
-  const userService = new UserService();
-  const existingUser = await userService.findUserByExternalId(userId);
-  if (existingUser !== null) {
-    return;
-  }
+  // // User does not exist, create user
+  // const clerkUser = await clerkClient.users.getUser(userId);
+  // const primaryEmail = getPrimaryEmailFromClerkUser(clerkUser);
+  // if (primaryEmail === null) {
+  //   console.log('Cannot extract primary email from user data: ' + JSON.stringify(clerkUser));
+  //   return;
+  // }
 
-  // User does not exist, create user
-  const clerkUser = await clerkClient.users.getUser(userId);
-  const primaryEmail = getPrimaryEmailFromClerkUser(clerkUser);
-  if (primaryEmail === null) {
-    console.log('Cannot extract primary email from user data: ' + JSON.stringify(clerkUser));
-    return;
-  }
-
-  const userEntity = {
-    externalId: userId,
-    email: primaryEmail
-  };
-
-  createUserAndAddToWorkspace(userEntity);
+  // const workspaceService = new WorkspaceService();
+  // workspaceService.addUserToNewOrExistingWorkspace(userId, primaryEmail);
 }
-
-
-async function createUserAndAddToWorkspace(userEntity : UserEntity) {
-  const userService = new UserService();
-  const workspaceService = new WorkspaceService();
-
-  const createdUserEntity = await userService.create(userEntity);
-  workspaceService.addUserToNewOrExistingWorkspace(createdUserEntity);
-}
-
 
 const getPrimaryEmailFromUserJson  = (data: UserJSON): string | null => {
   const primaryEmailId = data.primary_email_address_id;
