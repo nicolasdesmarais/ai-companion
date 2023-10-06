@@ -490,7 +490,8 @@ export const CompanionForm = ({
                 </div>
               </div>
               <FormDescription>
-                Add custom knowledge to your AI. Max file size: 4.5Mb. The following formats are supported: {supportedUploadFormats.map((format) => format.name).join(", ")}
+                Add custom knowledge to your AI. Max file size: 4.5Mb. <br />
+                The following formats are supported: {supportedUploadFormats.map((format) => format.name).join(", ")}
               </FormDescription>
               <FormMessage />
             </FormItem>

@@ -10,30 +10,7 @@ import { DocxLoader } from "langchain/document_loaders/fs/docx";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
-const getBlob = async (source: ReadableStream<Uint8Array>) => {
-  const reader = source.getReader();
-  const stream = new ReadableStream({
-    start(controller) {
-      return pump();
-      function pump(): any {
-        return reader.read().then(({ done, value }) => {
-          if (done) {
-            controller.close();
-            return;
-          }
-          controller.enqueue(value);
-          return pump();
-        });
-      }
-    },
-  });
-  return (new Response(stream)).blob();
-}
-
-const getFilepath = async (request: NextRequest) => {
-  const data = await request.formData();
-  const file: File | null = data.get('file') as unknown as File
-
+const getFilepath = async (file: File) => {
   if (!file) {
     throw new Error('Error reading file');
   }
@@ -66,20 +43,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const loader = new CSVLoader(file, "text");
         docs = await loader.load(); 
       } else if (type === 'text/plain') {
-        const blob = await getBlob(request.body);
-        const loader = new TextLoader(blob);
+        const loader = new TextLoader(file);
         docs = await loader.load(); 
       } else if (type === 'application/epub+zip') {
-        const path = await getFilepath(request);
+        const path = await getFilepath(file);
         const loader = new EPubLoader(path);
         docs = await loader.load();
       } else if (type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-        const blob = await getBlob(request.body);
-        const loader = new DocxLoader(blob);
+        const loader = new DocxLoader(file);
         docs = await loader.load();
       } else if (type === 'application/pdf') {
-        const blob = await getBlob(request.body);
-        const loader = new PDFLoader(blob);
+        const loader = new PDFLoader(file);
         docs = await loader.load();
       } else {
         return NextResponse.json("Unsupported file format.", { status: 400 });
@@ -104,7 +78,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       });
       
       const docOutput = await splitter.splitDocuments(docs);
-console.log(docOutput)
+
       const memoryManager = await MemoryManager.getInstance();
       await memoryManager.vectorUpload(docOutput);
       return NextResponse.json(knowledge);
