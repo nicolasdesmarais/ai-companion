@@ -1,4 +1,5 @@
 import prismadb from "@/lib/prismadb";
+import { clerkClient } from '@clerk/nextjs';
 import { ListAIsRequestParams, ListAIsRequestScope } from "./dtos/ListAIsRequestParams";
 
 enum AIVisibility {
@@ -8,6 +9,26 @@ enum AIVisibility {
 }
 
 export class AIService {
+
+    public async findAIById(id: string) {
+        return prismadb.companion.findUnique({
+            where: {
+                id: id
+            }
+        });
+    }
+
+    public async shareAi(aiId: string, request: ShareAIRequest) {
+        const userEmails = request.users.map(user => user.email);
+
+        const clerkUserList = await clerkClient.users.getUserList({ emailAddress: userEmails });
+        const aiPermissions = clerkUserList.map(user => ({
+            userId: user.id,
+            companionId: aiId
+        }));
+
+        prismadb.aIPermissions.createMany({ data: aiPermissions });
+    }
 
     public async findAIsForUser(userId: string, request: ListAIsRequestParams) {
         const scope = request.scope || ListAIsRequestScope.ALL;
