@@ -60,9 +60,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     if (request.body) {
       let docs;
+      const data = await request.formData();
+      const file: File | null = data.get('file') as unknown as File
       if (type === 'text/csv') {
-        const blob = await getBlob(request.body);
-        const loader = new CSVLoader(blob, "text");
+        const loader = new CSVLoader(file, "text");
         docs = await loader.load(); 
       } else if (type === 'text/plain') {
         const blob = await getBlob(request.body);

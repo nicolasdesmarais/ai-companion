@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { currentUser } from "@clerk/nextjs";
 import prismadb from "@/lib/prismadb";
 import { MemoryManager } from "@/lib/memory";
+import { Prisma } from '@prisma/client';
 
 export async function DELETE(
   request: Request,
@@ -23,6 +24,12 @@ export async function DELETE(
           companionId: params.aiId
         }
       }
+    }).catch((e) => {
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025' || e.code === 'P2016') {
+        // AI is not saved yet
+        return;
+      }
+      throw e;
     });
 
     const knowledge = await prismadb.knowledge.delete({

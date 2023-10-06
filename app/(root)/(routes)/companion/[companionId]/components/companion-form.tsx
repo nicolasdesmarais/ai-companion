@@ -278,7 +278,7 @@ export const CompanionForm = ({
       return;
     }
     const file = inputFileRef.current.files[0];
-console.log(file.type)
+
     if (supportedUploadFormats.findIndex((format) => format.type === file.type) === -1) {
       toast({
         variant: "destructive",
