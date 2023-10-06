@@ -9,7 +9,6 @@ enum AIVisibility {
 }
 
 export class AIService {
-
     public async findAIById(id: string) {
         return prismadb.companion.findUnique({
             where: {
@@ -32,7 +31,13 @@ export class AIService {
 
     public async findAIsForUser(userId: string, request: ListAIsRequestParams) {
         const scope = request.scope || ListAIsRequestScope.ALL;
-        const whereCondition = this.getBaseWhereCondition(userId, scope);
+
+        const whereCondition = { AND: [{}] };
+        whereCondition.AND.push(this.getBaseWhereCondition(userId, scope));
+
+        if (request.search) {
+            whereCondition.AND.push(this.getSearchCriteria(request.search));
+        }
 
         return prismadb.companion.findMany({
             where: whereCondition
@@ -107,5 +112,21 @@ export class AIService {
 
     private getPublicCriteria() {
         return { visibility: AIVisibility.PUBLIC };
+    }
+
+    private getSearchCriteria(search: string) {
+        return {
+            OR: [
+                {
+                    name: {
+                        search: search
+                    }
+                },
+                {
+                    userName: {
+                        search: search
+                    }
+                }
+            ]};
     }
 }
