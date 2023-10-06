@@ -77,6 +77,18 @@ const supportedUploadFormats = [
     name: "CSV",
     type: "text/csv"
   },
+  {
+    name: "PDF",
+    type: "application/pdf"
+  },
+  {
+    name: "DOCX",
+    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  },
+  {
+    name: "EPUB",
+    type: "application/epub+zip"
+  }
 ];
 
 const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
@@ -266,6 +278,7 @@ export const CompanionForm = ({
       return;
     }
     const file = inputFileRef.current.files[0];
+console.log(file.type)
     if (supportedUploadFormats.findIndex((format) => format.type === file.type) === -1) {
       toast({
         variant: "destructive",
@@ -274,11 +287,15 @@ export const CompanionForm = ({
       });
     }
     try {
+      const data = new FormData();
+      data.set('file', file);
       const response = await axios.post(
-        `/api/knowledge?filename=${file.name}&type=${file.type}`,
-        file,
+        `/api/knowledge?filename=${encodeURIComponent(file.name)}&type=${encodeURIComponent(file.type)}`,
+        data,
       );
       setKnowledge((current) => [...current, response.data]);
+      inputFileRef.current.value = '';
+
     } catch (error: any) {
       toast({
         variant: "destructive",
