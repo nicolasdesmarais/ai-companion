@@ -1,29 +1,31 @@
 import { currentUser } from "@clerk/nextjs";
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse  } from "next/server";
 import { AIService } from "@/domain/services/AIService";
 import { ListAIsRequestParams, ListAIsRequestScope } from "@/domain/services/dtos/ListAIsRequestParams";
 
 export async function GET(
-  request: NextApiRequest,
-  res: NextApiResponse) {
+  req: NextRequest): Promise<NextResponse> {
   try {
-    const { query, method } = request;
 
     const user = await currentUser();
     if (!user?.id) {
-      res.status(401).json("Unauthorized");
-      return;
+      return NextResponse.json("Unauthorized", { status: 401 });
     }
 
-    const scope = query.scope as ListAIsRequestScope || ListAIsRequestScope.ALL;
+    const { searchParams } = new URL(req.url);
+
+    const requestParams: ListAIsRequestParams = {
+      scope: searchParams.get('scope') as ListAIsRequestScope
+    }
+
 
     const aiService = new AIService();
-    const ais = await aiService.findAIsForUser(user.id, { scope: scope });
+    const ais = await aiService.findAIsForUser(user.id, requestParams);
 
-    res.status(200).json(ais);
+    return NextResponse.json(ais);
   } catch (error) {
     console.log("Error on [GET /v1/me/ai]", error);
-    res.status(500).json("Internal Error");
+    return NextResponse.json("Internal Error", { status: 500 });
   }
 };
 

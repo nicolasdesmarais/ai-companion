@@ -1,8 +1,8 @@
 export interface ListAIsRequestParams {
-    workspaceIds?: string[];
-    categories?: string[];
-    search?: string;
-    scope?: ListAIsRequestScope;
+    workspaceIds?: string[] | null;
+    categories?: string[] | null;
+    search?: string | null;
+    scope?: ListAIsRequestScope | null;
 }
 
 export enum ListAIsRequestScope {
