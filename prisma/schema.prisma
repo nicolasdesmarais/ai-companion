@@ -40,6 +40,8 @@ model Companion {
 
   knowledge     KnowledgeAI[]
 
+  permissions   AIPermissions[]
+
   @@index([categoryId])
   @@index([visibility])
   @@index([userId])
@@ -148,4 +150,13 @@ model KnowledgeAI {
 
   @@id([knowledgeId, companionId])
   @@map("knowledge_ais")
+}
+
+model AIPermissions {
+  userId                    String
+  companion                 Companion @relation(fields: [companionId], references: [id])
+  companionId               String    @map(name: "companion_id")
+
+  @@id([userId, companionId])
+  @@map("ai_permissions")
 }

@@ -14,7 +14,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(workspaces);
   } catch (error) {
-    console.log("[WORKSPACE_POST]", error);
+    console.log("Error in [GET v1/me/workspaces]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 };
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(workspace);
   } catch (error) {
-    console.log("[WORKSPACE_POST]", error);
+    console.log("[POST v1/me/workspaces]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 };
