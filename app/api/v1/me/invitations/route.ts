@@ -10,7 +10,8 @@ export async function GET(req: Request) {
     }
 
     const invitationService = new InvitationService();
-    const invitations = await invitationService.findInvitationsByExternalUserId(user.id)
+    const emailAddresses = user.emailAddresses.map((emailAddress: any) => emailAddress.email);
+    const invitations = await invitationService.findInvitationsByEmailAddresses(emailAddresses)
 
     return NextResponse.json(invitations);
   } catch (error) {
