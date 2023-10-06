@@ -71,3 +71,43 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json("Missing file", { status: 400 });
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const user = await currentUser();
+    if (!user || !user.id) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const memoryManager = await MemoryManager.getInstance();
+    await memoryManager.vectorDelete(params.id);
+
+    await prismadb.knowledge.update({
+      where: {
+        id: params.id
+      },
+      data: {
+        companions: {
+          set: []
+        }
+      },
+      include: {
+        companions: true,
+      }
+    });
+    
+    const companion = await prismadb.knowledge.delete({
+      where: {
+        id: params.id
+      }
+    });
+
+    return NextResponse.json(companion);
+  } catch (error) {
+    console.log("[COMPANION_DELETE]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+};

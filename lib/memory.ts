@@ -64,6 +64,21 @@ export class MemoryManager {
     return similarDocs;
   }
 
+  public async vectorDelete(
+    knowledgeId: string
+  ) {
+    const pineconeClient = <PineconeClient>this.vectorDBClient;
+
+    const pineconeIndex = pineconeClient.Index(
+      process.env.PINECONE_INDEX! || ""
+    );
+
+    await pineconeIndex._delete({
+      deleteRequest: {
+        filter: { knowledge: knowledgeId }
+    }});
+  }
+
   public static async getInstance(): Promise<MemoryManager> {
     if (!MemoryManager.instance) {
       MemoryManager.instance = new MemoryManager();

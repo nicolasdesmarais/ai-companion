@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Plus, Settings } from "lucide-react";
+import { Home, Plus, Settings, Wrench } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -39,7 +39,7 @@ export const Sidebar = ({
       pro: false,
     },
     {
-      icon: Settings,
+      icon: Wrench,
       href: '/dashboard',
       label: "Tools",
       pro: false,
