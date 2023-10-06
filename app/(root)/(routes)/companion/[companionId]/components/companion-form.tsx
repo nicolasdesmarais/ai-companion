@@ -170,7 +170,7 @@ export const CompanionForm = ({
     if (name && description) {
       try {
         const response = await axios.post('/api/image', {
-          prompt: `Image of ${name}, ${description}`,
+          prompt: `Image of ${name}, ${description}: intricate, elegant, highly detailed, concept art, smooth, sharp focus, 8K`,
           amount: 1,
           resolution: "512x512"
         });
