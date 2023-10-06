@@ -10,6 +10,7 @@ import { ChatForm } from "@/components/chat-form";
 import { ChatHeader } from "@/components/chat-header";
 import { ChatMessages } from "@/components/chat-messages";
 import { ChatMessageProps } from "@/components/chat-message";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ChatClientProps {
   companion: Companion & {
@@ -25,6 +26,7 @@ export const ChatClient = ({
 }: ChatClientProps) => {
   const router = useRouter();
   const [messages, setMessages] = useState<ChatMessageProps[]>(companion.messages);
+  const { toast } = useToast();
 
   const {
     input,
@@ -34,6 +36,13 @@ export const ChatClient = ({
     setInput,
   } = useCompletion({
     api: `/api/chat/${companion.id}`,
+    onError: err => {
+      toast({
+        variant: "destructive",
+        description: err.message,
+        duration: 60000,
+      });
+    },
     onFinish(_prompt, completion) {
       const systemMessage: ChatMessageProps = {
         role: "system",

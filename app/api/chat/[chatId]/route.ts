@@ -120,7 +120,6 @@ export async function POST(
 
         ${recentChatHistory}\n${companion.name}:`
         )
-        .catch(console.error)
     );
 
     const cleaned = resp.replaceAll(",", "");
@@ -154,6 +153,11 @@ export async function POST(
 
     return new StreamingTextResponse(s);
   } catch (error) {
+    if (error.response?.data?.error?.message) {
+      console.error("[CHAT]", error.response.data.error.message);
+      return new NextResponse(error.response.data.error.message, { status: 500 });
+    }
+    console.error("[CHAT]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 };
