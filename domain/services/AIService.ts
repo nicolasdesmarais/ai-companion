@@ -1,6 +1,6 @@
 import prismadb from "@/lib/prismadb";
-import { ListAIsRequestParams, ListAIsRequestScope } from "./dtos/ListAIsRequestParams";
 import { clerkClient } from '@clerk/nextjs';
+import { ListAIsRequestParams, ListAIsRequestScope } from "./dtos/ListAIsRequestParams";
 
 enum AIVisibility {
     PRIVATE = 'PRIVATE',
