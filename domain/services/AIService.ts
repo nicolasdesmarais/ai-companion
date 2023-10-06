@@ -3,19 +3,19 @@ import prismadb from "@/lib/prismadb";
 
 export class AIService {
 
-    public async findAIsForUser(externalUserId: string, request: ListAIsRequestParams) {
-        let whereCondition = this.getBaseWhereCondition(externalUserId);
+    public async findAIsForUser(userId: string, request: ListAIsRequestParams) {
+        let whereCondition = this.getBaseWhereCondition(userId);
 
         return prismadb.companion.findMany({
             where: whereCondition
         });
     }
 
-    private getBaseWhereCondition(externalUserId: string) {
+    private getBaseWhereCondition(userId: string) {
         return {
             OR: [
                 { visibility: 'public'},
-                { userId: externalUserId },
+                { userId: userId },
                 { AND: [
                     { visibility: 'workspace'},
                     { workspaces: {
@@ -23,13 +23,20 @@ export class AIService {
                             workspace: {
                                 users: {
                                     some: {
-                                        userId: externalUserId
+                                        userId: userId
                                         }
                                     }
                             }
                         }
                     }}
-                ]}
+                ]},
+                {
+                    permissions: {
+                        some: {
+                            userId: userId
+                        }
+                    }
+                }
             ]
         };
     }
