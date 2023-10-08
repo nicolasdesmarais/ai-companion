@@ -106,7 +106,7 @@ model Group {
 
 enum GroupAvailability {
   EVERYONE
-  SELECT
+  RESTRICTED
 }
 
 model WorkspaceUser {
