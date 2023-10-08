@@ -15,7 +15,7 @@ export async function GET(req: Request) {
       groups = [];
     } else {
       const groupService = new GroupService();
-      groups = await groupService.findGroupsByUserAndOrgId(authentication.userId, authentication.orgId);
+      groups = await groupService.findGroupsByOrgAndUserId(authentication.orgId, authentication.userId);
     }
 
     return NextResponse.json(groups);
