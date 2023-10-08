@@ -36,6 +36,7 @@ model Companion {
 
   modelId       String @default("llama2-13b")
 
+  groups        GroupAI[]
   workspaces    WorkspaceAI[]
 
   knowledge     KnowledgeAI[]
@@ -90,6 +91,24 @@ model Workspace {
   @@map("workspaces")
 }
 
+model Group {
+  id                        String    @id @default(cuid())
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt @default(now())
+  orgId                     String    @map(name: "org_id")
+  name                      String
+  availability              GroupAvailability @default(EVERYONE)
+  users                     GroupUser[]
+  companions                GroupAI[]
+
+  @@map("groups")
+}
+
+enum GroupAvailability {
+  EVERYONE
+  RESTRICTED
+}
+
 model WorkspaceUser {
   userId                    String    @map(name: "user_id")
   workspace                 Workspace @relation(fields: [workspaceId], references: [id])
@@ -99,6 +118,29 @@ model WorkspaceUser {
 
   @@id([userId, workspaceId])
   @@map("workspace_users")
+}
+
+model GroupUser {
+  group                     Group     @relation(fields: [groupId], references: [id])
+  groupId                   String    @map(name: "group_id")
+  userId                    String    @map(name: "user_id")
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt @default(now())
+
+  @@id([groupId, userId])
+  @@map("group_users")
+}
+
+model GroupAI {
+  group                     Group @relation(fields: [groupId], references: [id])
+  groupId                   String    @map(name: "group_id")
+  companion                 Companion @relation(fields: [companionId], references: [id])
+  companionId               String    @map(name: "companion_id")
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt @default(now())
+
+  @@id([groupId, companionId])
+  @@map("group_ais")
 }
 
 model WorkspaceAI {
