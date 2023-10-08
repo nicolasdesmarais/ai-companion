@@ -1,14 +1,14 @@
 import { AIService } from "@/domain/services/AIService";
 import { ListAIsRequestParams, ListAIsRequestScope } from "@/domain/services/dtos/ListAIsRequestParams";
-import { currentUser } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest): Promise<NextResponse> {
   try {
 
-    const user = await currentUser();
-    if (!user?.id) {
+    const authorization = await auth();
+    if (!authorization?.userId) {
       return NextResponse.json("Unauthorized", { status: 401 });
     }
 
@@ -27,11 +27,13 @@ export async function GET(
 
     const requestParams: ListAIsRequestParams = {
       scope: scope,
+      groupId: searchParams.get('groupId'),
+      categoryId: searchParams.get('categoryId'),
       search: searchParams.get('search'),
     }
 
     const aiService = new AIService();
-    const ais = await aiService.findAIsForUser(user.id, requestParams);
+    const ais = await aiService.findAIsForUser(authorization.orgId, authorization.userId, requestParams);
 
     return NextResponse.json(ais);
   } catch (error) {
