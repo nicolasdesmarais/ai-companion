@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     const createGroupRequest: CreateGroupRequest = await req.json();
 
     const groupService = new GroupService();
-    const group = groupService.createGroup(authentication.orgId, authentication.userId, createGroupRequest)
+    const group = await groupService.createGroup(authentication.orgId, authentication.userId, createGroupRequest)
 
     return NextResponse.json(group);
   } catch (error) {
