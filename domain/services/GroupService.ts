@@ -37,18 +37,21 @@ export class GroupService {
         if (createGroupRequest.availability === GroupAvailability.RESTRICTED) {
             // Create explicit permissions for users when group availability is SELECT
             const memberEmailsArray = createGroupRequest.memberEmails.split(",").map((email) => email.trim());
-            memberEmailsArray.push(createByUserId);
             const uniqueMemberEmailsSet = new Set(memberEmailsArray);
 
             const clerkUserList = await clerkClient.users.getUserList({
                 emailAddress: Array.from(uniqueMemberEmailsSet)
             });
-            const groupUsers = clerkUserList.map(user => ({
+
+            const userIds = clerkUserList.map(user => user.id);
+            userIds.push(createByUserId);
+
+            const groupUsers = userIds.map(userId => ({
                 groupId: group.id,
-                userId: user.id
+                userId: userId
             }));
 
-            prismadb.groupUser.createMany({ data: groupUsers });
+            await prismadb.groupUser.createMany({ data: groupUsers });
         }
 
         return group;
