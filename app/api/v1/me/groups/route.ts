@@ -6,17 +6,9 @@ import { CreateGroupRequest } from '../../../../../domain/types/CreateGroupReque
 export async function GET(req: Request) {
   try {
     const authentication = await auth();
-    if (!authentication?.userId) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
 
-    let groups: any[];
-    if (!authentication?.orgId) {
-      groups = [];
-    } else {
-      const groupService = new GroupService();
-      groups = await groupService.findGroupsByOrgAndUserId(authentication.orgId, authentication.userId);
-    }
+    const groupService = new GroupService();
+    const groups = await groupService.findGroupsByUser(authentication);
 
     return NextResponse.json(groups);
   } catch (error) {

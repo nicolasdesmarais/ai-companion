@@ -1,7 +1,8 @@
 import prismadb from "@/lib/prismadb";
 import { clerkClient } from '@clerk/nextjs';
+import { SignedInAuthObject, SignedOutAuthObject } from "@clerk/nextjs/server";
 import { GroupAvailability } from "@prisma/client";
-import { EntityNotFoundError } from "../errors/Errors";
+import { EntityNotFoundError, UnauthorizedError } from "../errors/Errors";
 import { CreateGroupRequest } from "../types/CreateGroupRequest";
 import { UpdateGroupRequest } from "../types/UpdateGroupRequest";
 
@@ -30,9 +31,16 @@ export class GroupService {
         });
     }
 
-    public async findGroupsByOrgAndUserId(orgId: string, userId: string){
+    public async findGroupsByUser(auth: SignedInAuthObject | SignedOutAuthObject){
+        if (!auth?.userId) {
+            throw new UnauthorizedError("Unauthorized");
+        }
+        if (!auth?.orgId) {
+            return [];
+        }
+
         return await prismadb.group.findMany({
-            where: this.getSecurityCriteria(orgId, userId),
+            where: this.getSecurityCriteria(auth.orgId, auth.userId),
         });
     }
 

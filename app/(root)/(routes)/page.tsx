@@ -1,7 +1,9 @@
 import { Categories } from "@/components/categories";
 import { Companions } from "@/components/companions";
+import { Groups } from "@/components/groups";
 import { SearchInput } from "@/components/search-input";
 import { AIService } from "@/domain/services/AIService";
+import { GroupService } from "@/domain/services/GroupService";
 import { ListAIsRequestParams, ListAIsRequestScope } from "@/domain/services/dtos/ListAIsRequestParams";
 import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs";
@@ -18,7 +20,6 @@ interface RootPageProps {
 const RootPage = async ({
   searchParams
 }: RootPageProps) => {
-  const aiService = new AIService();
   const authorization = await auth();
 
   const scopeParam = searchParams.scope;
@@ -36,11 +37,17 @@ const RootPage = async ({
     search: searchParams.search
   }
 
+  const aiService = new AIService();
   const data = await aiService.findAIsForUser(authorization, requestParams);
+
+  const groupService = new GroupService();
+  const groups = await groupService.findGroupsByUser(authorization);
+
   const categories = await prismadb.category.findMany();
 
   return (
     <div className="h-full px-4 space-y-2">
+      <Groups data={groups}/>
       <SearchInput />
       <Categories data={categories} />
       <Companions data={data} />
