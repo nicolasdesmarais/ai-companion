@@ -33,7 +33,7 @@ export const Companions = ({
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 pb-10">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-9 gap-3 pb-10">
       {data.map((item) => (
         <Card key={item.name} className="bg-card rounded-xl cursor-pointer hover:opacity-75 transition border-0 p-1">
           <Link href={`/chat/${item.id}`}>
