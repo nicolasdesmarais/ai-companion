@@ -1,15 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
-import { Poppins } from "next/font/google";
+import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { Sparkles } from "lucide-react";
+import { Poppins } from "next/font/google";
+import Link from "next/link";
 
-import { cn } from "@/lib/utils";
 import { MobileSidebar } from "@/components/mobile-sidebar";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Button } from "@/components/ui/button";
 import { useProModal } from "@/hooks/use-pro-modal";
+import { cn } from "@/lib/utils";
 
 const font = Poppins({ weight: "600", subsets: ["latin"] });
 interface NavbarProps {
@@ -21,7 +21,7 @@ export const Navbar = ({
 }: NavbarProps) => {
   const proModal = useProModal();
 
-  return ( 
+  return (
     <div className="fixed w-full z-50 flex justify-between items-center py-2 px-4 h-16 border-b border-primary/10 bg-secondary">
       <div className="flex items-center">
         <MobileSidebar isPro={isPro} />
@@ -40,6 +40,7 @@ export const Navbar = ({
         )}
         <ModeToggle />
         <UserButton afterSignOutUrl="/" />
+        <OrganizationSwitcher />
       </div>
     </div>
   );
