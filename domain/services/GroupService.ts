@@ -1,7 +1,7 @@
 import prismadb from "@/lib/prismadb";
 import { clerkClient } from '@clerk/nextjs';
 import { GroupAvailability } from "@prisma/client";
-import { EntityNotFoundError } from "../errors/EntityNotFoundError";
+import { EntityNotFoundError } from "../errors/Errors";
 import { CreateGroupRequest } from "../types/CreateGroupRequest";
 import { UpdateGroupRequest } from "../types/UpdateGroupRequest";
 

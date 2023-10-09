@@ -1,6 +1,8 @@
 import prismadb from "@/lib/prismadb";
 import { clerkClient } from '@clerk/nextjs';
+import { SignedInAuthObject, SignedOutAuthObject } from "@clerk/nextjs/server";
 import { AIVisibility, GroupAvailability } from "@prisma/client";
+import { UnauthorizedError } from "../errors/Errors";
 import { ListAIsRequestParams, ListAIsRequestScope } from "./dtos/ListAIsRequestParams";
 
 export class AIService {
@@ -24,15 +26,20 @@ export class AIService {
         prismadb.aIPermissions.createMany({ data: aiPermissions });
     }
 
-    public async findAIsForUser(orgId: string | undefined, userId: string, request: ListAIsRequestParams) {
-        const scope = request.scope || ListAIsRequestScope.ALL;
-        const orgIdFilter = orgId || '';
+    public async findAIsForUser(auth: SignedInAuthObject | SignedOutAuthObject, request: ListAIsRequestParams) {
+        if (!auth?.userId) {
+            throw new UnauthorizedError("Unauthorized");
+        }
+
+        const userId = auth.userId;
+        const orgId = auth.orgId || '';
+        const scope = this.determineScope(auth, request);
 
         const whereCondition = { AND: [{}] };
-        whereCondition.AND.push(this.getBaseWhereCondition(orgIdFilter, userId, scope));
+        whereCondition.AND.push(this.getBaseWhereCondition(orgId, userId, scope));
 
         if (request.groupId) {
-            whereCondition.AND.push(this.getGroupCriteria(orgIdFilter, request.groupId));
+            whereCondition.AND.push(this.getGroupCriteria(orgId, request.groupId));
         }
         if (request.categoryId) {
             whereCondition.AND.push(this.getCategoryCriteria(request.categoryId));
@@ -54,6 +61,14 @@ export class AIService {
                 }
               }
         });
+    }
+
+    private determineScope(auth: SignedInAuthObject | SignedOutAuthObject, request: ListAIsRequestParams) {
+        if (!auth?.userId || !auth?.orgId) {
+            return ListAIsRequestScope.PUBLIC;
+        } else {
+            return request.scope || ListAIsRequestScope.ALL;
+        }
     }
 
     private getBaseWhereCondition(orgId: string, userId: string, scope: ListAIsRequestScope) {

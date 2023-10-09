@@ -2,7 +2,7 @@ import { GroupService } from "@/domain/services/GroupService";
 import { UpdateGroupRequest } from "@/domain/types/UpdateGroupRequest";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-import { EntityNotFoundError } from "../../../../../../domain/errors/EntityNotFoundError";
+import { EntityNotFoundError } from "../../../../../../domain/errors/Errors";
 
 export async function GET(
   req: Request,

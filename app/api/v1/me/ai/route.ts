@@ -8,20 +8,16 @@ export async function GET(
   try {
 
     const authorization = await auth();
-    if (!authorization?.userId) {
-      return NextResponse.json("Unauthorized", { status: 401 });
-    }
-
     const { searchParams } = new URL(req.url);
 
     const scopeParam = searchParams.get('scope');
-    let scope: ListAIsRequestScope;
-    if (scopeParam === null) {
-      scope = ListAIsRequestScope.ALL;
-    } else  {
-      if (!Object.values(ListAIsRequestScope).includes(scopeParam as ListAIsRequestScope)) {
-        return NextResponse.json("Invalid scope", { status: 400 });
-      }
+    let scope: ListAIsRequestScope | undefined;
+
+    if (!scopeParam) {
+      scope = undefined;
+    } else if (!Object.values(ListAIsRequestScope).includes(scopeParam as ListAIsRequestScope)) {
+      return NextResponse.json("Invalid scope", { status: 400 });
+    } else {
       scope = ListAIsRequestScope[scopeParam as keyof typeof ListAIsRequestScope];
     }
 
@@ -33,7 +29,7 @@ export async function GET(
     }
 
     const aiService = new AIService();
-    const ais = await aiService.findAIsForUser(authorization.orgId, authorization.userId, requestParams);
+    const ais = await aiService.findAIsForUser(authorization,requestParams);
 
     return NextResponse.json(ais);
   } catch (error) {
