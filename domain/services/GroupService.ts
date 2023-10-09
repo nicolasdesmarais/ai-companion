@@ -1,9 +1,9 @@
 import prismadb from "@/lib/prismadb";
 import { clerkClient } from '@clerk/nextjs';
 import { GroupAvailability } from "@prisma/client";
-import { CreateGroupRequest } from "../apiInterfaces/CreateGroupRequest";
-import { UpdateGroupRequest } from "../apiInterfaces/UpdateGroupRequest";
 import { EntityNotFoundError } from "../errors/EntityNotFoundError";
+import { CreateGroupRequest } from "../types/CreateGroupRequest";
+import { UpdateGroupRequest } from "../types/UpdateGroupRequest";
 
 export class GroupService {
     public async findGroupById(groupId: string, orgId: string, userId: string) {
