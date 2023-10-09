@@ -1,12 +1,7 @@
 import prismadb from "@/lib/prismadb";
 import { clerkClient } from '@clerk/nextjs';
+import { AIVisibility, GroupAvailability, PrismaClient } from "@prisma/client";
 import { ListAIsRequestParams, ListAIsRequestScope } from "./dtos/ListAIsRequestParams";
-
-enum AIVisibility {
-    PRIVATE = 'PRIVATE',
-    WORKSPACE = 'WORKSPACE',
-    PUBLIC = 'PUBLIC'
-}
 
 export class AIService {
     public async findAIById(id: string) {
@@ -29,22 +24,33 @@ export class AIService {
         prismadb.aIPermissions.createMany({ data: aiPermissions });
     }
 
-    public async findAIsForUser(userId: string, request: ListAIsRequestParams) {
+    public async findAIsForUser(orgId: string | undefined, userId: string, request: ListAIsRequestParams) {
         const scope = request.scope || ListAIsRequestScope.ALL;
+        const orgIdFilter = orgId || '';
 
         const whereCondition = { AND: [{}] };
-        whereCondition.AND.push(this.getBaseWhereCondition(userId, scope));
+        whereCondition.AND.push(this.getBaseWhereCondition(orgIdFilter, userId, scope));
 
+        if (request.groupId) {
+            whereCondition.AND.push(this.getGroupCriteria(orgIdFilter, request.groupId));
+        }
+        if (request.categoryId) {
+            whereCondition.AND.push(this.getCategoryCriteria(request.categoryId));
+        }
         if (request.search) {
             whereCondition.AND.push(this.getSearchCriteria(request.search));
         }
 
-        return prismadb.companion.findMany({
+        const prisma = new PrismaClient({
+            log: ['query', 'info', 'warn', 'error'],
+          })
+
+        return prisma.companion.findMany({
             where: whereCondition
         });
     }
 
-    private getBaseWhereCondition(userId: string, scope: ListAIsRequestScope ) {
+    private getBaseWhereCondition(orgId: string, userId: string, scope: ListAIsRequestScope) {
         let baseWhereCondition;
 
         switch(scope) {
@@ -56,8 +62,8 @@ export class AIService {
             case ListAIsRequestScope.OWNED:
                 baseWhereCondition = this.getOwnedByUserCriteria(userId);
                 break;
-            case ListAIsRequestScope.WORKSPACE:
-                baseWhereCondition = this.getUserWorkspaceCriteria(userId);
+            case ListAIsRequestScope.GROUP:
+                baseWhereCondition = this.getUserGroupCriteria(orgId, userId);
                 break;
             case ListAIsRequestScope.SHARED:
                 baseWhereCondition = this.getSharedWithUserCriteria(userId);
@@ -68,7 +74,7 @@ export class AIService {
             case ListAIsRequestScope.ALL:
                 baseWhereCondition = { OR: [{}] };
                 baseWhereCondition.OR.push(this.getOwnedByUserCriteria(userId));
-                baseWhereCondition.OR.push(this.getUserWorkspaceCriteria(userId));
+                baseWhereCondition.OR.push(this.getUserGroupCriteria(orgId, userId));
                 baseWhereCondition.OR.push(this.getSharedWithUserCriteria(userId));
                 baseWhereCondition.OR.push(this.getPublicCriteria());
                 break;
@@ -81,22 +87,26 @@ export class AIService {
         return { userId: userId };
     }
 
-    private getUserWorkspaceCriteria(userId: string) {
+    private getUserGroupCriteria(orgId: string, userId: string) {
         return {
-            visibility: {
-                in: [AIVisibility.WORKSPACE, AIVisibility.PUBLIC],
-            },
-            workspaces: {
-                some: {
-                    workspace: {
-                        users: {
-                            some: {
-                                userId: userId
-                            }
+                visibility: {
+                    in: [AIVisibility.GROUP, AIVisibility.PUBLIC]
+                },
+                groups: {
+                    some: {
+                        group: {
+                            orgId: orgId,
+                            OR: [
+                                { availability: GroupAvailability.EVERYONE },
+                                {users: {
+                                    some: {
+                                        userId: userId
+                                    }
+                                }}
+                            ]
                         }
-                   }
+                    }
                 }
-            }
         }
     }
 
@@ -112,6 +122,23 @@ export class AIService {
 
     private getPublicCriteria() {
         return { visibility: AIVisibility.PUBLIC };
+    }
+
+    private getGroupCriteria(orgId: string, groupId: string) {
+        return {
+            groups: {
+                some: {
+                    group: {
+                        id: groupId,
+                        orgId: orgId
+                    }
+                }
+            }
+         }
+    }
+
+    private getCategoryCriteria(categoryId: string) {
+        return { categoryId: categoryId } ;
     }
 
     private getSearchCriteria(search: string) {
