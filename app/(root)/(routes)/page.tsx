@@ -11,7 +11,7 @@ interface RootPageProps {
     scope: string;
     groupId: string;
     categoryId: string;
-    name: string;
+    search: string;
   };
 };
 
@@ -33,7 +33,7 @@ const RootPage = async ({
     scope: scope,
     groupId: searchParams.groupId,
     categoryId: searchParams.categoryId,
-    search: searchParams.name
+    search: searchParams.search
   }
 
   const data = await aiService.findAIsForUser(authorization, requestParams);

@@ -1,9 +1,9 @@
 "use client";
 
+import { Search } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
 import { ChangeEventHandler, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -13,9 +13,9 @@ export const SearchInput = () => {
   const searchParams = useSearchParams();
 
   const categoryId = searchParams.get("categoryId");
-  const name = searchParams.get("name");
+  const search = searchParams.get("search");
 
-  const [value, setValue] = useState(name || "");
+  const [value, setValue] = useState(search || "");
   const debouncedValue = useDebounce<string>(value, 500);
 
 
@@ -24,8 +24,8 @@ export const SearchInput = () => {
   };
 
   useEffect(() => {
-    const query = { 
-      name: debouncedValue, 
+    const query = {
+      search: debouncedValue,
       categoryId: categoryId,
     };
 
