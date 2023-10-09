@@ -24,7 +24,7 @@ model Companion {
   description   String
   instructions  String @db.Text
   seed          String @db.Text
-  visibility    String?
+  visibility    AIVisibility @default(PRIVATE)
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -52,6 +52,12 @@ model Companion {
 enum Role {
   user
   system
+}
+
+enum AIVisibility {
+  PRIVATE
+  GROUP
+  PUBLIC
 }
 
 model Message {
