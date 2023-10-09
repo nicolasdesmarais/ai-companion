@@ -1,6 +1,6 @@
 import prismadb from "@/lib/prismadb";
 import { clerkClient } from '@clerk/nextjs';
-import { AIVisibility, GroupAvailability, PrismaClient } from "@prisma/client";
+import { AIVisibility, GroupAvailability } from "@prisma/client";
 import { ListAIsRequestParams, ListAIsRequestScope } from "./dtos/ListAIsRequestParams";
 
 export class AIService {
@@ -41,12 +41,18 @@ export class AIService {
             whereCondition.AND.push(this.getSearchCriteria(request.search));
         }
 
-        const prisma = new PrismaClient({
-            log: ['query', 'info', 'warn', 'error'],
-          })
-
-        return prisma.companion.findMany({
-            where: whereCondition
+        return prismadb.companion.findMany({
+            where: whereCondition,
+            orderBy: {
+                createdAt: "desc"
+              },
+              include: {
+                _count: {
+                  select: {
+                    messages: true,
+                  }
+                }
+              }
         });
     }
 
