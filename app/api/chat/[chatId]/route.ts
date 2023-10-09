@@ -1,7 +1,7 @@
 
 
 import { StreamingTextResponse, LangChainStream } from "ai";
-import { auth, currentUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs";
 import { Replicate } from "langchain/llms/replicate";
 import { OpenAI } from "langchain/llms/openai";
 import { CallbackManager } from "langchain/callbacks";
@@ -11,6 +11,7 @@ import { MemoryManager } from "@/lib/memory";
 import { rateLimit } from "@/lib/rate-limit";
 import prismadb from "@/lib/prismadb";
 
+export const maxDuration = 300;
 
 export async function POST(
   request: Request,
