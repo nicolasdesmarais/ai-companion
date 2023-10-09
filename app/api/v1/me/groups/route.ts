@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-import { CreateGroupRequest } from '../../../../../domain/apiInterfaces/CreateGroupRequest';
 import { GroupService } from '../../../../../domain/services/GroupService';
+import { CreateGroupRequest } from '../../../../../domain/types/CreateGroupRequest';
 
 export async function GET(req: Request) {
   try {
