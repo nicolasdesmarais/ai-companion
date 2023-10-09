@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { Configuration, OpenAIApi } from "openai";
 import cloudinary from 'cloudinary';
 
+export const maxDuration = 300;
+
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });

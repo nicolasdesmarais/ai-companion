@@ -4,6 +4,8 @@ import prismadb from "@/lib/prismadb";
 import { MemoryManager } from "@/lib/memory";
 import { Prisma } from '@prisma/client';
 
+export const maxDuration = 300;
+
 export async function DELETE(
   request: Request,
   { params }: { params: { knowledgeId: string, aiId: string } }

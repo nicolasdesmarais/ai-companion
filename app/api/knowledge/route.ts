@@ -10,6 +10,8 @@ import { DocxLoader } from "langchain/document_loaders/fs/docx";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
+export const maxDuration = 300;
+
 const getFilepath = async (file: File) => {
   if (!file) {
     throw new Error('Error reading file');

@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { OpenAI } from "langchain/llms/openai";
 
 
+export const maxDuration = 300;
+
 const openai = new OpenAI({
   openAIApiKey: process.env.OPENAI_API_KEY,
   modelName: "gpt-4"

@@ -3,6 +3,8 @@ import { currentUser } from "@clerk/nextjs";
 import prismadb from "@/lib/prismadb";
 import { MemoryManager } from "@/lib/memory";
 
+export const maxDuration = 300;
+
 export async function DELETE(
   request: Request,
   { params }: { params: { knowledgeId: string } }
