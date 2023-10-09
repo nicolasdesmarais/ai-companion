@@ -17,15 +17,16 @@ export const Groups = ({
   const searchParams = useSearchParams();
 
   const groupId = searchParams.get("groupId");
+  const scope = searchParams.get("scope");
 
   const onClick = (id: string | undefined) => {
     let query;
     if (id === "PUBLIC") {
       query = { scope : "PUBLIC", groupId: undefined };
-    }else if (id === "PRIVATE") {
+    } else if (id === "PRIVATE") {
       query = { scope : "PRIVATE", groupId: undefined };
     } else {
-      query = { groupId: id };
+      query = { scope: undefined, groupId: id };
     }
 
     const url = qs.stringifyUrl({
@@ -55,8 +56,9 @@ export const Groups = ({
           hover:opacity-75
           transition
         `,
-          !groupId ? 'bg-primary/25' : 'bg-primary/10'
+          scope == "PUBLIC" ? 'bg-primary/25' : 'bg-primary/10'
         )}
+        key="PUBLIC"
       >
         Public
       </button>
@@ -77,8 +79,9 @@ export const Groups = ({
           hover:opacity-75
           transition
         `,
-          !groupId ? 'bg-primary/25' : 'bg-primary/10'
+          scope === "PRIVATE" ? 'bg-primary/25' : 'bg-primary/10'
         )}
+        key="PRIVATE"
       >
         Private
       </button>
@@ -102,7 +105,7 @@ export const Groups = ({
           `,
             item.id === groupId ? 'bg-primary/25' : 'bg-primary/10'
           )}
-          key="PUBLIC"
+          key={item.id}
         >
           {item.name}
         </button>
