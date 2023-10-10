@@ -10,7 +10,17 @@ export async function PATCH(
   try {
     const body = await req.json();
     const user = await currentUser();
-    const { src, name, description, instructions, seed, categoryId, modelId, knowledge } = body;
+    const {
+      src,
+      name,
+      description,
+      instructions,
+      seed,
+      categoryId,
+      modelId,
+      knowledge,
+      visibility,
+    } = body;
 
     if (!params.companionId) {
       return new NextResponse("Companion ID required", { status: 400 });
@@ -22,8 +32,7 @@ export async function PATCH(
 
     if (!src || !name || !description || !instructions || !categoryId) {
       return new NextResponse("Missing required fields", { status: 400 });
-    };
-
+    }
 
     const companion = await prismadb.companion.update({
       where: {
@@ -43,16 +52,21 @@ export async function PATCH(
         instructions,
         seed,
         modelId,
-      }
+        visibility,
+      },
     });
     if (knowledge && knowledge.length > 0) {
-      knowledge.forEach(async (item: { id: string; }) => {
-        if (!companion.knowledge.find((k: { knowledgeId: string; }) => k.knowledgeId === item.id)) {
+      knowledge.forEach(async (item: { id: string }) => {
+        if (
+          !companion.knowledge.find(
+            (k: { knowledgeId: string }) => k.knowledgeId === item.id
+          )
+        ) {
           await prismadb.knowledgeAI.create({
             data: {
               companionId: companion.id,
               knowledgeId: item.id,
-            }
+            },
           });
         }
       });
@@ -63,7 +77,7 @@ export async function PATCH(
     console.log("[COMPANION_PATCH]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
-};
+}
 
 export async function DELETE(
   request: Request,
@@ -79,8 +93,8 @@ export async function DELETE(
     const companion = await prismadb.companion.delete({
       where: {
         userId,
-        id: params.companionId
-      }
+        id: params.companionId,
+      },
     });
 
     return NextResponse.json(companion);
@@ -88,4 +102,4 @@ export async function DELETE(
     console.log("[COMPANION_DELETE]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
-};
+}
