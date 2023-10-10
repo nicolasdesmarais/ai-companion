@@ -6,14 +6,9 @@ import { CreateGroupRequest } from "../../../../../domain/types/CreateGroupReque
 export async function GET(req: Request) {
   try {
     const authentication = await auth();
-    const orgId = authentication.orgId;
-    const userId = authentication.userId;
-    if (!userId) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
 
     const groupService = new GroupService();
-    const groups = await groupService.findGroupsByUser(orgId, userId);
+    const groups = await groupService.findGroupsByUser(authentication);
 
     return NextResponse.json(groups);
   } catch (error) {
@@ -25,16 +20,12 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const authentication = await auth();
-    if (!authentication?.userId || !authentication?.orgId) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
 
     const createGroupRequest: CreateGroupRequest = await req.json();
 
     const groupService = new GroupService();
     const group = await groupService.createGroup(
-      authentication.orgId,
-      authentication.userId,
+      authentication,
       createGroupRequest
     );
 
