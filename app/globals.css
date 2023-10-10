@@ -46,7 +46,7 @@ body,
     --foreground: 0 0% 98%;
  
     --card: 0 0% 0%;
-    --card-foreground: 0 0% 98%;
+    --card-foreground: 0 0% 81%;
  
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
@@ -104,4 +104,18 @@ body,
 
 .auth-side-panel {
   width: 500px;
+}
+
+.teaser {
+  height: 500px;
+  overflow: hidden;
+}
+
+.teaser-blur {
+  width: 500px;
+  height: 250px;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  -webkit-mask: linear-gradient(180deg, transparent, rgba(16,16,59,1) 70%);
+  margin-top: -200px;
 }
