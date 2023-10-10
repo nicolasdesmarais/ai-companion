@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -18,22 +19,25 @@ const groupFormSchema = z.object({
   name: z.string().min(1, {
     message: "Name is required.",
   }),
-  accessLevel: z.union([z.literal("Everyone"), z.literal("Select teammates")]),
+  accessLevel: z.union([z.literal("EVERYONE"), z.literal("SELECTED")]),
   teammates: z.string(),
 });
 
 export const CreateGroupForm = () => {
+  const [selectedOption, setSelectedOption] = useState<string | null>(
+    "EVERYONE"
+  );
+
   const form = useForm<z.infer<typeof groupFormSchema>>({
     resolver: zodResolver(groupFormSchema),
     defaultValues: {
       name: "",
-      accessLevel: "Everyone",
+      accessLevel: "EVERYONE",
       teammates: "",
     },
   });
 
   const onSubmit = (values: z.infer<typeof groupFormSchema>) => {
-    // Handle form submission logic here
     console.log(values);
   };
 
@@ -64,44 +68,55 @@ export const CreateGroupForm = () => {
             <FormLabel>Who can join?</FormLabel>
             <FormItem>
               <FormControl>
-                <label>
-                  <input
-                    type="radio"
-                    {...form.register("accessLevel")}
-                    value="Everyone"
-                  />
-                  Everyone
-                </label>
+                <div>
+                  <label>
+                    <input
+                      type="radio"
+                      value="EVERYONE"
+                      checked={selectedOption === "EVERYONE"}
+                      onChange={(e) => setSelectedOption(e.target.value)}
+                    />
+                    Everyone in your company
+                  </label>
+                </div>
               </FormControl>
               <FormControl>
-                <label>
-                  <input
-                    type="radio"
-                    {...form.register("accessLevel")}
-                    value="Select teammates"
-                  />
-                  Select teammates
-                </label>
+                <div>
+                  <label>
+                    <input
+                      type="radio"
+                      value="SELECTED"
+                      checked={selectedOption === "SELECTED"}
+                      onChange={(e) => setSelectedOption(e.target.value)}
+                    />
+                    Select Team Members
+                  </label>
+                </div>
               </FormControl>
             </FormItem>
           </div>
 
-          <FormField
-            name="teammates"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Add teammates</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Enter teammate names..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {selectedOption === "SELECTED" && (
+            <FormField
+              name="teammates"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Add teammates</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Ex: jennifer.wallace@acme.com, joe.hamm@acme.com"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <div className="w-full flex justify-center">
-            <Button size="lg">Create Group</Button>
+            <Button size="lg">Create</Button>
           </div>
         </form>
       </Form>
