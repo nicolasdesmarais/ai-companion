@@ -1,5 +1,5 @@
 import { auth, redirectToSignIn } from "@clerk/nextjs";
-import CreateGroupForm from "./components/create-group-form";
+import { CreateGroupForm } from "./components/create-group-form";
 
 const GroupPage = async () => {
   const { userId } = auth();
