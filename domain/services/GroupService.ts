@@ -1,67 +1,85 @@
 import prismadb from "@/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
+import { SignedInAuthObject, SignedOutAuthObject } from "@clerk/nextjs/server";
 import { GroupAvailability } from "@prisma/client";
-import { GroupEntity } from "../entities/GroupEntity";
-import { EntityNotFoundError } from "../errors/Errors";
+import { EntityNotFoundError, UnauthorizedError } from "../errors/Errors";
 import { CreateGroupRequest } from "../types/CreateGroupRequest";
 import {
   CreateOrganizationInvitationRequest,
   OrganizationInvitation,
 } from "../types/CreateOrganizationInvitationRequest";
 import { UpdateGroupRequest } from "../types/UpdateGroupRequest";
-import { Utilities } from "../util/utilities";
 import { InvitationService } from "./InvitationService";
 
 export class GroupService {
-  private getGroupCriteria(orgId: string, userId: string) {
+  public async findGroupById(groupId: string, orgId: string, userId: string) {
+    return await prismadb.group.findUnique({
+      where: {
+        id: groupId,
+        orgId: orgId,
+        OR: [
+          {
+            availability: GroupAvailability.EVERYONE,
+          },
+          {
+            users: {
+              some: {
+                userId: userId,
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        users: true,
+      },
+    });
+  }
+
+  public async findGroupsByUser(
+    auth: SignedInAuthObject | SignedOutAuthObject
+  ) {
+    if (!auth?.userId) {
+      throw new UnauthorizedError("Unauthorized");
+    }
+    if (!auth?.orgId) {
+      return [];
+    }
+
+    return await prismadb.group.findMany({
+      where: this.getSecurityCriteria(auth.orgId, auth.userId),
+    });
+  }
+
+  private getSecurityCriteria(orgId: string, userId: string) {
     return {
       orgId: orgId,
       OR: [
-        { availability: GroupAvailability.EVERYONE },
+        {
+          availability: GroupAvailability.EVERYONE,
+        },
         {
           users: {
-            some: { userId: userId },
+            some: {
+              userId: userId,
+            },
           },
         },
       ],
     };
   }
 
-  public async findGroupById(
-    orgId: string,
-    userId: string,
-    groupId: string
-  ): Promise<GroupEntity | null> {
-    return await prismadb.group.findUnique({
-      where: {
-        id: groupId,
-        ...this.getGroupCriteria(orgId, userId),
-      },
-      include: { users: true },
-    });
-  }
-
-  public async findGroupsByUser(
-    orgId: string | undefined | null,
-    userId: string
-  ) {
-    if (!orgId) {
-      return [];
-    }
-
-    return await prismadb.group.findMany({
-      where: this.getGroupCriteria(orgId, userId),
-    });
-  }
-
   public async createGroup(
-    orgId: string,
-    userId: string,
+    auth: SignedInAuthObject | SignedOutAuthObject,
     createGroupRequest: CreateGroupRequest
   ) {
+    if (!auth?.userId || !auth?.orgId) {
+      throw new UnauthorizedError("Unauthorized");
+    }
+
     const group = await prismadb.group.create({
       data: {
-        orgId: orgId,
+        orgId: auth.orgId,
         name: createGroupRequest.name,
         availability: createGroupRequest.availability,
       },
@@ -70,11 +88,10 @@ export class GroupService {
     if (createGroupRequest.availability === GroupAvailability.RESTRICTED) {
       // Create explicit permissions for users when group availability is SELECT
       this.addUsersToGroup(
-        orgId,
-        userId,
         group.id,
         createGroupRequest.memberEmails,
-        true
+        auth.orgId,
+        auth.userId
       );
     }
 
@@ -82,13 +99,13 @@ export class GroupService {
   }
 
   public async updateGroup(
+    groupId: string,
     orgId: string,
     userId: string,
-    groupId: string,
     updateGroupRequest: UpdateGroupRequest
   ) {
-    const existingGroup = await this.findGroupById(orgId, userId, groupId);
-    if (!existingGroup) {
+    const group = await this.findGroupById(groupId, orgId, userId);
+    if (!group) {
       throw new EntityNotFoundError("Group not found");
     }
 
@@ -104,7 +121,7 @@ export class GroupService {
 
     if (
       updateGroupRequest.availability === GroupAvailability.EVERYONE &&
-      existingGroup.availability === GroupAvailability.RESTRICTED
+      group.availability === GroupAvailability.RESTRICTED
     ) {
       // Availability switching from RESTRICTED to EVERYONE. Remove all explicit permissions
       await prismadb.groupUser.deleteMany({
@@ -118,11 +135,10 @@ export class GroupService {
       // Availability switching from EVERYONE to RESTRICTED. Create explicit permissions for users
       if (updateGroupRequest?.memberEmailsToAdd) {
         this.addUsersToGroup(
-          orgId,
-          userId,
           groupId,
           updateGroupRequest.memberEmailsToAdd,
-          false
+          orgId,
+          userId
         );
       }
       if (updateGroupRequest?.userIdsToRemove) {
@@ -141,33 +157,34 @@ export class GroupService {
   }
 
   private async addUsersToGroup(
-    orgId: string,
-    createdByUserId: string,
     groupId: string,
     emailsToAdd: string,
-    includeCreator: boolean = false
+    orgId: string,
+    createdByUserId: string
   ) {
-    const validEmails = Utilities.parseEmailCsv(emailsToAdd);
-    const userIdsToAdd: string[] = [];
-    if (includeCreator) {
-      userIdsToAdd.push(createdByUserId);
-    }
+    const memberEmailsArray = emailsToAdd
+      .split(",")
+      .map((email) => email.trim());
+    const uniqueMemberEmailsSet = new Set(memberEmailsArray);
+
+    const clerkUserList = await clerkClient.users.getUserList({
+      emailAddress: Array.from(uniqueMemberEmailsSet),
+    });
+
+    const userIds: string[] = [];
     const foundUserEmails = new Set<string>();
-
-    if (validEmails.length > 0) {
-      const clerkUserList = await clerkClient.users.getUserList({
-        emailAddress: validEmails,
+    clerkUserList.forEach((clerkUser) => {
+      userIds.push(clerkUser.id);
+      clerkUser.emailAddresses.forEach((emailAddress) => {
+        foundUserEmails.add(emailAddress.emailAddress);
       });
+    });
 
-      clerkUserList.forEach((clerkUser) => {
-        userIdsToAdd.push(clerkUser.id);
-        clerkUser.emailAddresses.forEach((emailAddress) => {
-          foundUserEmails.add(emailAddress.emailAddress);
-        });
-      });
+    if (createdByUserId) {
+      userIds.push(createdByUserId);
     }
 
-    const groupUsers = userIdsToAdd.map((userId) => ({
+    const groupUsers = userIds.map((userId) => ({
       groupId: groupId,
       userId: userId,
     }));
@@ -178,7 +195,7 @@ export class GroupService {
     this.inviteMissingUsers(
       orgId,
       createdByUserId,
-      validEmails,
+      uniqueMemberEmailsSet,
       foundUserEmails
     );
   }
@@ -186,10 +203,10 @@ export class GroupService {
   private async inviteMissingUsers(
     orgId: string,
     userId: string,
-    requestedEmails: string[],
+    requestedEmails: Set<string>,
     foundEmails: Set<string>
   ) {
-    const missingEmails = requestedEmails.filter(
+    const missingEmails = Array.from(requestedEmails).filter(
       (email) => !foundEmails.has(email)
     );
 

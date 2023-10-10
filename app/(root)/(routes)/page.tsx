@@ -22,12 +22,6 @@ interface RootPageProps {
 
 const RootPage = async ({ searchParams }: RootPageProps) => {
   const authorization = await auth();
-  const orgId = authorization.orgId;
-  const userId = authorization.userId;
-
-  if (!userId) {
-    return;
-  }
 
   const scopeParam = searchParams.scope;
   let scope: ListAIsRequestScope | undefined;
@@ -53,7 +47,7 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
   const data = await aiService.findAIsForUser(authorization, requestParams);
 
   const groupService = new GroupService();
-  const groups = await groupService.findGroupsByUser(orgId, userId);
+  const groups = await groupService.findGroupsByUser(authorization);
 
   const categories = await prismadb.category.findMany();
 
