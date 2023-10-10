@@ -145,24 +145,26 @@ export class GroupService {
     includeCreator: boolean = false
   ) {
     const validEmails = Utilities.parseEmailCsv(emailsToAdd);
-    const clerkUserList = await clerkClient.users.getUserList({
-      emailAddress: validEmails,
-    });
-
-    const userIds: string[] = [];
-    const foundUserEmails = new Set<string>();
-    clerkUserList.forEach((clerkUser) => {
-      userIds.push(clerkUser.id);
-      clerkUser.emailAddresses.forEach((emailAddress) => {
-        foundUserEmails.add(emailAddress.emailAddress);
-      });
-    });
-
+    const userIdsToAdd: string[] = [];
     if (includeCreator) {
-      userIds.push(createdByUserId);
+      userIdsToAdd.push(createdByUserId);
+    }
+    const foundUserEmails = new Set<string>();
+
+    if (validEmails.length > 0) {
+      const clerkUserList = await clerkClient.users.getUserList({
+        emailAddress: validEmails,
+      });
+
+      clerkUserList.forEach((clerkUser) => {
+        userIdsToAdd.push(clerkUser.id);
+        clerkUser.emailAddresses.forEach((emailAddress) => {
+          foundUserEmails.add(emailAddress.emailAddress);
+        });
+      });
     }
 
-    const groupUsers = userIds.map((userId) => ({
+    const groupUsers = userIdsToAdd.map((userId) => ({
       groupId: groupId,
       userId: userId,
     }));
