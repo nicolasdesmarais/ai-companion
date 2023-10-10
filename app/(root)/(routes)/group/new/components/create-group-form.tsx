@@ -47,7 +47,7 @@ export const CreateGroupForm = () => {
   const onSubmit = async (values: z.infer<typeof groupFormSchema>) => {
     const request: CreateGroupRequest = {
       name: values.name,
-      availability: values.accessLevel,
+      availability: selectedOption || GroupAvailability.EVERYONE,
       memberEmails: values.teammates,
     };
 
