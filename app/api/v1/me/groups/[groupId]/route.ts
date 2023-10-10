@@ -19,21 +19,24 @@ export async function GET(
     }
 
     const groupService = new GroupService();
-    const group = await groupService.findGroupById(params.groupId, authentication.orgId, authentication.userId);
+    const group = await groupService.findGroupById(
+      params.groupId,
+      authentication.orgId,
+      authentication.userId
+    );
 
     return NextResponse.json(group);
   } catch (error) {
     console.log("Error in [PUT v1/me/groups/{groupId}]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
-};
+}
 
 export async function PUT(
   req: Request,
   { params }: { params: { groupId: string } }
 ) {
   try {
-
     if (!params.groupId) {
       return new NextResponse("Group ID required", { status: 400 });
     }
@@ -43,10 +46,14 @@ export async function PUT(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-
-    const updateGroupRequest : UpdateGroupRequest = await req.json();
+    const updateGroupRequest: UpdateGroupRequest = await req.json();
     const groupService = new GroupService();
-    const updatedGroup = await groupService.updateGroup(authentication.orgId, authentication.userId, params.groupId, updateGroupRequest);
+    const updatedGroup = await groupService.updateGroup(
+      authentication.orgId,
+      authentication.userId,
+      params.groupId,
+      updateGroupRequest
+    );
     return NextResponse.json(updatedGroup);
   } catch (error) {
     console.log("Error in [PUT v1/me/groups/{groupId}]", error);
@@ -57,4 +64,4 @@ export async function PUT(
 
     return new NextResponse("Internal Error", { status: 500 });
   }
-};
+}
