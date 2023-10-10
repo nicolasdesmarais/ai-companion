@@ -166,6 +166,9 @@ export const UpdateGroupForm = ({
                   </FormItem>
                 )}
               />
+              <h4 className="mt-4">
+                Shared with {currentTeammates.length} people
+              </h4>
               <ul className="list-disc pl-5 mt-2">
                 {currentTeammates.map((teammate) => (
                   <li
