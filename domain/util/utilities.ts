@@ -1,3 +1,5 @@
+import { User } from "@clerk/nextjs/server";
+
 const EMAIL_REGEX = /^\S+@\S+\.\S+$/;
 
 export class Utilities {
@@ -14,5 +16,13 @@ export class Utilities {
 
     const uniqueEmailsSet = new Set(validEmailsArray);
     return Array.from(uniqueEmailsSet);
+  }
+
+  public static getUserPrimaryEmailAddress(user: User): string | null {
+    const primaryEmailId = user.primaryEmailAddressId;
+    const primaryEmail = user.emailAddresses.find(
+      (emailAddress) => emailAddress.id === primaryEmailId
+    );
+    return primaryEmail ? primaryEmail.emailAddress : null;
   }
 }

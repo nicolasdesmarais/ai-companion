@@ -1,6 +1,7 @@
 import prismadb from "@/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
 import { GroupAvailability } from "@prisma/client";
+import { GroupEntity } from "../entities/GroupEntity";
 import { EntityNotFoundError } from "../errors/Errors";
 import { CreateGroupRequest } from "../types/CreateGroupRequest";
 import {
@@ -26,7 +27,11 @@ export class GroupService {
     };
   }
 
-  public async findGroupById(orgId: string, userId: string, groupId: string) {
+  public async findGroupById(
+    orgId: string,
+    userId: string,
+    groupId: string
+  ): Promise<GroupEntity | null> {
     return await prismadb.group.findUnique({
       where: {
         id: groupId,
