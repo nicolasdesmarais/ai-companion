@@ -1,13 +1,18 @@
 "use client";
 
+import { ModeToggle } from "@/components/mode-toggle";
+import { useProModal } from "@/hooks/use-pro-modal";
+import { cn } from "@/lib/utils";
+import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 import {
-  Store,
+  Atom,
+  MessageSquare,
   Plus,
   Settings,
-  Wrench,
-  MessageSquare,
-  Atom,
+  Store,
   UserPlus,
+  Wrench,
 } from "lucide-react";
 import {
   ReadonlyURLSearchParams,
@@ -15,11 +20,6 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
-import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
-import { dark } from "@clerk/themes";
-import { ModeToggle } from "@/components/mode-toggle";
-import { cn } from "@/lib/utils";
-import { useProModal } from "@/hooks/use-pro-modal";
 
 interface SidebarProps {
   isPro: boolean;
@@ -95,9 +95,9 @@ export const Sidebar = ({ isPro }: SidebarProps) => {
     },
     {
       icon: UserPlus,
-      href: "/?scope=GROUP",
+      href: "/?scope=SHARED",
       pathname: "/",
-      searchparams: { scope: "GROUP" },
+      searchparams: { scope: "SHARED" },
       label: "Shared",
       pro: false,
     },
