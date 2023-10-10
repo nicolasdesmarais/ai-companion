@@ -8,9 +8,10 @@ import { Group } from "@prisma/client";
 
 interface GroupsProps {
   data: Group[];
+  orgId?: string | null;
 }
 
-export const Groups = ({ data }: GroupsProps) => {
+export const Groups = ({ data, orgId }: GroupsProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -118,10 +119,11 @@ export const Groups = ({ data }: GroupsProps) => {
           {item.name}
         </button>
       ))}
-      <button
-        onClick={() => createGroup()}
-        className={cn(
-          `
+      {orgId && (
+        <button
+          onClick={() => createGroup()}
+          className={cn(
+            `
           flex
           items-center
           text-center
@@ -136,12 +138,13 @@ export const Groups = ({ data }: GroupsProps) => {
           hover:opacity-75
           transition
         `,
-          "bg-primary/10"
-        )}
-        key="PRIVATE"
-      >
-        +
-      </button>
+            "bg-primary/10"
+          )}
+          key="PRIVATE"
+        >
+          +
+        </button>
+      )}
     </div>
   );
 };
