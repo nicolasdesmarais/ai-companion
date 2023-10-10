@@ -16,9 +16,7 @@ interface NavbarProps {
   isPro: boolean;
 }
 
-export const Navbar = ({
-  isPro
-}: NavbarProps) => {
+export const Navbar = ({ isPro }: NavbarProps) => {
   const proModal = useProModal();
 
   return (
@@ -26,14 +24,24 @@ export const Navbar = ({
       <div className="flex items-center">
         <MobileSidebar isPro={isPro} />
         <Link href="/landing">
-          <h1 className={cn("hidden md:block text-xl md:text-3xl font-bold text-primary", font.className)}>
+          <h1
+            className={cn(
+              "hidden md:block text-xl md:text-3xl font-bold text-primary",
+              font.className
+            )}
+          >
             AppDirect.ai
           </h1>
         </Link>
       </div>
       <div className="flex items-center gap-x-3">
         {!isPro && (
-          <Button onClick={proModal.onOpen} size="sm" variant="premium">
+          <Button
+            onClick={proModal.onOpen}
+            size="sm"
+            variant="premium"
+            className="hidden"
+          >
             Upgrade
             <Sparkles className="h-4 w-4 fill-white text-white ml-2" />
           </Button>
@@ -44,4 +52,4 @@ export const Navbar = ({
       </div>
     </div>
   );
-}
+};
