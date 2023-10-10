@@ -10,7 +10,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { CreateGroupRequest } from "@/domain/types/CreateGroupRequest";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { GroupAvailability } from "@prisma/client";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -19,26 +23,38 @@ const groupFormSchema = z.object({
   name: z.string().min(1, {
     message: "Name is required.",
   }),
-  accessLevel: z.union([z.literal("EVERYONE"), z.literal("SELECTED")]),
+  accessLevel: z.enum([
+    GroupAvailability.EVERYONE,
+    GroupAvailability.RESTRICTED,
+  ]),
   teammates: z.string(),
 });
 
 export const CreateGroupForm = () => {
-  const [selectedOption, setSelectedOption] = useState<string | null>(
-    "EVERYONE"
-  );
+  const router = useRouter();
+  const [selectedOption, setSelectedOption] =
+    useState<GroupAvailability | null>(GroupAvailability.EVERYONE);
 
   const form = useForm<z.infer<typeof groupFormSchema>>({
     resolver: zodResolver(groupFormSchema),
     defaultValues: {
       name: "",
-      accessLevel: "EVERYONE",
+      accessLevel: GroupAvailability.EVERYONE,
       teammates: "",
     },
   });
 
-  const onSubmit = (values: z.infer<typeof groupFormSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof groupFormSchema>) => {
+    const request: CreateGroupRequest = {
+      name: values.name,
+      availability: values.accessLevel,
+      memberEmails: values.teammates,
+    };
+
+    await axios.post(`/api/v1/me/groups`, request);
+
+    router.refresh();
+    router.push("/");
   };
 
   return (
@@ -72,9 +88,11 @@ export const CreateGroupForm = () => {
                   <label>
                     <input
                       type="radio"
-                      value="EVERYONE"
-                      checked={selectedOption === "EVERYONE"}
-                      onChange={(e) => setSelectedOption(e.target.value)}
+                      value={GroupAvailability.EVERYONE}
+                      checked={selectedOption === GroupAvailability.EVERYONE}
+                      onChange={(e) =>
+                        setSelectedOption(e.target.value as GroupAvailability)
+                      }
                     />
                     Everyone in your company
                   </label>
@@ -85,9 +103,11 @@ export const CreateGroupForm = () => {
                   <label>
                     <input
                       type="radio"
-                      value="SELECTED"
-                      checked={selectedOption === "SELECTED"}
-                      onChange={(e) => setSelectedOption(e.target.value)}
+                      value={GroupAvailability.RESTRICTED}
+                      checked={selectedOption === GroupAvailability.RESTRICTED}
+                      onChange={(e) =>
+                        setSelectedOption(e.target.value as GroupAvailability)
+                      }
                     />
                     Select Team Members
                   </label>
@@ -96,7 +116,7 @@ export const CreateGroupForm = () => {
             </FormItem>
           </div>
 
-          {selectedOption === "SELECTED" && (
+          {selectedOption === GroupAvailability.RESTRICTED && (
             <FormField
               name="teammates"
               control={form.control}
