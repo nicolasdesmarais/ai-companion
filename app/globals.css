@@ -119,3 +119,14 @@ body,
   -webkit-mask: linear-gradient(180deg, transparent, rgba(16,16,59,1) 70%);
   margin-top: -200px;
 }
+
+.organizationPreviewTextContainer,
+.cl-organizationSwitcherTriggerIcon {
+  display: none;
+}
+
+.cl-organizationSwitcherTrigger,
+.cl-organizationSwitcherTrigger .cl-avatarBox {
+  width: 64px;
+  height: 64px;
+}

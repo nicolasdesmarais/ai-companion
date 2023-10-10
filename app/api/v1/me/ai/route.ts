@@ -13,10 +13,8 @@ export async function GET(
     const scopeParam = searchParams.get('scope');
     let scope: ListAIsRequestScope | undefined;
 
-    if (!scopeParam) {
+    if (!scopeParam || !Object.values(ListAIsRequestScope).includes(scopeParam as ListAIsRequestScope)) {
       scope = undefined;
-    } else if (!Object.values(ListAIsRequestScope).includes(scopeParam as ListAIsRequestScope)) {
-      return NextResponse.json("Invalid scope", { status: 400 });
     } else {
       scope = ListAIsRequestScope[scopeParam as keyof typeof ListAIsRequestScope];
     }

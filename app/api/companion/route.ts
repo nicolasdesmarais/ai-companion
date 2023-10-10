@@ -7,7 +7,17 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const user = await currentUser();
-    const { src, name, description, instructions, seed, categoryId, modelId, knowledge } = body;
+    const {
+      src,
+      name,
+      description,
+      instructions,
+      seed,
+      categoryId,
+      modelId,
+      knowledge,
+      visibility,
+    } = body;
 
     if (!user || !user.id) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -15,8 +25,7 @@ export async function POST(req: Request) {
 
     if (!src || !name || !description || !instructions || !categoryId) {
       return new NextResponse("Missing required fields", { status: 400 });
-    };
-
+    }
 
     const companion = await prismadb.companion.create({
       data: {
@@ -29,16 +38,17 @@ export async function POST(req: Request) {
         instructions,
         seed,
         modelId,
-      }
+        visibility,
+      },
     });
 
     if (knowledge && knowledge.length > 0) {
-      knowledge.forEach(async (item: { id: string; }) => {
+      knowledge.forEach(async (item: { id: string }) => {
         await prismadb.knowledgeAI.create({
           data: {
             companionId: companion.id,
             knowledgeId: item.id,
-          }
+          },
         });
       });
     }
@@ -48,4 +58,4 @@ export async function POST(req: Request) {
     console.log("[COMPANION_POST]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
-};
+}

@@ -7,14 +7,28 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { Wand2, Loader, FileText, Trash2 } from "lucide-react";
 import { Category, Knowledge, Prisma } from "@prisma/client";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ImageUpload } from "@/components/image-upload";
 import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+  SelectTrigger,
+} from "@/components/ui/select";
 import { useState, useRef } from "react";
 
 const PREAMBLE = `You are a fictional character whose name is Elon. You are a visionary entrepreneur and inventor. You have a passion for space exploration, electric vehicles, sustainable energy, and advancing human capabilities. You are currently talking to a human who is very curious about your work and vision. You are ambitious and forward-thinking, with a touch of wit. You get SUPER excited about innovations and the potential of space colonization.
@@ -41,11 +55,11 @@ const formSchema = z.object({
     message: "Description is required.",
   }),
   instructions: z.string().min(200, {
-    message: "Instructions require at least 200 characters."
+    message: "Instructions require at least 200 characters.",
   }),
   seed: z.string(),
   src: z.string().min(1, {
-    message: "Image is required."
+    message: "Image is required.",
   }),
   categoryId: z.string().min(1, {
     message: "Category is required",
@@ -53,40 +67,43 @@ const formSchema = z.object({
   modelId: z.string().min(1, {
     message: "Model is required",
   }),
+  visibility: z.string().min(1, {
+    message: "Visibility is required",
+  }),
 });
 
 const models = [
   {
     id: "llama2-13b",
-    name: "llama2-13b"
+    name: "llama2-13b",
   },
-  { 
+  {
     id: "gpt-4",
-    name: "gpt-4"
-  }
+    name: "gpt-4",
+  },
 ];
 
 const supportedUploadFormats = [
   {
     name: "Text",
-    type: "text/plain"
+    type: "text/plain",
   },
   {
     name: "CSV",
-    type: "text/csv"
+    type: "text/csv",
   },
   {
     name: "PDF",
-    type: "application/pdf"
+    type: "application/pdf",
   },
   {
     name: "DOCX",
-    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   },
   {
     name: "EPUB",
-    type: "application/epub+zip"
-  }
+    type: "application/epub+zip",
+  },
 ];
 
 const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
@@ -96,7 +113,7 @@ const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
         knowledge: true,
       },
     },
-  }, 
+  },
 });
 
 type ExtendedCompanion = Prisma.CompanionGetPayload<typeof extendedCompanion>;
@@ -104,11 +121,11 @@ type ExtendedCompanion = Prisma.CompanionGetPayload<typeof extendedCompanion>;
 interface CompanionFormProps {
   categories: Category[];
   initialData: ExtendedCompanion | null;
-};
+}
 
 export const CompanionForm = ({
   categories,
-  initialData
+  initialData,
 }: CompanionFormProps) => {
   const { toast } = useToast();
   const router = useRouter();
@@ -116,10 +133,12 @@ export const CompanionForm = ({
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatingInstruction, setGeneratingInstruction] = useState(false);
   const [generatingConversation, setGeneratingConversation] = useState(false);
-  const initalKnowledge = initialData?.knowledge?.map((item: { knowledge: any }) => item.knowledge) || [];
+  const initalKnowledge =
+    initialData?.knowledge?.map((item: { knowledge: any }) => item.knowledge) ||
+    [];
   const [knowledge, setKnowledge] = useState<Knowledge[]>(initalKnowledge);
   const [uploading, setUploading] = useState(false);
-  const [removing, setRemoving] = useState('');
+  const [removing, setRemoving] = useState("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -138,7 +157,7 @@ export const CompanionForm = ({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const data = {knowledge, ...values};
+      const data = { knowledge, ...values };
       if (initialData) {
         await axios.patch(`/api/companion/${initialData.id}`, data);
       } else {
@@ -162,28 +181,31 @@ export const CompanionForm = ({
   };
 
   const generateAvatar = async () => {
-    setGeneratingImage(true)
-    const name = form.getValues('name');
-    const description = form.getValues('description');
+    setGeneratingImage(true);
+    const name = form.getValues("name");
+    const description = form.getValues("description");
     if (name && description) {
       try {
-        const response = await axios.post('/api/image', {
+        const response = await axios.post("/api/image", {
           prompt: `Image of ${name}, ${description}: intricate, elegant, highly detailed, concept art, smooth, sharp focus, 8K`,
           amount: 1,
-          resolution: "512x512"
+          resolution: "512x512",
         });
-        form.setValue('src', response.data.secure_url)
+        form.setValue("src", response.data.secure_url);
       } catch (error) {
         toast({
           variant: "destructive",
-          description: String((error as AxiosError).response?.data) || "Something went wrong.",
+          description:
+            String((error as AxiosError).response?.data) ||
+            "Something went wrong.",
           duration: 6000,
         });
       }
-    } else {  
+    } else {
       toast({
         variant: "destructive",
-        description: "Name and description are required to generate the avatar.",
+        description:
+          "Name and description are required to generate the avatar.",
         duration: 6000,
       });
     }
@@ -192,25 +214,28 @@ export const CompanionForm = ({
 
   const generateInstruction = async () => {
     setGeneratingInstruction(true);
-    const name = form.getValues('name');
-    const description = form.getValues('description');
+    const name = form.getValues("name");
+    const description = form.getValues("description");
     if (name && description) {
       try {
-        const response = await axios.post('/api/generate', {
+        const response = await axios.post("/api/generate", {
           prompt: `Generate an AI agent prompt for ${name}, ${description}.  Prompt should be at least 200 characters long.`,
         });
-        form.setValue('instructions', response.data)
+        form.setValue("instructions", response.data);
       } catch (error: any) {
         toast({
           variant: "destructive",
-          description: String((error as AxiosError).response?.data) || "Something went wrong.",
+          description:
+            String((error as AxiosError).response?.data) ||
+            "Something went wrong.",
           duration: 6000,
         });
       }
-    } else {  
+    } else {
       toast({
         variant: "destructive",
-        description: "Name and description are required to generate the instruction.",
+        description:
+          "Name and description are required to generate the instruction.",
         duration: 3000,
       });
     }
@@ -219,17 +244,17 @@ export const CompanionForm = ({
 
   const generateConversation = async () => {
     setGeneratingConversation(true);
-    const name = form.getValues('name');
-    const description = form.getValues('description');
-    const instructions = form.getValues('instructions');
-    const seed = form.getValues('seed');
+    const name = form.getValues("name");
+    const description = form.getValues("description");
+    const instructions = form.getValues("instructions");
+    const seed = form.getValues("seed");
     if (name && description) {
       try {
         let history;
         if (!seed) {
           history = `Human: Hi ${name}\n`;
         } else {
-          const question = await axios.post('/api/generate', {
+          const question = await axios.post("/api/generate", {
             prompt: `
               Pretend you are a human talking to an AI agent ${name}, ${description}.  Continue the conversation below.\n\n
               ${seed}\nHuman:
@@ -237,7 +262,7 @@ export const CompanionForm = ({
           });
           history = `${seed}Human: ${question.data}\n`;
         }
-        const response = await axios.post('/api/generate', {
+        const response = await axios.post("/api/generate", {
           prompt: `
           ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${name}: prefix. 
 
@@ -246,18 +271,21 @@ export const CompanionForm = ({
           Below are relevant details about ${name}'s past and the conversation you are in.
           ${history}\n${name}:`,
         });
-        form.setValue('seed', `${history}\n${name}: ${response.data}\n\n`)
+        form.setValue("seed", `${history}\n${name}: ${response.data}\n\n`);
       } catch (error: any) {
         toast({
           variant: "destructive",
-          description: String((error as AxiosError).response?.data) || "Something went wrong.",
+          description:
+            String((error as AxiosError).response?.data) ||
+            "Something went wrong.",
           duration: 6000,
         });
       }
-    } else {  
+    } else {
       toast({
         variant: "destructive",
-        description: "Name, description and instructions are required to generate the conversation.",
+        description:
+          "Name, description and instructions are required to generate the conversation.",
         duration: 6000,
       });
     }
@@ -266,7 +294,10 @@ export const CompanionForm = ({
 
   const uploadDocument = async () => {
     setUploading(true);
-    if (!inputFileRef.current?.files || inputFileRef.current?.files.length === 0) {
+    if (
+      !inputFileRef.current?.files ||
+      inputFileRef.current?.files.length === 0
+    ) {
       toast({
         variant: "destructive",
         description: "No file selected.",
@@ -277,7 +308,11 @@ export const CompanionForm = ({
     }
     const file = inputFileRef.current.files[0];
 
-    if (supportedUploadFormats.findIndex((format) => format.type === file.type) === -1) {
+    if (
+      supportedUploadFormats.findIndex(
+        (format) => format.type === file.type
+      ) === -1
+    ) {
       toast({
         variant: "destructive",
         description: "This file format is not supported",
@@ -286,18 +321,21 @@ export const CompanionForm = ({
     }
     try {
       const data = new FormData();
-      data.set('file', file);
+      data.set("file", file);
       const response = await axios.post(
-        `/api/knowledge?filename=${encodeURIComponent(file.name)}&type=${encodeURIComponent(file.type)}`,
-        data,
+        `/api/knowledge?filename=${encodeURIComponent(
+          file.name
+        )}&type=${encodeURIComponent(file.type)}`,
+        data
       );
       setKnowledge((current) => [...current, response.data]);
-      inputFileRef.current.value = '';
-
+      inputFileRef.current.value = "";
     } catch (error: any) {
       toast({
         variant: "destructive",
-        description: String((error as AxiosError).response?.data) || "Something went wrong.",
+        description:
+          String((error as AxiosError).response?.data) ||
+          "Something went wrong.",
         duration: 6000,
       });
     }
@@ -317,17 +355,22 @@ export const CompanionForm = ({
     } catch (error: any) {
       toast({
         variant: "destructive",
-        description: String((error as AxiosError).response?.data) || "Something went wrong.",
+        description:
+          String((error as AxiosError).response?.data) ||
+          "Something went wrong.",
         duration: 6000,
       });
     }
-    setRemoving('');
+    setRemoving("");
   };
 
-  return ( 
+  return (
     <div className="h-full p-4 space-y-2 max-w-3xl mx-auto">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 pb-10">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-8 pb-10"
+        >
           <div className="space-y-2 w-full col-span-2">
             <div>
               <h3 className="text-lg font-medium">General Information</h3>
@@ -342,11 +385,24 @@ export const CompanionForm = ({
             render={({ field }) => (
               <FormItem className="flex flex-col items-center justify-center space-y-4 col-span-2">
                 <FormControl>
-                  <ImageUpload disabled={isLoading} onChange={field.onChange} value={field.value} />
+                  <ImageUpload
+                    disabled={isLoading}
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
                 </FormControl>
-                <Button type="button" disabled={isLoading || generatingImage} variant="outline" onClick={() => generateAvatar()}>
+                <Button
+                  type="button"
+                  disabled={isLoading || generatingImage}
+                  variant="outline"
+                  onClick={() => generateAvatar()}
+                >
                   Generate Avatar Image
-                  {generatingImage ? <Loader className="w-4 h-4 ml-2 spinner"/> : <Wand2 className="w-4 h-4 ml-2" />}
+                  {generatingImage ? (
+                    <Loader className="w-4 h-4 ml-2 spinner" />
+                  ) : (
+                    <Wand2 className="w-4 h-4 ml-2" />
+                  )}
                 </Button>
                 <FormMessage />
               </FormItem>
@@ -360,7 +416,11 @@ export const CompanionForm = ({
                 <FormItem className="col-span-2 md:col-span-1">
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input disabled={isLoading} placeholder="Elon Musk" {...field} />
+                    <Input
+                      disabled={isLoading}
+                      placeholder="Elon Musk"
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>
                     This is how your AI Companion will be named.
@@ -376,7 +436,11 @@ export const CompanionForm = ({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input disabled={isLoading} placeholder="CEO & Founder of Tesla, SpaceX" {...field} />
+                    <Input
+                      disabled={isLoading}
+                      placeholder="CEO & Founder of Tesla, SpaceX"
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>
                     Short description for your AI Companion
@@ -391,15 +455,25 @@ export const CompanionForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select disabled={isLoading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                  <Select
+                    disabled={isLoading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger className="bg-background">
-                        <SelectValue defaultValue={field.value} placeholder="Select a category" />
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Select a category"
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -416,21 +490,29 @@ export const CompanionForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>AI Model</FormLabel>
-                  <Select disabled={isLoading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                  <Select
+                    disabled={isLoading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger className="bg-background">
-                        <SelectValue defaultValue={field.value} placeholder="Select a model" />
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Select a model"
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {models.map((model) => (
-                        <SelectItem key={model.id} value={model.id}>{model.name}</SelectItem>
+                        <SelectItem key={model.id} value={model.id}>
+                          {model.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    Select a LLM for your AI
-                  </FormDescription>
+                  <FormDescription>Select a LLM for your AI</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -452,14 +534,30 @@ export const CompanionForm = ({
               <FormItem>
                 <FormLabel>Instructions</FormLabel>
                 <FormControl>
-                  <Textarea disabled={isLoading} rows={7} className="bg-background resize-none" placeholder={PREAMBLE} {...field} />
+                  <Textarea
+                    disabled={isLoading}
+                    rows={7}
+                    className="bg-background resize-none"
+                    placeholder={PREAMBLE}
+                    {...field}
+                  />
                 </FormControl>
                 <FormDescription>
-                  Describe in detail your companion&apos;s backstory and relevant details.
+                  Describe in detail your companion&apos;s backstory and
+                  relevant details.
                 </FormDescription>
-                <Button type="button" disabled={isLoading || generatingInstruction} variant="outline" onClick={() => generateInstruction()}>
+                <Button
+                  type="button"
+                  disabled={isLoading || generatingInstruction}
+                  variant="outline"
+                  onClick={() => generateInstruction()}
+                >
                   Generate Instruction
-                  {generatingInstruction ? <Loader className="w-4 h-4 ml-2 spinner"/> : <Wand2 className="w-4 h-4 ml-2" />}
+                  {generatingInstruction ? (
+                    <Loader className="w-4 h-4 ml-2 spinner" />
+                  ) : (
+                    <Wand2 className="w-4 h-4 ml-2" />
+                  )}
                 </Button>
                 <FormMessage />
               </FormItem>
@@ -471,25 +569,48 @@ export const CompanionForm = ({
               <div>
                 <div>
                   {knowledge.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between my-2">
-                      <p className="text-sm px-3 py-2 bg-background rounded-lg  w-full  ">{item.name}</p>
-                      <Button type="button" variant="outline" onClick={() => removeKnowledge(item.id)}>
-                        {removing === item.id ? <Loader className="w-4 h-4 spinner"/> : <Trash2 className="w-4 h-4" />}
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between my-2"
+                    >
+                      <p className="text-sm px-3 py-2 bg-background rounded-lg  w-full  ">
+                        {item.name}
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => removeKnowledge(item.id)}
+                      >
+                        {removing === item.id ? (
+                          <Loader className="w-4 h-4 spinner" />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
                       </Button>
                     </div>
                   ))}
                 </div>
                 <div className="flex my-2">
                   <Input name="file" ref={inputFileRef} type="file" />
-                  <Button type="button" disabled={isLoading || uploading} variant="outline" onClick={() => uploadDocument()}>
+                  <Button
+                    type="button"
+                    disabled={isLoading || uploading}
+                    variant="outline"
+                    onClick={() => uploadDocument()}
+                  >
                     Upload
-                    {uploading ? <Loader className="w-4 h-4 ml-2 spinner"/> : <FileText className="w-4 h-4 ml-2" />}
+                    {uploading ? (
+                      <Loader className="w-4 h-4 ml-2 spinner" />
+                    ) : (
+                      <FileText className="w-4 h-4 ml-2" />
+                    )}
                   </Button>
                 </div>
               </div>
               <FormDescription>
                 Add custom knowledge to your AI. Max file size: 4.5Mb. <br />
-                The following formats are supported: {supportedUploadFormats.map((format) => format.name).join(", ")}
+                The following formats are supported:{" "}
+                {supportedUploadFormats.map((format) => format.name).join(", ")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -501,15 +622,68 @@ export const CompanionForm = ({
               <FormItem>
                 <FormLabel>Example Conversation</FormLabel>
                 <FormControl>
-                  <Textarea disabled={isLoading} rows={7} className="bg-background resize-none" placeholder={SEED_CHAT} {...field} />
+                  <Textarea
+                    disabled={isLoading}
+                    rows={7}
+                    className="bg-background resize-none"
+                    placeholder={SEED_CHAT}
+                    {...field}
+                  />
                 </FormControl>
                 <FormDescription>
-                  Write couple of examples of a human chatting with your AI companion, write expected answers.
+                  Write couple of examples of a human chatting with your AI
+                  companion, write expected answers.
                 </FormDescription>
-                <Button type="button" disabled={isLoading || generatingConversation} variant="outline" onClick={() => generateConversation()}>
+                <Button
+                  type="button"
+                  disabled={isLoading || generatingConversation}
+                  variant="outline"
+                  onClick={() => generateConversation()}
+                >
                   Add Generated Conversation
-                  {generatingConversation ? <Loader className="w-4 h-4 ml-2 spinner"/> : <Wand2 className="w-4 h-4 ml-2" />}
+                  {generatingConversation ? (
+                    <Loader className="w-4 h-4 ml-2 spinner" />
+                  ) : (
+                    <Wand2 className="w-4 h-4 ml-2" />
+                  )}
                 </Button>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="visibility"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Visibility</FormLabel>
+                <Select
+                  disabled={isLoading}
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue
+                        defaultValue={field.value}
+                        placeholder="Select one"
+                      />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem key="PUBLIC" value="PUBLIC">
+                      Public
+                    </SelectItem>
+                    <SelectItem key="PRIVATE" value="PRIVATE">
+                      Private
+                    </SelectItem>
+                    <SelectItem key="GROUP" value="GROUP">
+                      Group
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>Control who can see your AI</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -523,5 +697,5 @@ export const CompanionForm = ({
         </form>
       </Form>
     </div>
-   );
+  );
 };
