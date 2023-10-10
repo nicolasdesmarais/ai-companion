@@ -7,12 +7,10 @@ import { cn } from "@/lib/utils";
 import { Group } from "@prisma/client";
 
 interface GroupsProps {
-  data: Group[]
+  data: Group[];
 }
 
-export const Groups = ({
-  data
-}: GroupsProps) => {
+export const Groups = ({ data }: GroupsProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -22,26 +20,34 @@ export const Groups = ({
   const onClick = (id: string | undefined) => {
     let query;
     if (id === "PUBLIC") {
-      query = { scope : "PUBLIC", groupId: undefined };
+      query = { scope: "PUBLIC", groupId: undefined };
     } else if (id === "PRIVATE") {
-      query = { scope : "PRIVATE", groupId: undefined };
+      query = { scope: "PRIVATE", groupId: undefined };
     } else {
       query = { scope: undefined, groupId: id };
     }
 
-    const url = qs.stringifyUrl({
-      url: window.location.href,
-      query
-    }, { skipNull: true });
+    const url = qs.stringifyUrl(
+      {
+        url: window.location.href,
+        query,
+      },
+      { skipNull: true }
+    );
 
     router.push(url);
+  };
+
+  const createGroup = () => {
+    router.push("/group/new");
   };
 
   return (
     <div className="w-full overflow-x-auto space-x-2 flex p-1">
       <button
         onClick={() => onClick("PUBLIC")}
-        className={cn(`
+        className={cn(
+          `
           flex
           items-center
           text-center
@@ -56,7 +62,7 @@ export const Groups = ({
           hover:opacity-75
           transition
         `,
-          scope == "PUBLIC" ? 'bg-primary/25' : 'bg-primary/10'
+          scope == "PUBLIC" ? "bg-primary/25" : "bg-primary/10"
         )}
         key="PUBLIC"
       >
@@ -64,7 +70,8 @@ export const Groups = ({
       </button>
       <button
         onClick={() => onClick("PRIVATE")}
-        className={cn(`
+        className={cn(
+          `
           flex
           items-center
           text-center
@@ -79,7 +86,7 @@ export const Groups = ({
           hover:opacity-75
           transition
         `,
-          scope === "PRIVATE" ? 'bg-primary/25' : 'bg-primary/10'
+          scope === "PRIVATE" ? "bg-primary/25" : "bg-primary/10"
         )}
         key="PRIVATE"
       >
@@ -88,7 +95,8 @@ export const Groups = ({
       {data.map((item) => (
         <button
           onClick={() => onClick(item.id)}
-          className={cn(`
+          className={cn(
+            `
             flex
             items-center
             text-center
@@ -103,13 +111,37 @@ export const Groups = ({
             hover:opacity-75
             transition
           `,
-            item.id === groupId ? 'bg-primary/25' : 'bg-primary/10'
+            item.id === groupId ? "bg-primary/25" : "bg-primary/10"
           )}
           key={item.id}
         >
           {item.name}
         </button>
       ))}
+      <button
+        onClick={() => createGroup()}
+        className={cn(
+          `
+          flex
+          items-center
+          text-center
+          text-xs
+          md:text-sm
+          px-2
+          md:px-4
+          py-2
+          md:py-3
+          rounded-md
+          bg-primary/10
+          hover:opacity-75
+          transition
+        `,
+          "bg-primary/10"
+        )}
+        key="PRIVATE"
+      >
+        +
+      </button>
     </div>
-  )
-}
+  );
+};
