@@ -11,8 +11,6 @@ import { UpdateGroupRequest } from "../types/UpdateGroupRequest";
 import { Utilities } from "../util/utilities";
 import { InvitationService } from "./InvitationService";
 
-const EMAIL_REGEX = /^\S+@\S+\.\S+$/;
-
 export class GroupService {
   private getGroupCriteria(orgId: string, userId: string) {
     return {
