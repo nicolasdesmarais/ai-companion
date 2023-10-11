@@ -44,9 +44,15 @@ export const UpdateGroupForm = ({
 }: UpdateGroupFormProps) => {
   const router = useRouter();
 
-  const initialTeammates = groupUsers.map(
-    (user) => Utilities.getUserPrimaryEmailAddress(user) ?? ""
-  );
+  const initialTeammatesMap = new Map<string, string>();
+  groupUsers.forEach((user) => {
+    const email = Utilities.getUserPrimaryEmailAddress(user);
+    if (email) {
+      initialTeammatesMap.set(user.id, email);
+    }
+  });
+
+  const initialTeammates = Array.from(initialTeammatesMap.values());
 
   const [selectedOption, setSelectedOption] =
     useState<GroupAvailability | null>(group.availability);
@@ -63,12 +69,9 @@ export const UpdateGroupForm = ({
   });
 
   const onSubmit = async (values: z.infer<typeof groupFormSchema>) => {
-    const newTeammates = values.teammates
-      .split(",")
-      .map((email) => email.trim());
-    const removedTeammates = initialTeammates.filter(
-      (email) => !newTeammates.includes(email)
-    );
+    const removedTeammates: string[] = Array.from(initialTeammatesMap.entries())
+      .filter(([id, email]) => !currentTeammates.includes(email))
+      .map(([id]) => id);
 
     const request: UpdateGroupRequest = {
       name: values.name,
@@ -77,7 +80,7 @@ export const UpdateGroupForm = ({
       userIdsToRemove: removedTeammates,
     };
 
-    await axios.put(`/api/v1/me/groups`, request);
+    await axios.put(`/api/v1/me/groups/${group.id}`, request);
 
     router.refresh();
     router.push("/");
