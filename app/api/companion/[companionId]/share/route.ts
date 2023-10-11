@@ -1,12 +1,13 @@
 import { AIService } from "@/domain/services/AIService";
+import { ShareAIRequest } from "@/domain/types/ShareAIRequest";
 import { currentUser } from "@clerk/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(
+export async function PUT(
   req: NextRequest,
-  { params }: { params: { companionId: string } }): Promise<NextResponse> {
+  { params }: { params: { companionId: string } }
+): Promise<NextResponse> {
   try {
-
     const user = await currentUser();
     if (!user?.id) {
       return NextResponse.json("Unauthorized", { status: 401 });
@@ -32,5 +33,4 @@ export async function POST(
     console.log("Error on [GET /v1/me/ai]", error);
     return NextResponse.json("Internal Error", { status: 500 });
   }
-};
-
+}
