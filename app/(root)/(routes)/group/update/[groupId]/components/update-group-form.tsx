@@ -12,8 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { GroupEntity } from "@/domain/entities/GroupEntity";
 import { UpdateGroupRequest } from "@/domain/types/UpdateGroupRequest";
-import { Utilities } from "@/domain/util/utilities";
-import { User } from "@clerk/backend";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GroupAvailability } from "@prisma/client";
 import axios from "axios";
@@ -35,7 +33,7 @@ const groupFormSchema = z.object({
 
 interface UpdateGroupFormProps {
   group: GroupEntity;
-  groupUsers: User[];
+  groupUsers: { id: string; email: string }[];
 }
 
 export const UpdateGroupForm = ({
@@ -44,9 +42,7 @@ export const UpdateGroupForm = ({
 }: UpdateGroupFormProps) => {
   const router = useRouter();
 
-  const initialTeammates = groupUsers.map(
-    (user) => Utilities.getUserPrimaryEmailAddress(user) ?? ""
-  );
+  const initialTeammates = groupUsers.map((user) => user.email);
 
   const [selectedOption, setSelectedOption] =
     useState<GroupAvailability | null>(group.availability);
@@ -63,12 +59,9 @@ export const UpdateGroupForm = ({
   });
 
   const onSubmit = async (values: z.infer<typeof groupFormSchema>) => {
-    const newTeammates = values.teammates
-      .split(",")
-      .map((email) => email.trim());
-    const removedTeammates = initialTeammates.filter(
-      (email) => !newTeammates.includes(email)
-    );
+    const removedTeammates: string[] = groupUsers
+      .filter(({ email }) => !currentTeammates.includes(email))
+      .map(({ id }) => id);
 
     const request: UpdateGroupRequest = {
       name: values.name,
@@ -77,7 +70,7 @@ export const UpdateGroupForm = ({
       userIdsToRemove: removedTeammates,
     };
 
-    await axios.put(`/api/v1/me/groups`, request);
+    await axios.put(`/api/v1/me/groups/${group.id}`, request);
 
     router.refresh();
     router.push("/");
