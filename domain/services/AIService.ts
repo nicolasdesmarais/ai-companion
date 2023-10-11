@@ -64,7 +64,7 @@ export class AIService {
     }
 
     private determineScope(auth: SignedInAuthObject | SignedOutAuthObject, request: ListAIsRequestParams) {
-        if (!auth?.userId || !auth?.orgId) {
+        if (!auth?.userId) {
             return ListAIsRequestScope.PUBLIC;
         } else {
             return request.scope || ListAIsRequestScope.ALL;
