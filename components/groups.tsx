@@ -63,7 +63,7 @@ export const Groups = ({ data, orgId }: GroupsProps) => {
           hover:opacity-75
           transition
         `,
-          scope == "PUBLIC" ? "bg-primary/25" : "bg-primary/10"
+          scope == "PUBLIC" ? "bg-accent" : "bg-primary/10"
         )}
         key="PUBLIC"
       >
@@ -87,7 +87,7 @@ export const Groups = ({ data, orgId }: GroupsProps) => {
           hover:opacity-75
           transition
         `,
-          scope === "PRIVATE" ? "bg-primary/25" : "bg-primary/10"
+          scope === "PRIVATE" ? "bg-accent" : "bg-primary/10"
         )}
         key="PRIVATE"
       >
@@ -112,7 +112,7 @@ export const Groups = ({ data, orgId }: GroupsProps) => {
             hover:opacity-75
             transition
           `,
-            item.id === groupId ? "bg-primary/25" : "bg-primary/10"
+            item.id === groupId ? "bg-accent" : "bg-primary/10"
           )}
           key={item.id}
         >
