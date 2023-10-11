@@ -42,15 +42,7 @@ export const UpdateGroupForm = ({
 }: UpdateGroupFormProps) => {
   const router = useRouter();
 
-  const initialTeammatesMap = new Map<string, string>();
-  groupUsers.forEach((user) => {
-    const email = Utilities.getUserPrimaryEmailAddress(user);
-    if (email) {
-      initialTeammatesMap.set(user.id, email);
-    }
-  });
-
-  const initialTeammates = Array.from(initialTeammatesMap.values());
+  const initialTeammates = groupUsers.map((user) => user.email);
 
   const [selectedOption, setSelectedOption] =
     useState<GroupAvailability | null>(group.availability);
@@ -67,9 +59,9 @@ export const UpdateGroupForm = ({
   });
 
   const onSubmit = async (values: z.infer<typeof groupFormSchema>) => {
-    const removedTeammates: string[] = Array.from(initialTeammatesMap.entries())
-      .filter(([id, email]) => !currentTeammates.includes(email))
-      .map(([id]) => id);
+    const removedTeammates: string[] = groupUsers
+      .filter(({ email }) => !currentTeammates.includes(email))
+      .map(({ id }) => id);
 
     const request: UpdateGroupRequest = {
       name: values.name,
