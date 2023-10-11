@@ -1,180 +1,207 @@
 import prismadb from "@/lib/prismadb";
-import { clerkClient } from '@clerk/nextjs';
+import { clerkClient } from "@clerk/nextjs";
 import { SignedInAuthObject, SignedOutAuthObject } from "@clerk/nextjs/server";
 import { AIVisibility, GroupAvailability } from "@prisma/client";
 import { UnauthorizedError } from "../errors/Errors";
-import { ListAIsRequestParams, ListAIsRequestScope } from "./dtos/ListAIsRequestParams";
+import { ShareAIRequest } from "../types/ShareAIRequest";
+import {
+  ListAIsRequestParams,
+  ListAIsRequestScope,
+} from "./dtos/ListAIsRequestParams";
 
 export class AIService {
-    public async findAIById(id: string) {
-        return prismadb.companion.findUnique({
-            where: {
-                id: id
-            }
-        });
+  public async findAIById(id: string) {
+    return prismadb.companion.findUnique({
+      where: {
+        id: id,
+      },
+    });
+  }
+
+  public async shareAi(aiId: string, request: ShareAIRequest) {
+    await prismadb.companion.update({
+      where: {
+        id: aiId,
+      },
+      data: {
+        visibility: request.visibility,
+      },
+    });
+
+    if (request.emails.length > 0) {
+      const clerkUserList = await clerkClient.users.getUserList({
+        emailAddress: request.emails,
+      });
+      const aiPermissions = clerkUserList.map((user) => ({
+        userId: user.id,
+        companionId: aiId,
+      }));
+      await prismadb.aIPermissions.createMany({ data: aiPermissions });
+    }
+  }
+
+  public async findAIsForUser(
+    auth: SignedInAuthObject | SignedOutAuthObject,
+    request: ListAIsRequestParams
+  ) {
+    if (!auth?.userId) {
+      throw new UnauthorizedError("Unauthorized");
     }
 
-    public async shareAi(aiId: string, request: ShareAIRequest) {
-        const userEmails = request.users.map(user => user.email);
+    const userId = auth.userId;
+    const orgId = auth.orgId || "";
+    const scope = this.determineScope(auth, request);
 
-        const clerkUserList = await clerkClient.users.getUserList({ emailAddress: userEmails });
-        const aiPermissions = clerkUserList.map(user => ({
-            userId: user.id,
-            companionId: aiId
-        }));
+    const whereCondition = { AND: [{}] };
+    whereCondition.AND.push(this.getBaseWhereCondition(orgId, userId, scope));
 
-        prismadb.aIPermissions.createMany({ data: aiPermissions });
+    if (request.groupId) {
+      whereCondition.AND.push(this.getGroupCriteria(orgId, request.groupId));
+    }
+    if (request.categoryId) {
+      whereCondition.AND.push(this.getCategoryCriteria(request.categoryId));
+    }
+    if (request.search) {
+      whereCondition.AND.push(this.getSearchCriteria(request.search));
     }
 
-    public async findAIsForUser(auth: SignedInAuthObject | SignedOutAuthObject, request: ListAIsRequestParams) {
-        if (!auth?.userId) {
-            throw new UnauthorizedError("Unauthorized");
-        }
+    return prismadb.companion.findMany({
+      where: whereCondition,
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        _count: {
+          select: {
+            messages: true,
+          },
+        },
+      },
+    });
+  }
 
-        const userId = auth.userId;
-        const orgId = auth.orgId || '';
-        const scope = this.determineScope(auth, request);
+  private determineScope(
+    auth: SignedInAuthObject | SignedOutAuthObject,
+    request: ListAIsRequestParams
+  ) {
+    if (!auth?.userId) {
+      return ListAIsRequestScope.PUBLIC;
+    } else {
+      return request.scope || ListAIsRequestScope.ALL;
+    }
+  }
 
-        const whereCondition = { AND: [{}] };
-        whereCondition.AND.push(this.getBaseWhereCondition(orgId, userId, scope));
+  private getBaseWhereCondition(
+    orgId: string,
+    userId: string,
+    scope: ListAIsRequestScope
+  ) {
+    let baseWhereCondition;
 
-        if (request.groupId) {
-            whereCondition.AND.push(this.getGroupCriteria(orgId, request.groupId));
-        }
-        if (request.categoryId) {
-            whereCondition.AND.push(this.getCategoryCriteria(request.categoryId));
-        }
-        if (request.search) {
-            whereCondition.AND.push(this.getSearchCriteria(request.search));
-        }
-
-        return prismadb.companion.findMany({
-            where: whereCondition,
-            orderBy: {
-                createdAt: "desc"
-              },
-              include: {
-                _count: {
-                  select: {
-                    messages: true,
-                  }
-                }
-              }
-        });
+    switch (scope) {
+      case ListAIsRequestScope.PRIVATE:
+        baseWhereCondition = { AND: [{}] };
+        baseWhereCondition.AND.push({ visibility: AIVisibility.PRIVATE });
+        baseWhereCondition.AND.push(this.getOwnedByUserCriteria(userId));
+        break;
+      case ListAIsRequestScope.OWNED:
+        baseWhereCondition = this.getOwnedByUserCriteria(userId);
+        break;
+      case ListAIsRequestScope.GROUP:
+        baseWhereCondition = this.getUserGroupCriteria(orgId, userId);
+        break;
+      case ListAIsRequestScope.SHARED:
+        baseWhereCondition = this.getSharedWithUserCriteria(userId);
+        break;
+      case ListAIsRequestScope.PUBLIC:
+        baseWhereCondition = this.getPublicCriteria();
+        break;
+      case ListAIsRequestScope.ALL:
+        baseWhereCondition = { OR: [{}] };
+        baseWhereCondition.OR.push(this.getOwnedByUserCriteria(userId));
+        baseWhereCondition.OR.push(this.getUserGroupCriteria(orgId, userId));
+        baseWhereCondition.OR.push(this.getSharedWithUserCriteria(userId));
+        baseWhereCondition.OR.push(this.getPublicCriteria());
+        break;
     }
 
-    private determineScope(auth: SignedInAuthObject | SignedOutAuthObject, request: ListAIsRequestParams) {
-        if (!auth?.userId) {
-            return ListAIsRequestScope.PUBLIC;
-        } else {
-            return request.scope || ListAIsRequestScope.ALL;
-        }
-    }
+    return baseWhereCondition;
+  }
 
-    private getBaseWhereCondition(orgId: string, userId: string, scope: ListAIsRequestScope) {
-        let baseWhereCondition;
+  private getOwnedByUserCriteria(userId: string) {
+    return { userId: userId };
+  }
 
-        switch(scope) {
-            case ListAIsRequestScope.PRIVATE:
-                baseWhereCondition = { AND: [{}] };
-                baseWhereCondition.AND.push({ visibility: AIVisibility.PRIVATE });
-                baseWhereCondition.AND.push(this.getOwnedByUserCriteria(userId));
-                break;
-            case ListAIsRequestScope.OWNED:
-                baseWhereCondition = this.getOwnedByUserCriteria(userId);
-                break;
-            case ListAIsRequestScope.GROUP:
-                baseWhereCondition = this.getUserGroupCriteria(orgId, userId);
-                break;
-            case ListAIsRequestScope.SHARED:
-                baseWhereCondition = this.getSharedWithUserCriteria(userId);
-                break;
-            case ListAIsRequestScope.PUBLIC:
-                baseWhereCondition = this.getPublicCriteria();
-                break;
-            case ListAIsRequestScope.ALL:
-                baseWhereCondition = { OR: [{}] };
-                baseWhereCondition.OR.push(this.getOwnedByUserCriteria(userId));
-                baseWhereCondition.OR.push(this.getUserGroupCriteria(orgId, userId));
-                baseWhereCondition.OR.push(this.getSharedWithUserCriteria(userId));
-                baseWhereCondition.OR.push(this.getPublicCriteria());
-                break;
-        }
-
-        return baseWhereCondition;
-    }
-
-    private getOwnedByUserCriteria(userId: string) {
-        return { userId: userId };
-    }
-
-    private getUserGroupCriteria(orgId: string, userId: string) {
-        return {
-                visibility: {
-                    in: [AIVisibility.GROUP, AIVisibility.PUBLIC]
-                },
-                groups: {
-                    some: {
-                        group: {
-                            orgId: orgId,
-                            OR: [
-                                { availability: GroupAvailability.EVERYONE },
-                                {users: {
-                                    some: {
-                                        userId: userId
-                                    }
-                                }}
-                            ]
-                        }
-                    }
-                }
-        }
-    }
-
-    private getSharedWithUserCriteria(userId: string) {
-        return {
-             permissions: {
-                some: {
-                    userId: userId
-                }
-            }
-        };
-    }
-
-    private getPublicCriteria() {
-        return { visibility: AIVisibility.PUBLIC };
-    }
-
-    private getGroupCriteria(orgId: string, groupId: string) {
-        return {
-            groups: {
-                some: {
-                    group: {
-                        id: groupId,
-                        orgId: orgId
-                    }
-                }
-            }
-         }
-    }
-
-    private getCategoryCriteria(categoryId: string) {
-        return { categoryId: categoryId } ;
-    }
-
-    private getSearchCriteria(search: string) {
-        return {
+  private getUserGroupCriteria(orgId: string, userId: string) {
+    return {
+      visibility: {
+        in: [AIVisibility.GROUP, AIVisibility.PUBLIC],
+      },
+      groups: {
+        some: {
+          group: {
+            orgId: orgId,
             OR: [
-                {
-                    name: {
-                        search: search
-                    }
+              { availability: GroupAvailability.EVERYONE },
+              {
+                users: {
+                  some: {
+                    userId: userId,
+                  },
                 },
-                {
-                    userName: {
-                        search: search
-                    }
-                }
-            ]};
-    }
+              },
+            ],
+          },
+        },
+      },
+    };
+  }
+
+  private getSharedWithUserCriteria(userId: string) {
+    return {
+      permissions: {
+        some: {
+          userId: userId,
+        },
+      },
+    };
+  }
+
+  private getPublicCriteria() {
+    return { visibility: AIVisibility.PUBLIC };
+  }
+
+  private getGroupCriteria(orgId: string, groupId: string) {
+    return {
+      groups: {
+        some: {
+          group: {
+            id: groupId,
+            orgId: orgId,
+          },
+        },
+      },
+    };
+  }
+
+  private getCategoryCriteria(categoryId: string) {
+    return { categoryId: categoryId };
+  }
+
+  private getSearchCriteria(search: string) {
+    return {
+      OR: [
+        {
+          name: {
+            search: search,
+          },
+        },
+        {
+          userName: {
+            search: search,
+          },
+        },
+      ],
+    };
+  }
 }

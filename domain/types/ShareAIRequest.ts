@@ -1,7 +1,6 @@
-interface ShareAIRequest {
-    users: ShareAIRequestUsers[];
-}
+import { AIVisibility } from "@prisma/client";
 
-interface ShareAIRequestUsers {
-    email: string;
+export interface ShareAIRequest {
+  visibility: AIVisibility;
+  emails: string[];
 }
