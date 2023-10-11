@@ -76,6 +76,7 @@ export class GroupService {
         userId,
         group.id,
         createGroupRequest.memberEmails
+        createGroupRequest.memberEmails
       );
     }
 
@@ -155,6 +156,8 @@ export class GroupService {
     }
 
     const userIdsToAdd: string[] = [];
+    userIdsToAdd.push(createdByUserId);
+
     const foundUserEmails = new Set<string>();
 
     const clerkUserList = await clerkClient.users.getUserList({
@@ -175,6 +178,7 @@ export class GroupService {
 
     await prismadb.groupUser.createMany({
       data: groupUsers,
+      skipDuplicates: true,
     });
 
     // Invite users who were not found in Clerk
