@@ -73,8 +73,7 @@ export class GroupService {
         orgId,
         userId,
         group.id,
-        createGroupRequest.memberEmails,
-        true
+        createGroupRequest.memberEmails
       );
     }
 
@@ -115,14 +114,13 @@ export class GroupService {
     } else if (
       updateGroupRequest.availability === GroupAvailability.RESTRICTED
     ) {
-      // Availability switching from EVERYONE to RESTRICTED. Create explicit permissions for users
+      // RESTRICTED availability. Create explicit permissions for users
       if (updateGroupRequest?.memberEmailsToAdd) {
         this.addUsersToGroup(
           orgId,
           userId,
           groupId,
-          updateGroupRequest.memberEmailsToAdd,
-          false
+          updateGroupRequest.memberEmailsToAdd
         );
       }
       if (updateGroupRequest?.userIdsToRemove) {
@@ -144,14 +142,12 @@ export class GroupService {
     orgId: string,
     createdByUserId: string,
     groupId: string,
-    emailsToAdd: string,
-    includeCreator: boolean = false
+    emailsToAdd: string
   ) {
     const validEmails = Utilities.parseEmailCsv(emailsToAdd);
     const userIdsToAdd: string[] = [];
-    if (includeCreator) {
-      userIdsToAdd.push(createdByUserId);
-    }
+    userIdsToAdd.push(createdByUserId);
+
     const foundUserEmails = new Set<string>();
 
     if (validEmails.length > 0) {
@@ -172,7 +168,10 @@ export class GroupService {
       userId: userId,
     }));
 
-    await prismadb.groupUser.createMany({ data: groupUsers });
+    await prismadb.groupUser.createMany({
+      data: groupUsers,
+      skipDuplicates: true,
+    });
 
     // Invite users who were not found in Clerk
     this.inviteMissingUsers(
