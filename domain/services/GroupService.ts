@@ -122,7 +122,7 @@ export class GroupService {
     ) {
       // RESTRICTED availability. Create explicit permissions for users
       if (updateGroupRequest?.memberEmailsToAdd) {
-        this.addUsersToGroup(
+        await this.addUsersToGroup(
           orgId,
           userId,
           groupId,
@@ -130,11 +130,14 @@ export class GroupService {
         );
       }
       if (updateGroupRequest?.userIdsToRemove) {
-        this.removeUsersFromGroup(groupId, updateGroupRequest.userIdsToRemove);
+        await this.removeUsersFromGroup(
+          groupId,
+          updateGroupRequest.userIdsToRemove
+        );
       }
     }
 
-    return prismadb.group.findUnique({
+    return await prismadb.group.findUnique({
       where: {
         id: groupId,
       },
