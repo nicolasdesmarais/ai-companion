@@ -16,6 +16,7 @@ export class GroupService {
   private getGroupCriteria(orgId: string, userId: string) {
     return {
       orgId,
+      orgId,
       OR: [
         { availability: GroupAvailability.EVERYONE },
         { ownerUserId: userId },
@@ -156,8 +157,6 @@ export class GroupService {
     }
 
     const userIdsToAdd: string[] = [];
-    userIdsToAdd.push(createdByUserId);
-
     const foundUserEmails = new Set<string>();
 
     const clerkUserList = await clerkClient.users.getUserList({
