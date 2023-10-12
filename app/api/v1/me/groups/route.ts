@@ -38,7 +38,11 @@ export async function POST(req: Request) {
       createGroupRequest
     );
 
-    return NextResponse.json(group);
+    const groups = await groupService.findGroupsByUser(
+      authentication.orgId,
+      authentication.userId
+    );
+    return NextResponse.json(groups);
   } catch (error) {
     console.log("[POST v1/me/groups]", error);
     return new NextResponse("Internal Error", { status: 500 });

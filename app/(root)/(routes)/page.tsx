@@ -1,5 +1,6 @@
 import { Categories } from "@/components/categories";
 import { Companions } from "@/components/companions";
+import { GroupModal } from "@/components/group-modal";
 import { Groups } from "@/components/groups";
 import { InviteButton } from "@/components/invite-button";
 import { SearchInput } from "@/components/search-input";
@@ -61,12 +62,16 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
   return (
     <div className="h-full px-4 space-y-2 pt-2">
       <div className="flex ">
+        <h1 className="text-4xl font-bold whitespace-nowrap pt-2 pr-2">
+          Browse AIs
+        </h1>
         <Groups data={groups} orgId={authorization?.orgId} />
         <InviteButton />
       </div>
       <SearchInput />
       <Categories data={categories} />
       <Companions data={data} />
+      <GroupModal />
     </div>
   );
 };

@@ -2,9 +2,11 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
-
+import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Group } from "@prisma/client";
+import { useGroupModal } from "@/hooks/use-group-modal";
+import { useEffect, useState } from "react";
 
 interface GroupsProps {
   data: Group[];
@@ -14,9 +16,17 @@ interface GroupsProps {
 export const Groups = ({ data, orgId }: GroupsProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const groupModal = useGroupModal();
+  const [groups, setGroups] = useState<Group[]>(data);
 
   const groupId = searchParams.get("groupId");
   const scope = searchParams.get("scope");
+
+  useEffect(() => {
+    if (groupModal.data) {
+      setGroups(groupModal.data);
+    }
+  }, [groupModal.data]);
 
   const onClick = (id: string | undefined) => {
     let query;
@@ -40,7 +50,7 @@ export const Groups = ({ data, orgId }: GroupsProps) => {
   };
 
   const createGroup = () => {
-    router.push("/group/new");
+    groupModal.onOpen();
   };
 
   return (
@@ -65,7 +75,6 @@ export const Groups = ({ data, orgId }: GroupsProps) => {
         `,
           scope == "PUBLIC" ? "bg-accent" : "bg-primary/10"
         )}
-        key="PUBLIC"
       >
         Public
       </button>
@@ -89,11 +98,10 @@ export const Groups = ({ data, orgId }: GroupsProps) => {
         `,
           scope === "PRIVATE" ? "bg-accent" : "bg-primary/10"
         )}
-        key="PRIVATE"
       >
         Private
       </button>
-      {data.map((item) => (
+      {groups.map((item) => (
         <button
           onClick={() => onClick(item.id)}
           className={cn(
@@ -140,9 +148,8 @@ export const Groups = ({ data, orgId }: GroupsProps) => {
         `,
             "bg-primary/10"
           )}
-          key="PRIVATE"
         >
-          +
+          <Plus className="w-6 h-6" />
         </button>
       )}
     </div>
