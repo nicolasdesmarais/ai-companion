@@ -88,6 +88,10 @@ export class GroupService {
     groupId: string,
     updateGroupRequest: UpdateGroupRequest
   ) {
+    console.log(
+      "GroupService.updateGroup: " + JSON.stringify(updateGroupRequest)
+    );
+
     const existingGroup = await this.findGroupById(orgId, userId, groupId);
     if (!existingGroup) {
       throw new EntityNotFoundError("Group not found");
@@ -116,6 +120,7 @@ export class GroupService {
     } else if (
       updateGroupRequest.availability === GroupAvailability.RESTRICTED
     ) {
+      console.log("GroupService.updateGroup: RESTRICTED");
       // RESTRICTED availability. Create explicit permissions for users
       if (updateGroupRequest?.memberEmailsToAdd) {
         this.addUsersToGroup(
@@ -150,6 +155,7 @@ export class GroupService {
     if (validEmails.length === 0) {
       return;
     }
+    console.log("[GroupService.addUsersToGroup] Valid emails: " + validEmails);
 
     const userIdsToAdd: string[] = [];
     const foundUserEmails = new Set<string>();
@@ -157,6 +163,11 @@ export class GroupService {
     const clerkUserList = await clerkClient.users.getUserList({
       emailAddress: validEmails,
     });
+
+    console.log(
+      "[GroupService.addUsersToGroup] Fetched clerk users: ",
+      JSON.stringify(clerkUserList)
+    );
 
     clerkUserList.forEach((clerkUser) => {
       userIdsToAdd.push(clerkUser.id);
@@ -170,9 +181,16 @@ export class GroupService {
       userId,
     }));
 
-    await prismadb.groupUser.createMany({
+    console.log("[GroupService.addUsersToGroup] Group users: ", groupUsers);
+
+    const result = await prismadb.groupUser.createMany({
       data: groupUsers,
     });
+
+    console.log(
+      "[GroupService.addUsersToGroup] Group users result: ",
+      JSON.stringify(result)
+    );
 
     // Invite users who were not found in Clerk
     this.inviteMissingUsers(
