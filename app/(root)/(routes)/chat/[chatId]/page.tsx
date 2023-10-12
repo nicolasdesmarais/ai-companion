@@ -1,9 +1,8 @@
 import { auth, redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-
 import prismadb from "@/lib/prismadb";
-
 import { ChatClient } from "./components/client";
+import { ChatList } from "./components/chat-list";
 
 interface ChatIdPageProps {
   params: {
@@ -42,7 +41,29 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     return redirect("/");
   }
 
-  return <ChatClient companion={companion} />;
+  let companions = await prismadb.companion.findMany({
+    where: {
+      NOT: {
+        id: params.chatId,
+      },
+      AND: [
+        {
+          messages: {
+            some: {
+              userId: userId,
+            },
+          },
+        },
+      ],
+    },
+  });
+
+  return (
+    <div className="flex h-full">
+      <ChatList companions={[companion, ...companions]} />
+      <ChatClient companion={companion} />
+    </div>
+  );
 };
 
 export default ChatIdPage;
