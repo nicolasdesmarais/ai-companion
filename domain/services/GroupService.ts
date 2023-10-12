@@ -186,14 +186,17 @@ export class GroupService {
 
     console.log("[GroupService.addUsersToGroup] Group users: ", groupUsers);
 
-    const result = await prismadb.groupUser.createMany({
-      data: groupUsers,
-    });
-
-    console.log(
-      "[GroupService.addUsersToGroup] Group users result: ",
-      JSON.stringify(result)
-    );
+    try {
+      const result = await prismadb.groupUser.createMany({
+        data: groupUsers,
+      });
+      console.log(
+        "[GroupService.addUsersToGroup] Group users result: ",
+        JSON.stringify(result)
+      );
+    } catch (err) {
+      console.log("[GroupService.addUsersToGroup] Error: ", err);
+    }
 
     // Invite users who were not found in Clerk
     this.inviteMissingUsers(
