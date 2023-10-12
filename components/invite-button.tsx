@@ -11,7 +11,7 @@ export const InviteButton = () => {
     <>
       <Button
         size="sm"
-        variant="ring"
+        variant="premium"
         className="my-2"
         type="button"
         onClick={() => setShowModal(true)}

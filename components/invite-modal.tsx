@@ -45,7 +45,7 @@ export const InviteModal = ({ showModal, setShowModal }: InviteModalProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      emails: "",
+      name: "",
     },
   });
 
@@ -110,7 +110,7 @@ export const InviteModal = ({ showModal, setShowModal }: InviteModalProps) => {
               )}
             />
             <DialogFooter>
-              <Button size="lg" disabled={loading} variant="ring">
+              <Button size="lg" disabled={loading}>
                 Invite
                 {loading ? <Loader className="w-4 h-4 ml-2 spinner" /> : null}
               </Button>
