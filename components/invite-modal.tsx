@@ -45,7 +45,7 @@ export const InviteModal = ({ showModal, setShowModal }: InviteModalProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      emails: "",
     },
   });
 
