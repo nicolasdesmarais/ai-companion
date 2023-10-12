@@ -117,11 +117,13 @@ export const Sidebar = ({ isPro }: SidebarProps) => {
   return (
     <div className="p-3 flex-1 flex justify-between flex-col h-full">
       <div className="space-y-2 flex flex-col items-center">
-        <OrganizationSwitcher
-          appearance={{
-            baseTheme: dark,
-          }}
-        />
+        <div className="h-16">
+          <OrganizationSwitcher
+            appearance={{
+              baseTheme: dark,
+            }}
+          />
+        </div>
         <div
           className={cn(
             "text-muted-foreground text-xs group py-3 px-8 flex w-full justify-center font-medium  rounded-lg transition",
