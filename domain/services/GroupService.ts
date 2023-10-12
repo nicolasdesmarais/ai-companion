@@ -88,10 +88,6 @@ export class GroupService {
     groupId: string,
     updateGroupRequest: UpdateGroupRequest
   ) {
-    console.log(
-      "GroupService.updateGroup: " + JSON.stringify(updateGroupRequest)
-    );
-
     const existingGroup = await this.findGroupById(orgId, userId, groupId);
     if (!existingGroup) {
       throw new EntityNotFoundError("Group not found");
@@ -157,7 +153,6 @@ export class GroupService {
     if (validEmails.length === 0) {
       return;
     }
-    console.log("[GroupService.addUsersToGroup] Valid emails: " + validEmails);
 
     const userIdsToAdd: string[] = [];
     const foundUserEmails = new Set<string>();
@@ -178,30 +173,9 @@ export class GroupService {
       userId,
     }));
 
-    console.log("[GroupService.addUsersToGroup] Group users: ", groupUsers);
-
-    try {
-      // const result = await prismadb.groupUser.createMany({
-      //   data: groupUsers,
-      // });
-      // console.log(
-      //   "[GroupService.addUsersToGroup] Group users result: ",
-      //   JSON.stringify(result)
-      // );
-      for (const groupUser of groupUsers) {
-        console.log("Creating group user: " + JSON.stringify(groupUser));
-        const createdGroupUser = await prismadb.groupUser.create({
-          data: groupUser,
-        });
-
-        console.log(
-          "[GroupService.addUsersToGroup] Created group user: " +
-            JSON.stringify(createdGroupUser)
-        );
-      }
-    } catch (err) {
-      console.log("[GroupService.addUsersToGroup] Error: ", err);
-    }
+    await prismadb.groupUser.createMany({
+      data: groupUsers,
+    });
 
     // Invite users who were not found in Clerk
     this.inviteMissingUsers(
