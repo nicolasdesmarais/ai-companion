@@ -122,7 +122,6 @@ export class GroupService {
     } else if (
       updateGroupRequest.availability === GroupAvailability.RESTRICTED
     ) {
-      console.log("GroupService.updateGroup: RESTRICTED");
       // RESTRICTED availability. Create explicit permissions for users
       if (updateGroupRequest?.memberEmailsToAdd) {
         await this.addUsersToGroup(
@@ -169,11 +168,6 @@ export class GroupService {
       emailAddress: validEmails,
     });
 
-    console.log(
-      "[GroupService.addUsersToGroup] Fetched clerk users: ",
-      JSON.stringify(clerkUserList)
-    );
-
     clerkUserList.forEach((clerkUser) => {
       userIdsToAdd.push(clerkUser.id);
       clerkUser.emailAddresses.forEach((emailAddress) => {
@@ -197,6 +191,7 @@ export class GroupService {
       //   JSON.stringify(result)
       // );
       for (const groupUser of groupUsers) {
+        console.log("Creating group user: " + JSON.stringify(groupUser));
         const createdGroupUser = await prismadb.groupUser.create({
           data: groupUser,
         });
