@@ -1,25 +1,33 @@
+// pages/authenticate.tsx
 import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs";
 import { google } from "googleapis";
-import { NextRequest, NextResponse } from "next/server";
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  "http://localhost:3000/api/integrations/google-drive/callback"
+  "http://localhost:3000/authenticate"
 );
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
+interface GoogleDriveCallbackProps {
+  queryParams: {
+    code: string;
+  };
+}
+
+const GoogleDriveCallback = async (params: GoogleDriveCallbackProps) => {
+  // const [message, setMessage] = useState("");
+  // const [status, setStatus] = useState<number | null>(null);
   const authentication = await auth();
   const userId = authentication?.userId;
   if (!userId) {
-    return NextResponse.json("Unauthorized", { status: 401 });
+    return;
   }
 
-  const { searchParams } = new URL(req.url);
-  const code = searchParams.get("code");
+  const code = params.queryParams.code;
+
   try {
-    const { tokens } = await oauth2Client.getToken(code as string);
+    const { tokens } = await oauth2Client.getToken(code);
 
     await prismadb.googleTokens.upsert({
       where: { userId },
@@ -33,11 +41,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         refreshToken: tokens.refresh_token,
       },
     });
-
-    // You can now use the Google Drive API. Store the tokens securely (in session, JWT, database, etc.)
-    return NextResponse.json("Successfully authenticated!");
   } catch (error) {
     console.log(error);
-    return NextResponse.json("Authentication failed", { status: 400 });
   }
-}
+};
+
+export default GoogleDriveCallback;
