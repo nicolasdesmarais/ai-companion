@@ -167,3 +167,12 @@ model AIPermissions {
   @@unique([companionId, email])
   @@map("ai_permissions")
 }
+
+model GoogleTokens {
+  userId                    String    @map(name: "user_id")
+  accessToken               String?   @db.VarChar(500) @map(name: "access_token")
+  refreshToken              String?   @db.VarChar(500) @map(name: "refresh_token")
+
+  @@id(userId)
+  @@map("google_tokens")
+ }
