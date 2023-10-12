@@ -1,7 +1,6 @@
 "use client";
-import { Sparkles, UserPlus2 } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Poppins } from "next/font/google";
-
 import { MobileSidebar } from "@/components/mobile-sidebar";
 import { Button } from "@/components/ui/button";
 import { useProModal } from "@/hooks/use-pro-modal";
@@ -20,10 +19,6 @@ export const Navbar = ({ isPro }: NavbarProps) => {
         <MobileSidebar isPro={isPro} />
       </div>
       <div className="flex items-center gap-x-3">
-        <Button className="hidden" size="sm" variant="premium">
-          Invite
-          <UserPlus2 className="h-4 w-4 fill-white text-white ml-2" />
-        </Button>
         {!isPro && (
           <Button
             onClick={proModal.onOpen}
