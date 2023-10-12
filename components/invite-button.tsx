@@ -1,8 +1,8 @@
 "use client";
+import { InviteModal } from "@/components/invite-modal";
 import { Button } from "@/components/ui/button";
 import { UserPlus2 } from "lucide-react";
 import { useState } from "react";
-import { InviteModal } from "@/components/invite-modal";
 
 export const InviteButton = () => {
   const [showModal, setShowModal] = useState(false);
