@@ -23,24 +23,10 @@ export class InvitationService {
     });
   }
 
-  public async createInvitations(
-    invitationRequest: CreateInvitationRequest,
-    inviteeUserId: string
-  ) {
-    const invitationEntities = invitationRequest.invitations.map(
-      (invitationRequest) => ({
-        email: invitationRequest.email,
-        inviteeUserId: inviteeUserId,
-        workspaceId: invitationRequest.workspaceId,
-      })
-    );
-
-    await prismadb.invitation.createMany({ data: invitationEntities });
-
-    for (const invitation of invitationRequest.invitations) {
-      // Creating invitation with clerkClient
+  public async createInvitations(emails: string[]) {
+    for (const emailAddress of emails) {
       await clerkClient.invitations.createInvitation({
-        emailAddress: invitation.email,
+        emailAddress,
       });
     }
   }

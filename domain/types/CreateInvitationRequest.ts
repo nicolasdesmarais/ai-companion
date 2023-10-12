@@ -1,8 +1,8 @@
 interface CreateInvitationRequest {
-    invitations: WorkspaceInvitation[];
+  emails: string;
 }
 
 interface WorkspaceInvitation {
-    email: string;
-    workspaceId: string;
+  email: string;
+  workspaceId: string;
 }
