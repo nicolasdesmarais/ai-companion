@@ -1,8 +1,8 @@
 "use client";
-import { Companion } from "@prisma/client";
-import { useRouter, usePathname } from "next/navigation";
 import { BotAvatar } from "@/components/bot-avatar";
 import { cn } from "@/lib/utils";
+import { Companion } from "@prisma/client";
+import { usePathname, useRouter } from "next/navigation";
 
 interface ChatListProps {
   companions: Companion[];

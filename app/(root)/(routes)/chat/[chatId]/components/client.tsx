@@ -1,15 +1,14 @@
 "use client";
 
+import { Companion, Message } from "@prisma/client";
 import { useCompletion } from "ai/react";
-import { FormEvent, useState } from "react";
-import { Companion } from "@prisma/client";
-import { Message } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
 
 import { ChatForm } from "@/components/chat-form";
 import { ChatHeader } from "@/components/chat-header";
-import { ChatMessages } from "@/components/chat-messages";
 import { ChatMessageProps } from "@/components/chat-message";
+import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
 
 interface ChatClientProps {
