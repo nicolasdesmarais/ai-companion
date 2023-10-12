@@ -110,7 +110,7 @@ export const InviteModal = ({ showModal, setShowModal }: InviteModalProps) => {
               )}
             />
             <DialogFooter>
-              <Button size="lg" disabled={loading}>
+              <Button size="lg" disabled={loading} variant="ring">
                 Invite
                 {loading ? <Loader className="w-4 h-4 ml-2 spinner" /> : null}
               </Button>
