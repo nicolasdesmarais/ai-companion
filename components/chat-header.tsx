@@ -47,7 +47,7 @@ export const ChatHeader = ({ companion }: ChatHeaderProps) => {
   };
 
   return (
-    <div className="flex w-full justify-between items-center border-b border-primary/10 pb-4">
+    <div className="flex w-full justify-between items-center p-4 bg-accent/30 ml-1">
       <div className="flex gap-x-2 items-center">
         <BotAvatar src={companion.src} />
         <div className="flex flex-col gap-y-1">
