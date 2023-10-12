@@ -189,13 +189,23 @@ export class GroupService {
     console.log("[GroupService.addUsersToGroup] Group users: ", groupUsers);
 
     try {
-      const result = await prismadb.groupUser.createMany({
-        data: groupUsers,
-      });
-      console.log(
-        "[GroupService.addUsersToGroup] Group users result: ",
-        JSON.stringify(result)
-      );
+      // const result = await prismadb.groupUser.createMany({
+      //   data: groupUsers,
+      // });
+      // console.log(
+      //   "[GroupService.addUsersToGroup] Group users result: ",
+      //   JSON.stringify(result)
+      // );
+      for (const groupUser of groupUsers) {
+        const createdGroupUser = await prismadb.groupUser.create({
+          data: groupUser,
+        });
+
+        console.log(
+          "[GroupService.addUsersToGroup] Created group user: " +
+            JSON.stringify(createdGroupUser)
+        );
+      }
     } catch (err) {
       console.log("[GroupService.addUsersToGroup] Error: ", err);
     }
