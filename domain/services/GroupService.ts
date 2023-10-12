@@ -22,6 +22,7 @@ export class GroupService {
         {
           users: {
             some: { userId },
+            g,
           },
         },
       ],
@@ -172,7 +173,6 @@ export class GroupService {
 
     await prismadb.groupUser.createMany({
       data: groupUsers,
-      skipDuplicates: true,
     });
 
     // Invite users who were not found in Clerk
