@@ -59,7 +59,7 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
   const categories = await prismadb.category.findMany();
 
   return (
-    <div className="h-full px-4 space-y-2">
+    <div className="h-full px-4 space-y-2 pt-2">
       <div className="flex ">
         <Groups data={groups} orgId={authorization?.orgId} />
         <InviteButton />

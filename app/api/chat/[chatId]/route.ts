@@ -1,5 +1,3 @@
-
-
 import { StreamingTextResponse, LangChainStream } from "ai";
 import { currentUser } from "@clerk/nextjs";
 import { Replicate } from "langchain/llms/replicate";
@@ -34,7 +32,7 @@ export async function POST(
 
     const companion = await prismadb.companion.update({
       where: {
-        id: params.chatId
+        id: params.chatId,
       },
       include: {
         knowledge: true,
@@ -47,7 +45,7 @@ export async function POST(
             userId: user.id,
           },
         },
-      }
+      },
     });
 
     if (!companion) {
@@ -70,25 +68,24 @@ export async function POST(
     await memoryManager.writeToHistory("User: " + prompt + "\n", companionKey);
 
     // Query Pinecone
-    const recentChatHistory = await memoryManager.readLatestHistory(companionKey);
-    
-    const knowledgeIds = companion.knowledge.map((item) => item.knowledgeId);
-    const similarDocs = await memoryManager.vectorSearch(
-      prompt,
-      knowledgeIds
+    const recentChatHistory = await memoryManager.readLatestHistory(
+      companionKey
     );
+
+    const knowledgeIds = companion.knowledge.map((item) => item.knowledgeId);
+    const similarDocs = await memoryManager.vectorSearch(prompt, knowledgeIds);
 
     let relevantHistory = "";
     if (!!similarDocs && similarDocs.length !== 0) {
       relevantHistory = similarDocs.map((doc) => doc.pageContent).join("\n");
     }
     const { handlers } = LangChainStream();
-   
+
     let model;
     if (companion.modelId === "llama2-13b") {
       model = new Replicate({
         model:
-          "a16z-infra/llama-2-13b-chat:df7690f1994d94e96ad9d568eac121aecf50684a0b0963b25a41cc40061269e5",
+          "meta/llama-2-13b-chat:f4e2de70d66816a838a89eeeb621910adffb0dd0baba3976c96980970978018d",
         input: {
           max_length: 2048,
         },
@@ -102,30 +99,28 @@ export async function POST(
         maxTokens: -1,
       });
     }
-    
 
     // Turn verbose on for debugging
     model.verbose = true;
 
-    const resp = String(
-      await model
-        .call(
-          `
-        ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${companion.name}: prefix. 
+    const engineeredPrompt = `
+      ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${companion.name}: prefix. 
+      ${companion.instructions}
+      Below are relevant details about ${companion.name}'s past and the conversation you are in.
+      ${relevantHistory}
+      ${recentChatHistory}\n
+      ${companion.name}:
+    `;
 
-        ${companion.instructions}
+    const resp = await model.call(engineeredPrompt);
 
-        Below are relevant details about ${companion.name}'s past and the conversation you are in.
-        ${relevantHistory}
-
-
-        ${recentChatHistory}\n${companion.name}:`
-        )
-    );
-
-    const cleaned = resp.replaceAll(",", "");
-    const chunks = cleaned.split("\n");
-    const response = chunks[0];
+    let response;
+    if (companion.modelId === "llama2-13b") {
+      const cleaned = resp.replaceAll(",", "");
+      response = cleaned;
+    } else {
+      response = resp;
+    }
 
     await memoryManager.writeToHistory("" + response.trim(), companionKey);
     var Readable = require("stream").Readable;
@@ -138,7 +133,7 @@ export async function POST(
 
       await prismadb.companion.update({
         where: {
-          id: params.chatId
+          id: params.chatId,
         },
         data: {
           messages: {
@@ -148,7 +143,7 @@ export async function POST(
               userId: user.id,
             },
           },
-        }
+        },
       });
     }
 
@@ -156,9 +151,11 @@ export async function POST(
   } catch (error) {
     if (error.response?.data?.error?.message) {
       console.error("[CHAT]", error.response.data.error.message);
-      return new NextResponse(error.response.data.error.message, { status: 500 });
+      return new NextResponse(error.response.data.error.message, {
+        status: 500,
+      });
     }
     console.error("[CHAT]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
-};
+}
