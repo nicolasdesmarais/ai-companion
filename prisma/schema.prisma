@@ -104,6 +104,7 @@ model Group {
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt @default(now())
   orgId                     String    @map(name: "org_id")
+  ownerUserId               String?   @map(name: "owner_user_id")
   name                      String
   availability              GroupAvailability @default(EVERYONE)
   users                     GroupUser[]

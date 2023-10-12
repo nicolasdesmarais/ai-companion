@@ -15,12 +15,13 @@ import { InvitationService } from "./InvitationService";
 export class GroupService {
   private getGroupCriteria(orgId: string, userId: string) {
     return {
-      orgId: orgId,
+      orgId,
       OR: [
         { availability: GroupAvailability.EVERYONE },
+        { ownerUserId: userId },
         {
           users: {
-            some: { userId: userId },
+            some: { userId },
           },
         },
       ],
@@ -61,7 +62,8 @@ export class GroupService {
   ) {
     const group = await prismadb.group.create({
       data: {
-        orgId: orgId,
+        orgId,
+        ownerUserId: userId,
         name: createGroupRequest.name,
         availability: createGroupRequest.availability,
       },
@@ -145,27 +147,27 @@ export class GroupService {
     emailsToAdd: string
   ) {
     const validEmails = Utilities.parseEmailCsv(emailsToAdd);
-    const userIdsToAdd: string[] = [];
-    userIdsToAdd.push(createdByUserId);
-
-    const foundUserEmails = new Set<string>();
-
-    if (validEmails.length > 0) {
-      const clerkUserList = await clerkClient.users.getUserList({
-        emailAddress: validEmails,
-      });
-
-      clerkUserList.forEach((clerkUser) => {
-        userIdsToAdd.push(clerkUser.id);
-        clerkUser.emailAddresses.forEach((emailAddress) => {
-          foundUserEmails.add(emailAddress.emailAddress);
-        });
-      });
+    if (validEmails.length === 0) {
+      return;
     }
 
+    const userIdsToAdd: string[] = [];
+    const foundUserEmails = new Set<string>();
+
+    const clerkUserList = await clerkClient.users.getUserList({
+      emailAddress: validEmails,
+    });
+
+    clerkUserList.forEach((clerkUser) => {
+      userIdsToAdd.push(clerkUser.id);
+      clerkUser.emailAddresses.forEach((emailAddress) => {
+        foundUserEmails.add(emailAddress.emailAddress);
+      });
+    });
+
     const groupUsers = userIdsToAdd.map((userId) => ({
-      groupId: groupId,
-      userId: userId,
+      groupId,
+      userId,
     }));
 
     await prismadb.groupUser.createMany({
