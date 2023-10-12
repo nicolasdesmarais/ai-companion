@@ -22,7 +22,6 @@ export class GroupService {
         {
           users: {
             some: { userId },
-            g,
           },
         },
       ],
