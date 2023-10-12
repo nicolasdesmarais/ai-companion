@@ -63,7 +63,7 @@ export const ChatClient = ({ companion }: ChatClientProps) => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full p-4 space-y-2">
+    <div className="flex flex-col h-full w-full space-y-2">
       <ChatHeader companion={companion} />
       <ChatMessages
         companion={companion}
