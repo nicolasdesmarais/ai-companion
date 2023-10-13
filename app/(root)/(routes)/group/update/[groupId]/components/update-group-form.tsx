@@ -70,7 +70,7 @@ export const UpdateGroupForm = ({
       memberEmailsToRemove: removedTeammates,
     };
 
-    await axios.put(`/api/v1/me/groups/${group.id}`, request);
+    await axios.put(`/api/v1/groups/${group.id}`, request);
 
     router.refresh();
     router.push("/");
