@@ -154,56 +154,63 @@ export class GroupService {
       return;
     }
 
-    const userIdsToAdd: string[] = [];
     const foundUserEmails = new Set<string>();
+    const missingUserEmails = new Set<string>();
+    const groupUsers: {
+      groupId: string;
+      userId: string | null;
+      email: string;
+    }[] = [];
 
     const clerkUserList = await clerkClient.users.getUserList({
       emailAddress: validEmails,
     });
 
     clerkUserList.forEach((clerkUser) => {
-      userIdsToAdd.push(clerkUser.id);
-      clerkUser.emailAddresses.forEach((emailAddress) => {
-        foundUserEmails.add(emailAddress.emailAddress);
-      });
+      for (const { emailAddress } of clerkUser.emailAddresses) {
+        if (validEmails.includes(emailAddress)) {
+          foundUserEmails.add(emailAddress);
+          groupUsers.push({
+            groupId,
+            userId: clerkUser.id,
+            email: emailAddress,
+          });
+        }
+      }
     });
 
-    const groupUsers = userIdsToAdd.map((userId) => ({
-      groupId,
-      userId,
-    }));
+    validEmails.forEach((email) => {
+      if (!foundUserEmails.has(email)) {
+        missingUserEmails.add(email);
+        groupUsers.push({
+          groupId,
+          userId: null,
+          email,
+        });
+      }
+    });
 
     await prismadb.groupUser.createMany({
       data: groupUsers,
     });
 
     // Invite users who were not found in Clerk
-    this.inviteMissingUsers(
-      orgId,
-      createdByUserId,
-      validEmails,
-      foundUserEmails
-    );
+    this.inviteMissingUsers(orgId, createdByUserId, missingUserEmails);
   }
 
   private async inviteMissingUsers(
     orgId: string,
     userId: string,
-    requestedEmails: string[],
-    foundEmails: Set<string>
+    missingUserEmails: Set<string>
   ) {
-    const missingEmails = requestedEmails.filter(
-      (email) => !foundEmails.has(email)
-    );
-
     const orgInvitations: OrganizationInvitation[] = [];
-    for (const email of missingEmails) {
+    missingUserEmails.forEach((email) => {
       const invitation: OrganizationInvitation = {
         emailAddress: email,
         role: "basic_member",
       };
       orgInvitations.push(invitation);
-    }
+    });
 
     const createInvitationRequest: CreateOrganizationInvitationRequest = {
       organizationId: orgId,
@@ -227,6 +234,17 @@ export class GroupService {
         userId: {
           in: userIdsToRemove,
         },
+      },
+    });
+  }
+
+  public async populateGroupUserId(userId: string, email: string) {
+    await prismadb.groupUser.updateMany({
+      where: {
+        email,
+      },
+      data: {
+        userId,
       },
     });
   }
