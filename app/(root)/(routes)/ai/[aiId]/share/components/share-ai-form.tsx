@@ -10,12 +10,10 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { ShareAIRequest } from "@/domain/types/ShareAIRequest";
-import { Utilities } from "@/domain/util/utilities";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AIVisibility, Companion } from "@prisma/client";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -35,9 +33,6 @@ interface ShareAIFormProps {
 export const ShareAIForm = ({ ai }: ShareAIFormProps) => {
   const router = useRouter();
 
-  const [selectedOption, setSelectedOption] = useState<AIVisibility | null>(
-    ai.visibility
-  );
   const currentTeammates: string[] = [];
 
   const form = useForm<z.infer<typeof groupFormSchema>>({
@@ -50,11 +45,10 @@ export const ShareAIForm = ({ ai }: ShareAIFormProps) => {
 
   const onSubmit = async (values: z.infer<typeof groupFormSchema>) => {
     const request: ShareAIRequest = {
-      visibility: selectedOption || AIVisibility.PRIVATE,
-      emails: Utilities.parseEmailCsv(values.teammates),
+      emails: values.teammates,
     };
 
-    await axios.put(`/api/companion/${ai.id}/share`, request);
+    await axios.put(`/api/v1/ai/${ai.id}/share`, request);
 
     router.refresh();
     router.push("/");
@@ -74,57 +68,6 @@ export const ShareAIForm = ({ ai }: ShareAIFormProps) => {
           className="space-y-8 pb-10"
         >
           <h3 className="text-lg font-medium">Share AI - {ai.name}</h3>
-
-          <div className="space-y-4">
-            <FormLabel>Share with</FormLabel>
-            <FormItem>
-              <FormControl>
-                <div>
-                  <label>
-                    <input
-                      type="radio"
-                      value={AIVisibility.PRIVATE}
-                      checked={selectedOption === AIVisibility.PRIVATE}
-                      onChange={(e) =>
-                        setSelectedOption(e.target.value as AIVisibility)
-                      }
-                    />
-                    Private
-                  </label>
-                </div>
-              </FormControl>
-              <FormControl>
-                <div>
-                  <label>
-                    <input
-                      type="radio"
-                      value={AIVisibility.GROUP}
-                      checked={selectedOption === AIVisibility.GROUP}
-                      onChange={(e) =>
-                        setSelectedOption(e.target.value as AIVisibility)
-                      }
-                    />
-                    Select Groups
-                  </label>
-                </div>
-              </FormControl>
-              <FormControl>
-                <div>
-                  <label>
-                    <input
-                      type="radio"
-                      value={AIVisibility.PUBLIC}
-                      checked={selectedOption === AIVisibility.PUBLIC}
-                      onChange={(e) =>
-                        setSelectedOption(e.target.value as AIVisibility)
-                      }
-                    />
-                    Public
-                  </label>
-                </div>
-              </FormControl>
-            </FormItem>
-          </div>
 
           <>
             <FormField

@@ -4,6 +4,8 @@ import { SignedInAuthObject, SignedOutAuthObject } from "@clerk/nextjs/server";
 import { AIVisibility, GroupAvailability } from "@prisma/client";
 import { UnauthorizedError } from "../errors/Errors";
 import { ShareAIRequest } from "../types/ShareAIRequest";
+import { Utilities } from "../util/utilities";
+import { InvitationService } from "./InvitationService";
 import {
   ListAIsRequestParams,
   ListAIsRequestScope,
@@ -15,28 +17,74 @@ export class AIService {
       where: {
         id: id,
       },
+      include: {
+        permissions: true,
+      },
     });
   }
 
-  public async shareAi(aiId: string, request: ShareAIRequest) {
-    await prismadb.companion.update({
-      where: {
-        id: aiId,
-      },
-      data: {
-        visibility: request.visibility,
-      },
+  public async shareAi(
+    orgId: string | null | undefined,
+    userId: string,
+    aiId: string,
+    request: ShareAIRequest
+  ) {
+    const validEmails = Utilities.parseEmailCsv(request.emails);
+    if (validEmails.length === 0) {
+      return;
+    }
+
+    const foundUserEmails = new Set<string>();
+    const missingUserEmails = new Set<string>();
+    const aiPermissions: {
+      userId: string | null;
+      companionId: string;
+      email: string;
+    }[] = [];
+
+    const clerkUserList = await clerkClient.users.getUserList({
+      emailAddress: validEmails,
     });
 
-    if (request.emails.length > 0) {
-      const clerkUserList = await clerkClient.users.getUserList({
-        emailAddress: request.emails,
-      });
-      const aiPermissions = clerkUserList.map((user) => ({
-        userId: user.id,
-        companionId: aiId,
-      }));
-      await prismadb.aIPermissions.createMany({ data: aiPermissions });
+    clerkUserList.forEach((clerkUser) => {
+      for (const { emailAddress } of clerkUser.emailAddresses) {
+        if (validEmails.includes(emailAddress)) {
+          foundUserEmails.add(emailAddress);
+          aiPermissions.push({
+            companionId: aiId,
+            userId: clerkUser.id,
+            email: emailAddress,
+          });
+        }
+      }
+    });
+
+    validEmails.forEach((email) => {
+      if (!foundUserEmails.has(email)) {
+        missingUserEmails.add(email);
+        aiPermissions.push({
+          companionId: aiId,
+          userId: null,
+          email,
+        });
+      }
+    });
+
+    await prismadb.aIPermissions.createMany({
+      data: aiPermissions,
+      skipDuplicates: true,
+    });
+
+    // Invite users who were not found in Clerk
+    const invitationService = new InvitationService();
+    if (orgId) {
+      invitationService.createOrganizationInvitationsFromEmails(
+        orgId,
+        userId,
+        Array.from(missingUserEmails)
+      );
+    } else {
+      invitationService.createInvitations(Array.from(missingUserEmails));
     }
   }
 
