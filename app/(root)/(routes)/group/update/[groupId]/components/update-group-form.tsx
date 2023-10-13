@@ -32,11 +32,13 @@ const groupFormSchema = z.object({
 });
 
 interface UpdateGroupFormProps {
+  userId: string;
   group: GroupEntity;
   groupUsers: { id: string | null; email: string }[];
 }
 
 export const UpdateGroupForm = ({
+  userId,
   group,
   groupUsers,
 }: UpdateGroupFormProps) => {
@@ -202,22 +204,24 @@ export const UpdateGroupForm = ({
 
           <div className="w-full flex justify-between">
             <Button size="lg">Update</Button>
-            <Button
-              size="lg"
-              onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Delete
-            </Button>
-          </div>
-          <div className="w-full flex justify-between mt-4">
-            <Button
-              size="lg"
-              onClick={handleLeaveGroup}
-              className="bg-yellow-600 hover:bg-yellow-700"
-            >
-              Leave Group
-            </Button>
+            {userId === group.ownerUserId && (
+              <Button
+                size="lg"
+                onClick={handleDelete}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Delete
+              </Button>
+            )}
+            {userId !== group.ownerUserId && (
+              <Button
+                size="lg"
+                onClick={handleLeaveGroup}
+                className="bg-yellow-600 hover:bg-yellow-700"
+              >
+                Leave Group
+              </Button>
+            )}
           </div>
         </form>
       </Form>
