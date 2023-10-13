@@ -20,7 +20,11 @@ export async function PUT(
       params.groupId
     );
 
-    return new NextResponse(null, { status: 204 });
+    const groups = await groupService.findGroupsByUser(
+      authentication.orgId,
+      authentication.userId
+    );
+    return NextResponse.json(groups);
   } catch (error) {
     if (error instanceof EntityNotFoundError) {
       return new NextResponse("Group not found", { status: 404 });

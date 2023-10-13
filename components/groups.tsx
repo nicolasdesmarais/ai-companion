@@ -2,21 +2,24 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
-import { Plus } from "lucide-react";
+import { Plus, MoreVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Group } from "@prisma/client";
+import { Group, GroupAvailability } from "@prisma/client";
 import { useGroupModal } from "@/hooks/use-group-modal";
 import { useEffect, useState } from "react";
+import { useUser, useOrganization } from "@clerk/nextjs";
+import axios from "axios";
 
 interface GroupsProps {
   data: Group[];
-  orgId?: string | null;
 }
 
-export const Groups = ({ data, orgId }: GroupsProps) => {
+export const Groups = ({ data }: GroupsProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const groupModal = useGroupModal();
+  const { user } = useUser();
+  const { organization } = useOrganization();
   const [groups, setGroups] = useState<Group[]>(data);
 
   const groupId = searchParams.get("groupId");
@@ -27,6 +30,17 @@ export const Groups = ({ data, orgId }: GroupsProps) => {
       setGroups(groupModal.data);
     }
   }, [groupModal.data]);
+
+  const fetchGroups = async () => {
+    const response = await axios.get("/api/v1/groups");
+    if (response.status === 200) {
+      setGroups(response.data);
+    }
+  };
+
+  useEffect(() => {
+    fetchGroups();
+  }, [organization?.id]);
 
   const onClick = (id: string | undefined) => {
     let query;
@@ -112,7 +126,7 @@ export const Groups = ({ data, orgId }: GroupsProps) => {
             text-xs
             md:text-sm
             px-2
-            md:px-4
+            md:px-3
             py-2
             md:py-3
             rounded-md
@@ -125,9 +139,20 @@ export const Groups = ({ data, orgId }: GroupsProps) => {
           key={item.id}
         >
           {item.name}
+          {item.id === groupId &&
+          (item.availability === GroupAvailability.RESTRICTED ||
+            (item.availability === GroupAvailability.EVERYONE &&
+              item.ownerUserId === user?.id)) ? (
+            <MoreVertical
+              onClick={() => groupModal.onOpen(item.id)}
+              className="w-6 h-6 ml-1 p-1 opacity-60 hover:opacity-100 hover:bg-primary/10 hover:rounded-full cursor-pointer"
+            />
+          ) : (
+            ""
+          )}
         </button>
       ))}
-      {orgId && (
+      {organization?.id && (
         <button
           onClick={() => createGroup()}
           className={cn(

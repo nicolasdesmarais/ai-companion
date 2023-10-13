@@ -65,7 +65,7 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
         <h1 className="text-4xl font-bold whitespace-nowrap pt-2 pr-2">
           Browse AIs
         </h1>
-        <Groups data={groups} orgId={authorization?.orgId} />
+        <Groups data={groups} />
         <InviteButton />
       </div>
       <SearchInput />
