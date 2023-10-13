@@ -11,6 +11,7 @@ import {
 import { UpdateGroupRequest } from "../types/UpdateGroupRequest";
 import { Utilities } from "../util/utilities";
 import { InvitationService } from "./InvitationService";
+import { GroupSecurityService } from "./SecurityService";
 
 export class GroupService {
   private getGroupCriteria(orgId: string, userId: string) {
@@ -93,21 +94,29 @@ export class GroupService {
       throw new EntityNotFoundError("Group not found");
     }
 
-    await prismadb.group.update({
-      where: {
-        id: groupId,
-      },
-      data: {
-        name: updateGroupRequest.name,
-        availability: updateGroupRequest.availability,
-      },
-    });
+    const groupPermissions = GroupSecurityService.getGroupPermissions(
+      orgId,
+      userId,
+      existingGroup
+    );
 
-    if (
-      updateGroupRequest.availability === GroupAvailability.EVERYONE &&
-      existingGroup.availability === GroupAvailability.RESTRICTED
-    ) {
-      // Availability switching from RESTRICTED to EVERYONE. Remove all explicit permissions
+    let updatedGroup;
+    if (groupPermissions.canUpdateGroup) {
+      updatedGroup = await prismadb.group.update({
+        where: {
+          id: groupId,
+        },
+        data: {
+          name: updateGroupRequest.name,
+          availability: updateGroupRequest.availability,
+        },
+      });
+    } else {
+      updatedGroup = existingGroup;
+    }
+
+    if (updatedGroup.availability === GroupAvailability.EVERYONE) {
+      //  Remove all explicit permissions
       await prismadb.groupUser.deleteMany({
         where: {
           groupId: groupId,
@@ -117,7 +126,10 @@ export class GroupService {
       updateGroupRequest.availability === GroupAvailability.RESTRICTED
     ) {
       // RESTRICTED availability. Create explicit permissions for users
-      if (updateGroupRequest?.memberEmailsToAdd) {
+      if (
+        groupPermissions.canInviteUsersToGroup &&
+        updateGroupRequest?.memberEmailsToAdd
+      ) {
         await this.addUsersToGroup(
           orgId,
           userId,
@@ -125,7 +137,10 @@ export class GroupService {
           updateGroupRequest.memberEmailsToAdd
         );
       }
-      if (updateGroupRequest?.memberEmailsToRemove) {
+      if (
+        groupPermissions.canRemoveUsersFromGroup &&
+        updateGroupRequest?.memberEmailsToRemove
+      ) {
         await this.removeUsersFromGroup(
           groupId,
           updateGroupRequest.memberEmailsToRemove
