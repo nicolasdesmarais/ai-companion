@@ -19,9 +19,6 @@ interface ChatClientProps {
     };
   };
 }
-    };
-  };
-}
 
 export const ChatClient = ({ companion }: ChatClientProps) => {
   const router = useRouter();
@@ -62,7 +59,6 @@ export const ChatClient = ({ companion }: ChatClientProps) => {
     setMessages((current) => [...current, userMessage]);
 
     handleSubmit(e);
-  };
   };
 
   return (

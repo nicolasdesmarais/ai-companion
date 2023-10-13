@@ -16,7 +16,6 @@ export class GroupService {
   private getGroupCriteria(orgId: string, userId: string) {
     return {
       orgId,
-      orgId,
       OR: [
         { availability: GroupAvailability.EVERYONE },
         { ownerUserId: userId },
@@ -76,7 +75,6 @@ export class GroupService {
         orgId,
         userId,
         group.id,
-        createGroupRequest.memberEmails
         createGroupRequest.memberEmails
       );
     }
