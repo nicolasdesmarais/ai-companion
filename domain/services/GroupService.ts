@@ -2,7 +2,7 @@ import prismadb from "@/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
 import { GroupAvailability } from "@prisma/client";
 import { GroupEntity } from "../entities/GroupEntity";
-import { EntityNotFoundError } from "../errors/Errors";
+import { BadRequestError, EntityNotFoundError } from "../errors/Errors";
 import { CreateGroupRequest } from "../types/CreateGroupRequest";
 import {
   CreateOrganizationInvitationRequest,
@@ -267,5 +267,23 @@ export class GroupService {
         },
       }),
     ]);
+  }
+
+  public async leaveGroup(orgId: string, userId: string, groupId: string) {
+    const existingGroup = await this.findGroupById(orgId, userId, groupId);
+    if (!existingGroup) {
+      throw new EntityNotFoundError("Group not found");
+    }
+
+    if (existingGroup.ownerUserId === userId) {
+      throw new BadRequestError("Owner cannot leave group");
+    }
+
+    await prismadb.groupUser.deleteMany({
+      where: {
+        groupId: groupId,
+        userId: userId,
+      },
+    });
   }
 }
