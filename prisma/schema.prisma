@@ -39,7 +39,6 @@ model Companion {
   modelId       String @default("llama2-13b")
 
   groups        GroupAI[]
-  workspaces    WorkspaceAI[]
 
   knowledge     KnowledgeAI[]
 
@@ -86,19 +85,6 @@ model UserSubscription {
   stripeCurrentPeriodEnd    DateTime? @map(name: "stripe_current_period_end")
 }
 
-model Workspace {
-  id                        String    @id @default(cuid())
-  createdAt                 DateTime @default(now())
-  updatedAt                 DateTime @updatedAt @default(now())
-  name                      String
-  domain                    String?    @unique
-  users                     WorkspaceUser[]
-  companions                WorkspaceAI[]
-  invitations               Invitation[]
-
-  @@map("workspaces")
-}
-
 model Group {
   id                        String    @id @default(cuid())
   createdAt                 DateTime  @default(now())
@@ -116,17 +102,6 @@ model Group {
 enum GroupAvailability {
   EVERYONE
   RESTRICTED
-}
-
-model WorkspaceUser {
-  userId                    String    @map(name: "user_id")
-  workspace                 Workspace @relation(fields: [workspaceId], references: [id])
-  workspaceId               String    @map(name: "workspace_id")
-  createdAt                 DateTime  @default(now())
-  updatedAt                 DateTime  @updatedAt @default(now())
-
-  @@id([userId, workspaceId])
-  @@map("workspace_users")
 }
 
 model GroupUser {
@@ -153,33 +128,10 @@ model GroupAI {
   @@map("group_ais")
 }
 
-model WorkspaceAI {
-  workspace                 Workspace @relation(fields: [workspaceId], references: [id])
-  workspaceId               String    @map(name: "workspace_id")
-  companion                 Companion @relation(fields: [companionId], references: [id])
-  companionId               String    @map(name: "companion_id")
-
-  @@id([workspaceId, companionId])
-  @@map("workspace_ais")
-}
-
 model PublicDomain {
   domain                   String     @id
 
   @@map("public_domains")
-}
-
-model Invitation {
-  id                        String    @id @default(cuid())
-  createdAt                 DateTime  @default(now())
-  updatedAt                 DateTime  @updatedAt
-  email                     String
-  inviteeUserId             String    @map(name: "invitee_user_id")
-  workspace                 Workspace @relation(fields: [workspaceId], references: [id])
-  workspaceId               String    @map(name: "workspace_id")
-  isAccepted                Boolean   @default(false) @map(name: "is_accepted")
-
-  @@map("invitations")
 }
 
 model Knowledge {

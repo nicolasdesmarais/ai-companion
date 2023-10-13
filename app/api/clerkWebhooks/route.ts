@@ -103,17 +103,6 @@ async function handleUserCreatedEvent(userEvent: UserWebhookEvent) {
 
 async function handleSessionCreatedEvent(sessionEvent: SessionWebhookEvent) {
   // TODO: Remove this function if not needed
-  // const data = sessionEvent.data;
-  // const userId = data.user_id;
-  // // User does not exist, create user
-  // const clerkUser = await clerkClient.users.getUser(userId);
-  // const primaryEmail = getPrimaryEmailFromClerkUser(clerkUser);
-  // if (primaryEmail === null) {
-  //   console.log('Cannot extract primary email from user data: ' + JSON.stringify(clerkUser));
-  //   return;
-  // }
-  // const workspaceService = new WorkspaceService();
-  // workspaceService.addUserToNewOrExistingWorkspace(userId, primaryEmail);
 }
 
 const getPrimaryEmailFromUserJson = (data: UserJSON): string | null => {
