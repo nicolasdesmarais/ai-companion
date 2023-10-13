@@ -30,7 +30,13 @@ const UpdateGroupPage = async ({ params }: UpdateGroupPageProps) => {
     email: user.email,
   }));
 
-  return <UpdateGroupForm group={group} groupUsers={groupUsers} />;
+  return (
+    <UpdateGroupForm
+      userId={authentication.userId}
+      group={group}
+      groupUsers={groupUsers}
+    />
+  );
 };
 
 export default UpdateGroupPage;
