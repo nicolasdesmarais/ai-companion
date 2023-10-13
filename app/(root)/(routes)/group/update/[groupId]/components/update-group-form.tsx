@@ -86,6 +86,15 @@ export const UpdateGroupForm = ({
     }
   };
 
+  const handleLeaveGroup = async () => {
+    try {
+      await axios.put(`/api/v1/me/groups/${group.id}/leave`);
+      router.push("/");
+    } catch (error) {
+      console.error("Error leaving group:", error);
+    }
+  };
+
   const handleRemoveTeammate = (email: string) => {
     setCurrentTeammates((prevTeammates) =>
       prevTeammates.filter((t) => t !== email)
@@ -199,6 +208,15 @@ export const UpdateGroupForm = ({
               className="bg-red-600 hover:bg-red-700"
             >
               Delete
+            </Button>
+          </div>
+          <div className="w-full flex justify-between mt-4">
+            <Button
+              size="lg"
+              onClick={handleLeaveGroup}
+              className="bg-yellow-600 hover:bg-yellow-700"
+            >
+              Leave Group
             </Button>
           </div>
         </form>

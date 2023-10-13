@@ -7,6 +7,7 @@ export interface GroupEntity {
   updatedAt: Date;
   orgId: string;
   name: string;
+  ownerUserId: string;
   availability: GroupAvailability;
   users?: GroupUserEntity[];
 }
