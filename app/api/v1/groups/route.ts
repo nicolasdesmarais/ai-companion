@@ -13,13 +13,17 @@ export async function POST(req: Request) {
     const createGroupRequest: CreateGroupRequest = await req.json();
 
     const groupService = new GroupService();
-    const group = await groupService.createGroup(
+    await groupService.createGroup(
       authentication.orgId,
       authentication.userId,
       createGroupRequest
     );
 
-    return NextResponse.json(group);
+    const groups = await groupService.findGroupsByUser(
+      authentication.orgId,
+      authentication.userId
+    );
+    return NextResponse.json(groups);
   } catch (error) {
     console.log("[POST v1/groups]", error);
     return new NextResponse("Internal Error", { status: 500 });
