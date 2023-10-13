@@ -1,29 +1,7 @@
-import { currentUser, auth } from "@clerk/nextjs";
-import { NextResponse } from "next/server";
 import { InvitationService } from "@/domain/services/InvitationService";
 import { Utilities } from "@/domain/util/utilities";
-
-export async function GET(req: Request) {
-  try {
-    const user = await currentUser();
-    if (!user?.id) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
-    const invitationService = new InvitationService();
-    const emailAddresses = user.emailAddresses.map(
-      (emailAddress: any) => emailAddress.email
-    );
-    const invitations = await invitationService.findInvitationsByEmailAddresses(
-      emailAddresses
-    );
-
-    return NextResponse.json(invitations);
-  } catch (error) {
-    console.log("[WORKSPACE_POST]", error);
-    return new NextResponse("Internal Error", { status: 500 });
-  }
-}
+import { auth } from "@clerk/nextjs";
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
