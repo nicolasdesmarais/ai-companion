@@ -31,7 +31,9 @@ import { UpdateGroupRequest } from "@/domain/types/UpdateGroupRequest";
 import { useGroupModal } from "@/hooks/use-group-modal";
 import { useUser } from "@clerk/nextjs";
 import { GroupAvailability } from "@prisma/client";
+import { UpdateGroupRequest } from "@/domain/types/UpdateGroupRequest";
 import { Loader } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
 import * as z from "zod";
 
 const groupFormSchema = z.object({
