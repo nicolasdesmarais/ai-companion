@@ -108,3 +108,35 @@ export async function DELETE(
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: { groupId: string } }
+) {
+  try {
+    if (!params.groupId) {
+      return new NextResponse("Group ID required", { status: 400 });
+    }
+
+    const authentication = await auth();
+    if (!authentication?.userId || !authentication?.orgId) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const groupService = new GroupService();
+    await groupService.deleteGroup(
+      authentication.orgId,
+      authentication.userId,
+      params.groupId
+    );
+    return new NextResponse("", { status: 204 });
+  } catch (error) {
+    console.log("Error in [DELETE v1/me/groups/{groupId}]", error);
+
+    if (error instanceof EntityNotFoundError) {
+      return new NextResponse("Group not found", { status: 404 });
+    }
+
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
