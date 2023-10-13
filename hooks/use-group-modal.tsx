@@ -4,16 +4,17 @@ import { Group } from "@prisma/client";
 interface useGroupModalStore {
   isOpen: boolean;
   data?: Group[];
-  onOpen: () => void;
+  groupId?: string;
+  onOpen: (groupId?: string) => void;
   onClose: () => void;
   onUpdate: (data: Group[]) => void;
 }
 
 export const useGroupModal = create<useGroupModalStore>((set) => ({
   isOpen: false,
-  onOpen: () => set({ isOpen: true }),
+  onOpen: (groupId?: string) => set({ isOpen: true, groupId }),
   onClose: () => set({ isOpen: false }),
   onUpdate: (data: Group[]) => {
-    set({ data, isOpen: false });
+    set({ data, isOpen: false, groupId: undefined });
   },
 }));

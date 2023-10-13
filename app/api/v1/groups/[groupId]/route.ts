@@ -17,12 +17,11 @@ export async function GET(
     if (!authentication?.userId || !authentication?.orgId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
-
     const groupService = new GroupService();
     const group = await groupService.findGroupById(
-      params.groupId,
       authentication.orgId,
-      authentication.userId
+      authentication.userId,
+      params.groupId
     );
 
     if (!group) {
@@ -52,13 +51,17 @@ export async function PUT(
 
     const updateGroupRequest: UpdateGroupRequest = await req.json();
     const groupService = new GroupService();
-    const updatedGroup = await groupService.updateGroup(
+    await groupService.updateGroup(
       authentication.orgId,
       authentication.userId,
       params.groupId,
       updateGroupRequest
     );
-    return NextResponse.json(updatedGroup);
+    const groups = await groupService.findGroupsByUser(
+      authentication.orgId,
+      authentication.userId
+    );
+    return NextResponse.json(groups);
   } catch (error) {
     console.log("Error in [PUT v1/groups/{groupId}]", error);
 
@@ -90,7 +93,11 @@ export async function DELETE(
       authentication.userId,
       params.groupId
     );
-    return new NextResponse(null, { status: 204 });
+    const groups = await groupService.findGroupsByUser(
+      authentication.orgId,
+      authentication.userId
+    );
+    return NextResponse.json(groups);
   } catch (error) {
     console.log("Error in [DELETE v1/groups/{groupId}]", error);
 

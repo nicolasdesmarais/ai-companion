@@ -29,33 +29,34 @@ import { useToast } from "@/components/ui/use-toast";
 import { CreateGroupRequest } from "@/domain/types/CreateGroupRequest";
 import { useGroupModal } from "@/hooks/use-group-modal";
 import { GroupAvailability } from "@prisma/client";
+import { UpdateGroupRequest } from "@/domain/types/UpdateGroupRequest";
 import { Loader } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
 import * as z from "zod";
 
 const groupFormSchema = z.object({
   name: z.string().min(1, {
     message: "Name is required.",
   }),
-  accessLevel: z.enum([
-    GroupAvailability.EVERYONE,
-    GroupAvailability.RESTRICTED,
-  ]),
   teammates: z.string(),
 });
 
 export const GroupModal = () => {
-  const groupModal = useGroupModal();
   const [isMounted, setIsMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedOption, setSelectedOption] =
     useState<GroupAvailability | null>(GroupAvailability.EVERYONE);
+  const [currentTeammates, setCurrentTeammates] = useState<any[]>([]);
+  const [removedTeammates, setRemovedTeammates] = useState<any[]>([]);
+  const [isOwner, setIsOwner] = useState(true);
   const { toast } = useToast();
+  const { user } = useUser();
+  const groupModal = useGroupModal();
 
   const form = useForm<z.infer<typeof groupFormSchema>>({
     resolver: zodResolver(groupFormSchema),
     defaultValues: {
       name: "",
-      accessLevel: GroupAvailability.EVERYONE,
       teammates: "",
     },
   });
@@ -64,22 +65,79 @@ export const GroupModal = () => {
     setIsMounted(true);
   }, []);
 
+  const fetchGroup = async () => {
+    setLoading(true);
+    const response = await axios.get(`/api/v1/groups/${groupModal.groupId}`);
+    if (response.status === 200) {
+      form.setValue("name", response.data.name);
+      setSelectedOption(response.data.availability);
+      setCurrentTeammates(response.data.users);
+      setIsOwner(response.data.ownerUserId === user?.id);
+    } else {
+      toast({
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+      groupModal.onClose();
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (groupModal.groupId) {
+      fetchGroup();
+    }
+  }, [groupModal.groupId]);
+
+  const updateGroup = async (values: z.infer<typeof groupFormSchema>) => {
+    const request: UpdateGroupRequest = {
+      name: values.name,
+      availability: selectedOption || GroupAvailability.EVERYONE,
+      memberEmailsToAdd: values.teammates,
+      memberEmailsToRemove: removedTeammates,
+    };
+
+    const response = await axios.put(
+      `/api/v1/groups/${groupModal.groupId}`,
+      request
+    );
+    if (response.status === 200) {
+      toast({
+        description: "Group updated successfully",
+      });
+      groupModal.onUpdate(response.data);
+      form.reset();
+    } else {
+      throw new Error(response.data.message);
+    }
+  };
+
+  const createGroup = async (values: z.infer<typeof groupFormSchema>) => {
+    const request: CreateGroupRequest = {
+      name: values.name,
+      availability: selectedOption || GroupAvailability.EVERYONE,
+      memberEmails: values.teammates,
+    };
+
+    const response = await axios.post(`/api/v1/groups`, request);
+    if (response.status === 200) {
+      toast({
+        description: "Group created successfully",
+      });
+      groupModal.onUpdate(response.data);
+      form.reset();
+    } else {
+      throw new Error(response.data.message);
+    }
+  };
+
   const onSubmit = async (values: z.infer<typeof groupFormSchema>) => {
     try {
       setLoading(true);
-      const request: CreateGroupRequest = {
-        name: values.name,
-        availability: selectedOption || GroupAvailability.EVERYONE,
-        memberEmails: values.teammates,
-      };
-
-      const response = await axios.post(`/api/v1/groups`, request);
-      if (response.status === 200) {
-        toast({
-          description: "Group created successfully",
-        });
-        groupModal.onUpdate(response.data);
-        form.reset();
+      if (groupModal.groupId) {
+        await updateGroup(values);
+      } else {
+        await createGroup(values);
       }
     } catch (error) {
       toast({
@@ -91,84 +149,104 @@ export const GroupModal = () => {
     }
   };
 
+  const handleDelete = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.delete(
+        `/api/v1/groups/${groupModal.groupId}`
+      );
+      if (response.status === 200) {
+        toast({
+          description: "Group deleted successfully",
+        });
+        groupModal.onUpdate(response.data);
+        form.reset();
+      } else {
+        throw new Error(response.data.message);
+      }
+    } catch (error) {
+      toast({
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLeaveGroup = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.put(
+        `/api/v1/me/groups/${groupModal.groupId}/leave`
+      );
+      if (response.status === 200) {
+        toast({
+          description: "You have left the group",
+        });
+        groupModal.onUpdate(response.data);
+        form.reset();
+      } else {
+        throw new Error(response.data.message);
+      }
+    } catch (error) {
+      toast({
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveTeammate = (teammate: any) => {
+    setCurrentTeammates((prevTeammates) =>
+      prevTeammates.filter((t) => t.userId !== teammate.userId)
+    );
+    setRemovedTeammates((prevTeammates) => [...prevTeammates, teammate.email]);
+  };
+
   if (!isMounted) {
     return null;
   }
 
   return (
-    <Dialog open={groupModal.isOpen} onOpenChange={groupModal.onClose}>
+    <Dialog
+      open={groupModal.isOpen}
+      onOpenChange={() => {
+        form.reset();
+        groupModal.onClose();
+      }}
+    >
       <DialogContent>
         <DialogHeader className="space-y-4">
-          <DialogTitle className="text-center">Create a Group</DialogTitle>
+          <DialogTitle className="text-center">
+            {groupModal.groupId ? "Update" : "Create"} a Group
+          </DialogTitle>
           <DialogDescription className="text-center space-y-2">
-            Create a group to share your AI with select people.
+            {groupModal.groupId ? "Update" : "Create"} a group to share your AI
+            with select people.
           </DialogDescription>
         </DialogHeader>
         <Separator />
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              name="name"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Group Name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
-            <div className="space-y-4">
-              <FormLabel>Who can join?</FormLabel>
-              <FormItem>
-                <FormControl>
-                  <div>
-                    <label>
-                      <input
-                        type="radio"
-                        value={GroupAvailability.EVERYONE}
-                        checked={selectedOption === GroupAvailability.EVERYONE}
-                        onChange={(e) =>
-                          setSelectedOption(e.target.value as GroupAvailability)
-                        }
-                      />
-                      Everyone in your company
-                    </label>
-                  </div>
-                </FormControl>
-                <FormControl>
-                  <div>
-                    <label>
-                      <input
-                        type="radio"
-                        value={GroupAvailability.RESTRICTED}
-                        checked={
-                          selectedOption === GroupAvailability.RESTRICTED
-                        }
-                        onChange={(e) =>
-                          setSelectedOption(e.target.value as GroupAvailability)
-                        }
-                      />
-                      Select Team Members
-                    </label>
-                  </div>
-                </FormControl>
-              </FormItem>
-            </div>
-
-            {selectedOption === GroupAvailability.RESTRICTED && (
+        {loading ? (
+          <div className="flex justify-center items-center h-32">
+            <Loader className="w-16 h-16 spinner" />
+          </div>
+        ) : (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
-                name="teammates"
+                name="name"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Add teammates</FormLabel>
+                    <FormLabel>Group Name</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Ex: jennifer.wallace@acme.com, joe.hamm@acme.com"
+                      <Input
+                        placeholder="Group Name"
+                        disabled={!isOwner || loading}
                         {...field}
                       />
                     </FormControl>
@@ -176,15 +254,146 @@ export const GroupModal = () => {
                   </FormItem>
                 )}
               />
-            )}
-            <DialogFooter>
-              <Button size="lg" variant="ring" disabled={loading}>
-                Save
-                {loading ? <Loader className="w-4 h-4 ml-2 spinner" /> : null}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+
+              <div className="space-y-4">
+                <FormLabel>Who can join?</FormLabel>
+                <FormItem>
+                  <FormControl>
+                    <div>
+                      <label>
+                        <input
+                          type="radio"
+                          disabled={!isOwner || loading}
+                          value={GroupAvailability.EVERYONE}
+                          checked={
+                            selectedOption === GroupAvailability.EVERYONE
+                          }
+                          onChange={(e) =>
+                            setSelectedOption(
+                              e.target.value as GroupAvailability
+                            )
+                          }
+                          className="mr-2"
+                        />
+                        Everyone in your company
+                      </label>
+                    </div>
+                  </FormControl>
+                  <FormControl>
+                    <div>
+                      <label>
+                        <input
+                          type="radio"
+                          disabled={!isOwner || loading}
+                          value={GroupAvailability.RESTRICTED}
+                          checked={
+                            selectedOption === GroupAvailability.RESTRICTED
+                          }
+                          onChange={(e) =>
+                            setSelectedOption(
+                              e.target.value as GroupAvailability
+                            )
+                          }
+                          className="mr-2"
+                        />
+                        Select Team Members
+                      </label>
+                    </div>
+                  </FormControl>
+                </FormItem>
+              </div>
+
+              {selectedOption === GroupAvailability.RESTRICTED && (
+                <>
+                  <FormField
+                    name="teammates"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Add teammates</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Ex: jennifer.wallace@acme.com, joe.hamm@acme.com"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {groupModal.groupId && (
+                    <div>
+                      <h4 className="mt-4">
+                        Shared with {currentTeammates.length}{" "}
+                        {currentTeammates.length === 1 ? "person" : "people"}
+                      </h4>
+                      <ul className="list-disc pl-5 mt-2">
+                        {currentTeammates.map((teammate) => (
+                          <li
+                            key={teammate.id}
+                            className="flex justify-between items-center mb-2"
+                          >
+                            {teammate.email}
+                            <button
+                              onClick={() => handleRemoveTeammate(teammate)}
+                              className="text-red-600 px-2 py-1"
+                            >
+                              &#x2716;
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              )}
+
+              <DialogFooter>
+                <div className="flex justify-between w-full">
+                  <Button size="lg" variant="ring" disabled={loading}>
+                    Save
+                    {loading ? (
+                      <Loader className="w-4 h-4 ml-2 spinner" />
+                    ) : null}
+                  </Button>
+
+                  {groupModal.groupId && isOwner && (
+                    <Button
+                      size="lg"
+                      variant="destructive"
+                      onClick={handleDelete}
+                      className="bg-red-600 hover:bg-red-700"
+                      disabled={loading}
+                      type="button"
+                    >
+                      Delete
+                      {loading ? (
+                        <Loader className="w-4 h-4 ml-2 spinner" />
+                      ) : null}
+                    </Button>
+                  )}
+                  {groupModal.groupId &&
+                    !isOwner &&
+                    selectedOption === GroupAvailability.RESTRICTED && (
+                      <Button
+                        size="lg"
+                        variant="destructive"
+                        onClick={handleLeaveGroup}
+                        className="bg-red-600 hover:bg-red-700"
+                        disabled={loading}
+                        type="button"
+                      >
+                        Leave Group
+                        {loading ? (
+                          <Loader className="w-4 h-4 ml-2 spinner" />
+                        ) : null}
+                      </Button>
+                    )}
+                </div>
+              </DialogFooter>
+            </form>
+          </Form>
+        )}
       </DialogContent>
     </Dialog>
   );

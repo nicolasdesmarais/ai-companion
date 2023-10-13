@@ -279,7 +279,6 @@ export class GroupService {
     if (existingGroup.ownerUserId === userId) {
       throw new BadRequestError("Owner cannot leave group");
     }
-
     await prismadb.groupUser.deleteMany({
       where: {
         groupId: groupId,

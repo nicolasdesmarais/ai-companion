@@ -29,3 +29,23 @@ export async function POST(req: Request) {
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
+
+export async function GET(req: Request) {
+  try {
+    const { userId, orgId } = await auth();
+    if (!userId) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    if (!orgId) {
+      return NextResponse.json([]);
+    }
+
+    const groupService = new GroupService();
+    const groups = await groupService.findGroupsByUser(orgId, userId);
+    return NextResponse.json(groups);
+  } catch (error) {
+    console.log("[GET v1/groups]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
