@@ -27,7 +27,7 @@ const UpdateGroupPage = async ({ params }: UpdateGroupPageProps) => {
 
   const groupUsers = (group.users ?? []).map((user) => ({
     id: user.userId,
-    email: user.email ?? "",
+    email: user.email,
   }));
 
   return <UpdateGroupForm group={group} groupUsers={groupUsers} />;
