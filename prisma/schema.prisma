@@ -130,13 +130,14 @@ model WorkspaceUser {
 }
 
 model GroupUser {
+  id                        Int       @id @default(autoincrement())
   group                     Group     @relation(fields: [groupId], references: [id])
   groupId                   String    @map(name: "group_id")
-  userId                    String    @map(name: "user_id")
+  userId                    String?   @map(name: "user_id")
+  email                     String?
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt @default(now())
 
-  @@id([groupId, userId])
   @@map("group_users")
 }
 

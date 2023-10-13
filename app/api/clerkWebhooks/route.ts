@@ -1,24 +1,31 @@
-import { Webhook } from 'svix'
-import { headers } from 'next/headers'
-import { UserWebhookEvent, UserJSON, User, SessionWebhookEvent, WebhookEvent } from '@clerk/nextjs/server'
-import { WorkspaceService } from '../../../domain/services/WorkspaceService'
+import { GroupService } from "@/domain/services/GroupService";
+import {
+  SessionWebhookEvent,
+  User,
+  UserJSON,
+  UserWebhookEvent,
+  WebhookEvent,
+} from "@clerk/nextjs/server";
+import { headers } from "next/headers";
+import { Webhook } from "svix";
 
 enum SupportedEvents {
-  USER_CREATED_EVENT = 'user.created',
-  SESSION_CREATED_EVENT = 'session.created'
+  USER_CREATED_EVENT = "user.created",
+  SESSION_CREATED_EVENT = "session.created",
 }
 
 const isSupportedEvent = (eventType: string): eventType is SupportedEvents => {
   return Object.values(SupportedEvents).includes(eventType as SupportedEvents);
-}
+};
 
 export async function POST(req: Request) {
-
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
-  const CLERK_WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET
+  const CLERK_WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!CLERK_WEBHOOK_SECRET) {
-    throw new Error('Please add CLERK_WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local')
+    throw new Error(
+      "Please add CLERK_WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local"
+    );
   }
 
   // Get the headers
@@ -29,19 +36,19 @@ export async function POST(req: Request) {
 
   // If there are no headers, error out
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response('Error occured -- no svix headers', {
-      status: 400
-    })
+    return new Response("Error occured -- no svix headers", {
+      status: 400,
+    });
   }
 
   // Get the body
-  const payload = await req.json()
+  const payload = await req.json();
   const body = JSON.stringify(payload);
 
   // Create a new SVIX instance with your secret.
   const wh = new Webhook(CLERK_WEBHOOK_SECRET);
 
-  let evt: WebhookEvent
+  let evt: WebhookEvent;
 
   // Verify the payload with the headers
   try {
@@ -49,21 +56,21 @@ export async function POST(req: Request) {
       "svix-id": svix_id,
       "svix-timestamp": svix_timestamp,
       "svix-signature": svix_signature,
-    }) as WebhookEvent
+    }) as WebhookEvent;
   } catch (err) {
-    console.error('Error verifying webhook:', err);
-    return new Response('Error occured', {
-      status: 400
-    })
+    console.error("Error verifying webhook:", err);
+    return new Response("Error occured", {
+      status: 400,
+    });
   }
 
   if (!isSupportedEvent(evt.type)) {
-    console.log(`Unsupported event type: ${evt.type}`)
+    console.log(`Unsupported event type: ${evt.type}`);
     return;
   }
 
   const eventType: SupportedEvents = evt.type;
-  switch(eventType) {
+  switch (eventType) {
     case SupportedEvents.USER_CREATED_EVENT:
       await handleUserCreatedEvent(evt as UserWebhookEvent);
       break;
@@ -72,31 +79,32 @@ export async function POST(req: Request) {
       break;
   }
 
-  return new Response('', { status: 201 })
+  return new Response("", { status: 201 });
 }
 
 async function handleUserCreatedEvent(userEvent: UserWebhookEvent) {
   const data = userEvent.data;
   const primaryEmail = getPrimaryEmailFromUserJson(data as UserJSON);
   if (primaryEmail === null) {
-    console.log('Cannot extract primary email from user data: ' + JSON.stringify(data));
+    console.log(
+      "Cannot extract primary email from user data: " + JSON.stringify(data)
+    );
     return;
   }
 
   if (!data.id) {
-    console.log('Cannot extract id from user data: ' + JSON.stringify(data));
+    console.log("Cannot extract id from user data: " + JSON.stringify(data));
     return;
   }
 
-  const workspaceService = new WorkspaceService();
-  workspaceService.addUserToNewOrExistingWorkspace(data.id, primaryEmail);
+  const groupService = new GroupService();
+  groupService.populateGroupUserId(data.id, primaryEmail);
 }
 
 async function handleSessionCreatedEvent(sessionEvent: SessionWebhookEvent) {
   // TODO: Remove this function if not needed
   // const data = sessionEvent.data;
   // const userId = data.user_id;
-
   // // User does not exist, create user
   // const clerkUser = await clerkClient.users.getUser(userId);
   // const primaryEmail = getPrimaryEmailFromClerkUser(clerkUser);
@@ -104,20 +112,22 @@ async function handleSessionCreatedEvent(sessionEvent: SessionWebhookEvent) {
   //   console.log('Cannot extract primary email from user data: ' + JSON.stringify(clerkUser));
   //   return;
   // }
-
   // const workspaceService = new WorkspaceService();
   // workspaceService.addUserToNewOrExistingWorkspace(userId, primaryEmail);
 }
 
-const getPrimaryEmailFromUserJson  = (data: UserJSON): string | null => {
+const getPrimaryEmailFromUserJson = (data: UserJSON): string | null => {
   const primaryEmailId = data.primary_email_address_id;
-  const primaryEmail = data.email_addresses.find((emailAddress: any) => emailAddress.id === primaryEmailId);
+  const primaryEmail = data.email_addresses.find(
+    (emailAddress: any) => emailAddress.id === primaryEmailId
+  );
   return primaryEmail ? primaryEmail.email_address : null;
-}
+};
 
-const getPrimaryEmailFromClerkUser  = (clerkUser: User): string | null => {
+const getPrimaryEmailFromClerkUser = (clerkUser: User): string | null => {
   const primaryEmailId = clerkUser.primaryEmailAddressId;
-  const primaryEmail = clerkUser.emailAddresses.find((emailAddress: any) => emailAddress.id === primaryEmailId);
+  const primaryEmail = clerkUser.emailAddresses.find(
+    (emailAddress: any) => emailAddress.id === primaryEmailId
+  );
   return primaryEmail ? primaryEmail.emailAddress : null;
-}
-
+};
