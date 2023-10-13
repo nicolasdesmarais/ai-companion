@@ -4,10 +4,6 @@ import { GroupAvailability } from "@prisma/client";
 import { GroupEntity } from "../entities/GroupEntity";
 import { BadRequestError, EntityNotFoundError } from "../errors/Errors";
 import { CreateGroupRequest } from "../types/CreateGroupRequest";
-import {
-  CreateOrganizationInvitationRequest,
-  OrganizationInvitation,
-} from "../types/CreateOrganizationInvitationRequest";
 import { UpdateGroupRequest } from "../types/UpdateGroupRequest";
 import { Utilities } from "../util/utilities";
 import { InvitationService } from "./InvitationService";
@@ -211,32 +207,11 @@ export class GroupService {
     });
 
     // Invite users who were not found in Clerk
-    this.inviteMissingUsers(orgId, createdByUserId, missingUserEmails);
-  }
-
-  private async inviteMissingUsers(
-    orgId: string,
-    userId: string,
-    missingUserEmails: Set<string>
-  ) {
-    const orgInvitations: OrganizationInvitation[] = [];
-    missingUserEmails.forEach((email) => {
-      const invitation: OrganizationInvitation = {
-        emailAddress: email,
-        role: "basic_member",
-      };
-      orgInvitations.push(invitation);
-    });
-
-    const createInvitationRequest: CreateOrganizationInvitationRequest = {
-      organizationId: orgId,
-      inviterUserId: userId,
-      invitations: orgInvitations,
-    };
-
     const invitationService = new InvitationService();
-    await invitationService.createOrganizationInvitations(
-      createInvitationRequest
+    await invitationService.createOrganizationInvitationsFromEmails(
+      orgId,
+      createdByUserId,
+      Array.from(missingUserEmails)
     );
   }
 
