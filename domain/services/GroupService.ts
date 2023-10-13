@@ -125,10 +125,10 @@ export class GroupService {
           updateGroupRequest.memberEmailsToAdd
         );
       }
-      if (updateGroupRequest?.userIdsToRemove) {
+      if (updateGroupRequest?.memberEmailsToRemove) {
         await this.removeUsersFromGroup(
           groupId,
-          updateGroupRequest.userIdsToRemove
+          updateGroupRequest.memberEmailsToRemove
         );
       }
     }
@@ -226,13 +226,13 @@ export class GroupService {
 
   private async removeUsersFromGroup(
     groupId: string,
-    userIdsToRemove: string[]
+    memberEmailsToRemove: string[]
   ) {
     await prismadb.groupUser.deleteMany({
       where: {
         groupId: groupId,
-        userId: {
-          in: userIdsToRemove,
+        email: {
+          in: memberEmailsToRemove,
         },
       },
     });

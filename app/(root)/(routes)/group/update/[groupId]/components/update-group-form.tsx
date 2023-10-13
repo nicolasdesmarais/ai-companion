@@ -33,7 +33,7 @@ const groupFormSchema = z.object({
 
 interface UpdateGroupFormProps {
   group: GroupEntity;
-  groupUsers: { id: string; email: string }[];
+  groupUsers: { id: string | null; email: string }[];
 }
 
 export const UpdateGroupForm = ({
@@ -61,13 +61,13 @@ export const UpdateGroupForm = ({
   const onSubmit = async (values: z.infer<typeof groupFormSchema>) => {
     const removedTeammates: string[] = groupUsers
       .filter(({ email }) => !currentTeammates.includes(email))
-      .map(({ id }) => id);
+      .map(({ email }) => email);
 
     const request: UpdateGroupRequest = {
       name: values.name,
       availability: selectedOption || GroupAvailability.EVERYONE,
       memberEmailsToAdd: values.teammates,
-      userIdsToRemove: removedTeammates,
+      memberEmailsToRemove: removedTeammates,
     };
 
     await axios.put(`/api/v1/me/groups/${group.id}`, request);
