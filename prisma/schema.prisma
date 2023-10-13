@@ -113,6 +113,7 @@ model GroupUser {
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt @default(now())
 
+  @@unique([groupId, email])
   @@map("group_users")
 }
 
