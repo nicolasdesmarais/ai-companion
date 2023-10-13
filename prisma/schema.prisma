@@ -134,7 +134,7 @@ model GroupUser {
   group                     Group     @relation(fields: [groupId], references: [id])
   groupId                   String    @map(name: "group_id")
   userId                    String?   @map(name: "user_id")
-  email                     String?
+  email                     String
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt @default(now())
 
