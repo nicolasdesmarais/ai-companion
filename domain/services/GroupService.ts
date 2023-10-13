@@ -248,4 +248,24 @@ export class GroupService {
       },
     });
   }
+
+  public async deleteGroup(orgId: string, userId: string, groupId: string) {
+    const existingGroup = await this.findGroupById(orgId, userId, groupId);
+    if (!existingGroup) {
+      throw new EntityNotFoundError("Group not found");
+    }
+
+    await prismadb.$transaction([
+      prismadb.groupUser.deleteMany({
+        where: {
+          groupId: groupId,
+        },
+      }),
+      prismadb.group.delete({
+        where: {
+          id: groupId,
+        },
+      }),
+    ]);
+  }
 }
