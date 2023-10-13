@@ -158,10 +158,12 @@ model KnowledgeAI {
 }
 
 model AIPermissions {
-  userId                    String    @map(name: "user_id")
+  id                        Int       @id @default(autoincrement())
+  userId                    String?    @map(name: "user_id")
   companion                 Companion @relation(fields: [companionId], references: [id])
   companionId               String    @map(name: "companion_id")
+  email                     String
 
-  @@id([userId, companionId])
+  @@unique([companionId, email])
   @@map("ai_permissions")
 }

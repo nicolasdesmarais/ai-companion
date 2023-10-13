@@ -1,36 +1,37 @@
 import { AIService } from "@/domain/services/AIService";
 import { ShareAIRequest } from "@/domain/types/ShareAIRequest";
-import { currentUser } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { companionId: string } }
+  { params }: { params: { aiId: string } }
 ): Promise<NextResponse> {
   try {
-    const user = await currentUser();
-    if (!user?.id) {
+    const authentication = await auth();
+    const userId = authentication?.userId;
+    if (!userId) {
       return NextResponse.json("Unauthorized", { status: 401 });
     }
 
-    const aiId = params.companionId;
+    const aiId = params.aiId;
     const shareAiRequest: ShareAIRequest = await req.json();
 
     const aiService = new AIService();
     const ai = await aiService.findAIById(aiId);
-    if (ai === null) {
+    if (!ai) {
       return NextResponse.json("Not Found", { status: 404 });
     }
 
-    if (ai.userId !== user.id) {
+    if (ai.userId !== userId) {
       return NextResponse.json("Forbidden", { status: 403 });
     }
 
-    aiService.shareAi(aiId, shareAiRequest);
+    aiService.shareAi(authentication.orgId, userId, aiId, shareAiRequest);
 
-    return NextResponse.json("", { status: 201 });
+    return NextResponse.json("", { status: 200 });
   } catch (error) {
-    console.log("Error on [GET /v1/me/ai]", error);
+    console.log("Error on [PUT /v1/me/ai]", error);
     return NextResponse.json("Internal Error", { status: 500 });
   }
 }
