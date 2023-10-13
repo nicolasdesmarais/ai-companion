@@ -57,10 +57,22 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
       ],
     },
   });
+  companions = [companion, ...companions].sort((a, b) => {
+    const nameA = a.name.toUpperCase();
+    const nameB = b.name.toUpperCase();
+    if (nameA < nameB) {
+      return -1;
+    }
+    if (nameA > nameB) {
+      return 1;
+    }
+
+    return 0;
+  });
 
   return (
     <div className="flex h-full">
-      <ChatList companions={[companion, ...companions]} />
+      <ChatList companions={companions} />
       <ChatClient companion={companion} />
     </div>
   );
