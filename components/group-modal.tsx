@@ -27,11 +27,11 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { CreateGroupRequest } from "@/domain/types/CreateGroupRequest";
-import { useGroupModal } from "@/hooks/use-group-modal";
-import { GroupAvailability } from "@prisma/client";
 import { UpdateGroupRequest } from "@/domain/types/UpdateGroupRequest";
-import { Loader } from "lucide-react";
+import { useGroupModal } from "@/hooks/use-group-modal";
 import { useUser } from "@clerk/nextjs";
+import { GroupAvailability } from "@prisma/client";
+import { Loader } from "lucide-react";
 import * as z from "zod";
 
 const groupFormSchema = z.object({

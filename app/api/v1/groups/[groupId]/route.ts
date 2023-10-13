@@ -131,7 +131,7 @@ export async function DELETE(
     );
     return new NextResponse("", { status: 204 });
   } catch (error) {
-    console.log("Error in [DELETE v1/me/groups/{groupId}]", error);
+    console.log("Error in [DELETE v1/groups/{groupId}]", error);
 
     if (error instanceof EntityNotFoundError) {
       return new NextResponse("Group not found", { status: 404 });
