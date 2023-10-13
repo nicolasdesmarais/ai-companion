@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -22,13 +23,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useGroupModal } from "@/hooks/use-group-modal";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/components/ui/use-toast";
-import { GroupAvailability } from "@prisma/client";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 import { CreateGroupRequest } from "@/domain/types/CreateGroupRequest";
+import { useGroupModal } from "@/hooks/use-group-modal";
+import { GroupAvailability } from "@prisma/client";
 import { Loader } from "lucide-react";
 import * as z from "zod";
 
@@ -73,7 +73,7 @@ export const GroupModal = () => {
         memberEmails: values.teammates,
       };
 
-      const response = await axios.post(`/api/v1/me/groups`, request);
+      const response = await axios.post(`/api/v1/groups`, request);
       if (response.status === 200) {
         toast({
           description: "Group created successfully",

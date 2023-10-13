@@ -2,7 +2,7 @@ import { GroupService } from "@/domain/services/GroupService";
 import { UpdateGroupRequest } from "@/domain/types/UpdateGroupRequest";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-import { EntityNotFoundError } from "../../../../../../domain/errors/Errors";
+import { EntityNotFoundError } from "../../../../../domain/errors/Errors";
 
 export async function GET(
   req: Request,
@@ -25,9 +25,13 @@ export async function GET(
       authentication.userId
     );
 
+    if (!group) {
+      return new NextResponse("Group not found", { status: 404 });
+    }
+
     return NextResponse.json(group);
   } catch (error) {
-    console.log("Error in [PUT v1/me/groups/{groupId}]", error);
+    console.log("Error in [GET v1/me/groups/{groupId}]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
@@ -56,7 +60,7 @@ export async function PUT(
     );
     return NextResponse.json(updatedGroup);
   } catch (error) {
-    console.log("Error in [PUT v1/me/groups/{groupId}]", error);
+    console.log("Error in [PUT v1/groups/{groupId}]", error);
 
     if (error instanceof EntityNotFoundError) {
       return new NextResponse("Group not found", { status: 404 });
@@ -88,7 +92,7 @@ export async function DELETE(
     );
     return new NextResponse("", { status: 204 });
   } catch (error) {
-    console.log("Error in [DELETE v1/me/groups/{groupId}]", error);
+    console.log("Error in [DELETE v1/groups/{groupId}]", error);
 
     if (error instanceof EntityNotFoundError) {
       return new NextResponse("Group not found", { status: 404 });
