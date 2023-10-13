@@ -90,7 +90,7 @@ export async function DELETE(
       authentication.userId,
       params.groupId
     );
-    return new NextResponse("", { status: 204 });
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.log("Error in [DELETE v1/groups/{groupId}]", error);
 

@@ -76,6 +76,16 @@ export const UpdateGroupForm = ({
     router.push("/");
   };
 
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`/api/v1/groups/${group.id}`);
+      router.push("/");
+    } catch (error) {
+      console.error("Error deleting group:", error);
+      // Optionally, you can display an error message to the user here.
+    }
+  };
+
   const handleRemoveTeammate = (email: string) => {
     setCurrentTeammates((prevTeammates) =>
       prevTeammates.filter((t) => t !== email)
@@ -181,8 +191,15 @@ export const UpdateGroupForm = ({
             </>
           )}
 
-          <div className="w-full flex justify-center">
+          <div className="w-full flex justify-between">
             <Button size="lg">Update</Button>
+            <Button
+              size="lg"
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </Button>
           </div>
         </form>
       </Form>
