@@ -28,7 +28,7 @@ model Companion {
   seed          String @db.Text
   visibility    AIVisibility @default(PRIVATE)
 
-  createdAt     DateTime @default(now())
+  createdAt     DateTime @default(now()) @map(name: "created_at")
   updatedAt     DateTime @updatedAt
 
   category      Category @relation(fields: [categoryId], references: [id])
@@ -65,7 +65,7 @@ model Message {
   id          String   @id @default(uuid())
   role        Role
   content     String   @db.Text
-  createdAt   DateTime @default(now())
+  createdAt   DateTime @default(now()) @map(name: "created_at")
   updatedAt   DateTime @updatedAt
 
   companionId String
@@ -87,7 +87,7 @@ model UserSubscription {
 
 model Group {
   id                        String    @id @default(cuid())
-  createdAt                 DateTime  @default(now())
+  createdAt                 DateTime  @default(now()) @map(name: "created_at")
   updatedAt                 DateTime  @updatedAt @default(now())
   orgId                     String    @map(name: "org_id")
   ownerUserId               String   @map(name: "owner_user_id")
@@ -110,7 +110,7 @@ model GroupUser {
   groupId                   String    @map(name: "group_id")
   userId                    String?   @map(name: "user_id")
   email                     String
-  createdAt                 DateTime  @default(now())
+  createdAt                 DateTime  @default(now()) @map(name: "created_at")
   updatedAt                 DateTime  @updatedAt @default(now())
 
   @@unique([groupId, email])
@@ -122,7 +122,7 @@ model GroupAI {
   groupId                   String    @map(name: "group_id")
   companion                 Companion @relation(fields: [companionId], references: [id])
   companionId               String    @map(name: "companion_id")
-  createdAt                 DateTime  @default(now())
+  createdAt                 DateTime  @default(now()) @map(name: "created_at")
   updatedAt                 DateTime  @updatedAt @default(now())
 
   @@id([groupId, companionId])
@@ -137,7 +137,7 @@ model PublicDomain {
 
 model Knowledge {
   id                        String   @id @default(cuid())
-  createdAt                 DateTime @default(now())
+  createdAt                 DateTime @default(now()) @map(name: "created_at")
   updatedAt                 DateTime @updatedAt @default(now())
   userId                    String   @map(name: "user_id")
   name                      String
@@ -173,7 +173,7 @@ model OAuthToken {
   provider                  OAuthTokenProvider
   userId                    String            @map(name: "user_id")
   data                      Json?
-  createdAt                 DateTime          @default(now())
+  createdAt                 DateTime          @default(now()) @map(name: "created_at")
   updatedAt                 DateTime          @updatedAt @default(now())
 
   @@unique([provider, userId])
