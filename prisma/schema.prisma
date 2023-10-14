@@ -29,7 +29,7 @@ model Companion {
   visibility    AIVisibility @default(PRIVATE)
 
   createdAt     DateTime @default(now()) @map(name: "created_at")
-  updatedAt     DateTime @updatedAt
+  updatedAt     DateTime @updatedAt @map(name: "updated_at")
 
   category      Category @relation(fields: [categoryId], references: [id])
   categoryId    String
@@ -66,7 +66,7 @@ model Message {
   role        Role
   content     String   @db.Text
   createdAt   DateTime @default(now()) @map(name: "created_at")
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @updatedAt @map(name: "updated_at")
 
   companionId String
   userId      String
@@ -88,7 +88,7 @@ model UserSubscription {
 model Group {
   id                        String    @id @default(cuid())
   createdAt                 DateTime  @default(now()) @map(name: "created_at")
-  updatedAt                 DateTime  @updatedAt @default(now())
+  updatedAt                 DateTime  @updatedAt @default(now()) @map(name: "updated_at")
   orgId                     String    @map(name: "org_id")
   ownerUserId               String   @map(name: "owner_user_id")
   name                      String
@@ -111,7 +111,7 @@ model GroupUser {
   userId                    String?   @map(name: "user_id")
   email                     String
   createdAt                 DateTime  @default(now()) @map(name: "created_at")
-  updatedAt                 DateTime  @updatedAt @default(now())
+  updatedAt                 DateTime  @updatedAt @default(now()) @map(name: "updated_at")
 
   @@unique([groupId, email])
   @@map("group_users")
@@ -123,7 +123,7 @@ model GroupAI {
   companion                 Companion @relation(fields: [companionId], references: [id])
   companionId               String    @map(name: "companion_id")
   createdAt                 DateTime  @default(now()) @map(name: "created_at")
-  updatedAt                 DateTime  @updatedAt @default(now())
+  updatedAt                 DateTime  @updatedAt @default(now()) @map(name: "updated_at")
 
   @@id([groupId, companionId])
   @@map("group_ais")
@@ -138,7 +138,7 @@ model PublicDomain {
 model Knowledge {
   id                        String   @id @default(cuid())
   createdAt                 DateTime @default(now()) @map(name: "created_at")
-  updatedAt                 DateTime @updatedAt @default(now())
+  updatedAt                 DateTime @updatedAt @default(now()) @map(name: "updated_at")
   userId                    String   @map(name: "user_id")
   name                      String
   type                      String
@@ -174,7 +174,7 @@ model OAuthToken {
   userId                    String            @map(name: "user_id")
   data                      Json?
   createdAt                 DateTime          @default(now()) @map(name: "created_at")
-  updatedAt                 DateTime          @updatedAt @default(now())
+  updatedAt                 DateTime          @updatedAt @default(now()) @map(name: "updated_at")
 
   @@unique([provider, userId])
   @@map("oauth_tokens")
