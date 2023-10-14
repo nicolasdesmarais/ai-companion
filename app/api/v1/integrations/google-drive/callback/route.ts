@@ -1,12 +1,13 @@
-import prismadb from "@/lib/prismadb";
+import { OAuthTokenService } from "@/domain/services/OAuthTokenService";
 import { auth } from "@clerk/nextjs";
+import { OAuthTokenProvider } from "@prisma/client";
 import { google } from "googleapis";
 import { NextRequest, NextResponse } from "next/server";
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  "http://localhost:3000/api/integrations/google-drive/callback"
+  process.env.GOOGLE_CALLBACK_URL
 );
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
@@ -21,17 +22,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const { tokens } = await oauth2Client.getToken(code as string);
 
-    await prismadb.googleTokens.upsert({
-      where: { userId },
-      update: {
-        accessToken: tokens.access_token,
-        refreshToken: tokens.refresh_token,
-      },
-      create: {
-        userId,
-        accessToken: tokens.access_token!,
-        refreshToken: tokens.refresh_token,
-      },
+    const provider = OAuthTokenProvider.GOOGLE;
+    const oauthTokenService = new OAuthTokenService();
+    oauthTokenService.upsertToken({
+      userId,
+      provider,
+      data: JSON.stringify(tokens),
     });
 
     // You can now use the Google Drive API. Store the tokens securely (in session, JWT, database, etc.)
