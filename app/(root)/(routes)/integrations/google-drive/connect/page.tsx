@@ -4,7 +4,7 @@ import React from "react";
 const ConnectDrive: React.FC = () => {
   const handleConnectClick = () => {
     // Redirect the user to the backend endpoint that initiates Google Drive OAuth
-    window.location.href = "/api/integrations/google-drive/auth";
+    window.location.href = "/api/v1/integrations/google-drive/auth";
   };
 
   const buttonStyle = {

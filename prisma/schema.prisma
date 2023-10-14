@@ -158,21 +158,28 @@ model KnowledgeAI {
 }
 
 model AIPermissions {
-  id                        Int       @id @default(autoincrement())
-  userId                    String?    @map(name: "user_id")
-  companion                 Companion @relation(fields: [companionId], references: [id])
-  companionId               String    @map(name: "companion_id")
+  id                        Int         @id @default(autoincrement())
+  userId                    String?     @map(name: "user_id")
+  companion                 Companion   @relation(fields: [companionId], references: [id])
+  companionId               String      @map(name: "companion_id")
   email                     String
 
   @@unique([companionId, email])
   @@map("ai_permissions")
 }
 
-model GoogleTokens {
-  userId                    String    @map(name: "user_id")
-  accessToken               String?   @db.VarChar(500) @map(name: "access_token")
-  refreshToken              String?   @db.VarChar(500) @map(name: "refresh_token")
+model OAuthToken {
+  id                        Int               @id @default(autoincrement())
+  provider                  OAuthTokenProvider
+  userId                    String            @map(name: "user_id")
+  data                      Json?
+  createdAt                 DateTime          @default(now())
+  updatedAt                 DateTime          @updatedAt @default(now())
 
-  @@id(userId)
-  @@map("google_tokens")
+  @@unique([provider, userId])
+  @@map("oauth_tokens")
  }
+
+enum OAuthTokenProvider{
+  GOOGLE
+}
