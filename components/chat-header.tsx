@@ -1,7 +1,15 @@
 "use client";
 
 import axios from "axios";
-import { Edit, MessagesSquare, MoreVertical, Trash } from "lucide-react";
+import {
+  Edit,
+  MessagesSquare,
+  MoreVertical,
+  Trash,
+  Pin,
+  RefreshCw,
+  CopyPlus,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Companion, Message } from "@prisma/client";
 import { useUser } from "@clerk/nextjs";
@@ -30,22 +38,6 @@ export const ChatHeader = ({ companion }: ChatHeaderProps) => {
   const { user } = useUser();
   const { toast } = useToast();
 
-  const onDelete = async () => {
-    try {
-      await axios.delete(`/api/companion/${companion.id}`);
-      toast({
-        description: "Success.",
-      });
-      router.refresh();
-      router.push("/");
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        description: "Something went wrong.",
-      });
-    }
-  };
-
   return (
     <div className="flex w-full justify-between items-center p-4 bg-accent/30 ml-1">
       <div className="flex gap-x-2 items-center">
@@ -63,27 +55,40 @@ export const ChatHeader = ({ companion }: ChatHeaderProps) => {
           </p>
         </div>
       </div>
-      {user?.id === companion.userId && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="secondary" size="icon">
-              <MoreVertical />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="secondary" size="icon">
+            <MoreVertical />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem>
+            <Pin className="w-4 h-4 mr-2" />
+            Pin
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Reset
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <CopyPlus className="w-4 h-4 mr-2" />
+            Duplicate
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <Trash className="w-4 h-4 mr-2" />
+            Remove
+          </DropdownMenuItem>
+          {user?.id === companion.userId && (
             <DropdownMenuItem
               onClick={() => router.push(`/companion/${companion.id}`)}
             >
               <Edit className="w-4 h-4 mr-2" />
-              Edit
+              Edit AI
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onDelete}>
-              <Trash className="w-4 h-4 mr-2" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 };
