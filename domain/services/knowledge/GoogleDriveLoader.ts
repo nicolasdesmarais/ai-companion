@@ -76,19 +76,19 @@ export class GoogleDriveLoader {
       (type) => `mimeType='${type}'`
     ).join(" or ");
 
+    const folderKnowledgeIds: string[] = [];
     const folderIds = folders.map((folder) => folder.id);
     for (const folderId of folderIds) {
       const query = `'${folderId}' in parents and (${mimeTypeQuery}) and trashed = false`;
       const response = await this.listFiles(query);
       const files = response.data.files ?? [];
 
-      files.forEach((file) => {
-        this.loadFile(userId, file);
-      });
-
-      const fileNames = files.map((file) => file.name);
-      return fileNames;
+      for (const file of files) {
+        const fileKnowledgeIds = await this.loadFile(userId, file);
+        folderKnowledgeIds.push(...fileKnowledgeIds);
+      }
     }
+    return folderKnowledgeIds;
   }
 
   private async loadFile(userId: string, file: drive_v3.Schema$File) {
@@ -113,13 +113,19 @@ export class GoogleDriveLoader {
     const filePath = `/tmp/${file.name}`;
     const writableStream = fs.createWriteStream(filePath);
 
+    const knowledgeIds: string[] = [];
     if (fileResponse.data instanceof Readable) {
       fileResponse.data.pipe(writableStream).on("finish", async () => {
-        console.log(`File downloaded to ${filePath}`);
-
         const fileLoader = new FileLoader();
-        await fileLoader.loadFileFromPath(userId, mimeType, fileName, filePath);
+        const knowledge = await fileLoader.loadFileFromPath(
+          userId,
+          mimeType,
+          fileName,
+          filePath
+        );
+        knowledgeIds.push(knowledge.id);
       });
     }
+    return knowledgeIds;
   }
 }

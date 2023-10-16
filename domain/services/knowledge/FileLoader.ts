@@ -73,5 +73,6 @@ export class FileLoader {
 
     const memoryManager = await MemoryManager.getInstance();
     await memoryManager.vectorUpload(docOutput);
+    return knowledge;
   }
 }
