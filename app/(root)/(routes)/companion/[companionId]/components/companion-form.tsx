@@ -155,6 +155,24 @@ export const CompanionForm = ({
 
   const isLoading = form.formState.isSubmitting;
 
+  const onDelete = async () => {
+    if (initialData?.id) {
+      try {
+        await axios.delete(`/api/companion/${initialData.id}`);
+        toast({
+          description: "Deleted Successfully.",
+        });
+        router.refresh();
+        router.push("/");
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          description: "Something went wrong.",
+        });
+      }
+    }
+  };
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const data = { knowledge, ...values };
@@ -375,7 +393,7 @@ export const CompanionForm = ({
             <div>
               <h3 className="text-lg font-medium">General Information</h3>
               <p className="text-sm text-muted-foreground">
-                General information about your Companion
+                General information about your AI
               </p>
             </div>
             <Separator className="bg-primary/10" />
@@ -423,7 +441,7 @@ export const CompanionForm = ({
                     />
                   </FormControl>
                   <FormDescription>
-                    This is how your AI Companion will be named.
+                    This is how your AI will be named.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -443,7 +461,7 @@ export const CompanionForm = ({
                     />
                   </FormControl>
                   <FormDescription>
-                    Short description for your AI Companion
+                    Short description for your AI
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -543,8 +561,8 @@ export const CompanionForm = ({
                   />
                 </FormControl>
                 <FormDescription>
-                  Describe in detail your companion&apos;s backstory and
-                  relevant details.
+                  Describe in detail your AI&apos;s backstory and relevant
+                  details.
                 </FormDescription>
                 <Button
                   type="button"
@@ -631,8 +649,8 @@ export const CompanionForm = ({
                   />
                 </FormControl>
                 <FormDescription>
-                  Write couple of examples of a human chatting with your AI
-                  companion, write expected answers.
+                  Write couple of examples of a human chatting with your AI,
+                  write expected answers.
                 </FormDescription>
                 <Button
                   type="button"
@@ -688,9 +706,21 @@ export const CompanionForm = ({
               </FormItem>
             )}
           />
-          <div className="w-full flex justify-center">
+
+          <div className="w-full flex justify-between">
+            {initialData?.id && (
+              <Button
+                size="lg"
+                variant="destructive"
+                disabled={isLoading}
+                onClick={onDelete}
+                type="button"
+              >
+                Delete your AI
+              </Button>
+            )}
             <Button size="lg" disabled={isLoading}>
-              {initialData ? "Save your companion" : "Create your companion"}
+              {initialData ? "Save your AI" : "Create your AI"}
               <Wand2 className="w-4 h-4 ml-2" />
             </Button>
           </div>
