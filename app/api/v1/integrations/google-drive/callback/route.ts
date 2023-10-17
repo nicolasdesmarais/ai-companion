@@ -27,7 +27,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     oauthTokenService.upsertToken({
       userId,
       provider,
-      data: JSON.stringify(tokens),
+      data: tokens,
     });
 
     // You can now use the Google Drive API. Store the tokens securely (in session, JWT, database, etc.)

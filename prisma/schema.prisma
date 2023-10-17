@@ -36,6 +36,8 @@ model Companion {
 
   messages      Message[]
 
+  conversations Conversation[]
+
   modelId       String @default("llama2-13b")
 
   groups        GroupAI[]
@@ -73,16 +75,21 @@ model Message {
 
   companion   Companion @relation(fields: [companionId], references: [id], onDelete: Cascade)
 
+  conversation    Conversation? @relation(fields: [conversationId], references: [id])
+  conversationId  String? @map(name: "conversation_id")
+
   @@index([companionId])
 }
 
 model UserSubscription {
   id                        String    @id @default(cuid())
-  userId                    String    @unique
+  userId                    String    @unique @map(name: "user_id")
   stripeCustomerId          String?   @unique @map(name: "stripe_customer_id")
   stripeSubscriptionId      String?   @unique @map(name: "stripe_subscription_id")
   stripePriceId             String?   @map(name: "stripe_price_id")
   stripeCurrentPeriodEnd    DateTime? @map(name: "stripe_current_period_end")
+
+  @@map("user_subscriptions")
 }
 
 model Group {
@@ -182,4 +189,19 @@ model OAuthToken {
 
 enum OAuthTokenProvider{
   GOOGLE
+}
+
+model Conversation {
+  id                        String    @id @default(cuid())
+  createdAt                 DateTime  @default(now()) @map(name: "created_at")
+  updatedAt                 DateTime  @updatedAt @default(now()) @map(name: "updated_at")
+  name                      String
+  pinPosition               Int?      @map(name: "pin_position")
+
+  messages                  Message[]
+
+  companion                 Companion @relation(fields: [companionId], references: [id], onDelete: Cascade)
+  companionId               String    @map(name: "companion_id")
+
+  @@map("conversation")
 }

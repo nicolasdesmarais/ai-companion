@@ -16,7 +16,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     return redirectToSignIn();
   }
 
-  const companion = await prismadb.companion.findUnique({
+  const conversation = await prismadb.conversation.findUnique({
     where: {
       id: params.chatId,
     },
@@ -25,10 +25,8 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
         orderBy: {
           createdAt: "asc",
         },
-        where: {
-          userId,
-        },
       },
+      companion: true,
       _count: {
         select: {
           messages: true,
@@ -37,43 +35,27 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     },
   });
 
-  if (!companion) {
+  if (!conversation) {
     return redirect("/");
   }
 
-  let companions = await prismadb.companion.findMany({
+  const conversations = await prismadb.conversation.findMany({
     where: {
-      NOT: {
-        id: params.chatId,
-      },
-      AND: [
-        {
-          messages: {
-            some: {
-              userId: userId,
-            },
-          },
+      messages: {
+        some: {
+          userId: userId,
         },
-      ],
+      },
     },
-  });
-  companions = [companion, ...companions].sort((a, b) => {
-    const nameA = a.name.toUpperCase();
-    const nameB = b.name.toUpperCase();
-    if (nameA < nameB) {
-      return -1;
-    }
-    if (nameA > nameB) {
-      return 1;
-    }
-
-    return 0;
+    include: {
+      companion: true,
+    },
   });
 
   return (
     <div className="flex h-full">
-      <ChatList companions={companions} />
-      <ChatClient companion={companion} />
+      <ChatList initialConversations={conversations} />
+      <ChatClient conversation={conversation} />
     </div>
   );
 };

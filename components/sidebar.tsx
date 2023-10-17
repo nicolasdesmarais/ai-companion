@@ -126,7 +126,7 @@ export const Sidebar = ({ isPro, lastChat }: SidebarProps) => {
           />
         </div>
         <div
-          onClick={() => onNavigate(`/chat/${lastChat}`, false)}
+          onClick={() => onNavigate(`/ai/${lastChat}`, false)}
           className={cn(
             "text-muted-foreground text-xs group py-3 px-8 flex w-full justify-center font-medium rounded-lg transition",
             pathname.startsWith("/chat/")

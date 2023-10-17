@@ -8,12 +8,15 @@ import { NextResponse } from "next/server";
 import { MemoryManager } from "@/lib/memory";
 import { rateLimit } from "@/lib/rate-limit";
 import prismadb from "@/lib/prismadb";
+import { Message } from "@prisma/client";
 
 export const maxDuration = 300;
 
 export async function POST(
   request: Request,
-  { params }: { params: { chatId: string } }
+  {
+    params: { aiId, conversationId },
+  }: { params: { aiId: string; conversationId: string } }
 ) {
   try {
     const { prompt } = await request.json();
@@ -30,12 +33,21 @@ export async function POST(
       return new NextResponse("Rate limit exceeded", { status: 429 });
     }
 
-    const companion = await prismadb.companion.update({
+    const conversation = await prismadb.conversation.update({
       where: {
-        id: params.chatId,
+        id: conversationId,
       },
       include: {
-        knowledge: true,
+        companion: {
+          include: {
+            knowledge: true,
+          },
+        },
+        messages: {
+          orderBy: {
+            createdAt: "asc",
+          },
+        },
       },
       data: {
         messages: {
@@ -43,46 +55,30 @@ export async function POST(
             content: prompt,
             role: "user",
             userId: user.id,
+            companionId: aiId,
           },
         },
       },
     });
 
-    if (!companion) {
-      return new NextResponse("Companion not found", { status: 404 });
+    if (!conversation) {
+      return new NextResponse("Conversation not found", { status: 404 });
     }
 
-    const name = companion.id;
-
-    const companionKey = {
-      companionName: name!,
-      userId: user.id,
-      modelName: companion.modelId,
-    };
     const memoryManager = await MemoryManager.getInstance();
 
-    const records = await memoryManager.readLatestHistory(companionKey);
-    if (records.length === 0) {
-      await memoryManager.seedChatHistory(companion.seed, "\n\n", companionKey);
-    }
-    await memoryManager.writeToHistory("User: " + prompt + "\n", companionKey);
-
-    // Query Pinecone
-    const recentChatHistory = await memoryManager.readLatestHistory(
-      companionKey
+    const knowledgeIds = conversation.companion.knowledge.map(
+      (item) => item.knowledgeId
     );
-
-    const knowledgeIds = companion.knowledge.map((item) => item.knowledgeId);
     const similarDocs = await memoryManager.vectorSearch(prompt, knowledgeIds);
-
-    let relevantHistory = "";
+    let knowledge = "";
     if (!!similarDocs && similarDocs.length !== 0) {
-      relevantHistory = similarDocs.map((doc) => doc.pageContent).join("\n");
+      knowledge = similarDocs.map((doc) => doc.pageContent).join("\n");
     }
     const { handlers } = LangChainStream();
 
     let model;
-    if (companion.modelId === "llama2-13b") {
+    if (conversation.companion.modelId === "llama2-13b") {
       model = new Replicate({
         model:
           "meta/llama-2-13b-chat:f4e2de70d66816a838a89eeeb621910adffb0dd0baba3976c96980970978018d",
@@ -103,37 +99,46 @@ export async function POST(
     // Turn verbose on for debugging
     model.verbose = true;
 
+    const chatHistory = conversation.messages.reduce(
+      (acc: string, message: Message) => {
+        if (message.role === "user") {
+          return acc + `User: ${message.content}\n`;
+        } else {
+          return acc + `${conversation.companion.name}: ${message.content}\n`;
+        }
+      },
+      ""
+    );
+    const seededChatHistory = `${conversation.companion.seed}\n\n${chatHistory}`;
     const engineeredPrompt = `
-      ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${companion.name}: prefix. 
-      ${companion.instructions}
-      Below are relevant details about ${companion.name}'s past and the conversation you are in.
-      ${relevantHistory}
-      ${recentChatHistory}\n
-      ${companion.name}:
+      ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${conversation.companion.name}: prefix. 
+      ${conversation.companion.instructions}
+      Below are relevant details about ${conversation.companion.name}'s past and the conversation you are in.
+      ${knowledge}\n
+      ${seededChatHistory}\n
+      ${conversation.companion.name}:
     `;
+    console.log(engineeredPrompt);
 
     const resp = await model.call(engineeredPrompt);
 
     let response;
-    if (companion.modelId === "llama2-13b") {
+    if (conversation.companion.modelId === "llama2-13b") {
       const cleaned = resp.replaceAll(",", "");
       response = cleaned;
     } else {
       response = resp;
     }
 
-    await memoryManager.writeToHistory("" + response.trim(), companionKey);
     var Readable = require("stream").Readable;
 
     let s = new Readable();
     s.push(response);
     s.push(null);
     if (response !== undefined && response.length > 1) {
-      memoryManager.writeToHistory("" + response.trim(), companionKey);
-
-      await prismadb.companion.update({
+      await prismadb.conversation.update({
         where: {
-          id: params.chatId,
+          id: conversationId,
         },
         data: {
           messages: {
@@ -141,6 +146,7 @@ export async function POST(
               content: response.trim(),
               role: "system",
               userId: user.id,
+              companionId: aiId,
             },
           },
         },
