@@ -120,6 +120,7 @@ export const Sidebar = ({ isPro, hasChat }: SidebarProps) => {
       <div className="space-y-2 flex flex-col items-center">
         <div className="h-16">
           <OrganizationSwitcher
+            hidePersonal={true}
             appearance={{
               baseTheme: dark,
             }}
