@@ -17,7 +17,7 @@ const GoogleDriveKnowledgePage = async ({
 
   return (
     <div className="container mx-auto mt-10">
-      <h1 className="text-2xl mb-4">Search Files</h1>
+      <h1 className="text-2xl mb-4">Add Google Drive Folder</h1>
       <GoogleDriveForm aiId={params.aiId} />
     </div>
   );
