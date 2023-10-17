@@ -252,4 +252,15 @@ export class AIService {
       ],
     };
   }
+
+  public async createKnowledgeAI(companionId: string, knowledgeIds: string[]) {
+    const knowledgeAIs = knowledgeIds.map((knowledgeId) => ({
+      companionId: companionId,
+      knowledgeId: knowledgeId,
+    }));
+
+    return await prismadb.knowledgeAI.createMany({
+      data: knowledgeAIs,
+    });
+  }
 }
