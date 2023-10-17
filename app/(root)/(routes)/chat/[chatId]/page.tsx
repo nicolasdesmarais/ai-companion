@@ -35,17 +35,14 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     },
   });
 
-  if (!conversation) {
+  if (!conversation || conversation.isDeleted) {
     return redirect("/");
   }
 
   const conversations = await prismadb.conversation.findMany({
     where: {
-      messages: {
-        some: {
-          userId: userId,
-        },
-      },
+      userId: userId,
+      isDeleted: false,
     },
     include: {
       companion: true,

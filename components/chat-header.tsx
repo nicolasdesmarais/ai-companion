@@ -49,6 +49,16 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
     }
   };
 
+  const remove = async () => {
+    const response = await axios.delete(
+      `/api/v1/conversations/${conversation.id}`
+    );
+    if (response.status === 200) {
+      toast({ description: "Conversation deleted." });
+      router.push(`/chat/`);
+    }
+  };
+
   return (
     <div className="flex w-full justify-between items-center p-4 bg-accent/30">
       <div className="flex gap-x-2 items-center">
@@ -86,7 +96,7 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
             <CopyPlus className="w-4 h-4 mr-2" />
             Duplicate
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => remove()}>
             <Trash className="w-4 h-4 mr-2" />
             Remove
           </DropdownMenuItem>

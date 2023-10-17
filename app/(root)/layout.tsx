@@ -12,23 +12,18 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
     return;
   }
 
-  const conversations = await prismadb.companion.groupBy({
-    by: ["id"],
+  const conversations = await prismadb.conversation.findMany({
     where: {
-      messages: {
-        some: {
-          userId: userId,
-        },
-      },
+      userId: userId,
+      isDeleted: false,
     },
   });
-  const lastChat = conversations.length > 0 ? conversations[0].id : undefined;
 
   return (
     <div className="h-full">
-      <Navbar isPro={isPro} />
+      <Navbar isPro={isPro} hasChat={conversations.length > 0} />
       <div className="hidden md:flex h-full w-20 flex-col fixed inset-y-0 z-40">
-        <Sidebar isPro={isPro} lastChat={lastChat} />
+        <Sidebar isPro={isPro} hasChat={conversations.length > 0} />
       </div>
       <main className="md:pl-20 pt-20 md:pt-0 h-full">{children}</main>
     </div>
