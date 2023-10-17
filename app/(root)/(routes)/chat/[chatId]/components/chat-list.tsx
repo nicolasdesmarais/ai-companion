@@ -3,16 +3,34 @@ import { Companion, Conversation } from "@prisma/client";
 import { useRouter, usePathname } from "next/navigation";
 import { BotAvatar } from "@/components/bot-avatar";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 interface ChatListProps {
-  conversations: (Conversation & {
+  initialConversations: (Conversation & {
     companion: Companion;
   })[];
 }
 
-export const ChatList = ({ conversations }: ChatListProps) => {
+export const ChatList = ({ initialConversations }: ChatListProps) => {
+  const [conversations, setConversations] = useState<
+    (Conversation & {
+      companion: Companion;
+    })[]
+  >(initialConversations);
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    const fetchConversations = async () => {
+      const response = await fetch("/api/v1/conversations");
+      if (response.status === 200) {
+        const data = await response.json();
+        setConversations(data);
+      }
+    };
+
+    fetchConversations();
+  }, []);
 
   return (
     <div className="flex flex-col h-full p-2 bg-accent/30 space-y-2 overflow-y-auto">

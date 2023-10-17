@@ -54,7 +54,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
 
   return (
     <div className="flex h-full">
-      <ChatList conversations={conversations} />
+      <ChatList initialConversations={conversations} />
       <ChatClient conversation={conversation} />
     </div>
   );
