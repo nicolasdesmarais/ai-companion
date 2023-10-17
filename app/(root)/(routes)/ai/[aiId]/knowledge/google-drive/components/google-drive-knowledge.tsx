@@ -2,18 +2,18 @@
 import { useState } from "react";
 
 interface FilesProps {
-  userId: string;
+  aiId: string;
 }
 
-export const BrowseGoogleDrive = ({ userId }: FilesProps) => {
-  const [searchTerm, setSearchTerm] = useState("");
+export const GoogleDriveForm = ({ aiId }: FilesProps) => {
+  const [folderName, setFolderName] = useState("");
   const [results, setResults] = useState<string[]>([]);
 
-  const searchFiles = async () => {
-    const response = await fetch("/api/v1/integrations/google-drive/search", {
+  const addKnowledge = async () => {
+    const response = await fetch(`/api/v1/ai/${aiId}/knowledge/google-drive`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ searchTerm }),
+      body: JSON.stringify({ folderName }),
     });
 
     const fileNames = await response.json();
@@ -26,15 +26,15 @@ export const BrowseGoogleDrive = ({ userId }: FilesProps) => {
         <input
           className="border p-2 rounded w-full"
           type="text"
-          placeholder="Search for files"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Add Google Drive Folder"
+          value={folderName}
+          onChange={(e) => setFolderName(e.target.value)}
         />
         <button
           className="mt-2 p-2 bg-blue-500 text-white rounded"
-          onClick={searchFiles}
+          onClick={addKnowledge}
         >
-          Search
+          Add
         </button>
       </div>
       <ul>

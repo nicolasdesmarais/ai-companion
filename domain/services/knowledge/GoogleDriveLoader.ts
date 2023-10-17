@@ -62,7 +62,7 @@ export class GoogleDriveLoader {
   }
 
   public async loadFolder(userId: string, folderName: string) {
-    this.setOAuthCredentials(userId);
+    await this.setOAuthCredentials(userId);
 
     const findFolderQuery = `name = '${folderName}' and mimeType = 'application/vnd.google-apps.folder'`;
     const folderResponse = await this.listFiles(findFolderQuery);
