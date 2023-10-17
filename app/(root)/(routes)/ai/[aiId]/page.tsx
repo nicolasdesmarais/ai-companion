@@ -20,6 +20,9 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     },
     include: {
       conversations: {
+        where: {
+          userId: userId,
+        },
         orderBy: {
           updatedAt: "desc",
         },
@@ -41,6 +44,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
       data: {
         companionId: params.aiId,
         name: ai.name,
+        userId: userId,
       },
     });
     if (ai._count.messages > 0) {
