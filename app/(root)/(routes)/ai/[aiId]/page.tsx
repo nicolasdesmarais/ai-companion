@@ -22,6 +22,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
       conversations: {
         where: {
           userId: userId,
+          isDeleted: false,
         },
         orderBy: {
           updatedAt: "desc",
