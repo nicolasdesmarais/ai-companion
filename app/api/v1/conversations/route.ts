@@ -10,11 +10,7 @@ export async function GET(req: Request) {
     }
     const conversations = await prismadb.conversation.findMany({
       where: {
-        messages: {
-          some: {
-            userId: userId,
-          },
-        },
+        userId: userId,
       },
       include: {
         companion: true,

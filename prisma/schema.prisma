@@ -198,6 +198,8 @@ model Conversation {
   name                      String
   pinPosition               Int?      @map(name: "pin_position")
 
+  userId                    String
+
   messages                  Message[]
 
   companion                 Companion @relation(fields: [companionId], references: [id], onDelete: Cascade)
