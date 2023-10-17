@@ -35,7 +35,7 @@ export const ChatHeader = ({ companion, messageCount }: ChatHeaderProps) => {
   const { toast } = useToast();
 
   return (
-    <div className="flex w-full justify-between items-center p-4 bg-accent/30 ml-1">
+    <div className="flex w-full justify-between items-center p-4 bg-accent/30">
       <div className="flex gap-x-2 items-center">
         <BotAvatar src={companion.src} />
         <div className="flex flex-col gap-y-1">

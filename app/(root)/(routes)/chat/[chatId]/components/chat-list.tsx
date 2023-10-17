@@ -33,7 +33,7 @@ export const ChatList = ({ initialConversations }: ChatListProps) => {
   }, []);
 
   return (
-    <div className="flex flex-col h-full p-2 bg-accent/30 space-y-2 overflow-y-auto">
+    <div className="hidden sm:flex flex-col h-full p-2 bg-accent/30 space-y-2 overflow-y-auto min-width-24 max-w-md">
       {conversations.map((conversation: any) => (
         <div
           onClick={() => router.push(`/chat/${conversation.id}`)}
