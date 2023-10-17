@@ -113,19 +113,32 @@ export class GoogleDriveLoader {
     const filePath = `/tmp/${file.name}`;
     const writableStream = fs.createWriteStream(filePath);
 
-    const knowledgeIds: string[] = [];
-    if (fileResponse.data instanceof Readable) {
-      fileResponse.data.pipe(writableStream).on("finish", async () => {
-        const fileLoader = new FileLoader();
-        const knowledge = await fileLoader.loadFileFromPath(
-          userId,
-          mimeType,
-          fileName,
-          filePath
-        );
-        knowledgeIds.push(knowledge.id);
-      });
-    }
-    return knowledgeIds;
+    return new Promise<string[]>(async (resolve, reject) => {
+      const knowledgeIds: string[] = [];
+      if (fileResponse.data instanceof Readable) {
+        fileResponse.data
+          .pipe(writableStream)
+          .on("finish", async () => {
+            try {
+              const fileLoader = new FileLoader();
+              const knowledge = await fileLoader.loadFileFromPath(
+                userId,
+                mimeType,
+                fileName,
+                filePath
+              );
+              knowledgeIds.push(knowledge.id);
+              resolve(knowledgeIds);
+            } catch (error) {
+              reject(error);
+            }
+          })
+          .on("error", (error) => {
+            reject(error);
+          });
+      } else {
+        resolve(knowledgeIds);
+      }
+    });
   }
 }

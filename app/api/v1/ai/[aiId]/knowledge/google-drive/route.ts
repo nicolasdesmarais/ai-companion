@@ -20,7 +20,7 @@ export async function POST(
   const googleDriveLoader = new GoogleDriveLoader();
   const knowledgeIds = await googleDriveLoader.loadFolder(userId, folderName);
   const aiService = new AIService();
-  aiService.createKnowledgeAI(params.aiId, knowledgeIds);
+  await aiService.createKnowledgeAI(params.aiId, knowledgeIds);
 
   return new NextResponse("", { status: 201 });
 }
