@@ -64,10 +64,7 @@ export const ChatClient = ({ conversation }: ChatClientProps) => {
 
   return (
     <div className="flex flex-col h-full w-full space-y-2 ml-1">
-      <ChatHeader
-        companion={conversation.companion}
-        messageCount={conversation._count.messages}
-      />
+      <ChatHeader conversation={conversation} />
       <ChatMessages
         companion={conversation.companion}
         isLoading={isLoading}
