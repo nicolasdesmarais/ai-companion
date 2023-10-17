@@ -20,6 +20,13 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     },
     include: {
       conversations: {
+        where: {
+          messages: {
+            some: {
+              userId: userId,
+            },
+          },
+        },
         orderBy: {
           updatedAt: "desc",
         },
