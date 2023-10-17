@@ -36,6 +36,8 @@ model Companion {
 
   messages      Message[]
 
+  conversations Conversation[]
+
   modelId       String @default("llama2-13b")
 
   groups        GroupAI[]
@@ -72,6 +74,9 @@ model Message {
   userId      String
 
   companion   Companion @relation(fields: [companionId], references: [id], onDelete: Cascade)
+
+  conversation    Conversation? @relation(fields: [conversationId], references: [id])
+  conversationId  String? @map(name: "conversation_id")
 
   @@index([companionId])
 }
@@ -182,4 +187,19 @@ model OAuthToken {
 
 enum OAuthTokenProvider{
   GOOGLE
+}
+
+model Conversation {
+  id                        String    @id @default(cuid())
+  createdAt                 DateTime  @default(now()) @map(name: "created_at")
+  updatedAt                 DateTime  @updatedAt @default(now()) @map(name: "updated_at")
+  name                      String
+  pinPosition               Int?      @map(name: "pin_position")
+
+  messages                  Message[]
+  
+  companion                 Companion @relation(fields: [companionId], references: [id], onDelete: Cascade)
+  companionId               String    @map(name: "companion_id")
+
+  @@map("conversation")
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Companion, Message } from "@prisma/client";
+import { Companion, Message, Conversation } from "@prisma/client";
 import { useCompletion } from "ai/react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
@@ -12,24 +12,25 @@ import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
 
 interface ChatClientProps {
-  companion: Companion & {
+  conversation: Conversation & {
     messages: Message[];
+    companion: Companion;
     _count: {
       messages: number;
     };
   };
 }
 
-export const ChatClient = ({ companion }: ChatClientProps) => {
+export const ChatClient = ({ conversation }: ChatClientProps) => {
   const router = useRouter();
   const [messages, setMessages] = useState<ChatMessageProps[]>(
-    companion.messages
+    conversation.messages
   );
   const { toast } = useToast();
 
   const { input, isLoading, handleInputChange, handleSubmit, setInput } =
     useCompletion({
-      api: `/api/chat/${companion.id}`,
+      api: `/api/chat/${conversation.companion.id}/${conversation.id}`,
       onError: (err) => {
         toast({
           variant: "destructive",
@@ -63,9 +64,12 @@ export const ChatClient = ({ companion }: ChatClientProps) => {
 
   return (
     <div className="flex flex-col h-full w-full space-y-2">
-      <ChatHeader companion={companion} />
+      <ChatHeader
+        companion={conversation.companion}
+        messageCount={conversation._count.messages}
+      />
       <ChatMessages
-        companion={companion}
+        companion={conversation.companion}
         isLoading={isLoading}
         messages={messages}
       />
