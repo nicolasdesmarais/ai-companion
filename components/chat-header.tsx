@@ -49,6 +49,26 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
     }
   };
 
+  const reset = async () => {
+    const response = await axios.put(
+      `/api/v1/conversations/${conversation.id}/reset`
+    );
+    if (response.status === 200) {
+      toast({ description: "Conversation reset." });
+      router.push(`/chat/${response.data.id}`);
+    }
+  };
+
+  const pin = async () => {
+    const response = await axios.put(
+      `/api/v1/conversations/${conversation.id}/pin`
+    );
+    if (response.status === 200) {
+      toast({ description: "Conversation pinned." });
+      router.push(`/chat/${response.data.id}`);
+    }
+  };
+
   const remove = async () => {
     const response = await axios.delete(
       `/api/v1/conversations/${conversation.id}`
@@ -84,11 +104,11 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => pin()}>
             <Pin className="w-4 h-4 mr-2" />
             Pin
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => reset()}>
             <RefreshCw className="w-4 h-4 mr-2" />
             Reset
           </DropdownMenuItem>
