@@ -1,4 +1,9 @@
 import { EntityNotFoundError } from "@/domain/errors/Errors";
+import {
+  FileResponse,
+  FolderResponse,
+  LoadFolderResponse,
+} from "@/domain/types/LoadFolderResponse";
 import prismadb from "@/lib/prismadb";
 import fs from "fs";
 import { drive_v3, google } from "googleapis";
@@ -22,6 +27,12 @@ const OAUTH2_CLIENT = new google.auth.OAuth2(
 const DRIVE_CLIENT = google.drive({ version: "v3", auth: OAUTH2_CLIENT });
 
 export class GoogleDriveLoader {
+  private getMimeTypeQuery() {
+    return SUPPORTED_MIME_TYPES.map((type) => `mimeType='${type}'`).join(
+      " or "
+    );
+  }
+
   private async setOAuthCredentials(userId: string) {
     const oauthToken = await prismadb.oAuthToken.findUnique({
       where: {
@@ -61,7 +72,10 @@ export class GoogleDriveLoader {
     );
   }
 
-  public async loadFolder(userId: string, folderName: string) {
+  public async loadFolder(
+    userId: string,
+    folderName: string
+  ): Promise<LoadFolderResponse> {
     await this.setOAuthCredentials(userId);
 
     const findFolderQuery = `name = '${folderName}' and mimeType = 'application/vnd.google-apps.folder'`;
@@ -72,23 +86,40 @@ export class GoogleDriveLoader {
       throw new EntityNotFoundError("Folder not found");
     }
 
-    const mimeTypeQuery = SUPPORTED_MIME_TYPES.map(
-      (type) => `mimeType='${type}'`
-    ).join(" or ");
-
     const folderKnowledgeIds: string[] = [];
-    const folderIds = folders.map((folder) => folder.id);
-    for (const folderId of folderIds) {
-      const query = `'${folderId}' in parents and (${mimeTypeQuery}) and trashed = false`;
+    const folderResponses: FolderResponse[] = [];
+    const mimeTypeQuery = this.getMimeTypeQuery();
+
+    for (const folder of folders) {
+      const fileResponses: FileResponse[] = [];
+      const folderResponse: FolderResponse = {
+        id: folder.id ?? "",
+        name: folder.name ?? "",
+        files: fileResponses,
+      };
+      folderResponses.push(folderResponse);
+
+      const query = `'${folder.id}' in parents and (${mimeTypeQuery}) and trashed = false`;
       const response = await this.listFiles(query);
       const files = response.data.files ?? [];
 
       for (const file of files) {
+        const fileResponse: FileResponse = {
+          id: file.id ?? "",
+          name: file.name ?? "",
+          type: file.mimeType ?? "",
+        };
+        fileResponses.push(fileResponse);
+
         const fileKnowledgeIds = await this.loadFile(userId, file);
         folderKnowledgeIds.push(...fileKnowledgeIds);
       }
     }
-    return folderKnowledgeIds;
+    const loadFolderResponse: LoadFolderResponse = {
+      folders: folderResponses,
+      knowledgeIds: folderKnowledgeIds,
+    };
+    return loadFolderResponse;
   }
 
   private async loadFile(userId: string, file: drive_v3.Schema$File) {

@@ -1,5 +1,7 @@
 "use client";
-
+import { useToast } from "@/components/ui/use-toast";
+import { EntityNotFoundError } from "@/domain/errors/Errors";
+import { LoadFolderResponse } from "@/domain/types/LoadFolderResponse";
 import { useEffect, useState } from "react";
 
 interface FilesProps {
@@ -9,8 +11,9 @@ interface FilesProps {
 
 export const GoogleDriveForm = ({ aiId, hasOAuthToken }: FilesProps) => {
   const [folderName, setFolderName] = useState("");
-  const [results, setResults] = useState<string[]>([]);
+  const [folderData, setFolderData] = useState<LoadFolderResponse | null>(null);
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Detect when the OAuth flow has completed (for instance, when the popup window is closed)
@@ -46,14 +49,32 @@ export const GoogleDriveForm = ({ aiId, hasOAuthToken }: FilesProps) => {
   };
 
   const addKnowledge = async () => {
-    const response = await fetch(`/api/v1/ai/${aiId}/knowledge/google-drive`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ folderName }),
-    });
+    try {
+      const response = await fetch(
+        `/api/v1/ai/${aiId}/knowledge/google-drive`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ folderName }),
+        }
+      );
 
-    const fileNames = await response.json();
-    setResults(fileNames);
+      const folderData = await response.json();
+      console.log(folderData);
+      setFolderData(folderData);
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        toast({
+          variant: "destructive",
+          description: "Folder not found.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          description: "Something went wrong",
+        });
+      }
+    }
   };
 
   return (
@@ -73,6 +94,25 @@ export const GoogleDriveForm = ({ aiId, hasOAuthToken }: FilesProps) => {
           >
             Add
           </button>
+
+          <div>
+            {folderData?.folders.map((folder) => (
+              <div key={folder.id}>
+                <h2>Folder: {folder.name}</h2>
+                {folder.files && folder.files.length > 0 ? (
+                  <ul>
+                    {folder.files.map((file) => (
+                      <li key={file.id}>
+                        File: {file.name} (Type: {file.type})
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No files in this folder.</p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <button
@@ -82,12 +122,6 @@ export const GoogleDriveForm = ({ aiId, hasOAuthToken }: FilesProps) => {
           Connect to Google Drive
         </button>
       )}
-
-      <ul>
-        {results.map((file) => (
-          <li key={file}>{file}</li>
-        ))}
-      </ul>
     </div>
   );
 };
