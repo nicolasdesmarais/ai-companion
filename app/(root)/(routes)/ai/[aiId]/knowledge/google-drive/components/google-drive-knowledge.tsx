@@ -3,7 +3,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { UserOAuthTokenEntity } from "@/domain/entities/OAuthTokenEntity";
 import { EntityNotFoundError } from "@/domain/errors/Errors";
 import { LoadFolderResponse } from "@/domain/types/LoadFolderResponse";
+import axios from "axios";
 import { useEffect, useState } from "react";
+import { GoogleDriveSearchResultsModal } from "./google-drive-search-results-modal";
 
 const ADD_ACCOUNT_OPTION = "add-account";
 
@@ -14,15 +16,18 @@ interface FilesProps {
 
 export const GoogleDriveForm = ({
   aiId,
-  oauthTokens: oauthTokenEmails,
+  oauthTokens: oauthTokens,
 }: FilesProps) => {
-  const [folderName, setFolderName] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [folderData, setFolderData] = useState<LoadFolderResponse | null>(null);
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
+  const [isResultsModalVisible, setResultsModalVisible] = useState(false);
+  const [searchResults, setSearchResults] = useState(null);
 
-  const hasOAuthToken = oauthTokenEmails.length > 0;
-  const initialAccount = hasOAuthToken ? oauthTokenEmails[0].email : "";
-  const [selectedAccount, setAccount] = useState(initialAccount);
+  const hasOAuthToken = oauthTokens.length > 0;
+  const [selectedAccount, setAccount] = useState(
+    hasOAuthToken ? oauthTokens[0].id : ""
+  );
 
   const { toast } = useToast();
 
@@ -45,6 +50,7 @@ export const GoogleDriveForm = ({
 
   const handleAccountChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
+    console.log("selected account" + value);
     setAccount(value);
     if (value === ADD_ACCOUNT_OPTION) {
       handleConnectClick();
@@ -67,6 +73,35 @@ export const GoogleDriveForm = ({
     }
   };
 
+  const search = async () => {
+    try {
+      const searchRequest: GoogleDriveSearchRequest = {
+        oauthTokenId: selectedAccount ?? "",
+        searchTerm: searchTerm,
+      };
+
+      const response = await axios.post(
+        `/api/v1/integrations/google-drive/search`,
+        searchRequest
+      );
+
+      setSearchResults(response.data.files);
+      setResultsModalVisible(true);
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        toast({
+          variant: "destructive",
+          description: "Folder not found.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          description: "Something went wrong",
+        });
+      }
+    }
+  };
+
   const addKnowledge = async () => {
     try {
       const response = await fetch(
@@ -74,7 +109,7 @@ export const GoogleDriveForm = ({
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ folderName }),
+          body: JSON.stringify({ folderName: searchTerm }),
         }
       );
 
@@ -123,9 +158,9 @@ export const GoogleDriveForm = ({
           <option value="" disabled>
             Select an account
           </option>
-          {oauthTokenEmails.map((option) => (
-            <option key={option.id} value={option.email}>
-              {option.email}
+          {oauthTokens.map((token: UserOAuthTokenEntity) => (
+            <option key={token.id} value={token.id}>
+              {token.email}
             </option>
           ))}
           <option value={ADD_ACCOUNT_OPTION}>+ Add Account</option>
@@ -133,27 +168,28 @@ export const GoogleDriveForm = ({
       </div>
       {hasOAuthToken && (
         <div className="mb-4">
-          <h3 className="text-lg font-semibold">Search Term</h3>
-          <input
-            className="mt-2 w-full p-2 bg-gray-800 border rounded border-gray-700"
-            type="text"
-            placeholder="Add Google Drive Folder"
-            value={folderName}
-            onChange={(e) => setFolderName(e.target.value)}
-          />
-          <button
-            className="mt-4 block w-full p-2 bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onClick={addKnowledge}
-          >
-            Search
-          </button>
-
-          <div className="mt-4">
+          <h3>Search Term</h3>
+          <div className="flex items-center">
+            <input
+              className="border p-2 rounded w-full mr-2" // added mr-2 for spacing
+              type="text"
+              placeholder="Search term"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <button
+              className="p-2 bg-blue-500 text-white rounded"
+              onClick={search}
+            >
+              Search
+            </button>
+          </div>
+          <div>
             {folderData?.folders.map((folder) => (
-              <div key={folder.id} className="mb-4">
-                <h2 className="text-lg font-semibold">Folder: {folder.name}</h2>
+              <div key={folder.id}>
+                <h2>Folder: {folder.name}</h2>
                 {folder.files && folder.files.length > 0 ? (
-                  <ul className="list-disc pl-5">
+                  <ul>
                     {folder.files.map((file) => (
                       <li key={file.id}>
                         File: {file.name} (Type: {file.type})
@@ -161,13 +197,18 @@ export const GoogleDriveForm = ({
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-gray-400">No files in this folder.</p>
+                  <p>No files in this folder.</p>
                 )}
               </div>
             ))}
           </div>
         </div>
       )}
+      <GoogleDriveSearchResultsModal
+        isVisible={isResultsModalVisible}
+        onClose={() => setResultsModalVisible(false)}
+        results={searchResults}
+      />
     </div>
   );
 };

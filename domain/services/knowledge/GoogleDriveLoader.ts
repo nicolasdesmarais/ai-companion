@@ -1,4 +1,5 @@
 import { EntityNotFoundError } from "@/domain/errors/Errors";
+import { GoogleDriveSearchResponse } from "@/domain/types/GoogleDriveSearchResponse";
 import {
   FileResponse,
   FolderResponse,
@@ -27,19 +28,20 @@ const OAUTH2_CLIENT = new google.auth.OAuth2(
 const DRIVE_CLIENT = google.drive({ version: "v3", auth: OAUTH2_CLIENT });
 
 export class GoogleDriveLoader {
-  private getMimeTypeQuery() {
-    return SUPPORTED_MIME_TYPES.map((type) => `mimeType='${type}'`).join(
-      " or "
-    );
+  private getMimeTypeQuery(includeFolders: boolean) {
+    const mimeTypes: string[] = [];
+    mimeTypes.push(...SUPPORTED_MIME_TYPES);
+    if (includeFolders) {
+      mimeTypes.push("application/vnd.google-apps.folder");
+    }
+
+    return mimeTypes.map((type) => `mimeType='${type}'`).join(" or ");
   }
 
-  private async setOAuthCredentials(userId: string) {
+  private async setOAuthCredentials(oauthTokenId: string) {
     const oauthToken = await prismadb.oAuthToken.findUnique({
       where: {
-        provider_userId: {
-          userId,
-          provider: "GOOGLE",
-        },
+        id: oauthTokenId,
       },
     });
 
@@ -72,6 +74,28 @@ export class GoogleDriveLoader {
     );
   }
 
+  public async search(oauthTokenId: string, searchTerm: string) {
+    await this.setOAuthCredentials(oauthTokenId);
+
+    const query = `name contains '${searchTerm}' and (${this.getMimeTypeQuery(
+      true
+    )}) and trashed = false`;
+
+    const googleDriveSearchResponse = await this.listFiles(query);
+    const files = googleDriveSearchResponse.data.files?.map((file) => {
+      return {
+        id: file.id ?? "",
+        name: file.name ?? "",
+        type: file.mimeType ?? "",
+      };
+    });
+
+    const response: GoogleDriveSearchResponse = {
+      files: files ?? [],
+    };
+    return response;
+  }
+
   public async loadFolder(
     userId: string,
     folderName: string
@@ -88,7 +112,7 @@ export class GoogleDriveLoader {
 
     const folderKnowledgeIds: string[] = [];
     const folderResponses: FolderResponse[] = [];
-    const mimeTypeQuery = this.getMimeTypeQuery();
+    const mimeTypeQuery = this.getMimeTypeQuery(false);
 
     for (const folder of folders) {
       const fileResponses: FileResponse[] = [];
