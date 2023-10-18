@@ -88,9 +88,9 @@ export const Sidebar = ({ isPro, hasChat }: SidebarProps) => {
     },
     {
       icon: Atom,
-      href: "/?scope=PRIVATE",
+      href: "/?scope=OWNED",
       pathname: "/",
-      searchparams: { scope: "PRIVATE" },
+      searchparams: { scope: "OWNED" },
       label: "Your AIs",
       pro: false,
     },
