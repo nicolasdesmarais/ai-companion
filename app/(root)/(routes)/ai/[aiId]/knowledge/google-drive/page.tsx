@@ -26,15 +26,15 @@ const GoogleDriveKnowledgePage = async ({
   }
 
   const oauthTokenService = new OAuthTokenService();
-  const hasOAuthToken = await oauthTokenService.hasOAuthToken(
+  const oauthTokenEmails = await oauthTokenService.getOAuthTokenEmails(
     OAuthTokenProvider.GOOGLE,
     user.id
   );
 
   return (
     <div className="container mx-auto mt-10">
-      <h1 className="text-2xl mb-4">Add Knowledge from Cloud Storage</h1>
-      <GoogleDriveForm aiId={params.aiId} hasOAuthToken={hasOAuthToken} />
+      <h1 className="text-2xl mb-4">Create Data Store</h1>
+      <GoogleDriveForm aiId={params.aiId} oauthTokenEmails={oauthTokenEmails} />
     </div>
   );
 };

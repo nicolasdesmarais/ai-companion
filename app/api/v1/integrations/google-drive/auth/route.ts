@@ -8,7 +8,11 @@ const OAUTH2_CLIENT = new google.auth.OAuth2(
   process.env.GOOGLE_CALLBACK_URL
 );
 
-const SCOPE = ["https://www.googleapis.com/auth/drive.readonly"];
+const SCOPE = [
+  "https://www.googleapis.com/auth/drive.readonly",
+  "https://www.googleapis.com/auth/userinfo.email",
+  "https://www.googleapis.com/auth/userinfo.profile",
+];
 
 export async function GET(req: NextRequest, res: NextResponse) {
   const url = OAUTH2_CLIENT.generateAuthUrl({

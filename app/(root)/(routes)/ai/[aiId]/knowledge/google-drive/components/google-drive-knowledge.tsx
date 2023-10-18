@@ -6,14 +6,15 @@ import { useEffect, useState } from "react";
 
 interface FilesProps {
   aiId: string;
-  hasOAuthToken: boolean;
+  oauthTokenEmails: string[];
 }
 
-export const GoogleDriveForm = ({ aiId, hasOAuthToken }: FilesProps) => {
+export const GoogleDriveForm = ({ aiId, oauthTokenEmails }: FilesProps) => {
   const [folderName, setFolderName] = useState("");
   const [folderData, setFolderData] = useState<LoadFolderResponse | null>(null);
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
   const { toast } = useToast();
+  const hasOAuthToken = oauthTokenEmails.length > 0;
 
   useEffect(() => {
     // Detect when the OAuth flow has completed (for instance, when the popup window is closed)

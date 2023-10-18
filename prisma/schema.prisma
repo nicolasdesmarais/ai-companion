@@ -179,11 +179,12 @@ model OAuthToken {
   id                        Int               @id @default(autoincrement())
   provider                  OAuthTokenProvider
   userId                    String            @map(name: "user_id")
+  email                     String
   data                      Json?
   createdAt                 DateTime          @default(now()) @map(name: "created_at")
   updatedAt                 DateTime          @updatedAt @default(now()) @map(name: "updated_at")
 
-  @@unique([provider, userId])
+  @@unique([provider, userId, email])
   @@map("oauth_tokens")
  }
 
