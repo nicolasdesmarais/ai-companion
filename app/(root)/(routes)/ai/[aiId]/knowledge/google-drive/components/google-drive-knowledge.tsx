@@ -19,8 +19,10 @@ export const GoogleDriveForm = ({
   const [folderName, setFolderName] = useState("");
   const [folderData, setFolderData] = useState<LoadFolderResponse | null>(null);
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
-  const [selectedAccount, setAccount] = useState("");
+
   const hasOAuthToken = oauthTokenEmails.length > 0;
+  const initialAccount = hasOAuthToken ? oauthTokenEmails[0].email : "";
+  const [selectedAccount, setAccount] = useState(initialAccount);
 
   const { toast } = useToast();
 
