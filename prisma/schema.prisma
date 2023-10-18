@@ -176,7 +176,7 @@ model AIPermissions {
 }
 
 model OAuthToken {
-  id                        Int               @id @default(autoincrement())
+  id                        String            @id @default(cuid())
   provider                  OAuthTokenProvider
   userId                    String            @map(name: "user_id")
   email                     String

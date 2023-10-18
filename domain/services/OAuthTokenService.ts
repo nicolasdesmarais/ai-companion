@@ -3,13 +3,16 @@ import { OAuthTokenProvider } from "@prisma/client";
 import { UserOAuthTokenEntity } from "../entities/OAuthTokenEntity";
 
 export class OAuthTokenService {
-  public async getOAuthTokenEmails(
+  public async getOAuthTokens(
     provider: OAuthTokenProvider,
     userId: string
-  ) {
+  ): Promise<UserOAuthTokenEntity[]> {
     return await prismadb.oAuthToken.findMany({
       select: {
+        id: true,
+        userId: true,
         email: true,
+        provider: true,
       },
       where: {
         provider,

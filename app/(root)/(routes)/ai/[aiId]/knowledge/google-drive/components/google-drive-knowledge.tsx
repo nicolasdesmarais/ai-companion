@@ -1,20 +1,28 @@
 "use client";
 import { useToast } from "@/components/ui/use-toast";
+import { UserOAuthTokenEntity } from "@/domain/entities/OAuthTokenEntity";
 import { EntityNotFoundError } from "@/domain/errors/Errors";
 import { LoadFolderResponse } from "@/domain/types/LoadFolderResponse";
 import { useEffect, useState } from "react";
 
+const ADD_ACCOUNT_OPTION = "add-account";
+
 interface FilesProps {
   aiId: string;
-  oauthTokenEmails: string[];
+  oauthTokens: UserOAuthTokenEntity[];
 }
 
-export const GoogleDriveForm = ({ aiId, oauthTokenEmails }: FilesProps) => {
+export const GoogleDriveForm = ({
+  aiId,
+  oauthTokens: oauthTokenEmails,
+}: FilesProps) => {
   const [folderName, setFolderName] = useState("");
   const [folderData, setFolderData] = useState<LoadFolderResponse | null>(null);
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
-  const { toast } = useToast();
+  const [selectedAccount, setAccount] = useState("");
   const hasOAuthToken = oauthTokenEmails.length > 0;
+
+  const { toast } = useToast();
 
   useEffect(() => {
     // Detect when the OAuth flow has completed (for instance, when the popup window is closed)
@@ -32,6 +40,14 @@ export const GoogleDriveForm = ({ aiId, oauthTokenEmails }: FilesProps) => {
       clearInterval(popupInterval);
     };
   }, [popupWindow]);
+
+  const handleAccountChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setAccount(value);
+    if (value === ADD_ACCOUNT_OPTION) {
+      handleConnectClick();
+    }
+  };
 
   const handleConnectClick = () => {
     // Open a new popup window
@@ -80,7 +96,26 @@ export const GoogleDriveForm = ({ aiId, oauthTokenEmails }: FilesProps) => {
 
   return (
     <div className="w-full p-4">
-      {hasOAuthToken ? (
+      <div>
+        <h2>Google Drive Integration</h2>
+        <p>Choose a file or folders from your Google Drive to train your AI.</p>
+        <select
+          value={selectedAccount}
+          onChange={handleAccountChange}
+          className="p-2 bg-blue-500 text-white rounded"
+        >
+          <option value="" disabled>
+            Select an account
+          </option>
+          {oauthTokenEmails.map((option) => (
+            <option key={option.id} value={option.email}>
+              {option.email}
+            </option>
+          ))}
+          <option value={ADD_ACCOUNT_OPTION}>+ Add Account</option>
+        </select>
+      </div>
+      {hasOAuthToken && (
         <div className="mb-4">
           <input
             className="border p-2 rounded w-full"
@@ -115,13 +150,6 @@ export const GoogleDriveForm = ({ aiId, oauthTokenEmails }: FilesProps) => {
             ))}
           </div>
         </div>
-      ) : (
-        <button
-          onClick={handleConnectClick}
-          className="p-2 bg-blue-500 text-white rounded"
-        >
-          Connect to Google Drive
-        </button>
       )}
     </div>
   );
