@@ -99,6 +99,13 @@ export const GoogleDriveForm = ({
   return (
     <div className="w-full p-4">
       <div>
+        <h2>Data Store Name</h2>
+        <p>
+          Name this data set so you can use it later for other AIs. Choose
+          something descriptive
+        </p>
+      </div>
+      <div>
         <h2>Google Drive Integration</h2>
         <p>Choose a file or folders from your Google Drive to train your AI.</p>
         <select
@@ -119,6 +126,7 @@ export const GoogleDriveForm = ({
       </div>
       {hasOAuthToken && (
         <div className="mb-4">
+          <h3>Search Term</h3>
           <input
             className="border p-2 rounded w-full"
             type="text"
