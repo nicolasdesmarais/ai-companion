@@ -23,7 +23,7 @@ import {
 
 interface SidebarProps {
   isPro: boolean;
-  lastChat?: string;
+  hasChat: boolean;
 }
 
 interface Route {
@@ -57,7 +57,7 @@ const isActive = (
   return pathActive;
 };
 
-export const Sidebar = ({ isPro, lastChat }: SidebarProps) => {
+export const Sidebar = ({ isPro, hasChat }: SidebarProps) => {
   const proModal = useProModal();
   const router = useRouter();
   const pathname = usePathname();
@@ -120,18 +120,19 @@ export const Sidebar = ({ isPro, lastChat }: SidebarProps) => {
       <div className="space-y-2 flex flex-col items-center">
         <div className="h-16">
           <OrganizationSwitcher
+            hidePersonal={true}
             appearance={{
               baseTheme: dark,
             }}
           />
         </div>
         <div
-          onClick={() => onNavigate(`/ai/${lastChat}`, false)}
+          onClick={() => onNavigate(`/chat/`, false)}
           className={cn(
             "text-muted-foreground text-xs group py-3 px-8 flex w-full justify-center font-medium rounded-lg transition",
             pathname.startsWith("/chat/")
               ? "bg-accent text-primary cursor-pointer hover:text-primary hover:bg-primary/10"
-              : lastChat
+              : hasChat
               ? "cursor-pointer hover:text-primary hover:bg-primary/10"
               : "opacity-25"
           )}

@@ -1,7 +1,21 @@
 import prismadb from "@/lib/prismadb";
+import { OAuthTokenProvider } from "@prisma/client";
 import { UserOAuthTokenEntity as OAuthTokenEntity } from "../entities/OAuthTokenEntity";
 
 export class OAuthTokenService {
+  public async hasOAuthToken(provider: OAuthTokenProvider, userId: string) {
+    const token = await prismadb.oAuthToken.findUnique({
+      where: {
+        provider_userId: {
+          provider,
+          userId,
+        },
+      },
+    });
+
+    return !!token;
+  }
+
   public async upsertToken(token: OAuthTokenEntity) {
     await prismadb.oAuthToken.upsert({
       where: {

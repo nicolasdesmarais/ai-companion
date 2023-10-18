@@ -8,15 +8,16 @@ import { useProModal } from "@/hooks/use-pro-modal";
 const font = Poppins({ weight: "600", subsets: ["latin"] });
 interface NavbarProps {
   isPro: boolean;
+  hasChat: boolean;
 }
 
-export const Navbar = ({ isPro }: NavbarProps) => {
+export const Navbar = ({ isPro, hasChat }: NavbarProps) => {
   const proModal = useProModal();
 
   return (
     <div className="fixed w-full z-30 flex justify-between items-center py-2 px-4 h-16 border-primary/10 bg-secondary md:hidden">
       <div className="flex items-center">
-        <MobileSidebar isPro={isPro} />
+        <MobileSidebar isPro={isPro} hasChat={hasChat} />
       </div>
       <div className="flex items-center gap-x-3">
         {!isPro && (

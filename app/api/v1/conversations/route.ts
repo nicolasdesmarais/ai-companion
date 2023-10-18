@@ -11,6 +11,7 @@ export async function GET(req: Request) {
     const conversations = await prismadb.conversation.findMany({
       where: {
         userId: userId,
+        isDeleted: false,
       },
       include: {
         companion: true,

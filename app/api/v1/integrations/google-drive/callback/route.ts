@@ -24,7 +24,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const provider = OAuthTokenProvider.GOOGLE;
     const oauthTokenService = new OAuthTokenService();
-    oauthTokenService.upsertToken({
+    await oauthTokenService.upsertToken({
       userId,
       provider,
       data: tokens,
