@@ -1,12 +1,7 @@
 "use client";
 
-import * as z from "zod";
-import axios, { AxiosError } from "axios";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { Wand2, Loader, FileText, Trash2 } from "lucide-react";
-import { Category, Knowledge, Prisma } from "@prisma/client";
+import { ImageUpload } from "@/components/image-upload";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -17,19 +12,24 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { ImageUpload } from "@/components/image-upload";
-import { useToast } from "@/components/ui/use-toast";
-import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
   SelectItem,
-  SelectValue,
   SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-import { useState, useRef } from "react";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Category, Knowledge, Prisma } from "@prisma/client";
+import axios, { AxiosError } from "axios";
+import { FileText, Loader, Trash2, Wand2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 const PREAMBLE = `You are a fictional character whose name is Elon. You are a visionary entrepreneur and inventor. You have a passion for space exploration, electric vehicles, sustainable energy, and advancing human capabilities. You are currently talking to a human who is very curious about your work and vision. You are ambitious and forward-thinking, with a touch of wit. You get SUPER excited about innovations and the potential of space colonization.
 `;
@@ -75,11 +75,19 @@ const formSchema = z.object({
 const models = [
   {
     id: "llama2-13b",
-    name: "llama2-13b",
+    name: "LLAMA2 Chat Optimized (13b params)",
   },
   {
     id: "gpt-4",
-    name: "gpt-4",
+    name: "GPT-4 (32K Context)",
+  },
+  {
+    id: "gpt35-16k",
+    name: "GPT-3.5 (16K Context)",
+  },
+  {
+    id: "text-davinci-003",
+    name: "DaVinci-003 (4K Context)",
   },
 ];
 
@@ -123,10 +131,7 @@ interface CompanionFormProps {
   initialData: ExtendedCompanion | null;
 }
 
-export const CompanionForm = ({
-  categories,
-  initialData,
-}: CompanionFormProps) => {
+export const AIForm = ({ categories, initialData }: CompanionFormProps) => {
   const { toast } = useToast();
   const router = useRouter();
   const inputFileRef = useRef<HTMLInputElement>(null);
@@ -149,7 +154,7 @@ export const CompanionForm = ({
       seed: "",
       src: "",
       categoryId: undefined,
-      modelId: undefined,
+      modelId: "gpt-4",
     },
   });
 
@@ -158,7 +163,7 @@ export const CompanionForm = ({
   const onDelete = async () => {
     if (initialData?.id) {
       try {
-        await axios.delete(`/api/companion/${initialData.id}`);
+        await axios.delete(`/api/v1/ai/${initialData.id}`);
         toast({
           description: "Deleted Successfully.",
         });
@@ -177,9 +182,9 @@ export const CompanionForm = ({
     try {
       const data = { knowledge, ...values };
       if (initialData) {
-        await axios.patch(`/api/companion/${initialData.id}`, data);
+        await axios.patch(`/api/v1/ai/${initialData.id}`, data);
       } else {
-        await axios.post("/api/companion", data);
+        await axios.post("/api/v1/ai", data);
       }
 
       toast({
@@ -282,10 +287,10 @@ export const CompanionForm = ({
         }
         const response = await axios.post("/api/generate", {
           prompt: `
-          ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${name}: prefix. 
+          ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${name}: prefix.
 
           ${instructions}
-  
+
           Below are relevant details about ${name}'s past and the conversation you are in.
           ${history}\n${name}:`,
         });
