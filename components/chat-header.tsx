@@ -1,21 +1,21 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
+import { Companion, Conversation, Message } from "@prisma/client";
 import axios from "axios";
 import {
+  CopyPlus,
   Edit,
   MessagesSquare,
   MoreVertical,
-  Trash,
   Pin,
   RefreshCw,
-  CopyPlus,
+  Trash,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Companion, Message, Conversation } from "@prisma/client";
-import { useUser } from "@clerk/nextjs";
 
-import { Button } from "@/components/ui/button";
 import { BotAvatar } from "@/components/bot-avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -123,7 +123,7 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
           {user?.id === conversation.companion.userId && (
             <DropdownMenuItem
               onClick={() =>
-                router.push(`/companion/${conversation.companion.id}`)
+                router.push(`/ai/${conversation.companion.id}/edit`)
               }
             >
               <Edit className="w-4 h-4 mr-2" />

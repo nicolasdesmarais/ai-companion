@@ -123,10 +123,7 @@ interface CompanionFormProps {
   initialData: ExtendedCompanion | null;
 }
 
-export const CompanionForm = ({
-  categories,
-  initialData,
-}: CompanionFormProps) => {
+export const AIForm = ({ categories, initialData }: CompanionFormProps) => {
   const { toast } = useToast();
   const router = useRouter();
   const inputFileRef = useRef<HTMLInputElement>(null);

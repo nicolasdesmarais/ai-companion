@@ -82,7 +82,7 @@ export const Sidebar = ({ isPro, hasChat }: SidebarProps) => {
     },
     {
       icon: Plus,
-      href: "/companion/new",
+      href: "/ai/new/edit",
       label: "Create",
       pro: false,
     },

@@ -1,19 +1,16 @@
-import { redirect } from "next/navigation";
 import { auth, redirectToSignIn } from "@clerk/nextjs";
 
 import prismadb from "@/lib/prismadb";
 
-import { CompanionForm } from "./components/companion-form";
+import { AIForm } from "./components/ai-form";
 
-interface CompanionIdPageProps {
+interface AIIdPageProps {
   params: {
-    companionId: string;
+    aiId: string;
   };
-};
+}
 
-const CompanionIdPage = async ({
-  params
-}: CompanionIdPageProps) => {
+const AIIdPage = async ({ params }: AIIdPageProps) => {
   const { userId } = auth();
 
   if (!userId) {
@@ -22,7 +19,7 @@ const CompanionIdPage = async ({
 
   const companion = await prismadb.companion.findUnique({
     where: {
-      id: params.companionId,
+      id: params.aiId,
       userId,
     },
     include: {
@@ -36,9 +33,7 @@ const CompanionIdPage = async ({
 
   const categories = await prismadb.category.findMany();
 
-  return ( 
-    <CompanionForm initialData={companion} categories={categories} />
-  );
-}
- 
-export default CompanionIdPage;
+  return <AIForm initialData={companion} categories={categories} />;
+};
+
+export default AIIdPage;
