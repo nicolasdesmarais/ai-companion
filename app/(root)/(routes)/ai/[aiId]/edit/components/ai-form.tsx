@@ -75,11 +75,19 @@ const formSchema = z.object({
 const models = [
   {
     id: "llama2-13b",
-    name: "llama2-13b",
+    name: "LLAMA2 Chat Optimized (13b params)",
   },
   {
     id: "gpt-4",
-    name: "gpt-4",
+    name: "GPT-4 (32K Context)",
+  },
+  {
+    id: "gpt35-16k",
+    name: "GPT-3.5 (16K Context)",
+  },
+  {
+    id: "text-davinci-003",
+    name: "DaVinci-003 (4K Context)",
   },
 ];
 
@@ -146,7 +154,7 @@ export const AIForm = ({ categories, initialData }: CompanionFormProps) => {
       seed: "",
       src: "",
       categoryId: undefined,
-      modelId: undefined,
+      modelId: "gpt-4",
     },
   });
 

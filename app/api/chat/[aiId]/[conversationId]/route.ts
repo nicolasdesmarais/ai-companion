@@ -2,6 +2,8 @@ import { StreamingTextResponse, LangChainStream } from "ai";
 import { currentUser } from "@clerk/nextjs";
 import { Replicate } from "langchain/llms/replicate";
 import { OpenAI } from "langchain/llms/openai";
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { HumanChatMessage, SystemChatMessage } from "langchain/schema";
 import { CallbackManager } from "langchain/callbacks";
 import { NextResponse } from "next/server";
 
@@ -77,9 +79,9 @@ export async function POST(
     }
     const { handlers } = LangChainStream();
 
-    let model;
+    let completionModel, chatModel;
     if (conversation.companion.modelId === "llama2-13b") {
-      model = new Replicate({
+      completionModel = new Replicate({
         model:
           "meta/llama-2-13b-chat:f4e2de70d66816a838a89eeeb621910adffb0dd0baba3976c96980970978018d",
         input: {
@@ -88,16 +90,27 @@ export async function POST(
         apiKey: process.env.REPLICATE_API_TOKEN,
         callbackManager: CallbackManager.fromHandlers(handlers),
       });
-    } else {
-      model = new OpenAI({
+    } else if (conversation.companion.modelId === "text-davinci-003") {
+      completionModel = new OpenAI({
         openAIApiKey: process.env.OPENAI_API_KEY,
-        modelName: "gpt-4",
+        modelName: "text-davinci-003",
         maxTokens: -1,
       });
+    } else if (conversation.companion.modelId === "gpt35-16k") {
+      chatModel = new ChatOpenAI({
+        azureOpenAIApiKey: process.env.AZURE_GPT35_KEY,
+        azureOpenAIApiVersion: "2023-05-15",
+        azureOpenAIApiInstanceName: "appdirect-prod-ai-useast",
+        azureOpenAIApiDeploymentName: "ai-prod-16k",
+      });
+    } else {
+      chatModel = new ChatOpenAI({
+        azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
+        azureOpenAIApiVersion: "2023-05-15",
+        azureOpenAIApiInstanceName: "prod-appdirectai-east2",
+        azureOpenAIApiDeploymentName: "gpt4-32k",
+      });
     }
-
-    // Turn verbose on for debugging
-    model.verbose = true;
 
     const chatHistory = conversation.messages.reduce(
       (acc: string, message: Message) => {
@@ -110,24 +123,45 @@ export async function POST(
       ""
     );
     const seededChatHistory = `${conversation.companion.seed}\n\n${chatHistory}`;
-    const engineeredPrompt = `
+    const completionPrompt = `
       ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${conversation.companion.name}: prefix. 
+      Output format is markdown. Open links in new tabs.
       ${conversation.companion.instructions}
       Below are relevant details about ${conversation.companion.name}'s past and the conversation you are in.
       ${knowledge}\n
       ${seededChatHistory}\n
       ${conversation.companion.name}:
     `;
-    console.log(engineeredPrompt);
 
-    const resp = await model.call(engineeredPrompt);
+    const engineeredPrompt = `
+      Pretend you are ${conversation.companion.name}, ${conversation.companion.description}. 
+      Output format is markdown. Open links in new tabs.
+      Here are more details about your character:\n 
+      ${conversation.companion.instructions} 
+      Answer questions using this knowledge:\n
+      ${knowledge}\n
+    `;
 
     let response;
-    if (conversation.companion.modelId === "llama2-13b") {
+    if (completionModel) {
+      const resp = await completionModel.call(completionPrompt);
       const cleaned = resp.replaceAll(",", "");
       response = cleaned;
     } else {
-      response = resp;
+      const chatLog = [new SystemChatMessage(engineeredPrompt)];
+      const convertedMessages = conversation.messages.map((message) => {
+        if (message.role === "user") {
+          return new HumanChatMessage(message.content);
+        } else {
+          return new SystemChatMessage(message.content);
+        }
+      });
+      chatLog.push(...convertedMessages);
+      if (!chatModel) {
+        return new NextResponse("Missing chat model", { status: 500 });
+      }
+      const chatResponse = await chatModel.call(chatLog);
+      response = chatResponse.text;
     }
 
     var Readable = require("stream").Readable;
