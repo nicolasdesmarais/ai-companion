@@ -97,21 +97,28 @@ export const GoogleDriveForm = ({
   };
 
   return (
-    <div className="w-full p-4">
-      <div>
-        <h2>Data Store Name</h2>
-        <p>
+    <div className="w-full p-6 bg-gray-900 text-white">
+      <div className="mb-4">
+        <h2 className="text-xl font-bold">Data Store Name</h2>
+        <p className="text-gray-400">
           Name this data set so you can use it later for other AIs. Choose
           something descriptive
         </p>
+        <input
+          type="text"
+          placeholder="My business website index"
+          className="mt-2 w-full p-2 bg-gray-800 border rounded border-gray-700"
+        />
       </div>
-      <div>
-        <h2>Google Drive Integration</h2>
-        <p>Choose a file or folders from your Google Drive to train your AI.</p>
+      <div className="mb-4">
+        <h2 className="text-xl font-bold">Google Drive Integration</h2>
+        <p className="text-gray-400">
+          Choose a file or folders from your Google Drive to train your AI.
+        </p>
         <select
           value={selectedAccount}
           onChange={handleAccountChange}
-          className="p-2 bg-blue-500 text-white rounded"
+          className="mt-2 w-full p-2 bg-gray-800 border rounded border-gray-700 text-white"
         >
           <option value="" disabled>
             Select an account
@@ -126,27 +133,27 @@ export const GoogleDriveForm = ({
       </div>
       {hasOAuthToken && (
         <div className="mb-4">
-          <h3>Search Term</h3>
+          <h3 className="text-lg font-semibold">Search Term</h3>
           <input
-            className="border p-2 rounded w-full"
+            className="mt-2 w-full p-2 bg-gray-800 border rounded border-gray-700"
             type="text"
             placeholder="Add Google Drive Folder"
             value={folderName}
             onChange={(e) => setFolderName(e.target.value)}
           />
           <button
-            className="mt-2 p-2 bg-blue-500 text-white rounded"
+            className="mt-4 block w-full p-2 bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             onClick={addKnowledge}
           >
-            Add
+            Search
           </button>
 
-          <div>
+          <div className="mt-4">
             {folderData?.folders.map((folder) => (
-              <div key={folder.id}>
-                <h2>Folder: {folder.name}</h2>
+              <div key={folder.id} className="mb-4">
+                <h2 className="text-lg font-semibold">Folder: {folder.name}</h2>
                 {folder.files && folder.files.length > 0 ? (
-                  <ul>
+                  <ul className="list-disc pl-5">
                     {folder.files.map((file) => (
                       <li key={file.id}>
                         File: {file.name} (Type: {file.type})
@@ -154,7 +161,7 @@ export const GoogleDriveForm = ({
                     ))}
                   </ul>
                 ) : (
-                  <p>No files in this folder.</p>
+                  <p className="text-gray-400">No files in this folder.</p>
                 )}
               </div>
             ))}
