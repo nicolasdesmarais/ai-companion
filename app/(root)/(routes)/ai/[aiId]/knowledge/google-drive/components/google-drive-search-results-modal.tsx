@@ -31,8 +31,9 @@ export const GoogleDriveSearchResultsModal: React.FC<
   onSelect,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [narrowedResults, setNarrowedResults] =
-    useState<GoogleDriveFile[]>(results);
+  const [narrowedResults, setNarrowedResults] = useState<GoogleDriveFile[]>([
+    ...results,
+  ]);
   const [selectedFile, setSelectedFile] = useState<GoogleDriveFile | null>(
     null
   );
@@ -61,7 +62,7 @@ export const GoogleDriveSearchResultsModal: React.FC<
         <div className="space-y-8">
           <div className="flex items-center space-x-4">
             <div>
-              <h3>Narrow Search</h3>
+              <h3>Narrow Search {narrowedResults.length}</h3>
               <input
                 placeholder="search term"
                 value={searchTerm}

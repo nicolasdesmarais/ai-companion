@@ -171,12 +171,9 @@ export const GoogleDriveForm = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <button
-              className="p-2 bg-blue-500 text-white rounded"
-              onClick={handleSearch}
-            >
+            <Button onClick={handleSearch} variant="ring">
               Search
-            </button>
+            </Button>
           </div>
         </div>
       )}
