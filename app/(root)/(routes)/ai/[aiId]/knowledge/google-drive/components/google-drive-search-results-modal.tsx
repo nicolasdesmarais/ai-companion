@@ -9,7 +9,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { GoogleDriveFile } from "@/domain/types/GoogleDriveSearchResponse";
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface GoogleDriveSearchResultsModalProps {
   isVisible: boolean;
@@ -37,7 +37,15 @@ export const GoogleDriveSearchResultsModal: React.FC<
     null
   );
 
+  useEffect(() => {
+    setNarrowedResults(results);
+  }, [results]);
+
   const handleNarrowSearch = async () => {
+    if (!searchTerm) {
+      return;
+    }
+
     const searchRequest: GoogleDriveSearchRequest = {
       oauthTokenId,
       searchTerms: [initialSearchTerm, searchTerm],
@@ -61,7 +69,7 @@ export const GoogleDriveSearchResultsModal: React.FC<
         <div className="space-y-8">
           <div className="flex items-center space-x-4">
             <div>
-              <h3>Narrow Search {narrowedResults.length}</h3>
+              <h3>Narrow Search</h3>
               <input
                 placeholder="search term"
                 value={searchTerm}
@@ -79,7 +87,7 @@ export const GoogleDriveSearchResultsModal: React.FC<
               </tr>
             </thead>
             <tbody>
-              {results &&
+              {narrowedResults &&
                 narrowedResults.map((file) => (
                   <tr
                     key={file.id}

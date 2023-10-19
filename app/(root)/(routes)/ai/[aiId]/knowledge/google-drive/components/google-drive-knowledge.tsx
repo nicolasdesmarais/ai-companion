@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { UserOAuthTokenEntity } from "@/domain/entities/OAuthTokenEntity";
 import { EntityNotFoundError } from "@/domain/errors/Errors";
+import { CreateGoogleDriveKnowledgeRequest } from "@/domain/types/CreateGoogleDriveKnowledgeRequest";
 import { GoogleDriveFile } from "@/domain/types/GoogleDriveSearchResponse";
 import axios from "axios";
 import { redirect } from "next/navigation";
@@ -114,14 +115,21 @@ export const GoogleDriveForm = ({
   };
 
   const handleContinue = async () => {
-    if (!selectedFile) {
+    if (!selectedFile || !selectedAccount) {
       return;
     }
 
     try {
+      const createKnowledgeRequest: CreateGoogleDriveKnowledgeRequest = {
+        oauthTokenId: selectedAccount,
+        fileId: selectedFile.id,
+      };
+
       const response = await axios.post(
-        `/api/v1/ai/${aiId}/knowledge/google-drive`
+        `/api/v1/ai/${aiId}/knowledge/google-drive`,
+        createKnowledgeRequest
       );
+      redirect(`/ai/${aiId}/edit`);
     } catch (error) {}
   };
 
@@ -186,7 +194,7 @@ export const GoogleDriveForm = ({
       <div className="flex justify-between w-full">
         <Button
           onClick={handleContinue}
-          disabled={!selectedFile}
+          disabled={!selectedFile || !selectedAccount}
           variant="ring"
         >
           Continue

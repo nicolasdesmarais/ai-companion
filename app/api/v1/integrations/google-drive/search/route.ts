@@ -16,6 +16,7 @@ export async function POST(req: Request) {
   try {
     const googleDriveLoader = new GoogleDriveLoader();
     const searchResponse = await googleDriveLoader.search(
+      userId,
       oauthTokenId,
       searchTerms
     );

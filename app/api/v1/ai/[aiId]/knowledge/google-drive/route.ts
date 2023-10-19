@@ -1,6 +1,7 @@
 import { BadRequestError, EntityNotFoundError } from "@/domain/errors/Errors";
 import { AIService } from "@/domain/services/AIService";
 import { GoogleDriveLoader } from "@/domain/services/knowledge/GoogleDriveLoader";
+import { CreateGoogleDriveKnowledgeRequest } from "@/domain/types/CreateGoogleDriveKnowledgeRequest";
 import { currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
@@ -20,22 +21,22 @@ export async function POST(
   }
 
   const userId = user.id;
-  const body = await req.json();
-  const { folderName } = body;
+  const body: CreateGoogleDriveKnowledgeRequest = await req.json();
 
   try {
     const googleDriveLoader = new GoogleDriveLoader();
-    const loadFolderResponse = await googleDriveLoader.loadFolder(
+    const knowledgeIds = await googleDriveLoader.createKnowledges(
       userId,
-      folderName
+      body.oauthTokenId,
+      body.fileId
     );
     const aiService = new AIService();
     const response = await aiService.createKnowledgeAI(
       params.aiId,
-      loadFolderResponse.knowledgeIds
+      knowledgeIds
     );
 
-    return NextResponse.json(loadFolderResponse);
+    return new NextResponse("", { status: 201 });
   } catch (e) {
     console.log(e);
     if (e instanceof EntityNotFoundError) {
