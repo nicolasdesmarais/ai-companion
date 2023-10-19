@@ -180,7 +180,7 @@ export const GoogleDriveForm = ({
       {selectedFile && (
         <div className="selected-file-section">
           <span>{selectedFile.name}</span>
-          <button onClick={() => setSelectedFile(null)}>x</button>
+          <Button onClick={() => setSelectedFile(null)}>X</Button>
         </div>
       )}
       <div className="flex justify-between w-full">
