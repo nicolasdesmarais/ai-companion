@@ -149,6 +149,29 @@ export async function POST(
       response = cleaned;
     } else {
       const chatLog = [new SystemChatMessage(engineeredPrompt)];
+      if (conversation.companion.seed) {
+        const historySeed = conversation.companion.seed
+          .split("\n\n")
+          .reduce((result: any, line: string) => {
+            if (line.trimStart().startsWith(conversation.companion.name)) {
+              result.push(
+                new SystemChatMessage(
+                  line
+                    .replace(conversation.companion.name + ":", "")
+                    .trimStart()
+                )
+              );
+            } else {
+              result.push(
+                new HumanChatMessage(
+                  line.trimStart().replace("Human:", "").trimStart()
+                )
+              );
+            }
+            return result;
+          }, []);
+        chatLog.push(...historySeed);
+      }
       const convertedMessages = conversation.messages.map((message) => {
         if (message.role === "user") {
           return new HumanChatMessage(message.content);

@@ -1,9 +1,5 @@
-import { EntityNotFoundError } from "@/domain/errors/Errors";
-import {
-  FileResponse,
-  FolderResponse,
-  LoadFolderResponse,
-} from "@/domain/types/LoadFolderResponse";
+import { EntityNotFoundError, UnauthorizedError } from "@/domain/errors/Errors";
+import { GoogleDriveSearchResponse } from "@/domain/types/GoogleDriveSearchResponse";
 import prismadb from "@/lib/prismadb";
 import fs from "fs";
 import { drive_v3, google } from "googleapis";
@@ -18,6 +14,8 @@ const SUPPORTED_MIME_TYPES = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
 
+const FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
+
 const OAUTH2_CLIENT = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
@@ -27,24 +25,33 @@ const OAUTH2_CLIENT = new google.auth.OAuth2(
 const DRIVE_CLIENT = google.drive({ version: "v3", auth: OAUTH2_CLIENT });
 
 export class GoogleDriveLoader {
-  private getMimeTypeQuery() {
-    return SUPPORTED_MIME_TYPES.map((type) => `mimeType='${type}'`).join(
-      " or "
-    );
+  private getNamesQuery(names: string[]) {
+    return names.map((name) => `name contains '${name}'`).join(" AND ");
   }
 
-  private async setOAuthCredentials(userId: string) {
+  private getMimeTypeQuery(includeFolders: boolean) {
+    const mimeTypes: string[] = [];
+    mimeTypes.push(...SUPPORTED_MIME_TYPES);
+    if (includeFolders) {
+      mimeTypes.push(FOLDER_MIME_TYPE);
+    }
+
+    return mimeTypes.map((type) => `mimeType='${type}'`).join(" or ");
+  }
+
+  private async setOAuthCredentials(userId: string, oauthTokenId: string) {
     const oauthToken = await prismadb.oAuthToken.findUnique({
       where: {
-        provider_userId: {
-          userId,
-          provider: "GOOGLE",
-        },
+        id: oauthTokenId,
       },
     });
 
     if (!oauthToken?.data) {
       throw new EntityNotFoundError("OAuth token not found");
+    }
+
+    if (oauthToken.userId !== userId) {
+      throw new UnauthorizedError("Unauthorized access to OAuth token");
     }
 
     const oauthTokenData = oauthToken.data as {
@@ -72,54 +79,52 @@ export class GoogleDriveLoader {
     );
   }
 
-  public async loadFolder(
+  public async search(
     userId: string,
-    folderName: string
-  ): Promise<LoadFolderResponse> {
-    await this.setOAuthCredentials(userId);
+    oauthTokenId: string,
+    searchTerms: string[]
+  ) {
+    await this.setOAuthCredentials(userId, oauthTokenId);
 
-    const findFolderQuery = `name = '${folderName}' and mimeType = 'application/vnd.google-apps.folder'`;
-    const folderResponse = await this.listFiles(findFolderQuery);
+    const query = `(${this.getNamesQuery(
+      searchTerms
+    )}) and (${this.getMimeTypeQuery(true)}) and trashed = false`;
 
-    const folders = folderResponse.data.files;
-    if (!folders || folders.length === 0) {
-      throw new EntityNotFoundError("Folder not found");
+    const googleDriveSearchResponse = await this.listFiles(query);
+    const files = googleDriveSearchResponse.data.files?.map((file) => {
+      return {
+        id: file.id ?? "",
+        name: file.name ?? "",
+        type: file.mimeType ?? "",
+      };
+    });
+
+    const response: GoogleDriveSearchResponse = {
+      files: files ?? [],
+    };
+    return response;
+  }
+
+  public async createKnowledges(
+    userId: string,
+    oauthTokenId: string,
+    fileId: string
+  ) {
+    await this.setOAuthCredentials(userId, oauthTokenId);
+
+    const fileIds = await this.listAllFiles(fileId);
+    if (!fileIds || fileIds.length === 0) {
+      throw new EntityNotFoundError("Files not found");
     }
 
-    const folderKnowledgeIds: string[] = [];
-    const folderResponses: FolderResponse[] = [];
-    const mimeTypeQuery = this.getMimeTypeQuery();
-
-    for (const folder of folders) {
-      const fileResponses: FileResponse[] = [];
-      const folderResponse: FolderResponse = {
-        id: folder.id ?? "",
-        name: folder.name ?? "",
-        files: fileResponses,
-      };
-      folderResponses.push(folderResponse);
-
-      const query = `'${folder.id}' in parents and (${mimeTypeQuery}) and trashed = false`;
-      const response = await this.listFiles(query);
-      const files = response.data.files ?? [];
-
-      for (const file of files) {
-        const fileResponse: FileResponse = {
-          id: file.id ?? "",
-          name: file.name ?? "",
-          type: file.mimeType ?? "",
-        };
-        fileResponses.push(fileResponse);
-
-        const fileKnowledgeIds = await this.loadFile(userId, file);
-        folderKnowledgeIds.push(...fileKnowledgeIds);
+    const knowledgeIds: string[] = [];
+    for (const fileId of fileIds) {
+      const knowledgeId = await this.loadFile(userId, fileId);
+      if (knowledgeId) {
+        knowledgeIds.push(knowledgeId);
       }
     }
-    const loadFolderResponse: LoadFolderResponse = {
-      folders: folderResponses,
-      knowledgeIds: folderKnowledgeIds,
-    };
-    return loadFolderResponse;
+    return knowledgeIds;
   }
 
   private async loadFile(userId: string, file: drive_v3.Schema$File) {
@@ -129,23 +134,13 @@ export class GoogleDriveLoader {
 
     const mimeType = file.mimeType;
     const fileName = file.name;
-    console.log(
-      "Loading file: ",
-      fileName,
-      " with mime type: ",
-      mimeType,
-      " and id: ",
-      file.id,
-      " from google drive"
-    );
 
     const fileResponse = await this.getFileAsStream(file.id);
 
     const filePath = `/tmp/${file.name}`;
     const writableStream = fs.createWriteStream(filePath);
 
-    return new Promise<string[]>(async (resolve, reject) => {
-      const knowledgeIds: string[] = [];
+    return new Promise<string>(async (resolve, reject) => {
       if (fileResponse.data instanceof Readable) {
         fileResponse.data
           .pipe(writableStream)
@@ -158,8 +153,7 @@ export class GoogleDriveLoader {
                 fileName,
                 filePath
               );
-              knowledgeIds.push(knowledge.id);
-              resolve(knowledgeIds);
+              resolve(knowledge.id);
             } catch (error) {
               reject(error);
             }
@@ -168,8 +162,48 @@ export class GoogleDriveLoader {
             reject(error);
           });
       } else {
-        resolve(knowledgeIds);
+        resolve("");
       }
     });
+  }
+
+  private async listAllFiles(fileId: string): Promise<drive_v3.Schema$File[]> {
+    const result: drive_v3.Schema$File[] = [];
+
+    const listFilesRecursive = async (folderId: string): Promise<void> => {
+      const response = await DRIVE_CLIENT.files.list({
+        q: `'${folderId}' in parents and (${this.getMimeTypeQuery(
+          true
+        )}) and trashed=false`,
+        fields: "files(id, name, mimeType)",
+      });
+
+      if (!response.data.files) return;
+
+      for (const file of response.data.files) {
+        if (file.mimeType === FOLDER_MIME_TYPE) {
+          await listFilesRecursive(file.id!);
+        } else {
+          result.push(file);
+        }
+      }
+    };
+
+    const initialFile = await DRIVE_CLIENT.files.get({
+      fileId,
+      fields: "id, name, mimeType",
+    });
+
+    if (!initialFile.data.mimeType || !initialFile.data.id) {
+      return result;
+    }
+
+    if (initialFile.data.mimeType === FOLDER_MIME_TYPE) {
+      await listFilesRecursive(initialFile.data.id);
+    } else {
+      result.push(initialFile.data);
+    }
+
+    return result;
   }
 }
