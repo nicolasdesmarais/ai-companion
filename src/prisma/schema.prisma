@@ -100,7 +100,7 @@ model Group {
   createdAt                 DateTime  @default(now()) @map(name: "created_at")
   updatedAt                 DateTime  @updatedAt @default(now()) @map(name: "updated_at")
   orgId                     String    @map(name: "org_id")
-  ownerUserId               String   @map(name: "owner_user_id")
+  ownerUserId               String    @map(name: "owner_user_id")
   name                      String
   availability              GroupAvailability @default(EVERYONE)
   users                     GroupUser[]
@@ -211,4 +211,22 @@ model Conversation {
   companionId               String    @map(name: "companion_id")
 
   @@map("conversation")
+}
+
+model DataStore {
+  id                        String        @id @default(cuid())
+  createdAt                 DateTime      @default(now()) @map(name: "created_at")
+  updatedAt                 DateTime      @updatedAt @default(now()) @map(name: "updated_at")
+  name                      String
+  orgId                     String        @map(name: "org_id")
+  ownerUserId               String        @map(name: "owner_user_id")
+  type                      DataStoreType
+
+  @@map("data_stores")
+}
+
+enum DataStoreType {
+  WEBSITE
+  GOOGLE_DRIVE
+  FILE_UPLOAD
 }
