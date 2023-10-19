@@ -5,6 +5,7 @@ import { AIForm } from "./ai-form";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { AIKnowledge } from "./ai-knowledge";
+import { AIPersonality } from "./ai-personality";
 
 const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
   include: {
@@ -54,7 +55,7 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
           <AIForm initialData={initialAi} categories={categories} />
         )}
         {activeTab === 1 && <AIKnowledge aiId={initialAi?.id} />}
-        {activeTab === 2 && <p>Content for Tab 3</p>}
+        {activeTab === 2 && <AIPersonality intialAi={initialAi} />}
       </div>
     </div>
   );

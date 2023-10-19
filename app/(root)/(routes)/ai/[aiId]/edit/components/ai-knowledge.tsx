@@ -1,4 +1,3 @@
-"use client";
 import DataSourceCard from "./datasource-card";
 
 interface SelectDataSourceProps {
