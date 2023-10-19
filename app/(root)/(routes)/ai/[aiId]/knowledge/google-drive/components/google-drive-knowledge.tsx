@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { UserOAuthTokenEntity } from "@/domain/entities/OAuthTokenEntity";
 import { EntityNotFoundError } from "@/domain/errors/Errors";
@@ -185,19 +186,22 @@ export const GoogleDriveForm = ({
           <button onClick={() => setSelectedFile(null)}>x</button>
         </div>
       )}
-      <button
-        className="p-2 bg-blue-500 text-white rounded"
-        onClick={handleContinue}
-        disabled={!selectedFile}
-      >
-        <button
-          className="p-2 bg-blue-500 text-white rounded"
-          onClick={() => redirect(`/ai/${aiId}/knowledge/`)}
+      <div className="flex justify-between w-full">
+        <Button
+          onClick={handleContinue}
+          disabled={!selectedFile}
+          variant="ring"
+        >
+          Continue
+        </Button>
+        <Button
+          onClick={() => redirect(`/ai/${aiId}/knowledge`)}
+          variant="link"
         >
           Back
-        </button>
-        Continue
-      </button>
+        </Button>
+      </div>
+
       <GoogleDriveSearchResultsModal
         isVisible={isResultsModalVisible}
         oauthTokenId={selectedAccount ?? ""}
