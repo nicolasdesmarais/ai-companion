@@ -196,24 +196,6 @@ export const GoogleDriveForm = ({
               Search
             </button>
           </div>
-          <div>
-            {folderData?.folders.map((folder) => (
-              <div key={folder.id}>
-                <h2>Folder: {folder.name}</h2>
-                {folder.files && folder.files.length > 0 ? (
-                  <ul>
-                    {folder.files.map((file) => (
-                      <li key={file.id}>
-                        File: {file.name} (Type: {file.type})
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>No files in this folder.</p>
-                )}
-              </div>
-            ))}
-          </div>
         </div>
       )}
       <GoogleDriveSearchResultsModal
