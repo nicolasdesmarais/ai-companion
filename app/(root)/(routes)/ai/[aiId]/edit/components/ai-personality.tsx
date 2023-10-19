@@ -1,6 +1,6 @@
 "use client";
 import * as z from "zod";
-import { Companion } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import {
   Form,
   FormControl,
@@ -35,7 +35,7 @@ const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
 
 type ExtendedCompanion = Prisma.CompanionGetPayload<typeof extendedCompanion>;
 interface SelectDataSourceProps {
-  initialAi?: ExtendedCompanion;
+  initialAi: ExtendedCompanion | null;
 }
 
 export const AIPersonality = ({ initialAi }: SelectDataSourceProps) => {
