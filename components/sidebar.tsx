@@ -33,6 +33,7 @@ interface Route {
   searchparams?: Record<string, string>;
   label: string;
   pro: boolean;
+  regex: RegExp;
 }
 
 const isActive = (
@@ -40,9 +41,15 @@ const isActive = (
   pathname: string,
   searchparams: ReadonlyURLSearchParams
 ) => {
-  const pathActive = route.pathname
-    ? pathname === route.pathname
-    : pathname === route.href;
+  let pathActive;
+  if (route.regex) {
+    pathActive = route.regex.test(pathname);
+  } else if (route.pathname) {
+    pathActive = pathname === route.pathname;
+  } else {
+    pathname === route.href;
+  }
+
   if (route.searchparams) {
     const params = Object.fromEntries(searchparams.entries());
     const requiredParams = Object.entries(route.searchparams);
@@ -83,6 +90,7 @@ export const Sidebar = ({ isPro, hasChat }: SidebarProps) => {
     {
       icon: Plus,
       href: "/ai/new/edit",
+      regex: /\/ai\/(.*)\/edit/,
       label: "Create",
       pro: false,
     },
