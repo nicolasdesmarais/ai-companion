@@ -1,42 +1,27 @@
 import { BadRequestError, EntityNotFoundError } from "@/domain/errors/Errors";
-import { AIService } from "@/domain/services/AIService";
 import { GoogleDriveLoader } from "@/domain/services/knowledge/GoogleDriveLoader";
-import { CreateGoogleDriveKnowledgeRequest } from "@/domain/types/CreateGoogleDriveKnowledgeRequest";
 import { currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
-export async function POST(
-  req: Request,
-  { params }: { params: { aiId: string } }
-) {
+export async function POST(req: Request) {
   const user = await currentUser();
   if (!user) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const aiService = new AIService();
-  const ai = await aiService.findAIById(params.aiId);
-  if (!ai) {
-    return new NextResponse("AI not found", { status: 404 });
-  }
-
   const userId = user.id;
-  const body: CreateGoogleDriveKnowledgeRequest = await req.json();
+  const body: GoogleDriveSearchRequest = await req.json();
+  const { searchTerms, oauthTokenId } = body;
 
   try {
     const googleDriveLoader = new GoogleDriveLoader();
-    const knowledgeIds = await googleDriveLoader.createKnowledges(
+    const searchResponse = await googleDriveLoader.search(
       userId,
-      body.oauthTokenId,
-      body.fileId
-    );
-    const aiService = new AIService();
-    const response = await aiService.createKnowledgeAI(
-      params.aiId,
-      knowledgeIds
+      oauthTokenId,
+      searchTerms
     );
 
-    return new NextResponse("", { status: 201 });
+    return NextResponse.json(searchResponse);
   } catch (e) {
     console.log(e);
     if (e instanceof EntityNotFoundError) {

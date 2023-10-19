@@ -4,7 +4,8 @@ export interface UserOAuthTokenEntity {
   id?: string;
   userId: string;
   provider: OAuthTokenProvider;
-  data: any;
+  email: string;
+  data?: any;
   createdAt?: Date;
   updatedAt?: Date;
 }
