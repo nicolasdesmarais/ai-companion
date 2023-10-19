@@ -1,6 +1,5 @@
 "use client";
-import * as z from "zod";
-import { Companion } from "@prisma/client";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -10,13 +9,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Companion } from "@prisma/client";
 import { Wand2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 const formSchema = z.object({
   temperature: z.string(),
@@ -67,7 +67,7 @@ export const AIPersonality = ({ intialAi }: SelectDataSourceProps) => {
                 </FormControl>
                 <FormDescription>
                   The temperature is used to control the randomness of the
-                  output. When you set it higher, you'll get more random
+                  output. When you set it higher, you`&apos;`ll get more random
                   outputs.
                 </FormDescription>
                 <FormMessage />
