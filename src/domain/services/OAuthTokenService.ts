@@ -1,6 +1,7 @@
 import prismadb from "@/src/lib/prismadb";
 import { OAuthTokenProvider } from "@prisma/client";
 import { UserOAuthTokenEntity } from "../entities/OAuthTokenEntity";
+import { EncryptionService } from "./security/EncryptionService";
 
 export class OAuthTokenService {
   public async getOAuthTokens(
@@ -22,6 +23,9 @@ export class OAuthTokenService {
   }
 
   public async upsertToken(token: UserOAuthTokenEntity) {
+    const encryptionService = new EncryptionService();
+    const encryptedData = encryptionService.encrypt(JSON.stringify(token.data));
+
     await prismadb.oAuthToken.upsert({
       where: {
         provider_userId_email: {
@@ -31,13 +35,13 @@ export class OAuthTokenService {
         },
       },
       update: {
-        data: token.data,
+        data: encryptedData,
       },
       create: {
         userId: token.userId,
         provider: token.provider,
         email: token.email,
-        data: token.data,
+        data: encryptedData,
       },
     });
   }
