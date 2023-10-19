@@ -17,14 +17,25 @@ interface GoogleDriveSearchResultsModalProps {
   initialSearchTerm: string;
   results: GoogleDriveFile[];
   onClose: () => void;
+  onSelect: (id: GoogleDriveFile | null) => void;
 }
 
 export const GoogleDriveSearchResultsModal: React.FC<
   GoogleDriveSearchResultsModalProps
-> = ({ isVisible, initialSearchTerm, oauthTokenId, onClose, results }) => {
+> = ({
+  isVisible,
+  initialSearchTerm,
+  oauthTokenId,
+  results,
+  onClose,
+  onSelect,
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [narrowedResults, setNarrowedResults] =
     useState<GoogleDriveFile[]>(results);
+  const [selectedFile, setSelectedFile] = useState<GoogleDriveFile | null>(
+    null
+  );
 
   const handleNarrowSearch = async () => {
     const searchRequest: GoogleDriveSearchRequest = {
@@ -70,7 +81,13 @@ export const GoogleDriveSearchResultsModal: React.FC<
             <tbody>
               {narrowedResults &&
                 narrowedResults.map((file) => (
-                  <tr key={file.id}>
+                  <tr
+                    key={file.id}
+                    className={
+                      file.id === selectedFile?.id ? "bg-gray-200" : ""
+                    }
+                    onClick={() => setSelectedFile(file)}
+                  >
                     <td className="border px-4 py-2">{file.name}</td>
                     <td className="border px-4 py-2">{file.type}</td>
                   </tr>
@@ -79,9 +96,10 @@ export const GoogleDriveSearchResultsModal: React.FC<
           </table>
         </div>
         <DialogFooter>
-          <div className="flex justify-end w-full">
+          <div className="flex justify-end w-full space-x-4">
+            <Button onClick={() => onSelect(selectedFile)}>Select</Button>
             <Button size="lg" variant="ring" onClick={onClose}>
-              Close
+              Cancel
             </Button>
           </div>
         </DialogFooter>

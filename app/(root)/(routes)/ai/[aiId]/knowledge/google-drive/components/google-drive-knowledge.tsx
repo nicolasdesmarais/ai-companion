@@ -24,6 +24,9 @@ export const GoogleDriveForm = ({
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
   const [isResultsModalVisible, setResultsModalVisible] = useState(false);
   const [searchResults, setSearchResults] = useState<GoogleDriveFile[]>([]);
+  const [selectedFile, setSelectedFile] = useState<GoogleDriveFile | null>(
+    null
+  );
 
   const hasOAuthToken = oauthTokens.length > 0;
   const [selectedAccount, setAccount] = useState(
@@ -102,6 +105,12 @@ export const GoogleDriveForm = ({
           description: "Something went wrong",
         });
       }
+    }
+  };
+
+  const handleFileSelect = (fileId: string | null) => {
+    if (!fileId) {
+      return;
     }
   };
 
@@ -212,6 +221,7 @@ export const GoogleDriveForm = ({
         oauthTokenId={selectedAccount ?? ""}
         initialSearchTerm={searchTerm}
         onClose={() => setResultsModalVisible(false)}
+        onSelect={setSelectedFile}
         results={searchResults}
       />
     </div>
