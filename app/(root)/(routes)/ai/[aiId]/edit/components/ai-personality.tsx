@@ -23,11 +23,22 @@ const formSchema = z.object({
   top_p: z.string(),
 });
 
+const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
+  include: {
+    knowledge: {
+      include: {
+        knowledge: true,
+      },
+    },
+  },
+});
+
+type ExtendedCompanion = Prisma.CompanionGetPayload<typeof extendedCompanion>;
 interface SelectDataSourceProps {
-  intialAi?: Companion;
+  initialAi?: ExtendedCompanion;
 }
 
-export const AIPersonality = ({ intialAi }: SelectDataSourceProps) => {
+export const AIPersonality = ({ initialAi }: SelectDataSourceProps) => {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -67,7 +78,7 @@ export const AIPersonality = ({ intialAi }: SelectDataSourceProps) => {
                 </FormControl>
                 <FormDescription>
                   The temperature is used to control the randomness of the
-                  output. When you set it higher, you'll get more random
+                  output. When you set it higher, you&apos;ll get more random
                   outputs.
                 </FormDescription>
                 <FormMessage />
@@ -96,7 +107,7 @@ export const AIPersonality = ({ intialAi }: SelectDataSourceProps) => {
           />
           <div className="w-full flex justify-between">
             <Button size="lg" disabled={isLoading}>
-              {intialAi ? "Save your AI" : "Create your AI"}
+              {initialAi ? "Save your AI" : "Create your AI"}
               <Wand2 className="w-4 h-4 ml-2" />
             </Button>
           </div>

@@ -55,7 +55,7 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
           <AIForm initialData={initialAi} categories={categories} />
         )}
         {activeTab === 1 && <AIKnowledge aiId={initialAi?.id} />}
-        {activeTab === 2 && <AIPersonality intialAi={initialAi} />}
+        {activeTab === 2 && <AIPersonality initialAi={initialAi} />}
       </div>
     </div>
   );
