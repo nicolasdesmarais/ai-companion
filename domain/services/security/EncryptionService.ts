@@ -12,7 +12,7 @@ export class EncryptionService {
     const iv = crypto.randomBytes(IV_LENGTH);
     const cipher = crypto.createCipheriv(
       "aes-256-gcm",
-      Buffer.from(ENCRYPTION_KEY),
+      Buffer.from(ENCRYPTION_KEY, "hex"),
       iv
     );
     let encrypted = cipher.update(text);
@@ -30,7 +30,7 @@ export class EncryptionService {
     const encryptedText = Buffer.from(textParts.join(":"), "hex");
     const decipher = crypto.createDecipheriv(
       "aes-256-gcm",
-      Buffer.from(ENCRYPTION_KEY),
+      Buffer.from(ENCRYPTION_KEY, "hex"),
       iv
     );
     let decrypted = decipher.update(encryptedText);
