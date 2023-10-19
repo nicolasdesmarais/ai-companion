@@ -25,7 +25,7 @@ export const ChatList = () => {
   );
 
   return (
-    <div className="hidden sm:flex flex-col h-full p-2 bg-accent/30 space-y-2 overflow-y-auto w-96">
+    <div className="hidden sm:flex flex-col h-full p-2 bg-accent/30 overflow-y-auto w-96">
       <div className="flex flex-wrap">
         {pinned.map((conversation: any) => (
           <div className="w-1/3 p-1" key={conversation.id}>
@@ -52,7 +52,7 @@ export const ChatList = () => {
         <div
           onClick={() => router.push(`/chat/${conversation.id}`)}
           className={cn(
-            "flex gap-x-2 items-center h-20 text-primary rounded-lg p-2 transition",
+            "flex gap-x-2 items-center h-20 text-primary rounded-lg p-2 mb-2 transition",
             pathname.endsWith(conversation.id)
               ? "bg-accent"
               : "hover:text-primary hover:bg-primary/10 cursor-pointer"
