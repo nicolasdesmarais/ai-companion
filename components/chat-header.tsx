@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
+import { useConversations } from "@/hooks/use-conversations";
 
 interface ChatHeaderProps {
   conversation: Conversation & {
@@ -38,6 +39,7 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
   const router = useRouter();
   const { user } = useUser();
   const { toast } = useToast();
+  const { conversations, fetchConversations } = useConversations();
 
   const duplicate = async () => {
     const response = await axios.put(
@@ -60,12 +62,23 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
   };
 
   const pin = async () => {
+    const pinned = conversations.filter(
+      (conversation) => conversation.pinPosition
+    );
+    if (pinned.length >= 9) {
+      toast({
+        variant: "destructive",
+        description:
+          "You can only pin up to 9 chats. To pin this chat, unpin another one first.",
+      });
+      return;
+    }
     const response = await axios.put(
       `/api/v1/conversations/${conversation.id}/pin`
     );
     if (response.status === 200) {
       toast({ description: "Conversation pinned." });
-      router.push(`/chat/${response.data.id}`);
+      fetchConversations();
     }
   };
 

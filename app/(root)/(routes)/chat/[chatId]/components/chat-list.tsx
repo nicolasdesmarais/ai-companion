@@ -2,39 +2,53 @@
 import { Companion, Conversation } from "@prisma/client";
 import { useRouter, usePathname } from "next/navigation";
 import { BotAvatar } from "@/components/bot-avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { useConversations } from "@/hooks/use-conversations";
 
-interface ChatListProps {
-  initialConversations: (Conversation & {
-    companion: Companion;
-  })[];
-}
-
-export const ChatList = ({ initialConversations }: ChatListProps) => {
-  const [conversations, setConversations] = useState<
-    (Conversation & {
-      companion: Companion;
-    })[]
-  >(initialConversations);
+export const ChatList = () => {
+  const { conversations, fetchConversations } = useConversations();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    const fetchConversations = async () => {
-      const response = await fetch("/api/v1/conversations");
-      if (response.status === 200) {
-        const data = await response.json();
-        setConversations(data);
-      }
-    };
-
     fetchConversations();
   }, []);
 
+  const pinned = conversations.filter(
+    (conversation) => conversation.pinPosition
+  );
+
+  const unpinned = conversations.filter(
+    (conversation) => !conversation.pinPosition
+  );
+
   return (
-    <div className="hidden sm:flex flex-col h-full p-2 bg-accent/30 space-y-2 overflow-y-auto min-width-24 max-w-md">
-      {conversations.map((conversation: any) => (
+    <div className="hidden sm:flex flex-col h-full p-2 bg-accent/30 space-y-2 overflow-y-auto w-96">
+      <div className="flex flex-wrap">
+        {pinned.map((conversation: any) => (
+          <div className="w-1/3 p-1" key={conversation.id}>
+            <div
+              onClick={() => router.push(`/chat/${conversation.id}`)}
+              className={cn(
+                "rounded-lg p-2 transition",
+                pathname.endsWith(conversation.id)
+                  ? "bg-accent"
+                  : "hover:text-primary hover:bg-primary/10 cursor-pointer"
+              )}
+            >
+              <div>
+                <Avatar className="h-18 w-18">
+                  <AvatarImage src={conversation.companion.src} />
+                </Avatar>
+              </div>
+              <div className="mt-2 text-xs truncate">{conversation.name}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {unpinned.map((conversation: any) => (
         <div
           onClick={() => router.push(`/chat/${conversation.id}`)}
           className={cn(

@@ -39,19 +39,9 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     return redirect("/");
   }
 
-  const conversations = await prismadb.conversation.findMany({
-    where: {
-      userId: userId,
-      isDeleted: false,
-    },
-    include: {
-      companion: true,
-    },
-  });
-
   return (
     <div className="flex h-full">
-      <ChatList initialConversations={conversations} />
+      <ChatList />
       <ChatClient conversation={conversation} />
     </div>
   );
