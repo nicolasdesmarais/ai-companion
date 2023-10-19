@@ -28,6 +28,10 @@ const OAUTH2_CLIENT = new google.auth.OAuth2(
 const DRIVE_CLIENT = google.drive({ version: "v3", auth: OAUTH2_CLIENT });
 
 export class GoogleDriveLoader {
+  private getNamesQuery(names: string[]) {
+    return names.map((name) => `name contains '${name}'`).join(" AND ");
+  }
+
   private getMimeTypeQuery(includeFolders: boolean) {
     const mimeTypes: string[] = [];
     mimeTypes.push(...SUPPORTED_MIME_TYPES);
@@ -74,12 +78,12 @@ export class GoogleDriveLoader {
     );
   }
 
-  public async search(oauthTokenId: string, searchTerm: string) {
+  public async search(oauthTokenId: string, searchTerms: string[]) {
     await this.setOAuthCredentials(oauthTokenId);
 
-    const query = `name contains '${searchTerm}' and (${this.getMimeTypeQuery(
-      true
-    )}) and trashed = false`;
+    const query = `(${this.getNamesQuery(
+      searchTerms
+    )}) and (${this.getMimeTypeQuery(true)}) and trashed = false`;
 
     const googleDriveSearchResponse = await this.listFiles(query);
     const files = googleDriveSearchResponse.data.files?.map((file) => {

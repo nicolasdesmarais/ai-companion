@@ -2,6 +2,7 @@
 import { useToast } from "@/components/ui/use-toast";
 import { UserOAuthTokenEntity } from "@/domain/entities/OAuthTokenEntity";
 import { EntityNotFoundError } from "@/domain/errors/Errors";
+import { GoogleDriveFile } from "@/domain/types/GoogleDriveSearchResponse";
 import { LoadFolderResponse } from "@/domain/types/LoadFolderResponse";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -22,7 +23,7 @@ export const GoogleDriveForm = ({
   const [folderData, setFolderData] = useState<LoadFolderResponse | null>(null);
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
   const [isResultsModalVisible, setResultsModalVisible] = useState(false);
-  const [searchResults, setSearchResults] = useState(null);
+  const [searchResults, setSearchResults] = useState<GoogleDriveFile[]>([]);
 
   const hasOAuthToken = oauthTokens.length > 0;
   const [selectedAccount, setAccount] = useState(
@@ -77,7 +78,7 @@ export const GoogleDriveForm = ({
     try {
       const searchRequest: GoogleDriveSearchRequest = {
         oauthTokenId: selectedAccount ?? "",
-        searchTerm: searchTerm,
+        searchTerms: [searchTerm],
       };
 
       const response = await axios.post(
@@ -85,7 +86,9 @@ export const GoogleDriveForm = ({
         searchRequest
       );
 
-      setSearchResults(response.data.files);
+      const files: GoogleDriveFile[] = response.data.files;
+
+      setSearchResults(files);
       setResultsModalVisible(true);
     } catch (error) {
       if (error instanceof EntityNotFoundError) {
@@ -206,6 +209,8 @@ export const GoogleDriveForm = ({
       )}
       <GoogleDriveSearchResultsModal
         isVisible={isResultsModalVisible}
+        oauthTokenId={selectedAccount ?? ""}
+        initialSearchTerm={searchTerm}
         onClose={() => setResultsModalVisible(false)}
         results={searchResults}
       />

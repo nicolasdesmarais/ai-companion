@@ -8,16 +8,38 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { GoogleDriveFile } from "@/domain/types/GoogleDriveSearchResponse";
+import axios from "axios";
+import React, { useState } from "react";
 
 interface GoogleDriveSearchResultsModalProps {
   isVisible: boolean;
-  onClose: () => void;
+  oauthTokenId: string;
+  initialSearchTerm: string;
   results: GoogleDriveFile[];
+  onClose: () => void;
 }
 
 export const GoogleDriveSearchResultsModal: React.FC<
   GoogleDriveSearchResultsModalProps
-> = ({ isVisible, onClose, results }) => {
+> = ({ isVisible, initialSearchTerm, oauthTokenId, onClose, results }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [narrowedResults, setNarrowedResults] =
+    useState<GoogleDriveFile[]>(results);
+
+  const handleNarrowSearch = async () => {
+    const searchRequest: GoogleDriveSearchRequest = {
+      oauthTokenId,
+      searchTerms: [initialSearchTerm, searchTerm],
+    };
+
+    const response = await axios.post(
+      `/api/v1/integrations/google-drive/search`,
+      searchRequest
+    );
+
+    setNarrowedResults(response.data.files);
+  };
+
   return (
     <Dialog open={isVisible} onOpenChange={onClose}>
       <DialogContent>

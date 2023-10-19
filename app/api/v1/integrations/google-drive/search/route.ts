@@ -11,13 +11,13 @@ export async function POST(req: Request) {
 
   const userId = user.id;
   const body: GoogleDriveSearchRequest = await req.json();
-  const { searchTerm, oauthTokenId } = body;
+  const { searchTerms, oauthTokenId } = body;
 
   try {
     const googleDriveLoader = new GoogleDriveLoader();
     const searchResponse = await googleDriveLoader.search(
       oauthTokenId,
-      searchTerm
+      searchTerms
     );
 
     return NextResponse.json(searchResponse);

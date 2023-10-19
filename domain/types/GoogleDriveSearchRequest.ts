@@ -1,4 +1,4 @@
 interface GoogleDriveSearchRequest {
   oauthTokenId: string;
-  searchTerm: string;
+  searchTerms: string[];
 }
