@@ -9,6 +9,7 @@ import {
   MessagesSquare,
   MoreVertical,
   Pin,
+  PinOff,
   RefreshCw,
   Trash,
 } from "lucide-react";
@@ -82,6 +83,16 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
     }
   };
 
+  const unpin = async () => {
+    const response = await axios.put(
+      `/api/v1/conversations/${conversation.id}/unpin`
+    );
+    if (response.status === 200) {
+      toast({ description: "Conversation unpinned." });
+      fetchConversations();
+    }
+  };
+
   const remove = async () => {
     const response = await axios.delete(
       `/api/v1/conversations/${conversation.id}`
@@ -117,10 +128,17 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => pin()}>
-            <Pin className="w-4 h-4 mr-2" />
-            Pin
-          </DropdownMenuItem>
+          {conversation.pinPosition ? (
+            <DropdownMenuItem onClick={() => unpin()}>
+              <PinOff className="w-4 h-4 mr-2" />
+              Unpin
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem onClick={() => pin()}>
+              <Pin className="w-4 h-4 mr-2" />
+              Pin
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={() => reset()}>
             <RefreshCw className="w-4 h-4 mr-2" />
             Reset
