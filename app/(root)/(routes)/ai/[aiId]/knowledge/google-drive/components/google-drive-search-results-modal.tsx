@@ -64,7 +64,7 @@ export const GoogleDriveSearchResultsModal: React.FC<
 
   return (
     <Dialog open={isVisible} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="overflow-auto">
         <DialogHeader className="space-y-4">
           <DialogTitle className="text-center">Search Results</DialogTitle>
         </DialogHeader>
@@ -82,35 +82,37 @@ export const GoogleDriveSearchResultsModal: React.FC<
             <Button onClick={handleNarrowSearch}>Search</Button>
           </div>
           {/* Table */}
-          <table className="min-w-full table-auto">
-            <thead>
-              <tr>
-                <th className="px-4 py-2">NAME</th>
-                <th className="px-4 py-2">TYPE</th>
-                <th className="px-4 py-2">OWNER</th>
-                <th className="px-4 py-2">LAST MODIFIED</th>
-              </tr>
-            </thead>
-            <tbody>
-              {narrowedResults &&
-                narrowedResults.map((file) => (
-                  <tr
-                    key={file.id}
-                    className={
-                      file.id === selectedFile?.id ? "bg-gray-400" : ""
-                    }
-                    onClick={() => setSelectedFile(file)}
-                  >
-                    <td className="border px-4 py-2">{file.name}</td>
-                    <td className="border px-4 py-2">
-                      {getLabelFromFileType(file.type)}
-                    </td>
-                    <td className="border px-4 py-2">{file.owner}</td>
-                    <td className="border px-4 py-2">{file.modifiedTime}</td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="min-w-full table-auto">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2">NAME</th>
+                  <th className="px-4 py-2">TYPE</th>
+                  <th className="px-4 py-2">OWNER</th>
+                  <th className="px-4 py-2">LAST MODIFIED</th>
+                </tr>
+              </thead>
+              <tbody>
+                {narrowedResults &&
+                  narrowedResults.map((file) => (
+                    <tr
+                      key={file.id}
+                      className={
+                        file.id === selectedFile?.id ? "bg-gray-200" : ""
+                      }
+                      onClick={() => setSelectedFile(file)}
+                    >
+                      <td className="border px-4 py-2">{file.name}</td>
+                      <td className="border px-4 py-2">
+                        {getLabelFromFileType(file.type)}
+                      </td>
+                      <td className="border px-4 py-2">{file.owner}</td>
+                      <td className="border px-4 py-2">{file.modifiedTime}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
         </div>
         <DialogFooter>
           <div className="flex justify-end w-full space-x-4">
