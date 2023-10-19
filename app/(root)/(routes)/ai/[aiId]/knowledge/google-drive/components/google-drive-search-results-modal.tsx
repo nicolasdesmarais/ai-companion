@@ -7,7 +7,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { GoogleDriveFile } from "@/domain/types/GoogleDriveSearchResponse";
+import {
+  GoogleDriveFile,
+  getLabelFromFileType,
+} from "@/domain/types/GoogleDriveSearchResponse";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
@@ -82,8 +85,10 @@ export const GoogleDriveSearchResultsModal: React.FC<
           <table className="min-w-full table-auto">
             <thead>
               <tr>
-                <th className="px-4 py-2">Name</th>
-                <th className="px-4 py-2">Type</th>
+                <th className="px-4 py-2">NAME</th>
+                <th className="px-4 py-2">TYPE</th>
+                <th className="px-4 py-2">OWNER</th>
+                <th className="px-4 py-2">LAST MODIFIED</th>
               </tr>
             </thead>
             <tbody>
@@ -92,12 +97,16 @@ export const GoogleDriveSearchResultsModal: React.FC<
                   <tr
                     key={file.id}
                     className={
-                      file.id === selectedFile?.id ? "bg-gray-200" : ""
+                      file.id === selectedFile?.id ? "bg-gray-400" : ""
                     }
                     onClick={() => setSelectedFile(file)}
                   >
                     <td className="border px-4 py-2">{file.name}</td>
-                    <td className="border px-4 py-2">{file.type}</td>
+                    <td className="border px-4 py-2">
+                      {getLabelFromFileType(file.type)}
+                    </td>
+                    <td className="border px-4 py-2">{file.owner}</td>
+                    <td className="border px-4 py-2">{file.modifiedTime}</td>
                   </tr>
                 ))}
             </tbody>
