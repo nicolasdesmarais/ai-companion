@@ -3,8 +3,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { UserOAuthTokenEntity } from "@/domain/entities/OAuthTokenEntity";
 import { EntityNotFoundError } from "@/domain/errors/Errors";
 import { GoogleDriveFile } from "@/domain/types/GoogleDriveSearchResponse";
-import { LoadFolderResponse } from "@/domain/types/LoadFolderResponse";
 import axios from "axios";
+import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import { GoogleDriveSearchResultsModal } from "./google-drive-search-results-modal";
 
@@ -20,7 +20,6 @@ export const GoogleDriveForm = ({
   oauthTokens: oauthTokens,
 }: FilesProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [folderData, setFolderData] = useState<LoadFolderResponse | null>(null);
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
   const [isResultsModalVisible, setResultsModalVisible] = useState(false);
   const [searchResults, setSearchResults] = useState<GoogleDriveFile[]>([]);
@@ -36,13 +35,9 @@ export const GoogleDriveForm = ({
   const { toast } = useToast();
 
   useEffect(() => {
-    // Detect when the OAuth flow has completed (for instance, when the popup window is closed)
     const popupInterval = setInterval(() => {
       if (popupWindow?.closed) {
         clearInterval(popupInterval);
-
-        // If needed, handle what should be done after the OAuth flow here.
-        // For example, check if the user is authenticated or refresh some data.
       }
     }, 1000);
 
@@ -77,7 +72,7 @@ export const GoogleDriveForm = ({
     }
   };
 
-  const search = async () => {
+  const handleSearch = async () => {
     try {
       const searchRequest: GoogleDriveSearchRequest = {
         oauthTokenId: selectedAccount ?? "",
@@ -108,39 +103,25 @@ export const GoogleDriveForm = ({
     }
   };
 
-  const handleFileSelect = (fileId: string | null) => {
-    if (!fileId) {
+  const handleSelectFile = (file: GoogleDriveFile | null) => {
+    if (!file) {
       return;
     }
+
+    setSelectedFile(file);
+    setResultsModalVisible(false);
   };
 
-  const addKnowledge = async () => {
-    try {
-      const response = await fetch(
-        `/api/v1/ai/${aiId}/knowledge/google-drive`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ folderName: searchTerm }),
-        }
-      );
-
-      const folderData = await response.json();
-      console.log(folderData);
-      setFolderData(folderData);
-    } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        toast({
-          variant: "destructive",
-          description: "Folder not found.",
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          description: "Something went wrong",
-        });
-      }
+  const handleContinue = async () => {
+    if (!selectedFile) {
+      return;
     }
+
+    try {
+      const response = await axios.post(
+        `/api/v1/ai/${aiId}/knowledge/google-drive`
+      );
+    } catch (error) {}
   };
 
   return (
@@ -191,19 +172,38 @@ export const GoogleDriveForm = ({
             />
             <button
               className="p-2 bg-blue-500 text-white rounded"
-              onClick={search}
+              onClick={handleSearch}
             >
               Search
             </button>
           </div>
         </div>
       )}
+      {selectedFile && (
+        <div className="selected-file-section">
+          <span>{selectedFile.name}</span>
+          <button onClick={() => setSelectedFile(null)}>x</button>
+        </div>
+      )}
+      <button
+        className="p-2 bg-blue-500 text-white rounded"
+        onClick={handleContinue}
+        disabled={!selectedFile}
+      >
+        <button
+          className="p-2 bg-blue-500 text-white rounded"
+          onClick={() => redirect(`/ai/${aiId}/knowledge/`)}
+        >
+          Back
+        </button>
+        Continue
+      </button>
       <GoogleDriveSearchResultsModal
         isVisible={isResultsModalVisible}
         oauthTokenId={selectedAccount ?? ""}
         initialSearchTerm={searchTerm}
         onClose={() => setResultsModalVisible(false)}
-        onSelect={setSelectedFile}
+        onSelect={handleSelectFile}
         results={searchResults}
       />
     </div>
