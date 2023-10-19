@@ -60,13 +60,13 @@ export const ChatList = () => {
           key={conversation.id}
         >
           <BotAvatar src={conversation.companion.src} />
-          <div className="flex flex-col gap-y-1">
+          <div className="flex flex-col gap-y-1 w-full">
             <div className="flex items-center gap-x-2">
               <p className="font-bold">{conversation.name}</p>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground w-full pb-2 border-b border-muted-foreground text-ellipsis">
               {conversation.companion.description}
-            </p>
+            </div>
           </div>
         </div>
       ))}
