@@ -48,6 +48,17 @@ export const GoogleDriveSearchResultsModal: React.FC<
         </DialogHeader>
         <Separator />
         <div className="space-y-8">
+          <div className="flex items-center space-x-4">
+            <div>
+              <h3>Narrow Search</h3>
+              <input
+                placeholder="search term"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Button onClick={handleNarrowSearch}>Search</Button>
+          </div>
           {/* Table */}
           <table className="min-w-full table-auto">
             <thead>
@@ -57,8 +68,8 @@ export const GoogleDriveSearchResultsModal: React.FC<
               </tr>
             </thead>
             <tbody>
-              {results &&
-                results.map((file) => (
+              {narrowedResults &&
+                narrowedResults.map((file) => (
                   <tr key={file.id}>
                     <td className="border px-4 py-2">{file.name}</td>
                     <td className="border px-4 py-2">{file.type}</td>
