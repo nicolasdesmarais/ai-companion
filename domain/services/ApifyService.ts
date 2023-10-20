@@ -3,11 +3,23 @@ import { ApifyClient } from "apify-client";
 const client = new ApifyClient({
   token: process.env.APIFY_TOKEN,
 });
+const webScraperActorId = process.env.APIFY_WEB_SCRAPER_ACTOR_ID;
 
 export class ApifyService {
   async createWebUrlKnowledge(userId: string, url: string) {
-    // Prepare Actor input
-    const input = {
+    if (!webScraperActorId) {
+      throw new Error("APIFY_WEB_SCRAPER_ACTOR_ID is not set");
+    }
+
+    const actorRun = await client
+      .actor(webScraperActorId)
+      .start(this.getWebScraperInput(url));
+
+    console.log("Actor run starter: " + actorRun.id);
+  }
+
+  private getWebScraperInput(url: string) {
+    return {
       runMode: "DEVELOPMENT",
       startUrls: [
         {
@@ -101,17 +113,5 @@ export class ApifyService {
       browserLog: false,
       customData: {},
     };
-
-    (async () => {
-      // Run the Actor and wait for it to finish
-      const run = await client.actor(`moJRLRc85AitArpNN`).call(input);
-
-      // Fetch and print Actor results from the run's dataset (if any)
-      console.log("Results from dataset");
-      const { items } = await client.dataset(run.defaultDatasetId).listItems();
-      items.forEach((item) => {
-        console.dir(item);
-      });
-    })();
   }
 }
