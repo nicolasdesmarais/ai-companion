@@ -31,7 +31,7 @@ export class ApifyService {
       linkSelector: "a[href]",
       globs: [
         {
-          glob: `${url}/*/*`,
+          glob: `${url}/**/*`,
         },
       ],
       pseudoUrls: [],
