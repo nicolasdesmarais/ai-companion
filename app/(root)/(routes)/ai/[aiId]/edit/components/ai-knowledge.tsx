@@ -19,7 +19,7 @@ export const AIKnowledge = ({ aiId }: SelectDataSourceProps) => {
         <DataSourceCard
           title="Website URLs"
           description="Automatically crawl website content from a list of domains you define."
-          href=""
+          href={`/ai/${aiId}/knowledge/web-urls`}
         />
         <DataSourceCard
           title="Cloud Storage"
