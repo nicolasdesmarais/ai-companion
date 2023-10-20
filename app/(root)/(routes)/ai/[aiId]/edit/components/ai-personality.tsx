@@ -85,7 +85,9 @@ export const AIPersonality = ({ initialAi, form }: SelectDataSourceProps) => {
           control={form.control}
           render={({ field }) => (
             <FormItem className="col-span-2 md:col-span-1">
-              <FormLabel>Top_P: {field.value}</FormLabel>
+              <FormLabel>
+                Top_P: {field.value || model.options.top_p.default}
+              </FormLabel>
               <FormControl>
                 <Slider
                   {...field}
@@ -114,7 +116,9 @@ export const AIPersonality = ({ initialAi, form }: SelectDataSourceProps) => {
           control={form.control}
           render={({ field }) => (
             <FormItem className="col-span-2 md:col-span-1">
-              <FormLabel>Max Tokens: {field.value}</FormLabel>
+              <FormLabel>
+                Max Tokens: {field.value || model.options.max_tokens.default}
+              </FormLabel>
               <FormControl>
                 <Slider
                   {...field}
@@ -141,7 +145,10 @@ export const AIPersonality = ({ initialAi, form }: SelectDataSourceProps) => {
           control={form.control}
           render={({ field }) => (
             <FormItem className="col-span-2 md:col-span-1">
-              <FormLabel>Frequency Penalty: {field.value}</FormLabel>
+              <FormLabel>
+                Frequency Penalty:{" "}
+                {field.value || model.options.frequency_penalty?.default}
+              </FormLabel>
               <FormControl>
                 <Slider
                   {...field}
@@ -168,7 +175,10 @@ export const AIPersonality = ({ initialAi, form }: SelectDataSourceProps) => {
           control={form.control}
           render={({ field }) => (
             <FormItem className="col-span-2 md:col-span-1">
-              <FormLabel>Presence Penalty: {field.value}</FormLabel>
+              <FormLabel>
+                Presence Penalty:{" "}
+                {field.value || model.options.presence_penalty?.default}
+              </FormLabel>
               <FormControl>
                 <Slider
                   {...field}
