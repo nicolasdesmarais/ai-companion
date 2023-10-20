@@ -4,6 +4,7 @@ const client = new ApifyClient({
   token: process.env.APIFY_TOKEN,
 });
 const webScraperActorId = process.env.APIFY_WEB_SCRAPER_ACTOR_ID;
+const runMode = process.env.APIFY_RUN_MODE;
 
 export class ApifyService {
   async createWebUrlKnowledge(userId: string, url: string) {
@@ -15,12 +16,12 @@ export class ApifyService {
       .actor(webScraperActorId)
       .start(this.getWebScraperInput(url));
 
-    console.log("Actor run starter: " + actorRun.id);
+    console.log("Actor run started: " + actorRun.id);
   }
 
   private getWebScraperInput(url: string) {
     return {
-      runMode: "DEVELOPMENT",
+      runMode: runMode,
       startUrls: [
         {
           url: url,
@@ -57,9 +58,6 @@ export class ApifyService {
 
           // Print some information to actor log
           context.log.info(`URL: ${context.request.url}, TITLE: ${pageTitle}`);
-
-          // Manually add a new page to the queue for scraping.
-          await context.enqueueRequest({ url: "http://www.example.com" });
 
           // Return an object with the data extracted from the page.
           // It will be stored to the resulting dataset.
