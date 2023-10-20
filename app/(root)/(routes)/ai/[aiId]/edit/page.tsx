@@ -1,8 +1,7 @@
 import { auth, redirectToSignIn } from "@clerk/nextjs";
 
 import prismadb from "@/lib/prismadb";
-
-import { AIForm } from "./components/ai-form";
+import { AIEditor } from "./components/ai-editor";
 
 interface AIIdPageProps {
   params: {
@@ -17,7 +16,7 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
     return redirectToSignIn();
   }
 
-  const companion = await prismadb.companion.findUnique({
+  const initialAi = await prismadb.companion.findUnique({
     where: {
       id: params.aiId,
       userId,
@@ -33,7 +32,7 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
 
   const categories = await prismadb.category.findMany();
 
-  return <AIForm initialData={companion} categories={categories} />;
+  return <AIEditor initialAi={initialAi} categories={categories} />;
 };
 
 export default AIIdPage;

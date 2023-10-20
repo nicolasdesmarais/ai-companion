@@ -62,7 +62,7 @@ export const ChatList = () => {
           <BotAvatar src={conversation.companion.src} />
           <div className="flex flex-col gap-y-1 w-full">
             <div className="flex items-center gap-x-2">
-              <p className="font-bold">{conversation.name}</p>
+              <p className="font-bold text-ellipsis">{conversation.name}</p>
             </div>
             <div className="text-xs text-muted-foreground w-full pb-2 border-b border-muted-foreground text-ellipsis">
               {conversation.companion.description}

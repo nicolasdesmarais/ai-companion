@@ -1,5 +1,8 @@
 import { EntityNotFoundError, UnauthorizedError } from "@/domain/errors/Errors";
-import { GoogleDriveSearchResponse } from "@/domain/types/GoogleDriveSearchResponse";
+import {
+  GoogleDriveSearchResponse,
+  mapMimeTypeToEnum,
+} from "@/domain/types/GoogleDriveSearchResponse";
 import prismadb from "@/lib/prismadb";
 import fs from "fs";
 import { drive_v3, google } from "googleapis";
@@ -66,7 +69,10 @@ export class GoogleDriveLoader {
   }
 
   private async listFiles(query: string) {
-    return await DRIVE_CLIENT.files.list({ q: query });
+    return await DRIVE_CLIENT.files.list({
+      q: query,
+      fields: "files(id, name, mimeType, owners, modifiedTime)",
+    });
   }
 
   private async getFileAsStream(fileId: string) {
@@ -95,7 +101,9 @@ export class GoogleDriveLoader {
       return {
         id: file.id ?? "",
         name: file.name ?? "",
-        type: file.mimeType ?? "",
+        type: mapMimeTypeToEnum(file.mimeType),
+        owner: file.owners?.[0]?.displayName ?? "",
+        modifiedTime: file.modifiedTime ?? "",
       };
     });
 
@@ -171,12 +179,11 @@ export class GoogleDriveLoader {
     const result: drive_v3.Schema$File[] = [];
 
     const listFilesRecursive = async (folderId: string): Promise<void> => {
-      const response = await DRIVE_CLIENT.files.list({
-        q: `'${folderId}' in parents and (${this.getMimeTypeQuery(
-          true
-        )}) and trashed=false`,
-        fields: "files(id, name, mimeType)",
-      });
+      const query = `'${folderId}' in parents and (${this.getMimeTypeQuery(
+        true
+      )}) and trashed=false`;
+
+      const response = await this.listFiles(query);
 
       if (!response.data.files) return;
 
