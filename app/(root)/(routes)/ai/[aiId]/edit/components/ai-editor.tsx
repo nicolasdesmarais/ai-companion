@@ -13,6 +13,7 @@ import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { Form } from "@/components/ui/form";
+import LeavePageBlocker from "@/components/leave-page-blocker";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -147,6 +148,7 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
           </div>
         </form>
       </Form>
+      <LeavePageBlocker when={form.formState.isDirty} />
     </div>
   );
 };
