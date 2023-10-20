@@ -38,8 +38,9 @@ const formSchema = z.object({
   visibility: z.string().min(1, {
     message: "Visibility is required",
   }),
-  temperature: z.string().optional(),
-  top_p: z.string().optional(),
+  frequency_penalty: z.array(z.number()).optional(),
+  temperature: z.array(z.number()).optional(),
+  top_p: z.array(z.number()).optional(),
   knowledge: z.array(z.custom<Knowledge>()).optional(),
 });
 
@@ -76,9 +77,12 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
       src: "",
       categoryId: undefined,
       modelId: "gpt-4",
-      temperature: "",
-      top_p: "",
       knowledge: [],
+      // temperature: [1],
+      // top_p: [1],
+      // max_tokens: [4000],
+      // frequency_penalty: [0],
+      // presence_penalty: [0],
     },
   });
 
