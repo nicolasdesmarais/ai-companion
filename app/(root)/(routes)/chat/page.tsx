@@ -23,7 +23,6 @@ const ChatPage = async () => {
   if (!conversations.length) {
     return redirect("/");
   }
-  console.log(conversations);
 
   return redirect(`/chat/${conversations[0].id}`);
 };

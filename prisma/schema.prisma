@@ -27,6 +27,7 @@ model Companion {
   instructions  String @db.Text
   seed          String @db.Text
   visibility    AIVisibility @default(PRIVATE)
+  options       Json?
 
   createdAt     DateTime @default(now()) @map(name: "created_at")
   updatedAt     DateTime @updatedAt @map(name: "updated_at")

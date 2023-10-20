@@ -34,7 +34,6 @@ export const AIPersonality = ({ initialAi, form }: SelectDataSourceProps) => {
   const isLoading = form.formState.isSubmitting;
   const modelId = form.getValues("modelId");
   const model = models.find((model) => model.id === modelId);
-  console.log(model);
 
   if (!model) {
     return null;
@@ -54,7 +53,7 @@ export const AIPersonality = ({ initialAi, form }: SelectDataSourceProps) => {
 
       {model.options.temperature && (
         <FormField
-          name="temperature"
+          name="options.temperature"
           control={form.control}
           render={({ field }) => (
             <FormItem className="col-span-2 md:col-span-1">
@@ -82,7 +81,7 @@ export const AIPersonality = ({ initialAi, form }: SelectDataSourceProps) => {
       )}
       {model.options.top_p && (
         <FormField
-          name="top_p"
+          name="options.top_p"
           control={form.control}
           render={({ field }) => (
             <FormItem className="col-span-2 md:col-span-1">
@@ -111,7 +110,7 @@ export const AIPersonality = ({ initialAi, form }: SelectDataSourceProps) => {
       )}
       {model.options.max_tokens && (
         <FormField
-          name="max_tokens"
+          name="options.max_tokens"
           control={form.control}
           render={({ field }) => (
             <FormItem className="col-span-2 md:col-span-1">
@@ -138,7 +137,7 @@ export const AIPersonality = ({ initialAi, form }: SelectDataSourceProps) => {
       )}
       {model.options.frequency_penalty && (
         <FormField
-          name="frequency_penalty"
+          name="options.frequency_penalty"
           control={form.control}
           render={({ field }) => (
             <FormItem className="col-span-2 md:col-span-1">
@@ -165,7 +164,7 @@ export const AIPersonality = ({ initialAi, form }: SelectDataSourceProps) => {
       )}
       {model.options.presence_penalty && (
         <FormField
-          name="presence_penalty"
+          name="options.presence_penalty"
           control={form.control}
           render={({ field }) => (
             <FormItem className="col-span-2 md:col-span-1">
