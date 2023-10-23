@@ -12,6 +12,10 @@ export class ApifyService {
       throw new Error("APIFY_WEB_SCRAPER_ACTOR_ID is not set");
     }
 
+    if (!url) {
+      return;
+    }
+
     const actorRun = await client
       .actor(webScraperActorId)
       .start(this.getWebScraperInput(url));
