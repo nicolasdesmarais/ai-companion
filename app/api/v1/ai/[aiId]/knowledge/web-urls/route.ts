@@ -21,10 +21,13 @@ export async function POST(
 
   const userId = user.id;
   const body = await req.json();
-  const { url } = body;
+  const { urls } = body;
 
   const apifyService = new ApifyService();
-  apifyService.createWebUrlKnowledge(userId, url);
+
+  urls.forEach(async (url: string) => {
+    await apifyService.createWebUrlKnowledge(userId, url);
+  });
 
   try {
     return new NextResponse("", { status: 201 });

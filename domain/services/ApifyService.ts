@@ -12,6 +12,10 @@ export class ApifyService {
       throw new Error("APIFY_WEB_SCRAPER_ACTOR_ID is not set");
     }
 
+    if (!url) {
+      return;
+    }
+
     const actorRun = await client
       .actor(webScraperActorId)
       .start(this.getWebScraperInput(url));
@@ -34,39 +38,37 @@ export class ApifyService {
           glob: `${url}/**/*`,
         },
       ],
-      pseudoUrls: [],
       excludes: [
         {
           glob: "/**/*.{png,jpg,jpeg,pdf}",
         },
       ],
-      // The function accepts a single argument: the "context" object.
       pageFunction:
         // For a complete list of its properties and functions,
         // see https://apify.com/apify/web-scraper#page-function
         async function pageFunction(context: any) {
-          // This statement works as a breakpoint when you're trying to debug your code. Works only with Run mode: DEVELOPMENT!
-          // debugger;
-
-          // jQuery is handy for finding DOM elements and extracting data from them.
-          // To use it, make sure to enable the "Inject jQuery" option.
           const $ = context.jQuery;
           const pageTitle = $("title").first().text();
-          const h1 = $("h1").first().text();
-          const first_h2 = $("h2").first().text();
-          const random_text_from_the_page = $("p").first().text();
 
-          // Print some information to actor log
-          context.log.info(`URL: ${context.request.url}, TITLE: ${pageTitle}`);
+          // Get all text from meaningful elements
+          let allText = "";
+          $("p, h1, h2, h3, h4, h5, h6").each(
+            (_: any, element: HTMLElement) => {
+              allText += $(element).text() + "\n"; // Add a newline for separation
+            }
+          );
 
-          // Return an object with the data extracted from the page.
-          // It will be stored to the resulting dataset.
+          // Remove extra spaces and newlines
+          allText = allText.replace(/\s\s+/g, " ").trim();
+
+          context.log.info(
+            `URL: ${context.request.url}, TITLE: ${pageTitle}, allText: ${allText}`
+          );
+
           return {
             url: context.request.url,
             pageTitle,
-            h1,
-            first_h2,
-            random_text_from_the_page,
+            allText,
           };
         },
       injectJQuery: true,
@@ -74,13 +76,6 @@ export class ApifyService {
         useApifyProxy: true,
       },
       proxyRotation: "RECOMMENDED",
-      initialCookies: [],
-      useChrome: false,
-      headless: true,
-      ignoreSslErrors: false,
-      ignoreCorsAndCsp: false,
-      downloadMedia: true,
-      downloadCss: true,
       maxRequestRetries: 3,
       maxPagesPerCrawl: 0,
       maxResultsPerCrawl: 0,
@@ -88,28 +83,8 @@ export class ApifyService {
       maxConcurrency: 50,
       pageLoadTimeoutSecs: 60,
       pageFunctionTimeoutSecs: 60,
-      waitUntil: ["networkidle2"],
-      preNavigationHooks: `// We need to return array of (possibly async) functions here.
-        // The functions accept two arguments: the "crawlingContext" object
-        // and "gotoOptions".
-        [
-            async (crawlingContext, gotoOptions) => {
-                // ...
-            },
-        ]`,
-      postNavigationHooks: `// We need to return array of (possibly async) functions here.
-        // The functions accept a single argument: the "crawlingContext" object.
-        [
-            async (crawlingContext) => {
-                // ...
-            },
-        ]`,
-      breakpointLocation: "NONE",
-      closeCookieModals: false,
+      closeCookieModals: true,
       maxScrollHeightPixels: 5000,
-      debugLog: false,
-      browserLog: false,
-      customData: {},
     };
   }
 }
