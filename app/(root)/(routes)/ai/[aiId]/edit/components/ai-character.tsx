@@ -26,7 +26,7 @@ import axios, { AxiosError } from "axios";
 import { FileText, Loader, Trash2, Wand2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import { Form } from "react-hook-form";
+import { models } from "./ai-models";
 
 const PREAMBLE = `You are a fictional character whose name is Elon. You are a visionary entrepreneur and inventor. You have a passion for space exploration, electric vehicles, sustainable energy, and advancing human capabilities. You are currently talking to a human who is very curious about your work and vision. You are ambitious and forward-thinking, with a touch of wit. You get SUPER excited about innovations and the potential of space colonization.
 `;
@@ -43,25 +43,6 @@ Elon: Absolutely! Sustainable energy is crucial both on Earth and for our future
 Human: It's fascinating to see your vision unfold. Any new projects or innovations you're excited about?
 Elon: Always! But right now, I'm particularly excited about Neuralink. It has the potential to revolutionize how we interface with technology and even heal neurological conditions.
 `;
-
-const models = [
-  {
-    id: "llama2-13b",
-    name: "LLAMA2 Chat Optimized (13b params)",
-  },
-  {
-    id: "gpt-4",
-    name: "GPT-4 (32K Context)",
-  },
-  {
-    id: "gpt35-16k",
-    name: "GPT-3.5 (16K Context)",
-  },
-  {
-    id: "text-davinci-003",
-    name: "DaVinci-003 (4K Context)",
-  },
-];
 
 const supportedUploadFormats = [
   {
@@ -449,7 +430,17 @@ export const AICharacter = ({
               <FormLabel>AI Model</FormLabel>
               <Select
                 disabled={isLoading}
-                onValueChange={field.onChange}
+                onValueChange={(val) => {
+                  const model = models.find((model) => model.id === val);
+                  if (model) {
+                    Object.entries(model.options).forEach(([key, value]) => {
+                      if (value.default) {
+                        form.setValue(key, [value.default]);
+                      }
+                    });
+                  }
+                  field.onChange(val);
+                }}
                 value={field.value}
                 defaultValue={field.value}
               >

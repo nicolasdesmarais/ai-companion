@@ -17,6 +17,7 @@ export async function POST(req: Request) {
       modelId,
       knowledge,
       visibility,
+      options,
     } = body;
 
     if (!user || !user.id) {
@@ -39,6 +40,7 @@ export async function POST(req: Request) {
         seed,
         modelId,
         visibility,
+        options,
       },
     });
 

@@ -20,6 +20,7 @@ export async function PATCH(
       modelId,
       knowledge,
       visibility,
+      options,
     } = body;
 
     if (!params.aiId) {
@@ -53,6 +54,7 @@ export async function PATCH(
         seed,
         modelId,
         visibility,
+        options,
       },
     });
     if (knowledge && knowledge.length > 0) {

@@ -2,7 +2,7 @@
 
 import { Category, Prisma, Knowledge } from "@prisma/client";
 import { AICharacter } from "./ai-character";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { AIKnowledge } from "./ai-knowledge";
 import { AIPersonality } from "./ai-personality";
@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { Form } from "@/components/ui/form";
 import LeavePageBlocker from "@/components/leave-page-blocker";
+import { models } from "./ai-models";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -38,8 +39,13 @@ const formSchema = z.object({
   visibility: z.string().min(1, {
     message: "Visibility is required",
   }),
-  temperature: z.string().optional(),
-  top_p: z.string().optional(),
+  options: z.object({
+    max_tokens: z.array(z.number()).optional(),
+    temperature: z.array(z.number()).optional(),
+    top_p: z.array(z.number()).optional(),
+    frequency_penalty: z.array(z.number()).optional(),
+    presence_penalty: z.array(z.number()).optional(),
+  }),
   knowledge: z.array(z.custom<Knowledge>()).optional(),
 });
 
@@ -66,6 +72,18 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
   const { toast } = useToast();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState(0);
+  if (initialAi && !initialAi.options) {
+    const model = models.find((model) => model.id === initialAi.modelId);
+    if (model) {
+      const options = {} as any;
+      Object.entries(model.options).forEach(([key, value]) => {
+        if (value.default) {
+          options[key] = [value.default];
+        }
+      });
+      initialAi.options = options;
+    }
+  }
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: (initialAi as any) || {
@@ -76,11 +94,19 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
       src: "",
       categoryId: undefined,
       modelId: "gpt-4",
-      temperature: "",
-      top_p: "",
       knowledge: [],
     },
   });
+  useEffect(() => {
+    if (Object.keys(form.formState.errors).length) {
+      setActiveTab(0);
+      toast({
+        variant: "destructive",
+        description: "Form is not valid. Please check the errors.",
+        duration: 3000,
+      });
+    }
+  }, [form.formState.errors, toast]);
 
   const handleTabClick = (index: number) => setActiveTab(index);
 
