@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
 import { redirect } from "next/navigation";
 import { useState } from "react";
@@ -9,10 +10,19 @@ interface WebUrlsProps {
 }
 
 export const WebUrlsForm = ({ aiId }: WebUrlsProps) => {
-  const [urls, setUrls] = useState([""]); // Initialize with a single empty string
+  const { toast } = useToast();
+  const [urls, setUrls] = useState([""]);
 
   const handleContinue = async () => {
-    axios.post(`/api/v1/ai/${aiId}/knowledge/web-urls`, { urls });
+    try {
+      await axios.post(`/api/v1/ai/${aiId}/knowledge/web-urls`, { urls });
+      redirect(`/`);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: "Something went wrong",
+      });
+    }
   };
 
   const handleUrlChange = (index: number, value: string) => {

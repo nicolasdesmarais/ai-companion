@@ -130,7 +130,12 @@ export const GoogleDriveForm = ({
         createKnowledgeRequest
       );
       redirect(`/ai/${aiId}/edit`);
-    } catch (error) {}
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: "Something went wrong",
+      });
+    }
   };
 
   return (
