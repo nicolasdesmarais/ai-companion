@@ -2,7 +2,7 @@
 
 import { Category, Prisma, Knowledge } from "@prisma/client";
 import { AICharacter } from "./ai-character";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { AIKnowledge } from "./ai-knowledge";
 import { AIPersonality } from "./ai-personality";
@@ -97,6 +97,16 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
       knowledge: [],
     },
   });
+  useEffect(() => {
+    if (Object.keys(form.formState.errors).length) {
+      setActiveTab(0);
+      toast({
+        variant: "destructive",
+        description: "Form is not valid. Please check the errors.",
+        duration: 3000,
+      });
+    }
+  }, [form.formState.errors, toast]);
 
   const handleTabClick = (index: number) => setActiveTab(index);
 
