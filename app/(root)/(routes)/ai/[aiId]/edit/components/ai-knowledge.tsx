@@ -14,16 +14,20 @@ interface SelectDataSourceProps {
 
 export const AIKnowledge = ({ aiId }: SelectDataSourceProps) => {
   return (
-    <div className="h-full p-4 space-y-2 max-w-3xl mx-auto">
-      <h1>Select a data source</h1>
-      <p>Choose a data source for your data store</p>
+    <div className="h-full p-4 max-w-3xl mx-auto">
+      <h1 className="text-lg font-medium">Select a data source</h1>
+      <p className="text-sm text-muted-foreground">
+        Choose a data source for your data store
+      </p>
 
+      <h3 className="text-md font-medium mt-6 mb-2">Data Sources</h3>
       <div className="grid grid-cols-3 gap-4">
         <DataSourceCard
           icon={PlusCircle}
           title="Your Data Stores"
           description="Select a data store you created for a different AI."
           href=""
+          isSelected={true}
         />
         <DataSourceCard
           icon={FileUp}

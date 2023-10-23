@@ -8,6 +8,7 @@ interface Props {
   description: string;
   href: string;
   icon: LucideIcon;
+  isSelected?: boolean;
 }
 
 const DataSourceCard: React.FC<Props> = ({
@@ -15,15 +16,27 @@ const DataSourceCard: React.FC<Props> = ({
   description,
   href,
   icon,
+  isSelected = false,
 }) => {
   const Icon = icon;
+  if (isSelected) {
+    return (
+      <div className="p-6 border-2 rounded-xl flex flex-col justify-between border-dashed">
+        <div>
+          <Icon className="w-16 h-16 mb-2" />
+          <h2>{title}</h2>
+          <p className="text-xs">{description}</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <Link
       href={href}
       className="p-6 border rounded-xl flex flex-col justify-between bg-accent/50 hover:bg-primary/10"
     >
       <div>
-        <Icon className="w-16 h-16" />
+        <Icon className="w-16 h-16 mb-2" />
         <h2>{title}</h2>
         <p className="text-xs">{description}</p>
       </div>
