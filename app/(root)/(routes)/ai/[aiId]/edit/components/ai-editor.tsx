@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { Form } from "@/components/ui/form";
 import LeavePageBlocker from "@/components/leave-page-blocker";
+import { models } from "./ai-models";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -71,6 +72,18 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
   const { toast } = useToast();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState(0);
+  if (initialAi && !initialAi.options) {
+    const model = models.find((model) => model.id === initialAi.modelId);
+    if (model) {
+      const options = {} as any;
+      Object.entries(model.options).forEach(([key, value]) => {
+        if (value.default) {
+          options[key] = [value.default];
+        }
+      });
+      initialAi.options = options;
+    }
+  }
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: (initialAi as any) || {
