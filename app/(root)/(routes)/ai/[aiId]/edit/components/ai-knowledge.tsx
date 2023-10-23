@@ -47,7 +47,7 @@ export const AIKnowledge = ({ aiId }: SelectDataSourceProps) => {
           description="Import data from a cloud storage bucket."
           href={`/ai/${aiId}/knowledge/google-drive`}
         />
-        <DataSourceCard
+        {/* <DataSourceCard
           icon={Database}
           title="SQL Query"
           description="Import data from a SQL table."
@@ -58,7 +58,7 @@ export const AIKnowledge = ({ aiId }: SelectDataSourceProps) => {
           title="API"
           description="Import data manually by calling an API."
           href=""
-        />
+        /> */}
       </div>
     </div>
   );
