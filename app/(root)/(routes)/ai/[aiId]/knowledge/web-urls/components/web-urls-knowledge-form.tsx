@@ -18,6 +18,7 @@ export const WebUrlsForm = ({ aiId }: WebUrlsProps) => {
       await axios.post(`/api/v1/ai/${aiId}/knowledge/web-urls`, { urls });
       redirect(`/`);
     } catch (error) {
+      console.log(error);
       toast({
         variant: "destructive",
         description: "Something went wrong",
