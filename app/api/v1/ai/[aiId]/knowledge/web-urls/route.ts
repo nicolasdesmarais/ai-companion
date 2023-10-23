@@ -24,23 +24,21 @@ export async function POST(
   const body = await req.json();
   const { urls } = body;
 
-  const apifyService = new ApifyService();
+  try {
+    const apifyService = new ApifyService();
+    urls.forEach(async (url: string) => {
+      const knowledge = await prismadb.knowledge.create({
+        data: {
+          userId: userId,
+          name: url,
+          type: "URL",
+        },
+      });
 
-  urls.forEach(async (url: string) => {
-    const knowledge = await prismadb.knowledge.create({
-      data: {
-        userId: userId,
-        name: url,
-        type: "URL",
-      },
+      await aiService.createKnowledgeAI(params.aiId, [knowledge.id]);
+      await apifyService.createWebUrlKnowledge(knowledge.id, url);
     });
 
-    await aiService.createKnowledgeAI(params.aiId, [knowledge.id]);
-
-    await apifyService.createWebUrlKnowledge(knowledge.id, url);
-  });
-
-  try {
     return new NextResponse("", { status: 201 });
   } catch (e) {
     console.log(e);
