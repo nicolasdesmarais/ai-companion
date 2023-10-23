@@ -107,7 +107,7 @@ export class ApifyService {
       },
       proxyRotation: "RECOMMENDED",
       maxRequestRetries: 3,
-      maxPagesPerCrawl: 3,
+      maxPagesPerCrawl: 0,
       maxResultsPerCrawl: 0,
       maxCrawlingDepth: 0,
       maxConcurrency: 50,
