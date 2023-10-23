@@ -7,7 +7,7 @@ const webScraperActorId = process.env.APIFY_WEB_SCRAPER_ACTOR_ID;
 const runMode = process.env.APIFY_RUN_MODE;
 const webhookUrl = process.env.APIFY_WEBHOOK_URL;
 const webhookSecret = process.env.APIFY_WEBHOOK_SECRET;
-const maxPagesPerCrawl = process.env.APIFY_MAX_PAGES_PER_CRAWL || 0;
+const maxPagesPerCrawl = process.env.APIFY_MAX_PAGES_PER_CRAWL;
 
 export class ApifyService {
   async createWebUrlKnowledge(knowledgeId: string, url: string) {
@@ -108,7 +108,7 @@ export class ApifyService {
       },
       proxyRotation: "RECOMMENDED",
       maxRequestRetries: 3,
-      maxPagesPerCrawl: maxPagesPerCrawl,
+      maxPagesPerCrawl: this.getMaxPagesPerCrawl(),
       maxResultsPerCrawl: 0,
       maxCrawlingDepth: 0,
       maxConcurrency: 50,
@@ -130,5 +130,16 @@ export class ApifyService {
         knowledge: item.knowledge,
       };
     });
+  }
+
+  private getMaxPagesPerCrawl(): number {
+    const maxPagesPerCrawl = process.env.APIFY_MAX_PAGES_PER_CRAWL;
+    if (maxPagesPerCrawl) {
+      const maxPagesPerCrawlNumber = parseInt(maxPagesPerCrawl);
+      if (!isNaN(maxPagesPerCrawlNumber)) {
+        return maxPagesPerCrawlNumber;
+      }
+    }
+    return 0;
   }
 }
