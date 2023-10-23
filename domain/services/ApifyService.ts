@@ -7,6 +7,7 @@ const webScraperActorId = process.env.APIFY_WEB_SCRAPER_ACTOR_ID;
 const runMode = process.env.APIFY_RUN_MODE;
 const webhookUrl = process.env.APIFY_WEBHOOK_URL;
 const webhookSecret = process.env.APIFY_WEBHOOK_SECRET;
+const maxPagesPerCrawl = process.env.APIFY_MAX_PAGES_PER_CRAWL || 0;
 
 export class ApifyService {
   async createWebUrlKnowledge(knowledgeId: string, url: string) {
@@ -107,7 +108,7 @@ export class ApifyService {
       },
       proxyRotation: "RECOMMENDED",
       maxRequestRetries: 3,
-      maxPagesPerCrawl: 0,
+      maxPagesPerCrawl: maxPagesPerCrawl,
       maxResultsPerCrawl: 0,
       maxCrawlingDepth: 0,
       maxConcurrency: 50,
