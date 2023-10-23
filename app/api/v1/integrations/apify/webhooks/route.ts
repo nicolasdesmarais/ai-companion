@@ -1,11 +1,9 @@
+import { ApifyWebUrlLoader } from "@/domain/services/knowledge/ApifyWebUrlLoader";
+import {
+  ApifySupportedEvents,
+  ApifyWebhookEvent,
+} from "@/domain/types/ApifyWebhookEvent";
 import { headers } from "next/headers";
-
-enum ApifySupportedEvents {
-  ACTOR_RUN_SUCCEEDED = "ACTOR.RUN.SUCCEEDED",
-  ACTOR_RUN_FAILED = "ACTOR.RUN.FAILED",
-  ACTOR_RUN_ABORTED = "ACTOR.RUN.ABORTED",
-  ACTOR_RUN_TIMED_OUT = "ACTOR.RUN.TIMED_OUT",
-}
 
 const isSupportedEvent = (
   eventType: string
@@ -15,29 +13,28 @@ const isSupportedEvent = (
   );
 };
 
-interface ApifyWebhookEvent {
-  eventType: string;
-  eventData: ApifyEventData;
-}
-
-interface ApifyEventData {
-  actorId: string;
-  actorRunId: string;
-}
+const webhookSecret = process.env.APIFY_WEBHOOK_SECRET;
 
 export async function POST(req: Request) {
-  console.log("APIFY Webhook:");
+  console.log("Received Apify Webhook");
   const headerPayload = headers();
-  const header = JSON.stringify(headerPayload);
-  console.log("Headers:" + header);
+
+  const secret = headerPayload.get("X-Apify-Webhook-Secret");
+  if (secret !== webhookSecret) {
+    console.log("Invalid Apify Webhook secret");
+    return new Response("", { status: 400 });
+  }
 
   const payload = await req.json();
   const event = payload as ApifyWebhookEvent;
-  console.log(event);
+  console.log("Apify Webhook payload: " + event);
   if (!isSupportedEvent(event.eventType)) {
     console.log(`Unsupported event type: ${event.eventType}`);
     return new Response("", { status: 200 });
   }
+
+  const apifyWebUrlLoader = new ApifyWebUrlLoader();
+  await apifyWebUrlLoader.loadFromWebhook(event);
 
   return new Response("", { status: 200 });
 }
