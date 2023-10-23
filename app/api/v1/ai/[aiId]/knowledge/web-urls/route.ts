@@ -1,6 +1,7 @@
 import { BadRequestError, EntityNotFoundError } from "@/domain/errors/Errors";
 import { AIService } from "@/domain/services/AIService";
 import { ApifyService } from "@/domain/services/ApifyService";
+import prismadb from "@/lib/prismadb";
 import { currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
@@ -26,7 +27,17 @@ export async function POST(
   const apifyService = new ApifyService();
 
   urls.forEach(async (url: string) => {
-    await apifyService.createWebUrlKnowledge(userId, url);
+    const knowledge = await prismadb.knowledge.create({
+      data: {
+        userId: userId,
+        name: url,
+        type: "URL",
+      },
+    });
+
+    await aiService.createKnowledgeAI(params.aiId, [knowledge.id]);
+
+    await apifyService.createWebUrlKnowledge(knowledge.id, url);
   });
 
   try {

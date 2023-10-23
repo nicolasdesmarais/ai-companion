@@ -1,3 +1,5 @@
+import { Document } from "langchain/document";
+
 import { BadRequestError } from "@/domain/errors/Errors";
 import { MemoryManager } from "@/lib/memory";
 import prismadb from "@/lib/prismadb";
@@ -74,5 +76,24 @@ export class FileLoader {
     const memoryManager = await MemoryManager.getInstance();
     await memoryManager.vectorUpload(docOutput);
     return knowledge;
+  }
+
+  public async loadJsonArray(jsonArray: any[], knowlegeId: string) {
+    const docs: Document[] = jsonArray.map((json) => {
+      return new Document({
+        pageContent: JSON.stringify(json),
+        metadata: { knowledge: knowlegeId },
+      });
+    });
+
+    const splitter = new RecursiveCharacterTextSplitter({
+      chunkSize: 4000,
+      chunkOverlap: 600,
+    });
+
+    const docOutput = await splitter.splitDocuments(docs);
+
+    const memoryManager = await MemoryManager.getInstance();
+    await memoryManager.vectorUpload(docOutput);
   }
 }
