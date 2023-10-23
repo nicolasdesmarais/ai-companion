@@ -5,23 +5,23 @@ export const models = [
     options: {
       temperature: {
         default: 0.75,
-        max: 4,
+        max: 2,
         min: 0,
         step: 0.1,
       },
-      top_p: {
+      topP: {
         default: 0.9,
         max: 1,
         min: 0,
         step: 0.01,
       },
-      top_k: {
+      topK: {
         default: 50,
         max: 100,
         min: 0,
         step: 1,
       },
-      max_tokens: {
+      maxTokens: {
         default: 128,
         max: 2000,
         min: 100,
@@ -36,28 +36,28 @@ export const models = [
       temperature: {
         default: 1,
         max: 2,
-        min: -2,
+        min: 0,
         step: 0.1,
       },
-      top_p: {
+      topP: {
         default: 1,
         max: 1,
         min: 0,
         step: 0.01,
       },
-      max_tokens: {
+      maxTokens: {
         default: 4000,
         max: 6000,
         min: 100,
         step: 1,
       },
-      frequency_penalty: {
+      frequencyPenalty: {
         default: 0,
         max: 2,
         min: -2,
         step: 0.1,
       },
-      presence_penalty: {
+      presencePenalty: {
         default: 0,
         max: 2,
         min: -2,
@@ -72,28 +72,28 @@ export const models = [
       temperature: {
         default: 1,
         max: 2,
-        min: -2,
+        min: 0,
         step: 0.1,
       },
-      top_p: {
+      topP: {
         default: 1,
         max: 1,
         min: 0,
         step: 0.01,
       },
-      max_tokens: {
+      maxTokens: {
         default: 4000,
         max: 6000,
         min: 100,
         step: 1,
       },
-      frequency_penalty: {
+      frequencyPenalty: {
         default: 0,
         max: 2,
         min: -2,
         step: 0.1,
       },
-      presence_penalty: {
+      presencePenalty: {
         default: 0,
         max: 2,
         min: -2,
@@ -108,28 +108,28 @@ export const models = [
       temperature: {
         default: 1,
         max: 2,
-        min: -2,
+        min: 0,
         step: 0.1,
       },
-      top_p: {
+      topP: {
         default: 1,
         max: 1,
         min: 0,
         step: 0.01,
       },
-      max_tokens: {
+      maxTokens: {
         default: 400,
         max: 2000,
         min: 100,
         step: 1,
       },
-      frequency_penalty: {
+      frequencyPenalty: {
         default: 0,
         max: 2,
         min: -2,
         step: 0.1,
       },
-      presence_penalty: {
+      presencePenalty: {
         default: 0,
         max: 2,
         min: -2,

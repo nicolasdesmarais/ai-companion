@@ -79,13 +79,26 @@ export async function POST(
     }
     const { handlers } = LangChainStream();
 
-    let completionModel, chatModel;
+    let completionModel,
+      chatModel,
+      options = {} as any;
+
+    Object.entries(conversation.companion.options || {}).forEach(
+      ([key, value]) => {
+        if (value && value.length > 0) {
+          options[key] = value[0];
+        }
+      }
+    );
+
     if (conversation.companion.modelId === "llama2-13b") {
       completionModel = new Replicate({
         model:
           "meta/llama-2-13b-chat:f4e2de70d66816a838a89eeeb621910adffb0dd0baba3976c96980970978018d",
         input: {
-          max_length: 2048,
+          ...options,
+          top_p: options.topP,
+          max_tokens: options.maxTokens,
         },
         apiKey: process.env.REPLICATE_API_TOKEN,
         callbackManager: CallbackManager.fromHandlers(handlers),
@@ -94,7 +107,7 @@ export async function POST(
       completionModel = new OpenAI({
         openAIApiKey: process.env.OPENAI_API_KEY,
         modelName: "text-davinci-003",
-        maxTokens: -1,
+        ...options,
       });
     } else if (conversation.companion.modelId === "gpt35-16k") {
       chatModel = new ChatOpenAI({
@@ -102,6 +115,7 @@ export async function POST(
         azureOpenAIApiVersion: "2023-05-15",
         azureOpenAIApiInstanceName: "appdirect-prod-ai-useast",
         azureOpenAIApiDeploymentName: "ai-prod-16k",
+        ...options,
       });
     } else {
       chatModel = new ChatOpenAI({
@@ -109,6 +123,7 @@ export async function POST(
         azureOpenAIApiVersion: "2023-05-15",
         azureOpenAIApiInstanceName: "prod-appdirectai-east2",
         azureOpenAIApiDeploymentName: "gpt4-32k",
+        ...options,
       });
     }
 

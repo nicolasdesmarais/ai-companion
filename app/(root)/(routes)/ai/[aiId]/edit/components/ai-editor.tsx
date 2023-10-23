@@ -40,11 +40,11 @@ const formSchema = z.object({
     message: "Visibility is required",
   }),
   options: z.object({
-    max_tokens: z.array(z.number()).optional(),
+    maxTokens: z.array(z.number()).optional(),
     temperature: z.array(z.number()).optional(),
-    top_p: z.array(z.number()).optional(),
-    frequency_penalty: z.array(z.number()).optional(),
-    presence_penalty: z.array(z.number()).optional(),
+    topP: z.array(z.number()).optional(),
+    frequencyPenalty: z.array(z.number()).optional(),
+    presencePenalty: z.array(z.number()).optional(),
   }),
   knowledge: z.array(z.custom<Knowledge>()).optional(),
 });
