@@ -46,10 +46,10 @@ export const AIKnowledge = ({
     <div className="h-full p-4 max-w-3xl mx-auto">
       {activeTab === 0 && (
         <>
-          <h1 className="text-lg font-medium">Your AI's Data Sources</h1>
+          <h1 className="text-lg font-medium">Your AI&apos;s Data Sources</h1>
           <p className="text-sm text-muted-foreground">
             The following files and sources are currently being used to inform
-            your AI's knowledge.
+            your AI&apos;s knowledge.
           </p>
           <FormField
             name="knowledge"
