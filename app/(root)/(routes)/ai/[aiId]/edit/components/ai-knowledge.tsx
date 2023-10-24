@@ -9,6 +9,7 @@ import {
   Network,
   ChevronLeft,
 } from "lucide-react";
+import { FormField } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
 import { GoogleDriveForm } from "./google-drive-knowledge";
 import { useRouter } from "next/navigation";
@@ -40,15 +41,46 @@ export const AIKnowledge = ({
   const { toast } = useToast();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState(0);
+
   return (
     <div className="h-full p-4 max-w-3xl mx-auto">
       {activeTab === 0 && (
         <>
-          <h1 className="text-lg font-medium">Select a data source</h1>
+          <h1 className="text-lg font-medium">Your AI's Data Sources</h1>
+          <p className="text-sm text-muted-foreground">
+            The following files and sources are currently being used to inform
+            your AI's knowledge.
+          </p>
+          <FormField
+            name="knowledge"
+            control={form.control}
+            render={({ field }) => (
+              <div>
+                {field.value.map((item: any) => (
+                  <div
+                    key={item.knowledgeId}
+                    className="flex items-center justify-between my-2"
+                  >
+                    <p className="text-sm px-3 py-2 bg-background rounded-lg  w-full ">
+                      {item.knowledge.name}
+                    </p>
+                  </div>
+                ))}
+                {field.value.length === 0 ? (
+                  <div className="flex items-center justify-between my-2">
+                    <p className="text-sm px-3 py-2 bg-background rounded-lg w-full ">
+                      None
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            )}
+          />
+
+          <h2 className="text-lg font-medium mt-8">Add more data sources</h2>
           <p className="text-sm text-muted-foreground">
             Choose a data source for your data store
           </p>
-
           <h3 className="text-md font-medium mt-6 mb-2">Data Sources</h3>
           <div className="grid grid-cols-3 gap-4">
             <DataSourceCard

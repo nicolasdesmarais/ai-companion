@@ -39,7 +39,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
       }
     };
     fetchAccount();
-  });
+  }, []);
 
   const { toast } = useToast();
 

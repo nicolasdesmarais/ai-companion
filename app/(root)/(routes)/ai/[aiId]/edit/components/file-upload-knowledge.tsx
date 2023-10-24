@@ -154,7 +154,7 @@ export const FileUploadKnowledge = ({
         control={form.control}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Custom Knowledge</FormLabel>
+            <FormLabel>Upload your file</FormLabel>
             <div>
               {field.value.map((item: any) => (
                 <div
