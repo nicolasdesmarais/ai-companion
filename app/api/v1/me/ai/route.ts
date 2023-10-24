@@ -1,4 +1,4 @@
-import { AIService } from "@/src/domain/services/AIService";
+import aiService from "@/src/domain/services/AIService";
 import {
   ListAIsRequestParams,
   ListAIsRequestScope,
@@ -33,7 +33,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       search: searchParams.get("search"),
     };
 
-    const aiService = new AIService();
     const ais = await aiService.findAIsForUser(authorization, requestParams);
 
     return NextResponse.json(ais);
