@@ -89,7 +89,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       const docOutput = await splitter.splitDocuments(docs);
 
       const memoryManager = await MemoryManager.getInstance();
-      // await memoryManager.vectorUpload(docOutput);
+      await memoryManager.vectorUpload(docOutput);
       return NextResponse.json(knowledge);
     } else {
       return NextResponse.json("Missing file", { status: 400 });

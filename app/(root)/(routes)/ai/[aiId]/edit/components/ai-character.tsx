@@ -58,40 +58,16 @@ type ExtendedCompanion = Prisma.CompanionGetPayload<typeof extendedCompanion>;
 
 interface CompanionFormProps {
   categories: Category[];
-  initialData: ExtendedCompanion | null;
   form: any;
 }
 
-export const AICharacter = ({
-  categories,
-  initialData,
-  form,
-}: CompanionFormProps) => {
+export const AICharacter = ({ categories, form }: CompanionFormProps) => {
   const { toast } = useToast();
-  const router = useRouter();
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatingInstruction, setGeneratingInstruction] = useState(false);
   const [generatingConversation, setGeneratingConversation] = useState(false);
 
   const isLoading = form.formState.isSubmitting;
-
-  const onDelete = async () => {
-    if (initialData?.id) {
-      try {
-        await axios.delete(`/api/v1/ai/${initialData.id}`);
-        toast({
-          description: "Deleted Successfully.",
-        });
-        router.refresh();
-        router.push("/");
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          description: "Something went wrong.",
-        });
-      }
-    }
-  };
 
   const generateAvatar = async () => {
     setGeneratingImage(true);
@@ -104,7 +80,7 @@ export const AICharacter = ({
           amount: 1,
           resolution: "512x512",
         });
-        form.setValue("src", response.data.secure_url);
+        form.setValue("src", response.data.secure_url, { shouldDirty: true });
       } catch (error) {
         toast({
           variant: "destructive",
@@ -134,7 +110,7 @@ export const AICharacter = ({
         const response = await axios.post("/api/generate", {
           prompt: `Generate an AI agent prompt for ${name}, ${description}.  Prompt should be at least 200 characters long.`,
         });
-        form.setValue("instructions", response.data);
+        form.setValue("instructions", response.data, { shouldDirty: true });
       } catch (error: any) {
         toast({
           variant: "destructive",
@@ -184,7 +160,9 @@ export const AICharacter = ({
           Below are relevant details about ${name}'s past and the conversation you are in.
           ${history}\n${name}:`,
         });
-        form.setValue("seed", `${history}\n${name}: ${response.data}\n\n`);
+        form.setValue("seed", `${history}\n${name}: ${response.data}\n\n`, {
+          shouldDirty: true,
+        });
       } catch (error: any) {
         toast({
           variant: "destructive",
@@ -329,7 +307,9 @@ export const AICharacter = ({
                   if (model) {
                     Object.entries(model.options).forEach(([key, value]) => {
                       if (value.default) {
-                        form.setValue(key, [value.default]);
+                        form.setValue(key, [value.default], {
+                          shouldDirty: true,
+                        });
                       }
                     });
                   }
@@ -477,24 +457,6 @@ export const AICharacter = ({
           </FormItem>
         )}
       />
-
-      <div className="w-full flex justify-between">
-        {initialData?.id && (
-          <Button
-            size="lg"
-            variant="destructive"
-            disabled={isLoading}
-            onClick={onDelete}
-            type="button"
-          >
-            Delete your AI
-          </Button>
-        )}
-        <Button size="lg" disabled={isLoading}>
-          {initialData ? "Save your AI" : "Create your AI"}
-          <Wand2 className="w-4 h-4 ml-2" />
-        </Button>
-      </div>
     </div>
   );
 };

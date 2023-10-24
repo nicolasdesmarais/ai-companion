@@ -41,7 +41,11 @@ export async function PATCH(
         userId: user.id,
       },
       include: {
-        knowledge: true,
+        knowledge: {
+          include: {
+            knowledge: true,
+          },
+        },
       },
       data: {
         categoryId,

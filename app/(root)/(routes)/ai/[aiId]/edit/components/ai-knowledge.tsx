@@ -14,33 +14,15 @@ import { useToast } from "@/components/ui/use-toast";
 import { GoogleDriveForm } from "./google-drive-knowledge";
 import { useRouter } from "next/navigation";
 import { FileUploadKnowledge } from "./file-upload-knowledge";
-import { Prisma } from "@prisma/client";
-
-const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
-  include: {
-    knowledge: {
-      include: {
-        knowledge: true,
-      },
-    },
-  },
-});
-
-type ExtendedCompanion = Prisma.CompanionGetPayload<typeof extendedCompanion>;
 interface SelectDataSourceProps {
-  aiId?: string;
   form: any;
-  initialAi: ExtendedCompanion | null;
 }
 
-export const AIKnowledge = ({
-  aiId,
-  form,
-  initialAi,
-}: SelectDataSourceProps) => {
+export const AIKnowledge = ({ form }: SelectDataSourceProps) => {
   const { toast } = useToast();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState(0);
+  const aiId = form.getValues("id");
 
   return (
     <div className="h-full p-4 max-w-3xl mx-auto">
@@ -150,11 +132,7 @@ export const AIKnowledge = ({
         </div>
       )}
       {activeTab === 1 && (
-        <FileUploadKnowledge
-          goBack={() => setActiveTab(0)}
-          form={form}
-          initialAi={initialAi}
-        />
+        <FileUploadKnowledge goBack={() => setActiveTab(0)} form={form} />
       )}
       {activeTab === 2 && <div></div>}
       {activeTab === 3 && aiId && (

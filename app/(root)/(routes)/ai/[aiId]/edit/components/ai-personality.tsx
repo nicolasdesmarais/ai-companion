@@ -200,12 +200,6 @@ export const AIPersonality = ({ initialAi, form }: SelectDataSourceProps) => {
           )}
         />
       )}
-      <div className="w-full flex justify-between">
-        <Button size="lg" disabled={isLoading}>
-          {initialAi ? "Save your AI" : "Create your AI"}
-          <Wand2 className="w-4 h-4 ml-2" />
-        </Button>
-      </div>
     </div>
   );
 };

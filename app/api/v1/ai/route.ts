@@ -42,6 +42,13 @@ export async function POST(req: Request) {
         visibility,
         options,
       },
+      include: {
+        knowledge: {
+          include: {
+            knowledge: true,
+          },
+        },
+      },
     });
 
     if (knowledge && knowledge.length > 0) {

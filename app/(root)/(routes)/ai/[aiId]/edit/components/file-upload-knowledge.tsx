@@ -37,28 +37,14 @@ const supportedUploadFormats = [
   },
 ];
 
-const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
-  include: {
-    knowledge: {
-      include: {
-        knowledge: true,
-      },
-    },
-  },
-});
-
-type ExtendedCompanion = Prisma.CompanionGetPayload<typeof extendedCompanion>;
-
 interface FileUploadKnowledgeProps {
   goBack: () => void;
   form: any;
-  initialAi: ExtendedCompanion | null;
 }
 
 export const FileUploadKnowledge = ({
   goBack,
   form,
-  initialAi,
 }: FileUploadKnowledgeProps) => {
   const [uploading, setUploading] = useState(false);
   const [removing, setRemoving] = useState("");
@@ -104,10 +90,14 @@ export const FileUploadKnowledge = ({
         data
       );
       const current = form.getValues("knowledge");
-      form.setValue("knowledge", [
-        ...current,
-        { knowledge: response.data, knowledgeId: response.data.id },
-      ]);
+      form.setValue(
+        "knowledge",
+        [
+          ...current,
+          { knowledge: response.data, knowledgeId: response.data.id },
+        ],
+        { shouldDirty: true }
+      );
       inputFileRef.current.value = "";
     } catch (error: any) {
       toast({
@@ -123,17 +113,15 @@ export const FileUploadKnowledge = ({
 
   const removeKnowledge = async (id: string) => {
     setRemoving(id);
+    const aiId = form.getValues("id");
     try {
-      if (initialAi) {
-        await axios.delete(`/api/knowledge/${id}/${initialAi.id}`);
-      } else {
-        await axios.delete(`/api/knowledge/${id}`);
-      }
+      await axios.delete(`/api/knowledge/${id}/${aiId}`);
 
       const current = form.getValues("knowledge");
       form.setValue(
         "knowledge",
-        current.filter((i: any) => i.knowledge.id !== id)
+        current.filter((i: any) => i.knowledge.id !== id),
+        { shouldDirty: false }
       );
     } catch (error: any) {
       toast({
