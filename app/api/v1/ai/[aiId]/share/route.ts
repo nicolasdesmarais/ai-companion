@@ -1,5 +1,5 @@
-import { AIService } from "@/domain/services/AIService";
-import { ShareAIRequest } from "@/domain/types/ShareAIRequest";
+import { AIService } from "@/src/domain/services/AIService";
+import { ShareAIRequest } from "@/src/domain/types/ShareAIRequest";
 import { auth } from "@clerk/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 

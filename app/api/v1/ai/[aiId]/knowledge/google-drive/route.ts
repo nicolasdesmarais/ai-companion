@@ -1,7 +1,10 @@
-import { BadRequestError, EntityNotFoundError } from "@/domain/errors/Errors";
-import { AIService } from "@/domain/services/AIService";
-import { GoogleDriveLoader } from "@/domain/services/knowledge/GoogleDriveLoader";
-import { CreateGoogleDriveKnowledgeRequest } from "@/domain/types/CreateGoogleDriveKnowledgeRequest";
+import {
+  BadRequestError,
+  EntityNotFoundError,
+} from "@/src/domain/errors/Errors";
+import { AIService } from "@/src/domain/services/AIService";
+import { GoogleDriveLoader } from "@/src/domain/services/knowledge/GoogleDriveLoader";
+import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/types/CreateGoogleDriveKnowledgeRequest";
 import { currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 

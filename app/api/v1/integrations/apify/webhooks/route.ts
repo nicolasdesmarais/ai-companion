@@ -1,8 +1,8 @@
-import { ApifyWebUrlLoader } from "@/domain/services/knowledge/ApifyWebUrlLoader";
+import { ApifyWebUrlLoader } from "@/src/domain/services/knowledge/ApifyWebUrlLoader";
 import {
   ApifySupportedEvents,
   ApifyWebhookEvent,
-} from "@/domain/types/ApifyWebhookEvent";
+} from "@/src/domain/types/ApifyWebhookEvent";
 import { headers } from "next/headers";
 
 const isSupportedEvent = (

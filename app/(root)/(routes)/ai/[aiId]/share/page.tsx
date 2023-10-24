@@ -1,4 +1,4 @@
-import { AIService } from "@/domain/services/AIService";
+import { AIService } from "@/src/domain/services/AIService";
 import { auth } from "@clerk/nextjs";
 import { ShareAIForm } from "./components/share-ai-form";
 

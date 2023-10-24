@@ -1,8 +1,8 @@
 import { Document } from "langchain/document";
 
-import { BadRequestError } from "@/domain/errors/Errors";
 import { MemoryManager } from "@/lib/memory";
 import prismadb from "@/lib/prismadb";
+import { BadRequestError } from "@/src/domain/errors/Errors";
 import { writeFile } from "fs/promises";
 import { CSVLoader } from "langchain/document_loaders/fs/csv";
 import { DocxLoader } from "langchain/document_loaders/fs/docx";

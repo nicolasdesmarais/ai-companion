@@ -1,5 +1,5 @@
-import { InvitationService } from "@/domain/services/InvitationService";
-import { Utilities } from "@/domain/util/utilities";
+import { InvitationService } from "@/src/domain/services/InvitationService";
+import { Utilities } from "@/src/domain/util/utilities";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
