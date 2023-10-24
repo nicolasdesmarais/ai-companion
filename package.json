@@ -79,5 +79,8 @@
   "devDependencies": {
     "encoding": "^0.1.13",
     "prisma": "^5.0.0"
+  },
+  "prisma": {
+    "schema": "src/prisma/schema.prisma"
   }
 }
