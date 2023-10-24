@@ -1,7 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
-import prismadb from "@/lib/prismadb";
+import prismadb from "@/src/lib/prismadb";
 
 export async function PATCH(
   req: Request,

@@ -1,20 +1,20 @@
 "use client";
 
-import { Category, Prisma, Knowledge } from "@prisma/client";
-import { AICharacter } from "./ai-character";
+import LeavePageBlocker from "@/components/leave-page-blocker";
+import { Form } from "@/components/ui/form";
+import { useToast } from "@/components/ui/use-toast";
+import { cn } from "@/src/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Category, Knowledge, Prisma } from "@prisma/client";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
-import { AIKnowledge } from "./ai-knowledge";
-import { AIPersonality } from "./ai-personality";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
-import { useToast } from "@/components/ui/use-toast";
-import { useRouter } from "next/navigation";
-import { Form } from "@/components/ui/form";
-import LeavePageBlocker from "@/components/leave-page-blocker";
+import { AICharacter } from "./ai-character";
+import { AIKnowledge } from "./ai-knowledge";
 import { models } from "./ai-models";
+import { AIPersonality } from "./ai-personality";
 
 const formSchema = z.object({
   name: z.string().min(1, {

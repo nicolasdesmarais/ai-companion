@@ -1,4 +1,3 @@
-import prismadb from "@/lib/prismadb";
 import {
   EntityNotFoundError,
   UnauthorizedError,
@@ -7,6 +6,7 @@ import {
   GoogleDriveSearchResponse,
   mapMimeTypeToEnum,
 } from "@/src/domain/types/GoogleDriveSearchResponse";
+import prismadb from "@/src/lib/prismadb";
 import { put } from "@vercel/blob";
 import fs from "fs";
 import { drive_v3, google } from "googleapis";

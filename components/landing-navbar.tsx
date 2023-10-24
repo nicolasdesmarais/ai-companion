@@ -1,14 +1,14 @@
 "use client";
 
-import { Montserrat } from "next/font/google";
-import Image from "next/image"
-import Link from "next/link"
 import { useAuth } from "@clerk/nextjs";
+import { Montserrat } from "next/font/google";
+import Image from "next/image";
+import Link from "next/link";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/src/lib/utils";
 
-const font = Montserrat({ weight: '600', subsets: ['latin'] });
+const font = Montserrat({ weight: "600", subsets: ["latin"] });
 
 export const LandingNavbar = () => {
   const { isSignedIn } = useAuth();
@@ -31,5 +31,5 @@ export const LandingNavbar = () => {
         </Link>
       </div>
     </nav>
-  )
-}
+  );
+};

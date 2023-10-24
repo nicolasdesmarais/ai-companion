@@ -1,9 +1,9 @@
-import prismadb from "@/lib/prismadb";
 import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import {
   ApifySupportedEvents,
   ApifyWebhookEvent,
 } from "@/src/domain/types/ApifyWebhookEvent";
+import prismadb from "@/src/lib/prismadb";
 import { ApifyService } from "../ApifyService";
 import { FileLoader } from "./FileLoader";
 

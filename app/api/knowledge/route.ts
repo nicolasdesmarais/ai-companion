@@ -1,15 +1,15 @@
-import { NextResponse, NextRequest } from "next/server";
+import { MemoryManager } from "@/src/lib/memory";
+import prismadb from "@/src/lib/prismadb";
+import { currentUser } from "@clerk/nextjs";
+import { put } from "@vercel/blob";
 import { writeFile } from "fs/promises";
 import { CSVLoader } from "langchain/document_loaders/fs/csv";
-import { TextLoader } from "langchain/document_loaders/fs/text";
-import { currentUser } from "@clerk/nextjs";
-import prismadb from "@/lib/prismadb";
-import { MemoryManager } from "@/lib/memory";
-import { EPubLoader } from "langchain/document_loaders/fs/epub";
 import { DocxLoader } from "langchain/document_loaders/fs/docx";
+import { EPubLoader } from "langchain/document_loaders/fs/epub";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
+import { TextLoader } from "langchain/document_loaders/fs/text";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { put } from "@vercel/blob";
+import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 300;
 
