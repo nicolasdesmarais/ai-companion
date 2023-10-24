@@ -230,3 +230,14 @@ enum DataStoreType {
   GOOGLE_DRIVE
   FILE_UPLOAD
 }
+
+model DataStoreKnowledge {
+  dataStore                 DataStore @relation(fields: [dataStoreId], references: [id])
+  dataStoreId               String    @map(name: "data_store_id")
+  knowledge                 Knowledge @relation(fields: [knowledgeId], references: [id])
+  knowledgeId               String    @map(name: "knowledge_id")
+
+
+  @@id([dataStoreId, knowledgeId])
+  @@map("data_store_knowledges")
+}
