@@ -154,6 +154,7 @@ model Knowledge {
   type                      String
   blobUrl                   String?   @map(name: "blob_url")
   companions                KnowledgeAI[]
+  datastores                DataStoreKnowledge[]
 
   @@map("knowledge")
 }
@@ -221,6 +222,7 @@ model DataStore {
   orgId                     String        @map(name: "org_id")
   ownerUserId               String        @map(name: "owner_user_id")
   type                      DataStoreType
+  knowledges                DataStoreKnowledge[]
 
   @@map("data_stores")
 }
