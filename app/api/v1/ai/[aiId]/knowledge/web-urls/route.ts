@@ -2,7 +2,7 @@ import {
   BadRequestError,
   EntityNotFoundError,
 } from "@/src/domain/errors/Errors";
-import { AIService } from "@/src/domain/services/AIService";
+import aiService from "@/src/domain/services/AIService";
 import { ApifyService } from "@/src/domain/services/ApifyService";
 import prismadb from "@/src/lib/prismadb";
 import { currentUser } from "@clerk/nextjs";
@@ -18,7 +18,6 @@ export async function POST(
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const aiService = new AIService();
   const ai = await aiService.findAIById(params.aiId);
   if (!ai) {
     return new NextResponse("AI not found", { status: 404 });

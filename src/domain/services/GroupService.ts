@@ -277,3 +277,6 @@ export class GroupService {
     });
   }
 }
+
+const groupService = new GroupService();
+export default groupService;

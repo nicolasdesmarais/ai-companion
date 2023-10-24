@@ -264,3 +264,6 @@ export class AIService {
     });
   }
 }
+
+const aiService = new AIService();
+export default aiService;

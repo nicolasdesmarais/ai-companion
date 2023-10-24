@@ -2,7 +2,7 @@ import {
   BadRequestError,
   EntityNotFoundError,
 } from "@/src/domain/errors/Errors";
-import { AIService } from "@/src/domain/services/AIService";
+import aiService from "@/src/domain/services/AIService";
 import { GoogleDriveLoader } from "@/src/domain/services/knowledge/GoogleDriveLoader";
 import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/types/CreateGoogleDriveKnowledgeRequest";
 import { currentUser } from "@clerk/nextjs";
@@ -17,7 +17,6 @@ export async function POST(
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const aiService = new AIService();
   const ai = await aiService.findAIById(params.aiId);
   if (!ai) {
     return new NextResponse("AI not found", { status: 404 });
@@ -33,7 +32,7 @@ export async function POST(
       body.oauthTokenId,
       body.fileId
     );
-    const aiService = new AIService();
+
     const response = await aiService.createKnowledgeAI(
       params.aiId,
       knowledgeIds

@@ -1,4 +1,4 @@
-import { AIService } from "@/src/domain/services/AIService";
+import aiService from "@/src/domain/services/AIService";
 import { auth } from "@clerk/nextjs";
 import { ShareAIForm } from "./components/share-ai-form";
 
@@ -15,8 +15,6 @@ const ShareAIPage = async ({ params }: ShareAIPageProps) => {
     return;
   }
 
-  const aiService = new AIService();
-  aiService.findAIById(params.aiId);
   const ai = await aiService.findAIById(params.aiId);
   if (!ai) {
     return;
