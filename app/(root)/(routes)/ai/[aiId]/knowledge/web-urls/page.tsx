@@ -1,4 +1,4 @@
-import { AIService } from "@/domain/services/AIService";
+import { AIService } from "@/src/domain/services/AIService";
 import { currentUser, redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { WebUrlsForm } from "./components/web-urls-knowledge-form";

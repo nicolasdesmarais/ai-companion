@@ -1,14 +1,17 @@
-import { EntityNotFoundError, UnauthorizedError } from "@/domain/errors/Errors";
+import prismadb from "@/lib/prismadb";
+import {
+  EntityNotFoundError,
+  UnauthorizedError,
+} from "@/src/domain/errors/Errors";
 import {
   GoogleDriveSearchResponse,
   mapMimeTypeToEnum,
-} from "@/domain/types/GoogleDriveSearchResponse";
-import prismadb from "@/lib/prismadb";
+} from "@/src/domain/types/GoogleDriveSearchResponse";
+import { put } from "@vercel/blob";
 import fs from "fs";
 import { drive_v3, google } from "googleapis";
 import { Readable } from "stream";
 import { FileLoader } from "./FileLoader";
-import { put } from "@vercel/blob";
 
 const SUPPORTED_MIME_TYPES = [
   "text/plain",

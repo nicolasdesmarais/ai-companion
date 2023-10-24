@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-import { GroupService } from "../../../../../domain/services/GroupService";
+import { GroupService } from "../../../../../src/domain/services/GroupService";
 
 export async function GET(req: Request) {
   try {

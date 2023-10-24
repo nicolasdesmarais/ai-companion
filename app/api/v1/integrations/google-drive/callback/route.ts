@@ -1,4 +1,4 @@
-import { OAuthTokenService } from "@/domain/services/OAuthTokenService";
+import { OAuthTokenService } from "@/src/domain/services/OAuthTokenService";
 import { auth } from "@clerk/nextjs";
 import { OAuthTokenProvider } from "@prisma/client";
 import { Credentials } from "google-auth-library";

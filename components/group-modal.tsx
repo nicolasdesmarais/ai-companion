@@ -26,12 +26,12 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { CreateGroupRequest } from "@/domain/types/CreateGroupRequest";
 import { useGroupModal } from "@/hooks/use-group-modal";
-import { GroupAvailability } from "@prisma/client";
-import { UpdateGroupRequest } from "@/domain/types/UpdateGroupRequest";
-import { Loader } from "lucide-react";
+import { CreateGroupRequest } from "@/src/domain/types/CreateGroupRequest";
+import { UpdateGroupRequest } from "@/src/domain/types/UpdateGroupRequest";
 import { useUser } from "@clerk/nextjs";
+import { GroupAvailability } from "@prisma/client";
+import { Loader } from "lucide-react";
 import * as z from "zod";
 
 const groupFormSchema = z.object({

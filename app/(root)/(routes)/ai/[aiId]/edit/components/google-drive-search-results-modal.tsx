@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   GoogleDriveFile,
   getLabelFromFileType,
-} from "@/domain/types/GoogleDriveSearchResponse";
+} from "@/src/domain/types/GoogleDriveSearchResponse";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 

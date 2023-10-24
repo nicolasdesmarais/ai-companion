@@ -1,8 +1,7 @@
-import { NextResponse } from "next/server";
+import { OAuthTokenService } from "@/src/domain/services/OAuthTokenService";
 import { currentUser } from "@clerk/nextjs";
-import { AIService } from "@/domain/services/AIService";
-import { OAuthTokenService } from "@/domain/services/OAuthTokenService";
 import { OAuthTokenProvider } from "@prisma/client";
+import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
