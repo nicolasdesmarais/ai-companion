@@ -1,11 +1,10 @@
 "use client";
-import { Companion, Conversation } from "@prisma/client";
-import { useRouter, usePathname } from "next/navigation";
 import { BotAvatar } from "@/components/bot-avatar";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
 import { useConversations } from "@/hooks/use-conversations";
+import { cn } from "@/src/lib/utils";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export const ChatList = () => {
   const { conversations, fetchConversations } = useConversations();

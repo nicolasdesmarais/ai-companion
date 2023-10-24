@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
+import { MemoryManager } from "@/src/lib/memory";
+import prismadb from "@/src/lib/prismadb";
 import { currentUser } from "@clerk/nextjs";
-import prismadb from "@/lib/prismadb";
-import { MemoryManager } from "@/lib/memory";
+import { NextResponse } from "next/server";
 
 export const maxDuration = 300;
 
@@ -20,8 +20,8 @@ export async function DELETE(
 
     const knowledge = await prismadb.knowledge.delete({
       where: {
-        id: params.knowledgeId
-      }
+        id: params.knowledgeId,
+      },
     });
 
     return NextResponse.json(knowledge);
@@ -29,4 +29,4 @@ export async function DELETE(
     console.log("[KNOWLEDGE_DELETE]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
-};
+}

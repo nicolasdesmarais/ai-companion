@@ -2,7 +2,7 @@
 
 import { ModeToggle } from "@/components/mode-toggle";
 import { useProModal } from "@/hooks/use-pro-modal";
-import { cn } from "@/lib/utils";
+import { cn } from "@/src/lib/utils";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import {

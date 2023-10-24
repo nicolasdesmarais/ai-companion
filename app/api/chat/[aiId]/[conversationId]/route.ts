@@ -1,15 +1,15 @@
-import { StreamingTextResponse, LangChainStream } from "ai";
 import { currentUser } from "@clerk/nextjs";
-import { Replicate } from "langchain/llms/replicate";
-import { OpenAI } from "langchain/llms/openai";
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { HumanChatMessage, SystemChatMessage } from "langchain/schema";
+import { LangChainStream, StreamingTextResponse } from "ai";
 import { CallbackManager } from "langchain/callbacks";
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { OpenAI } from "langchain/llms/openai";
+import { Replicate } from "langchain/llms/replicate";
+import { HumanChatMessage, SystemChatMessage } from "langchain/schema";
 import { NextResponse } from "next/server";
 
-import { MemoryManager } from "@/lib/memory";
-import { rateLimit } from "@/lib/rate-limit";
-import prismadb from "@/lib/prismadb";
+import { MemoryManager } from "@/src/lib/memory";
+import prismadb from "@/src/lib/prismadb";
+import { rateLimit } from "@/src/lib/rate-limit";
 import { Message } from "@prisma/client";
 
 export const maxDuration = 300;
@@ -139,7 +139,7 @@ export async function POST(
     );
     const seededChatHistory = `${conversation.companion.seed}\n\n${chatHistory}`;
     const completionPrompt = `
-      ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${conversation.companion.name}: prefix. 
+      ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${conversation.companion.name}: prefix.
       Output format is markdown. Open links in new tabs.
       ${conversation.companion.instructions}
       Below are relevant details about ${conversation.companion.name}'s past and the conversation you are in.
@@ -149,10 +149,10 @@ export async function POST(
     `;
 
     const engineeredPrompt = `
-      Pretend you are ${conversation.companion.name}, ${conversation.companion.description}. 
+      Pretend you are ${conversation.companion.name}, ${conversation.companion.description}.
       Output format is markdown. Open links in new tabs.
-      Here are more details about your character:\n 
-      ${conversation.companion.instructions} 
+      Here are more details about your character:\n
+      ${conversation.companion.instructions}
       Answer questions using this knowledge:\n
       ${knowledge}\n
     `;
