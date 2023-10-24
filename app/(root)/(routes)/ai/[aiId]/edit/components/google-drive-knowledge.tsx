@@ -15,11 +15,13 @@ const ADD_ACCOUNT_OPTION = "add-account";
 interface FilesProps {
   aiId: string;
   oauthTokens: UserOAuthTokenEntity[];
+  goBack: () => void;
 }
 
 export const GoogleDriveForm = ({
   aiId,
   oauthTokens: oauthTokens,
+  goBack,
 }: FilesProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
@@ -28,11 +30,21 @@ export const GoogleDriveForm = ({
   const [selectedFile, setSelectedFile] = useState<GoogleDriveFile | null>(
     null
   );
+  const [selectedAccount, setSelectedAccount] = useState("");
+  const [accounts, setAccounts] = useState<UserOAuthTokenEntity[]>([]);
 
-  const hasOAuthToken = oauthTokens.length > 0;
-  const [selectedAccount, setAccount] = useState(
-    hasOAuthToken ? oauthTokens[0].id : ""
-  );
+  useEffect(() => {
+    const fetchAccount = async () => {
+      const response = await axios.get(
+        `/api/v1/integrations/google-drive/accounts`
+      );
+      setAccounts(response.data);
+      if (response.data.length > 0) {
+        setSelectedAccount(response.data[0]?.id);
+      }
+    };
+    fetchAccount();
+  });
 
   const { toast } = useToast();
 
@@ -52,7 +64,7 @@ export const GoogleDriveForm = ({
   const handleAccountChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     console.log("selected account" + value);
-    setAccount(value);
+    setSelectedAccount(value);
     if (value === ADD_ACCOUNT_OPTION) {
       handleConnectClick();
     }
@@ -173,7 +185,7 @@ export const GoogleDriveForm = ({
           <option value={ADD_ACCOUNT_OPTION}>+ Add Account</option>
         </select>
       </div>
-      {hasOAuthToken && (
+      {accounts.length ? (
         <div className="mb-4">
           <h3>Search Term</h3>
           <div className="flex items-center">
@@ -189,7 +201,7 @@ export const GoogleDriveForm = ({
             </Button>
           </div>
         </div>
-      )}
+      ) : null}
       {selectedFile && (
         <div className="selected-file-section">
           <span>{selectedFile.name}</span>
@@ -204,10 +216,7 @@ export const GoogleDriveForm = ({
         >
           Continue
         </Button>
-        <Button
-          onClick={() => redirect(`/ai/${aiId}/knowledge`)}
-          variant="link"
-        >
+        <Button onClick={goBack} variant="link">
           Back
         </Button>
       </div>
