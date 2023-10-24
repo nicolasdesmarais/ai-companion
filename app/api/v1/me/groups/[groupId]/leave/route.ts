@@ -1,5 +1,8 @@
-import { BadRequestError, EntityNotFoundError } from "@/domain/errors/Errors";
-import { GroupService } from "@/domain/services/GroupService";
+import {
+  BadRequestError,
+  EntityNotFoundError,
+} from "@/src/domain/errors/Errors";
+import { GroupService } from "@/src/domain/services/GroupService";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 

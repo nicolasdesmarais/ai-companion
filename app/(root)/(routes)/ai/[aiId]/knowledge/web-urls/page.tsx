@@ -1,4 +1,4 @@
-import { AIService } from "@/domain/services/AIService";
+import aiService from "@/src/domain/services/AIService";
 import { currentUser, redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { WebUrlsForm } from "./components/web-urls-knowledge-form";
@@ -15,7 +15,6 @@ const WebUrlsKnowledgePage = async ({ params }: WebUrlsKnowledgePageProps) => {
     return redirectToSignIn();
   }
 
-  const aiService = new AIService();
   const ai = await aiService.findAIById(params.aiId);
   if (!ai) {
     return redirect("/404");

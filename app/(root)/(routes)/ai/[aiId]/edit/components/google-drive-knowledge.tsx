@@ -1,12 +1,11 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { UserOAuthTokenEntity } from "@/domain/entities/OAuthTokenEntity";
-import { EntityNotFoundError } from "@/domain/errors/Errors";
-import { CreateGoogleDriveKnowledgeRequest } from "@/domain/types/CreateGoogleDriveKnowledgeRequest";
-import { GoogleDriveFile } from "@/domain/types/GoogleDriveSearchResponse";
+import { UserOAuthTokenEntity } from "@/src/domain/entities/OAuthTokenEntity";
+import { EntityNotFoundError } from "@/src/domain/errors/Errors";
+import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/types/CreateGoogleDriveKnowledgeRequest";
+import { GoogleDriveFile } from "@/src/domain/types/GoogleDriveSearchResponse";
 import axios from "axios";
-import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import { GoogleDriveSearchResultsModal } from "./google-drive-search-results-modal";
 

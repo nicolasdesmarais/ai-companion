@@ -1,4 +1,4 @@
-import { GroupService } from "@/domain/services/GroupService";
+import { GroupService } from "@/src/domain/services/GroupService";
 import {
   SessionWebhookEvent,
   User,

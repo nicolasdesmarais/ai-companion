@@ -1,4 +1,4 @@
-import prismadb from "@/lib/prismadb";
+import prismadb from "@/src/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
 import { SignedInAuthObject, SignedOutAuthObject } from "@clerk/nextjs/server";
 import { AIVisibility, GroupAvailability } from "@prisma/client";
@@ -264,3 +264,6 @@ export class AIService {
     });
   }
 }
+
+const aiService = new AIService();
+export default aiService;

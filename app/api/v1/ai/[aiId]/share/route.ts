@@ -1,5 +1,5 @@
-import { AIService } from "@/domain/services/AIService";
-import { ShareAIRequest } from "@/domain/types/ShareAIRequest";
+import aiService from "@/src/domain/services/AIService";
+import { ShareAIRequest } from "@/src/domain/types/ShareAIRequest";
 import { auth } from "@clerk/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -17,7 +17,6 @@ export async function PUT(
     const aiId = params.aiId;
     const shareAiRequest: ShareAIRequest = await req.json();
 
-    const aiService = new AIService();
     const ai = await aiService.findAIById(aiId);
     if (!ai) {
       return NextResponse.json("Not Found", { status: 404 });

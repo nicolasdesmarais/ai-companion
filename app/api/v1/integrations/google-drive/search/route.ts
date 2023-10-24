@@ -1,5 +1,8 @@
-import { BadRequestError, EntityNotFoundError } from "@/domain/errors/Errors";
-import { GoogleDriveLoader } from "@/domain/services/knowledge/GoogleDriveLoader";
+import {
+  BadRequestError,
+  EntityNotFoundError,
+} from "@/src/domain/errors/Errors";
+import { GoogleDriveLoader } from "@/src/domain/services/knowledge/GoogleDriveLoader";
 import { currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 

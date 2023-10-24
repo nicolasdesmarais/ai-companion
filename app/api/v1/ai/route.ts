@@ -1,7 +1,7 @@
-import { auth, currentUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
-import prismadb from "@/lib/prismadb";
+import prismadb from "@/src/lib/prismadb";
 
 export async function POST(req: Request) {
   try {
@@ -41,6 +41,13 @@ export async function POST(req: Request) {
         modelId,
         visibility,
         options,
+      },
+      include: {
+        knowledge: {
+          include: {
+            knowledge: true,
+          },
+        },
       },
     });
 
