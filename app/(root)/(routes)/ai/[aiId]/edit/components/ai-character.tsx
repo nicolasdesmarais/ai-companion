@@ -21,11 +21,11 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { Category, Knowledge, Prisma } from "@prisma/client";
+import { Category, Prisma } from "@prisma/client";
 import axios, { AxiosError } from "axios";
-import { FileText, Loader, Trash2, Wand2 } from "lucide-react";
+import { Loader, Wand2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { models } from "./ai-models";
 
 const PREAMBLE = `You are a fictional character whose name is Elon. You are a visionary entrepreneur and inventor. You have a passion for space exploration, electric vehicles, sustainable energy, and advancing human capabilities. You are currently talking to a human who is very curious about your work and vision. You are ambitious and forward-thinking, with a touch of wit. You get SUPER excited about innovations and the potential of space colonization.
@@ -43,29 +43,6 @@ Elon: Absolutely! Sustainable energy is crucial both on Earth and for our future
 Human: It's fascinating to see your vision unfold. Any new projects or innovations you're excited about?
 Elon: Always! But right now, I'm particularly excited about Neuralink. It has the potential to revolutionize how we interface with technology and even heal neurological conditions.
 `;
-
-const supportedUploadFormats = [
-  {
-    name: "Text",
-    type: "text/plain",
-  },
-  {
-    name: "CSV",
-    type: "text/csv",
-  },
-  {
-    name: "PDF",
-    type: "application/pdf",
-  },
-  {
-    name: "DOCX",
-    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  },
-  {
-    name: "EPUB",
-    type: "application/epub+zip",
-  },
-];
 
 const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
   include: {
@@ -92,12 +69,9 @@ export const AICharacter = ({
 }: CompanionFormProps) => {
   const { toast } = useToast();
   const router = useRouter();
-  const inputFileRef = useRef<HTMLInputElement>(null);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatingInstruction, setGeneratingInstruction] = useState(false);
   const [generatingConversation, setGeneratingConversation] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [removing, setRemoving] = useState("");
 
   const isLoading = form.formState.isSubmitting;
 
@@ -229,86 +203,6 @@ export const AICharacter = ({
       });
     }
     setGeneratingConversation(false);
-  };
-
-  const uploadDocument = async () => {
-    setUploading(true);
-    if (
-      !inputFileRef.current?.files ||
-      inputFileRef.current?.files.length === 0
-    ) {
-      toast({
-        variant: "destructive",
-        description: "No file selected.",
-        duration: 6000,
-      });
-      setUploading(false);
-      return;
-    }
-    const file = inputFileRef.current.files[0];
-
-    if (
-      supportedUploadFormats.findIndex(
-        (format) => format.type === file.type
-      ) === -1
-    ) {
-      toast({
-        variant: "destructive",
-        description: "This file format is not supported",
-        duration: 6000,
-      });
-    }
-    try {
-      const data = new FormData();
-      data.set("file", file);
-      const response = await axios.post(
-        `/api/knowledge?filename=${encodeURIComponent(
-          file.name
-        )}&type=${encodeURIComponent(file.type)}`,
-        data
-      );
-      const current = form.getValues("knowledge");
-      form.setValue("knowledge", [
-        ...current,
-        { knowledge: response.data, knowledgeId: response.data.id },
-      ]);
-      inputFileRef.current.value = "";
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        description:
-          String((error as AxiosError).response?.data) ||
-          "Something went wrong.",
-        duration: 6000,
-      });
-    }
-    setUploading(false);
-  };
-
-  const removeKnowledge = async (id: string) => {
-    setRemoving(id);
-    try {
-      if (initialData) {
-        await axios.delete(`/api/knowledge/${id}/${initialData.id}`);
-      } else {
-        await axios.delete(`/api/knowledge/${id}`);
-      }
-
-      const current = form.getValues("knowledge");
-      form.setValue(
-        "knowledge",
-        current.filter((i: any) => i.knowledge.id !== id)
-      );
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        description:
-          String((error as AxiosError).response?.data) ||
-          "Something went wrong.",
-        duration: 6000,
-      });
-    }
-    setRemoving("");
   };
 
   return (
@@ -510,64 +404,6 @@ export const AICharacter = ({
           </FormItem>
         )}
       />
-      <div>
-        <FormField
-          name="knowledge"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Custom Knowledge</FormLabel>
-              <div>
-                {field.value.map((item: any) => (
-                  <div
-                    key={item.knowledgeId}
-                    className="flex items-center justify-between my-2"
-                  >
-                    <p className="text-sm px-3 py-2 bg-background rounded-lg  w-full ">
-                      {item.knowledge.name}
-                    </p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => removeKnowledge(item.knowledgeId)}
-                    >
-                      {removing === item.knowledgeId ? (
-                        <Loader className="w-4 h-4 spinner" />
-                      ) : (
-                        <Trash2 className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <div>
-                <div className="flex my-2">
-                  <Input name="file" ref={inputFileRef} type="file" />
-                  <Button
-                    type="button"
-                    disabled={isLoading || uploading}
-                    variant="outline"
-                    onClick={() => uploadDocument()}
-                  >
-                    Upload
-                    {uploading ? (
-                      <Loader className="w-4 h-4 ml-2 spinner" />
-                    ) : (
-                      <FileText className="w-4 h-4 ml-2" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-              <FormDescription>
-                Add custom knowledge to your AI. Max file size: 4.5Mb. <br />
-                The following formats are supported:{" "}
-                {supportedUploadFormats.map((format) => format.name).join(", ")}
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
       <FormField
         name="seed"
         control={form.control}

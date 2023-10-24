@@ -169,7 +169,13 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
                 form={form}
               />
             )}
-            {activeTab === 1 && <AIKnowledge aiId={initialAi?.id} />}
+            {activeTab === 1 && (
+              <AIKnowledge
+                aiId={initialAi?.id}
+                form={form}
+                initialAi={initialAi}
+              />
+            )}
             {activeTab === 2 && (
               <AIPersonality initialAi={initialAi} form={form} />
             )}

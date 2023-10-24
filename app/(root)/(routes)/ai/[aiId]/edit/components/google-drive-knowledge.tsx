@@ -14,15 +14,10 @@ const ADD_ACCOUNT_OPTION = "add-account";
 
 interface FilesProps {
   aiId: string;
-  oauthTokens: UserOAuthTokenEntity[];
   goBack: () => void;
 }
 
-export const GoogleDriveForm = ({
-  aiId,
-  oauthTokens: oauthTokens,
-  goBack,
-}: FilesProps) => {
+export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
   const [isResultsModalVisible, setResultsModalVisible] = useState(false);
@@ -141,7 +136,7 @@ export const GoogleDriveForm = ({
         `/api/v1/ai/${aiId}/knowledge/google-drive`,
         createKnowledgeRequest
       );
-      redirect(`/ai/${aiId}/edit`);
+      goBack();
     } catch (error) {
       toast({
         variant: "destructive",
@@ -177,7 +172,7 @@ export const GoogleDriveForm = ({
           <option value="" disabled>
             Select an account
           </option>
-          {oauthTokens.map((token: UserOAuthTokenEntity) => (
+          {accounts.map((token: UserOAuthTokenEntity) => (
             <option key={token.id} value={token.id}>
               {token.email}
             </option>
@@ -196,7 +191,7 @@ export const GoogleDriveForm = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <Button onClick={handleSearch} variant="ring">
+            <Button onClick={handleSearch} variant="ring" type="button">
               Search
             </Button>
           </div>
@@ -205,18 +200,21 @@ export const GoogleDriveForm = ({
       {selectedFile && (
         <div className="selected-file-section">
           <span>{selectedFile.name}</span>
-          <Button onClick={() => setSelectedFile(null)}>X</Button>
+          <Button onClick={() => setSelectedFile(null)} type="button">
+            X
+          </Button>
         </div>
       )}
       <div className="flex justify-between w-full">
         <Button
+          type="button"
           onClick={handleContinue}
           disabled={!selectedFile || !selectedAccount}
           variant="ring"
         >
           Continue
         </Button>
-        <Button onClick={goBack} variant="link">
+        <Button onClick={goBack} variant="link" type="button">
           Back
         </Button>
       </div>
