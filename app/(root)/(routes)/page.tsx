@@ -4,13 +4,14 @@ import { GroupModal } from "@/components/group-modal";
 import { Groups } from "@/components/groups";
 import { InviteButton } from "@/components/invite-button";
 import { SearchInput } from "@/components/search-input";
-import prismadb from "@/lib/prismadb";
 import aiService from "@/src/domain/services/AIService";
 import groupService from "@/src/domain/services/GroupService";
+
 import {
   ListAIsRequestParams,
   ListAIsRequestScope,
 } from "@/src/domain/services/dtos/ListAIsRequestParams";
+import prismadb from "@/src/lib/prismadb";
 import { auth } from "@clerk/nextjs";
 
 interface RootPageProps {

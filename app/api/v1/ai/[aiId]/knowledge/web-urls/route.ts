@@ -1,10 +1,10 @@
-import prismadb from "@/lib/prismadb";
 import {
   BadRequestError,
   EntityNotFoundError,
 } from "@/src/domain/errors/Errors";
 import aiService from "@/src/domain/services/AIService";
 import { ApifyService } from "@/src/domain/services/ApifyService";
+import prismadb from "@/src/lib/prismadb";
 import { currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 

@@ -1,4 +1,4 @@
-import prismadb from "@/lib/prismadb";
+import prismadb from "@/src/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
 import { GroupAvailability } from "@prisma/client";
 import { GroupEntity } from "../entities/GroupEntity";

@@ -1,14 +1,14 @@
 "use client";
 
+import { useGroupModal } from "@/hooks/use-group-modal";
+import { cn } from "@/src/lib/utils";
+import { useOrganization, useUser } from "@clerk/nextjs";
+import { Group, GroupAvailability } from "@prisma/client";
+import axios from "axios";
+import { MoreVertical, Plus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
-import { Plus, MoreVertical } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Group, GroupAvailability } from "@prisma/client";
-import { useGroupModal } from "@/hooks/use-group-modal";
 import { useEffect, useState } from "react";
-import { useUser, useOrganization } from "@clerk/nextjs";
-import axios from "axios";
 
 interface GroupsProps {
   data: Group[];

@@ -1,4 +1,4 @@
-import prismadb from "@/lib/prismadb";
+import prismadb from "@/src/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
 import { SignedInAuthObject, SignedOutAuthObject } from "@clerk/nextjs/server";
 import { AIVisibility, GroupAvailability } from "@prisma/client";

@@ -1,6 +1,6 @@
 import { auth, redirectToSignIn } from "@clerk/nextjs";
 
-import prismadb from "@/lib/prismadb";
+import prismadb from "@/src/lib/prismadb";
 import { AIEditor } from "./components/ai-editor";
 
 interface AIIdPageProps {
