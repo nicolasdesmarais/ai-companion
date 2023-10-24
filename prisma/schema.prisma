@@ -150,6 +150,7 @@ model Knowledge {
   userId                    String   @map(name: "user_id")
   name                      String
   type                      String
+  blobUrl                   String?   @map(name: "blob_url")
   companions                KnowledgeAI[]
 
   @@map("knowledge")

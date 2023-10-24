@@ -79,23 +79,24 @@ export const AIPersonality = ({ initialAi, form }: SelectDataSourceProps) => {
           )}
         />
       )}
-      {model.options.top_p && (
+      {model.options.topP && (
         <FormField
-          name="options.top_p"
+          name="options.topP"
           control={form.control}
           render={({ field }) => (
             <FormItem className="col-span-2 md:col-span-1">
               <FormLabel>
-                Top_P: {field.value || model.options.top_p.default}
+                Nucleus Sampling Factor (top_p):{" "}
+                {field.value || model.options.topP.default}
               </FormLabel>
               <FormControl>
                 <Slider
                   {...field}
                   disabled={isLoading}
-                  max={model.options.top_p.max}
-                  min={model.options.top_p.min}
-                  step={model.options.top_p.step}
-                  defaultValue={[model.options.top_p.default]}
+                  max={model.options.topP.max}
+                  min={model.options.topP.min}
+                  step={model.options.topP.step}
+                  defaultValue={[model.options.topP.default]}
                 />
               </FormControl>
               <FormDescription>
@@ -110,23 +111,23 @@ export const AIPersonality = ({ initialAi, form }: SelectDataSourceProps) => {
           )}
         />
       )}
-      {model.options.max_tokens && (
+      {model.options.maxTokens && (
         <FormField
-          name="options.max_tokens"
+          name="options.maxTokens"
           control={form.control}
           render={({ field }) => (
             <FormItem className="col-span-2 md:col-span-1">
               <FormLabel>
-                Max Tokens: {field.value || model.options.max_tokens.default}
+                Max Tokens: {field.value || model.options.maxTokens.default}
               </FormLabel>
               <FormControl>
                 <Slider
                   {...field}
                   disabled={isLoading}
-                  max={model.options.max_tokens.max}
-                  min={model.options.max_tokens.min}
-                  step={model.options.max_tokens.step}
-                  defaultValue={[model.options.max_tokens.default]}
+                  max={model.options.maxTokens.max}
+                  min={model.options.maxTokens.min}
+                  step={model.options.maxTokens.step}
+                  defaultValue={[model.options.maxTokens.default]}
                 />
               </FormControl>
               <FormDescription>
@@ -139,24 +140,24 @@ export const AIPersonality = ({ initialAi, form }: SelectDataSourceProps) => {
           )}
         />
       )}
-      {model.options.frequency_penalty && (
+      {model.options.frequencyPenalty && (
         <FormField
-          name="options.frequency_penalty"
+          name="options.frequencyPenalty"
           control={form.control}
           render={({ field }) => (
             <FormItem className="col-span-2 md:col-span-1">
               <FormLabel>
                 Frequency Penalty:{" "}
-                {field.value || model.options.frequency_penalty?.default}
+                {field.value || model.options.frequencyPenalty?.default}
               </FormLabel>
               <FormControl>
                 <Slider
                   {...field}
                   disabled={isLoading}
-                  max={model.options.frequency_penalty?.max}
-                  min={model.options.frequency_penalty?.min}
-                  step={model.options.frequency_penalty?.step}
-                  defaultValue={[model.options.frequency_penalty?.default || 0]}
+                  max={model.options.frequencyPenalty?.max}
+                  min={model.options.frequencyPenalty?.min}
+                  step={model.options.frequencyPenalty?.step}
+                  defaultValue={[model.options.frequencyPenalty?.default || 0]}
                 />
               </FormControl>
               <FormDescription>
@@ -169,24 +170,24 @@ export const AIPersonality = ({ initialAi, form }: SelectDataSourceProps) => {
           )}
         />
       )}
-      {model.options.presence_penalty && (
+      {model.options.presencePenalty && (
         <FormField
-          name="options.presence_penalty"
+          name="options.presencePenalty"
           control={form.control}
           render={({ field }) => (
             <FormItem className="col-span-2 md:col-span-1">
               <FormLabel>
                 Presence Penalty:{" "}
-                {field.value || model.options.presence_penalty?.default}
+                {field.value || model.options.presencePenalty?.default}
               </FormLabel>
               <FormControl>
                 <Slider
                   {...field}
                   disabled={isLoading}
-                  max={model.options.presence_penalty?.max}
-                  min={model.options.presence_penalty?.min}
-                  step={model.options.presence_penalty?.step}
-                  defaultValue={[model.options.presence_penalty?.default || 0]}
+                  max={model.options.presencePenalty?.max}
+                  min={model.options.presencePenalty?.min}
+                  step={model.options.presencePenalty?.step}
+                  defaultValue={[model.options.presencePenalty?.default || 0]}
                 />
               </FormControl>
               <FormDescription>

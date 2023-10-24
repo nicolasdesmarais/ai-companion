@@ -14,13 +14,10 @@ const ADD_ACCOUNT_OPTION = "add-account";
 
 interface FilesProps {
   aiId: string;
-  oauthTokens: UserOAuthTokenEntity[];
+  goBack: () => void;
 }
 
-export const GoogleDriveForm = ({
-  aiId,
-  oauthTokens: oauthTokens,
-}: FilesProps) => {
+export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
   const [isResultsModalVisible, setResultsModalVisible] = useState(false);
@@ -28,11 +25,21 @@ export const GoogleDriveForm = ({
   const [selectedFile, setSelectedFile] = useState<GoogleDriveFile | null>(
     null
   );
+  const [selectedAccount, setSelectedAccount] = useState("");
+  const [accounts, setAccounts] = useState<UserOAuthTokenEntity[]>([]);
 
-  const hasOAuthToken = oauthTokens.length > 0;
-  const [selectedAccount, setAccount] = useState(
-    hasOAuthToken ? oauthTokens[0].id : ""
-  );
+  useEffect(() => {
+    const fetchAccount = async () => {
+      const response = await axios.get(
+        `/api/v1/integrations/google-drive/accounts`
+      );
+      setAccounts(response.data);
+      if (response.data.length > 0) {
+        setSelectedAccount(response.data[0]?.id);
+      }
+    };
+    fetchAccount();
+  }, []);
 
   const { toast } = useToast();
 
@@ -52,7 +59,7 @@ export const GoogleDriveForm = ({
   const handleAccountChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     console.log("selected account" + value);
-    setAccount(value);
+    setSelectedAccount(value);
     if (value === ADD_ACCOUNT_OPTION) {
       handleConnectClick();
     }
@@ -129,8 +136,13 @@ export const GoogleDriveForm = ({
         `/api/v1/ai/${aiId}/knowledge/google-drive`,
         createKnowledgeRequest
       );
-      redirect(`/ai/${aiId}/edit`);
-    } catch (error) {}
+      goBack();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: "Something went wrong",
+      });
+    }
   };
 
   return (
@@ -160,7 +172,7 @@ export const GoogleDriveForm = ({
           <option value="" disabled>
             Select an account
           </option>
-          {oauthTokens.map((token: UserOAuthTokenEntity) => (
+          {accounts.map((token: UserOAuthTokenEntity) => (
             <option key={token.id} value={token.id}>
               {token.email}
             </option>
@@ -168,7 +180,7 @@ export const GoogleDriveForm = ({
           <option value={ADD_ACCOUNT_OPTION}>+ Add Account</option>
         </select>
       </div>
-      {hasOAuthToken && (
+      {accounts.length ? (
         <div className="mb-4">
           <h3>Search Term</h3>
           <div className="flex items-center">
@@ -179,30 +191,30 @@ export const GoogleDriveForm = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <Button onClick={handleSearch} variant="ring">
+            <Button onClick={handleSearch} variant="ring" type="button">
               Search
             </Button>
           </div>
         </div>
-      )}
+      ) : null}
       {selectedFile && (
         <div className="selected-file-section">
           <span>{selectedFile.name}</span>
-          <Button onClick={() => setSelectedFile(null)}>X</Button>
+          <Button onClick={() => setSelectedFile(null)} type="button">
+            X
+          </Button>
         </div>
       )}
       <div className="flex justify-between w-full">
         <Button
+          type="button"
           onClick={handleContinue}
           disabled={!selectedFile || !selectedAccount}
           variant="ring"
         >
           Continue
         </Button>
-        <Button
-          onClick={() => redirect(`/ai/${aiId}/knowledge`)}
-          variant="link"
-        >
+        <Button onClick={goBack} variant="link" type="button">
           Back
         </Button>
       </div>

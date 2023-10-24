@@ -1,3 +1,5 @@
+import { Document } from "langchain/document";
+
 import { BadRequestError } from "@/domain/errors/Errors";
 import { MemoryManager } from "@/lib/memory";
 import prismadb from "@/lib/prismadb";
@@ -8,7 +10,6 @@ import { EPubLoader } from "langchain/document_loaders/fs/epub";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-
 export class FileLoader {
   private async getFilepath(file: File) {
     if (!file) {
@@ -25,7 +26,8 @@ export class FileLoader {
     userId: string,
     type: string,
     filename: string,
-    filePath: string
+    filePath: string,
+    blobUrl: string
   ) {
     let docs;
 
@@ -56,6 +58,7 @@ export class FileLoader {
         userId: userId,
         name: filename,
         type,
+        blobUrl,
       },
     });
 
@@ -74,5 +77,24 @@ export class FileLoader {
     const memoryManager = await MemoryManager.getInstance();
     await memoryManager.vectorUpload(docOutput);
     return knowledge;
+  }
+
+  public async loadJsonArray(jsonArray: any[], knowlegeId: string) {
+    const docs: Document[] = jsonArray.map((json) => {
+      return new Document({
+        pageContent: JSON.stringify(json),
+        metadata: { knowledge: knowlegeId },
+      });
+    });
+
+    const splitter = new RecursiveCharacterTextSplitter({
+      chunkSize: 4000,
+      chunkOverlap: 600,
+    });
+
+    const docOutput = await splitter.splitDocuments(docs);
+
+    const memoryManager = await MemoryManager.getInstance();
+    await memoryManager.vectorUpload(docOutput);
   }
 }

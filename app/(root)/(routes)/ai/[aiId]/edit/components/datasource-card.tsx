@@ -1,45 +1,46 @@
 "use client";
+import { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
 interface Props {
   title: string;
   description: string;
-  href: string;
+  onClick?: () => void;
+  icon: LucideIcon;
+  isSelected?: boolean;
 }
 
-const DataSourceCard: React.FC<Props> = ({ title, description, href }) => {
+const DataSourceCard: React.FC<Props> = ({
+  title,
+  description,
+  onClick,
+  icon,
+  isSelected = false,
+}) => {
+  const Icon = icon;
+  if (isSelected) {
+    return (
+      <div className="p-6 border-2 rounded-xl flex flex-col justify-between border-dashed">
+        <div>
+          <Icon className="w-16 h-16 mb-2" />
+          <h2>{title}</h2>
+          <p className="text-xs">{description}</p>
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="card">
-      <h2>{title}</h2>
-      <p>{description}</p>
-      <Link href={href} className="btn">
-        Select
-      </Link>
-
-      <style jsx>{`
-        .card {
-          padding: 20px;
-          border: 1px solid #ccc;
-          border-radius: 8px;
-        }
-
-        .btn {
-          display: inline-block;
-          margin-top: 20px;
-          padding: 10px 20px;
-          background-color: #333;
-          color: #fff;
-          text-decoration: none;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-        }
-
-        .btn:hover {
-          background-color: #555;
-        }
-      `}</style>
+    <div
+      onClick={onClick}
+      className="p-6 border rounded-xl flex flex-col justify-between bg-accent/50 hover:bg-primary/10 cursor-pointer transition"
+    >
+      <div>
+        <Icon className="w-16 h-16 mb-2" />
+        <h2>{title}</h2>
+        <p className="text-xs">{description}</p>
+      </div>
+      <div className="mt-4 text-ring">SELECT</div>
     </div>
   );
 };

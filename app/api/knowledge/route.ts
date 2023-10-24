@@ -9,6 +9,7 @@ import { EPubLoader } from "langchain/document_loaders/fs/epub";
 import { DocxLoader } from "langchain/document_loaders/fs/docx";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { put } from "@vercel/blob";
 
 export const maxDuration = 300;
 
@@ -64,11 +65,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         return NextResponse.json("Unsupported file format.", { status: 400 });
       }
 
+      const blob = await put(filename, file, { access: "public" });
+
       const knowledge = await prismadb.knowledge.create({
         data: {
           userId: user.id,
           name: filename,
           type,
+          blobUrl: blob.url,
         },
       });
 
@@ -85,7 +89,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       const docOutput = await splitter.splitDocuments(docs);
 
       const memoryManager = await MemoryManager.getInstance();
-      await memoryManager.vectorUpload(docOutput);
+      // await memoryManager.vectorUpload(docOutput);
       return NextResponse.json(knowledge);
     } else {
       return NextResponse.json("Missing file", { status: 400 });
