@@ -10,7 +10,6 @@ import { EPubLoader } from "langchain/document_loaders/fs/epub";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-
 export class FileLoader {
   private async getFilepath(file: File) {
     if (!file) {
@@ -27,7 +26,8 @@ export class FileLoader {
     userId: string,
     type: string,
     filename: string,
-    filePath: string
+    filePath: string,
+    blobUrl: string
   ) {
     let docs;
 
@@ -58,6 +58,7 @@ export class FileLoader {
         userId: userId,
         name: filename,
         type,
+        blobUrl,
       },
     });
 

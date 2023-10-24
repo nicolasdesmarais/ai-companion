@@ -8,6 +8,7 @@ import fs from "fs";
 import { drive_v3, google } from "googleapis";
 import { Readable } from "stream";
 import { FileLoader } from "./FileLoader";
+import { put } from "@vercel/blob";
 
 const SUPPORTED_MIME_TYPES = [
   "text/plain",
@@ -143,6 +144,11 @@ export class GoogleDriveLoader {
     const mimeType = file.mimeType;
     const fileName = file.name;
 
+    const blobStream = await this.getFileAsStream(file.id);
+    const blob = await put(fileName, blobStream.data, {
+      access: "public",
+    });
+
     const fileResponse = await this.getFileAsStream(file.id);
 
     const filePath = `/tmp/${file.name}`;
@@ -159,7 +165,8 @@ export class GoogleDriveLoader {
                 userId,
                 mimeType,
                 fileName,
-                filePath
+                filePath,
+                blob.url
               );
               resolve(knowledge.id);
             } catch (error) {
