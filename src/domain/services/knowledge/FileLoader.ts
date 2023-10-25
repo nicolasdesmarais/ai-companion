@@ -98,3 +98,6 @@ export class FileLoader {
     await memoryManager.vectorUpload(docOutput);
   }
 }
+
+const fileLoader = new FileLoader();
+export default fileLoader;
