@@ -16,7 +16,10 @@ export const WebUrlsForm = ({ aiId }: WebUrlsProps) => {
   const handleContinue = async () => {
     try {
       await axios.post(`/api/v1/ai/${aiId}/knowledge/web-urls`, { urls });
-      redirect(`/`);
+      toast({
+        variant: "default",
+        description: "Web URLs added",
+      });
     } catch (error) {
       console.log(error);
       toast({
