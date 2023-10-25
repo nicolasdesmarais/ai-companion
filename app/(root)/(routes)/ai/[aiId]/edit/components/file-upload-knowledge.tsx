@@ -99,6 +99,8 @@ export const FileUploadKnowledge = ({
         { shouldDirty: false }
       );
       inputFileRef.current.value = "";
+      toast({ description: "File uploaded." });
+      goBack();
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -111,29 +113,6 @@ export const FileUploadKnowledge = ({
     setUploading(false);
   };
 
-  const removeKnowledge = async (id: string) => {
-    setRemoving(id);
-    try {
-      await axios.delete(`/api/knowledge/${id}/${aiId}`);
-
-      const current = form.getValues("knowledge");
-      form.setValue(
-        "knowledge",
-        current.filter((i: any) => i.knowledge.id !== id),
-        { shouldDirty: false }
-      );
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        description:
-          String((error as AxiosError).response?.data) ||
-          "Something went wrong.",
-        duration: 6000,
-      });
-    }
-    setRemoving("");
-  };
-
   return (
     <>
       <FormField
@@ -142,29 +121,6 @@ export const FileUploadKnowledge = ({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Upload your file</FormLabel>
-            <div>
-              {field.value.map((item: any) => (
-                <div
-                  key={item.knowledgeId}
-                  className="flex items-center justify-between my-2"
-                >
-                  <p className="text-sm px-3 py-2 bg-background rounded-lg  w-full ">
-                    {item.knowledge.name}
-                  </p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => removeKnowledge(item.knowledgeId)}
-                  >
-                    {removing === item.knowledgeId ? (
-                      <Loader className="w-4 h-4 spinner" />
-                    ) : (
-                      <Trash2 className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-              ))}
-            </div>
             <div>
               <div className="flex my-2">
                 <Input name="file" ref={inputFileRef} type="file" />

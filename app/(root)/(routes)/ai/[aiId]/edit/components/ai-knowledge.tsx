@@ -8,22 +8,49 @@ import {
   Database,
   Network,
   ChevronLeft,
+  Loader,
+  MinusCircle,
 } from "lucide-react";
 import { FormField } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
 import { GoogleDriveForm } from "./google-drive-knowledge";
-import { useRouter } from "next/navigation";
 import { FileUploadKnowledge } from "./file-upload-knowledge";
 import { WebUrlsForm } from "./web-urls-knowledge-form";
+import axios, { AxiosError } from "axios";
+import { Button } from "@/components/ui/button";
 interface SelectDataSourceProps {
   form: any;
 }
 
 export const AIKnowledge = ({ form }: SelectDataSourceProps) => {
   const { toast } = useToast();
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState(0);
+  const [removing, setRemoving] = useState("");
   const aiId = form.getValues("id");
+
+  const removeKnowledge = async (id: string) => {
+    setRemoving(id);
+    try {
+      await axios.delete(`/api/knowledge/${id}/${aiId}`);
+
+      const current = form.getValues("knowledge");
+      form.setValue(
+        "knowledge",
+        current.filter((i: any) => i.knowledge.id !== id),
+        { shouldDirty: false }
+      );
+      toast({ description: "Knowledge removed." });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description:
+          String((error as AxiosError).response?.data) ||
+          "Something went wrong.",
+        duration: 6000,
+      });
+    }
+    setRemoving("");
+  };
 
   return (
     <div className="h-full p-4 max-w-3xl mx-auto">
@@ -44,9 +71,20 @@ export const AIKnowledge = ({ form }: SelectDataSourceProps) => {
                     key={item.knowledgeId}
                     className="flex items-center justify-between my-2"
                   >
-                    <p className="text-sm px-3 py-2 bg-background rounded-lg  w-full ">
+                    <p className="text-sm px-3 py-2 bg-background rounded-lg w-full text-ellipsis">
                       {item.knowledge.name}
                     </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => removeKnowledge(item.knowledgeId)}
+                    >
+                      {removing === item.knowledgeId ? (
+                        <Loader className="w-4 h-4 spinner" />
+                      ) : (
+                        <MinusCircle className="w-4 h-4" />
+                      )}
+                    </Button>
                   </div>
                 ))}
                 {field.value.length === 0 ? (
