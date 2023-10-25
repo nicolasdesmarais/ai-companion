@@ -20,7 +20,7 @@ export const Groups = ({ data }: GroupsProps) => {
   const groupModal = useGroupModal();
   const { user } = useUser();
   const { organization } = useOrganization();
-  const [groups, setGroups] = useState<Group[]>(data);
+  const [groups, setGroups] = useState<Group[]>(data || []);
 
   const groupId = searchParams.get("groupId");
   const scope = searchParams.get("scope");
@@ -33,7 +33,7 @@ export const Groups = ({ data }: GroupsProps) => {
 
   const fetchGroups = async () => {
     const response = await axios.get("/api/v1/groups");
-    if (response.status === 200) {
+    if (response.status === 200 && Array.isArray(response.data)) {
       setGroups(response.data);
     }
   };
