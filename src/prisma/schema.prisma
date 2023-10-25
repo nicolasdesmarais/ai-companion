@@ -19,6 +19,7 @@ model Category {
 
 model Companion {
   id            String @id @default(uuid())
+  orgId         String? @map(name: "org_id")
   userId        String
   userName      String
   src           String @db.Text
@@ -61,6 +62,7 @@ enum Role {
 enum AIVisibility {
   PRIVATE
   GROUP
+  ORGANIZATION
   PUBLIC
 }
 
