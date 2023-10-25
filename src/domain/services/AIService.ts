@@ -201,6 +201,7 @@ export class AIService {
         baseWhereCondition.OR.push(this.getOwnedByUserCriteria(userId));
         baseWhereCondition.OR.push(this.getUserGroupCriteria(orgId, userId));
         baseWhereCondition.OR.push(this.getSharedWithUserCriteria(userId));
+        baseWhereCondition.OR.push(this.getOrganizationCriteria(orgId));
         baseWhereCondition.OR.push(this.getPublicCriteria());
         break;
     }
