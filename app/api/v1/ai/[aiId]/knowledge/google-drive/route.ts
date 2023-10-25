@@ -1,9 +1,9 @@
+import { GoogleDriveDataStoreAdapter } from "@/src/adapters/knowledge/google-drive/GoogleDriveDataStoreAdapter";
 import {
   BadRequestError,
   EntityNotFoundError,
 } from "@/src/domain/errors/Errors";
 import aiService from "@/src/domain/services/AIService";
-import { GoogleDriveLoader } from "@/src/domain/services/knowledge/GoogleDriveLoader";
 import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/types/CreateGoogleDriveKnowledgeRequest";
 import { currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
@@ -26,7 +26,7 @@ export async function POST(
   const body: CreateGoogleDriveKnowledgeRequest = await req.json();
 
   try {
-    const googleDriveLoader = new GoogleDriveLoader();
+    const googleDriveLoader = new GoogleDriveDataStoreAdapter();
     const knowledgeIds = await googleDriveLoader.createKnowledges(
       userId,
       body.oauthTokenId,

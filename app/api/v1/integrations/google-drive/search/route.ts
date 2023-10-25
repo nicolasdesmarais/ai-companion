@@ -1,8 +1,8 @@
+import { GoogleDriveDataStoreAdapter } from "@/src/adapters/knowledge/google-drive/GoogleDriveDataStoreAdapter";
 import {
   BadRequestError,
   EntityNotFoundError,
 } from "@/src/domain/errors/Errors";
-import { GoogleDriveLoader } from "@/src/domain/services/knowledge/GoogleDriveLoader";
 import { currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   const { searchTerms, oauthTokenId } = body;
 
   try {
-    const googleDriveLoader = new GoogleDriveLoader();
+    const googleDriveLoader = new GoogleDriveDataStoreAdapter();
     const searchResponse = await googleDriveLoader.search(
       userId,
       oauthTokenId,

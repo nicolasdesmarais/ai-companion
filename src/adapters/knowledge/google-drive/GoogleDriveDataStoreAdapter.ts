@@ -11,7 +11,10 @@ import { put } from "@vercel/blob";
 import fs from "fs";
 import { drive_v3, google } from "googleapis";
 import { Readable } from "stream";
-import { FileLoader } from "./FileLoader";
+import { FileLoader } from "../../../domain/services/knowledge/FileLoader";
+import { DataStoreAdapter } from "../types/DataStoreAdapter";
+import { DataStoreKnowledgeList } from "../types/DataStoreKnowledgeList";
+import { GoogleDriveDataStoreInput } from "./types/GoogleDriveDataStoreInput";
 
 const SUPPORTED_MIME_TYPES = [
   "text/plain",
@@ -31,7 +34,7 @@ const OAUTH2_CLIENT = new google.auth.OAuth2(
 
 const DRIVE_CLIENT = google.drive({ version: "v3", auth: OAUTH2_CLIENT });
 
-export class GoogleDriveLoader {
+export class GoogleDriveDataStoreAdapter implements DataStoreAdapter {
   private getNamesQuery(names: string[]) {
     return names.map((name) => `name contains '${name}'`).join(" AND ");
   }
@@ -120,6 +123,24 @@ export class GoogleDriveLoader {
       files: files ?? [],
     };
     return response;
+  }
+
+  public async getDataStoreKnowledgeList(
+    orgId: string,
+    userId: string,
+    data: any
+  ) {
+    const input = data as GoogleDriveDataStoreInput;
+
+    await this.setOAuthCredentials(userId, input.oauthTokenId);
+
+    const fileIds = await this.listAllFiles(input.fileId);
+    if (!fileIds || fileIds.length === 0) {
+      throw new EntityNotFoundError("Files not found");
+    }
+
+    const result: DataStoreKnowledgeList = { knowledges: [] };
+    return result;
   }
 
   public async createKnowledges(
@@ -229,3 +250,6 @@ export class GoogleDriveLoader {
     return result;
   }
 }
+
+const googleDriveDataStoreAdapter = new GoogleDriveDataStoreAdapter();
+export default googleDriveDataStoreAdapter;
