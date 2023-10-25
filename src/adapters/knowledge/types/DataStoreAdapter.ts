@@ -5,5 +5,5 @@ export interface DataStoreAdapter {
     orgId: string,
     userId: string,
     data: any
-  ): DataStoreKnowledgeList;
+  ): Promise<DataStoreKnowledgeList>;
 }

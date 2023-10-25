@@ -229,7 +229,7 @@ model DataStore {
 }
 
 enum DataStoreType {
-  WEBSITE
+  WEB_URL
   GOOGLE_DRIVE
   FILE_UPLOAD
 }
