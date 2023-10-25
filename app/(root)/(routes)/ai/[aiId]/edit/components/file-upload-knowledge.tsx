@@ -10,7 +10,6 @@ import {
 import { useRef, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import axios, { AxiosError } from "axios";
-import { Prisma } from "@prisma/client";
 import { FileText, Loader, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -52,6 +51,7 @@ export const FileUploadKnowledge = ({
   const { toast } = useToast();
 
   const isLoading = form.formState.isSubmitting;
+  const aiId = form.getValues("id");
 
   const uploadDocument = async () => {
     setUploading(true);
@@ -84,7 +84,7 @@ export const FileUploadKnowledge = ({
       const data = new FormData();
       data.set("file", file);
       const response = await axios.post(
-        `/api/knowledge?filename=${encodeURIComponent(
+        `/api/v1/ai/${aiId}/knowledge/file?filename=${encodeURIComponent(
           file.name
         )}&type=${encodeURIComponent(file.type)}`,
         data
@@ -96,7 +96,7 @@ export const FileUploadKnowledge = ({
           ...current,
           { knowledge: response.data, knowledgeId: response.data.id },
         ],
-        { shouldDirty: true }
+        { shouldDirty: false }
       );
       inputFileRef.current.value = "";
     } catch (error: any) {
@@ -113,7 +113,6 @@ export const FileUploadKnowledge = ({
 
   const removeKnowledge = async (id: string) => {
     setRemoving(id);
-    const aiId = form.getValues("id");
     try {
       await axios.delete(`/api/knowledge/${id}/${aiId}`);
 

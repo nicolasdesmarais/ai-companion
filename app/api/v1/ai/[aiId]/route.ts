@@ -61,22 +61,6 @@ export async function PATCH(
         options,
       },
     });
-    if (knowledge && knowledge.length > 0) {
-      knowledge.forEach(async (item: { id: string }) => {
-        if (
-          !companion.knowledge.find(
-            (k: { knowledgeId: string }) => k.knowledgeId === item.id
-          )
-        ) {
-          await prismadb.knowledgeAI.create({
-            data: {
-              companionId: companion.id,
-              knowledgeId: item.id,
-            },
-          });
-        }
-      });
-    }
 
     return NextResponse.json(companion);
   } catch (error) {
