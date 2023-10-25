@@ -82,7 +82,7 @@ export class ApifyService {
 
           // Get all text from meaningful elements
           let allText = "";
-          $("h1, h2, h3, h4, h5, h6, p, a, li").each(
+          $("h1, h2, h3, h4, h5, h6, p, a, li, span").each(
             (_: any, element: HTMLElement) => {
               allText += $(element).text() + "\n"; // Add a newline for separation
             }

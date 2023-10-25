@@ -1,8 +1,12 @@
 import prismadb from "@/src/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
-import { SignedInAuthObject, SignedOutAuthObject } from "@clerk/nextjs/server";
-import { AIVisibility, GroupAvailability } from "@prisma/client";
-import { UnauthorizedError } from "../errors/Errors";
+import {
+  SignedInAuthObject,
+  SignedOutAuthObject,
+  User,
+} from "@clerk/nextjs/server";
+import { AIVisibility, Companion, GroupAvailability } from "@prisma/client";
+import { EntityNotFoundError, UnauthorizedError } from "../errors/Errors";
 import { ShareAIRequest } from "../types/ShareAIRequest";
 import { Utilities } from "../util/utilities";
 import { InvitationService } from "./InvitationService";
@@ -29,6 +33,15 @@ export class AIService {
     aiId: string,
     request: ShareAIRequest
   ) {
+    const ai = await prismadb.companion.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
     const validEmails = Utilities.parseEmailCsv(request.emails);
     if (validEmails.length === 0) {
       return;
@@ -85,6 +98,23 @@ export class AIService {
       );
     } else {
       invitationService.createInvitations(Array.from(missingUserEmails));
+    }
+
+    await this.sendAiSharedEmail(ai, clerkUserList);
+  }
+
+  private async sendAiSharedEmail(ai: Companion, clerkUsers: User[]) {
+    for (const clerkUser of clerkUsers) {
+      if (!clerkUser.primaryEmailAddressId) {
+        continue;
+      }
+
+      await clerkClient.emails.createEmail({
+        fromEmailName: "AppDirect.ai",
+        emailAddressId: clerkUser.primaryEmailAddressId,
+        subject: "AI shared with you on AppDirect.ai",
+        body: `${ai.userName} has shared a ${ai.name} with you on AppDirect.ai.`,
+      });
     }
   }
 

@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { GoogleDriveForm } from "./google-drive-knowledge";
 import { useRouter } from "next/navigation";
 import { FileUploadKnowledge } from "./file-upload-knowledge";
+import { WebUrlsForm } from "./web-urls-knowledge-form";
 interface SelectDataSourceProps {
   form: any;
 }
@@ -81,16 +82,7 @@ export const AIKnowledge = ({ form }: SelectDataSourceProps) => {
               icon={Globe}
               title="Website URLs"
               description="Automatically crawl website content from a list of domains you define."
-              onClick={() => {
-                if (!aiId) {
-                  toast({
-                    variant: "destructive",
-                    description: "Please save your AI first.",
-                  });
-                } else {
-                  router.push(`/ai/${aiId}/knowledge/web-urls`);
-                }
-              }}
+              onClick={() => setActiveTab(2)}
             />
             <DataSourceCard
               icon={Server}
@@ -134,7 +126,7 @@ export const AIKnowledge = ({ form }: SelectDataSourceProps) => {
       {activeTab === 1 && (
         <FileUploadKnowledge goBack={() => setActiveTab(0)} form={form} />
       )}
-      {activeTab === 2 && <div></div>}
+      {activeTab === 2 && <WebUrlsForm aiId={aiId} />}
       {activeTab === 3 && aiId && (
         <GoogleDriveForm aiId={aiId} goBack={() => setActiveTab(0)} />
       )}
