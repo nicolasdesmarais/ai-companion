@@ -9,7 +9,7 @@ import { AIVisibility, Companion, GroupAvailability } from "@prisma/client";
 import { EntityNotFoundError, UnauthorizedError } from "../errors/Errors";
 import { ShareAIRequest } from "../types/ShareAIRequest";
 import { Utilities } from "../util/utilities";
-import { InvitationService } from "./InvitationService";
+import invitationService from "./InvitationService";
 import {
   ListAIsRequestParams,
   ListAIsRequestScope,
@@ -89,7 +89,6 @@ export class AIService {
     });
 
     // Invite users who were not found in Clerk
-    const invitationService = new InvitationService();
     if (orgId) {
       invitationService.createOrganizationInvitationsFromEmails(
         orgId,
@@ -191,6 +190,9 @@ export class AIService {
       case ListAIsRequestScope.SHARED:
         baseWhereCondition = this.getSharedWithUserCriteria(userId);
         break;
+      case ListAIsRequestScope.ORGANIZATION:
+        baseWhereCondition = this.getOrganizationCriteria(orgId);
+        break;
       case ListAIsRequestScope.PUBLIC:
         baseWhereCondition = this.getPublicCriteria();
         break;
@@ -199,6 +201,7 @@ export class AIService {
         baseWhereCondition.OR.push(this.getOwnedByUserCriteria(userId));
         baseWhereCondition.OR.push(this.getUserGroupCriteria(orgId, userId));
         baseWhereCondition.OR.push(this.getSharedWithUserCriteria(userId));
+        baseWhereCondition.OR.push(this.getOrganizationCriteria(orgId));
         baseWhereCondition.OR.push(this.getPublicCriteria());
         break;
     }
@@ -242,6 +245,13 @@ export class AIService {
           userId: userId,
         },
       },
+    };
+  }
+
+  private getOrganizationCriteria(orgId: string) {
+    return {
+      orgId,
+      visibility: AIVisibility.ORGANIZATION,
     };
   }
 
