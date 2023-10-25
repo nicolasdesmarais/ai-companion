@@ -196,6 +196,21 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
     return needsSave ? "Save and Continue" : "Continue";
   };
 
+  const getTabClassNames = (isActive: boolean, isDisabled: boolean) => {
+    let classNames;
+    if (isActive) {
+      classNames = "bg-accent text-primary";
+    } else if (isDisabled) {
+      classNames = "cursor-not-allowed bg-accent/30 text-ring/30";
+    } else {
+      classNames = "cursor-pointer hover:bg-primary/10";
+    }
+    return cn(
+      "flex grow bg-accent/50 justify-center first:rounded-l-lg last:rounded-r-lg py-4 text-ring transition",
+      classNames
+    );
+  };
+
   return (
     <div>
       <Form {...form}>
@@ -203,11 +218,9 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
           <div className="flex h-full p-4 space-x-1 max-w-3xl mx-auto">
             {tabs.map((tab, index) => (
               <div
-                className={cn(
-                  "flex grow bg-accent/50 justify-center first:rounded-l-lg last:rounded-r-lg py-4 text-ring transition",
-                  activeTab === index
-                    ? "bg-accent text-primary"
-                    : "cursor-pointer hover:bg-primary/10"
+                className={getTabClassNames(
+                  activeTab === index,
+                  !form.getValues("id") && index > 0
                 )}
                 key={index}
                 onClick={() => handleTabClick(index)}

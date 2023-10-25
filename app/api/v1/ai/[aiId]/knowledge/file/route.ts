@@ -10,6 +10,7 @@ import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { NextRequest, NextResponse } from "next/server";
+import aiService from "@/src/domain/services/AIService";
 
 export const maxDuration = 300;
 
@@ -24,7 +25,10 @@ const getFilepath = async (file: File) => {
   return path;
 };
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(
+  request: NextRequest,
+  { params: { aiId } }: { params: { aiId: string } }
+): Promise<NextResponse> {
   const user = await currentUser();
   if (!user || !user.id) {
     return new NextResponse("Unauthorized", { status: 401 });
@@ -90,6 +94,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       const memoryManager = await MemoryManager.getInstance();
       await memoryManager.vectorUpload(docOutput);
+
+      await aiService.createKnowledgeAI(aiId, [knowledge.id]);
+
       return NextResponse.json(knowledge);
     } else {
       return NextResponse.json("Missing file", { status: 400 });

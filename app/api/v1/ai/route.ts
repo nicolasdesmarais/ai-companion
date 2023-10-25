@@ -51,17 +51,6 @@ export async function POST(req: Request) {
       },
     });
 
-    if (knowledge && knowledge.length > 0) {
-      knowledge.forEach(async (item: { id: string }) => {
-        await prismadb.knowledgeAI.create({
-          data: {
-            companionId: companion.id,
-            knowledgeId: item.id,
-          },
-        });
-      });
-    }
-
     return NextResponse.json(companion);
   } catch (error) {
     console.log("[COMPANION_POST]", error);

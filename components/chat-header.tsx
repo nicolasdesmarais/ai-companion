@@ -12,6 +12,7 @@ import {
   PinOff,
   RefreshCw,
   Trash,
+  ExternalLink,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -25,6 +26,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
 import { useConversations } from "@/hooks/use-conversations";
+import { ShareModal } from "./share-modal";
+import { useState } from "react";
 
 interface ChatHeaderProps {
   conversation: Conversation & {
@@ -41,6 +44,7 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
   const { user } = useUser();
   const { toast } = useToast();
   const { conversations, fetchConversations } = useConversations();
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const duplicate = async () => {
     const response = await axios.put(
@@ -120,49 +124,64 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
           </p>
         </div>
       </div>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="secondary" size="icon">
-            <MoreVertical />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {conversation.pinPosition ? (
-            <DropdownMenuItem onClick={() => unpin()}>
-              <PinOff className="w-4 h-4 mr-2" />
-              Unpin
+      <div>
+        <Button
+          variant="secondary"
+          size="icon"
+          className="mr-4"
+          type="button"
+          onClick={() => setShowShareModal(true)}
+        >
+          <ExternalLink />
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="secondary" size="icon">
+              <MoreVertical />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {conversation.pinPosition ? (
+              <DropdownMenuItem onClick={() => unpin()}>
+                <PinOff className="w-4 h-4 mr-2" />
+                Unpin
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem onClick={() => pin()}>
+                <Pin className="w-4 h-4 mr-2" />
+                Pin
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onClick={() => reset()}>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Reset
             </DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem onClick={() => pin()}>
-              <Pin className="w-4 h-4 mr-2" />
-              Pin
+            <DropdownMenuItem onClick={() => duplicate()}>
+              <CopyPlus className="w-4 h-4 mr-2" />
+              Duplicate
             </DropdownMenuItem>
-          )}
-          <DropdownMenuItem onClick={() => reset()}>
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Reset
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => duplicate()}>
-            <CopyPlus className="w-4 h-4 mr-2" />
-            Duplicate
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => remove()}>
-            <Trash className="w-4 h-4 mr-2" />
-            Remove
-          </DropdownMenuItem>
-          {user?.id === conversation.companion.userId && (
-            <DropdownMenuItem
-              onClick={() =>
-                router.push(`/ai/${conversation.companion.id}/edit`)
-              }
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Edit AI
+            <DropdownMenuItem onClick={() => remove()}>
+              <Trash className="w-4 h-4 mr-2" />
+              Remove
             </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+            {user?.id === conversation.companion.userId && (
+              <DropdownMenuItem
+                onClick={() =>
+                  router.push(`/ai/${conversation.companion.id}/edit`)
+                }
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit AI
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <ShareModal
+        showModal={showShareModal}
+        setShowModal={setShowShareModal}
+        ai={conversation.companion}
+      />
     </div>
   );
 };
