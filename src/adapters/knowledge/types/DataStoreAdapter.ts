@@ -1,9 +1,9 @@
-import { DataStoreKnowledgeList } from "./DataStoreKnowledgeList";
+import { DataStoreItemList } from "./DataStoreItemList";
 
 export interface DataStoreAdapter {
-  getDataStoreKnowledgeList(
+  getDataStoreItemList(
     orgId: string,
     userId: string,
     data: any
-  ): Promise<DataStoreKnowledgeList>;
+  ): Promise<DataStoreItemList>;
 }

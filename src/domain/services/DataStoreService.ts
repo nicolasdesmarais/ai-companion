@@ -8,33 +8,32 @@ export class DataStoreService {
   public async createDataStore(
     orgId: string,
     ownerUserId: string,
-    name: string,
     type: DataStoreType,
     data: any
   ) {
+    const dataStoreAdapter = this.getDataStoreAdapter(type);
+    const itemList = await dataStoreAdapter.getDataStoreItemList(
+      orgId,
+      ownerUserId,
+      data
+    );
+
     const dataStore = await prismadb.dataStore.create({
       data: {
         orgId,
         ownerUserId,
         name,
         type,
-        indexStatus: DataStoreIndexStatus.INITIALIZED,
+        indexStatus: DataStoreIndexStatus.INDEXING,
       },
     });
 
-    const dataStoreAdapter = this.getDataStoreAdapter(type);
-    const knowledgeList = await dataStoreAdapter.getDataStoreKnowledgeList(
-      orgId,
-      ownerUserId,
-      data
-    );
-
-    for (const knowledge of knowledgeList.knowledges) {
+    for (const item of itemList.items) {
       const createdKnowledge = await prismadb.knowledge.create({
         data: {
-          userId: ownerUserId,
-          name: knowledge.name,
-          type: knowledge.type,
+          name: item.name,
+          type: item.type,
+          metadata: item.metadata,
         },
       });
     }

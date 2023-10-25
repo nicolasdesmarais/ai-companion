@@ -5,15 +5,17 @@ import {
 } from "@/src/domain/errors/Errors";
 import aiService from "@/src/domain/services/AIService";
 import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/types/CreateGoogleDriveKnowledgeRequest";
-import { currentUser } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
 export async function POST(
   req: Request,
   { params }: { params: { aiId: string } }
 ) {
-  const user = await currentUser();
-  if (!user) {
+  const authentication = await auth();
+  const userId = authentication?.userId;
+  const orgId = authentication?.orgId;
+  if (!userId || !orgId) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
@@ -22,10 +24,20 @@ export async function POST(
     return new NextResponse("AI not found", { status: 404 });
   }
 
-  const userId = user.id;
   const body: CreateGoogleDriveKnowledgeRequest = await req.json();
 
   try {
+    // const input: GoogleDriveDataStoreInput = {
+    //   oauthTokenId: body.oauthTokenId,
+    //   fileId: body.fileId,
+    // };
+    // dataStoreService.createDataStore(
+    //   orgId,
+    //   userId,
+    //   DataStoreType.GOOGLE_DRIVE,
+    //   input
+    // );
+
     const googleDriveLoader = new GoogleDriveDataStoreAdapter();
     const knowledgeIds = await googleDriveLoader.createKnowledges(
       userId,

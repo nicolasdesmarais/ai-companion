@@ -13,8 +13,9 @@ import { drive_v3, google } from "googleapis";
 import { Readable } from "stream";
 import { FileLoader } from "../../../domain/services/knowledge/FileLoader";
 import { DataStoreAdapter } from "../types/DataStoreAdapter";
-import { DataStoreKnowledgeList } from "../types/DataStoreKnowledgeList";
+import { DataStoreItem, DataStoreItemList } from "../types/DataStoreItemList";
 import { GoogleDriveDataStoreInput } from "./types/GoogleDriveDataStoreInput";
+import { GoogleDriveFileMetaData } from "./types/GoogleDriveFileMetaData";
 
 const SUPPORTED_MIME_TYPES = [
   "text/plain",
@@ -33,6 +34,11 @@ const OAUTH2_CLIENT = new google.auth.OAuth2(
 );
 
 const DRIVE_CLIENT = google.drive({ version: "v3", auth: OAUTH2_CLIENT });
+
+interface ListFilesResponse {
+  rootName: string;
+  files: drive_v3.Schema$File[];
+}
 
 export class GoogleDriveDataStoreAdapter implements DataStoreAdapter {
   private getNamesQuery(names: string[]) {
@@ -125,21 +131,34 @@ export class GoogleDriveDataStoreAdapter implements DataStoreAdapter {
     return response;
   }
 
-  public async getDataStoreKnowledgeList(
-    orgId: string,
-    userId: string,
-    data: any
-  ) {
+  public async getDataStoreItemList(orgId: string, userId: string, data: any) {
     const input = data as GoogleDriveDataStoreInput;
 
     await this.setOAuthCredentials(userId, input.oauthTokenId);
 
-    const fileIds = await this.listAllFiles(input.fileId);
-    if (!fileIds || fileIds.length === 0) {
+    const listFilesResponse = await this.listAllFiles(input.fileId);
+    if (!listFilesResponse?.files || listFilesResponse.files.length === 0) {
       throw new EntityNotFoundError("Files not found");
     }
 
-    const result: DataStoreKnowledgeList = { knowledges: [] };
+    const items: DataStoreItem[] = [];
+    const result: DataStoreItemList = {
+      dataStoreName: listFilesResponse.rootName,
+      items,
+    };
+    for (const file of listFilesResponse.files) {
+      const metadata: GoogleDriveFileMetaData = {
+        fileId: file.id ?? "",
+        mimeType: file.mimeType ?? "",
+      };
+      const item: DataStoreItem = {
+        name: file.name ?? "",
+        type: "FILE",
+        metadata,
+      };
+      items.push(item);
+    }
+
     return result;
   }
 
@@ -150,13 +169,13 @@ export class GoogleDriveDataStoreAdapter implements DataStoreAdapter {
   ) {
     await this.setOAuthCredentials(userId, oauthTokenId);
 
-    const fileIds = await this.listAllFiles(fileId);
-    if (!fileIds || fileIds.length === 0) {
+    const listFilesResponse = await this.listAllFiles(fileId);
+    if (!listFilesResponse?.files || listFilesResponse.files.length === 0) {
       throw new EntityNotFoundError("Files not found");
     }
 
     const knowledgeIds: string[] = [];
-    for (const fileId of fileIds) {
+    for (const fileId of listFilesResponse.files) {
       const knowledgeId = await this.loadFile(userId, fileId);
       if (knowledgeId) {
         knowledgeIds.push(knowledgeId);
@@ -211,8 +230,8 @@ export class GoogleDriveDataStoreAdapter implements DataStoreAdapter {
     });
   }
 
-  private async listAllFiles(fileId: string): Promise<drive_v3.Schema$File[]> {
-    const result: drive_v3.Schema$File[] = [];
+  private async listAllFiles(fileId: string): Promise<ListFilesResponse> {
+    const files: drive_v3.Schema$File[] = [];
 
     const listFilesRecursive = async (folderId: string): Promise<void> => {
       const query = `'${folderId}' in parents and (${this.getMimeTypeQuery(
@@ -227,7 +246,7 @@ export class GoogleDriveDataStoreAdapter implements DataStoreAdapter {
         if (file.mimeType === FOLDER_MIME_TYPE) {
           await listFilesRecursive(file.id!);
         } else {
-          result.push(file);
+          files.push(file);
         }
       }
     };
@@ -236,18 +255,25 @@ export class GoogleDriveDataStoreAdapter implements DataStoreAdapter {
       fileId,
       fields: "id, name, mimeType",
     });
+    const rootName = initialFile.data.name ?? "";
 
     if (!initialFile.data.mimeType || !initialFile.data.id) {
-      return result;
+      return {
+        rootName,
+        files,
+      };
     }
 
     if (initialFile.data.mimeType === FOLDER_MIME_TYPE) {
       await listFilesRecursive(initialFile.data.id);
     } else {
-      result.push(initialFile.data);
+      files.push(initialFile.data);
     }
 
-    return result;
+    return {
+      rootName,
+      files,
+    };
   }
 }
 
