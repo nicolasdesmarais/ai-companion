@@ -13,16 +13,17 @@ import { ShareAIRequest } from "@/src/domain/types/ShareAIRequest";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AIVisibility, Companion } from "@prisma/client";
 import axios from "axios";
+import { Copy } from "lucide-react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useToast } from "./ui/use-toast";
-import { Copy } from "lucide-react";
 
 const groupFormSchema = z.object({
   visibility: z.enum([
     AIVisibility.PRIVATE,
     AIVisibility.GROUP,
     AIVisibility.PUBLIC,
+    AIVisibility.ORGANIZATION,
   ]),
   teammates: z.string(),
 });
