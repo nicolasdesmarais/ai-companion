@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import {
   FormDescription,
-  FormField,
   FormItem,
   FormLabel,
   FormMessage,
@@ -10,7 +9,7 @@ import {
 import { useRef, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import axios, { AxiosError } from "axios";
-import { FileText, Loader, Trash2 } from "lucide-react";
+import { FileText, Loader } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 const supportedUploadFormats = [

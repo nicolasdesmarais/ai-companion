@@ -4,19 +4,23 @@ import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Globe, Loader } from "lucide-react";
 
 interface WebUrlsProps {
   aiId: string;
 }
 
 export const WebUrlsForm = ({ aiId }: WebUrlsProps) => {
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const [urls, setUrls] = useState([""]);
   const router = useRouter();
 
   const handleContinue = async () => {
+    setLoading(true);
     try {
       await axios.post(`/api/v1/ai/${aiId}/knowledge/web-urls`, { urls });
+      setLoading(false);
       toast({
         variant: "default",
         description: "Web URLs added",
@@ -73,6 +77,11 @@ export const WebUrlsForm = ({ aiId }: WebUrlsProps) => {
           variant="ring"
         >
           Load
+          {loading ? (
+            <Loader className="w-4 h-4 ml-2 spinner" />
+          ) : (
+            <Globe className="w-4 h-4 ml-2" />
+          )}
         </Button>
       </div>
     </div>
