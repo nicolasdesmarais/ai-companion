@@ -26,12 +26,14 @@ interface SelectDataSourceProps {
   form: any;
   knowledge: any;
   setKnowledge: (knowledge: any) => void;
+  knowledgeLoading: boolean;
 }
 
 export const AIKnowledge = ({
   form,
   knowledge,
   setKnowledge,
+  knowledgeLoading,
 }: SelectDataSourceProps) => {
   const { toast } = useToast();
   const [removing, setRemoving] = useState("");
@@ -111,7 +113,7 @@ export const AIKnowledge = ({
                   </td>
                 </tr>
               ))}
-              {knowledge.length === 0 ? (
+              {!knowledgeLoading && knowledge.length === 0 ? (
                 <div className="flex items-center justify-between my-2">
                   <p className="text-sm px-3 py-2 bg-background rounded-lg w-full ">
                     None
@@ -119,6 +121,13 @@ export const AIKnowledge = ({
                 </div>
               ) : null}
             </Table>
+            {knowledgeLoading ? (
+              <div className="flex items-center my-2 w-full">
+                <div className="mx-auto">
+                  <Loader className="w-8 h-8 spinner" />
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <h2 className="text-lg font-medium mt-8">Add more data sources</h2>

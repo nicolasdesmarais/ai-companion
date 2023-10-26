@@ -77,11 +77,14 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
   const pathname = usePathname();
   const [continueRequested, setContinueRequested] = useState("");
   const [knowledge, setKnowledge] = useState<any[]>([]);
+  const [knowledgeLoading, setKnowledgeLoading] = useState(true);
 
   useEffect(() => {
     const fetchKnowledge = async () => {
+      setKnowledgeLoading(true);
       const response = await axios.get(`/api/v1/ai/${aiId}/knowledge`);
       setKnowledge(response.data.map((k: any) => k.knowledge));
+      setKnowledgeLoading(false);
     };
     fetchKnowledge();
   }, []);
@@ -227,6 +230,7 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
       form={form}
       knowledge={knowledge}
       setKnowledge={setKnowledge}
+      knowledgeLoading={knowledgeLoading}
     />
   );
 
