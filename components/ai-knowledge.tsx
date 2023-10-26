@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   Loader,
   MinusCircle,
+  Coffee,
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { GoogleDriveForm } from "./google-drive-knowledge";
@@ -116,14 +117,15 @@ export const AIKnowledge = ({
                   </td>
                 </tr>
               ))}
-              {!knowledgeLoading && knowledge.length === 0 ? (
-                <div className="flex items-center justify-between my-2">
-                  <p className="text-sm px-3 py-2 bg-background rounded-lg w-full ">
-                    None
-                  </p>
-                </div>
-              ) : null}
             </Table>
+            {!knowledgeLoading && knowledge.length === 0 ? (
+              <div className="flex items-center my-2 w-full">
+                <div className="mx-auto flex p-4 bg-background rounded-lg">
+                  <Coffee className="w-6 h-6 mr-2" />
+                  <p>Load data to see it here</p>
+                </div>
+              </div>
+            ) : null}
             {knowledgeLoading ? (
               <div className="flex items-center my-2 w-full">
                 <div className="mx-auto">
