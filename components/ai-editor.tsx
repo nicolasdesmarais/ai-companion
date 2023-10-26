@@ -9,7 +9,7 @@ import { Category, Knowledge, Prisma } from "@prisma/client";
 import axios from "axios";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { AIKnowledge } from "./ai-knowledge";
 import { AIPersonality } from "./ai-personality";
 import * as z from "zod";
@@ -76,6 +76,15 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const [continueRequested, setContinueRequested] = useState("");
+  const [knowledge, setKnowledge] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchKnowledge = async () => {
+      const response = await axios.get(`/api/v1/ai/${aiId}/knowledge`);
+      setKnowledge(response.data.map((k: any) => k.knowledge));
+    };
+    fetchKnowledge();
+  }, []);
 
   if (initialAi && !initialAi.options) {
     const model = models.find((model) => model.id === initialAi.modelId);
@@ -105,7 +114,6 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
   });
 
   const aiId = form.getValues("id");
-  const knowledge = form.getValues("knowledge") || [];
   const isLoading = form.formState.isSubmitting;
   const needsSave = !aiId || form.formState.isDirty;
 
@@ -126,8 +134,6 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
     let aiId = form.getValues("id");
     if (form.formState.isDirty) {
       try {
-        values.knowledge = values.knowledge?.map((item: any) => item.knowledge);
-
         let response;
         if (aiId) {
           response = await axios.patch(`/api/v1/ai/${aiId}`, values);
@@ -216,7 +222,13 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
     </Button>
   );
 
-  const aiKnowledge = <AIKnowledge form={form} />;
+  const aiKnowledge = (
+    <AIKnowledge
+      form={form}
+      knowledge={knowledge}
+      setKnowledge={setKnowledge}
+    />
+  );
 
   const tabs = [
     {

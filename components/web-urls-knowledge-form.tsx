@@ -70,13 +70,7 @@ export const WebUrlsForm = ({ aiId }: WebUrlsProps) => {
           disabled={!urls.some((url) => url)}
           variant="ring"
         >
-          Continue
-        </Button>
-        <Button
-          onClick={() => redirect(`/ai/${aiId}/knowledge`)}
-          variant="link"
-        >
-          Back
+          Load
         </Button>
       </div>
     </div>

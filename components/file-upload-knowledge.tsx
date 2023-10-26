@@ -39,14 +39,17 @@ const supportedUploadFormats = [
 interface FileUploadKnowledgeProps {
   goBack: () => void;
   form: any;
+  knowledge: any;
+  setKnowledge: (knowledge: any) => void;
 }
 
 export const FileUploadKnowledge = ({
   goBack,
   form,
+  knowledge,
+  setKnowledge,
 }: FileUploadKnowledgeProps) => {
   const [uploading, setUploading] = useState(false);
-  const [removing, setRemoving] = useState("");
   const inputFileRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -89,15 +92,10 @@ export const FileUploadKnowledge = ({
         )}&type=${encodeURIComponent(file.type)}`,
         data
       );
-      const current = form.getValues("knowledge");
-      form.setValue(
-        "knowledge",
-        [
-          ...current,
-          { knowledge: response.data, knowledgeId: response.data.id },
-        ],
-        { shouldDirty: false }
-      );
+      setKnowledge((current: any) => {
+        const newKnowledge = [...current, response.data];
+        return newKnowledge;
+      });
       inputFileRef.current.value = "";
       toast({ description: "File uploaded." });
       goBack();
@@ -114,45 +112,32 @@ export const FileUploadKnowledge = ({
   };
 
   return (
-    <>
-      <FormField
-        name="knowledge"
-        control={form.control}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Upload your file</FormLabel>
-            <div>
-              <div className="flex my-2">
-                <Input name="file" ref={inputFileRef} type="file" />
-                <Button
-                  type="button"
-                  disabled={isLoading || uploading}
-                  variant="outline"
-                  onClick={() => uploadDocument()}
-                >
-                  Upload
-                  {uploading ? (
-                    <Loader className="w-4 h-4 ml-2 spinner" />
-                  ) : (
-                    <FileText className="w-4 h-4 ml-2" />
-                  )}
-                </Button>
-              </div>
-            </div>
-            <FormDescription>
-              Add custom knowledge to your AI. Max file size: 4.5Mb. <br />
-              The following formats are supported:{" "}
-              {supportedUploadFormats.map((format) => format.name).join(", ")}
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <div className="flex justify-between w-full flex-row-reverse">
-        <Button onClick={goBack} variant="link">
-          Back
-        </Button>
+    <FormItem>
+      <FormLabel>Upload your file</FormLabel>
+      <div>
+        <div className="flex my-2">
+          <Input name="file" ref={inputFileRef} type="file" />
+          <Button
+            type="button"
+            disabled={isLoading || uploading}
+            variant="outline"
+            onClick={() => uploadDocument()}
+          >
+            Upload
+            {uploading ? (
+              <Loader className="w-4 h-4 ml-2 spinner" />
+            ) : (
+              <FileText className="w-4 h-4 ml-2" />
+            )}
+          </Button>
+        </div>
       </div>
-    </>
+      <FormDescription>
+        Add custom knowledge to your AI. Max file size: 4.5Mb. <br />
+        The following formats are supported:{" "}
+        {supportedUploadFormats.map((format) => format.name).join(", ")}
+      </FormDescription>
+      <FormMessage />
+    </FormItem>
   );
 };

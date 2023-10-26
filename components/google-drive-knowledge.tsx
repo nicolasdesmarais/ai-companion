@@ -211,10 +211,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
           disabled={!selectedFile || !selectedAccount}
           variant="ring"
         >
-          Continue
-        </Button>
-        <Button onClick={goBack} variant="link" type="button">
-          Back
+          Load
         </Button>
       </div>
 

@@ -21,9 +21,15 @@ import { Button } from "@/components/ui/button";
 import { useRouter, usePathname } from "next/navigation";
 interface SelectDataSourceProps {
   form: any;
+  knowledge: any;
+  setKnowledge: (knowledge: any) => void;
 }
 
-export const AIKnowledge = ({ form }: SelectDataSourceProps) => {
+export const AIKnowledge = ({
+  form,
+  knowledge,
+  setKnowledge,
+}: SelectDataSourceProps) => {
   const { toast } = useToast();
   const [removing, setRemoving] = useState("");
   const pathname = usePathname();
@@ -35,12 +41,7 @@ export const AIKnowledge = ({ form }: SelectDataSourceProps) => {
     try {
       await axios.delete(`/api/knowledge/${id}/${aiId}`);
 
-      const current = form.getValues("knowledge");
-      form.setValue(
-        "knowledge",
-        current.filter((i: any) => i.knowledge.id !== id),
-        { shouldDirty: false }
-      );
+      setKnowledge((current: any) => current.filter((i: any) => i.id !== id));
       toast({ description: "Knowledge removed." });
     } catch (error: any) {
       toast({
@@ -63,42 +64,37 @@ export const AIKnowledge = ({ form }: SelectDataSourceProps) => {
             The following files and sources are currently being used to inform
             your AI&apos;s knowledge.
           </p>
-          <FormField
-            name="knowledge"
-            control={form.control}
-            render={({ field }) => (
-              <div>
-                {field.value.map((item: any) => (
-                  <div
-                    key={item.knowledgeId}
-                    className="flex items-center justify-between my-2"
-                  >
-                    <p className="text-sm px-3 py-2 bg-background rounded-lg w-full text-ellipsis">
-                      {item.knowledge.name}
-                    </p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => removeKnowledge(item.knowledgeId)}
-                    >
-                      {removing === item.knowledgeId ? (
-                        <Loader className="w-4 h-4 spinner" />
-                      ) : (
-                        <MinusCircle className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
-                ))}
-                {field.value.length === 0 ? (
-                  <div className="flex items-center justify-between my-2">
-                    <p className="text-sm px-3 py-2 bg-background rounded-lg w-full ">
-                      None
-                    </p>
-                  </div>
-                ) : null}
+
+          <div>
+            {knowledge.map((knowledge: any) => (
+              <div
+                key={knowledge.id}
+                className="flex items-center justify-between my-2"
+              >
+                <p className="text-sm px-3 py-2 bg-background rounded-lg w-full text-ellipsis">
+                  {knowledge.name}
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => removeKnowledge(knowledge.id)}
+                >
+                  {removing === knowledge.id ? (
+                    <Loader className="w-4 h-4 spinner" />
+                  ) : (
+                    <MinusCircle className="w-4 h-4" />
+                  )}
+                </Button>
               </div>
-            )}
-          />
+            ))}
+            {knowledge.length === 0 ? (
+              <div className="flex items-center justify-between my-2">
+                <p className="text-sm px-3 py-2 bg-background rounded-lg w-full ">
+                  None
+                </p>
+              </div>
+            ) : null}
+          </div>
 
           <h2 className="text-lg font-medium mt-8">Add more data sources</h2>
           <p className="text-sm text-muted-foreground">
@@ -158,6 +154,8 @@ export const AIKnowledge = ({ form }: SelectDataSourceProps) => {
         <FileUploadKnowledge
           goBack={() => router.push(`/ai/${aiId}/edit/knowledge`)}
           form={form}
+          knowledge={knowledge}
+          setKnowledge={setKnowledge}
         />
       )}
       {pathname.endsWith("web-url") && <WebUrlsForm aiId={aiId} />}
