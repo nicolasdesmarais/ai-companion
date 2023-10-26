@@ -1,11 +1,12 @@
-import { ApifyAdapter } from "@/src/adapters/knowledge/web-urls/ApifyAdapter";
+import { WebUrlDataSourceInput } from "@/src/adapters/knowledge/web-urls/types/WebUrlDataSourceInput";
 import {
   BadRequestError,
   EntityNotFoundError,
 } from "@/src/domain/errors/Errors";
 import aiService from "@/src/domain/services/AIService";
-import prismadb from "@/src/lib/prismadb";
-import { currentUser } from "@clerk/nextjs";
+import dataSourceService from "@/src/domain/services/DataSourceService";
+import { auth } from "@clerk/nextjs";
+import { DataSourceType } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function POST(
@@ -13,8 +14,11 @@ export async function POST(
   { params }: { params: { aiId: string } }
 ) {
   console.log("POST /api/v1/ai/[aiId]/knowledge/web-urls");
-  const user = await currentUser();
-  if (!user) {
+  const authentication = await auth();
+  const userId = authentication?.userId;
+  const orgId = authentication?.orgId;
+
+  if (!userId || !orgId) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
@@ -23,26 +27,31 @@ export async function POST(
     return new NextResponse("AI not found", { status: 404 });
   }
 
-  const userId = user.id;
   const body = await req.json();
   const { urls } = body;
-  console.log("Urls: " + urls);
 
   try {
-    const apifyService = new ApifyAdapter();
+    const dataSources = [];
     for (const url of urls) {
-      const knowledge = await prismadb.knowledge.create({
-        data: {
-          userId: userId,
-          name: url,
-          type: "URL",
-        },
-      });
-      await aiService.createKnowledgeAI(params.aiId, [knowledge.id]);
-      await apifyService.startUrlIndexing(knowledge.id, url);
+      const input: WebUrlDataSourceInput = {
+        url,
+      };
+
+      const dataSourceId = await dataSourceService.createDataSource(
+        orgId,
+        userId,
+        DataSourceType.WEB_URL,
+        input
+      );
+
+      const dataSource = await aiService.createAIDataSource(
+        ai.id,
+        dataSourceId
+      );
+      dataSources.push(dataSource);
     }
 
-    return new NextResponse("", { status: 201 });
+    return NextResponse.json(dataSources, { status: 201 });
   } catch (e) {
     console.log(e);
     if (e instanceof EntityNotFoundError) {
