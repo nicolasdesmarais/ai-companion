@@ -15,8 +15,8 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    dataSourceService.deleteDataSource(params.aiId, params.dataSourceId);
-    return NextResponse.json(null, { status: 204 });
+    await dataSourceService.deleteDataSource(params.aiId, params.dataSourceId);
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.log("[KNOWLEDGE_DELETE]", error);
     return new NextResponse("Internal Error", { status: 500 });
