@@ -8,6 +8,7 @@ import { GoogleDriveFile } from "@/src/domain/types/GoogleDriveSearchResponse";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { GoogleDriveSearchResultsModal } from "./google-drive-search-results-modal";
+import { Server, Loader } from "lucide-react";
 
 const ADD_ACCOUNT_OPTION = "add-account";
 
@@ -26,9 +27,11 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   );
   const [selectedAccount, setSelectedAccount] = useState("");
   const [accounts, setAccounts] = useState<UserOAuthTokenEntity[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchAccount = async () => {
+      setLoading(true);
       const response = await axios.get(
         `/api/v1/integrations/google-drive/accounts`
       );
@@ -36,6 +39,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
       if (response.data.length > 0) {
         setSelectedAccount(response.data[0]?.id);
       }
+      setLoading(false);
     };
     fetchAccount();
   }, []);
@@ -124,6 +128,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
     if (!selectedFile || !selectedAccount) {
       return;
     }
+    setLoading(true);
 
     try {
       const createKnowledgeRequest: CreateGoogleDriveKnowledgeRequest = {
@@ -135,6 +140,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
         `/api/v1/ai/${aiId}/knowledge/google-drive`,
         createKnowledgeRequest
       );
+      setLoading(false);
       goBack();
     } catch (error) {
       toast({
@@ -212,6 +218,11 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
           variant="ring"
         >
           Load
+          {loading ? (
+            <Loader className="w-4 h-4 ml-2 spinner" />
+          ) : (
+            <Server className="w-4 h-4 ml-2" />
+          )}
         </Button>
       </div>
 
