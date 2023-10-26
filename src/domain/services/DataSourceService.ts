@@ -12,6 +12,17 @@ import {
 import { EntityNotFoundError } from "../errors/Errors";
 
 export class DataSourceService {
+  private getDataSourceAdapter(type: DataSourceType): DataSourceAdapter {
+    switch (type) {
+      case DataSourceType.GOOGLE_DRIVE:
+        return googleDriveDataSourceAdapter;
+      case DataSourceType.WEB_URL:
+        return webUrlsDataSourceAdapter;
+      default:
+        throw new Error(`DataSourceType ${type} not supported`);
+    }
+  }
+
   public async createDataSource(
     orgId: string,
     ownerUserId: string,
@@ -85,6 +96,10 @@ export class DataSourceService {
         indexStatus: indexKnowledgeResponse.indexStatus,
       },
     });
+
+    if (indexKnowledgeResponse.indexStatus === KnowledgeIndexStatus.COMPLETED) {
+      this.updateCompletedKnowledgeDataSources(knowledge.id);
+    }
   }
 
   private async createDataSourceAndKnowledgeList(
@@ -166,14 +181,33 @@ export class DataSourceService {
     }
   }
 
-  private getDataSourceAdapter(type: DataSourceType): DataSourceAdapter {
-    switch (type) {
-      case DataSourceType.GOOGLE_DRIVE:
-        return googleDriveDataSourceAdapter;
-      case DataSourceType.WEB_URL:
-        return webUrlsDataSourceAdapter;
-      default:
-        throw new Error(`DataSourceType ${type} not supported`);
+  private async updateCompletedKnowledgeDataSources(knowledgeId: string) {
+    const dataSources = await prismadb.dataSource.findMany({
+      where: { knowledges: { some: { knowledgeId } } },
+      include: {
+        knowledges: {
+          include: {
+            knowledge: true,
+          },
+        },
+      },
+    });
+
+    for (const dataSource of dataSources) {
+      const knowledgeCount = dataSource.knowledges.length;
+      const completedKnowledges = dataSource.knowledges.filter(
+        (knowledge) =>
+          knowledge.knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED
+      ).length;
+      const indexPercentage = (completedKnowledges / knowledgeCount) * 100;
+
+      await prismadb.dataSource.update({
+        where: { id: dataSource.id },
+        data: {
+          indexPercentage,
+          lastIndexedAt: new Date(),
+        },
+      });
     }
   }
 }
