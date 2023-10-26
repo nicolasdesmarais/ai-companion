@@ -22,4 +22,6 @@ export interface DataSourceAdapter {
     knowledge: Knowledge,
     data: any
   ): Promise<IndexKnowledgeResponse>;
+
+  deleteKnowledge(knowledgeId: string): Promise<void>;
 }

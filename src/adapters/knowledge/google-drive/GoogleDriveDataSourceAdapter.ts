@@ -266,6 +266,10 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
   ): Promise<IndexKnowledgeResponse> {
     throw new Error("Method not implemented.");
   }
+
+  public async deleteKnowledge(knowledgeId: string): Promise<void> {
+    fileLoader.deleteKnowledge(knowledgeId);
+  }
 }
 
 const googleDriveDataSourceAdapter = new GoogleDriveDataSourceAdapter();

@@ -26,6 +26,20 @@ export class DataSourceService {
     }
   }
 
+  public async getDataSources(orgId: string, userId: string, aiId: string) {
+    return await prismadb.dataSource.findMany({
+      where: {
+        orgId,
+        ownerUserId: userId,
+        ais: {
+          some: {
+            aiId,
+          },
+        },
+      },
+    });
+  }
+
   public async createDataSource(
     orgId: string,
     ownerUserId: string,
@@ -212,6 +226,39 @@ export class DataSourceService {
         },
       });
     }
+  }
+
+  public async deleteDataSource(aiId: string, dataSourceId: string) {
+    const dataSource = await prismadb.dataSource.findUnique({
+      where: { id: dataSourceId },
+      include: {
+        knowledges: true,
+      },
+    });
+    if (!dataSource) {
+      throw new EntityNotFoundError(
+        `DataSource with id=${dataSourceId} not found`
+      );
+    }
+
+    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
+    const knowledgeIds: string[] = [];
+    for (const knowledge of dataSource.knowledges) {
+      await dataSourceAdapter.deleteKnowledge(knowledge.knowledgeId);
+      knowledgeIds.push(knowledge.knowledgeId);
+    }
+
+    await prismadb.$transaction(async (tx) => {
+      await prismadb.dataSourceKnowledge.deleteMany({
+        where: { dataSourceId },
+      });
+
+      await prismadb.knowledge.deleteMany({
+        where: { id: { in: knowledgeIds } },
+      });
+
+      await prismadb.dataSource.delete({ where: { id: dataSourceId } });
+    });
   }
 }
 

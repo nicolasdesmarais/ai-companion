@@ -46,7 +46,7 @@ export async function POST(
   } catch (e) {
     console.log(e);
     if (e instanceof EntityNotFoundError) {
-      return NextResponse.json({ folders: [], knowledgeIds: [] });
+      return new NextResponse(e.message, { status: 404 });
     }
     if (e instanceof BadRequestError) {
       return new NextResponse(e.message, { status: 400 });

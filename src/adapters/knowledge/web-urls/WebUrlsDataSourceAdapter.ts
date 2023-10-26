@@ -89,6 +89,10 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       indexStatus: KnowledgeIndexStatus.COMPLETED,
     };
   }
+
+  public async deleteKnowledge(knowledgeId: string): Promise<void> {
+    fileLoader.deleteKnowledge(knowledgeId);
+  }
 }
 
 const webUrlsDataSourceAdapter = new WebUrlsDataSourceAdapter();

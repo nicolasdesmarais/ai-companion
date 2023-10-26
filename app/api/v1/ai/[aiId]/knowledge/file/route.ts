@@ -3,21 +3,9 @@ import aiService from "@/src/domain/services/AIService";
 import dataSourceService from "@/src/domain/services/DataSourceService";
 import { auth } from "@clerk/nextjs";
 import { DataSourceType } from "@prisma/client";
-import { writeFile } from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 300;
-
-const getFilepath = async (file: File) => {
-  if (!file) {
-    throw new Error("Error reading file");
-  }
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-  const path = `/tmp/${file.name}`;
-  await writeFile(path, buffer);
-  return path;
-};
 
 export async function POST(
   request: NextRequest,

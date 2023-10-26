@@ -89,6 +89,11 @@ export class FileLoader {
     const memoryManager = await MemoryManager.getInstance();
     await memoryManager.vectorUpload(docOutput);
   }
+
+  public async deleteKnowledge(knowledgeId: string): Promise<void> {
+    const memoryManager = await MemoryManager.getInstance();
+    await memoryManager.vectorDelete(knowledgeId);
+  }
 }
 
 const fileLoader = new FileLoader();
