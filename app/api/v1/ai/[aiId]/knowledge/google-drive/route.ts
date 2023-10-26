@@ -1,11 +1,13 @@
-import { GoogleDriveDataStoreAdapter } from "@/src/adapters/knowledge/google-drive/GoogleDriveDataStoreAdapter";
+import { GoogleDriveDataSourceInput } from "@/src/adapters/knowledge/google-drive/types/GoogleDriveDataSourceInput";
 import {
   BadRequestError,
   EntityNotFoundError,
 } from "@/src/domain/errors/Errors";
 import aiService from "@/src/domain/services/AIService";
+import dataSourceService from "@/src/domain/services/DataSourceService";
 import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/types/CreateGoogleDriveKnowledgeRequest";
 import { auth } from "@clerk/nextjs";
+import { DataSourceType } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function POST(
@@ -27,28 +29,28 @@ export async function POST(
   const body: CreateGoogleDriveKnowledgeRequest = await req.json();
 
   try {
-    // const input: GoogleDriveDataStoreInput = {
-    //   oauthTokenId: body.oauthTokenId,
-    //   fileId: body.fileId,
-    // };
-    // dataStoreService.createDataStore(
-    //   orgId,
+    const input: GoogleDriveDataSourceInput = {
+      oauthTokenId: body.oauthTokenId,
+      fileId: body.fileId,
+    };
+    dataSourceService.createDataSource(
+      orgId,
+      userId,
+      DataSourceType.GOOGLE_DRIVE,
+      input
+    );
+
+    // const googleDriveLoader = new GoogleDriveDataSourceAdapter();
+    // const knowledgeIds = await googleDriveLoader.createKnowledges(
     //   userId,
-    //   DataStoreType.GOOGLE_DRIVE,
-    //   input
+    //   body.oauthTokenId,
+    //   body.fileId
     // );
 
-    const googleDriveLoader = new GoogleDriveDataStoreAdapter();
-    const knowledgeIds = await googleDriveLoader.createKnowledges(
-      userId,
-      body.oauthTokenId,
-      body.fileId
-    );
-
-    const response = await aiService.createKnowledgeAI(
-      params.aiId,
-      knowledgeIds
-    );
+    // const response = await aiService.createKnowledgeAI(
+    //   params.aiId,
+    //   knowledgeIds
+    // );
 
     return new NextResponse("", { status: 201 });
   } catch (e) {

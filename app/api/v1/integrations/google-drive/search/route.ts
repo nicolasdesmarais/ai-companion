@@ -1,4 +1,4 @@
-import { GoogleDriveDataStoreAdapter } from "@/src/adapters/knowledge/google-drive/GoogleDriveDataStoreAdapter";
+import { GoogleDriveDataSourceAdapter } from "@/src/adapters/knowledge/google-drive/GoogleDriveDataSourceAdapter";
 import {
   BadRequestError,
   EntityNotFoundError,
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   const { searchTerms, oauthTokenId } = body;
 
   try {
-    const googleDriveLoader = new GoogleDriveDataStoreAdapter();
+    const googleDriveLoader = new GoogleDriveDataSourceAdapter();
     const searchResponse = await googleDriveLoader.search(
       userId,
       oauthTokenId,

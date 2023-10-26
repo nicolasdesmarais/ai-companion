@@ -12,9 +12,9 @@ import fs from "fs";
 import { drive_v3, google } from "googleapis";
 import { Readable } from "stream";
 import { FileLoader } from "../../../domain/services/knowledge/FileLoader";
-import { DataStoreAdapter } from "../types/DataStoreAdapter";
-import { DataStoreItem, DataStoreItemList } from "../types/DataStoreItemList";
-import { GoogleDriveDataStoreInput } from "./types/GoogleDriveDataStoreInput";
+import { DataSourceAdapter } from "../types/DataSourceAdapter";
+import { DataSourceItem } from "../types/DataSourceItemList";
+import { GoogleDriveDataSourceInput } from "./types/GoogleDriveDataSourceInput";
 import { GoogleDriveFileMetaData } from "./types/GoogleDriveFileMetaData";
 
 const SUPPORTED_MIME_TYPES = [
@@ -40,7 +40,7 @@ interface ListFilesResponse {
   files: drive_v3.Schema$File[];
 }
 
-export class GoogleDriveDataStoreAdapter implements DataStoreAdapter {
+export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
   private getNamesQuery(names: string[]) {
     return names.map((name) => `name contains '${name}'`).join(" AND ");
   }
@@ -131,8 +131,8 @@ export class GoogleDriveDataStoreAdapter implements DataStoreAdapter {
     return response;
   }
 
-  public async getDataStoreItemList(orgId: string, userId: string, data: any) {
-    const input = data as GoogleDriveDataStoreInput;
+  public async getDataSourceItemList(orgId: string, userId: string, data: any) {
+    const input = data as GoogleDriveDataSourceInput;
 
     await this.setOAuthCredentials(userId, input.oauthTokenId);
 
@@ -141,9 +141,9 @@ export class GoogleDriveDataStoreAdapter implements DataStoreAdapter {
       throw new EntityNotFoundError("Files not found");
     }
 
-    const items: DataStoreItem[] = [];
-    const result: DataStoreItemList = {
-      dataStoreName: listFilesResponse.rootName,
+    const items: DataSourceItem[] = [];
+    const result: DataSourceItem = {
+      dataSourceName: listFilesResponse.rootName,
       items,
     };
     for (const file of listFilesResponse.files) {
@@ -151,7 +151,7 @@ export class GoogleDriveDataStoreAdapter implements DataStoreAdapter {
         fileId: file.id ?? "",
         mimeType: file.mimeType ?? "",
       };
-      const item: DataStoreItem = {
+      const item: DataSourceItem = {
         name: file.name ?? "",
         type: "FILE",
         metadata,
@@ -277,5 +277,5 @@ export class GoogleDriveDataStoreAdapter implements DataStoreAdapter {
   }
 }
 
-const googleDriveDataStoreAdapter = new GoogleDriveDataStoreAdapter();
-export default googleDriveDataStoreAdapter;
+const googleDriveDataSourceAdapter = new GoogleDriveDataSourceAdapter();
+export default googleDriveDataSourceAdapter;
