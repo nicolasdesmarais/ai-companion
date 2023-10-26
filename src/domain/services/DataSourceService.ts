@@ -3,7 +3,11 @@ import { DataSourceAdapter } from "@/src/adapters/knowledge/types/DataSourceAdap
 import { DataSourceItemList } from "@/src/adapters/knowledge/types/DataSourceItemList";
 import webUrlsDataSourceAdapter from "@/src/adapters/knowledge/web-urls/WebUrlsDataSourceAdapter";
 import prismadb from "@/src/lib/prismadb";
-import { DataSourceIndexStatus, DataSourceType } from "@prisma/client";
+import {
+  DataSourceType,
+  Knowledge,
+  KnowledgeIndexStatus,
+} from "@prisma/client";
 
 export class DataSourceService {
   public async createDataSource(
@@ -20,18 +24,45 @@ export class DataSourceService {
     );
 
     try {
-      const dataSource = await prismadb.$transaction(async (tx) => {
-        this.createDataSourceAndKnowledges(orgId, ownerUserId, type, itemList);
-      });
+      const { dataSourceId, knowledgeList } = await prismadb.$transaction(
+        async (tx) => {
+          return await this.createDataSourceAndKnowledgeList(
+            orgId,
+            ownerUserId,
+            type,
+            itemList
+          );
+        }
+      );
 
-      return dataSource;
+      const knowledgeListLength = knowledgeList.length;
+      for (let i = 0; i < knowledgeListLength; i++) {
+        const knowledge = knowledgeList[i];
+        await dataSourceAdapter.indexKnowledge(
+          orgId,
+          ownerUserId,
+          knowledge,
+          data
+        );
+
+        await prismadb.$transaction(async (tx) => {
+          this.onKnowledgeIndexed(
+            dataSourceId,
+            knowledge,
+            i,
+            knowledgeListLength
+          );
+        });
+      }
+
+      return dataSourceId;
     } catch (err) {
       console.log(err);
       throw new Error("Failed to create data store");
     }
   }
 
-  private async createDataSourceAndKnowledges(
+  private async createDataSourceAndKnowledgeList(
     orgId: string,
     ownerUserId: string,
     type: DataSourceType,
@@ -43,26 +74,59 @@ export class DataSourceService {
         ownerUserId,
         name: itemList.dataSourceName,
         type,
-        indexStatus: DataSourceIndexStatus.INDEXING,
+        indexPercentage: 0,
       },
     });
 
+    const knowledgeList = [];
     for (const item of itemList.items) {
-      const createdKnowledge = await prismadb.knowledge.create({
+      const knowledge = await prismadb.knowledge.create({
         data: {
           name: item.name,
           type: item.type,
+          indexStatus: KnowledgeIndexStatus.INDEXING,
           metadata: item.metadata,
         },
       });
+      knowledgeList.push(knowledge);
 
       await prismadb.dataSourceKnowledge.create({
         data: {
           dataSourceId: dataSource.id,
-          knowledgeId: createdKnowledge.id,
+          knowledgeId: knowledge.id,
         },
       });
     }
+
+    return { dataSourceId: dataSource.id, knowledgeList };
+  }
+
+  private async onKnowledgeIndexed(
+    dataSourceId: string,
+    knowledge: Knowledge,
+    knowledgeIndex: number,
+    knowledgeCount: number
+  ) {
+    let indexPercentage;
+    if (knowledgeCount === 0) {
+      indexPercentage = 100;
+    } else {
+      indexPercentage = ((knowledgeIndex + 1) / knowledgeCount) * 100;
+    }
+
+    await prismadb.knowledge.update({
+      where: { id: knowledge.id },
+      data: {
+        indexStatus: KnowledgeIndexStatus.COMPLETED,
+        blobUrl: knowledge.blobUrl,
+        lastIndexedAt: new Date(),
+      },
+    });
+
+    await prismadb.dataSource.update({
+      where: { id: dataSourceId },
+      data: { indexPercentage, lastIndexedAt: new Date() },
+    });
   }
 
   private getDataSourceAdapter(type: DataSourceType): DataSourceAdapter {

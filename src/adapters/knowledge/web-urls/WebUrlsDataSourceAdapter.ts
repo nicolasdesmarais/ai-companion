@@ -1,4 +1,4 @@
-import { DataSourceType } from "@prisma/client";
+import { DataSourceType, Knowledge } from "@prisma/client";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import { DataSourceItemList } from "../types/DataSourceItemList";
 import { WebUrlDataSourceInput } from "./types/WebUrlDataSourceInput";
@@ -20,6 +20,15 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       ],
     };
     return result;
+  }
+
+  indexKnowledge(
+    orgId: string,
+    useId: string,
+    knowledge: Knowledge,
+    data: any
+  ): Promise<void> {
+    throw new Error("Method not implemented.");
   }
 }
 

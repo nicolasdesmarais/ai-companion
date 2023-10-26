@@ -7,11 +7,14 @@ import {
   mapMimeTypeToEnum,
 } from "@/src/domain/types/GoogleDriveSearchResponse";
 import prismadb from "@/src/lib/prismadb";
+import { Knowledge } from "@prisma/client";
 import { put } from "@vercel/blob";
 import fs from "fs";
 import { drive_v3, google } from "googleapis";
 import { Readable } from "stream";
-import { FileLoader } from "../../../domain/services/knowledge/FileLoader";
+import fileLoader, {
+  FileLoader,
+} from "../../../domain/services/knowledge/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
@@ -152,6 +155,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     for (const file of listFilesResponse.files) {
       const metadata: GoogleDriveFileMetaData = {
         fileId: file.id ?? "",
+        fileName: file.name ?? "",
         mimeType: file.mimeType ?? "",
       };
       const item: DataSourceItem = {
@@ -163,6 +167,48 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     }
 
     return result;
+  }
+
+  public async indexKnowledge(
+    orgId: string,
+    userId: string,
+    knowledge: Knowledge,
+    data: any
+  ): Promise<void> {
+    const input = data as GoogleDriveDataSourceInput;
+    await this.setOAuthCredentials(userId, data.oauthTokenId);
+
+    if (!knowledge.metadata) {
+      return;
+    }
+
+    const { fileId, fileName, mimeType } =
+      knowledge.metadata as unknown as GoogleDriveFileMetaData;
+
+    const blobStream = await this.getFileAsStream(fileId);
+    const blob = await put(fileName, blobStream.data, {
+      access: "public",
+    });
+    knowledge.blobUrl = blob.url;
+
+    const fileResponse = await this.getFileAsStream(fileId);
+    const filePath = `/tmp/${fileName}`;
+    const writableStream = fs.createWriteStream(filePath);
+
+    if (fileResponse.data instanceof Readable) {
+      fileResponse.data.pipe(writableStream).on("finish", async () => {
+        try {
+          await fileLoader.loadFileFromPath(
+            knowledge.id,
+            fileName,
+            mimeType,
+            filePath
+          );
+        } catch (error) {
+          console.log(error);
+        }
+      });
+    }
   }
 
   public async createKnowledges(

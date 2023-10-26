@@ -48,6 +48,8 @@ model Companion {
 
   permissions   AIPermissions[]
 
+  dataSources   AIDataSource[]
+
   @@index([categoryId])
   @@index([visibility])
   @@index([userId])
@@ -146,19 +148,25 @@ model PublicDomain {
 }
 
 model Knowledge {
-  id                        String   @id @default(cuid())
-  createdAt                 DateTime @default(now()) @map(name: "created_at")
+  id                        String                              @id @default(cuid())
+  createdAt                 DateTime @default(now())            @map(name: "created_at")
   updatedAt                 DateTime @updatedAt @default(now()) @map(name: "updated_at")
   lastIndexedAt             DateTime?
-  userId                    String?   @map(name: "user_id")
+  userId                    String?                             @map(name: "user_id")
   name                      String
   type                      String
-  blobUrl                   String?   @map(name: "blob_url")
+  indexStatus               KnowledgeIndexStatus                @map(name :"index_status")
+  blobUrl                   String?                             @map(name: "blob_url")
   metadata                  Json?
   companions                KnowledgeAI[]
   DataSources               DataSourceKnowledge[]
 
   @@map("knowledge")
+}
+
+enum KnowledgeIndexStatus {
+  INDEXING
+  COMPLETED
 }
 
 model KnowledgeAI {
@@ -225,8 +233,9 @@ model DataSource {
   orgId                     String                      @map(name: "org_id")
   ownerUserId               String                      @map(name: "owner_user_id")
   type                      DataSourceType
-  indexStatus               DataSourceIndexStatus        @map(name: "index_status")
+  indexPercentage           Decimal                     @map(name: "index_percentage")
   knowledges                DataSourceKnowledge[]
+  ais                       AIDataSource[]
 
   @@map("data_sources")
 }
@@ -252,4 +261,14 @@ model DataSourceKnowledge {
 
   @@id([dataSourceId, knowledgeId])
   @@map("data_source_knowledges")
+}
+
+model AIDataSource {
+  ai                         Companion      @relation(fields: [aiId], references: [id])
+  aiId                       String         @map(name: "ai_id")
+  dataSource                 DataSource     @relation(fields: [dataSourceId], references: [id])
+  dataSourceId               String         @map(name: "data_source_id")
+
+  @@id([aiId, dataSourceId])
+  @@map("ai_data_sources")
 }

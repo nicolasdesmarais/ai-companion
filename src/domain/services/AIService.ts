@@ -303,6 +303,15 @@ export class AIService {
       data: knowledgeAIs,
     });
   }
+
+  public createAIDataSource(aiId: string, dataSourceId: string) {
+    return prismadb.aIDataSource.create({
+      data: {
+        aiId,
+        dataSourceId,
+      },
+    });
+  }
 }
 
 const aiService = new AIService();

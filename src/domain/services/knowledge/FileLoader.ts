@@ -2,7 +2,6 @@ import { Document } from "langchain/document";
 
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import { MemoryManager } from "@/src/lib/memory";
-import prismadb from "@/src/lib/prismadb";
 import { writeFile } from "fs/promises";
 import { CSVLoader } from "langchain/document_loaders/fs/csv";
 import { DocxLoader } from "langchain/document_loaders/fs/docx";
@@ -23,48 +22,38 @@ export class FileLoader {
   }
 
   public async loadFileFromPath(
-    userId: string,
-    type: string,
+    knowledgeId: string,
     filename: string,
-    filePath: string,
-    blobUrl: string
+    mimeType: string,
+    filePath: string
   ) {
     let docs;
 
-    if (type === "text/csv") {
+    if (mimeType === "text/csv") {
       const loader = new CSVLoader(filePath, "text");
       docs = await loader.load();
-    } else if (type === "text/plain") {
+    } else if (mimeType === "text/plain") {
       const loader = new TextLoader(filePath);
       docs = await loader.load();
-    } else if (type === "application/epub+zip") {
+    } else if (mimeType === "application/epub+zip") {
       const loader = new EPubLoader(filePath);
       docs = await loader.load();
     } else if (
-      type ===
+      mimeType ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ) {
       const loader = new DocxLoader(filePath);
       docs = await loader.load();
-    } else if (type === "application/pdf") {
+    } else if (mimeType === "application/pdf") {
       const loader = new PDFLoader(filePath);
       docs = await loader.load();
     } else {
       throw new BadRequestError("Unsupported file type");
     }
 
-    const knowledge = await prismadb.knowledge.create({
-      data: {
-        userId: userId,
-        name: filename,
-        type,
-        blobUrl,
-      },
-    });
-
     for (const doc of docs) {
       doc.metadata.source = filename;
-      doc.metadata.knowledge = knowledge.id;
+      doc.metadata.knowledge = knowledgeId;
     }
 
     const splitter = new RecursiveCharacterTextSplitter({
@@ -76,7 +65,6 @@ export class FileLoader {
 
     const memoryManager = await MemoryManager.getInstance();
     await memoryManager.vectorUpload(docOutput);
-    return knowledge;
   }
 
   public async loadJsonArray(jsonArray: any[], knowlegeId: string) {

@@ -33,24 +33,14 @@ export async function POST(
       oauthTokenId: body.oauthTokenId,
       fileId: body.fileId,
     };
-    dataSourceService.createDataSource(
+    const dataSourceId = await dataSourceService.createDataSource(
       orgId,
       userId,
       DataSourceType.GOOGLE_DRIVE,
       input
     );
 
-    // const googleDriveLoader = new GoogleDriveDataSourceAdapter();
-    // const knowledgeIds = await googleDriveLoader.createKnowledges(
-    //   userId,
-    //   body.oauthTokenId,
-    //   body.fileId
-    // );
-
-    // const response = await aiService.createKnowledgeAI(
-    //   params.aiId,
-    //   knowledgeIds
-    // );
+    await aiService.createAIDataSource(ai.id, dataSourceId);
 
     return new NextResponse("", { status: 201 });
   } catch (e) {
