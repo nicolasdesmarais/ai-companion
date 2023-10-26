@@ -4,7 +4,6 @@ const client = new ApifyClient({
   token: process.env.APIFY_TOKEN,
 });
 
-const DEFAULT_ACTOR_TIMEOUT = 3600;
 const webScraperActorId = process.env.APIFY_WEB_SCRAPER_ACTOR_ID;
 const runMode = process.env.APIFY_RUN_MODE;
 const webhookUrl = process.env.APIFY_WEBHOOK_URL;
@@ -33,6 +32,7 @@ export class ApifyAdapter {
   private getActorStartOptions(knowledgeId: string): ActorStartOptions {
     return {
       timeout: this.getActorTimeout(),
+      memory: this.getActorMemory(),
       webhooks: [
         {
           eventTypes: [
@@ -143,16 +143,24 @@ export class ApifyAdapter {
     return 0;
   }
 
-  private getActorTimeout(): number {
-    const actorTimeout = process.env.ACTOR_TIMEOUT;
+  private getActorTimeout(): number | undefined {
+    const actorTimeout = process.env.APIFY_ACTOR_TIMEOUT;
     if (actorTimeout) {
       const actorTimeoutNumber = parseInt(actorTimeout);
       if (!isNaN(actorTimeoutNumber)) {
         return actorTimeoutNumber;
       }
     }
+  }
 
-    return DEFAULT_ACTOR_TIMEOUT;
+  private getActorMemory(): number | undefined {
+    const actorMemory = process.env.APIFY_ACTOR_MEMORY;
+    if (actorMemory) {
+      const actorMemoryNumber = parseInt(actorMemory);
+      if (!isNaN(actorMemoryNumber)) {
+        return actorMemoryNumber;
+      }
+    }
   }
 }
 
