@@ -7,7 +7,7 @@ import { cn } from "@/src/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Category, Knowledge, Prisma } from "@prisma/client";
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AIKnowledge } from "./ai-knowledge";
@@ -16,6 +16,7 @@ import * as z from "zod";
 import { AICharacter } from "./ai-character";
 import { models } from "./ai-models";
 import { Button } from "@/components/ui/button";
+
 const formSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, {
@@ -70,13 +71,11 @@ interface CompanionFormProps {
   initialAi: ExtendedCompanion | null;
 }
 
-const tabs = ["Character", "Knowledge", "Personality"];
-
 export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
   const { toast } = useToast();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState(0);
-  const [continueRequested, setContinueRequested] = useState(false);
+  const pathname = usePathname();
+  const [continueRequested, setContinueRequested] = useState("");
 
   if (initialAi && !initialAi.options) {
     const model = models.find((model) => model.id === initialAi.modelId);
@@ -105,12 +104,13 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
     },
   });
 
+  const aiId = form.getValues("id");
+  const knowledge = form.getValues("knowledge") || [];
   const isLoading = form.formState.isSubmitting;
+  const needsSave = !aiId || form.formState.isDirty;
 
   useEffect(() => {
     if (Object.keys(form.formState.errors).length) {
-      setActiveTab(0);
-      console.log(form.formState.errors);
       toast({
         variant: "destructive",
         description: "Form is not valid. Please check the errors.",
@@ -119,20 +119,11 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
     }
   }, [form.formState.errors, toast]);
 
-  const handleTabClick = (index: number) => setActiveTab(index);
-
-  const onContinue = () => {
-    const aiId = form.getValues("id");
-    setContinueRequested(false);
-    if (activeTab === 2) {
-      router.push(`/ai/${aiId}`);
-    } else {
-      setActiveTab(activeTab + 1);
-    }
-  };
+  const handleTabClick = (route: string) =>
+    router.push(`/ai/${aiId}/${route}` as any);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const aiId = form.getValues("id");
+    let aiId = form.getValues("id");
     if (form.formState.isDirty) {
       try {
         values.knowledge = values.knowledge?.map((item: any) => item.knowledge);
@@ -143,6 +134,7 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
         } else {
           response = await axios.post("/api/v1/ai", values);
         }
+        aiId = response.data.id;
         form.reset(response.data);
         toast({
           description: "AI Saved.",
@@ -157,7 +149,8 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
       }
     }
     if (continueRequested) {
-      onContinue();
+      setContinueRequested("");
+      router.push(`/ai/${aiId}${continueRequested}`);
     }
   };
 
@@ -180,22 +173,6 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
     }
   };
 
-  const getContinueButtonText = (form: any) => {
-    const needsSave = !form.getValues("id") || form.formState.isDirty;
-    if (activeTab === 1) {
-      const knowledge = form.getValues("knowledge");
-      if (!knowledge.length && !needsSave) {
-        return "Skip & Continue";
-      }
-    }
-    if (activeTab === 2) {
-      return needsSave
-        ? "Save & Start Chatting with your AI"
-        : "Start Chatting with your AI";
-    }
-    return needsSave ? "Save and Continue" : "Continue";
-  };
-
   const getTabClassNames = (isActive: boolean, isDisabled: boolean) => {
     let classNames;
     if (isActive) {
@@ -211,86 +188,198 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
     );
   };
 
+  const saveProgressButton =
+    form.formState.isDirty || !form.getValues("id") ? (
+      <Button variant="link" disabled={isLoading}>
+        Save Progress
+      </Button>
+    ) : null;
+
+  const continueButton = (route: string, text: string) => (
+    <Button
+      size="lg"
+      variant="ring"
+      disabled={isLoading}
+      onClick={() => setContinueRequested(route)}
+    >
+      {text}
+    </Button>
+  );
+
+  const backButton = (route: string) => (
+    <Button
+      onClick={() => router.push(`/ai/${aiId}/${route}`)}
+      variant="link"
+      type="button"
+    >
+      Go Back
+    </Button>
+  );
+
+  const aiKnowledge = <AIKnowledge form={form} />;
+
+  const tabs = [
+    {
+      name: "Character",
+      index: 1,
+      route: "edit",
+      content: <AICharacter categories={categories} form={form} />,
+      buttons: (
+        <>
+          <div>
+            {aiId && (
+              <Button
+                size="lg"
+                variant="destructive"
+                disabled={isLoading}
+                onClick={onDelete}
+                type="button"
+              >
+                Delete your AI
+              </Button>
+            )}
+            <Button
+              onClick={() => router.push("/")}
+              variant="link"
+              type="button"
+              disabled={isLoading}
+            >
+              Back to Browse
+            </Button>
+          </div>
+          <div>
+            {saveProgressButton}
+            {continueButton(
+              "/edit/knowledge",
+              needsSave ? "Save and Continue" : "Continue"
+            )}
+          </div>
+        </>
+      ),
+    },
+    {
+      name: "Knowledge",
+      route: "edit/knowledge",
+      index: 2,
+      content: aiKnowledge,
+      buttons: (
+        <>
+          <div>{backButton("edit")}</div>
+          <div>
+            {saveProgressButton}
+            {continueButton(
+              "/edit/personality",
+              knowledge.length ? "Continue" : "Skip & Continue"
+            )}
+          </div>
+        </>
+      ),
+    },
+    {
+      name: "File Upload",
+      secondary: true,
+      route: "edit/knowledge/file",
+      content: aiKnowledge,
+      buttons: (
+        <>
+          <div>{backButton("edit/knowledge")}</div>
+          <div>
+            {saveProgressButton}
+            {continueButton(
+              "/edit/personality",
+              knowledge.length ? "Continue" : "Skip & Continue"
+            )}
+          </div>
+        </>
+      ),
+    },
+
+    {
+      name: "Website URL",
+      secondary: true,
+      route: "edit/knowledge/web-url",
+      content: aiKnowledge,
+      buttons: (
+        <>
+          <div>{backButton("edit/knowledge")}</div>
+          <div>
+            {saveProgressButton}
+            {continueButton(
+              "/edit/personality",
+              knowledge.length ? "Continue" : "Skip & Continue"
+            )}
+          </div>
+        </>
+      ),
+    },
+    {
+      name: "Cloud Storage",
+      secondary: true,
+      route: "edit/knowledge/cloud",
+      content: aiKnowledge,
+      buttons: (
+        <>
+          <div>{backButton("edit/knowledge")}</div>
+          <div>
+            {saveProgressButton}
+            {continueButton(
+              "/edit/personality",
+              knowledge.length ? "Continue" : "Skip & Continue"
+            )}
+          </div>
+        </>
+      ),
+    },
+    {
+      name: "Personality",
+      route: "edit/personality",
+      index: 3,
+      content: <AIPersonality initialAi={initialAi} form={form} />,
+      buttons: (
+        <>
+          <div>{backButton("edit/knowledge")}</div>
+          <div>
+            {saveProgressButton}
+            {continueButton(
+              "/",
+              needsSave
+                ? "Save & Start Chatting with your AI"
+                : "Start Chatting with your AI"
+            )}
+          </div>
+        </>
+      ),
+    },
+  ];
+
+  const activeTab = tabs.find((tab) => pathname.endsWith(tab.route));
+
   return (
     <div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="pb-10">
           <div className="flex h-full p-4 space-x-1 max-w-3xl mx-auto">
-            {tabs.map((tab, index) => (
-              <div
-                className={getTabClassNames(
-                  activeTab === index,
-                  !form.getValues("id") && index > 0
-                )}
-                key={index}
-                onClick={() => handleTabClick(index)}
-              >
-                <div className="bg-secondary rounded-lg px-2 text-ring">
-                  {index + 1}
+            {tabs.map((tab, index) =>
+              tab.secondary ? null : (
+                <div
+                  className={getTabClassNames(
+                    pathname.endsWith(tab.route),
+                    !aiId && index > 0
+                  )}
+                  key={index}
+                  onClick={() => handleTabClick(tab.route)}
+                >
+                  <div className="bg-secondary rounded-lg px-2 text-ring">
+                    {tab.index}
+                  </div>
+                  <div className="ml-2">{tab.name}</div>
                 </div>
-                <div className="ml-2">{tab}</div>
-              </div>
-            ))}
-          </div>
-          <div>
-            {activeTab === 0 && (
-              <AICharacter categories={categories} form={form} />
-            )}
-            {activeTab === 1 && <AIKnowledge form={form} />}
-            {activeTab === 2 && (
-              <AIPersonality initialAi={initialAi} form={form} />
+              )
             )}
           </div>
-
+          <div>{activeTab?.content}</div>
           <div className="w-full flex justify-between max-w-3xl mx-auto mt-8">
-            <div>
-              {activeTab === 0 && form.getValues("id") && (
-                <Button
-                  size="lg"
-                  variant="destructive"
-                  disabled={isLoading}
-                  onClick={onDelete}
-                  type="button"
-                >
-                  Delete your AI
-                </Button>
-              )}
-              {activeTab === 0 && (
-                <Button
-                  onClick={() => router.push("/")}
-                  variant="link"
-                  type="button"
-                >
-                  Back to Browse
-                </Button>
-              )}
-              {activeTab !== 0 && (
-                <Button
-                  onClick={() => setActiveTab(activeTab - 1)}
-                  variant="link"
-                  type="button"
-                >
-                  Go Back
-                </Button>
-              )}
-            </div>
-            <div>
-              <>
-                {form.formState.isDirty || !form.getValues("id") ? (
-                  <Button variant="link" disabled={isLoading}>
-                    Save Progress
-                  </Button>
-                ) : null}
-                <Button
-                  size="lg"
-                  variant="ring"
-                  disabled={isLoading}
-                  onClick={() => setContinueRequested(true)}
-                >
-                  {getContinueButtonText(form)}
-                </Button>
-              </>
-            </div>
+            {activeTab?.buttons}
           </div>
         </form>
       </Form>

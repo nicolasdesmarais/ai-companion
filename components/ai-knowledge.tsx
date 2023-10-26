@@ -18,14 +18,16 @@ import { FileUploadKnowledge } from "./file-upload-knowledge";
 import { WebUrlsForm } from "./web-urls-knowledge-form";
 import axios, { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
+import { useRouter, usePathname } from "next/navigation";
 interface SelectDataSourceProps {
   form: any;
 }
 
 export const AIKnowledge = ({ form }: SelectDataSourceProps) => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState(0);
   const [removing, setRemoving] = useState("");
+  const pathname = usePathname();
+  const router = useRouter();
   const aiId = form.getValues("id");
 
   const removeKnowledge = async (id: string) => {
@@ -54,7 +56,7 @@ export const AIKnowledge = ({ form }: SelectDataSourceProps) => {
 
   return (
     <div className="h-full p-4 max-w-3xl mx-auto">
-      {activeTab === 0 && (
+      {pathname.endsWith("knowledge") && (
         <>
           <h1 className="text-lg font-medium">Your AI&apos;s Data Sources</h1>
           <p className="text-sm text-muted-foreground">
@@ -114,28 +116,19 @@ export const AIKnowledge = ({ form }: SelectDataSourceProps) => {
               icon={FileUp}
               title="Upload Files"
               description="Directly add files as data sources for your AI."
-              onClick={() => setActiveTab(1)}
+              onClick={() => router.push(`/ai/${aiId}/edit/knowledge/file`)}
             />
             <DataSourceCard
               icon={Globe}
               title="Website URLs"
               description="Automatically crawl website content from a list of domains you define."
-              onClick={() => setActiveTab(2)}
+              onClick={() => router.push(`/ai/${aiId}/edit/knowledge/web-url`)}
             />
             <DataSourceCard
               icon={Server}
               title="Cloud Storage"
               description="Import data from a cloud storage bucket."
-              onClick={() => {
-                if (!aiId) {
-                  toast({
-                    variant: "destructive",
-                    description: "Please save your AI first.",
-                  });
-                } else {
-                  setActiveTab(3);
-                }
-              }}
+              onClick={() => router.push(`/ai/${aiId}/edit/knowledge/cloud`)}
             />
             {/* <DataSourceCard
                   icon={Database}
@@ -152,21 +145,27 @@ export const AIKnowledge = ({ form }: SelectDataSourceProps) => {
           </div>
         </>
       )}
-      {activeTab !== 0 && (
+      {!pathname.endsWith("knowledge") && (
         <div className="flex items-center mb-8">
           <ChevronLeft
             className="text-ring h-8 w-8 cursor-pointer"
-            onClick={() => setActiveTab(0)}
+            onClick={() => router.push(`/ai/${aiId}/edit/knowledge`)}
           />
           <h1 className="text-lg font-medium">Create Data Store</h1>
         </div>
       )}
-      {activeTab === 1 && (
-        <FileUploadKnowledge goBack={() => setActiveTab(0)} form={form} />
+      {pathname.endsWith("file") && (
+        <FileUploadKnowledge
+          goBack={() => router.push(`/ai/${aiId}/edit/knowledge`)}
+          form={form}
+        />
       )}
-      {activeTab === 2 && <WebUrlsForm aiId={aiId} />}
-      {activeTab === 3 && aiId && (
-        <GoogleDriveForm aiId={aiId} goBack={() => setActiveTab(0)} />
+      {pathname.endsWith("web-url") && <WebUrlsForm aiId={aiId} />}
+      {pathname.endsWith("cloud") && aiId && (
+        <GoogleDriveForm
+          aiId={aiId}
+          goBack={() => router.push(`/ai/${aiId}/edit/knowledge`)}
+        />
       )}
     </div>
   );
