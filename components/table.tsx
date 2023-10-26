@@ -14,7 +14,7 @@ export const Table = ({ headers, children, className }: Props) => {
       <thead className="border-y-2 p-2 border-ring">
         <tr>
           {headers.map((header) => (
-            <th className="p-2" key={header}>
+            <th className="p-2 text-sm" key={header}>
               {header}
             </th>
           ))}

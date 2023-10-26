@@ -70,7 +70,7 @@ export const AIKnowledge = ({
             your AI&apos;s knowledge.
           </p>
 
-          <div>
+          <div className="max-h-96 overflow-auto">
             <Table
               headers={["NAME", "TYPE", "LAST MODIFIED", "Progress", "Remove"]}
               className="w-full my-4 max-h-60"
