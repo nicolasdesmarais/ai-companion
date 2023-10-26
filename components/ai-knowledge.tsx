@@ -83,6 +83,7 @@ export const AIKnowledge = ({
                 <Button
                   type="button"
                   variant="outline"
+                  disabled={!!removing}
                   onClick={() => removeKnowledge(knowledge.id)}
                 >
                   {removing === knowledge.id ? (
