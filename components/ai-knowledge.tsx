@@ -11,7 +11,6 @@ import {
   Loader,
   MinusCircle,
 } from "lucide-react";
-import { FormField } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
 import { GoogleDriveForm } from "./google-drive-knowledge";
 import { FileUploadKnowledge } from "./file-upload-knowledge";

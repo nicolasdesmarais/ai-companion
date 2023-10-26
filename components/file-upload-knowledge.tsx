@@ -39,21 +39,16 @@ const supportedUploadFormats = [
 interface FileUploadKnowledgeProps {
   goBack: () => void;
   form: any;
-  knowledge: any;
-  setKnowledge: (knowledge: any) => void;
 }
 
 export const FileUploadKnowledge = ({
   goBack,
   form,
-  knowledge,
-  setKnowledge,
 }: FileUploadKnowledgeProps) => {
   const [uploading, setUploading] = useState(false);
   const inputFileRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const isLoading = form.formState.isSubmitting;
   const aiId = form.getValues("id");
 
   const uploadDocument = async () => {
@@ -86,16 +81,12 @@ export const FileUploadKnowledge = ({
     try {
       const data = new FormData();
       data.set("file", file);
-      const response = await axios.post(
+      await axios.post(
         `/api/v1/ai/${aiId}/knowledge/file?filename=${encodeURIComponent(
           file.name
         )}&type=${encodeURIComponent(file.type)}`,
         data
       );
-      setKnowledge((current: any) => {
-        const newKnowledge = [...current, response.data];
-        return newKnowledge;
-      });
       inputFileRef.current.value = "";
       toast({ description: "File uploaded." });
       goBack();
@@ -119,7 +110,7 @@ export const FileUploadKnowledge = ({
           <Input name="file" ref={inputFileRef} type="file" />
           <Button
             type="button"
-            disabled={isLoading || uploading}
+            disabled={uploading}
             variant="outline"
             onClick={() => uploadDocument()}
           >

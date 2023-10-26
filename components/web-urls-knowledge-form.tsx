@@ -2,8 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
-import { redirect } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface WebUrlsProps {
   aiId: string;
@@ -12,6 +12,7 @@ interface WebUrlsProps {
 export const WebUrlsForm = ({ aiId }: WebUrlsProps) => {
   const { toast } = useToast();
   const [urls, setUrls] = useState([""]);
+  const router = useRouter();
 
   const handleContinue = async () => {
     try {
@@ -20,6 +21,7 @@ export const WebUrlsForm = ({ aiId }: WebUrlsProps) => {
         variant: "default",
         description: "Web URLs added",
       });
+      router.push(`/ai/${aiId}/edit/knowledge`);
     } catch (error) {
       console.log(error);
       toast({
