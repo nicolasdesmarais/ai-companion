@@ -8,7 +8,7 @@ interface Props {
   description: string;
   onClick?: () => void;
   icon: LucideIcon;
-  isSelected?: boolean;
+  isDisabled?: boolean;
 }
 
 const DataSourceCard: React.FC<Props> = ({
@@ -16,10 +16,10 @@ const DataSourceCard: React.FC<Props> = ({
   description,
   onClick,
   icon,
-  isSelected = false,
+  isDisabled = false,
 }) => {
   const Icon = icon;
-  if (isSelected) {
+  if (isDisabled) {
     return (
       <div className="p-6 border-2 rounded-xl flex flex-col justify-between border-dashed">
         <div>

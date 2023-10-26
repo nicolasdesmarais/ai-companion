@@ -113,7 +113,7 @@ export const AIKnowledge = ({
               icon={PlusCircle}
               title="Your Data Stores"
               description="Select a data store you created for a different AI."
-              isSelected={true}
+              isDisabled={true}
             />
             <DataSourceCard
               icon={FileUp}
@@ -133,18 +133,18 @@ export const AIKnowledge = ({
               description="Import data from a cloud storage bucket."
               onClick={() => router.push(`/ai/${aiId}/edit/knowledge/cloud`)}
             />
-            {/* <DataSourceCard
-                  icon={Database}
-                  title="SQL Query"
-                  description="Import data from a SQL table."
-                  href=""
-                />
-                <DataSourceCard
-                  icon={Network}
-                  title="API"
-                  description="Import data manually by calling an API."
-                  href=""
-                /> */}
+            <DataSourceCard
+              icon={Database}
+              title="SQL Query"
+              description="Import data from a SQL table."
+              isDisabled={true}
+            />
+            <DataSourceCard
+              icon={Network}
+              title="API"
+              description="Import data manually by calling an API."
+              isDisabled={true}
+            />
           </div>
         </>
       )}
@@ -154,7 +154,7 @@ export const AIKnowledge = ({
             className="text-ring h-8 w-8 cursor-pointer"
             onClick={() => router.push(`/ai/${aiId}/edit/knowledge`)}
           />
-          <h1 className="text-lg font-medium">Create Data Store</h1>
+          <h1 className="text-lg font-medium">Create Data Source</h1>
         </div>
       )}
       {pathname.endsWith("file") && (
