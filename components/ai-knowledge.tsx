@@ -161,8 +161,6 @@ export const AIKnowledge = ({
         <FileUploadKnowledge
           goBack={() => router.push(`/ai/${aiId}/edit/knowledge`)}
           form={form}
-          knowledge={knowledge}
-          setKnowledge={setKnowledge}
         />
       )}
       {pathname.endsWith("web-url") && <WebUrlsForm aiId={aiId} />}
