@@ -19,6 +19,9 @@ import axios, { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { Table } from "@/components/table";
+import { knowledgeTypes } from "@/components/knowledge-types";
+import { format } from "date-fns";
 interface SelectDataSourceProps {
   form: any;
   knowledge: any;
@@ -54,7 +57,6 @@ export const AIKnowledge = ({
     }
     setRemoving("");
   };
-
   return (
     <div className="h-full p-4 max-w-3xl mx-auto">
       {pathname.endsWith("knowledge") && (
@@ -66,41 +68,57 @@ export const AIKnowledge = ({
           </p>
 
           <div>
-            {knowledge.map((knowledge: any) => (
-              <div
-                key={knowledge.id}
-                className="flex items-center justify-between my-2"
-              >
-                <p className="text-sm px-3 py-2 bg-background rounded-lg w-full text-ellipsis">
-                  {knowledge.blobUrl ? (
-                    <Link href={knowledge.blobUrl} className="text-ring">
-                      {knowledge.name}
-                    </Link>
-                  ) : (
-                    knowledge.name
-                  )}
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={!!removing}
-                  onClick={() => removeKnowledge(knowledge.id)}
-                >
-                  {removing === knowledge.id ? (
-                    <Loader className="w-4 h-4 spinner" />
-                  ) : (
-                    <MinusCircle className="w-4 h-4" />
-                  )}
-                </Button>
-              </div>
-            ))}
-            {knowledge.length === 0 ? (
-              <div className="flex items-center justify-between my-2">
-                <p className="text-sm px-3 py-2 bg-background rounded-lg w-full ">
-                  None
-                </p>
-              </div>
-            ) : null}
+            <Table
+              headers={["NAME", "TYPE", "LAST MODIFIED", "Remove"]}
+              className="w-full my-4 max-h-60"
+            >
+              {knowledge.map((knowledge: any) => (
+                <tr key={knowledge.id} className="items-center my-2 text-sm">
+                  <td className="p-2 ">
+                    {knowledge.blobUrl ? (
+                      <Link href={knowledge.blobUrl}>
+                        <div className="text-ring max-w-sm truncate">
+                          {knowledge.name}
+                        </div>
+                      </Link>
+                    ) : (
+                      <div className="max-w-sm truncate">{knowledge.name}</div>
+                    )}
+                  </td>
+                  <td className="p-2">
+                    {
+                      knowledgeTypes.find(
+                        (format) => format.type === knowledge.type
+                      )?.name
+                    }
+                  </td>
+                  <td className="p-2">
+                    {format(new Date(knowledge.updatedAt), "h:mma M/d/yyyy ")}
+                  </td>
+                  <td className="p-2 text-center">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={!!removing}
+                      onClick={() => removeKnowledge(knowledge.id)}
+                    >
+                      {removing === knowledge.id ? (
+                        <Loader className="w-4 h-4 spinner" />
+                      ) : (
+                        <MinusCircle className="w-4 h-4 text-destructive" />
+                      )}
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+              {knowledge.length === 0 ? (
+                <div className="flex items-center justify-between my-2">
+                  <p className="text-sm px-3 py-2 bg-background rounded-lg w-full ">
+                    None
+                  </p>
+                </div>
+              ) : null}
+            </Table>
           </div>
 
           <h2 className="text-lg font-medium mt-8">Add more data sources</h2>

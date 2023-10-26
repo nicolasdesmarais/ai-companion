@@ -11,29 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import axios, { AxiosError } from "axios";
 import { FileText, Loader } from "lucide-react";
 import { Input } from "@/components/ui/input";
-
-const supportedUploadFormats = [
-  {
-    name: "Text",
-    type: "text/plain",
-  },
-  {
-    name: "CSV",
-    type: "text/csv",
-  },
-  {
-    name: "PDF",
-    type: "application/pdf",
-  },
-  {
-    name: "DOCX",
-    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  },
-  {
-    name: "EPUB",
-    type: "application/epub+zip",
-  },
-];
+import { knowledgeTypes } from "./knowledge-types";
 
 interface FileUploadKnowledgeProps {
   goBack: () => void;
@@ -67,9 +45,7 @@ export const FileUploadKnowledge = ({
     const file = inputFileRef.current.files[0];
 
     if (
-      supportedUploadFormats.findIndex(
-        (format) => format.type === file.type
-      ) === -1
+      knowledgeTypes.findIndex((format) => format.type === file.type) === -1
     ) {
       toast({
         variant: "destructive",
@@ -125,7 +101,9 @@ export const FileUploadKnowledge = ({
       <FormDescription>
         Add custom knowledge to your AI. Max file size: 4.5Mb. <br />
         The following formats are supported:{" "}
-        {supportedUploadFormats.map((format) => format.name).join(", ")}
+        {knowledgeTypes
+          .map((format) => (format.type !== "URL" ? format.name : null))
+          .join(", ")}
       </FormDescription>
       <FormMessage />
     </FormItem>
