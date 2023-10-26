@@ -18,6 +18,7 @@ import { WebUrlsForm } from "./web-urls-knowledge-form";
 import axios, { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 interface SelectDataSourceProps {
   form: any;
   knowledge: any;
@@ -71,7 +72,13 @@ export const AIKnowledge = ({
                 className="flex items-center justify-between my-2"
               >
                 <p className="text-sm px-3 py-2 bg-background rounded-lg w-full text-ellipsis">
-                  {knowledge.name}
+                  {knowledge.blobUrl ? (
+                    <Link href={knowledge.blobUrl} className="text-ring">
+                      {knowledge.name}
+                    </Link>
+                  ) : (
+                    knowledge.name
+                  )}
                 </p>
                 <Button
                   type="button"
