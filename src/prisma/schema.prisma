@@ -156,7 +156,7 @@ model Knowledge {
   blobUrl                   String?   @map(name: "blob_url")
   metadata                  Json?
   companions                KnowledgeAI[]
-  datastores                DataStoreKnowledge[]
+  DataSources               DataSourceKnowledge[]
 
   @@map("knowledge")
 }
@@ -216,7 +216,7 @@ model Conversation {
   @@map("conversation")
 }
 
-model DataStore {
+model DataSource {
   id                        String                      @id @default(cuid())
   createdAt                 DateTime                    @default(now()) @map(name: "created_at")
   updatedAt                 DateTime                    @updatedAt @default(now()) @map(name: "updated_at")
@@ -224,32 +224,32 @@ model DataStore {
   name                      String
   orgId                     String                      @map(name: "org_id")
   ownerUserId               String                      @map(name: "owner_user_id")
-  type                      DataStoreType
-  indexStatus               DataStoreIndexStatus        @map(name: "index_status")
-  knowledges                DataStoreKnowledge[]
+  type                      DataSourceType
+  indexStatus               DataSourceIndexStatus        @map(name: "index_status")
+  knowledges                DataSourceKnowledge[]
 
-  @@map("data_stores")
+  @@map("data_sources")
 }
 
-enum DataStoreType {
+enum DataSourceType {
   WEB_URL
   GOOGLE_DRIVE
   FILE_UPLOAD
 }
 
-enum DataStoreIndexStatus {
+enum DataSourceIndexStatus {
   INITIALIZED
   INDEXING
   COMPLETED
 }
 
-model DataStoreKnowledge {
-  dataStore                 DataStore @relation(fields: [dataStoreId], references: [id])
-  dataStoreId               String    @map(name: "data_store_id")
-  knowledge                 Knowledge @relation(fields: [knowledgeId], references: [id])
-  knowledgeId               String    @map(name: "knowledge_id")
+model DataSourceKnowledge {
+  dataSource                 DataSource     @relation(fields: [dataSourceId], references: [id])
+  dataSourceId               String         @map(name: "data_source_id")
+  knowledge                  Knowledge      @relation(fields: [knowledgeId], references: [id])
+  knowledgeId                String         @map(name: "knowledge_id")
 
 
-  @@id([dataStoreId, knowledgeId])
-  @@map("data_store_knowledges")
+  @@id([dataSourceId, knowledgeId])
+  @@map("data_source_knowledges")
 }

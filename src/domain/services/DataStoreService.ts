@@ -22,7 +22,7 @@ export class DataStoreService {
       data: {
         orgId,
         ownerUserId,
-        name,
+        name: itemList.dataStoreName,
         type,
         indexStatus: DataStoreIndexStatus.INDEXING,
       },
@@ -34,6 +34,13 @@ export class DataStoreService {
           name: item.name,
           type: item.type,
           metadata: item.metadata,
+        },
+      });
+
+      await prismadb.dataStoreKnowledge.create({
+        data: {
+          dataStoreId: dataStore.id,
+          knowledgeId: createdKnowledge.id,
         },
       });
     }
