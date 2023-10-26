@@ -1,16 +1,10 @@
-import { MemoryManager } from "@/src/lib/memory";
-import prismadb from "@/src/lib/prismadb";
-import { currentUser } from "@clerk/nextjs";
-import { put } from "@vercel/blob";
-import { writeFile } from "fs/promises";
-import { CSVLoader } from "langchain/document_loaders/fs/csv";
-import { DocxLoader } from "langchain/document_loaders/fs/docx";
-import { EPubLoader } from "langchain/document_loaders/fs/epub";
-import { PDFLoader } from "langchain/document_loaders/fs/pdf";
-import { TextLoader } from "langchain/document_loaders/fs/text";
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { NextRequest, NextResponse } from "next/server";
+import { FileUploadDataSourceInput } from "@/src/adapters/knowledge/file-upload/types/FileUploadDataSourceInput";
 import aiService from "@/src/domain/services/AIService";
+import dataSourceService from "@/src/domain/services/DataSourceService";
+import { auth } from "@clerk/nextjs";
+import { DataSourceType } from "@prisma/client";
+import { writeFile } from "fs/promises";
+import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 300;
 
@@ -29,8 +23,11 @@ export async function POST(
   request: NextRequest,
   { params: { aiId } }: { params: { aiId: string } }
 ): Promise<NextResponse> {
-  const user = await currentUser();
-  if (!user || !user.id) {
+  const authentication = await auth();
+  const userId = authentication?.userId;
+  const orgId = authentication.orgId;
+
+  if (!userId || !orgId) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
@@ -41,66 +38,29 @@ export async function POST(
   if (!filename || !type) {
     return new NextResponse("Missing required fields", { status: 400 });
   }
+
+  if (!request.body) {
+    return NextResponse.json("Missing file", { status: 400 });
+  }
+
   try {
-    if (request.body) {
-      let docs;
-      const data = await request.formData();
-      const file: File | null = data.get("file") as unknown as File;
-      if (type === "text/csv") {
-        const loader = new CSVLoader(file, "text");
-        docs = await loader.load();
-      } else if (type === "text/plain") {
-        const loader = new TextLoader(file);
-        docs = await loader.load();
-      } else if (type === "application/epub+zip") {
-        const path = await getFilepath(file);
-        const loader = new EPubLoader(path);
-        docs = await loader.load();
-      } else if (
-        type ===
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-      ) {
-        const loader = new DocxLoader(file);
-        docs = await loader.load();
-      } else if (type === "application/pdf") {
-        const loader = new PDFLoader(file);
-        docs = await loader.load();
-      } else {
-        return NextResponse.json("Unsupported file format.", { status: 400 });
-      }
+    const data = await request.formData();
+    const file: File | null = data.get("file") as unknown as File;
 
-      const blob = await put(filename, file, { access: "public" });
+    const input: FileUploadDataSourceInput = {
+      filename,
+      mimetype: type,
+      file,
+    };
+    const dataSourceId = await dataSourceService.createDataSource(
+      orgId,
+      userId,
+      DataSourceType.FILE_UPLOAD,
+      input
+    );
+    const dataSource = await aiService.createAIDataSource(aiId, dataSourceId);
 
-      const knowledge = await prismadb.knowledge.create({
-        data: {
-          userId: user.id,
-          name: filename,
-          type,
-          blobUrl: blob.url,
-        },
-      });
-
-      for (const doc of docs) {
-        doc.metadata.source = filename;
-        doc.metadata.knowledge = knowledge.id;
-      }
-
-      const splitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 4000,
-        chunkOverlap: 600,
-      });
-
-      const docOutput = await splitter.splitDocuments(docs);
-
-      const memoryManager = await MemoryManager.getInstance();
-      await memoryManager.vectorUpload(docOutput);
-
-      await aiService.createKnowledgeAI(aiId, [knowledge.id]);
-
-      return NextResponse.json(knowledge);
-    } else {
-      return NextResponse.json("Missing file", { status: 400 });
-    }
+    return NextResponse.json(dataSource, { status: 201 });
   } catch (error) {
     if (error.response?.data?.error?.message) {
       return new NextResponse(error.response.data.error.message, {

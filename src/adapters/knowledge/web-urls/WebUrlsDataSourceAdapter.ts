@@ -37,7 +37,7 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
 
   public async indexKnowledge(
     orgId: string,
-    useId: string,
+    userId: string,
     knowledge: Knowledge,
     data: any
   ): Promise<IndexKnowledgeResponse> {

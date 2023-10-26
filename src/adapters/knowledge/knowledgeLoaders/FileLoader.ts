@@ -21,31 +21,35 @@ export class FileLoader {
     return path;
   }
 
-  public async loadFileFromPath(
+  public async loadFile(
     knowledgeId: string,
     filename: string,
     mimeType: string,
-    filePath: string
+    filePathOrBlob: string | Blob
   ) {
     let docs;
 
     if (mimeType === "text/csv") {
-      const loader = new CSVLoader(filePath, "text");
+      const loader = new CSVLoader(filePathOrBlob, "text");
       docs = await loader.load();
     } else if (mimeType === "text/plain") {
-      const loader = new TextLoader(filePath);
+      const loader = new TextLoader(filePathOrBlob);
       docs = await loader.load();
-    } else if (mimeType === "application/epub+zip") {
-      const loader = new EPubLoader(filePath);
+    } else if (
+      mimeType === "application/epub+zip" &&
+      filePathOrBlob instanceof File
+    ) {
+      const path = await this.getFilepath(filePathOrBlob);
+      const loader = new EPubLoader(path);
       docs = await loader.load();
     } else if (
       mimeType ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ) {
-      const loader = new DocxLoader(filePath);
+      const loader = new DocxLoader(filePathOrBlob);
       docs = await loader.load();
     } else if (mimeType === "application/pdf") {
-      const loader = new PDFLoader(filePath);
+      const loader = new PDFLoader(filePathOrBlob);
       docs = await loader.load();
     } else {
       throw new BadRequestError("Unsupported file type");

@@ -20,7 +20,7 @@ import {
 } from "../types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { GoogleDriveDataSourceInput } from "./types/GoogleDriveDataSourceInput";
-import { GoogleDriveFileMetadata } from "./types/GoogleDriveFileMetadata";
+import { GoogleDriveFileMetadata } from "./types/GoogleDriveFileMetaData";
 
 const SUPPORTED_MIME_TYPES = [
   "text/plain",
@@ -197,12 +197,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     if (fileResponse.data instanceof Readable) {
       fileResponse.data.pipe(writableStream).on("finish", async () => {
         try {
-          await fileLoader.loadFileFromPath(
-            knowledge.id,
-            fileName,
-            mimeType,
-            filePath
-          );
+          await fileLoader.loadFile(knowledge.id, fileName, mimeType, filePath);
         } catch (error) {
           console.log(error);
           throw new Error("Failed to load file from google drive");

@@ -1,3 +1,4 @@
+import fileUploadDataSourceAdapter from "@/src/adapters/knowledge/file-upload/FileUploadDataSourceAdapter";
 import googleDriveDataSourceAdapter from "@/src/adapters/knowledge/google-drive/GoogleDriveDataSourceAdapter";
 import { DataSourceAdapter } from "@/src/adapters/knowledge/types/DataSourceAdapter";
 import { DataSourceItemList } from "@/src/adapters/knowledge/types/DataSourceItemList";
@@ -18,6 +19,8 @@ export class DataSourceService {
         return googleDriveDataSourceAdapter;
       case DataSourceType.WEB_URL:
         return webUrlsDataSourceAdapter;
+      case DataSourceType.FILE_UPLOAD:
+        return fileUploadDataSourceAdapter;
       default:
         throw new Error(`DataSourceType ${type} not supported`);
     }
