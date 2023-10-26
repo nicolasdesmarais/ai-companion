@@ -71,7 +71,7 @@ export const AIKnowledge = ({
 
           <div>
             <Table
-              headers={["NAME", "TYPE", "LAST MODIFIED", "Remove"]}
+              headers={["NAME", "TYPE", "LAST MODIFIED", "Progress", "Remove"]}
               className="w-full my-4 max-h-60"
             >
               {knowledge.map((knowledge: any) => (
@@ -96,6 +96,9 @@ export const AIKnowledge = ({
                   </td>
                   <td className="p-2">
                     {format(new Date(knowledge.updatedAt), "h:mma M/d/yyyy ")}
+                  </td>
+                  <td className="p-2 text-center">
+                    {knowledge.blobUrl ? "100%" : ""}
                   </td>
                   <td className="p-2 text-center">
                     <Button
