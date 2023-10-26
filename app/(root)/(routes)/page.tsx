@@ -68,7 +68,9 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
         <InviteButton />
       </div>
       <SearchInput />
-      <Categories data={categories} />
+      {!(scope === ListAIsRequestScope.PRIVATE || searchParams.groupId) && (
+        <Categories data={categories} />
+      )}
       <Companions data={data} />
       <GroupModal />
     </div>
