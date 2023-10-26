@@ -1,9 +1,9 @@
+import { ApifyAdapter } from "@/src/adapters/knowledge/web-urls/ApifyAdapter";
 import {
   BadRequestError,
   EntityNotFoundError,
 } from "@/src/domain/errors/Errors";
 import aiService from "@/src/domain/services/AIService";
-import { ApifyService } from "@/src/domain/services/ApifyService";
 import prismadb from "@/src/lib/prismadb";
 import { currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
@@ -29,7 +29,7 @@ export async function POST(
   console.log("Urls: " + urls);
 
   try {
-    const apifyService = new ApifyService();
+    const apifyService = new ApifyAdapter();
     for (const url of urls) {
       const knowledge = await prismadb.knowledge.create({
         data: {
@@ -39,7 +39,7 @@ export async function POST(
         },
       });
       await aiService.createKnowledgeAI(params.aiId, [knowledge.id]);
-      await apifyService.createWebUrlKnowledge(knowledge.id, url);
+      await apifyService.startUrlIndexing(knowledge.id, url);
     }
 
     return new NextResponse("", { status: 201 });

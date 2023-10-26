@@ -165,8 +165,10 @@ model Knowledge {
 }
 
 enum KnowledgeIndexStatus {
+  INITIALIZED
   INDEXING
   COMPLETED
+  FAILED
 }
 
 model KnowledgeAI {

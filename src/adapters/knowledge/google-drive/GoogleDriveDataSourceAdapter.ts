@@ -7,19 +7,20 @@ import {
   mapMimeTypeToEnum,
 } from "@/src/domain/types/GoogleDriveSearchResponse";
 import prismadb from "@/src/lib/prismadb";
-import { Knowledge } from "@prisma/client";
+import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import { put } from "@vercel/blob";
 import fs from "fs";
 import { drive_v3, google } from "googleapis";
 import { Readable } from "stream";
-import fileLoader from "../../../domain/services/knowledge/FileLoader";
+import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
   DataSourceItemList,
 } from "../types/DataSourceItemList";
+import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { GoogleDriveDataSourceInput } from "./types/GoogleDriveDataSourceInput";
-import { GoogleDriveFileMetaData } from "./types/GoogleDriveFileMetaData";
+import { GoogleDriveFileMetadata } from "./types/GoogleDriveFileMetadata";
 
 const SUPPORTED_MIME_TYPES = [
   "text/plain",
@@ -151,7 +152,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       items,
     };
     for (const file of listFilesResponse.files) {
-      const metadata: GoogleDriveFileMetaData = {
+      const metadata: GoogleDriveFileMetadata = {
         fileId: file.id ?? "",
         fileName: file.name ?? "",
         mimeType: file.mimeType ?? "",
@@ -172,16 +173,16 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     userId: string,
     knowledge: Knowledge,
     data: any
-  ): Promise<void> {
+  ): Promise<IndexKnowledgeResponse> {
     const input = data as GoogleDriveDataSourceInput;
     await this.setOAuthCredentials(userId, data.oauthTokenId);
 
     if (!knowledge.metadata) {
-      return;
+      throw new Error("Knowledge metadata not found for indexing Google Drive");
     }
 
     const { fileId, fileName, mimeType } =
-      knowledge.metadata as unknown as GoogleDriveFileMetaData;
+      knowledge.metadata as unknown as GoogleDriveFileMetadata;
 
     const blobStream = await this.getFileAsStream(fileId);
     const blob = await put(fileName, blobStream.data, {
@@ -204,9 +205,14 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
           );
         } catch (error) {
           console.log(error);
+          throw new Error("Failed to load file from google drive");
         }
       });
     }
+
+    return {
+      indexStatus: KnowledgeIndexStatus.COMPLETED,
+    };
   }
 
   private async listAllFiles(fileId: string): Promise<ListFilesResponse> {
@@ -253,6 +259,17 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       rootName,
       files,
     };
+  }
+
+  public retrieveKnowledgeIdFromEvent(data: any): string {
+    throw new Error("Method not implemented.");
+  }
+
+  public async handleKnowledgeIndexedEvent(
+    knowledge: Knowledge,
+    data: any
+  ): Promise<IndexKnowledgeResponse> {
+    throw new Error("Method not implemented.");
   }
 }
 
