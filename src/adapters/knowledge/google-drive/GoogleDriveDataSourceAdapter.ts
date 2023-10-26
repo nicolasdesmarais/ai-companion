@@ -12,9 +12,7 @@ import { put } from "@vercel/blob";
 import fs from "fs";
 import { drive_v3, google } from "googleapis";
 import { Readable } from "stream";
-import fileLoader, {
-  FileLoader,
-} from "../../../domain/services/knowledge/FileLoader";
+import fileLoader from "../../../domain/services/knowledge/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
@@ -209,74 +207,6 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
         }
       });
     }
-  }
-
-  public async createKnowledges(
-    userId: string,
-    oauthTokenId: string,
-    fileId: string
-  ) {
-    await this.setOAuthCredentials(userId, oauthTokenId);
-
-    const listFilesResponse = await this.listAllFiles(fileId);
-    if (!listFilesResponse?.files || listFilesResponse.files.length === 0) {
-      throw new EntityNotFoundError("Files not found");
-    }
-
-    const knowledgeIds: string[] = [];
-    for (const fileId of listFilesResponse.files) {
-      const knowledgeId = await this.loadFile(userId, fileId);
-      if (knowledgeId) {
-        knowledgeIds.push(knowledgeId);
-      }
-    }
-    return knowledgeIds;
-  }
-
-  private async loadFile(userId: string, file: drive_v3.Schema$File) {
-    if (!file?.id || !file?.name || !file?.mimeType) {
-      throw new EntityNotFoundError(`File not found`);
-    }
-
-    const mimeType = file.mimeType;
-    const fileName = file.name;
-
-    const blobStream = await this.getFileAsStream(file.id);
-    const blob = await put(fileName, blobStream.data, {
-      access: "public",
-    });
-
-    const fileResponse = await this.getFileAsStream(file.id);
-
-    const filePath = `/tmp/${file.name}`;
-    const writableStream = fs.createWriteStream(filePath);
-
-    return new Promise<string>(async (resolve, reject) => {
-      if (fileResponse.data instanceof Readable) {
-        fileResponse.data
-          .pipe(writableStream)
-          .on("finish", async () => {
-            try {
-              const fileLoader = new FileLoader();
-              const knowledge = await fileLoader.loadFileFromPath(
-                userId,
-                mimeType,
-                fileName,
-                filePath,
-                blob.url
-              );
-              resolve(knowledge.id);
-            } catch (error) {
-              reject(error);
-            }
-          })
-          .on("error", (error) => {
-            reject(error);
-          });
-      } else {
-        resolve("");
-      }
-    });
   }
 
   private async listAllFiles(fileId: string): Promise<ListFilesResponse> {
