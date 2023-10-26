@@ -1,6 +1,6 @@
 import { DataSourceType } from "@prisma/client";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
-import { DataSourceItem } from "../types/DataSourceItemList";
+import { DataSourceItemList } from "../types/DataSourceItemList";
 import { WebUrlDataSourceInput } from "./types/WebUrlDataSourceInput";
 
 export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
@@ -8,9 +8,9 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
     orgId: string,
     userId: string,
     data: any
-  ): Promise<DataSourceItem> {
+  ): Promise<DataSourceItemList> {
     const input = data as WebUrlDataSourceInput;
-    const result: DataSourceItem = {
+    const result: DataSourceItemList = {
       dataSourceName: input.url,
       items: [
         {

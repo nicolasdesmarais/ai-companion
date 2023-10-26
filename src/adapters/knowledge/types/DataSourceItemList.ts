@@ -1,4 +1,4 @@
-export interface DataSourceItem {
+export interface DataSourceItemList {
   dataSourceName: string;
   items: DataSourceItem[];
 }

@@ -13,7 +13,10 @@ import { drive_v3, google } from "googleapis";
 import { Readable } from "stream";
 import { FileLoader } from "../../../domain/services/knowledge/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
-import { DataSourceItem } from "../types/DataSourceItemList";
+import {
+  DataSourceItem,
+  DataSourceItemList,
+} from "../types/DataSourceItemList";
 import { GoogleDriveDataSourceInput } from "./types/GoogleDriveDataSourceInput";
 import { GoogleDriveFileMetaData } from "./types/GoogleDriveFileMetaData";
 
@@ -142,7 +145,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     }
 
     const items: DataSourceItem[] = [];
-    const result: DataSourceItem = {
+    const result: DataSourceItemList = {
       dataSourceName: listFilesResponse.rootName,
       items,
     };

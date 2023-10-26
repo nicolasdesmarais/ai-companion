@@ -1,6 +1,6 @@
 import googleDriveDataSourceAdapter from "@/src/adapters/knowledge/google-drive/GoogleDriveDataSourceAdapter";
 import { DataSourceAdapter } from "@/src/adapters/knowledge/types/DataSourceAdapter";
-import { DataSourceItem } from "@/src/adapters/knowledge/types/DataSourceItemList";
+import { DataSourceItemList } from "@/src/adapters/knowledge/types/DataSourceItemList";
 import webUrlsDataSourceAdapter from "@/src/adapters/knowledge/web-urls/WebUrlsDataSourceAdapter";
 import prismadb from "@/src/lib/prismadb";
 import { DataSourceIndexStatus, DataSourceType } from "@prisma/client";
@@ -35,7 +35,7 @@ export class DataSourceService {
     orgId: string,
     ownerUserId: string,
     type: DataSourceType,
-    itemList: DataSourceItem
+    itemList: DataSourceItemList
   ) {
     const dataSource = await prismadb.dataSource.create({
       data: {
