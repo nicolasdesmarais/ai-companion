@@ -27,7 +27,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   );
   const [selectedAccount, setSelectedAccount] = useState("");
   const [accounts, setAccounts] = useState<UserOAuthTokenEntity[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAccount = async () => {
@@ -153,37 +153,34 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   return (
     <div className="w-full p-6 bg-gray-900 text-white">
       <div className="mb-4">
-        <h2 className="text-xl font-bold">Data Store Name</h2>
-        <p className="text-gray-400">
-          Name this data set so you can use it later for other AIs. Choose
-          something descriptive
-        </p>
-        <input
-          type="text"
-          placeholder="My business website index"
-          className="mt-2 w-full p-2 bg-gray-800 border rounded border-gray-700"
-        />
-      </div>
-      <div className="mb-4">
         <h2 className="text-xl font-bold">Google Drive Integration</h2>
         <p className="text-gray-400">
           Choose a file or folders from your Google Drive to train your AI.
         </p>
-        <select
-          value={selectedAccount}
-          onChange={handleAccountChange}
-          className="mt-2 w-full p-2 bg-gray-800 border rounded border-gray-700 text-white"
-        >
-          <option value="" disabled>
-            Select an account
-          </option>
-          {accounts.map((token: UserOAuthTokenEntity) => (
-            <option key={token.id} value={token.id}>
-              {token.email}
+        {loading ? (
+          <div className="flex items-center my-2 w-full">
+            <div className="mx-auto">
+              <Loader className="w-8 h-8 spinner" />
+            </div>
+          </div>
+        ) : null}
+        {!loading ? (
+          <select
+            value={selectedAccount}
+            onChange={handleAccountChange}
+            className="mt-2 w-full p-2 bg-gray-800 border rounded border-gray-700 text-white"
+          >
+            <option value="" disabled>
+              Select an account
             </option>
-          ))}
-          <option value={ADD_ACCOUNT_OPTION}>+ Add Account</option>
-        </select>
+            {accounts.map((token: UserOAuthTokenEntity) => (
+              <option key={token.id} value={token.id}>
+                {token.email}
+              </option>
+            ))}
+            <option value={ADD_ACCOUNT_OPTION}>+ Add Account</option>
+          </select>
+        ) : null}
       </div>
       {accounts.length ? (
         <div className="mb-4">
