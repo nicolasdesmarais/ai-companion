@@ -26,6 +26,11 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
           knowledge: true,
         },
       },
+      dataSources: {
+        include: {
+          dataSource: true,
+        },
+      },
     },
   });
 
