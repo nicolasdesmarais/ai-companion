@@ -208,8 +208,8 @@ model Conversation {
   updatedAt                 DateTime  @updatedAt @default(now()) @map(name: "updated_at")
   name                      String
   pinPosition               Int?      @map(name: "pin_position")
-  isDeleted                 Boolean   @default(false)
-  userId                    String
+  isDeleted                 Boolean   @default(false) @map("is_deleted")
+  userId                    String                    @map("user_id")
 
   messages                  Message[]
 
