@@ -78,34 +78,38 @@ export const FileUploadKnowledge = ({
   };
 
   return (
-    <FormItem>
-      <FormLabel>Upload your file</FormLabel>
-      <div>
-        <div className="flex my-2">
-          <Input name="file" ref={inputFileRef} type="file" />
-          <Button
-            type="button"
-            disabled={uploading}
-            variant="outline"
-            onClick={() => uploadDocument()}
-          >
-            Upload
-            {uploading ? (
-              <Loader className="w-4 h-4 ml-2 spinner" />
-            ) : (
-              <FileText className="w-4 h-4 ml-2" />
-            )}
-          </Button>
+    <div className="w-full p-6 bg-gray-900 text-white">
+      <FormItem>
+        <FormLabel>Upload your file</FormLabel>
+        <div>
+          <div className="flex my-2">
+            <Input name="file" ref={inputFileRef} type="file" />
+          </div>
         </div>
+        <FormDescription>
+          Add custom knowledge to your AI. Max file size: 4.5Mb. <br />
+          The following formats are supported:{" "}
+          {knowledgeTypes
+            .map((format) => (format.type !== "URL" ? format.name : null))
+            .join(", ")}
+        </FormDescription>
+        <FormMessage />
+      </FormItem>
+      <div className="flex flex-row-reverse w-full mt-4">
+        <Button
+          type="button"
+          disabled={uploading}
+          onClick={() => uploadDocument()}
+          variant="ring"
+        >
+          Upload
+          {uploading ? (
+            <Loader className="w-4 h-4 ml-2 spinner" />
+          ) : (
+            <FileText className="w-4 h-4 ml-2" />
+          )}
+        </Button>
       </div>
-      <FormDescription>
-        Add custom knowledge to your AI. Max file size: 4.5Mb. <br />
-        The following formats are supported:{" "}
-        {knowledgeTypes
-          .map((format) => (format.type !== "URL" ? format.name : null))
-          .join(", ")}
-      </FormDescription>
-      <FormMessage />
-    </FormItem>
+    </div>
   );
 };
