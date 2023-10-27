@@ -76,8 +76,8 @@ model Message {
   createdAt   DateTime @default(now()) @map(name: "created_at")
   updatedAt   DateTime @updatedAt @map(name: "updated_at")
 
-  companionId String
-  userId      String
+  companionId String   @map("ai_id")
+  userId      String   @map("user_id")
 
   companion   Companion @relation(fields: [companionId], references: [id], onDelete: Cascade)
 
@@ -85,6 +85,8 @@ model Message {
   conversationId  String? @map(name: "conversation_id")
 
   @@index([companionId])
+
+  @@map("messages")
 }
 
 model UserSubscription {
