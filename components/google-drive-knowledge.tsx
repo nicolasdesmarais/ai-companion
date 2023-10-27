@@ -40,6 +40,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   const [accounts, setAccounts] = useState<UserOAuthTokenEntity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(true);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const fetchAccount = async () => {
@@ -145,7 +146,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
     if (!selectedFile || !selectedAccount) {
       return;
     }
-    setLoading(true);
+    setUploading(true);
 
     try {
       const createKnowledgeRequest: CreateGoogleDriveKnowledgeRequest = {
@@ -164,7 +165,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
         description: "Something went wrong",
       });
     }
-    setLoading(false);
+    setUploading(false);
   };
 
   return (
@@ -278,7 +279,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
               variant="ring"
             >
               Load
-              {loading ? (
+              {uploading ? (
                 <Loader className="w-4 h-4 ml-2 spinner" />
               ) : (
                 <Server className="w-4 h-4 ml-2" />
