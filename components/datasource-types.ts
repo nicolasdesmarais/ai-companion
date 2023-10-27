@@ -1,14 +1,14 @@
 export const DataSourceTypes = [
   {
-    name: "WEB_URL",
-    type: "Website",
+    name: "Website",
+    type: "WEB_URL",
   },
   {
-    name: "GOOGLE_DRIVE",
-    type: "Google Drive",
+    name: "Google Drive",
+    type: "GOOGLE_DRIVE",
   },
   {
-    name: "FILE_UPLOAD",
-    type: "Upload",
+    name: "Upload",
+    type: "FILE_UPLOAD",
   },
 ];
