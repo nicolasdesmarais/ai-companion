@@ -4,10 +4,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { UserOAuthTokenEntity } from "@/src/domain/entities/OAuthTokenEntity";
 import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/types/CreateGoogleDriveKnowledgeRequest";
-import { GoogleDriveFile } from "@/src/domain/types/GoogleDriveSearchResponse";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { GoogleDriveSearchResultsModal } from "./google-drive-search-results-modal";
 import { Server, Loader } from "lucide-react";
 import {
   Select,
@@ -24,6 +22,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Table } from "@/components/table";
+import {
+  GoogleDriveFile,
+  getLabelFromFileType,
+} from "@/src/domain/types/GoogleDriveSearchResponse";
+import { set } from "zod";
 
 const ADD_ACCOUNT_OPTION = "add-account";
 
@@ -35,7 +39,6 @@ interface FilesProps {
 export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
-  const [isResultsModalVisible, setResultsModalVisible] = useState(false);
   const [searchResults, setSearchResults] = useState<GoogleDriveFile[]>([]);
   const [selectedFile, setSelectedFile] = useState<GoogleDriveFile | null>(
     null
@@ -43,6 +46,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   const [selectedAccount, setSelectedAccount] = useState("");
   const [accounts, setAccounts] = useState<UserOAuthTokenEntity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searching, setSearching] = useState(true);
 
   useEffect(() => {
     const fetchAccount = async () => {
@@ -58,6 +62,12 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
     };
     fetchAccount();
   }, []);
+
+  useEffect(() => {
+    if (selectedAccount) {
+      handleSearch();
+    }
+  }, [selectedAccount]);
 
   const { toast } = useToast();
 
@@ -98,6 +108,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   };
 
   const handleSearch = async () => {
+    setSearching(true);
     try {
       const searchRequest: GoogleDriveSearchRequest = {
         oauthTokenId: selectedAccount ?? "",
@@ -112,7 +123,6 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
       const files: GoogleDriveFile[] = response.data.files;
 
       setSearchResults(files);
-      setResultsModalVisible(true);
     } catch (error) {
       if (error instanceof EntityNotFoundError) {
         toast({
@@ -126,6 +136,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
         });
       }
     }
+    setSearching(false);
   };
 
   const handleSelectFile = (file: GoogleDriveFile | null) => {
@@ -134,7 +145,6 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
     }
 
     setSelectedFile(file);
-    setResultsModalVisible(false);
   };
 
   const handleContinue = async () => {
@@ -170,13 +180,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
         <p className="text-gray-400 mb-4">
           Choose a file or folders from your Google Drive to train your AI.
         </p>
-        {loading ? (
-          <div className="flex items-center my-2 w-full">
-            <div className="mx-auto">
-              <Loader className="w-8 h-8 spinner" />
-            </div>
-          </div>
-        ) : null}
+
         {!loading ? (
           <>
             <FormItem>
@@ -206,20 +210,48 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
           </>
         ) : null}
       </div>
-      {accounts.length ? (
-        <div className="mb-4">
-          <h3>Search Term</h3>
-          <div className="flex items-center">
-            <input
-              className="border p-2 rounded w-full mr-2" // added mr-2 for spacing
-              type="text"
-              placeholder="Search term"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <Button onClick={handleSearch} variant="ring" type="button">
-              Search
-            </Button>
+      {selectedAccount ? (
+        <>
+          <div className="mb-4">
+            <div className="flex items-center">
+              <input
+                className="border p-2 rounded w-full mr-2" // added mr-2 for spacing
+                type="text"
+                placeholder="Search term"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Button onClick={handleSearch} variant="ring" type="button">
+                Search
+              </Button>
+            </div>
+          </div>
+          <Table
+            headers={["NAME", "TYPE", "OWNER", "LAST MODIFIED"]}
+            className="w-full my-4 max-h-60"
+          >
+            {searchResults &&
+              searchResults.map((file) => (
+                <tr
+                  key={file.id}
+                  className={file.id === selectedFile?.id ? "bg-gray-200" : ""}
+                  onClick={() => setSelectedFile(file)}
+                >
+                  <td className="border px-4 py-2">{file.name}</td>
+                  <td className="border px-4 py-2">
+                    {getLabelFromFileType(file.type)}
+                  </td>
+                  <td className="border px-4 py-2">{file.owner}</td>
+                  <td className="border px-4 py-2">{file.modifiedTime}</td>
+                </tr>
+              ))}
+          </Table>
+        </>
+      ) : null}
+      {loading || searching ? (
+        <div className="flex items-center my-2 w-full">
+          <div className="mx-auto">
+            <Loader className="w-8 h-8 spinner" />
           </div>
         </div>
       ) : null}
@@ -246,15 +278,6 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
           )}
         </Button>
       </div>
-
-      <GoogleDriveSearchResultsModal
-        isVisible={isResultsModalVisible}
-        oauthTokenId={selectedAccount ?? ""}
-        initialSearchTerm={searchTerm}
-        onClose={() => setResultsModalVisible(false)}
-        onSelect={handleSelectFile}
-        results={searchResults}
-      />
     </div>
   );
 };
