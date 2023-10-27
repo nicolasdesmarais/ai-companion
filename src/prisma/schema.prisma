@@ -216,7 +216,7 @@ model Conversation {
   companion                 Companion @relation(fields: [companionId], references: [id], onDelete: Cascade)
   companionId               String    @map(name: "companion_id")
 
-  @@map("conversation")
+  @@map("conversations")
 }
 
 model DataSource {
