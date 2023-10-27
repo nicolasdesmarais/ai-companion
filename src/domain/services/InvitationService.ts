@@ -51,3 +51,6 @@ export class InvitationService {
     this.createOrganizationInvitations(createInvitationRequest);
   }
 }
+
+const invitationService = new InvitationService();
+export default invitationService;

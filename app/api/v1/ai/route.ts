@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs";
+import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
 import prismadb from "@/src/lib/prismadb";
@@ -6,6 +6,8 @@ import prismadb from "@/src/lib/prismadb";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    const authentication = await auth();
+    const orgId = authentication.orgId;
     const user = await currentUser();
     const {
       src,
@@ -20,7 +22,7 @@ export async function POST(req: Request) {
       options,
     } = body;
 
-    if (!user || !user.id) {
+    if (!user || !user.id || !orgId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -31,6 +33,7 @@ export async function POST(req: Request) {
     const companion = await prismadb.companion.create({
       data: {
         categoryId,
+        orgId,
         userId: user.id,
         userName: user.firstName || user.username || "user",
         src,

@@ -10,6 +10,7 @@ export enum ListAIsRequestScope {
   OWNED = "OWNED", // Only return AIs owned by the user
   GROUP = "GROUP", // Only return AIs that are within the user's groups
   SHARED = "SHARED", // Only return AIs that are explicitly shared with the user
+  ORGANIZATION = "ORGANIZATION", // Only return AIs that are shared within the user's organization
   PUBLIC = "PUBLIC", // Only return AIs that are public,
   ALL = "ALL", // Return all AIs that the user has access to
 }

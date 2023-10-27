@@ -2,24 +2,30 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
-import { redirect } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Globe, Loader } from "lucide-react";
 
 interface WebUrlsProps {
   aiId: string;
 }
 
 export const WebUrlsForm = ({ aiId }: WebUrlsProps) => {
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const [urls, setUrls] = useState([""]);
+  const router = useRouter();
 
   const handleContinue = async () => {
+    setLoading(true);
     try {
       await axios.post(`/api/v1/ai/${aiId}/knowledge/web-urls`, { urls });
+      setLoading(false);
       toast({
         variant: "default",
         description: "Web URLs added",
       });
+      router.push(`/ai/${aiId}/edit/knowledge`);
     } catch (error) {
       console.log(error);
       toast({
@@ -70,13 +76,12 @@ export const WebUrlsForm = ({ aiId }: WebUrlsProps) => {
           disabled={!urls.some((url) => url)}
           variant="ring"
         >
-          Continue
-        </Button>
-        <Button
-          onClick={() => redirect(`/ai/${aiId}/knowledge`)}
-          variant="link"
-        >
-          Back
+          Load
+          {loading ? (
+            <Loader className="w-4 h-4 ml-2 spinner" />
+          ) : (
+            <Globe className="w-4 h-4 ml-2" />
+          )}
         </Button>
       </div>
     </div>

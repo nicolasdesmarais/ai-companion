@@ -8,6 +8,22 @@ import { GoogleDriveFile } from "@/src/domain/types/GoogleDriveSearchResponse";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { GoogleDriveSearchResultsModal } from "./google-drive-search-results-modal";
+import { Server, Loader } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 const ADD_ACCOUNT_OPTION = "add-account";
 
@@ -26,9 +42,11 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   );
   const [selectedAccount, setSelectedAccount] = useState("");
   const [accounts, setAccounts] = useState<UserOAuthTokenEntity[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAccount = async () => {
+      setLoading(true);
       const response = await axios.get(
         `/api/v1/integrations/google-drive/accounts`
       );
@@ -36,6 +54,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
       if (response.data.length > 0) {
         setSelectedAccount(response.data[0]?.id);
       }
+      setLoading(false);
     };
     fetchAccount();
   }, []);
@@ -55,9 +74,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
     };
   }, [popupWindow]);
 
-  const handleAccountChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value;
-    console.log("selected account" + value);
+  const handleAccountChange = (value: string) => {
     setSelectedAccount(value);
     if (value === ADD_ACCOUNT_OPTION) {
       handleConnectClick();
@@ -124,6 +141,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
     if (!selectedFile || !selectedAccount) {
       return;
     }
+    setLoading(true);
 
     try {
       const createKnowledgeRequest: CreateGoogleDriveKnowledgeRequest = {
@@ -135,6 +153,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
         `/api/v1/ai/${aiId}/knowledge/google-drive`,
         createKnowledgeRequest
       );
+      setLoading(false);
       goBack();
     } catch (error) {
       toast({
@@ -147,37 +166,45 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   return (
     <div className="w-full p-6 bg-gray-900 text-white">
       <div className="mb-4">
-        <h2 className="text-xl font-bold">Data Store Name</h2>
-        <p className="text-gray-400">
-          Name this data set so you can use it later for other AIs. Choose
-          something descriptive
-        </p>
-        <input
-          type="text"
-          placeholder="My business website index"
-          className="mt-2 w-full p-2 bg-gray-800 border rounded border-gray-700"
-        />
-      </div>
-      <div className="mb-4">
         <h2 className="text-xl font-bold">Google Drive Integration</h2>
-        <p className="text-gray-400">
+        <p className="text-gray-400 mb-4">
           Choose a file or folders from your Google Drive to train your AI.
         </p>
-        <select
-          value={selectedAccount}
-          onChange={handleAccountChange}
-          className="mt-2 w-full p-2 bg-gray-800 border rounded border-gray-700 text-white"
-        >
-          <option value="" disabled>
-            Select an account
-          </option>
-          {accounts.map((token: UserOAuthTokenEntity) => (
-            <option key={token.id} value={token.id}>
-              {token.email}
-            </option>
-          ))}
-          <option value={ADD_ACCOUNT_OPTION}>+ Add Account</option>
-        </select>
+        {loading ? (
+          <div className="flex items-center my-2 w-full">
+            <div className="mx-auto">
+              <Loader className="w-8 h-8 spinner" />
+            </div>
+          </div>
+        ) : null}
+        {!loading ? (
+          <>
+            <FormItem>
+              <FormLabel>Account</FormLabel>
+              <Select
+                disabled={loading}
+                onValueChange={handleAccountChange}
+                value={selectedAccount}
+              >
+                <FormControl>
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="Select an account" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {accounts.map((token: UserOAuthTokenEntity) => (
+                    <SelectItem key={token.id} value={token.id as string}>
+                      {token.email}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value={ADD_ACCOUNT_OPTION}>
+                    + Add Account
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          </>
+        ) : null}
       </div>
       {accounts.length ? (
         <div className="mb-4">
@@ -211,10 +238,12 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
           disabled={!selectedFile || !selectedAccount}
           variant="ring"
         >
-          Continue
-        </Button>
-        <Button onClick={goBack} variant="link" type="button">
-          Back
+          Load
+          {loading ? (
+            <Loader className="w-4 h-4 ml-2 spinner" />
+          ) : (
+            <Server className="w-4 h-4 ml-2" />
+          )}
         </Button>
       </div>
 

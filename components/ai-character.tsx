@@ -24,7 +24,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { Category, Prisma } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { Loader, Wand2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { models } from "./ai-models";
 
@@ -449,6 +448,9 @@ export const AICharacter = ({ categories, form }: CompanionFormProps) => {
                 </SelectItem>
                 <SelectItem key="GROUP" value="GROUP">
                   Group
+                </SelectItem>
+                <SelectItem key="ORGANIZATION" value="ORGANIZATION">
+                  Organization
                 </SelectItem>
               </SelectContent>
             </Select>

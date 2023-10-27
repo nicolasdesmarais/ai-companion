@@ -61,7 +61,7 @@ export class ApifyService {
           url: url,
         },
       ],
-      keepUrlFragments: false,
+      keepUrlFragments: true,
       linkSelector: "a[href]",
       globs: [
         {

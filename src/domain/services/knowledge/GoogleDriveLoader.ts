@@ -96,9 +96,14 @@ export class GoogleDriveLoader {
   ) {
     await this.setOAuthCredentials(userId, oauthTokenId);
 
-    const query = `(${this.getNamesQuery(
-      searchTerms
-    )}) and (${this.getMimeTypeQuery(true)}) and trashed = false`;
+    let query;
+    if (searchTerms.length > 0) {
+      query = `(${this.getNamesQuery(
+        searchTerms
+      )}) and (${this.getMimeTypeQuery(true)}) and trashed = false`;
+    } else {
+      query = `(${this.getMimeTypeQuery(true)}) and trashed = false`;
+    }
 
     const googleDriveSearchResponse = await this.listFiles(query);
     const files = googleDriveSearchResponse.data.files?.map((file) => {
