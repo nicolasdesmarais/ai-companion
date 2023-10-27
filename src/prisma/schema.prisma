@@ -12,13 +12,13 @@ datasource db {
 model Category {
   id            String @id @default(uuid())
   name          String
-  companions    Companion[]
+  ais           AI[]
 
   @@map("categories")
 }
 
 
-model Companion {
+model AI {
   id            String                          @id @default(uuid())
   orgId         String?                         @map(name: "org_id")
   userId        String                          @map("user_id")
@@ -70,21 +70,21 @@ enum AIVisibility {
 }
 
 model Message {
-  id          String   @id @default(uuid())
-  role        Role
-  content     String   @db.Text
-  createdAt   DateTime @default(now()) @map(name: "created_at")
-  updatedAt   DateTime @updatedAt @map(name: "updated_at")
+  id              String    @id @default(uuid())
+  role            Role
+  content         String    @db.Text
+  createdAt       DateTime  @default(now()) @map(name: "created_at")
+  updatedAt       DateTime  @updatedAt @map(name: "updated_at")
 
-  companionId String   @map("ai_id")
-  userId      String   @map("user_id")
+  aiId            String    @map("ai_id")
+  userId          String    @map("user_id")
 
-  companion   Companion @relation(fields: [companionId], references: [id], onDelete: Cascade)
+  ai              AI @relation(fields: [aiId], references: [id], onDelete: Cascade)
 
   conversation    Conversation? @relation(fields: [conversationId], references: [id])
   conversationId  String? @map(name: "conversation_id")
 
-  @@index([companionId])
+  @@index([aiId])
 
   @@map("messages")
 }
@@ -109,7 +109,7 @@ model Group {
   name                      String
   availability              GroupAvailability @default(EVERYONE)
   users                     GroupUser[]
-  companions                GroupAI[]
+  ais                       GroupAI[]
 
   @@map("groups")
 }
@@ -135,12 +135,12 @@ model GroupUser {
 model GroupAI {
   group                     Group @relation(fields: [groupId], references: [id])
   groupId                   String    @map(name: "group_id")
-  companion                 Companion @relation(fields: [companionId], references: [id])
-  companionId               String    @map(name: "ai_id")
+  ai                        AI @relation(fields: [aiId], references: [id])
+  aiId                      String    @map(name: "ai_id")
   createdAt                 DateTime  @default(now()) @map(name: "created_at")
   updatedAt                 DateTime  @updatedAt @default(now()) @map(name: "updated_at")
 
-  @@id([groupId, companionId])
+  @@id([groupId, aiId])
   @@map("group_ais")
 }
 
@@ -177,11 +177,11 @@ enum KnowledgeIndexStatus {
 model AIPermissions {
   id                        Int         @id @default(autoincrement())
   userId                    String?     @map(name: "user_id")
-  companion                 Companion   @relation(fields: [companionId], references: [id])
-  companionId               String      @map(name: "ai_id")
+  ai                        AI          @relation(fields: [aiId], references: [id])
+  aiId                      String      @map(name: "ai_id")
   email                     String
 
-  @@unique([companionId, email])
+  @@unique([aiId, email])
   @@map("ai_permissions")
 }
 
@@ -213,8 +213,8 @@ model Conversation {
 
   messages                  Message[]
 
-  companion                 Companion @relation(fields: [companionId], references: [id], onDelete: Cascade)
-  companionId               String    @map(name: "ai_id")
+  ai                        AI @relation(fields: [aiId], references: [id], onDelete: Cascade)
+  aiId                      String    @map(name: "ai_id")
 
   @@map("conversations")
 }
@@ -259,7 +259,7 @@ model DataSourceKnowledge {
 }
 
 model AIDataSource {
-  ai                         Companion      @relation(fields: [aiId], references: [id])
+  ai                         AI      @relation(fields: [aiId], references: [id])
   aiId                       String         @map(name: "ai_id")
   dataSource                 DataSource     @relation(fields: [dataSourceId], references: [id])
   dataSourceId               String         @map(name: "data_source_id")
