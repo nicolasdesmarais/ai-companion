@@ -147,7 +147,7 @@ body,
 }
 .markdown-chat-message pre, 
 .markdown-chat-message code {
-  background: hsl(217 37% 18%);
+  background: hsl(217 37% 68%);
   margin: 10px 0;
   border-radius: 5px;
 }
