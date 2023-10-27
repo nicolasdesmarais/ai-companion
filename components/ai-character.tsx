@@ -45,9 +45,9 @@ Elon: Always! But right now, I'm particularly excited about Neuralink. It has th
 
 const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
   include: {
-    knowledge: {
+    dataSources: {
       include: {
-        knowledge: true,
+        dataSource: true,
       },
     },
   },
