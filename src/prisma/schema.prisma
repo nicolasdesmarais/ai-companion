@@ -44,8 +44,6 @@ model Companion {
 
   groups        GroupAI[]
 
-  knowledge     KnowledgeAI[]
-
   permissions   AIPermissions[]
 
   dataSources   AIDataSource[]
@@ -158,7 +156,6 @@ model Knowledge {
   indexStatus               KnowledgeIndexStatus                @map(name :"index_status")
   blobUrl                   String?                             @map(name: "blob_url")
   metadata                  Json?
-  companions                KnowledgeAI[]
   DataSources               DataSourceKnowledge[]
 
   @@map("knowledge")
@@ -171,15 +168,6 @@ enum KnowledgeIndexStatus {
   FAILED
 }
 
-model KnowledgeAI {
-  knowledge                 Knowledge @relation(fields: [knowledgeId], references: [id])
-  knowledgeId               String    @map(name: "knowledge_id")
-  companion                 Companion @relation(fields: [companionId], references: [id])
-  companionId               String    @map(name: "companion_id")
-
-  @@id([knowledgeId, companionId])
-  @@map("knowledge_ais")
-}
 
 model AIPermissions {
   id                        Int         @id @default(autoincrement())
