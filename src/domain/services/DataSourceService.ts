@@ -76,7 +76,7 @@ export class DataSourceService {
         );
 
         await prismadb.$transaction(async (tx) => {
-          this.onKnowledgeIndexed(
+          await this.onKnowledgeIndexed(
             dataSourceId,
             knowledge,
             indexKnowledgeResponse,
