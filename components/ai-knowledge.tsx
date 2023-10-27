@@ -32,7 +32,7 @@ interface SelectDataSourceProps {
 export const AIKnowledge = ({
   form,
   dataSources,
-  setDataSource: setDataSource,
+  setDataSource,
   knowledgeLoading,
 }: SelectDataSourceProps) => {
   const { toast } = useToast();

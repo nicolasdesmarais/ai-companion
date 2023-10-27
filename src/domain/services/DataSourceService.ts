@@ -249,6 +249,10 @@ export class DataSourceService {
     }
 
     await prismadb.$transaction(async (tx) => {
+      await prismadb.aIDataSource.deleteMany({
+        where: { dataSourceId },
+      });
+
       await prismadb.dataSourceKnowledge.deleteMany({
         where: { dataSourceId },
       });
