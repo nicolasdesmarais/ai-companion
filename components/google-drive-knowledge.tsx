@@ -157,7 +157,6 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
         `/api/v1/ai/${aiId}/knowledge/google-drive`,
         createKnowledgeRequest
       );
-      setLoading(false);
       goBack();
     } catch (error) {
       toast({
@@ -165,6 +164,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
         description: "Something went wrong",
       });
     }
+    setLoading(false);
   };
 
   return (
