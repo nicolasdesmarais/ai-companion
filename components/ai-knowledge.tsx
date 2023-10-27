@@ -18,6 +18,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import DataSourceCard from "./datasource-card";
+import { DataSourceTypes } from "./datasource-types";
 import { FileUploadKnowledge } from "./file-upload-knowledge";
 import { GoogleDriveForm } from "./google-drive-knowledge";
 import { WebUrlsForm } from "./web-urls-knowledge-form";
@@ -78,7 +79,13 @@ export const AIKnowledge = ({
                   <td className="p-2 ">
                     <div className="max-w-sm truncate">{dataSource.name}</div>
                   </td>
-                  <td className="p-2">{dataSource.type}</td>
+                  <td className="p-2">
+                    {
+                      DataSourceTypes.find(
+                        (format) => format.type === dataSource.type
+                      )?.name
+                    }
+                  </td>
                   <td className="p-2">
                     {format(
                       new Date(dataSource.lastIndexedAt),
