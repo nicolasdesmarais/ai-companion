@@ -226,26 +226,31 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
               </Button>
             </div>
           </div>
-          <Table
-            headers={["NAME", "TYPE", "OWNER", "LAST MODIFIED"]}
-            className="w-full my-4 max-h-60"
-          >
-            {searchResults &&
-              searchResults.map((file) => (
-                <tr
-                  key={file.id}
-                  className={file.id === selectedFile?.id ? "bg-gray-200" : ""}
-                  onClick={() => setSelectedFile(file)}
-                >
-                  <td className="border px-4 py-2">{file.name}</td>
-                  <td className="border px-4 py-2">
-                    {getLabelFromFileType(file.type)}
-                  </td>
-                  <td className="border px-4 py-2">{file.owner}</td>
-                  <td className="border px-4 py-2">{file.modifiedTime}</td>
-                </tr>
-              ))}
-          </Table>
+
+          <div className="max-h-96 overflow-auto">
+            <Table
+              headers={["NAME", "TYPE", "OWNER", "LAST MODIFIED"]}
+              className="w-full my-4 max-h-60"
+            >
+              {searchResults &&
+                searchResults.map((file) => (
+                  <tr
+                    key={file.id}
+                    className={
+                      file.id === selectedFile?.id ? "bg-gray-200" : ""
+                    }
+                    onClick={() => setSelectedFile(file)}
+                  >
+                    <td className="border px-4 py-2">{file.name}</td>
+                    <td className="border px-4 py-2">
+                      {getLabelFromFileType(file.type)}
+                    </td>
+                    <td className="border px-4 py-2">{file.owner}</td>
+                    <td className="border px-4 py-2">{file.modifiedTime}</td>
+                  </tr>
+                ))}
+            </Table>
+          </div>
         </>
       ) : null}
       {loading || searching ? (
@@ -256,28 +261,30 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
         </div>
       ) : null}
       {selectedFile && (
-        <div className="selected-file-section">
-          <span>{selectedFile.name}</span>
-          <Button onClick={() => setSelectedFile(null)} type="button">
-            X
-          </Button>
-        </div>
+        <>
+          <div>
+            <span>{selectedFile.name}</span>
+            <Button onClick={() => setSelectedFile(null)} type="button">
+              X
+            </Button>
+          </div>
+          <div className="flex justify-between w-full mt-4">
+            <Button
+              type="button"
+              onClick={handleContinue}
+              disabled={!selectedFile || !selectedAccount}
+              variant="ring"
+            >
+              Load
+              {loading ? (
+                <Loader className="w-4 h-4 ml-2 spinner" />
+              ) : (
+                <Server className="w-4 h-4 ml-2" />
+              )}
+            </Button>
+          </div>
+        </>
       )}
-      <div className="flex justify-between w-full">
-        <Button
-          type="button"
-          onClick={handleContinue}
-          disabled={!selectedFile || !selectedAccount}
-          variant="ring"
-        >
-          Load
-          {loading ? (
-            <Loader className="w-4 h-4 ml-2 spinner" />
-          ) : (
-            <Server className="w-4 h-4 ml-2" />
-          )}
-        </Button>
-      </div>
     </div>
   );
 };
