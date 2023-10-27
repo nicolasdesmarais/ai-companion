@@ -39,7 +39,7 @@ export const ChatList = () => {
             >
               <div>
                 <Avatar className="h-18 w-18">
-                  <AvatarImage src={conversation.companion.src} />
+                  <AvatarImage src={conversation.ai.src} />
                 </Avatar>
               </div>
               <div className="mt-2 text-xs truncate">{conversation.name}</div>
@@ -58,13 +58,13 @@ export const ChatList = () => {
           )}
           key={conversation.id}
         >
-          <BotAvatar src={conversation.companion.src} />
+          <BotAvatar src={conversation.ai.src} />
           <div className="flex flex-col gap-y-1 w-full">
             <div className="flex items-center gap-x-2">
               <p className="font-bold text-ellipsis">{conversation.name}</p>
             </div>
             <div className="text-xs text-muted-foreground w-full pb-2 border-b border-muted-foreground text-ellipsis">
-              {conversation.companion.description}
+              {conversation.ai.description}
             </div>
           </div>
         </div>

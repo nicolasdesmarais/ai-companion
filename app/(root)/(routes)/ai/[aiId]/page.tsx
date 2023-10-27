@@ -14,7 +14,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     return redirectToSignIn();
   }
 
-  const ai = await prismadb.companion.findUnique({
+  const ai = await prismadb.aI.findUnique({
     where: {
       id: params.aiId,
     },
@@ -43,7 +43,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
   if (ai.conversations.length === 0) {
     const conversation = await prismadb.conversation.create({
       data: {
-        companionId: params.aiId,
+        aiId: params.aiId,
         name: ai.name,
         userId: userId,
       },
@@ -52,7 +52,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
       // add legacy messages to new conversation
       await prismadb.message.updateMany({
         where: {
-          companionId: params.aiId,
+          aiId: params.aiId,
           userId: userId,
         },
         data: {

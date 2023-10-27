@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
-    const companion = await prismadb.companion.create({
+    const ai = await prismadb.aI.create({
       data: {
         categoryId,
         orgId,
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json(companion);
+    return NextResponse.json(ai);
   } catch (error) {
     console.log("[COMPANION_POST]", error);
     return new NextResponse("Internal Error", { status: 500 });

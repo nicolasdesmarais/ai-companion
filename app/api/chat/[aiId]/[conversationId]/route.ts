@@ -40,7 +40,7 @@ export async function POST(
         id: conversationId,
       },
       include: {
-        companion: {
+        ai: {
           include: {
             dataSources: {
               include: {
@@ -65,7 +65,7 @@ export async function POST(
             content: prompt,
             role: "user",
             userId: user.id,
-            companionId: aiId,
+            aiId: aiId,
           },
         },
       },
@@ -77,7 +77,7 @@ export async function POST(
 
     const memoryManager = await MemoryManager.getInstance();
 
-    const knowledgeIds: string[] = conversation.companion.dataSources
+    const knowledgeIds: string[] = conversation.ai.dataSources
       .map((ds) => ds.dataSource.knowledges.map((k) => k.knowledgeId))
       .reduce((acc, curr) => acc.concat(curr), []);
 
@@ -92,15 +92,13 @@ export async function POST(
       chatModel,
       options = {} as any;
 
-    Object.entries(conversation.companion.options || {}).forEach(
-      ([key, value]) => {
-        if (value && value.length > 0) {
-          options[key] = value[0];
-        }
+    Object.entries(conversation.ai.options || {}).forEach(([key, value]) => {
+      if (value && value.length > 0) {
+        options[key] = value[0];
       }
-    );
+    });
 
-    if (conversation.companion.modelId === "llama2-13b") {
+    if (conversation.ai.modelId === "llama2-13b") {
       completionModel = new Replicate({
         model:
           "meta/llama-2-13b-chat:f4e2de70d66816a838a89eeeb621910adffb0dd0baba3976c96980970978018d",
@@ -112,13 +110,13 @@ export async function POST(
         apiKey: process.env.REPLICATE_API_TOKEN,
         callbackManager: CallbackManager.fromHandlers(handlers),
       });
-    } else if (conversation.companion.modelId === "text-davinci-003") {
+    } else if (conversation.ai.modelId === "text-davinci-003") {
       completionModel = new OpenAI({
         openAIApiKey: process.env.OPENAI_API_KEY,
         modelName: "text-davinci-003",
         ...options,
       });
-    } else if (conversation.companion.modelId === "gpt35-16k") {
+    } else if (conversation.ai.modelId === "gpt35-16k") {
       chatModel = new ChatOpenAI({
         azureOpenAIApiKey: process.env.AZURE_GPT35_KEY,
         azureOpenAIApiVersion: "2023-05-15",
@@ -141,27 +139,27 @@ export async function POST(
         if (message.role === "user") {
           return acc + `User: ${message.content}\n`;
         } else {
-          return acc + `${conversation.companion.name}: ${message.content}\n`;
+          return acc + `${conversation.ai.name}: ${message.content}\n`;
         }
       },
       ""
     );
-    const seededChatHistory = `${conversation.companion.seed}\n\n${chatHistory}`;
+    const seededChatHistory = `${conversation.ai.seed}\n\n${chatHistory}`;
     const completionPrompt = `
-      ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${conversation.companion.name}: prefix.
+      ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${conversation.ai.name}: prefix.
       Output format is markdown. Open links in new tabs.
-      ${conversation.companion.instructions}
-      Below are relevant details about ${conversation.companion.name}'s past and the conversation you are in.
+      ${conversation.ai.instructions}
+      Below are relevant details about ${conversation.ai.name}'s past and the conversation you are in.
       ${knowledge}\n
       ${seededChatHistory}\n
-      ${conversation.companion.name}:
+      ${conversation.ai.name}:
     `;
 
     const engineeredPrompt = `
-      Pretend you are ${conversation.companion.name}, ${conversation.companion.description}.
+      Pretend you are ${conversation.ai.name}, ${conversation.ai.description}.
       Output format is markdown. Open links in new tabs.
       Here are more details about your character:\n
-      ${conversation.companion.instructions}
+      ${conversation.ai.instructions}
       Answer questions using this knowledge:\n
       ${knowledge}\n
     `;
@@ -173,16 +171,14 @@ export async function POST(
       response = cleaned;
     } else {
       const chatLog = [new SystemChatMessage(engineeredPrompt)];
-      if (conversation.companion.seed) {
-        const historySeed = conversation.companion.seed
+      if (conversation.ai.seed) {
+        const historySeed = conversation.ai.seed
           .split("\n\n")
           .reduce((result: any, line: string) => {
-            if (line.trimStart().startsWith(conversation.companion.name)) {
+            if (line.trimStart().startsWith(conversation.ai.name)) {
               result.push(
                 new SystemChatMessage(
-                  line
-                    .replace(conversation.companion.name + ":", "")
-                    .trimStart()
+                  line.replace(conversation.ai.name + ":", "").trimStart()
                 )
               );
             } else {
@@ -227,7 +223,7 @@ export async function POST(
               content: response.trim(),
               role: "system",
               userId: user.id,
-              companionId: aiId,
+              aiId: aiId,
             },
           },
         },

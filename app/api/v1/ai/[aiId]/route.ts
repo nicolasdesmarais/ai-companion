@@ -35,7 +35,7 @@ export async function PATCH(
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
-    const companion = await prismadb.companion.update({
+    const ai = await prismadb.aI.update({
       where: {
         id: params.aiId,
         userId: user.id,
@@ -62,7 +62,7 @@ export async function PATCH(
       },
     });
 
-    return NextResponse.json(companion);
+    return NextResponse.json(ai);
   } catch (error) {
     console.log("[COMPANION_PATCH]", error);
     return new NextResponse("Internal Error", { status: 500 });
@@ -80,14 +80,14 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const companion = await prismadb.companion.delete({
+    const ai = await prismadb.aI.delete({
       where: {
         userId,
         id: params.aiId,
       },
     });
 
-    return NextResponse.json(companion);
+    return NextResponse.json(ai);
   } catch (error) {
     console.log("[COMPANION_DELETE]", error);
     return new NextResponse("Internal Error", { status: 500 });
