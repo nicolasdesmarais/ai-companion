@@ -36,8 +36,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       data: tokens,
     });
 
-    // You can now use the Google Drive API. Store the tokens securely (in session, JWT, database, etc.)
-    return NextResponse.json("Successfully authenticated!");
+    const url = req.nextUrl.clone();
+    url.pathname = "/close";
+    return NextResponse.redirect(url);
   } catch (error) {
     console.log(error);
     return NextResponse.json("Authentication failed", { status: 400 });

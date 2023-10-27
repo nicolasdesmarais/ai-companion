@@ -42,18 +42,21 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   const [searching, setSearching] = useState(true);
   const [uploading, setUploading] = useState(false);
 
+  const fetchAccount = async () => {
+    setLoading(true);
+    const response = await axios.get(
+      `/api/v1/integrations/google-drive/accounts`
+    );
+    setAccounts(response.data);
+    if (response.data.length > 0) {
+      setSelectedAccount(response.data[0]?.id);
+    } else {
+      setSearching(false);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchAccount = async () => {
-      setLoading(true);
-      const response = await axios.get(
-        `/api/v1/integrations/google-drive/accounts`
-      );
-      setAccounts(response.data);
-      if (response.data.length > 0) {
-        setSelectedAccount(response.data[0]?.id);
-      }
-      setLoading(false);
-    };
     fetchAccount();
   }, []);
 
@@ -69,6 +72,8 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
     const popupInterval = setInterval(() => {
       if (popupWindow?.closed) {
         clearInterval(popupInterval);
+        console.log("window closed");
+        fetchAccount();
       }
     }, 1000);
 
@@ -180,27 +185,41 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
           <>
             <FormItem>
               <FormLabel>Account</FormLabel>
-              <Select
-                disabled={loading}
-                onValueChange={handleAccountChange}
-                value={selectedAccount}
-              >
-                <FormControl>
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Select an account" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {accounts.map((token: UserOAuthTokenEntity) => (
-                    <SelectItem key={token.id} value={token.id as string}>
-                      {token.email}
+              {accounts.length === 0 ? (
+                <div>
+                  <Button
+                    onClick={handleConnectClick}
+                    type="button"
+                    variant="ring"
+                  >
+                    Connect Your Google Account
+                  </Button>
+                </div>
+              ) : null}
+              {accounts.length > 0 ? (
+                <Select
+                  disabled={loading}
+                  onValueChange={handleAccountChange}
+                  value={selectedAccount}
+                >
+                  <FormControl>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Select an account" />
+                    </SelectTrigger>
+                  </FormControl>
+
+                  <SelectContent>
+                    {accounts.map((token: UserOAuthTokenEntity) => (
+                      <SelectItem key={token.id} value={token.id as string}>
+                        {token.email}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value={ADD_ACCOUNT_OPTION}>
+                      + Add Account
                     </SelectItem>
-                  ))}
-                  <SelectItem value={ADD_ACCOUNT_OPTION}>
-                    + Add Account
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                  </SelectContent>
+                </Select>
+              ) : null}
             </FormItem>
           </>
         ) : null}
