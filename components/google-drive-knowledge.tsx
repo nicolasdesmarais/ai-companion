@@ -215,6 +215,12 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
                 placeholder="Search term"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSearch();
+                  }
+                }}
               />
               <Button onClick={handleSearch} variant="ring" type="button">
                 Search
