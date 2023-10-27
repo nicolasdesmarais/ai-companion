@@ -14,7 +14,7 @@ export async function GET(req: Request) {
         isDeleted: false,
       },
       include: {
-        companion: true,
+        ai: true,
       },
     });
     return NextResponse.json(conversations);

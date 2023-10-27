@@ -1,18 +1,18 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { Companion, Conversation, Message } from "@prisma/client";
+import { AI, Conversation, Message } from "@prisma/client";
 import axios from "axios";
 import {
   CopyPlus,
   Edit,
+  ExternalLink,
   MessagesSquare,
   MoreVertical,
   Pin,
   PinOff,
   RefreshCw,
   Trash,
-  ExternalLink,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -26,13 +26,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
 import { useConversations } from "@/hooks/use-conversations";
-import { ShareModal } from "./share-modal";
 import { useState } from "react";
+import { ShareModal } from "./share-modal";
 
 interface ChatHeaderProps {
   conversation: Conversation & {
     messages: Message[];
-    companion: Companion;
+    ai: AI;
     _count: {
       messages: number;
     };
@@ -110,17 +110,17 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
   return (
     <div className="flex w-full justify-between items-center p-4 bg-accent/30">
       <div className="flex gap-x-2 items-center">
-        <BotAvatar src={conversation.companion.src} />
+        <BotAvatar src={conversation.ai.src} />
         <div className="flex flex-col gap-y-1">
           <div className="flex items-center gap-x-2">
-            <p className="font-bold">{conversation.companion.name}</p>
+            <p className="font-bold">{conversation.ai.name}</p>
             <div className="flex items-center text-xs text-muted-foreground">
               <MessagesSquare className="w-3 h-3 mr-1" />
               {conversation._count.messages}
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Created by {conversation.companion.userName}
+            Created by {conversation.ai.userName}
           </p>
         </div>
       </div>
@@ -164,11 +164,9 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
               <Trash className="w-4 h-4 mr-2" />
               Remove
             </DropdownMenuItem>
-            {user?.id === conversation.companion.userId && (
+            {user?.id === conversation.ai.userId && (
               <DropdownMenuItem
-                onClick={() =>
-                  router.push(`/ai/${conversation.companion.id}/edit`)
-                }
+                onClick={() => router.push(`/ai/${conversation.ai.id}/edit`)}
               >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit AI
@@ -180,7 +178,7 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
       <ShareModal
         showModal={showShareModal}
         setShowModal={setShowShareModal}
-        ai={conversation.companion}
+        ai={conversation.ai}
       />
     </div>
   );

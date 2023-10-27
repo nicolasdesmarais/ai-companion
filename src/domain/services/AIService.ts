@@ -5,7 +5,7 @@ import {
   SignedOutAuthObject,
   User,
 } from "@clerk/nextjs/server";
-import { AIVisibility, Companion, GroupAvailability } from "@prisma/client";
+import { AI, AIVisibility, GroupAvailability } from "@prisma/client";
 import { EntityNotFoundError, UnauthorizedError } from "../errors/Errors";
 import { ShareAIRequest } from "../types/ShareAIRequest";
 import { Utilities } from "../util/utilities";
@@ -17,7 +17,7 @@ import {
 
 export class AIService {
   public async findAIById(id: string) {
-    return prismadb.companion.findUnique({
+    return prismadb.aI.findUnique({
       where: {
         id: id,
       },
@@ -33,7 +33,7 @@ export class AIService {
     aiId: string,
     request: ShareAIRequest
   ) {
-    const ai = await prismadb.companion.findUnique({
+    const ai = await prismadb.aI.findUnique({
       where: {
         id: aiId,
       },
@@ -51,7 +51,7 @@ export class AIService {
     const missingUserEmails = new Set<string>();
     const aiPermissions: {
       userId: string | null;
-      companionId: string;
+      aiId: string;
       email: string;
     }[] = [];
 
@@ -64,7 +64,7 @@ export class AIService {
         if (validEmails.includes(emailAddress)) {
           foundUserEmails.add(emailAddress);
           aiPermissions.push({
-            companionId: aiId,
+            aiId: aiId,
             userId: clerkUser.id,
             email: emailAddress,
           });
@@ -76,7 +76,7 @@ export class AIService {
       if (!foundUserEmails.has(email)) {
         missingUserEmails.add(email);
         aiPermissions.push({
-          companionId: aiId,
+          aiId: aiId,
           userId: null,
           email,
         });
@@ -102,7 +102,7 @@ export class AIService {
     await this.sendAiSharedEmail(ai, clerkUserList);
   }
 
-  private async sendAiSharedEmail(ai: Companion, clerkUsers: User[]) {
+  private async sendAiSharedEmail(ai: AI, clerkUsers: User[]) {
     for (const clerkUser of clerkUsers) {
       if (!clerkUser.primaryEmailAddressId) {
         continue;
@@ -142,7 +142,7 @@ export class AIService {
       whereCondition.AND.push(this.getSearchCriteria(request.search));
     }
 
-    return prismadb.companion.findMany({
+    return prismadb.aI.findMany({
       where: whereCondition,
       orderBy: {
         createdAt: "desc",

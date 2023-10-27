@@ -15,7 +15,7 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
     return redirectToSignIn();
   }
 
-  const initialAi = await prismadb.companion.findUnique({
+  const initialAi = await prismadb.aI.findUnique({
     where: {
       id: params.aiId,
       userId,

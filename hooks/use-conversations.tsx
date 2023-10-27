@@ -1,9 +1,9 @@
+import { AI, Conversation } from "@prisma/client";
 import { create } from "zustand";
-import { Companion, Conversation } from "@prisma/client";
 
 interface useConversationsStore {
   conversations: (Conversation & {
-    companion: Companion;
+    ai: AI;
   })[];
   fetchConversations: () => void;
 }

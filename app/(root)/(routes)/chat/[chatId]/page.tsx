@@ -26,7 +26,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
           createdAt: "asc",
         },
       },
-      companion: true,
+      ai: true,
       _count: {
         select: {
           messages: true,

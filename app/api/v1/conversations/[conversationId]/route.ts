@@ -21,7 +21,7 @@ export async function DELETE(
         id: conversationId,
       },
       include: {
-        companion: true,
+        ai: true,
       },
     });
 
