@@ -9,6 +9,20 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { UserAvatar } from "@/components/user-avatar";
 import { cn } from "@/src/lib/utils";
+import { Marked } from "marked";
+import { markedHighlight } from "marked-highlight";
+import hljs from "highlight.js";
+import "highlight.js/styles/github.css";
+
+const marked = new Marked(
+  markedHighlight({
+    langPrefix: "hljs language-",
+    highlight(code, lang) {
+      const language = hljs.getLanguage(lang) ? lang : "plaintext";
+      return hljs.highlight(code, { language }).value;
+    },
+  })
+);
 
 export interface ChatMessageProps {
   role: "system" | "user";
@@ -46,11 +60,16 @@ export const ChatMessage = ({
       )}
     >
       {role !== "user" && src && <BotAvatar src={src} />}
-      <div className="rounded-md px-4 py-2 max-w-sm text-sm bg-primary/10">
+      <div className="rounded-md px-4 py-2 max-w-sm lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl text-sm bg-primary/10">
         {isLoading ? (
           <BeatLoader color={theme === "light" ? "black" : "white"} size={5} />
         ) : (
-          content
+          <div
+            className="markdown-chat-message"
+            dangerouslySetInnerHTML={{
+              __html: content ? marked.parse(content) : "",
+            }}
+          ></div>
         )}
       </div>
       {role === "user" && <UserAvatar />}

@@ -7,11 +7,20 @@ import {
   mapMimeTypeToEnum,
 } from "@/src/domain/types/GoogleDriveSearchResponse";
 import prismadb from "@/src/lib/prismadb";
+import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import { put } from "@vercel/blob";
 import fs from "fs";
 import { drive_v3, google } from "googleapis";
 import { Readable } from "stream";
-import { FileLoader } from "./FileLoader";
+import fileLoader from "../knowledgeLoaders/FileLoader";
+import { DataSourceAdapter } from "../types/DataSourceAdapter";
+import {
+  DataSourceItem,
+  DataSourceItemList,
+} from "../types/DataSourceItemList";
+import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
+import { GoogleDriveDataSourceInput } from "./types/GoogleDriveDataSourceInput";
+import { GoogleDriveFileMetadata } from "./types/GoogleDriveFileMetaData";
 
 const SUPPORTED_MIME_TYPES = [
   "text/plain",
@@ -31,7 +40,12 @@ const OAUTH2_CLIENT = new google.auth.OAuth2(
 
 const DRIVE_CLIENT = google.drive({ version: "v3", auth: OAUTH2_CLIENT });
 
-export class GoogleDriveLoader {
+interface ListFilesResponse {
+  rootName: string;
+  files: drive_v3.Schema$File[];
+}
+
+export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
   private getNamesQuery(names: string[]) {
     return names.map((name) => `name contains '${name}'`).join(" AND ");
   }
@@ -122,76 +136,85 @@ export class GoogleDriveLoader {
     return response;
   }
 
-  public async createKnowledges(
-    userId: string,
-    oauthTokenId: string,
-    fileId: string
-  ) {
-    await this.setOAuthCredentials(userId, oauthTokenId);
+  public async getDataSourceItemList(orgId: string, userId: string, data: any) {
+    const input = data as GoogleDriveDataSourceInput;
 
-    const fileIds = await this.listAllFiles(fileId);
-    if (!fileIds || fileIds.length === 0) {
-      throw new EntityNotFoundError("Files not found");
+    await this.setOAuthCredentials(userId, input.oauthTokenId);
+
+    const listFilesResponse = await this.listAllFiles(input.fileId);
+    if (!listFilesResponse?.files || listFilesResponse.files.length === 0) {
+      return {
+        dataSourceName: listFilesResponse.rootName,
+        items: [],
+      };
     }
 
-    const knowledgeIds: string[] = [];
-    for (const fileId of fileIds) {
-      const knowledgeId = await this.loadFile(userId, fileId);
-      if (knowledgeId) {
-        knowledgeIds.push(knowledgeId);
-      }
+    const items: DataSourceItem[] = [];
+    const result: DataSourceItemList = {
+      dataSourceName: listFilesResponse.rootName,
+      items,
+    };
+    for (const file of listFilesResponse.files) {
+      const metadata: GoogleDriveFileMetadata = {
+        fileId: file.id ?? "",
+        fileName: file.name ?? "",
+        mimeType: file.mimeType ?? "",
+      };
+      const item: DataSourceItem = {
+        name: file.name ?? "",
+        type: "FILE",
+        metadata,
+      };
+      items.push(item);
     }
-    return knowledgeIds;
+
+    return result;
   }
 
-  private async loadFile(userId: string, file: drive_v3.Schema$File) {
-    if (!file?.id || !file?.name || !file?.mimeType) {
-      throw new EntityNotFoundError(`File not found`);
+  public async indexKnowledge(
+    orgId: string,
+    userId: string,
+    knowledge: Knowledge,
+    data: any
+  ): Promise<IndexKnowledgeResponse> {
+    const input = data as GoogleDriveDataSourceInput;
+    await this.setOAuthCredentials(userId, data.oauthTokenId);
+
+    if (!knowledge.metadata) {
+      throw new Error("Knowledge metadata not found for indexing Google Drive");
     }
 
-    const mimeType = file.mimeType;
-    const fileName = file.name;
+    const { fileId, fileName, mimeType } =
+      knowledge.metadata as unknown as GoogleDriveFileMetadata;
 
-    const blobStream = await this.getFileAsStream(file.id);
+    const blobStream = await this.getFileAsStream(fileId);
     const blob = await put(fileName, blobStream.data, {
       access: "public",
     });
+    knowledge.blobUrl = blob.url;
 
-    const fileResponse = await this.getFileAsStream(file.id);
-
-    const filePath = `/tmp/${file.name}`;
+    const fileResponse = await this.getFileAsStream(fileId);
+    const filePath = `/tmp/${fileName}`;
     const writableStream = fs.createWriteStream(filePath);
 
-    return new Promise<string>(async (resolve, reject) => {
-      if (fileResponse.data instanceof Readable) {
-        fileResponse.data
-          .pipe(writableStream)
-          .on("finish", async () => {
-            try {
-              const fileLoader = new FileLoader();
-              const knowledge = await fileLoader.loadFileFromPath(
-                userId,
-                mimeType,
-                fileName,
-                filePath,
-                blob.url
-              );
-              resolve(knowledge.id);
-            } catch (error) {
-              reject(error);
-            }
-          })
-          .on("error", (error) => {
-            reject(error);
-          });
-      } else {
-        resolve("");
-      }
-    });
+    if (fileResponse.data instanceof Readable) {
+      fileResponse.data.pipe(writableStream).on("finish", async () => {
+        try {
+          await fileLoader.loadFile(knowledge.id, fileName, mimeType, filePath);
+        } catch (error) {
+          console.log(error);
+          throw new Error("Failed to load file from google drive");
+        }
+      });
+    }
+
+    return {
+      indexStatus: KnowledgeIndexStatus.COMPLETED,
+    };
   }
 
-  private async listAllFiles(fileId: string): Promise<drive_v3.Schema$File[]> {
-    const result: drive_v3.Schema$File[] = [];
+  private async listAllFiles(fileId: string): Promise<ListFilesResponse> {
+    const files: drive_v3.Schema$File[] = [];
 
     const listFilesRecursive = async (folderId: string): Promise<void> => {
       const query = `'${folderId}' in parents and (${this.getMimeTypeQuery(
@@ -206,7 +229,7 @@ export class GoogleDriveLoader {
         if (file.mimeType === FOLDER_MIME_TYPE) {
           await listFilesRecursive(file.id!);
         } else {
-          result.push(file);
+          files.push(file);
         }
       }
     };
@@ -215,17 +238,42 @@ export class GoogleDriveLoader {
       fileId,
       fields: "id, name, mimeType",
     });
+    const rootName = initialFile.data.name ?? "";
 
     if (!initialFile.data.mimeType || !initialFile.data.id) {
-      return result;
+      return {
+        rootName,
+        files,
+      };
     }
 
     if (initialFile.data.mimeType === FOLDER_MIME_TYPE) {
       await listFilesRecursive(initialFile.data.id);
     } else {
-      result.push(initialFile.data);
+      files.push(initialFile.data);
     }
 
-    return result;
+    return {
+      rootName,
+      files,
+    };
+  }
+
+  public retrieveKnowledgeIdFromEvent(data: any): string {
+    throw new Error("Method not implemented.");
+  }
+
+  public async handleKnowledgeIndexedEvent(
+    knowledge: Knowledge,
+    data: any
+  ): Promise<IndexKnowledgeResponse> {
+    throw new Error("Method not implemented.");
+  }
+
+  public async deleteKnowledge(knowledgeId: string): Promise<void> {
+    fileLoader.deleteKnowledge(knowledgeId);
   }
 }
+
+const googleDriveDataSourceAdapter = new GoogleDriveDataSourceAdapter();
+export default googleDriveDataSourceAdapter;

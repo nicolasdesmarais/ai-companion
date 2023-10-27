@@ -130,3 +130,41 @@ body,
   width: 64px;
   height: 64px;
 }
+
+.markdown-chat-message {
+  white-space: normal;
+}
+.markdown-chat-message a {
+  color: hsl(var(--ring));
+}
+.markdown-chat-message a:hover {
+  color: hsl(var(--ring));
+  text-decoration: underline;
+}
+.markdown-chat-message p, 
+.markdown-chat-message table {
+  padding: 5px 0;
+}
+.markdown-chat-message pre, 
+.markdown-chat-message code {
+  background: hsl(217 37% 68%);
+  margin: 10px 0;
+  border-radius: 5px;
+}
+.markdown-chat-message pre {
+  padding: 0 10px;
+}
+
+.markdown-chat-message table {
+  margin: 5px 0 10px;
+}
+
+.markdown-chat-message th, 
+.markdown-chat-message td {
+  border: 1px solid hsl(var(--muted-foreground));
+  padding: 8px;
+}
+.markdown-chat-message li {
+  list-style: auto;
+  margin: 10px 15px;
+}

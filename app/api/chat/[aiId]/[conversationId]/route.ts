@@ -42,7 +42,15 @@ export async function POST(
       include: {
         companion: {
           include: {
-            knowledge: true,
+            dataSources: {
+              include: {
+                dataSource: {
+                  include: {
+                    knowledges: true,
+                  },
+                },
+              },
+            },
           },
         },
         messages: {
@@ -69,9 +77,10 @@ export async function POST(
 
     const memoryManager = await MemoryManager.getInstance();
 
-    const knowledgeIds = conversation.companion.knowledge.map(
-      (item) => item.knowledgeId
-    );
+    const knowledgeIds: string[] = conversation.companion.dataSources
+      .map((ds) => ds.dataSource.knowledges.map((k) => k.knowledgeId))
+      .reduce((acc, curr) => acc.concat(curr), []);
+
     const similarDocs = await memoryManager.vectorSearch(prompt, knowledgeIds);
     let knowledge = "";
     if (!!similarDocs && similarDocs.length !== 0) {

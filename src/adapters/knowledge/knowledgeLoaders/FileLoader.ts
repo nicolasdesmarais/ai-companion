@@ -2,7 +2,6 @@ import { Document } from "langchain/document";
 
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import { MemoryManager } from "@/src/lib/memory";
-import prismadb from "@/src/lib/prismadb";
 import { writeFile } from "fs/promises";
 import { CSVLoader } from "langchain/document_loaders/fs/csv";
 import { DocxLoader } from "langchain/document_loaders/fs/docx";
@@ -22,49 +21,43 @@ export class FileLoader {
     return path;
   }
 
-  public async loadFileFromPath(
-    userId: string,
-    type: string,
+  public async loadFile(
+    knowledgeId: string,
     filename: string,
-    filePath: string,
-    blobUrl: string
+    mimeType: string,
+    filePathOrBlob: string | Blob
   ) {
     let docs;
 
-    if (type === "text/csv") {
-      const loader = new CSVLoader(filePath, "text");
+    if (mimeType === "text/csv") {
+      const loader = new CSVLoader(filePathOrBlob, "text");
       docs = await loader.load();
-    } else if (type === "text/plain") {
-      const loader = new TextLoader(filePath);
-      docs = await loader.load();
-    } else if (type === "application/epub+zip") {
-      const loader = new EPubLoader(filePath);
+    } else if (mimeType === "text/plain") {
+      const loader = new TextLoader(filePathOrBlob);
       docs = await loader.load();
     } else if (
-      type ===
+      mimeType === "application/epub+zip" &&
+      filePathOrBlob instanceof File
+    ) {
+      const path = await this.getFilepath(filePathOrBlob);
+      const loader = new EPubLoader(path);
+      docs = await loader.load();
+    } else if (
+      mimeType ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ) {
-      const loader = new DocxLoader(filePath);
+      const loader = new DocxLoader(filePathOrBlob);
       docs = await loader.load();
-    } else if (type === "application/pdf") {
-      const loader = new PDFLoader(filePath);
+    } else if (mimeType === "application/pdf") {
+      const loader = new PDFLoader(filePathOrBlob);
       docs = await loader.load();
     } else {
       throw new BadRequestError("Unsupported file type");
     }
 
-    const knowledge = await prismadb.knowledge.create({
-      data: {
-        userId: userId,
-        name: filename,
-        type,
-        blobUrl,
-      },
-    });
-
     for (const doc of docs) {
       doc.metadata.source = filename;
-      doc.metadata.knowledge = knowledge.id;
+      doc.metadata.knowledge = knowledgeId;
     }
 
     const splitter = new RecursiveCharacterTextSplitter({
@@ -76,7 +69,6 @@ export class FileLoader {
 
     const memoryManager = await MemoryManager.getInstance();
     await memoryManager.vectorUpload(docOutput);
-    return knowledge;
   }
 
   public async loadJsonArray(jsonArray: any[], knowlegeId: string) {
@@ -96,6 +88,11 @@ export class FileLoader {
 
     const memoryManager = await MemoryManager.getInstance();
     await memoryManager.vectorUpload(docOutput);
+  }
+
+  public async deleteKnowledge(knowledgeId: string): Promise<void> {
+    const memoryManager = await MemoryManager.getInstance();
+    await memoryManager.vectorDelete(knowledgeId);
   }
 }
 
