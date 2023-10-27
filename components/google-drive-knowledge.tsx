@@ -14,20 +14,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { FormControl, FormItem, FormLabel } from "@/components/ui/form";
 import { Table } from "@/components/table";
 import {
   GoogleDriveFile,
   getLabelFromFileType,
 } from "@/src/domain/types/GoogleDriveSearchResponse";
-import { set } from "zod";
+import { format } from "date-fns";
 
 const ADD_ACCOUNT_OPTION = "add-account";
 
@@ -248,7 +241,9 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
                       {getLabelFromFileType(file.type)}
                     </td>
                     <td className="border px-4 py-2">{file.owner}</td>
-                    <td className="border px-4 py-2">{file.modifiedTime}</td>
+                    <td className="border px-4 py-2">
+                      {format(new Date(file.modifiedTime), "h:mma M/d/yyyy ")}
+                    </td>
                   </tr>
                 ))}
             </Table>
