@@ -153,7 +153,7 @@ model Knowledge {
   userId                    String?                             @map(name: "user_id")
   name                      String
   type                      String
-  indexStatus               KnowledgeIndexStatus                @map(name :"index_status")
+  indexStatus               KnowledgeIndexStatus?               @map(name :"index_status")
   blobUrl                   String?                             @map(name: "blob_url")
   metadata                  Json?
   DataSources               DataSourceKnowledge[]
