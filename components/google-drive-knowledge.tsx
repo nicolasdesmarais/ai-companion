@@ -109,6 +109,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
 
   const handleSearch = async () => {
     setSearching(true);
+    setSelectedFile(null);
     try {
       const searchRequest: GoogleDriveSearchRequest = {
         oauthTokenId: selectedAccount ?? "",
@@ -178,7 +179,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
       <div className="mb-4">
         <h2 className="text-xl font-bold">Google Drive Integration</h2>
         <p className="text-gray-400 mb-4">
-          Choose a file or folders from your Google Drive to train your AI.
+          Choose a file or folder from your Google Drive to train your AI.
         </p>
 
         {!loading ? (
@@ -232,7 +233,8 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
               headers={["NAME", "TYPE", "OWNER", "LAST MODIFIED"]}
               className="w-full my-4 max-h-60"
             >
-              {searchResults &&
+              {!searching &&
+                searchResults &&
                 searchResults.map((file) => (
                   <tr
                     key={file.id}
@@ -250,6 +252,14 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
                   </tr>
                 ))}
             </Table>
+            {!searching && searchResults && searchResults.length === 0 ? (
+              <div className="flex items-center my-2 w-full">
+                <div className="mx-auto flex p-4 bg-background rounded-lg">
+                  <Server className="w-6 h-6 mr-2" />
+                  <p>No results found</p>
+                </div>
+              </div>
+            ) : null}
           </div>
         </>
       ) : null}
@@ -262,13 +272,14 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
       ) : null}
       {selectedFile && (
         <>
-          <div>
-            <span>{selectedFile.name}</span>
-            <Button onClick={() => setSelectedFile(null)} type="button">
-              X
-            </Button>
-          </div>
           <div className="flex justify-between w-full mt-4">
+            <Button
+              onClick={() => setSelectedFile(null)}
+              type="button"
+              variant="link"
+            >
+              Unselect
+            </Button>
             <Button
               type="button"
               onClick={handleContinue}
