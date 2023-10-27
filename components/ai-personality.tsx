@@ -1,5 +1,4 @@
 "use client";
-import { Prisma } from "@prisma/client";
 import {
   FormControl,
   FormDescription,
@@ -8,17 +7,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Wand2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { Prisma } from "@prisma/client";
 import { models } from "./ai-models";
 
 const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
   include: {
-    knowledge: {
+    dataSources: {
       include: {
-        knowledge: true,
+        dataSource: true,
       },
     },
   },
