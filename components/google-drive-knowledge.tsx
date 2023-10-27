@@ -231,17 +231,13 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
                 searchResults.map((file) => (
                   <tr
                     key={file.id}
-                    className={
-                      file.id === selectedFile?.id ? "bg-gray-200" : ""
-                    }
+                    className={file.id === selectedFile?.id ? "bg-ring" : ""}
                     onClick={() => setSelectedFile(file)}
                   >
-                    <td className="border px-4 py-2">{file.name}</td>
-                    <td className="border px-4 py-2">
-                      {getLabelFromFileType(file.type)}
-                    </td>
-                    <td className="border px-4 py-2">{file.owner}</td>
-                    <td className="border px-4 py-2">
+                    <td className="p-2">{file.name}</td>
+                    <td className="p-2">{getLabelFromFileType(file.type)}</td>
+                    <td className="p-2">{file.owner}</td>
+                    <td className="p-2">
                       {format(new Date(file.modifiedTime), "h:mma M/d/yyyy ")}
                     </td>
                   </tr>
