@@ -219,7 +219,7 @@ model DataSource {
   createdAt                 DateTime                    @default(now()) @map(name: "created_at")
   updatedAt                 DateTime                    @updatedAt @default(now()) @map(name: "updated_at")
   lastIndexedAt             DateTime?
-  name                      String
+  name                      String                      @db.VarChar(500)
   orgId                     String                      @map(name: "org_id")
   ownerUserId               String                      @map(name: "owner_user_id")
   type                      DataSourceType
