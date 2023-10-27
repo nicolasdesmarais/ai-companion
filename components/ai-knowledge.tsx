@@ -87,10 +87,12 @@ export const AIKnowledge = ({
                     }
                   </td>
                   <td className="p-2">
-                    {format(
-                      new Date(dataSource.lastIndexedAt),
-                      "h:mma M/d/yyyy "
-                    )}
+                    {dataSource.lastIndexedAt
+                      ? format(
+                          new Date(dataSource.lastIndexedAt),
+                          "h:mma M/d/yyyy "
+                        )
+                      : null}
                   </td>
                   <td className="p-2 text-center">
                     {dataSource.indexPercentage + "%"}
