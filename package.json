@@ -51,6 +51,7 @@
     "langchain": "^0.0.92",
     "lucide-react": "^0.263.0",
     "mammoth": "^1.6.0",
+    "marked": "^9.1.2",
     "next": "13.4.11",
     "next-cloudinary": "^4.16.0",
     "next-themes": "^0.2.1",
