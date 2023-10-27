@@ -136,7 +136,7 @@ model GroupAI {
   group                     Group @relation(fields: [groupId], references: [id])
   groupId                   String    @map(name: "group_id")
   companion                 Companion @relation(fields: [companionId], references: [id])
-  companionId               String    @map(name: "companion_id")
+  companionId               String    @map(name: "ai_id")
   createdAt                 DateTime  @default(now()) @map(name: "created_at")
   updatedAt                 DateTime  @updatedAt @default(now()) @map(name: "updated_at")
 
@@ -178,7 +178,7 @@ model AIPermissions {
   id                        Int         @id @default(autoincrement())
   userId                    String?     @map(name: "user_id")
   companion                 Companion   @relation(fields: [companionId], references: [id])
-  companionId               String      @map(name: "companion_id")
+  companionId               String      @map(name: "ai_id")
   email                     String
 
   @@unique([companionId, email])
@@ -214,7 +214,7 @@ model Conversation {
   messages                  Message[]
 
   companion                 Companion @relation(fields: [companionId], references: [id], onDelete: Cascade)
-  companionId               String    @map(name: "companion_id")
+  companionId               String    @map(name: "ai_id")
 
   @@map("conversations")
 }
