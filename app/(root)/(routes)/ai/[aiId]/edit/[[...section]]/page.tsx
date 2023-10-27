@@ -21,9 +21,9 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
       userId,
     },
     include: {
-      knowledge: {
+      dataSources: {
         include: {
-          knowledge: true,
+          dataSource: true,
         },
       },
     },

@@ -56,9 +56,9 @@ const formSchema = z.object({
 
 const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
   include: {
-    knowledge: {
+    dataSources: {
       include: {
-        knowledge: true,
+        dataSource: true,
       },
     },
   },
