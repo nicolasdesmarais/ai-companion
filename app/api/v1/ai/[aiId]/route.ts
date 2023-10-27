@@ -24,7 +24,7 @@ export async function PATCH(
     } = body;
 
     if (!params.aiId) {
-      return new NextResponse("Companion ID required", { status: 400 });
+      return new NextResponse("AI ID required", { status: 400 });
     }
 
     if (!user?.id) {
