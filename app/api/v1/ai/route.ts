@@ -46,9 +46,9 @@ export async function POST(req: Request) {
         options,
       },
       include: {
-        knowledge: {
+        dataSources: {
           include: {
-            knowledge: true,
+            dataSource: true,
           },
         },
       },

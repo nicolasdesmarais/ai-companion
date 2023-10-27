@@ -1,8 +1,9 @@
-import { ApifyWebUrlLoader } from "@/src/domain/services/knowledge/ApifyWebUrlLoader";
+import dataSourceService from "@/src/domain/services/DataSourceService";
 import {
   ApifySupportedEvents,
   ApifyWebhookEvent,
 } from "@/src/domain/types/ApifyWebhookEvent";
+import { DataSourceType } from "@prisma/client";
 import { headers } from "next/headers";
 
 const isSupportedEvent = (
@@ -27,14 +28,16 @@ export async function POST(req: Request) {
 
   const payload = await req.json();
   const event = payload as ApifyWebhookEvent;
-  console.log("Apify Webhook payload: " + event);
+  console.log("Apify Webhook payload: " + JSON.stringify(event));
   if (!isSupportedEvent(event.eventType)) {
     console.log(`Unsupported event type: ${event.eventType}`);
     return new Response("", { status: 200 });
   }
 
-  const apifyWebUrlLoader = new ApifyWebUrlLoader();
-  await apifyWebUrlLoader.loadFromWebhook(event);
+  await dataSourceService.handleKnowledgeIndexedEvent(
+    DataSourceType.WEB_URL,
+    event
+  );
 
   return new Response("", { status: 200 });
 }

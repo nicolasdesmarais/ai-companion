@@ -1,39 +1,38 @@
-import { useState } from "react";
-import DataSourceCard from "./datasource-card";
+import { Table } from "@/components/table";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import axios, { AxiosError } from "axios";
+import { format } from "date-fns";
 import {
-  PlusCircle,
+  ChevronLeft,
+  Coffee,
+  Database,
   FileUp,
   Globe,
-  Server,
-  Database,
-  Network,
-  ChevronLeft,
   Loader,
   MinusCircle,
-  Coffee,
+  Network,
+  PlusCircle,
+  Server,
 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
-import { GoogleDriveForm } from "./google-drive-knowledge";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import DataSourceCard from "./datasource-card";
+import { DataSourceTypes } from "./datasource-types";
 import { FileUploadKnowledge } from "./file-upload-knowledge";
+import { GoogleDriveForm } from "./google-drive-knowledge";
 import { WebUrlsForm } from "./web-urls-knowledge-form";
-import axios, { AxiosError } from "axios";
-import { Button } from "@/components/ui/button";
-import { useRouter, usePathname } from "next/navigation";
-import Link from "next/link";
-import { Table } from "@/components/table";
-import { knowledgeTypes } from "@/components/knowledge-types";
-import { format } from "date-fns";
 interface SelectDataSourceProps {
   form: any;
-  knowledge: any;
-  setKnowledge: (knowledge: any) => void;
+  dataSources: any;
+  setDataSource: (dataSource: any) => void;
   knowledgeLoading: boolean;
 }
 
 export const AIKnowledge = ({
   form,
-  knowledge,
-  setKnowledge,
+  dataSources,
+  setDataSource: setDataSource,
   knowledgeLoading,
 }: SelectDataSourceProps) => {
   const { toast } = useToast();
@@ -42,12 +41,12 @@ export const AIKnowledge = ({
   const router = useRouter();
   const aiId = form.getValues("id");
 
-  const removeKnowledge = async (id: string) => {
+  const removeDataSource = async (id: string) => {
     setRemoving(id);
     try {
-      await axios.delete(`/api/knowledge/${id}/${aiId}`);
+      await axios.delete(`/api/v1/ai/${aiId}/data-source/${id}/`);
 
-      setKnowledge((current: any) => current.filter((i: any) => i.id !== id));
+      setDataSource((current: any) => current.filter((i: any) => i.id !== id));
       toast({ description: "Knowledge removed." });
     } catch (error: any) {
       toast({
@@ -75,40 +74,35 @@ export const AIKnowledge = ({
               headers={["NAME", "TYPE", "LAST MODIFIED", "Progress", "Remove"]}
               className="w-full my-4 max-h-60"
             >
-              {knowledge.map((knowledge: any) => (
-                <tr key={knowledge.id} className="items-center my-2 text-sm">
+              {dataSources.map((dataSource: any) => (
+                <tr key={dataSource.id} className="items-center my-2 text-sm">
                   <td className="p-2 ">
-                    {knowledge.blobUrl ? (
-                      <Link href={knowledge.blobUrl}>
-                        <div className="text-ring max-w-sm truncate">
-                          {knowledge.name}
-                        </div>
-                      </Link>
-                    ) : (
-                      <div className="max-w-sm truncate">{knowledge.name}</div>
-                    )}
+                    <div className="max-w-sm truncate">{dataSource.name}</div>
                   </td>
                   <td className="p-2">
                     {
-                      knowledgeTypes.find(
-                        (format) => format.type === knowledge.type
+                      DataSourceTypes.find(
+                        (format) => format.type === dataSource.type
                       )?.name
                     }
                   </td>
                   <td className="p-2">
-                    {format(new Date(knowledge.updatedAt), "h:mma M/d/yyyy ")}
+                    {format(
+                      new Date(dataSource.lastIndexedAt),
+                      "h:mma M/d/yyyy "
+                    )}
                   </td>
                   <td className="p-2 text-center">
-                    {knowledge.blobUrl ? "100%" : ""}
+                    {dataSource.indexPercentage + "%"}
                   </td>
                   <td className="p-2 text-center">
                     <Button
                       type="button"
                       variant="outline"
                       disabled={!!removing}
-                      onClick={() => removeKnowledge(knowledge.id)}
+                      onClick={() => removeDataSource(dataSource.id)}
                     >
-                      {removing === knowledge.id ? (
+                      {removing === dataSource.id ? (
                         <Loader className="w-4 h-4 spinner" />
                       ) : (
                         <MinusCircle className="w-4 h-4 text-destructive" />
@@ -118,7 +112,7 @@ export const AIKnowledge = ({
                 </tr>
               ))}
             </Table>
-            {!knowledgeLoading && knowledge.length === 0 ? (
+            {!knowledgeLoading && dataSources.length === 0 ? (
               <div className="flex items-center my-2 w-full">
                 <div className="mx-auto flex p-4 bg-background rounded-lg">
                   <Coffee className="w-6 h-6 mr-2" />

@@ -1,6 +1,6 @@
-import { auth, redirectToSignIn } from "@clerk/nextjs";
-import prismadb from "@/src/lib/prismadb";
 import { AIEditor } from "@/components/ai-editor";
+import prismadb from "@/src/lib/prismadb";
+import { auth, redirectToSignIn } from "@clerk/nextjs";
 
 interface AIIdPageProps {
   params: {
@@ -21,9 +21,9 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
       userId,
     },
     include: {
-      knowledge: {
+      dataSources: {
         include: {
-          knowledge: true,
+          dataSource: true,
         },
       },
     },

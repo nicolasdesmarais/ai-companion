@@ -1,21 +1,21 @@
 "use client";
 
 import LeavePageBlocker from "@/components/leave-page-blocker";
+import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/src/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Category, Knowledge, Prisma } from "@prisma/client";
 import axios from "axios";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { set, useForm } from "react-hook-form";
-import { AIKnowledge } from "./ai-knowledge";
-import { AIPersonality } from "./ai-personality";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { AICharacter } from "./ai-character";
+import { AIKnowledge } from "./ai-knowledge";
 import { models } from "./ai-models";
-import { Button } from "@/components/ui/button";
+import { AIPersonality } from "./ai-personality";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -56,9 +56,9 @@ const formSchema = z.object({
 
 const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
   include: {
-    knowledge: {
+    dataSources: {
       include: {
-        knowledge: true,
+        dataSource: true,
       },
     },
   },
@@ -76,17 +76,18 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const [continueRequested, setContinueRequested] = useState("");
-  const [knowledge, setKnowledge] = useState<any[]>([]);
-  const [knowledgeLoading, setKnowledgeLoading] = useState(true);
+  const [dataSources, setDataSources] = useState<any[]>([]);
+  const [dataSourcesLoading, setDataSourcesLoading] = useState(true);
 
   useEffect(() => {
-    const fetchKnowledge = async () => {
-      setKnowledgeLoading(true);
+    const fetchDataSources = async () => {
+      setDataSourcesLoading(true);
       const response = await axios.get(`/api/v1/ai/${aiId}/knowledge`);
-      setKnowledge(response.data.map((k: any) => k.knowledge));
-      setKnowledgeLoading(false);
+      console.log(response);
+      setDataSources(response.data);
+      setDataSourcesLoading(false);
     };
-    fetchKnowledge();
+    fetchDataSources();
   }, []);
 
   if (initialAi && !initialAi.options) {
@@ -228,9 +229,9 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
   const aiKnowledge = (
     <AIKnowledge
       form={form}
-      knowledge={knowledge}
-      setKnowledge={setKnowledge}
-      knowledgeLoading={knowledgeLoading}
+      dataSources={dataSources}
+      setDataSource={setDataSources}
+      knowledgeLoading={dataSourcesLoading}
     />
   );
 
@@ -285,7 +286,7 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
             {saveProgressButton}
             {continueButton(
               "/edit/personality",
-              knowledge.length ? "Continue" : "Skip & Continue"
+              dataSources.length ? "Continue" : "Skip & Continue"
             )}
           </div>
         </>
@@ -303,7 +304,7 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
             {saveProgressButton}
             {continueButton(
               "/edit/personality",
-              knowledge.length ? "Continue" : "Skip & Continue"
+              dataSources.length ? "Continue" : "Skip & Continue"
             )}
           </div>
         </>
@@ -322,7 +323,7 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
             {saveProgressButton}
             {continueButton(
               "/edit/personality",
-              knowledge.length ? "Continue" : "Skip & Continue"
+              dataSources.length ? "Continue" : "Skip & Continue"
             )}
           </div>
         </>
@@ -340,7 +341,7 @@ export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
             {saveProgressButton}
             {continueButton(
               "/edit/personality",
-              knowledge.length ? "Continue" : "Skip & Continue"
+              dataSources.length ? "Continue" : "Skip & Continue"
             )}
           </div>
         </>

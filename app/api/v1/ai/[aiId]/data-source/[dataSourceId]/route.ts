@@ -2,9 +2,9 @@ import dataSourceService from "@/src/domain/services/DataSourceService";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
-export async function GET(
+export async function DELETE(
   request: Request,
-  { params }: { params: { aiId: string } }
+  { params }: { params: { aiId: string; dataSourceId: string } }
 ) {
   try {
     const authentication = await auth();
@@ -15,15 +15,10 @@ export async function GET(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const dataSources = await dataSourceService.getDataSources(
-      orgId,
-      userId,
-      params.aiId
-    );
-
-    return NextResponse.json(dataSources);
+    await dataSourceService.deleteDataSource(params.aiId, params.dataSourceId);
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
-    console.log("[KNOWLEDGE_GET]", error);
+    console.log("[KNOWLEDGE_DELETE]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

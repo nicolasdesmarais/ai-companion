@@ -3,14 +3,14 @@ import { ActorStartOptions, ApifyClient } from "apify-client";
 const client = new ApifyClient({
   token: process.env.APIFY_TOKEN,
 });
+
 const webScraperActorId = process.env.APIFY_WEB_SCRAPER_ACTOR_ID;
 const runMode = process.env.APIFY_RUN_MODE;
 const webhookUrl = process.env.APIFY_WEBHOOK_URL;
 const webhookSecret = process.env.APIFY_WEBHOOK_SECRET;
-const maxPagesPerCrawl = process.env.APIFY_MAX_PAGES_PER_CRAWL;
 
-export class ApifyService {
-  async createWebUrlKnowledge(knowledgeId: string, url: string) {
+export class ApifyAdapter {
+  async startUrlIndexing(knowledgeId: string, url: string) {
     if (!webScraperActorId) {
       throw new Error("APIFY_WEB_SCRAPER_ACTOR_ID is not set");
     }
@@ -22,15 +22,17 @@ export class ApifyService {
     const actorRun = await client
       .actor(webScraperActorId)
       .start(
-        this.getWebScraperInput(knowledgeId, url),
+        this.getWebScraperInput(url),
         this.getActorStartOptions(knowledgeId)
       );
 
-    console.log("Actor run started: " + actorRun.id);
+    return actorRun.id;
   }
 
   private getActorStartOptions(knowledgeId: string): ActorStartOptions {
     return {
+      timeout: this.getActorTimeout(),
+      memory: this.getActorMemory(),
       webhooks: [
         {
           eventTypes: [
@@ -53,7 +55,7 @@ export class ApifyService {
     };
   }
 
-  private getWebScraperInput(knowledgeId: string, url: string) {
+  private getWebScraperInput(url: string) {
     return {
       runMode: runMode,
       startUrls: [
@@ -99,7 +101,6 @@ export class ApifyService {
             url: context.request.url,
             pageTitle,
             allText,
-            knowledge: context.customData.knowledgeId,
           };
         },
       injectJQuery: true,
@@ -116,7 +117,6 @@ export class ApifyService {
       pageFunctionTimeoutSecs: 60,
       closeCookieModals: true,
       maxScrollHeightPixels: 5000,
-      customData: { knowledgeId: knowledgeId },
     };
   }
 
@@ -142,4 +142,27 @@ export class ApifyService {
     }
     return 0;
   }
+
+  private getActorTimeout(): number | undefined {
+    const actorTimeout = process.env.APIFY_ACTOR_TIMEOUT;
+    if (actorTimeout) {
+      const actorTimeoutNumber = parseInt(actorTimeout);
+      if (!isNaN(actorTimeoutNumber)) {
+        return actorTimeoutNumber;
+      }
+    }
+  }
+
+  private getActorMemory(): number | undefined {
+    const actorMemory = process.env.APIFY_ACTOR_MEMORY;
+    if (actorMemory) {
+      const actorMemoryNumber = parseInt(actorMemory);
+      if (!isNaN(actorMemoryNumber)) {
+        return actorMemoryNumber;
+      }
+    }
+  }
 }
+
+const apifyAdapter = new ApifyAdapter();
+export default apifyAdapter;
