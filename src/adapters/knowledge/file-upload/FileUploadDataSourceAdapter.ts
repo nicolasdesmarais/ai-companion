@@ -44,7 +44,7 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     });
     knowledge.blobUrl = blob.url;
 
-    fileLoader.loadFile(
+    await fileLoader.loadFile(
       knowledge.id,
       input.filename,
       input.mimetype,
