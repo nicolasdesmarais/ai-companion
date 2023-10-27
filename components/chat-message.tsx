@@ -54,9 +54,7 @@ export const ChatMessage = ({
           <div
             className="markdown-chat-message"
             dangerouslySetInnerHTML={{
-              __html: content
-                ? marked.parse(content, { headerIds: false, mangle: false })
-                : "",
+              __html: content ? marked.parse(content) : "",
             }}
           ></div>
         )}
