@@ -2,11 +2,11 @@ import {
   EntityNotFoundError,
   UnauthorizedError,
 } from "@/src/domain/errors/Errors";
-import { EncryptionService } from "@/src/domain/services/EncryptionService";
 import {
   GoogleDriveSearchResponse,
   mapMimeTypeToEnum,
 } from "@/src/domain/types/GoogleDriveSearchResponse";
+import { EncryptionService } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import { put } from "@vercel/blob";

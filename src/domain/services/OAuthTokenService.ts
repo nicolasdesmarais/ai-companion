@@ -1,7 +1,7 @@
 import prismadb from "@/src/lib/prismadb";
 import { OAuthTokenProvider } from "@prisma/client";
+import { EncryptionService } from "../../lib/encryptionUtils";
 import { UserOAuthTokenEntity } from "../entities/OAuthTokenEntity";
-import { EncryptionService } from "./EncryptionService";
 
 export class OAuthTokenService {
   public async getOAuthTokens(
