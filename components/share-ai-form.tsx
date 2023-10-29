@@ -11,7 +11,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { ShareAIRequest } from "@/src/domain/types/ShareAIRequest";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AIVisibility, Companion } from "@prisma/client";
+import { AI, AIVisibility } from "@prisma/client";
 import axios from "axios";
 import { Copy } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -29,7 +29,7 @@ const groupFormSchema = z.object({
 });
 
 interface ShareAIFormProps {
-  ai: Companion;
+  ai: AI;
   onSuccess: () => void;
 }
 

@@ -1,20 +1,20 @@
 "use client";
 
+import { AI } from "@prisma/client";
 import { ElementRef, useEffect, useRef, useState } from "react";
-import { Companion } from "@prisma/client";
 
 import { ChatMessage, ChatMessageProps } from "@/components/chat-message";
 
 interface ChatMessagesProps {
   messages: ChatMessageProps[];
   isLoading: boolean;
-  companion: Companion;
+  ai: AI;
 }
 
 export const ChatMessages = ({
   messages = [],
   isLoading,
-  companion,
+  ai,
 }: ChatMessagesProps) => {
   const scrollRef = useRef<ElementRef<"div">>(null);
 
@@ -40,19 +40,19 @@ export const ChatMessages = ({
     <div className="flex-1 overflow-y-auto px-4">
       <ChatMessage
         isLoading={fakeLoading}
-        src={companion.src}
+        src={ai.src}
         role="system"
-        content={`Hello, I am ${companion.name}, ${companion.description}`}
+        content={`Hello, I am ${ai.name}, ${ai.description}`}
       />
       {messages.map((message) => (
         <ChatMessage
           key={message.content}
-          src={companion.src}
+          src={ai.src}
           content={message.content}
           role={message.role}
         />
       ))}
-      {isLoading && <ChatMessage src={companion.src} role="system" isLoading />}
+      {isLoading && <ChatMessage src={ai.src} role="system" isLoading />}
       <div ref={scrollRef} />
     </div>
   );

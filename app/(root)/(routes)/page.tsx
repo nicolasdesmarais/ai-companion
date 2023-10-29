@@ -1,5 +1,5 @@
+import { AIs } from "@/components/ais";
 import { Categories } from "@/components/categories";
-import { Companions } from "@/components/companions";
 import { GroupModal } from "@/components/group-modal";
 import { Groups } from "@/components/groups";
 import { InviteButton } from "@/components/invite-button";
@@ -71,7 +71,7 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
       {!(scope === ListAIsRequestScope.PRIVATE || searchParams.groupId) && (
         <Categories data={categories} />
       )}
-      <Companions data={data} />
+      <AIs data={data} />
       <GroupModal />
     </div>
   );

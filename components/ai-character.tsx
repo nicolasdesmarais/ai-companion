@@ -43,7 +43,7 @@ Human: It's fascinating to see your vision unfold. Any new projects or innovatio
 Elon: Always! But right now, I'm particularly excited about Neuralink. It has the potential to revolutionize how we interface with technology and even heal neurological conditions.
 `;
 
-const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
+const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
   include: {
     dataSources: {
       include: {
@@ -53,14 +53,14 @@ const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
   },
 });
 
-type ExtendedCompanion = Prisma.CompanionGetPayload<typeof extendedCompanion>;
+type ExtendedAI = Prisma.AIGetPayload<typeof extendedAI>;
 
-interface CompanionFormProps {
+interface AIFormProps {
   categories: Category[];
   form: any;
 }
 
-export const AICharacter = ({ categories, form }: CompanionFormProps) => {
+export const AICharacter = ({ categories, form }: AIFormProps) => {
   const { toast } = useToast();
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatingInstruction, setGeneratingInstruction] = useState(false);

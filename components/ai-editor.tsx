@@ -54,7 +54,7 @@ const formSchema = z.object({
   knowledge: z.array(z.custom<Knowledge>()).optional(),
 });
 
-const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
+const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
   include: {
     dataSources: {
       include: {
@@ -64,14 +64,14 @@ const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
   },
 });
 
-type ExtendedCompanion = Prisma.CompanionGetPayload<typeof extendedCompanion>;
+type ExtendedAI = Prisma.AIGetPayload<typeof extendedAI>;
 
-interface CompanionFormProps {
+interface AIFormProps {
   categories: Category[];
-  initialAi: ExtendedCompanion | null;
+  initialAi: ExtendedAI | null;
 }
 
-export const AIEditor = ({ categories, initialAi }: CompanionFormProps) => {
+export const AIEditor = ({ categories, initialAi }: AIFormProps) => {
   const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();

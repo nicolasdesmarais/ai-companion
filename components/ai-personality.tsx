@@ -12,7 +12,7 @@ import { Slider } from "@/components/ui/slider";
 import { Prisma } from "@prisma/client";
 import { models } from "./ai-models";
 
-const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
+const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
   include: {
     dataSources: {
       include: {
@@ -22,9 +22,9 @@ const extendedCompanion = Prisma.validator<Prisma.CompanionDefaultArgs>()({
   },
 });
 
-type ExtendedCompanion = Prisma.CompanionGetPayload<typeof extendedCompanion>;
+type ExtendedAI = Prisma.AIGetPayload<typeof extendedAI>;
 interface SelectDataSourceProps {
-  initialAi: ExtendedCompanion | null;
+  initialAi: ExtendedAI | null;
   form: any;
 }
 

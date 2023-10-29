@@ -17,7 +17,7 @@ export async function PUT(
         id: conversationId,
       },
       include: {
-        companion: true,
+        ai: true,
       },
     });
 
@@ -28,15 +28,15 @@ export async function PUT(
     const conversationCount = await prismadb.conversation.count({
       where: {
         userId: userId,
-        companionId: conversation.companion.id,
+        aiId: conversation.ai.id,
       },
     });
 
     const newConversation = await prismadb.conversation.create({
       data: {
         userId: userId,
-        name: `${conversation.companion.name} (${conversationCount + 1})`,
-        companionId: conversation.companion.id,
+        name: `${conversation.ai.name} (${conversationCount + 1})`,
+        aiId: conversation.ai.id,
       },
     });
 

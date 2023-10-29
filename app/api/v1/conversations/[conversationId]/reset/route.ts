@@ -20,7 +20,7 @@ export async function PUT(
         isDeleted: true,
       },
       include: {
-        companion: true,
+        ai: true,
       },
     });
 
@@ -32,7 +32,7 @@ export async function PUT(
       data: {
         userId: userId,
         name: conversation.name,
-        companionId: conversation.companion.id,
+        aiId: conversation.ai.id,
       },
     });
 
