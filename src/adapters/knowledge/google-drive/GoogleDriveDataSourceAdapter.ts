@@ -2,6 +2,7 @@ import {
   EntityNotFoundError,
   UnauthorizedError,
 } from "@/src/domain/errors/Errors";
+import { EncryptionService } from "@/src/domain/services/EncryptionService";
 import {
   GoogleDriveSearchResponse,
   mapMimeTypeToEnum,
@@ -75,7 +76,10 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       throw new UnauthorizedError("Unauthorized access to OAuth token");
     }
 
-    const oauthTokenData = oauthToken.data as {
+    const encryptionService = new EncryptionService();
+    const oauthTokenData = JSON.parse(
+      encryptionService.decrypt(oauthToken.data)
+    ) as {
       access_token: string;
       refresh_token: string;
     };
