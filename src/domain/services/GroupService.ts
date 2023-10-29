@@ -7,7 +7,7 @@ import { CreateGroupRequest } from "../types/CreateGroupRequest";
 import { UpdateGroupRequest } from "../types/UpdateGroupRequest";
 import { Utilities } from "../util/utilities";
 import { InvitationService } from "./InvitationService";
-import { GroupSecurityService } from "./security/SecurityService";
+import { GroupSecurityService } from "./SecurityService";
 
 export class GroupService {
   private getGroupCriteria(orgId: string, userId: string) {
