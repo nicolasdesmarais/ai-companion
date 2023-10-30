@@ -32,7 +32,7 @@ export class FileLoader {
     if (mimeType === "text/csv") {
       const loader = new CSVLoader(filePathOrBlob, "text");
       docs = await loader.load();
-    } else if (mimeType === "text/plain") {
+    } else if (mimeType === "text/plain" || mimeType === "text/markdown") {
       const loader = new TextLoader(filePathOrBlob);
       docs = await loader.load();
     } else if (
@@ -52,7 +52,7 @@ export class FileLoader {
       const loader = new PDFLoader(filePathOrBlob);
       docs = await loader.load();
     } else {
-      throw new BadRequestError("Unsupported file type");
+      throw new BadRequestError(`Unsupported file type ${mimeType}`);
     }
 
     for (const doc of docs) {
