@@ -86,7 +86,7 @@ export async function POST(
     if (!!similarDocs && similarDocs.length !== 0) {
       knowledge = similarDocs.map((doc) => doc.pageContent).join("\n");
     }
-    const { handlers } = LangChainStream();
+    const { stream, handlers } = LangChainStream();
 
     let completionModel,
       chatModel,
@@ -122,6 +122,7 @@ export async function POST(
         azureOpenAIApiVersion: "2023-05-15",
         azureOpenAIApiInstanceName: "appdirect-prod-ai-useast",
         azureOpenAIApiDeploymentName: "ai-prod-16k",
+        streaming: true,
         ...options,
       });
     } else {
@@ -130,6 +131,7 @@ export async function POST(
         azureOpenAIApiVersion: "2023-05-15",
         azureOpenAIApiInstanceName: "prod-appdirectai-east2",
         azureOpenAIApiDeploymentName: "gpt4-32k",
+        streaming: true,
         ...options,
       });
     }
@@ -164,11 +166,14 @@ export async function POST(
       ${knowledge}\n
     `;
 
-    let response;
     if (completionModel) {
-      const resp = await completionModel.call(completionPrompt);
-      const cleaned = resp.replaceAll(",", "");
-      response = cleaned;
+      let response = await completionModel.call(completionPrompt);
+      response = response.replaceAll(",", "");
+      var Readable = require("stream").Readable;
+      let s = new Readable();
+      s.push(response);
+      s.push(null);
+      return new StreamingTextResponse(s);
     } else {
       const chatLog = [new SystemChatMessage(engineeredPrompt)];
       if (conversation.ai.seed) {
@@ -203,34 +208,10 @@ export async function POST(
       if (!chatModel) {
         return new NextResponse("Missing chat model", { status: 500 });
       }
-      const chatResponse = await chatModel.call(chatLog);
-      response = chatResponse.text;
+      chatModel.call(chatLog, {}, [handlers]);
+
+      return new StreamingTextResponse(stream);
     }
-
-    var Readable = require("stream").Readable;
-
-    let s = new Readable();
-    s.push(response);
-    s.push(null);
-    if (response !== undefined && response.length > 1) {
-      await prismadb.conversation.update({
-        where: {
-          id: conversationId,
-        },
-        data: {
-          messages: {
-            create: {
-              content: response.trim(),
-              role: "system",
-              userId: user.id,
-              aiId: aiId,
-            },
-          },
-        },
-      });
-    }
-
-    return new StreamingTextResponse(s);
   } catch (error) {
     if (error.response?.data?.error?.message) {
       console.error("[CHAT]", error.response.data.error.message);
