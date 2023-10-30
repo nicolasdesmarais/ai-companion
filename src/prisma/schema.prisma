@@ -228,6 +228,7 @@ model DataSource {
   orgId                     String                      @map(name: "org_id")
   ownerUserId               String                      @map(name: "owner_user_id")
   type                      DataSourceType
+  indexStatus               DataSourceIndexStatus?
   indexPercentage           Decimal                     @map(name: "index_percentage")
   knowledges                DataSourceKnowledge[]
   ais                       AIDataSource[]
@@ -242,9 +243,9 @@ enum DataSourceType {
 }
 
 enum DataSourceIndexStatus {
-  INITIALIZED
   INDEXING
   COMPLETED
+  FAILED
 }
 
 model DataSourceKnowledge {
