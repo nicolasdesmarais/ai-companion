@@ -202,15 +202,16 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       fileResponse.data.pipe(writableStream).on("finish", async () => {
         try {
           await fileLoader.loadFile(knowledge.id, fileName, mimeType, filePath);
+          return {
+            indexStatus: KnowledgeIndexStatus.COMPLETED,
+          };
         } catch (error) {
           console.log(error);
-          throw new Error("Failed to load file from google drive");
         }
       });
     }
-
     return {
-      indexStatus: KnowledgeIndexStatus.COMPLETED,
+      indexStatus: KnowledgeIndexStatus.FAILED,
     };
   }
 
