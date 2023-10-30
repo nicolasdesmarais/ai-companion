@@ -10,7 +10,6 @@ import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import { drive_v3, google } from "googleapis";
-import { Readable } from "stream";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import {
@@ -144,7 +143,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
         searchTerms
       )}) and (${this.getMimeTypeQuery(true)}) and trashed = false`;
     } else {
-      query = `(${this.getMimeTypeQuery(true)}) and trashed = false`;
+      query = `trashed = false`;
     }
 
     const googleDriveSearchResponse = await this.listFiles(query);
@@ -258,9 +257,10 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     const files: drive_v3.Schema$File[] = [];
 
     const listFilesRecursive = async (folderId: string): Promise<void> => {
-      const query = `'${folderId}' in parents and (${this.getMimeTypeQuery(
-        true
-      )}) and trashed=false`;
+      // const query = `'${folderId}' in parents and (${this.getMimeTypeQuery(
+      //   true
+      // )}) and trashed=false`;
+      const query = `'${folderId}' in parents and trashed=false`;
 
       const response = await this.listFiles(query);
 
