@@ -54,36 +54,39 @@ export class DataSourceService {
     );
 
     try {
-      const { dataSourceId, knowledgeList } = await prismadb.$transaction(
-        async (tx) => {
-          return await this.createDataSourceAndKnowledgeList(
-            orgId,
-            ownerUserId,
-            type,
-            itemList
-          );
-        }
-      );
+      const { dataSourceId, knowledgeList } =
+        await this.createDataSourceAndKnowledgeList(
+          orgId,
+          ownerUserId,
+          type,
+          itemList
+        );
 
       const knowledgeListLength = knowledgeList.length;
       for (let i = 0; i < knowledgeListLength; i++) {
         const knowledge = knowledgeList[i];
-        const indexKnowledgeResponse = await dataSourceAdapter.indexKnowledge(
-          orgId,
-          ownerUserId,
-          knowledge,
-          data
-        );
 
-        await prismadb.$transaction(async (tx) => {
-          await this.onKnowledgeIndexed(
-            dataSourceId,
+        let indexKnowledgeResponse;
+        try {
+          indexKnowledgeResponse = await dataSourceAdapter.indexKnowledge(
+            orgId,
+            ownerUserId,
             knowledge,
-            indexKnowledgeResponse,
-            i,
-            knowledgeListLength
+            data
           );
-        });
+        } catch (error) {
+          indexKnowledgeResponse = {
+            indexStatus: KnowledgeIndexStatus.FAILED,
+          };
+        }
+
+        await this.onKnowledgeIndexed(
+          dataSourceId,
+          knowledge,
+          indexKnowledgeResponse,
+          i,
+          knowledgeListLength
+        );
       }
 
       return dataSourceId;
@@ -125,37 +128,39 @@ export class DataSourceService {
     type: DataSourceType,
     itemList: DataSourceItemList
   ) {
-    const dataSource = await prismadb.dataSource.create({
-      data: {
-        orgId,
-        ownerUserId,
-        name: itemList.dataSourceName,
-        type,
-        indexPercentage: 0,
-      },
+    return await prismadb.$transaction(async (tx) => {
+      const dataSource = await tx.dataSource.create({
+        data: {
+          orgId,
+          ownerUserId,
+          name: itemList.dataSourceName,
+          type,
+          indexPercentage: 0,
+        },
+      });
+
+      const knowledgeList = [];
+      for (const item of itemList.items) {
+        const knowledge = await tx.knowledge.create({
+          data: {
+            name: item.name,
+            type: item.type,
+            indexStatus: KnowledgeIndexStatus.INITIALIZED,
+            metadata: item.metadata,
+          },
+        });
+        knowledgeList.push(knowledge);
+
+        await tx.dataSourceKnowledge.create({
+          data: {
+            dataSourceId: dataSource.id,
+            knowledgeId: knowledge.id,
+          },
+        });
+      }
+
+      return { dataSourceId: dataSource.id, knowledgeList };
     });
-
-    const knowledgeList = [];
-    for (const item of itemList.items) {
-      const knowledge = await prismadb.knowledge.create({
-        data: {
-          name: item.name,
-          type: item.type,
-          indexStatus: KnowledgeIndexStatus.INITIALIZED,
-          metadata: item.metadata,
-        },
-      });
-      knowledgeList.push(knowledge);
-
-      await prismadb.dataSourceKnowledge.create({
-        data: {
-          dataSourceId: dataSource.id,
-          knowledgeId: knowledge.id,
-        },
-      });
-    }
-
-    return { dataSourceId: dataSource.id, knowledgeList };
   }
 
   private async onKnowledgeIndexed(
@@ -165,37 +170,41 @@ export class DataSourceService {
     knowledgeIndex: number,
     knowledgeCount: number
   ) {
-    let updateDataForKnowledge = {
-      indexStatus: indexKnowledgeResponse.indexStatus,
-      blobUrl: knowledge.blobUrl,
-      lastIndexedAt: new Date(),
-      metadata: typeof indexKnowledgeResponse.metadata,
-    };
+    await prismadb.$transaction(async (tx) => {
+      let updateDataForKnowledge = {
+        indexStatus: indexKnowledgeResponse.indexStatus,
+        blobUrl: knowledge.blobUrl,
+        lastIndexedAt: new Date(),
+        metadata: typeof indexKnowledgeResponse.metadata,
+      };
 
-    // Update the metadata field only if it's present in indexKnowledgeResponse
-    if (indexKnowledgeResponse.metadata) {
-      updateDataForKnowledge.metadata = indexKnowledgeResponse.metadata;
-    }
-
-    await prismadb.knowledge.update({
-      where: { id: knowledge.id },
-      data: updateDataForKnowledge,
-    });
-
-    // Update indexPercentage only when indexKnowledgeResponse.indexStatus is COMPLETED
-    if (indexKnowledgeResponse.indexStatus === KnowledgeIndexStatus.COMPLETED) {
-      let indexPercentage;
-      if (knowledgeCount === 0) {
-        indexPercentage = 100;
-      } else {
-        indexPercentage = ((knowledgeIndex + 1) / knowledgeCount) * 100;
+      // Update the metadata field only if it's present in indexKnowledgeResponse
+      if (indexKnowledgeResponse.metadata) {
+        updateDataForKnowledge.metadata = indexKnowledgeResponse.metadata;
       }
 
-      await prismadb.dataSource.update({
-        where: { id: dataSourceId },
-        data: { indexPercentage, lastIndexedAt: new Date() },
+      await tx.knowledge.update({
+        where: { id: knowledge.id },
+        data: updateDataForKnowledge,
       });
-    }
+
+      // Update indexPercentage only when indexKnowledgeResponse.indexStatus is COMPLETED
+      if (
+        indexKnowledgeResponse.indexStatus === KnowledgeIndexStatus.COMPLETED
+      ) {
+        let indexPercentage;
+        if (knowledgeCount === 0) {
+          indexPercentage = 100;
+        } else {
+          indexPercentage = ((knowledgeIndex + 1) / knowledgeCount) * 100;
+        }
+
+        await tx.dataSource.update({
+          where: { id: dataSourceId },
+          data: { indexPercentage, lastIndexedAt: new Date() },
+        });
+      }
+    });
   }
 
   private async updateCompletedKnowledgeDataSources(knowledgeId: string) {

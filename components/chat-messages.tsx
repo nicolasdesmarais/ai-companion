@@ -9,12 +9,14 @@ interface ChatMessagesProps {
   messages: ChatMessageProps[];
   isLoading: boolean;
   ai: AI;
+  stream: string;
 }
 
 export const ChatMessages = ({
   messages = [],
   isLoading,
   ai,
+  stream,
 }: ChatMessagesProps) => {
   const scrollRef = useRef<ElementRef<"div">>(null);
 
@@ -53,6 +55,7 @@ export const ChatMessages = ({
         />
       ))}
       {isLoading && <ChatMessage src={ai.src} role="system" isLoading />}
+      {stream && <ChatMessage src={ai.src} role="system" content={stream} />}
       <div ref={scrollRef} />
     </div>
   );

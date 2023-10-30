@@ -10,6 +10,7 @@ import { ChatHeader } from "@/components/chat-header";
 import { ChatMessageProps } from "@/components/chat-message";
 import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
+import axios from "axios";
 
 interface ChatClientProps {
   conversation: Conversation & {
@@ -26,30 +27,51 @@ export const ChatClient = ({ conversation }: ChatClientProps) => {
   const [messages, setMessages] = useState<ChatMessageProps[]>(
     conversation.messages
   );
+  const [streaming, setStreaming] = useState<boolean>(false);
   const { toast } = useToast();
 
-  const { input, isLoading, handleInputChange, handleSubmit, setInput } =
-    useCompletion({
-      api: `/api/chat/${conversation.ai.id}/${conversation.id}`,
-      onError: (err) => {
-        toast({
-          variant: "destructive",
-          description: err.message,
-          duration: 60000,
-        });
-      },
-      onFinish(_prompt, completion) {
-        const systemMessage: ChatMessageProps = {
-          role: "system",
-          content: completion,
-        };
+  const saveAnswer = async (answer: string) => {
+    const response = await axios.post(
+      `/api/chat/${conversation.ai.id}/${conversation.id}/answer`,
+      {
+        answer,
+      }
+    );
+    if (response.status !== 200) {
+      toast({ description: "Error updating chat log." });
+    }
+  };
 
-        setMessages((current) => [...current, systemMessage]);
-        setInput("");
+  const {
+    completion,
+    input,
+    isLoading,
+    handleInputChange,
+    handleSubmit,
+    setInput,
+  } = useCompletion({
+    api: `/api/chat/${conversation.ai.id}/${conversation.id}`,
+    onError: (err) => {
+      toast({
+        variant: "destructive",
+        description: err.message,
+        duration: 60000,
+      });
+    },
+    onFinish(_prompt, completion) {
+      setStreaming(false);
+      const systemMessage: ChatMessageProps = {
+        role: "system",
+        content: completion,
+      };
 
-        router.refresh();
-      },
-    });
+      setMessages((current) => [...current, systemMessage]);
+      setInput("");
+      saveAnswer(completion);
+
+      router.refresh();
+    },
+  });
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     const userMessage: ChatMessageProps = {
@@ -59,16 +81,22 @@ export const ChatClient = ({ conversation }: ChatClientProps) => {
 
     setMessages((current) => [...current, userMessage]);
 
+    setStreaming(true);
     handleSubmit(e);
   };
 
+  let stream = "";
+  if (streaming) {
+    stream = completion;
+  }
   return (
     <div className="flex flex-col h-full w-full space-y-2 ml-1">
       <ChatHeader conversation={conversation} />
       <ChatMessages
         ai={conversation.ai}
-        isLoading={isLoading}
+        isLoading={isLoading && !stream}
         messages={messages}
+        stream={stream}
       />
       <ChatForm
         isLoading={isLoading}
