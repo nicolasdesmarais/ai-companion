@@ -9,7 +9,6 @@ import {
 import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
-import { put } from "@vercel/blob";
 import fs from "fs";
 import { drive_v3, google } from "googleapis";
 import { Readable } from "stream";
@@ -23,12 +22,25 @@ import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { GoogleDriveDataSourceInput } from "./types/GoogleDriveDataSourceInput";
 import { GoogleDriveFileMetadata } from "./types/GoogleDriveFileMetaData";
 
+const MIME_TYPE_TEXT = "text/plain";
+const MIME_TYPE_CSV = "text/csv";
+const MIME_TYPE_EPUB = "application/epub+zip";
+const MIME_TYPE_PDF = "application/pdf";
+const MIME_TYPE_GOOGLE_DOC = "application/vnd.google-apps.document";
+const MIME_TYPE_GOOGLE_SHEETS = "application/vnd.google-apps.spreadsheet";
+const MIME_TYPE_GOOGLE_SLIDES = "application/vnd.google-apps.presentation";
+const MIME_TYPE_DOCX =
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
 const SUPPORTED_MIME_TYPES = [
-  "text/plain",
-  "text/csv",
-  "application/epub+zip",
-  "application/pdf",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  MIME_TYPE_TEXT,
+  MIME_TYPE_CSV,
+  MIME_TYPE_EPUB,
+  MIME_TYPE_PDF,
+  MIME_TYPE_GOOGLE_DOC,
+  MIME_TYPE_GOOGLE_SHEETS,
+  MIME_TYPE_GOOGLE_SLIDES,
+  MIME_TYPE_DOCX,
 ];
 
 const FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
@@ -102,6 +114,20 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       },
       { responseType: "stream" }
     );
+  }
+
+  private async getGoogleDocContent(fileId: string, exportedMimeType: string) {
+    const response = await DRIVE_CLIENT.files.export(
+      {
+        fileId: fileId,
+        mimeType: exportedMimeType,
+      },
+      {
+        responseType: "stream",
+      }
+    );
+
+    return response;
   }
 
   public async search(
@@ -187,31 +213,38 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
 
     const { fileId, fileName, mimeType } =
       knowledge.metadata as unknown as GoogleDriveFileMetadata;
+    let derivedMimeType = mimeType;
 
-    const blobStream = await this.getFileAsStream(fileId);
-    const blob = await put(fileName, blobStream.data, {
-      access: "public",
-    });
-    knowledge.blobUrl = blob.url;
+    let fileResponse;
+    if (mimeType === MIME_TYPE_GOOGLE_DOC) {
+      fileResponse = await this.getGoogleDocContent(fileId, MIME_TYPE_DOCX);
+      derivedMimeType = MIME_TYPE_DOCX;
+    } else if (mimeType === MIME_TYPE_GOOGLE_SHEETS) {
+      fileResponse = await this.getGoogleDocContent(fileId, MIME_TYPE_CSV);
+      derivedMimeType = MIME_TYPE_CSV;
+    } else if (mimeType === MIME_TYPE_GOOGLE_SLIDES) {
+      fileResponse = await this.getGoogleDocContent(fileId, MIME_TYPE_PDF);
+      derivedMimeType = MIME_TYPE_PDF;
+    } else {
+      fileResponse = await this.getFileAsStream(fileId);
+    }
 
-    const fileResponse = await this.getFileAsStream(fileId);
     const filePath = `/tmp/${fileName}`;
     const writableStream = fs.createWriteStream(filePath);
 
     if (fileResponse.data instanceof Readable) {
       fileResponse.data.pipe(writableStream).on("finish", async () => {
-        try {
-          await fileLoader.loadFile(knowledge.id, fileName, mimeType, filePath);
-          return {
-            indexStatus: KnowledgeIndexStatus.COMPLETED,
-          };
-        } catch (error) {
-          console.log(error);
-        }
+        await fileLoader.loadFile(
+          knowledge.id,
+          fileName,
+          derivedMimeType,
+          filePath
+        );
       });
     }
+
     return {
-      indexStatus: KnowledgeIndexStatus.FAILED,
+      indexStatus: KnowledgeIndexStatus.COMPLETED,
     };
   }
 
