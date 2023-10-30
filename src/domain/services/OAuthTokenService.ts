@@ -1,3 +1,4 @@
+import { encryptAsBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import { OAuthTokenProvider } from "@prisma/client";
 import { UserOAuthTokenEntity } from "../entities/OAuthTokenEntity";
@@ -22,6 +23,8 @@ export class OAuthTokenService {
   }
 
   public async upsertToken(token: UserOAuthTokenEntity) {
+    const encryptedData = encryptAsBuffer(JSON.stringify(token.data));
+
     await prismadb.oAuthToken.upsert({
       where: {
         provider_userId_email: {
@@ -31,13 +34,13 @@ export class OAuthTokenService {
         },
       },
       update: {
-        data: token.data,
+        data: encryptedData,
       },
       create: {
         userId: token.userId,
         provider: token.provider,
         email: token.email,
-        data: token.data,
+        data: encryptedData,
       },
     });
   }
