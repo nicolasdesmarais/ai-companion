@@ -6,7 +6,7 @@ import {
   GoogleDriveSearchResponse,
   mapMimeTypeToEnum,
 } from "@/src/domain/types/GoogleDriveSearchResponse";
-import { EncryptionService } from "@/src/lib/encryptionUtils";
+import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import { put } from "@vercel/blob";
@@ -76,10 +76,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       throw new UnauthorizedError("Unauthorized access to OAuth token");
     }
 
-    const encryptionService = new EncryptionService();
-    const oauthTokenData = JSON.parse(
-      encryptionService.decrypt(oauthToken.data)
-    ) as {
+    const oauthTokenData = JSON.parse(decryptFromBuffer(oauthToken.data)) as {
       access_token: string;
       refresh_token: string;
     };

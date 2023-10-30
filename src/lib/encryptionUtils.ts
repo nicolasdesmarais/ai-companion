@@ -5,7 +5,11 @@ const algorithm = "aes-256-gcm";
 const NONCE_LENGTH = 12;
 const TAG_LENGTH = 16;
 
-export function encrypt(text: string): string {
+export function encryptAsBuffer(plainText: string) {
+  const encryptedText = encrypt(plainText);
+  return Buffer.from(encryptedText, "hex");
+}
+export function encrypt(plainText: string): string {
   if (!ENCRYPTION_KEY) {
     throw new Error("ENCRYPTION_KEY is not set");
   }
@@ -13,7 +17,7 @@ export function encrypt(text: string): string {
   const nonce = crypto.randomBytes(NONCE_LENGTH);
   const cipher = crypto.createCipheriv(algorithm, ENCRYPTION_KEY, nonce);
 
-  let encryptedData = cipher.update(text, "utf-8", "hex");
+  let encryptedData = cipher.update(plainText, "utf-8", "hex");
   encryptedData += cipher.final("hex");
 
   const tag = cipher.getAuthTag();
@@ -22,17 +26,22 @@ export function encrypt(text: string): string {
   return nonce.toString("hex") + tag.toString("hex") + encryptedData;
 }
 
-export function decrypt(text: string): string {
+export function decryptFromBuffer(encryptedData: Buffer) {
+  const encryptedText = encryptedData.toString("hex");
+  return decrypt(encryptedText);
+}
+
+export function decrypt(encryptedData: string): string {
   if (!ENCRYPTION_KEY) {
     throw new Error("ENCRYPTION_KEY is not set");
   }
 
-  const nonce = Buffer.from(text.slice(0, 2 * NONCE_LENGTH), "hex");
+  const nonce = Buffer.from(encryptedData.slice(0, 2 * NONCE_LENGTH), "hex");
   const tag = Buffer.from(
-    text.slice(2 * NONCE_LENGTH, 2 * NONCE_LENGTH + 2 * TAG_LENGTH),
+    encryptedData.slice(2 * NONCE_LENGTH, 2 * NONCE_LENGTH + 2 * TAG_LENGTH),
     "hex"
   );
-  const encryptedText = text.slice(2 * NONCE_LENGTH + 2 * TAG_LENGTH);
+  const encryptedText = encryptedData.slice(2 * NONCE_LENGTH + 2 * TAG_LENGTH);
 
   const decipher = crypto.createDecipheriv(algorithm, ENCRYPTION_KEY, nonce);
   decipher.setAuthTag(tag);

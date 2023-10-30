@@ -1,6 +1,6 @@
+import { encryptAsBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import { OAuthTokenProvider } from "@prisma/client";
-import { EncryptionService } from "../../lib/encryptionUtils";
 import { UserOAuthTokenEntity } from "../entities/OAuthTokenEntity";
 
 export class OAuthTokenService {
@@ -23,8 +23,7 @@ export class OAuthTokenService {
   }
 
   public async upsertToken(token: UserOAuthTokenEntity) {
-    const encryptionService = new EncryptionService();
-    const encryptedData = encryptionService.encrypt(JSON.stringify(token.data));
+    const encryptedData = encryptAsBuffer(JSON.stringify(token.data));
 
     await prismadb.oAuthToken.upsert({
       where: {
