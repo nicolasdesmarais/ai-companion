@@ -63,7 +63,7 @@ export const ChatList = () => {
             <div className="flex items-center gap-x-2">
               <p className="font-bold text-ellipsis">{conversation.name}</p>
             </div>
-            <div className="text-xs text-muted-foreground w-full pb-2 border-b border-muted-foreground text-ellipsis">
+            <div className="text-xs text-muted-foreground w-full pb-2 border-b border-muted-foreground text-ellipsis h-9 overflow-hidden">
               {conversation.ai.description}
             </div>
           </div>
