@@ -54,15 +54,15 @@ export class DataSourceService {
       data
     );
 
-    try {
-      const { dataSourceId, knowledgeList } =
-        await this.createDataSourceAndKnowledgeList(
-          orgId,
-          ownerUserId,
-          type,
-          itemList
-        );
+    const { dataSourceId, knowledgeList } =
+      await this.createDataSourceAndKnowledgeList(
+        orgId,
+        ownerUserId,
+        type,
+        itemList
+      );
 
+    const processKnowledgeList = async () => {
       const knowledgeListLength = knowledgeList.length;
       for (let i = 0; i < knowledgeListLength; i++) {
         const knowledge = knowledgeList[i];
@@ -89,12 +89,13 @@ export class DataSourceService {
       }
 
       await this.updateDataSourceStatus(dataSourceId);
+    };
 
-      return dataSourceId;
-    } catch (err) {
-      console.log(err);
-      throw new Error("Failed to create data store");
-    }
+    processKnowledgeList().catch((error) => {
+      console.log("Error in background task:", error);
+    });
+
+    return dataSourceId;
   }
 
   public async handleKnowledgeIndexedEvent(type: DataSourceType, data: any) {
