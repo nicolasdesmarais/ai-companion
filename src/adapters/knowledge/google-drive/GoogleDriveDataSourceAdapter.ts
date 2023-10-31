@@ -20,6 +20,8 @@ import {
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { GoogleDriveDataSourceInput } from "./types/GoogleDriveDataSourceInput";
 import { GoogleDriveFileMetadata } from "./types/GoogleDriveFileMetaData";
+import { put } from "@vercel/blob";
+import { GaxiosResponse } from "gaxios";
 
 const MIME_TYPE_TEXT = "text/plain";
 const MIME_TYPE_CSV = "text/csv";
@@ -216,7 +218,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       knowledge.metadata as unknown as GoogleDriveFileMetadata;
     let derivedMimeType = mimeType;
 
-    let fileResponse;
+    let fileResponse: GaxiosResponse<Readable>;
     if (mimeType === MIME_TYPE_GOOGLE_DOC) {
       fileResponse = await this.getGoogleDocContent(fileId, MIME_TYPE_DOCX);
       derivedMimeType = MIME_TYPE_DOCX;
@@ -230,28 +232,36 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       fileResponse = await this.getFileAsStream(fileId);
     }
 
-    if (fileResponse.data instanceof Readable) {
-      const chunks: any[] = [];
-      fileResponse.data.on("data", (chunk) => {
-        chunks.push(chunk);
-      });
+    return new Promise((resolve) => {
+      if (fileResponse.data instanceof Readable) {
+        const chunks: any[] = [];
+        fileResponse.data.on("data", (chunk) => {
+          chunks.push(chunk);
+        });
 
-      await fileResponse.data.on("end", async () => {
-        const buffer = Buffer.concat(chunks);
-        const blob = new Blob([buffer]);
+        fileResponse.data.on("end", async () => {
+          const buffer = Buffer.concat(chunks);
+          const blob = new Blob([buffer]);
 
-        await fileLoader.loadFile(
-          knowledge.id,
-          fileName,
-          derivedMimeType,
-          blob
-        );
-      });
-    }
+          const cloudBlob = await put(fileName, blob, {
+            access: "public",
+          });
+          knowledge.blobUrl = cloudBlob.url;
 
-    return {
-      indexStatus: KnowledgeIndexStatus.COMPLETED,
-    };
+          const metadata = await fileLoader.loadFile(
+            knowledge.id,
+            fileName,
+            derivedMimeType,
+            blob
+          );
+
+          resolve({
+            indexStatus: KnowledgeIndexStatus.COMPLETED,
+            metadata,
+          });
+        });
+      }
+    });
   }
 
   private async listAllFiles(fileId: string): Promise<ListFilesResponse> {

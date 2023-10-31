@@ -9,6 +9,7 @@ import { EPubLoader } from "langchain/document_loaders/fs/epub";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { getTokenLength } from "@/src/lib/tokenCount";
 export class FileLoader {
   private async getFilepath(file: File) {
     if (!file) {
@@ -55,9 +56,13 @@ export class FileLoader {
       throw new BadRequestError(`Unsupported file type ${mimeType}`);
     }
 
+    let totalTokenCount = 0;
     for (const doc of docs) {
       doc.metadata.source = filename;
       doc.metadata.knowledge = knowledgeId;
+      const tokenCount = getTokenLength(doc.pageContent);
+      totalTokenCount += tokenCount;
+      doc.metadata.tokenCount = tokenCount;
     }
 
     const splitter = new RecursiveCharacterTextSplitter({
@@ -69,6 +74,11 @@ export class FileLoader {
 
     const memoryManager = await MemoryManager.getInstance();
     await memoryManager.vectorUpload(docOutput);
+
+    return {
+      documentCount: docOutput.length,
+      totalTokenCount,
+    };
   }
 
   public async loadJsonArray(jsonArray: any[], knowlegeId: string) {

@@ -44,7 +44,7 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     });
     knowledge.blobUrl = blob.url;
 
-    await fileLoader.loadFile(
+    const metadata = await fileLoader.loadFile(
       knowledge.id,
       input.filename,
       input.mimetype,
@@ -53,6 +53,7 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
 
     return {
       indexStatus: KnowledgeIndexStatus.COMPLETED,
+      metadata,
     };
   }
   retrieveKnowledgeIdFromEvent(data: any): string {
