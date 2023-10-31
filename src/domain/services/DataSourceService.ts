@@ -81,11 +81,7 @@ export class DataSourceService {
           };
         }
 
-        await this.onKnowledgeIndexed(
-          dataSourceId,
-          knowledge,
-          indexKnowledgeResponse
-        );
+        await this.onKnowledgeIndexed(knowledge, indexKnowledgeResponse);
       }
 
       await this.updateDataSourceStatus(dataSourceId);
@@ -172,20 +168,41 @@ export class DataSourceService {
   }
 
   private async onKnowledgeIndexed(
-    dataSourceId: string,
     knowledge: Knowledge,
     indexKnowledgeResponse: IndexKnowledgeResponse
   ) {
-    let updateDataForKnowledge = {
+    let updateDataForKnowledge: {
+      indexStatus: KnowledgeIndexStatus;
+      blobUrl: string | null;
+      lastIndexedAt: Date;
+      metadata?: any;
+    } = {
       indexStatus: indexKnowledgeResponse.indexStatus,
       blobUrl: knowledge.blobUrl,
       lastIndexedAt: new Date(),
-      metadata: typeof indexKnowledgeResponse.metadata,
     };
 
-    // Update the metadata field only if it's present in indexKnowledgeResponse
     if (indexKnowledgeResponse.metadata) {
-      updateDataForKnowledge.metadata = indexKnowledgeResponse.metadata;
+      const currentKnowledge = await prismadb.knowledge.findUnique({
+        where: { id: knowledge.id },
+        select: { metadata: true },
+      });
+
+      if (!currentKnowledge) {
+        return;
+      }
+
+      const currentMetadata =
+        currentKnowledge.metadata &&
+        typeof currentKnowledge.metadata === "object"
+          ? currentKnowledge.metadata
+          : {};
+
+      // Merge existing metadata with the new metadata
+      updateDataForKnowledge.metadata = {
+        ...currentMetadata,
+        ...indexKnowledgeResponse.metadata,
+      };
     }
 
     await prismadb.knowledge.update({
