@@ -1,4 +1,4 @@
-import { OAuthTokenService } from "@/src/domain/services/OAuthTokenService";
+import oauthTokenService from "@/src/domain/services/OAuthTokenService";
 import { currentUser } from "@clerk/nextjs";
 import { OAuthTokenProvider } from "@prisma/client";
 import { NextResponse } from "next/server";
@@ -13,7 +13,6 @@ export async function GET(
   }
 
   try {
-    const oauthTokenService = new OAuthTokenService();
     const oauthTokens = await oauthTokenService.getOAuthTokens(
       OAuthTokenProvider.GOOGLE,
       user.id
