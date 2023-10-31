@@ -21,6 +21,7 @@ export const maxDuration = 300;
 
 const getKnowledge = async (
   prompt: string,
+  history: Message[],
   knowledgeIds: string[],
   availTokens: number
 ) => {
@@ -28,8 +29,16 @@ const getKnowledge = async (
     return "";
   }
 
+  let query = prompt;
+  if (history.length > 1) {
+    query = `${history[history.length - 2].content}\n${query}`;
+  }
+  if (history.length > 2) {
+    query = `${history[history.length - 3].content}\n${query}`;
+  }
+
   const memoryManager = await MemoryManager.getInstance();
-  const similarDocs = await memoryManager.vectorSearch(prompt, knowledgeIds);
+  const similarDocs = await memoryManager.vectorSearch(query, knowledgeIds);
 
   let knowledge = "";
   if (!!similarDocs && similarDocs.length !== 0) {
@@ -203,6 +212,7 @@ export async function POST(
       console.log("remaining tokens", remainingTokens);
       const knowledge = await getKnowledge(
         prompt,
+        conversation.messages,
         knowledgeIds,
         remainingTokens
       );
@@ -271,6 +281,7 @@ export async function POST(
         BUFFER_TOKENS;
       const knowledge = await getKnowledge(
         prompt,
+        conversation.messages,
         knowledgeIds,
         remainingTokens
       );
