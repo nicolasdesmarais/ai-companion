@@ -2,7 +2,7 @@ import { User } from "@clerk/nextjs/server";
 
 const EMAIL_REGEX = /^\S+@\S+\.\S+$/;
 
-export class Utilities {
+export class EmailUtils {
   /**
    * Parses a string containing a comma-separated list of emails into an array of unique, valid emails.
    * @param emailsCsv
@@ -26,3 +26,5 @@ export class Utilities {
     return primaryEmail ? primaryEmail.emailAddress : null;
   }
 }
+
+export default EmailUtils;

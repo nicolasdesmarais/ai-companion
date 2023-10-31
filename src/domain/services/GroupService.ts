@@ -1,3 +1,4 @@
+import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
 import { GroupAvailability } from "@prisma/client";
@@ -5,7 +6,6 @@ import { GroupEntity } from "../entities/GroupEntity";
 import { BadRequestError, EntityNotFoundError } from "../errors/Errors";
 import { CreateGroupRequest } from "../types/CreateGroupRequest";
 import { UpdateGroupRequest } from "../types/UpdateGroupRequest";
-import { Utilities } from "../util/utilities";
 import { InvitationService } from "./InvitationService";
 import { GroupSecurityService } from "./SecurityService";
 
@@ -160,7 +160,7 @@ export class GroupService {
     groupId: string,
     emailsToAdd: string
   ) {
-    const validEmails = Utilities.parseEmailCsv(emailsToAdd);
+    const validEmails = EmailUtils.parseEmailCsv(emailsToAdd);
     if (validEmails.length === 0) {
       return;
     }

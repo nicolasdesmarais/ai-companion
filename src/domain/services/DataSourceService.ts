@@ -142,6 +142,8 @@ export class DataSourceService {
       });
 
       const knowledgeList = [];
+      const dataSourceKnowledgeRelations = [];
+
       for (const item of itemList.items) {
         const knowledge = await tx.knowledge.create({
           data: {
@@ -151,15 +153,18 @@ export class DataSourceService {
             metadata: item.metadata,
           },
         });
+
         knowledgeList.push(knowledge);
 
-        await tx.dataSourceKnowledge.create({
-          data: {
-            dataSourceId: dataSource.id,
-            knowledgeId: knowledge.id,
-          },
+        dataSourceKnowledgeRelations.push({
+          dataSourceId: dataSource.id,
+          knowledgeId: knowledge.id,
         });
       }
+
+      await tx.dataSourceKnowledge.createMany({
+        data: dataSourceKnowledgeRelations,
+      });
 
       return { dataSourceId: dataSource.id, knowledgeList };
     });
