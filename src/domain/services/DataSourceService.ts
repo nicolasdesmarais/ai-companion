@@ -54,15 +54,15 @@ export class DataSourceService {
       data
     );
 
-    try {
-      const { dataSourceId, knowledgeList } =
-        await this.createDataSourceAndKnowledgeList(
-          orgId,
-          ownerUserId,
-          type,
-          itemList
-        );
+    const { dataSourceId, knowledgeList } =
+      await this.createDataSourceAndKnowledgeList(
+        orgId,
+        ownerUserId,
+        type,
+        itemList
+      );
 
+    const processKnowledgeList = async () => {
       const knowledgeListLength = knowledgeList.length;
       for (let i = 0; i < knowledgeListLength; i++) {
         const knowledge = knowledgeList[i];
@@ -81,20 +81,17 @@ export class DataSourceService {
           };
         }
 
-        await this.onKnowledgeIndexed(
-          dataSourceId,
-          knowledge,
-          indexKnowledgeResponse
-        );
+        await this.onKnowledgeIndexed(knowledge, indexKnowledgeResponse);
       }
 
       await this.updateDataSourceStatus(dataSourceId);
+    };
 
-      return dataSourceId;
-    } catch (err) {
-      console.log(err);
-      throw new Error("Failed to create data store");
-    }
+    processKnowledgeList().catch((error) => {
+      console.log("Error in background task:", error);
+    });
+
+    return dataSourceId;
   }
 
   public async handleKnowledgeIndexedEvent(type: DataSourceType, data: any) {
@@ -118,9 +115,7 @@ export class DataSourceService {
       },
     });
 
-    if (indexKnowledgeResponse.indexStatus === KnowledgeIndexStatus.COMPLETED) {
-      this.updateCompletedKnowledgeDataSources(knowledge.id);
-    }
+    await this.updateCompletedKnowledgeDataSources(knowledge.id);
   }
 
   private async createDataSourceAndKnowledgeList(
@@ -171,20 +166,41 @@ export class DataSourceService {
   }
 
   private async onKnowledgeIndexed(
-    dataSourceId: string,
     knowledge: Knowledge,
     indexKnowledgeResponse: IndexKnowledgeResponse
   ) {
-    let updateDataForKnowledge = {
+    let updateDataForKnowledge: {
+      indexStatus: KnowledgeIndexStatus;
+      blobUrl: string | null;
+      lastIndexedAt: Date;
+      metadata?: any;
+    } = {
       indexStatus: indexKnowledgeResponse.indexStatus,
       blobUrl: knowledge.blobUrl,
       lastIndexedAt: new Date(),
-      metadata: typeof indexKnowledgeResponse.metadata,
     };
 
-    // Update the metadata field only if it's present in indexKnowledgeResponse
     if (indexKnowledgeResponse.metadata) {
-      updateDataForKnowledge.metadata = indexKnowledgeResponse.metadata;
+      const currentKnowledge = await prismadb.knowledge.findUnique({
+        where: { id: knowledge.id },
+        select: { metadata: true },
+      });
+
+      if (!currentKnowledge) {
+        return;
+      }
+
+      const currentMetadata =
+        currentKnowledge.metadata &&
+        typeof currentKnowledge.metadata === "object"
+          ? currentKnowledge.metadata
+          : {};
+
+      // Merge existing metadata with the new metadata
+      updateDataForKnowledge.metadata = {
+        ...currentMetadata,
+        ...indexKnowledgeResponse.metadata,
+      };
     }
 
     await prismadb.knowledge.update({
@@ -202,7 +218,7 @@ export class DataSourceService {
     });
 
     for (const dataSource of dataSourceIds) {
-      this.updateDataSourceStatus(dataSource.id);
+      await this.updateDataSourceStatus(dataSource.id);
     }
   }
 

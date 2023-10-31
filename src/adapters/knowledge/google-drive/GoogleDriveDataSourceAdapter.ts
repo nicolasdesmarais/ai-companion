@@ -9,6 +9,8 @@ import {
 import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
+import { put } from "@vercel/blob";
+import { GaxiosResponse } from "gaxios";
 import { drive_v3, google } from "googleapis";
 import { Readable } from "stream";
 import fileLoader from "../knowledgeLoaders/FileLoader";
@@ -205,7 +207,6 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     knowledge: Knowledge,
     data: any
   ): Promise<IndexKnowledgeResponse> {
-    const input = data as GoogleDriveDataSourceInput;
     await this.setOAuthCredentials(userId, data.oauthTokenId);
 
     if (!knowledge.metadata) {
@@ -214,44 +215,42 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
 
     const { fileId, fileName, mimeType } =
       knowledge.metadata as unknown as GoogleDriveFileMetadata;
-    let derivedMimeType = mimeType;
 
-    let fileResponse;
-    if (mimeType === MIME_TYPE_GOOGLE_DOC) {
-      fileResponse = await this.getGoogleDocContent(fileId, MIME_TYPE_DOCX);
-      derivedMimeType = MIME_TYPE_DOCX;
-    } else if (mimeType === MIME_TYPE_GOOGLE_SHEETS) {
-      fileResponse = await this.getGoogleDocContent(fileId, MIME_TYPE_CSV);
-      derivedMimeType = MIME_TYPE_CSV;
-    } else if (mimeType === MIME_TYPE_GOOGLE_SLIDES) {
-      fileResponse = await this.getGoogleDocContent(fileId, MIME_TYPE_PDF);
-      derivedMimeType = MIME_TYPE_PDF;
-    } else {
-      fileResponse = await this.getFileAsStream(fileId);
-    }
+    const { fileResponse, derivedMimeType } = await this.getFileContent(
+      fileId,
+      mimeType
+    );
 
-    if (fileResponse.data instanceof Readable) {
-      const chunks: any[] = [];
-      fileResponse.data.on("data", (chunk) => {
-        chunks.push(chunk);
-      });
+    return new Promise((resolve) => {
+      if (fileResponse.data instanceof Readable) {
+        const chunks: any[] = [];
+        fileResponse.data.on("data", (chunk) => {
+          chunks.push(chunk);
+        });
 
-      await fileResponse.data.on("end", async () => {
-        const buffer = Buffer.concat(chunks);
-        const blob = new Blob([buffer]);
+        fileResponse.data.on("end", async () => {
+          const buffer = Buffer.concat(chunks);
+          const blob = new Blob([buffer]);
 
-        await fileLoader.loadFile(
-          knowledge.id,
-          fileName,
-          derivedMimeType,
-          blob
-        );
-      });
-    }
+          const cloudBlob = await put(fileName, blob, {
+            access: "public",
+          });
+          knowledge.blobUrl = cloudBlob.url;
 
-    return {
-      indexStatus: KnowledgeIndexStatus.COMPLETED,
-    };
+          const metadata = await fileLoader.loadFile(
+            knowledge.id,
+            fileName,
+            derivedMimeType,
+            blob
+          );
+
+          resolve({
+            indexStatus: KnowledgeIndexStatus.COMPLETED,
+            metadata,
+          });
+        });
+      }
+    });
   }
 
   private async listAllFiles(fileId: string): Promise<ListFilesResponse> {
@@ -297,6 +296,32 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     return {
       rootName,
       files,
+    };
+  }
+
+  private async getFileContent(fileId: string, mimeType: string) {
+    let fileResponse: GaxiosResponse<Readable>;
+    let derivedMimeType = mimeType;
+    switch (mimeType) {
+      case MIME_TYPE_GOOGLE_DOC:
+        fileResponse = await this.getGoogleDocContent(fileId, MIME_TYPE_DOCX);
+        derivedMimeType = MIME_TYPE_DOCX;
+        break;
+      case MIME_TYPE_GOOGLE_SHEETS:
+        fileResponse = await this.getGoogleDocContent(fileId, MIME_TYPE_CSV);
+        derivedMimeType = MIME_TYPE_CSV;
+        break;
+      case MIME_TYPE_GOOGLE_SLIDES:
+        fileResponse = await this.getGoogleDocContent(fileId, MIME_TYPE_PDF);
+        derivedMimeType = MIME_TYPE_PDF;
+        break;
+      default:
+        fileResponse = await this.getFileAsStream(fileId);
+    }
+
+    return {
+      fileResponse,
+      derivedMimeType,
     };
   }
 
