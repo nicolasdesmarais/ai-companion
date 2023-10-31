@@ -1,5 +1,5 @@
 import { InvitationService } from "@/src/domain/services/InvitationService";
-import { Utilities } from "@/src/domain/util/utilities";
+import EmailUtils from "@/src/lib/emailUtils";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
-    const validEmails = Utilities.parseEmailCsv(invitationRequest.emails);
+    const validEmails = EmailUtils.parseEmailCsv(invitationRequest.emails);
 
     if (validEmails.length === 0) {
       return new NextResponse("No valid emails", { status: 400 });
