@@ -1,25 +1,46 @@
-import { encryptAsBuffer } from "@/src/lib/encryptionUtils";
+import googleDriveOAuthAdapter from "@/src/adapters/oauth/GoogleDriveOAuthAdapter";
+import { OAuthAdapter } from "@/src/adapters/oauth/OAuthAdapter";
+import { decryptFromBuffer, encryptAsBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import { OAuthTokenProvider } from "@prisma/client";
 import { UserOAuthTokenEntity } from "../entities/OAuthTokenEntity";
 
 export class OAuthTokenService {
+  private getOAuthAdapter(provider: OAuthTokenProvider): OAuthAdapter {
+    switch (provider) {
+      case OAuthTokenProvider.GOOGLE:
+        return googleDriveOAuthAdapter;
+      default:
+        throw new Error(`No OAuthAdapter found for ${provider}`);
+    }
+  }
+
   public async getOAuthTokens(
     provider: OAuthTokenProvider,
     userId: string
   ): Promise<UserOAuthTokenEntity[]> {
-    return await prismadb.oAuthToken.findMany({
-      select: {
-        id: true,
-        userId: true,
-        email: true,
-        provider: true,
-      },
+    const oauthAdapter = await this.getOAuthAdapter(provider);
+
+    const tokens = await prismadb.oAuthToken.findMany({
       where: {
         provider,
         userId,
       },
     });
+
+    const validTokens: UserOAuthTokenEntity[] = [];
+    for (const token of tokens) {
+      if (!token.data) {
+        continue;
+      }
+      const tokenData = JSON.parse(decryptFromBuffer(token.data));
+      const isValid = await oauthAdapter.validateToken(tokenData);
+      if (isValid) {
+        validTokens.push(token);
+      }
+    }
+
+    return validTokens;
   }
 
   public async upsertToken(token: UserOAuthTokenEntity) {
@@ -45,3 +66,6 @@ export class OAuthTokenService {
     });
   }
 }
+
+const oauthTokenService = new OAuthTokenService();
+export default oauthTokenService;
