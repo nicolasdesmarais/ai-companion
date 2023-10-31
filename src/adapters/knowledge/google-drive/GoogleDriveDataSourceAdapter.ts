@@ -236,7 +236,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
         chunks.push(chunk);
       });
 
-      fileResponse.data.on("end", async () => {
+      await fileResponse.data.on("end", async () => {
         const buffer = Buffer.concat(chunks);
         const blob = new Blob([buffer]);
 
