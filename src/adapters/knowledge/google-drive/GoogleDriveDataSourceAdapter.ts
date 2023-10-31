@@ -25,6 +25,7 @@ const MIME_TYPE_TEXT = "text/plain";
 const MIME_TYPE_CSV = "text/csv";
 const MIME_TYPE_EPUB = "application/epub+zip";
 const MIME_TYPE_PDF = "application/pdf";
+const MIME_TYPE_MARKDOWN = "text/markdown";
 const MIME_TYPE_GOOGLE_DOC = "application/vnd.google-apps.document";
 const MIME_TYPE_GOOGLE_SHEETS = "application/vnd.google-apps.spreadsheet";
 const MIME_TYPE_GOOGLE_SLIDES = "application/vnd.google-apps.presentation";
@@ -36,6 +37,7 @@ const SUPPORTED_MIME_TYPES = [
   MIME_TYPE_CSV,
   MIME_TYPE_EPUB,
   MIME_TYPE_PDF,
+  MIME_TYPE_MARKDOWN,
   MIME_TYPE_GOOGLE_DOC,
   MIME_TYPE_GOOGLE_SHEETS,
   MIME_TYPE_GOOGLE_SLIDES,
