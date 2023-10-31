@@ -1,6 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
+import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
 
 export async function POST(req: Request) {
@@ -17,12 +18,11 @@ export async function POST(req: Request) {
       seed,
       categoryId,
       modelId,
-      knowledge,
       visibility,
       options,
     } = body;
 
-    if (!user || !user.id || !orgId) {
+    if (!user?.id || !orgId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -30,12 +30,14 @@ export async function POST(req: Request) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
+    const emailAddress = EmailUtils.getUserPrimaryEmailAddress(user);
+
     const ai = await prismadb.aI.create({
       data: {
         categoryId,
         orgId,
         userId: user.id,
-        userName: user.firstName || user.username || "user",
+        userName: emailAddress ?? user.firstName ?? user.username ?? "user",
         src,
         name,
         description,

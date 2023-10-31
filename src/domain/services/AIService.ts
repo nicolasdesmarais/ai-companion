@@ -1,3 +1,4 @@
+import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
 import {
@@ -8,7 +9,6 @@ import {
 import { AI, AIVisibility, GroupAvailability } from "@prisma/client";
 import { EntityNotFoundError, UnauthorizedError } from "../errors/Errors";
 import { ShareAIRequest } from "../types/ShareAIRequest";
-import { Utilities } from "../util/utilities";
 import invitationService from "./InvitationService";
 import {
   ListAIsRequestParams,
@@ -42,7 +42,7 @@ export class AIService {
       throw new EntityNotFoundError(`AI with id=${aiId} not found`);
     }
 
-    const validEmails = Utilities.parseEmailCsv(request.emails);
+    const validEmails = EmailUtils.parseEmailCsv(request.emails);
     if (validEmails.length === 0) {
       return;
     }
