@@ -115,9 +115,7 @@ export class DataSourceService {
       },
     });
 
-    if (indexKnowledgeResponse.indexStatus === KnowledgeIndexStatus.COMPLETED) {
-      this.updateCompletedKnowledgeDataSources(knowledge.id);
-    }
+    await this.updateCompletedKnowledgeDataSources(knowledge.id);
   }
 
   private async createDataSourceAndKnowledgeList(
@@ -220,7 +218,7 @@ export class DataSourceService {
     });
 
     for (const dataSource of dataSourceIds) {
-      this.updateDataSourceStatus(dataSource.id);
+      await this.updateDataSourceStatus(dataSource.id);
     }
   }
 
