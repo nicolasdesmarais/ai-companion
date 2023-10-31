@@ -30,7 +30,7 @@ export class FileLoader {
     let docs;
 
     if (mimeType === "text/csv") {
-      const loader = new CSVLoader(filePathOrBlob, "text");
+      const loader = new CSVLoader(filePathOrBlob);
       docs = await loader.load();
     } else if (mimeType === "text/plain" || mimeType === "text/markdown") {
       const loader = new TextLoader(filePathOrBlob);

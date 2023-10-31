@@ -2,6 +2,7 @@ export const models = [
   // {
   //   id: "llama2-13b",
   //   name: "LLAMA2 13B Chat (4K Context)",
+  //   contextSize: 4096,
   //   options: {
   //     temperature: {
   //       default: 0.75,
@@ -22,9 +23,9 @@ export const models = [
   //       step: 1,
   //     },
   //     maxTokens: {
-  //       default: 128,
+  //       default: 1275,
   //       max: 2000,
-  //       min: 100,
+  //       min: 1275,
   //       step: 1,
   //     },
   //   },
@@ -32,6 +33,7 @@ export const models = [
   {
     id: "gpt-4",
     name: "GPT-4 (32K Context)",
+    contextSize: 32768,
     options: {
       temperature: {
         default: 1,
@@ -68,6 +70,7 @@ export const models = [
   {
     id: "gpt35-16k",
     name: "GPT-3.5 (16K Context)",
+    contextSize: 16384,
     options: {
       temperature: {
         default: 1,
@@ -104,6 +107,7 @@ export const models = [
   // {
   //   id: "text-davinci-003",
   //   name: "DaVinci-003 (4K Context)",
+  //   contextSize: 4096,
   //   options: {
   //     temperature: {
   //       default: 1,
@@ -118,9 +122,9 @@ export const models = [
   //       step: 0.01,
   //     },
   //     maxTokens: {
-  //       default: 400,
+  //       default: 600,
   //       max: 2000,
-  //       min: 100,
+  //       min: 500,
   //       step: 1,
   //     },
   //     frequencyPenalty: {

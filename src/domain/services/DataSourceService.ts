@@ -6,6 +6,7 @@ import { IndexKnowledgeResponse } from "@/src/adapters/knowledge/types/IndexKnow
 import webUrlsDataSourceAdapter from "@/src/adapters/knowledge/web-urls/WebUrlsDataSourceAdapter";
 import prismadb from "@/src/lib/prismadb";
 import {
+  DataSourceIndexStatus,
   DataSourceType,
   Knowledge,
   KnowledgeIndexStatus,
@@ -83,11 +84,11 @@ export class DataSourceService {
         await this.onKnowledgeIndexed(
           dataSourceId,
           knowledge,
-          indexKnowledgeResponse,
-          i,
-          knowledgeListLength
+          indexKnowledgeResponse
         );
       }
+
+      await this.updateDataSourceStatus(dataSourceId);
 
       return dataSourceId;
     } catch (err) {
@@ -135,6 +136,7 @@ export class DataSourceService {
           ownerUserId,
           name: itemList.dataSourceName,
           type,
+          indexStatus: DataSourceIndexStatus.INDEXING,
           indexPercentage: 0,
         },
       });
@@ -166,50 +168,42 @@ export class DataSourceService {
   private async onKnowledgeIndexed(
     dataSourceId: string,
     knowledge: Knowledge,
-    indexKnowledgeResponse: IndexKnowledgeResponse,
-    knowledgeIndex: number,
-    knowledgeCount: number
+    indexKnowledgeResponse: IndexKnowledgeResponse
   ) {
-    await prismadb.$transaction(async (tx) => {
-      let updateDataForKnowledge = {
-        indexStatus: indexKnowledgeResponse.indexStatus,
-        blobUrl: knowledge.blobUrl,
-        lastIndexedAt: new Date(),
-        metadata: typeof indexKnowledgeResponse.metadata,
-      };
+    let updateDataForKnowledge = {
+      indexStatus: indexKnowledgeResponse.indexStatus,
+      blobUrl: knowledge.blobUrl,
+      lastIndexedAt: new Date(),
+      metadata: typeof indexKnowledgeResponse.metadata,
+    };
 
-      // Update the metadata field only if it's present in indexKnowledgeResponse
-      if (indexKnowledgeResponse.metadata) {
-        updateDataForKnowledge.metadata = indexKnowledgeResponse.metadata;
-      }
+    // Update the metadata field only if it's present in indexKnowledgeResponse
+    if (indexKnowledgeResponse.metadata) {
+      updateDataForKnowledge.metadata = indexKnowledgeResponse.metadata;
+    }
 
-      await tx.knowledge.update({
-        where: { id: knowledge.id },
-        data: updateDataForKnowledge,
-      });
-
-      // Update indexPercentage only when indexKnowledgeResponse.indexStatus is COMPLETED
-      if (
-        indexKnowledgeResponse.indexStatus === KnowledgeIndexStatus.COMPLETED
-      ) {
-        let indexPercentage;
-        if (knowledgeCount === 0) {
-          indexPercentage = 100;
-        } else {
-          indexPercentage = ((knowledgeIndex + 1) / knowledgeCount) * 100;
-        }
-
-        await tx.dataSource.update({
-          where: { id: dataSourceId },
-          data: { indexPercentage, lastIndexedAt: new Date() },
-        });
-      }
+    await prismadb.knowledge.update({
+      where: { id: knowledge.id },
+      data: updateDataForKnowledge,
     });
   }
 
   private async updateCompletedKnowledgeDataSources(knowledgeId: string) {
-    const dataSources = await prismadb.dataSource.findMany({
-      where: { knowledges: { some: { knowledgeId } } },
+    const dataSourceIds = await prismadb.dataSource.findMany({
+      select: { id: true },
+      where: {
+        knowledges: { some: { knowledgeId } },
+      },
+    });
+
+    for (const dataSource of dataSourceIds) {
+      this.updateDataSourceStatus(dataSource.id);
+    }
+  }
+
+  private async updateDataSourceStatus(dataSourceId: string) {
+    const dataSource = await prismadb.dataSource.findUnique({
+      where: { id: dataSourceId },
       include: {
         knowledges: {
           include: {
@@ -219,22 +213,47 @@ export class DataSourceService {
       },
     });
 
-    for (const dataSource of dataSources) {
-      const knowledgeCount = dataSource.knowledges.length;
-      const completedKnowledges = dataSource.knowledges.filter(
-        (knowledge) =>
-          knowledge.knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED
-      ).length;
-      const indexPercentage = (completedKnowledges / knowledgeCount) * 100;
-
-      await prismadb.dataSource.update({
-        where: { id: dataSource.id },
-        data: {
-          indexPercentage,
-          lastIndexedAt: new Date(),
-        },
-      });
+    if (!dataSource) {
+      return;
     }
+
+    const knowledgeCount = dataSource.knowledges.length;
+    let completedKnowledges = 0;
+    let failedKnowledges = 0;
+    for (const knowledge of dataSource.knowledges) {
+      if (knowledge.knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
+        completedKnowledges++;
+      } else if (
+        knowledge.knowledge.indexStatus === KnowledgeIndexStatus.FAILED
+      ) {
+        failedKnowledges++;
+      }
+    }
+
+    let indexPercentage;
+    if (knowledgeCount === 0) {
+      indexPercentage = 100;
+    } else {
+      indexPercentage = (completedKnowledges / knowledgeCount) * 100;
+    }
+
+    let indexingStatus;
+    if (failedKnowledges > 0) {
+      indexingStatus = DataSourceIndexStatus.FAILED;
+    } else if (completedKnowledges === knowledgeCount) {
+      indexingStatus = DataSourceIndexStatus.COMPLETED;
+    } else {
+      indexingStatus = DataSourceIndexStatus.INDEXING;
+    }
+
+    await prismadb.dataSource.update({
+      where: { id: dataSource.id },
+      data: {
+        indexStatus: indexingStatus,
+        indexPercentage,
+        lastIndexedAt: new Date(),
+      },
+    });
   }
 
   public async deleteDataSource(aiId: string, dataSourceId: string) {

@@ -6,13 +6,45 @@ import { OpenAI } from "langchain/llms/openai";
 import { Replicate } from "langchain/llms/replicate";
 import { HumanChatMessage, SystemChatMessage } from "langchain/schema";
 import { NextResponse } from "next/server";
-
 import { MemoryManager } from "@/src/lib/memory";
 import prismadb from "@/src/lib/prismadb";
 import { rateLimit } from "@/src/lib/rate-limit";
 import { Message } from "@prisma/client";
+import { getTokenLength } from "@/src/lib/tokenCount";
+import { models } from "@/components/ai-models";
+import { JsonObject } from "@prisma/client/runtime/library";
+
+// small buffer so we don't go over the limit
+const BUFFER_TOKENS = 10;
 
 export const maxDuration = 300;
+
+const getKnowledge = async (
+  prompt: string,
+  knowledgeIds: string[],
+  availTokens: number
+) => {
+  if (knowledgeIds.length === 0) {
+    return "";
+  }
+
+  const memoryManager = await MemoryManager.getInstance();
+  const similarDocs = await memoryManager.vectorSearch(prompt, knowledgeIds);
+
+  let knowledge = "";
+  if (!!similarDocs && similarDocs.length !== 0) {
+    for (let i = 0; i < similarDocs.length; i++) {
+      const doc = similarDocs[i];
+      const newKnowledge = `${knowledge}\n${doc.pageContent}`;
+      if (getTokenLength(newKnowledge) < availTokens) {
+        knowledge = newKnowledge;
+      } else {
+        break;
+      }
+    }
+  }
+  return knowledge;
+};
 
 export async function POST(
   request: Request,
@@ -75,17 +107,14 @@ export async function POST(
       return new NextResponse("Conversation not found", { status: 404 });
     }
 
-    const memoryManager = await MemoryManager.getInstance();
+    const model = models.find((model) => model.id === conversation.ai.modelId);
 
-    const knowledgeIds: string[] = conversation.ai.dataSources
-      .map((ds) => ds.dataSource.knowledges.map((k) => k.knowledgeId))
-      .reduce((acc, curr) => acc.concat(curr), []);
-
-    const similarDocs = await memoryManager.vectorSearch(prompt, knowledgeIds);
-    let knowledge = "";
-    if (!!similarDocs && similarDocs.length !== 0) {
-      knowledge = similarDocs.map((doc) => doc.pageContent).join("\n");
+    if (!model) {
+      return new NextResponse(`Model ${conversation.ai.modelId} not found`, {
+        status: 404,
+      });
     }
+
     const { stream, handlers } = LangChainStream();
 
     let completionModel,
@@ -136,38 +165,55 @@ export async function POST(
       });
     }
 
-    const chatHistory = conversation.messages.reduce(
-      (acc: string, message: Message) => {
-        if (message.role === "user") {
-          return acc + `User: ${message.content}\n`;
-        } else {
-          return acc + `${conversation.ai.name}: ${message.content}\n`;
-        }
-      },
-      ""
-    );
-    const seededChatHistory = `${conversation.ai.seed}\n\n${chatHistory}`;
-    const completionPrompt = `
-      ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${conversation.ai.name}: prefix.
-      Output format is markdown. Open links in new tabs.
-      ${conversation.ai.instructions}
-      Below are relevant details about ${conversation.ai.name}'s past and the conversation you are in.
-      ${knowledge}\n
-      ${seededChatHistory}\n
-      ${conversation.ai.name}:
-    `;
+    const questionTokens = getTokenLength(prompt);
+    const answerTokens = ((conversation.ai.options as JsonObject)?.maxTokens ||
+      model.options.maxTokens.default) as number;
 
-    const engineeredPrompt = `
-      Pretend you are ${conversation.ai.name}, ${conversation.ai.description}.
-      Output format is markdown. Open links in new tabs.
-      Here are more details about your character:\n
-      ${conversation.ai.instructions}
-      Answer questions using this knowledge:\n
-      ${knowledge}\n
-    `;
+    const knowledgeIds: string[] = conversation.ai.dataSources
+      .map((ds) => ds.dataSource.knowledges.map((k) => k.knowledgeId))
+      .reduce((acc, curr) => acc.concat(curr), []);
 
     if (completionModel) {
-      let response = await completionModel.call(completionPrompt);
+      const chatHistory = conversation.messages.reduce(
+        (acc: string, message: Message) => {
+          if (message.role === "user") {
+            return acc + `User: ${message.content}\n`;
+          } else {
+            return acc + `${conversation.ai.name}: ${message.content}\n`;
+          }
+        },
+        ""
+      );
+      const completionPrompt = `
+        ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${conversation.ai.name}: prefix.
+        Output format is markdown. Open links in new tabs.
+        ${conversation.ai.instructions}
+        Below are relevant details about ${conversation.ai.name}'s past and the conversation you are in:\n
+      `;
+      const instructionTokens = getTokenLength(completionPrompt);
+      const seededChatHistory = `${conversation.ai.seed}\n\n${chatHistory}\n${conversation.ai.name}:`;
+      const chatHistoryTokens = getTokenLength(seededChatHistory);
+      const remainingTokens =
+        model.contextSize -
+        answerTokens -
+        chatHistoryTokens -
+        instructionTokens -
+        questionTokens -
+        BUFFER_TOKENS;
+      console.log("remaining tokens", remainingTokens);
+      const knowledge = await getKnowledge(
+        prompt,
+        knowledgeIds,
+        remainingTokens
+      );
+      console.log("knowledge", getTokenLength(knowledge));
+      console.log(
+        "call size",
+        getTokenLength(`${completionPrompt}${knowledge}${seededChatHistory}`)
+      );
+      let response = await completionModel.call(
+        `${completionPrompt}${knowledge}${seededChatHistory}`
+      );
       response = response.replaceAll(",", "");
       var Readable = require("stream").Readable;
       let s = new Readable();
@@ -175,9 +221,9 @@ export async function POST(
       s.push(null);
       return new StreamingTextResponse(s);
     } else {
-      const chatLog = [new SystemChatMessage(engineeredPrompt)];
+      let historySeed = [];
       if (conversation.ai.seed) {
-        const historySeed = conversation.ai.seed
+        historySeed = conversation.ai.seed
           .split("\n\n")
           .reduce((result: any, line: string) => {
             if (line.trimStart().startsWith(conversation.ai.name)) {
@@ -195,7 +241,6 @@ export async function POST(
             }
             return result;
           }, []);
-        chatLog.push(...historySeed);
       }
       const convertedMessages = conversation.messages.map((message) => {
         if (message.role === "user") {
@@ -204,6 +249,35 @@ export async function POST(
           return new SystemChatMessage(message.content);
         }
       });
+      const engineeredPrompt = `
+        Pretend you are ${conversation.ai.name}, ${conversation.ai.description}.
+        Output format is markdown. Open links in new tabs.
+        Here are more details about your character:\n
+        ${conversation.ai.instructions}
+        Answer questions using this knowledge:\n
+      `;
+      const instructionTokens = getTokenLength(engineeredPrompt);
+      const chatHistoryTokens = getTokenLength(
+        JSON.stringify(convertedMessages)
+      );
+      const chatSeedTokens = getTokenLength(JSON.stringify(historySeed));
+      const remainingTokens =
+        model.contextSize -
+        answerTokens -
+        chatHistoryTokens -
+        chatSeedTokens -
+        instructionTokens -
+        questionTokens -
+        BUFFER_TOKENS;
+      const knowledge = await getKnowledge(
+        prompt,
+        knowledgeIds,
+        remainingTokens
+      );
+      const chatLog = [
+        new SystemChatMessage(`${engineeredPrompt}${knowledge}\n`),
+      ];
+      chatLog.push(...historySeed);
       chatLog.push(...convertedMessages);
       if (!chatModel) {
         return new NextResponse("Missing chat model", { status: 500 });

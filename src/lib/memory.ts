@@ -41,7 +41,11 @@ export class MemoryManager {
     });
   }
 
-  public async vectorSearch(query: string, knowledgeIds: string[]) {
+  public async vectorSearch(
+    query: string,
+    knowledgeIds: string[],
+    numDocs = 100
+  ) {
     const pineconeClient = <PineconeClient>this.vectorDBClient;
 
     const pineconeIndex = pineconeClient.Index(
@@ -54,7 +58,7 @@ export class MemoryManager {
     );
 
     const similarDocs = await vectorStore
-      .similaritySearch(query, 3, {
+      .similaritySearch(query, numDocs, {
         knowledge: { $in: knowledgeIds },
       })
       .catch((err) => {

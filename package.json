@@ -49,6 +49,7 @@
     "googleapis": "^127.0.0",
     "highlight.js": "^11.9.0",
     "html-to-text": "^9.0.5",
+    "js-tiktoken": "^1.0.7",
     "langchain": "^0.0.92",
     "lucide-react": "^0.263.0",
     "mammoth": "^1.6.0",
