@@ -46,7 +46,9 @@ export const AIs = ({ data }: AIsProps) => {
                 <p className="text-xs">{item.description}</p>
               </CardHeader>
               <CardFooter className="flex justify-between text-xs text-muted-foreground mt-2">
-                <p className="lowercase">@{item.userName}</p>
+                <div className="lowercase truncate w-11/12">
+                  {item.userName}
+                </div>
                 <div className="flex items-center">{item._count.messages}</div>
               </CardFooter>
             </div>
