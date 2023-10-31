@@ -312,7 +312,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
   }
 
   public async deleteKnowledge(knowledgeId: string): Promise<void> {
-    fileLoader.deleteKnowledge(knowledgeId);
+    await fileLoader.deleteKnowledge(knowledgeId);
   }
 }
 
