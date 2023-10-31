@@ -16,6 +16,7 @@ const SCOPE = [
 
 export async function GET(req: NextRequest, res: NextResponse) {
   const url = OAUTH2_CLIENT.generateAuthUrl({
+    prompt: "consent",
     access_type: "offline",
     scope: SCOPE,
   });
