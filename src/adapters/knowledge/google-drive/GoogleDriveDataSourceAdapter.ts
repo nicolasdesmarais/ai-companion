@@ -9,7 +9,6 @@ import {
 import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
-import fs from "fs";
 import { drive_v3, google } from "googleapis";
 import { Readable } from "stream";
 import fileLoader from "../knowledgeLoaders/FileLoader";
@@ -229,16 +228,21 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       fileResponse = await this.getFileAsStream(fileId);
     }
 
-    const filePath = `/tmp/${fileName}`;
-    const writableStream = fs.createWriteStream(filePath);
-
     if (fileResponse.data instanceof Readable) {
-      fileResponse.data.pipe(writableStream).on("finish", async () => {
+      const chunks: any[] = [];
+      fileResponse.data.on("data", (chunk) => {
+        chunks.push(chunk);
+      });
+
+      fileResponse.data.on("end", async () => {
+        const buffer = Buffer.concat(chunks);
+        const blob = new Blob([buffer]);
+
         await fileLoader.loadFile(
           knowledge.id,
           fileName,
           derivedMimeType,
-          filePath
+          blob
         );
       });
     }
