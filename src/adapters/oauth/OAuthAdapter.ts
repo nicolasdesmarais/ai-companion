@@ -1,3 +1,5 @@
+import { OAuthTokenInfo } from "./OAuthTokenInfo";
+
 export interface OAuthAdapter {
-  validateToken(token: any): Promise<boolean>;
+  getOAuthTokenInfo(token: any): Promise<OAuthTokenInfo>;
 }
