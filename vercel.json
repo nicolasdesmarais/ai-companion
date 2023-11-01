@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/v1/jobs/processKnowledge",
+      "path": "/api/v1/cron",
       "schedule": "* * * * *"
     }
   ]
