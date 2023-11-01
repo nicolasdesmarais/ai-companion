@@ -301,6 +301,35 @@ export class AIService {
       },
     });
   }
+
+  public async deleteAI(orgId: string, userId: string, aiId: string) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+        orgId,
+        userId,
+      },
+    });
+    if (!ai) {
+      throw new EntityNotFoundError(
+        `AI with id=${aiId} not found, for user=${userId} and org=${orgId}`
+      );
+    }
+
+    await prismadb.$transaction(async (tx) => {
+      await prismadb.aIDataSource.deleteMany({
+        where: { aiId },
+      });
+
+      await prismadb.aIPermissions.deleteMany({
+        where: { aiId },
+      });
+
+      await prismadb.aI.delete({
+        where: { id: aiId },
+      });
+    });
+  }
 }
 
 const aiService = new AIService();

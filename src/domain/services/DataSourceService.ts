@@ -87,7 +87,7 @@ export class DataSourceService {
       await this.updateDataSourceStatus(dataSourceId);
     };
 
-    processKnowledgeList().catch((error) => {
+    await processKnowledgeList().catch((error) => {
       console.log("Error in background task:", error);
     });
 
@@ -124,44 +124,65 @@ export class DataSourceService {
     type: DataSourceType,
     itemList: DataSourceItemList
   ) {
+    console.log(
+      `Creating data source and knowledge list for ${itemList.dataSourceName}, with ${itemList.items.length} items`
+    );
+
     return await prismadb.$transaction(async (tx) => {
-      const dataSource = await tx.dataSource.create({
-        data: {
-          orgId,
-          ownerUserId,
-          name: itemList.dataSourceName,
-          type,
-          indexStatus: DataSourceIndexStatus.INDEXING,
-          indexPercentage: 0,
-        },
-      });
-
-      const knowledgeList = [];
-      const dataSourceKnowledgeRelations = [];
-
-      for (const item of itemList.items) {
-        const knowledge = await tx.knowledge.create({
+      try {
+        console.log("Creating data source");
+        const dataSource = await tx.dataSource.create({
           data: {
-            name: item.name,
-            type: item.type,
-            indexStatus: KnowledgeIndexStatus.INITIALIZED,
-            metadata: item.metadata,
+            orgId,
+            ownerUserId,
+            name: itemList.dataSourceName,
+            type,
+            indexStatus: DataSourceIndexStatus.INDEXING,
+            indexPercentage: 0,
           },
         });
 
-        knowledgeList.push(knowledge);
+        console.log(`Data source created with id=${dataSource.id}`);
 
-        dataSourceKnowledgeRelations.push({
-          dataSourceId: dataSource.id,
-          knowledgeId: knowledge.id,
+        const knowledgeList = [];
+        const dataSourceKnowledgeRelations = [];
+
+        let i = 1;
+        for (const item of itemList.items) {
+          console.log(
+            `Creating knowledge for item ${item.name}, ${i++} of ${
+              itemList.items.length
+            }`
+          );
+          const knowledge = await tx.knowledge.create({
+            data: {
+              name: item.name,
+              type: item.type,
+              indexStatus: KnowledgeIndexStatus.INITIALIZED,
+              metadata: item.metadata,
+            },
+          });
+          console.log(`Knowledge created with id=${knowledge.id}`);
+
+          knowledgeList.push(knowledge);
+
+          dataSourceKnowledgeRelations.push({
+            dataSourceId: dataSource.id,
+            knowledgeId: knowledge.id,
+          });
+        }
+
+        console.log("Creating data source knowledge relations");
+        await tx.dataSourceKnowledge.createMany({
+          data: dataSourceKnowledgeRelations,
         });
+        console.log("Data source knowledge relations created");
+
+        return { dataSourceId: dataSource.id, knowledgeList };
+      } catch (e) {
+        console.log(e);
+        throw e;
       }
-
-      await tx.dataSourceKnowledge.createMany({
-        data: dataSourceKnowledgeRelations,
-      });
-
-      return { dataSourceId: dataSource.id, knowledgeList };
     });
   }
 
