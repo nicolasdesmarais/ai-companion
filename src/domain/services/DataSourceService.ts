@@ -87,7 +87,7 @@ export class DataSourceService {
       await this.updateDataSourceStatus(dataSourceId);
     };
 
-    processKnowledgeList().catch((error) => {
+    await processKnowledgeList().catch((error) => {
       console.log("Error in background task:", error);
     });
 
