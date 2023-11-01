@@ -106,6 +106,8 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     return await DRIVE_CLIENT.files.list({
       q: query,
       fields: "files(id, name, mimeType, owners, modifiedTime)",
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
     });
   }
 
