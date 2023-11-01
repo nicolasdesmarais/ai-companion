@@ -1,6 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
+import aiService from "@/src/domain/services/AIService";
 import prismadb from "@/src/lib/prismadb";
 
 export async function PATCH(
@@ -74,20 +75,15 @@ export async function DELETE(
   { params }: { params: { aiId: string } }
 ) {
   try {
-    const { userId } = auth();
+    const { userId, orgId } = auth();
 
-    if (!userId) {
+    if (!userId || !orgId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const ai = await prismadb.aI.delete({
-      where: {
-        userId,
-        id: params.aiId,
-      },
-    });
+    await aiService.deleteAI(orgId, userId, params.aiId);
 
-    return NextResponse.json(ai);
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.log("[COMPANION_DELETE]", error);
     return new NextResponse("Internal Error", { status: 500 });
