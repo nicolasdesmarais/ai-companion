@@ -124,8 +124,13 @@ export class DataSourceService {
     type: DataSourceType,
     itemList: DataSourceItemList
   ) {
+    console.log(
+      `Creating data source and knowledge list for ${itemList.dataSourceName}, with ${itemList.items.length} items`
+    );
+
     return await prismadb.$transaction(async (tx) => {
       try {
+        console.log("Creating data source");
         const dataSource = await tx.dataSource.create({
           data: {
             orgId,
@@ -137,10 +142,13 @@ export class DataSourceService {
           },
         });
 
+        console.log(`Data source created with id=${dataSource.id}`);
+
         const knowledgeList = [];
         const dataSourceKnowledgeRelations = [];
 
         for (const item of itemList.items) {
+          console.log(`Creating knowledge for item ${item.name}`);
           const knowledge = await tx.knowledge.create({
             data: {
               name: item.name,
@@ -149,6 +157,7 @@ export class DataSourceService {
               metadata: item.metadata,
             },
           });
+          console.log(`Knowledge created with id=${knowledge.id}`);
 
           knowledgeList.push(knowledge);
 
@@ -158,9 +167,11 @@ export class DataSourceService {
           });
         }
 
+        console.log("Creating data source knowledge relations");
         await tx.dataSourceKnowledge.createMany({
           data: dataSourceKnowledgeRelations,
         });
+        console.log("Data source knowledge relations created");
 
         return { dataSourceId: dataSource.id, knowledgeList };
       } catch (e) {
