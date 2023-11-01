@@ -48,7 +48,9 @@ export class FileLoader {
       mimeType ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ) {
+      console.log("Loading docx file");
       const loader = new DocxLoader(filePathOrBlob);
+      console.log("Initialized DocxLoader");
       docs = await loader.load();
     } else if (mimeType === "application/pdf") {
       const loader = new PDFLoader(filePathOrBlob);
