@@ -1,5 +1,6 @@
 import { google } from "googleapis";
 import { OAuthAdapter } from "./OAuthAdapter";
+import { OAuthTokenInfo } from "./OAuthTokenInfo";
 
 const OAUTH2_CLIENT = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -8,21 +9,44 @@ const OAUTH2_CLIENT = new google.auth.OAuth2(
 );
 
 export class GoogleDriveOAuthAdapter implements OAuthAdapter {
-  public async validateToken(token: any): Promise<boolean> {
+  public async getOAuthTokenInfo(token: any): Promise<OAuthTokenInfo> {
     const oauthTokenData = token as {
       access_token: string;
       refresh_token: string;
     };
 
     try {
-      const tokenInfo = await OAUTH2_CLIENT.getTokenInfo(
-        oauthTokenData.access_token
-      );
-      console.log(tokenInfo);
-      return true;
+      await OAUTH2_CLIENT.getTokenInfo(oauthTokenData.access_token);
+      return {
+        isExistingTokenValid: true,
+      };
     } catch (error) {
-      console.log(error);
-      return false;
+      const client = new google.auth.OAuth2(
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_SECRET,
+        process.env.GOOGLE_CALLBACK_URL
+      );
+      client.setCredentials({
+        access_token: oauthTokenData.access_token,
+        refresh_token: oauthTokenData.refresh_token,
+      });
+
+      try {
+        const refreshedToken = await client.refreshAccessToken();
+        return {
+          isExistingTokenValid: false,
+          refreshedToken: {
+            access_token: refreshedToken.credentials.access_token,
+            refresh_token: oauthTokenData.refresh_token,
+          },
+        };
+      } catch (error) {
+        console.log(error);
+      }
+
+      return {
+        isExistingTokenValid: false,
+      };
     }
   }
 }

@@ -34,9 +34,20 @@ export class OAuthTokenService {
         continue;
       }
       const tokenData = JSON.parse(decryptFromBuffer(token.data));
-      const isValid = await oauthAdapter.validateToken(tokenData);
-      if (isValid) {
-        validTokens.push(token);
+
+      try {
+        const tokenInfo = await oauthAdapter.getOAuthTokenInfo(tokenData);
+        if (tokenInfo.isExistingTokenValid) {
+          validTokens.push(token);
+        } else if (tokenInfo.refreshedToken) {
+          await this.upsertToken({
+            ...token,
+            data: tokenInfo.refreshedToken,
+          });
+          validTokens.push(token);
+        }
+      } catch (error) {
+        console.log(error);
       }
     }
 
