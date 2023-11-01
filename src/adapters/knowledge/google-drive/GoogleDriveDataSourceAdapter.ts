@@ -116,6 +116,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       {
         fileId: fileId,
         alt: "media",
+        supportsAllDrives: true,
       },
       { responseType: "stream" }
     );
@@ -279,6 +280,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     const initialFile = await DRIVE_CLIENT.files.get({
       fileId,
       fields: "id, name, mimeType",
+      supportsAllDrives: true,
     });
     const rootName = initialFile.data.name ?? "";
 
