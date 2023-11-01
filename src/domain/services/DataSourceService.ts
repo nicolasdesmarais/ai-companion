@@ -147,8 +147,13 @@ export class DataSourceService {
         const knowledgeList = [];
         const dataSourceKnowledgeRelations = [];
 
+        let i = 1;
         for (const item of itemList.items) {
-          console.log(`Creating knowledge for item ${item.name}`);
+          console.log(
+            `Creating knowledge for item ${item.name}, ${i++} of ${
+              itemList.items.length
+            }`
+          );
           const knowledge = await tx.knowledge.create({
             data: {
               name: item.name,
