@@ -23,5 +23,9 @@ export interface DataSourceAdapter {
     data: any
   ): Promise<IndexKnowledgeResponse>;
 
+  pollKnowledgeIndexingStatus(
+    knowledge: Knowledge
+  ): Promise<IndexKnowledgeResponse>;
+
   deleteKnowledge(knowledgeId: string): Promise<void>;
 }

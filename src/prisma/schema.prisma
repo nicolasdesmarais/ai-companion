@@ -161,7 +161,7 @@ model Knowledge {
   indexStatus               KnowledgeIndexStatus?               @map(name :"index_status")
   blobUrl                   String?                             @map(name: "blob_url")
   metadata                  Json?
-  DataSources               DataSourceKnowledge[]
+  dataSources               DataSourceKnowledge[]
 
   @@map("knowledge")
 }

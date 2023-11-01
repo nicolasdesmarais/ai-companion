@@ -340,6 +340,14 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     throw new Error("Method not implemented.");
   }
 
+  public async pollKnowledgeIndexingStatus(
+    knowledge: Knowledge
+  ): Promise<IndexKnowledgeResponse> {
+    return {
+      indexStatus: knowledge.indexStatus ?? KnowledgeIndexStatus.INITIALIZED,
+    };
+  }
+
   public async deleteKnowledge(knowledgeId: string): Promise<void> {
     await fileLoader.deleteKnowledge(knowledgeId);
   }

@@ -87,7 +87,33 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       };
     }
 
-    const result = await apifyAdapter.getActorRunResult(actorRunId);
+    return await this.getActorRunResult(knowledge, metadata);
+  }
+
+  public async pollKnowledgeIndexingStatus(
+    knowledge: Knowledge
+  ): Promise<IndexKnowledgeResponse> {
+    const metadata = knowledge.metadata as unknown as WebUrlMetadata;
+    if (!metadata?.indexingRunId) {
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
+
+    return this.getActorRunResult(knowledge, metadata);
+  }
+
+  public async deleteKnowledge(knowledgeId: string): Promise<void> {
+    fileLoader.deleteKnowledge(knowledgeId);
+  }
+
+  private async getActorRunResult(
+    knowledge: Knowledge,
+    metadata: WebUrlMetadata
+  ): Promise<IndexKnowledgeResponse> {
+    console.log("Retrieving actor run result");
+    const result = await apifyAdapter.getActorRunResult(metadata.indexingRunId);
+    console.log("Actor run result retrieved");
     const { documentCount, totalTokenCount } = await fileLoader.loadJsonArray(
       result,
       knowledge.id
@@ -110,10 +136,6 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
         totalTokenCount,
       },
     };
-  }
-
-  public async deleteKnowledge(knowledgeId: string): Promise<void> {
-    fileLoader.deleteKnowledge(knowledgeId);
   }
 }
 
