@@ -43,13 +43,12 @@ export const FileUploadKnowledge = ({
       return;
     }
     const file = inputFileRef.current.files[0];
+    const fileType = file.type || "text/plain";
 
-    if (
-      knowledgeTypes.findIndex((format) => format.type === file.type) === -1
-    ) {
+    if (knowledgeTypes.findIndex((format) => format.type === fileType) === -1) {
       toast({
         variant: "destructive",
-        description: "This file format is not supported",
+        description: `This file format is not supported: ${fileType}.`,
         duration: 6000,
       });
     }
@@ -59,7 +58,7 @@ export const FileUploadKnowledge = ({
       await axios.post(
         `/api/v1/ai/${aiId}/knowledge/file?filename=${encodeURIComponent(
           file.name
-        )}&type=${encodeURIComponent(file.type)}`,
+        )}&type=${encodeURIComponent(fileType)}`,
         data
       );
       inputFileRef.current.value = "";

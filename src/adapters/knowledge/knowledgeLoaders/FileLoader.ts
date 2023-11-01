@@ -82,10 +82,14 @@ export class FileLoader {
   }
 
   public async loadJsonArray(jsonArray: any[], knowlegeId: string) {
+    let totalTokenCount = 0;
     const docs: Document[] = jsonArray.map((json) => {
+      const pageContent = JSON.stringify(json);
+      const tokenCount = getTokenLength(pageContent);
+      totalTokenCount += tokenCount;
       return new Document({
-        pageContent: JSON.stringify(json),
-        metadata: { knowledge: knowlegeId },
+        pageContent,
+        metadata: { knowledge: knowlegeId, tokenCount },
       });
     });
 
@@ -98,6 +102,11 @@ export class FileLoader {
 
     const memoryManager = await MemoryManager.getInstance();
     await memoryManager.vectorUpload(docOutput);
+
+    return {
+      documentCount: docOutput.length,
+      totalTokenCount,
+    };
   }
 
   public async deleteKnowledge(knowledgeId: string): Promise<void> {

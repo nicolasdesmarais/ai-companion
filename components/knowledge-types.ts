@@ -4,6 +4,10 @@ export const knowledgeTypes = [
     type: "text/plain",
   },
   {
+    name: "Markdown",
+    type: "text/markdown",
+  },
+  {
     name: "CSV",
     type: "text/csv",
   },
