@@ -131,8 +131,11 @@ export const AIEditor = ({ categories, initialAi }: AIFormProps) => {
     }
   }, [form.formState.errors, toast]);
 
-  const handleTabClick = (route: string) =>
-    router.push(`/ai/${aiId}/${route}` as any);
+  const handleTabClick = (route: string, isDisabled: boolean) => {
+    if (!isDisabled) {
+      router.push(`/ai/${aiId}/${route}` as any);
+    }
+  };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     let aiId = form.getValues("id");
@@ -384,7 +387,7 @@ export const AIEditor = ({ categories, initialAi }: AIFormProps) => {
                     !aiId && index > 0
                   )}
                   key={index}
-                  onClick={() => handleTabClick(tab.route)}
+                  onClick={() => handleTabClick(tab.route, !aiId && index > 0)}
                 >
                   <div className="bg-secondary rounded-lg px-2 text-ring">
                     {tab.index}
