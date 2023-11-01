@@ -2,6 +2,7 @@ import { Document } from "langchain/document";
 
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import { MemoryManager } from "@/src/lib/memory";
+import { getTokenLength } from "@/src/lib/tokenCount";
 import { writeFile } from "fs/promises";
 import { CSVLoader } from "langchain/document_loaders/fs/csv";
 import { DocxLoader } from "langchain/document_loaders/fs/docx";
@@ -9,7 +10,6 @@ import { EPubLoader } from "langchain/document_loaders/fs/epub";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { getTokenLength } from "@/src/lib/tokenCount";
 export class FileLoader {
   private async getFilepath(file: File) {
     if (!file) {
@@ -29,6 +29,7 @@ export class FileLoader {
     filePathOrBlob: string | Blob
   ) {
     let docs;
+    console.log(`Loading file ${filename} with mime type ${mimeType}`);
 
     if (mimeType === "text/csv") {
       const loader = new CSVLoader(filePathOrBlob);
@@ -56,6 +57,7 @@ export class FileLoader {
       throw new BadRequestError(`Unsupported file type ${mimeType}`);
     }
 
+    console.log(`Loaded ${docs.length} documents`);
     let totalTokenCount = 0;
     for (const doc of docs) {
       doc.metadata.source = filename;
