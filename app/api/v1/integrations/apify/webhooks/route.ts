@@ -13,7 +13,7 @@ const isSupportedEvent = (
     eventType as ApifySupportedEvents
   );
 };
-
+export const maxDuration = 300;
 const webhookSecret = process.env.APIFY_WEBHOOK_SECRET;
 
 export async function POST(req: Request) {
