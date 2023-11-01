@@ -43,6 +43,7 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
     data: any
   ): Promise<IndexKnowledgeResponse> {
     const input = data as WebUrlDataSourceInput;
+    console.log(`Indexing web url ${input.url}`);
     const actorRunId = await apifyAdapter.startUrlIndexing(
       knowledge.id,
       input.url
@@ -51,6 +52,8 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
     if (!actorRunId) {
       throw new Error("Failed to start web indexing run");
     }
+
+    console.log(`Started web indexing run ${actorRunId}`);
 
     const metadata: WebUrlMetadata = {
       indexingRunId: actorRunId,
