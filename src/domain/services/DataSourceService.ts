@@ -105,6 +105,8 @@ export class DataSourceService {
       where: { id: knowledge.id },
       data: {
         indexStatus: indexKnowledgeResponse.indexStatus,
+        metadata: indexKnowledgeResponse.metadata,
+        blobUrl: indexKnowledgeResponse.blobUrl,
       },
     });
 
