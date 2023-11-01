@@ -1,3 +1,4 @@
+import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import dataSourceService from "@/src/domain/services/DataSourceService";
 import {
   ApifySupportedEvents,
@@ -34,10 +35,19 @@ export async function POST(req: Request) {
     return new Response("", { status: 200 });
   }
 
-  await dataSourceService.handleKnowledgeIndexedEvent(
-    DataSourceType.WEB_URL,
-    event
-  );
+  try {
+    await dataSourceService.handleKnowledgeIndexedEvent(
+      DataSourceType.WEB_URL,
+      event
+    );
+    return new Response("", { status: 200 });
+  } catch (error) {
+    console.log(error);
+    if (error instanceof EntityNotFoundError) {
+      console.log("Entity not found");
+      return new Response("", { status: 200 });
+    }
 
-  return new Response("", { status: 200 });
+    return new Response("", { status: 500 });
+  }
 }
