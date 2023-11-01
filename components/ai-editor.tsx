@@ -83,7 +83,6 @@ export const AIEditor = ({ categories, initialAi }: AIFormProps) => {
     const fetchDataSources = async () => {
       setDataSourcesLoading(true);
       const response = await axios.get(`/api/v1/ai/${aiId}/knowledge`);
-      console.log(response);
       setDataSources(response.data);
       setDataSourcesLoading(false);
     };
