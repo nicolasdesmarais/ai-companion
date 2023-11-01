@@ -8,6 +8,7 @@ import {
   Knowledge,
   KnowledgeIndexStatus,
 } from "@prisma/client";
+import { put } from "@vercel/blob";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import { DataSourceItemList } from "../types/DataSourceItemList";
@@ -42,6 +43,7 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
     data: any
   ): Promise<IndexKnowledgeResponse> {
     const input = data as WebUrlDataSourceInput;
+    console.log(`Indexing web url ${input.url}`);
     const actorRunId = await apifyAdapter.startUrlIndexing(
       knowledge.id,
       input.url
@@ -50,6 +52,8 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
     if (!actorRunId) {
       throw new Error("Failed to start web indexing run");
     }
+
+    console.log(`Started web indexing run ${actorRunId}`);
 
     const metadata: WebUrlMetadata = {
       indexingRunId: actorRunId,
@@ -84,9 +88,27 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
     }
 
     const result = await apifyAdapter.getActorRunResult(actorRunId);
-    fileLoader.loadJsonArray(result, knowledge.id);
+    const { documentCount, totalTokenCount } = await fileLoader.loadJsonArray(
+      result,
+      knowledge.id
+    );
+
+    const cloudBlob = await put(
+      `${knowledge.name}.json`,
+      JSON.stringify(result),
+      {
+        access: "public",
+      }
+    );
+    knowledge.blobUrl = cloudBlob.url;
     return {
       indexStatus: KnowledgeIndexStatus.COMPLETED,
+      blobUrl: cloudBlob.url,
+      metadata: {
+        ...metadata,
+        documentCount,
+        totalTokenCount,
+      },
     };
   }
 

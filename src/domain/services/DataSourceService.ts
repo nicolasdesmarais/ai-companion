@@ -74,6 +74,7 @@ export class DataSourceService {
           data
         );
       } catch (error) {
+        console.log(error);
         indexKnowledgeResponse = {
           indexStatus: KnowledgeIndexStatus.FAILED,
         };
@@ -105,6 +106,8 @@ export class DataSourceService {
       where: { id: knowledge.id },
       data: {
         indexStatus: indexKnowledgeResponse.indexStatus,
+        metadata: indexKnowledgeResponse.metadata,
+        blobUrl: indexKnowledgeResponse.blobUrl,
       },
     });
 
