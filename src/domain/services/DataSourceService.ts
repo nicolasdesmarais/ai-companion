@@ -53,16 +53,16 @@ export class DataSourceService {
       ownerUserId,
       data
     );
-
-    const { dataSourceId, knowledgeList } =
-      await this.createDataSourceAndKnowledgeList(
-        orgId,
-        ownerUserId,
-        type,
-        itemList
-      );
+    const dataSourceId = await this.persistDataSource(
+      orgId,
+      ownerUserId,
+      type,
+      itemList
+    );
 
     const processKnowledgeList = async () => {
+      const knowledgeList = await this.persistKnowledge(dataSourceId, itemList);
+
       const knowledgeListLength = knowledgeList.length;
       for (let i = 0; i < knowledgeListLength; i++) {
         const knowledge = knowledgeList[i];
@@ -118,72 +118,54 @@ export class DataSourceService {
     await this.updateCompletedKnowledgeDataSources(knowledge.id);
   }
 
-  private async createDataSourceAndKnowledgeList(
+  private async persistDataSource(
     orgId: string,
     ownerUserId: string,
     type: DataSourceType,
     itemList: DataSourceItemList
   ) {
-    console.log(
-      `Creating data source and knowledge list for ${itemList.dataSourceName}, with ${itemList.items.length} items`
-    );
-
-    return await prismadb.$transaction(async (tx) => {
-      try {
-        console.log("Creating data source");
-        const dataSource = await tx.dataSource.create({
-          data: {
-            orgId,
-            ownerUserId,
-            name: itemList.dataSourceName,
-            type,
-            indexStatus: DataSourceIndexStatus.INDEXING,
-            indexPercentage: 0,
-          },
-        });
-
-        console.log(`Data source created with id=${dataSource.id}`);
-
-        const knowledgeList = [];
-        const dataSourceKnowledgeRelations = [];
-
-        let i = 1;
-        for (const item of itemList.items) {
-          console.log(
-            `Creating knowledge for item ${item.name}, ${i++} of ${
-              itemList.items.length
-            }`
-          );
-          const knowledge = await tx.knowledge.create({
-            data: {
-              name: item.name,
-              type: item.type,
-              indexStatus: KnowledgeIndexStatus.INITIALIZED,
-              metadata: item.metadata,
-            },
-          });
-          console.log(`Knowledge created with id=${knowledge.id}`);
-
-          knowledgeList.push(knowledge);
-
-          dataSourceKnowledgeRelations.push({
-            dataSourceId: dataSource.id,
-            knowledgeId: knowledge.id,
-          });
-        }
-
-        console.log("Creating data source knowledge relations");
-        await tx.dataSourceKnowledge.createMany({
-          data: dataSourceKnowledgeRelations,
-        });
-        console.log("Data source knowledge relations created");
-
-        return { dataSourceId: dataSource.id, knowledgeList };
-      } catch (e) {
-        console.log(e);
-        throw e;
-      }
+    const dataSource = await prismadb.dataSource.create({
+      data: {
+        orgId,
+        ownerUserId,
+        name: itemList.dataSourceName,
+        type,
+        indexStatus: DataSourceIndexStatus.INDEXING,
+        indexPercentage: 0,
+      },
     });
+    return dataSource.id;
+  }
+
+  private async persistKnowledge(
+    dataSourceId: string,
+    itemList: DataSourceItemList
+  ) {
+    const knowledgeList = [];
+    const dataSourceKnowledgeRelations = [];
+
+    for (const item of itemList.items) {
+      const knowledge = await prismadb.knowledge.create({
+        data: {
+          name: item.name,
+          type: item.type,
+          indexStatus: KnowledgeIndexStatus.INITIALIZED,
+          metadata: item.metadata,
+        },
+      });
+      knowledgeList.push(knowledge);
+
+      dataSourceKnowledgeRelations.push({
+        dataSourceId,
+        knowledgeId: knowledge.id,
+      });
+    }
+
+    await prismadb.dataSourceKnowledge.createMany({
+      data: dataSourceKnowledgeRelations,
+    });
+
+    return knowledgeList;
   }
 
   private async onKnowledgeIndexed(
