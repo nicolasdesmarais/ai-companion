@@ -125,43 +125,48 @@ export class DataSourceService {
     itemList: DataSourceItemList
   ) {
     return await prismadb.$transaction(async (tx) => {
-      const dataSource = await tx.dataSource.create({
-        data: {
-          orgId,
-          ownerUserId,
-          name: itemList.dataSourceName,
-          type,
-          indexStatus: DataSourceIndexStatus.INDEXING,
-          indexPercentage: 0,
-        },
-      });
-
-      const knowledgeList = [];
-      const dataSourceKnowledgeRelations = [];
-
-      for (const item of itemList.items) {
-        const knowledge = await tx.knowledge.create({
+      try {
+        const dataSource = await tx.dataSource.create({
           data: {
-            name: item.name,
-            type: item.type,
-            indexStatus: KnowledgeIndexStatus.INITIALIZED,
-            metadata: item.metadata,
+            orgId,
+            ownerUserId,
+            name: itemList.dataSourceName,
+            type,
+            indexStatus: DataSourceIndexStatus.INDEXING,
+            indexPercentage: 0,
           },
         });
 
-        knowledgeList.push(knowledge);
+        const knowledgeList = [];
+        const dataSourceKnowledgeRelations = [];
 
-        dataSourceKnowledgeRelations.push({
-          dataSourceId: dataSource.id,
-          knowledgeId: knowledge.id,
+        for (const item of itemList.items) {
+          const knowledge = await tx.knowledge.create({
+            data: {
+              name: item.name,
+              type: item.type,
+              indexStatus: KnowledgeIndexStatus.INITIALIZED,
+              metadata: item.metadata,
+            },
+          });
+
+          knowledgeList.push(knowledge);
+
+          dataSourceKnowledgeRelations.push({
+            dataSourceId: dataSource.id,
+            knowledgeId: knowledge.id,
+          });
+        }
+
+        await tx.dataSourceKnowledge.createMany({
+          data: dataSourceKnowledgeRelations,
         });
+
+        return { dataSourceId: dataSource.id, knowledgeList };
+      } catch (e) {
+        console.log(e);
+        throw e;
       }
-
-      await tx.dataSourceKnowledge.createMany({
-        data: dataSourceKnowledgeRelations,
-      });
-
-      return { dataSourceId: dataSource.id, knowledgeList };
     });
   }
 
