@@ -20,7 +20,7 @@ export const Table = ({ headers, children, className }: Props) => {
           ))}
         </tr>
       </thead>
-      <tbody>{children}</tbody>
+      <tbody className="text-sm">{children}</tbody>
     </table>
   );
 };
