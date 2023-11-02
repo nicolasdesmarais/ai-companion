@@ -1,13 +1,8 @@
+import { inngest } from "@/src/adapters/inngest/client";
 import { GoogleDriveDataSourceInput } from "@/src/adapters/knowledge/google-drive/types/GoogleDriveDataSourceInput";
-import {
-  BadRequestError,
-  EntityNotFoundError,
-} from "@/src/domain/errors/Errors";
 import aiService from "@/src/domain/services/AIService";
-import dataSourceService from "@/src/domain/services/DataSourceService";
 import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/types/CreateGoogleDriveKnowledgeRequest";
 import { auth } from "@clerk/nextjs";
-import { DataSourceType } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 300;
@@ -29,31 +24,20 @@ export async function POST(
   }
 
   const body: CreateGoogleDriveKnowledgeRequest = await req.json();
+  const input: GoogleDriveDataSourceInput = {
+    oauthTokenId: body.oauthTokenId,
+    fileId: body.fileId,
+  };
 
-  try {
-    const input: GoogleDriveDataSourceInput = {
-      oauthTokenId: body.oauthTokenId,
-      fileId: body.fileId,
-    };
-    const dataSourceId = await dataSourceService.createDataSource(
+  await inngest.send({
+    name: "google-drive/datasource.creation.requested",
+    data: {
       orgId,
       userId,
-      DataSourceType.GOOGLE_DRIVE,
-      input
-    );
+      aiId: ai.id,
+      input,
+    },
+  });
 
-    await aiService.createAIDataSource(ai.id, dataSourceId);
-
-    return new NextResponse("", { status: 201 });
-  } catch (e) {
-    console.log(e);
-    if (e instanceof EntityNotFoundError) {
-      return new NextResponse(e.message, { status: 404 });
-    }
-    if (e instanceof BadRequestError) {
-      return new NextResponse(e.message, { status: 400 });
-    }
-
-    return new NextResponse(e.message, { status: 500 });
-  }
+  return new NextResponse("", { status: 202 });
 }
