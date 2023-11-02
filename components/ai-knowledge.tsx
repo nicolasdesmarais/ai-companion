@@ -22,6 +22,8 @@ import { DataSourceTypes } from "./datasource-types";
 import { FileUploadKnowledge } from "./file-upload-knowledge";
 import { GoogleDriveForm } from "./google-drive-knowledge";
 import { WebUrlsForm } from "./web-urls-knowledge-form";
+import { KnowledgeIndexStatus } from "@prisma/client";
+
 interface SelectDataSourceProps {
   form: any;
   dataSources: any;
@@ -59,6 +61,7 @@ export const AIKnowledge = ({
     }
     setRemoving("");
   };
+
   return (
     <div className="h-full p-4 max-w-3xl mx-auto">
       {pathname.endsWith("knowledge") && (
@@ -94,8 +97,10 @@ export const AIKnowledge = ({
                         )
                       : null}
                   </td>
-                  <td className="p-2 text-center">
-                    {dataSource.indexPercentage + "%"}
+                  <td className="p-2">
+                    {dataSource.indexStatus === KnowledgeIndexStatus.FAILED
+                      ? "Failed"
+                      : dataSource.indexPercentage + "%"}
                   </td>
                   <td className="p-2 text-center">
                     <Button
