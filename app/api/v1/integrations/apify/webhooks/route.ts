@@ -1,8 +1,9 @@
-import { inngest } from "@/src/adapters/inngest/client";
+import dataSourceService from "@/src/domain/services/DataSourceService";
 import {
   ApifySupportedEvents,
   ApifyWebhookEvent,
 } from "@/src/domain/types/ApifyWebhookEvent";
+import { DataSourceType } from "@prisma/client";
 import { headers } from "next/headers";
 
 const isSupportedEvent = (
@@ -33,12 +34,7 @@ export async function POST(req: Request) {
     return new Response("", { status: 200 });
   }
 
-  await inngest.send({
-    name: "apify/webhook.received",
-    data: {
-      apifyEvent: event,
-    },
-  });
+  dataSourceService.knowledgeEventReceived(DataSourceType.WEB_URL, event);
 
   return new Response("", { status: 200 });
 }

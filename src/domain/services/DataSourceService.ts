@@ -273,11 +273,34 @@ export class DataSourceService {
     });
   }
 
-  public async handleKnowledgeIndexedEvent(type: DataSourceType, data: any) {
-    console.log("Received knowledge indexed event");
-    const dataSourceAdapter = this.getDataSourceAdapter(type);
+  /**
+   * Accept data received from a knowledge indexed event and publish a
+   * KNOWLEDGE_INDEXED_EVENT_RECEIVED domain event.
+   * @param dataSourceType
+   * @param data
+   */
+  public async knowledgeEventReceived(
+    dataSourceType: DataSourceType,
+    data: any
+  ) {
+    await publishEvent(DomainEvent.KNOWLEDGE_EVENT_RECEIVED, {
+      dataSourceType,
+      data,
+    });
+  }
+
+  /**
+   * Updates a knowledge with data received through an event
+   *
+   * @param dataSourceType
+   * @param data
+   */
+  public async handleKnowledgeEventReceived(
+    dataSourceType: DataSourceType,
+    data: any
+  ) {
+    const dataSourceAdapter = this.getDataSourceAdapter(dataSourceType);
     const knowledgeId = dataSourceAdapter.retrieveKnowledgeIdFromEvent(data);
-    console.log(`Updating knowledge ${knowledgeId}`);
     const knowledge = await prismadb.knowledge.findUnique({
       where: { id: knowledgeId },
     });
@@ -286,8 +309,6 @@ export class DataSourceService {
         `Knowledge with id=${knowledgeId} not found`
       );
     }
-
-    console.log(`Found knowledge ${knowledgeId}`);
 
     const indexKnowledgeResponse =
       await dataSourceAdapter.handleKnowledgeIndexedEvent(knowledge, data);
