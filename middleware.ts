@@ -9,6 +9,7 @@ export default authMiddleware({
     "/api/webhook",
     "/api/v1/integrations/clerkWebhooks",
     "/api/v1/integrations/apify/webhooks",
+    "/api/inngest",
   ],
 
   afterAuth(auth, req, evt) {
