@@ -51,7 +51,11 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
 
     return {
       indexStatus: KnowledgeIndexStatus.COMPLETED,
-      metadata,
+      metadata: {
+        mimeType: input.mimetype,
+        fileName: input.filename,
+        ...metadata,
+      },
     };
   }
   retrieveKnowledgeIdFromEvent(data: any): string {

@@ -13,6 +13,7 @@ import { Message } from "@prisma/client";
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { models } from "@/components/ai-models";
 import { JsonObject } from "@prisma/client/runtime/library";
+import axios from "axios";
 
 // small buffer so we don't go over the limit
 const BUFFER_TOKENS = 10;
@@ -87,7 +88,11 @@ export async function POST(
               include: {
                 dataSource: {
                   include: {
-                    knowledges: true,
+                    knowledges: {
+                      include: {
+                        knowledge: true,
+                      },
+                    },
                   },
                 },
               },
@@ -178,6 +183,26 @@ export async function POST(
     const answerTokens = ((conversation.ai.options as JsonObject)?.maxTokens ||
       model.options.maxTokens.default) as number;
 
+    let bootstrapKnowledge;
+    if (conversation.ai.dataSources.length === 1) {
+      if (conversation.ai.dataSources[0].dataSource.knowledges.length === 1) {
+        const meta =
+          conversation.ai.dataSources[0].dataSource.knowledges[0].knowledge
+            .metadata;
+        if (
+          meta &&
+          meta.mimeType &&
+          meta.totalTokenCount &&
+          meta.mimeType === "text/plain"
+        ) {
+          bootstrapKnowledge = {
+            ...conversation.ai.dataSources[0].dataSource.knowledges[0]
+              .knowledge,
+            ...meta,
+          };
+        }
+      }
+    }
     const knowledgeIds: string[] = conversation.ai.dataSources
       .map((ds) => ds.dataSource.knowledges.map((k) => k.knowledgeId))
       .reduce((acc, curr) => acc.concat(curr), []);
@@ -209,17 +234,11 @@ export async function POST(
         instructionTokens -
         questionTokens -
         BUFFER_TOKENS;
-      console.log("remaining tokens", remainingTokens);
       const knowledge = await getKnowledge(
         prompt,
         conversation.messages,
         knowledgeIds,
         remainingTokens
-      );
-      console.log("knowledge", getTokenLength(knowledge));
-      console.log(
-        "call size",
-        getTokenLength(`${completionPrompt}${knowledge}${seededChatHistory}`)
       );
       let response = await completionModel.call(
         `${completionPrompt}${knowledge}${seededChatHistory}`
@@ -279,12 +298,25 @@ export async function POST(
         instructionTokens -
         questionTokens -
         BUFFER_TOKENS;
-      const knowledge = await getKnowledge(
-        prompt,
-        conversation.messages,
-        knowledgeIds,
-        remainingTokens
-      );
+      let knowledge;
+      if (
+        bootstrapKnowledge &&
+        bootstrapKnowledge.blobUrl &&
+        remainingTokens > bootstrapKnowledge.totalTokenCount
+      ) {
+        const resp = await axios.get(bootstrapKnowledge.blobUrl);
+        if (resp.status === 200) {
+          knowledge = resp.data;
+        }
+      }
+      if (!knowledge) {
+        knowledge = await getKnowledge(
+          prompt,
+          conversation.messages,
+          knowledgeIds,
+          remainingTokens
+        );
+      }
       const chatLog = [
         new SystemChatMessage(`${engineeredPrompt}${knowledge}\n`),
       ];
