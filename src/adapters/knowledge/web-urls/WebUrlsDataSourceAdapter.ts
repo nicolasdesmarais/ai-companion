@@ -111,11 +111,25 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
     knowledge: Knowledge,
     metadata: WebUrlMetadata
   ): Promise<IndexKnowledgeResponse> {
-    console.log("Retrieving actor run result");
+    console.log(
+      `Retrieving actor run result for indexingRunId=${metadata.indexingRunId}`
+    );
     const result = await apifyAdapter.getActorRunResult(metadata.indexingRunId);
-    console.log("Actor run result retrieved");
+    if (!result.isSuccessful) {
+      console.log(
+        `Actor run for indexingRunId=${metadata.indexingRunId} was unsuccessful`
+      );
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
+
+    console.log(
+      `Successful actor run for indexingRunId=${metadata.indexingRunId}, with ${result.items.length} items`
+    );
+
     const { documentCount, totalTokenCount } = await fileLoader.loadJsonArray(
-      result,
+      result.items,
       knowledge.id
     );
 

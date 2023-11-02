@@ -106,15 +106,8 @@ export class DataSourceService {
 
     const indexKnowledgeResponse =
       await dataSourceAdapter.handleKnowledgeIndexedEvent(knowledge, data);
-    await prismadb.knowledge.update({
-      where: { id: knowledge.id },
-      data: {
-        indexStatus: indexKnowledgeResponse.indexStatus,
-        metadata: indexKnowledgeResponse.metadata,
-        blobUrl: indexKnowledgeResponse.blobUrl,
-      },
-    });
 
+    await this.onKnowledgeIndexed(knowledge, indexKnowledgeResponse);
     await this.updateCompletedKnowledgeDataSources(knowledge.id);
   }
 
