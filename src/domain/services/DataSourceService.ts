@@ -89,8 +89,10 @@ export class DataSourceService {
   }
 
   public async handleKnowledgeIndexedEvent(type: DataSourceType, data: any) {
+    console.log("Received knowledge indexed event");
     const dataSourceAdapter = this.getDataSourceAdapter(type);
     const knowledgeId = dataSourceAdapter.retrieveKnowledgeIdFromEvent(data);
+    console.log(`Updating knowledge ${knowledgeId}`);
     const knowledge = await prismadb.knowledge.findUnique({
       where: { id: knowledgeId },
     });
@@ -100,18 +102,58 @@ export class DataSourceService {
       );
     }
 
+    console.log(`Found knowledge ${knowledgeId}`);
+
     const indexKnowledgeResponse =
       await dataSourceAdapter.handleKnowledgeIndexedEvent(knowledge, data);
-    await prismadb.knowledge.update({
-      where: { id: knowledge.id },
-      data: {
-        indexStatus: indexKnowledgeResponse.indexStatus,
-        metadata: indexKnowledgeResponse.metadata,
-        blobUrl: indexKnowledgeResponse.blobUrl,
+
+    await this.onKnowledgeIndexed(knowledge, indexKnowledgeResponse);
+    await this.updateCompletedKnowledgeDataSources(knowledge.id);
+  }
+
+  public async pollDataSourceStatus() {
+    const currentDate = new Date();
+    const oneHourAgo = new Date(currentDate.getTime() - 60 * 60 * 1000);
+
+    const dataSources = await prismadb.dataSource.findMany({
+      take: 1,
+      where: {
+        indexStatus: DataSourceIndexStatus.INDEXING,
+        updatedAt: {
+          lt: oneHourAgo,
+        },
+        type: DataSourceType.WEB_URL, // limit to WEB_URLs for now
       },
     });
 
-    await this.updateCompletedKnowledgeDataSources(knowledge.id);
+    if (dataSources.length === 0) {
+      return;
+    }
+
+    const dataSource = dataSources[0];
+    const knowledges = await prismadb.knowledge.findMany({
+      where: {
+        indexStatus: {
+          in: [KnowledgeIndexStatus.INITIALIZED, KnowledgeIndexStatus.INDEXING],
+        },
+        dataSources: {
+          some: {
+            dataSourceId: dataSource.id,
+          },
+        },
+      },
+    });
+
+    console.log(`Polling data source ${dataSource.id}`);
+    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
+    for (const knowledge of knowledges) {
+      const indexKnowledgeResponse =
+        await dataSourceAdapter.pollKnowledgeIndexingStatus(knowledge);
+
+      await this.onKnowledgeIndexed(knowledge, indexKnowledgeResponse);
+    }
+
+    await this.updateDataSourceStatus(dataSource.id);
   }
 
   private async persistDataSource(

@@ -1,9 +1,7 @@
 import {
-  $Enums,
   DataSourceType,
   Knowledge,
   KnowledgeIndexStatus,
-  Prisma,
 } from "@prisma/client";
 import { put } from "@vercel/blob";
 import fileLoader from "../knowledgeLoaders/FileLoader";
@@ -60,21 +58,18 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     throw new Error("Method not implemented.");
   }
   handleKnowledgeIndexedEvent(
-    knowledge: {
-      id: string;
-      createdAt: Date;
-      updatedAt: Date;
-      lastIndexedAt: Date | null;
-      userId: string | null;
-      name: string;
-      type: string;
-      indexStatus: $Enums.KnowledgeIndexStatus;
-      blobUrl: string | null;
-      metadata: Prisma.JsonValue;
-    },
+    knowledge: Knowledge,
     data: any
   ): Promise<IndexKnowledgeResponse> {
     throw new Error("Method not implemented.");
+  }
+
+  public async pollKnowledgeIndexingStatus(
+    knowledge: Knowledge
+  ): Promise<IndexKnowledgeResponse> {
+    return {
+      indexStatus: knowledge.indexStatus ?? KnowledgeIndexStatus.INITIALIZED,
+    };
   }
 
   public async deleteKnowledge(knowledgeId: string): Promise<void> {

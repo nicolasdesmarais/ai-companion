@@ -87,9 +87,49 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       };
     }
 
-    const result = await apifyAdapter.getActorRunResult(actorRunId);
+    return await this.getActorRunResult(knowledge, metadata);
+  }
+
+  public async pollKnowledgeIndexingStatus(
+    knowledge: Knowledge
+  ): Promise<IndexKnowledgeResponse> {
+    const metadata = knowledge.metadata as unknown as WebUrlMetadata;
+    if (!metadata?.indexingRunId) {
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
+
+    return this.getActorRunResult(knowledge, metadata);
+  }
+
+  public async deleteKnowledge(knowledgeId: string): Promise<void> {
+    fileLoader.deleteKnowledge(knowledgeId);
+  }
+
+  private async getActorRunResult(
+    knowledge: Knowledge,
+    metadata: WebUrlMetadata
+  ): Promise<IndexKnowledgeResponse> {
+    console.log(
+      `Retrieving actor run result for indexingRunId=${metadata.indexingRunId}`
+    );
+    const result = await apifyAdapter.getActorRunResult(metadata.indexingRunId);
+    if (!result.isSuccessful) {
+      console.log(
+        `Actor run for indexingRunId=${metadata.indexingRunId} was unsuccessful`
+      );
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
+
+    console.log(
+      `Successful actor run for indexingRunId=${metadata.indexingRunId}, with ${result.items.length} items`
+    );
+
     const { documentCount, totalTokenCount } = await fileLoader.loadJsonArray(
-      result,
+      result.items,
       knowledge.id
     );
 
@@ -110,10 +150,6 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
         totalTokenCount,
       },
     };
-  }
-
-  public async deleteKnowledge(knowledgeId: string): Promise<void> {
-    fileLoader.deleteKnowledge(knowledgeId);
   }
 }
 

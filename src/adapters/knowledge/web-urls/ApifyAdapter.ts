@@ -121,15 +121,35 @@ export class ApifyAdapter {
   }
 
   public async getActorRunResult(actorRunId: string) {
+    let result: {
+      isSuccessful: boolean;
+      items: any[];
+    };
+
+    const actorRun = await client.run(actorRunId).get();
+    if (!actorRun) {
+      result = {
+        isSuccessful: false,
+        items: [],
+      };
+
+      return result;
+    }
+
     const dataset = await client.run(actorRunId).dataset();
     const listItems = await dataset.listItems();
-    return listItems.items.map((item) => {
+    const items = listItems.items.map((item) => {
       return {
         pageTitle: item.pageTitle,
         allText: item.allText,
-        knowledge: item.knowledge,
       };
     });
+
+    result = {
+      isSuccessful: true,
+      items,
+    };
+    return result;
   }
 
   private getMaxPagesPerCrawl(): number {
