@@ -219,13 +219,14 @@ export class DataSourceService {
     const knowledgeCount = dataSource.knowledges.length;
     const counts = {
       partiallyCompletedKnowledges: 0,
+      indexingKnowledges: 0,
       completedKnowledges: 0,
       failedKnowledges: 0,
     };
     for (const { knowledge } of dataSource.knowledges) {
       switch (knowledge.indexStatus) {
-        case KnowledgeIndexStatus.PARTIALLY_COMPLETED:
-          counts.partiallyCompletedKnowledges++;
+        case KnowledgeIndexStatus.INDEXING:
+          counts.indexingKnowledges++;
           break;
         case KnowledgeIndexStatus.COMPLETED:
           counts.completedKnowledges++;
@@ -236,11 +237,8 @@ export class DataSourceService {
       }
     }
 
-    const {
-      partiallyCompletedKnowledges,
-      completedKnowledges,
-      failedKnowledges,
-    } = counts;
+    const { indexingKnowledges, completedKnowledges, failedKnowledges } =
+      counts;
 
     let indexPercentage;
     if (knowledgeCount === 0) {
@@ -250,14 +248,14 @@ export class DataSourceService {
     }
 
     let indexingStatus;
-    if (failedKnowledges > 0) {
+    if (indexingKnowledges > 0) {
+      indexingStatus = DataSourceIndexStatus.INDEXING;
+    } else if (failedKnowledges === knowledgeCount) {
       indexingStatus = DataSourceIndexStatus.FAILED;
-    } else if (partiallyCompletedKnowledges > 0) {
-      indexingStatus = DataSourceIndexStatus.PARTIALLY_COMPLETED;
     } else if (completedKnowledges === knowledgeCount) {
       indexingStatus = DataSourceIndexStatus.COMPLETED;
     } else {
-      indexingStatus = DataSourceIndexStatus.INDEXING;
+      indexingStatus = DataSourceIndexStatus.PARTIALLY_COMPLETED;
     }
 
     const lastIndexedAt =
