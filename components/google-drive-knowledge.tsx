@@ -1,12 +1,7 @@
 "use client";
+import { Table } from "@/components/table";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { UserOAuthTokenEntity } from "@/src/domain/entities/OAuthTokenEntity";
-import { EntityNotFoundError } from "@/src/domain/errors/Errors";
-import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/types/CreateGoogleDriveKnowledgeRequest";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { Server, Loader } from "lucide-react";
+import { FormControl, FormItem, FormLabel } from "@/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -14,13 +9,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FormControl, FormItem, FormLabel } from "@/components/ui/form";
-import { Table } from "@/components/table";
+import { useToast } from "@/components/ui/use-toast";
+import { UserOAuthTokenEntity } from "@/src/domain/entities/OAuthTokenEntity";
+import { EntityNotFoundError } from "@/src/domain/errors/Errors";
+import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/types/CreateGoogleDriveKnowledgeRequest";
 import {
   GoogleDriveFile,
   getLabelFromFileType,
 } from "@/src/domain/types/GoogleDriveSearchResponse";
+import axios from "axios";
 import { format } from "date-fns";
+import { Loader, Server } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const ADD_ACCOUNT_OPTION = "add-account";
 
@@ -157,6 +157,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
       const createKnowledgeRequest: CreateGoogleDriveKnowledgeRequest = {
         oauthTokenId: selectedAccount,
         fileId: selectedFile.id,
+        filename: selectedFile.name,
       };
 
       const response = await axios.post(
