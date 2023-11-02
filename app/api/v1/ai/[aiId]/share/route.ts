@@ -26,7 +26,7 @@ export async function PUT(
       return NextResponse.json("Forbidden", { status: 403 });
     }
 
-    aiService.shareAi(authentication.orgId, userId, aiId, shareAiRequest);
+    await aiService.shareAi(authentication.orgId, userId, aiId, shareAiRequest);
 
     return NextResponse.json("", { status: 200 });
   } catch (error) {
