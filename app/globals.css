@@ -168,3 +168,6 @@ body,
   list-style: auto;
   margin: 10px 15px;
 }
+.markdown-chat-message ul li {
+  list-style: disc;
+}
