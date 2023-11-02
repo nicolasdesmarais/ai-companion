@@ -186,9 +186,8 @@ export async function POST(
     let bootstrapKnowledge;
     if (conversation.ai.dataSources.length === 1) {
       if (conversation.ai.dataSources[0].dataSource.knowledges.length === 1) {
-        const meta =
-          conversation.ai.dataSources[0].dataSource.knowledges[0].knowledge
-            .metadata;
+        const meta = conversation.ai.dataSources[0].dataSource.knowledges[0]
+          .knowledge.metadata as any;
         if (
           meta &&
           meta.mimeType &&
