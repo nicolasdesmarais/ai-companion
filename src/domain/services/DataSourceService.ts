@@ -112,6 +112,7 @@ export class DataSourceService {
   }
 
   public async pollDataSourceStatus() {
+    console.log("Polling data source status");
     const currentDate = new Date();
     const oneHourAgo = new Date(currentDate.getTime() - 60 * 60 * 1000);
 
