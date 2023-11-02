@@ -38,6 +38,7 @@ export async function POST(
     const dataSourceId = await dataSourceService.createDataSource(
       orgId,
       userId,
+      body.filename,
       DataSourceType.GOOGLE_DRIVE,
       input
     );
