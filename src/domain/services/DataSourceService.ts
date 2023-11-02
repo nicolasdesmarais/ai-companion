@@ -1,4 +1,4 @@
-import { inngest } from "@/src/adapters/inngest/client";
+import { publishEvent } from "@/src/adapters/inngest/event-publisher";
 import fileUploadDataSourceAdapter from "@/src/adapters/knowledge/file-upload/FileUploadDataSourceAdapter";
 import googleDriveDataSourceAdapter from "@/src/adapters/knowledge/google-drive/GoogleDriveDataSourceAdapter";
 import { DataSourceAdapter } from "@/src/adapters/knowledge/types/DataSourceAdapter";
@@ -42,6 +42,16 @@ export class DataSourceService {
     });
   }
 
+  /**
+   * Create and persist a data source entity.
+   * Publishes a DATASOURCE_PERSISTED event.
+   * @param orgId
+   * @param ownerUserId
+   * @param name
+   * @param type
+   * @param data
+   * @returns
+   */
   public async createDataSource(
     orgId: string,
     ownerUserId: string,
@@ -49,7 +59,7 @@ export class DataSourceService {
     type: DataSourceType,
     data: any
   ) {
-    const dataSourceId = await this.persistDataSource(
+    const dataSourceId = await this.initializeDataSource(
       orgId,
       ownerUserId,
       name,
@@ -57,18 +67,41 @@ export class DataSourceService {
       data
     );
 
-    await inngest.send({
-      name: "datasources/datasource.persisted",
-      data: {
-        dataSourceId,
-        dataSourceType: type,
-      },
+    await publishEvent(DomainEvent.DATASOURCE_INITIALIZED, {
+      dataSourceId,
+      dataSourceType: type,
     });
 
     return dataSourceId;
   }
 
-  public async getDataSourceKnowledgeList(dataSourceId: string) {
+  private async initializeDataSource(
+    orgId: string,
+    ownerUserId: string,
+    name: string,
+    type: DataSourceType,
+    data: any
+  ) {
+    const dataSource = await prismadb.dataSource.create({
+      data: {
+        orgId,
+        ownerUserId,
+        name,
+        type,
+        indexStatus: DataSourceIndexStatus.INITIALIZED,
+        indexPercentage: 0,
+        data,
+      },
+    });
+    return dataSource.id;
+  }
+
+  /**
+   * Retrieves and persists knowledge list for the specified data source
+   * @param dataSourceId
+   * @returns
+   */
+  public async createDataSourceKnowledgeList(dataSourceId: string) {
     const dataSource = await prismadb.dataSource.findUnique({
       where: { id: dataSourceId },
     });
@@ -86,10 +119,41 @@ export class DataSourceService {
       dataSource.data
     );
 
-    await this.persistKnowledge(dataSourceId, itemList);
+    return await this.initializeKnowledgeList(dataSourceId, itemList);
   }
 
-  public async indexDataSourceKnowlege(dataSourceId: string) {
+  private async initializeKnowledgeList(
+    dataSourceId: string,
+    itemList: DataSourceItemList
+  ) {
+    const knowledgeList = [];
+    const dataSourceKnowledgeRelations = [];
+
+    for (const item of itemList.items) {
+      const knowledge = await prismadb.knowledge.create({
+        data: {
+          name: item.name,
+          type: item.type,
+          indexStatus: KnowledgeIndexStatus.INITIALIZED,
+          metadata: item.metadata,
+        },
+      });
+      knowledgeList.push(knowledge);
+
+      dataSourceKnowledgeRelations.push({
+        dataSourceId,
+        knowledgeId: knowledge.id,
+      });
+    }
+
+    await prismadb.dataSourceKnowledge.createMany({
+      data: dataSourceKnowledgeRelations,
+    });
+
+    return knowledgeList;
+  }
+
+  public async indexDataSourceKnowledge(dataSourceId: string) {
     const dataSource = await prismadb.dataSource.findUnique({
       where: { id: dataSourceId },
     });
@@ -103,6 +167,7 @@ export class DataSourceService {
 
     const knowledgeList = await prismadb.knowledge.findMany({
       where: {
+        indexStatus: KnowledgeIndexStatus.INITIALIZED,
         dataSources: {
           some: {
             dataSourceId: dataSource.id,
@@ -127,12 +192,85 @@ export class DataSourceService {
         };
       }
 
-      await this.onKnowledgeIndexed(knowledge, indexKnowledgeResponse);
+      await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
     }
 
     await this.updateDataSourceStatus(dataSourceId);
 
     return dataSourceId;
+  }
+
+  private async updateDataSourceStatus(dataSourceId: string) {
+    const dataSource = await prismadb.dataSource.findUnique({
+      where: { id: dataSourceId },
+      include: {
+        knowledges: {
+          include: {
+            knowledge: true,
+          },
+        },
+      },
+    });
+
+    if (!dataSource) {
+      return;
+    }
+
+    const knowledgeCount = dataSource.knowledges.length;
+    const counts = {
+      partiallyCompletedKnowledges: 0,
+      completedKnowledges: 0,
+      failedKnowledges: 0,
+    };
+    for (const { knowledge } of dataSource.knowledges) {
+      switch (knowledge.indexStatus) {
+        case KnowledgeIndexStatus.PARTIALLY_COMPLETED:
+          counts.partiallyCompletedKnowledges++;
+          break;
+        case KnowledgeIndexStatus.COMPLETED:
+          counts.completedKnowledges++;
+          break;
+        case KnowledgeIndexStatus.FAILED:
+          counts.failedKnowledges++;
+          break;
+      }
+    }
+
+    const {
+      partiallyCompletedKnowledges,
+      completedKnowledges,
+      failedKnowledges,
+    } = counts;
+
+    let indexPercentage;
+    if (knowledgeCount === 0) {
+      indexPercentage = 100;
+    } else {
+      indexPercentage = (completedKnowledges / knowledgeCount) * 100;
+    }
+
+    let indexingStatus;
+    if (failedKnowledges > 0) {
+      indexingStatus = DataSourceIndexStatus.FAILED;
+    } else if (partiallyCompletedKnowledges > 0) {
+      indexingStatus = DataSourceIndexStatus.PARTIALLY_COMPLETED;
+    } else if (completedKnowledges === knowledgeCount) {
+      indexingStatus = DataSourceIndexStatus.COMPLETED;
+    } else {
+      indexingStatus = DataSourceIndexStatus.INDEXING;
+    }
+
+    const lastIndexedAt =
+      indexingStatus === DataSourceIndexStatus.INDEXING ? null : new Date();
+
+    await prismadb.dataSource.update({
+      where: { id: dataSource.id },
+      data: {
+        indexStatus: indexingStatus,
+        indexPercentage,
+        lastIndexedAt,
+      },
+    });
   }
 
   public async handleKnowledgeIndexedEvent(type: DataSourceType, data: any) {
@@ -154,7 +292,7 @@ export class DataSourceService {
     const indexKnowledgeResponse =
       await dataSourceAdapter.handleKnowledgeIndexedEvent(knowledge, data);
 
-    await this.onKnowledgeIndexed(knowledge, indexKnowledgeResponse);
+    await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
     await this.updateCompletedKnowledgeDataSources(knowledge.id);
   }
 
@@ -198,63 +336,13 @@ export class DataSourceService {
       const indexKnowledgeResponse =
         await dataSourceAdapter.pollKnowledgeIndexingStatus(knowledge);
 
-      await this.onKnowledgeIndexed(knowledge, indexKnowledgeResponse);
+      await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
     }
 
     await this.updateDataSourceStatus(dataSource.id);
   }
 
-  private async persistDataSource(
-    orgId: string,
-    ownerUserId: string,
-    name: string,
-    type: DataSourceType,
-    data: any
-  ) {
-    const dataSource = await prismadb.dataSource.create({
-      data: {
-        orgId,
-        ownerUserId,
-        name,
-        type,
-        indexStatus: DataSourceIndexStatus.INDEXING,
-        indexPercentage: 0,
-        data,
-      },
-    });
-    return dataSource.id;
-  }
-
-  private async persistKnowledge(
-    dataSourceId: string,
-    itemList: DataSourceItemList
-  ) {
-    const knowledgeList = [];
-    const dataSourceKnowledgeRelations = [];
-
-    for (const item of itemList.items) {
-      const knowledge = await prismadb.knowledge.create({
-        data: {
-          name: item.name,
-          type: item.type,
-          indexStatus: KnowledgeIndexStatus.INITIALIZED,
-          metadata: item.metadata,
-        },
-      });
-      knowledgeList.push(knowledge);
-
-      dataSourceKnowledgeRelations.push({
-        dataSourceId,
-        knowledgeId: knowledge.id,
-      });
-    }
-
-    await prismadb.dataSourceKnowledge.createMany({
-      data: dataSourceKnowledgeRelations,
-    });
-  }
-
-  private async onKnowledgeIndexed(
+  private async persistIndexedKnowledge(
     knowledge: Knowledge,
     indexKnowledgeResponse: IndexKnowledgeResponse
   ) {
@@ -309,61 +397,6 @@ export class DataSourceService {
     for (const dataSource of dataSourceIds) {
       await this.updateDataSourceStatus(dataSource.id);
     }
-  }
-
-  private async updateDataSourceStatus(dataSourceId: string) {
-    const dataSource = await prismadb.dataSource.findUnique({
-      where: { id: dataSourceId },
-      include: {
-        knowledges: {
-          include: {
-            knowledge: true,
-          },
-        },
-      },
-    });
-
-    if (!dataSource) {
-      return;
-    }
-
-    const knowledgeCount = dataSource.knowledges.length;
-    let completedKnowledges = 0;
-    let failedKnowledges = 0;
-    for (const knowledge of dataSource.knowledges) {
-      if (knowledge.knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
-        completedKnowledges++;
-      } else if (
-        knowledge.knowledge.indexStatus === KnowledgeIndexStatus.FAILED
-      ) {
-        failedKnowledges++;
-      }
-    }
-
-    let indexPercentage;
-    if (knowledgeCount === 0) {
-      indexPercentage = 100;
-    } else {
-      indexPercentage = (completedKnowledges / knowledgeCount) * 100;
-    }
-
-    let indexingStatus;
-    if (failedKnowledges > 0) {
-      indexingStatus = DataSourceIndexStatus.FAILED;
-    } else if (completedKnowledges === knowledgeCount) {
-      indexingStatus = DataSourceIndexStatus.COMPLETED;
-    } else {
-      indexingStatus = DataSourceIndexStatus.INDEXING;
-    }
-
-    await prismadb.dataSource.update({
-      where: { id: dataSource.id },
-      data: {
-        indexStatus: indexingStatus,
-        indexPercentage,
-        lastIndexedAt: new Date(),
-      },
-    });
   }
 
   public async deleteDataSource(aiId: string, dataSourceId: string) {
