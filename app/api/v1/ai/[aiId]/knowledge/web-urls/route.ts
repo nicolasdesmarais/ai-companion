@@ -40,6 +40,7 @@ export async function POST(
       const dataSourceId = await dataSourceService.createDataSource(
         orgId,
         userId,
+        url,
         DataSourceType.WEB_URL,
         input
       );

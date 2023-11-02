@@ -232,6 +232,7 @@ model DataSource {
   indexPercentage           Decimal                     @map(name: "index_percentage")
   knowledges                DataSourceKnowledge[]
   ais                       AIDataSource[]
+  data                      Json?
 
   @@map("data_sources")
 }
