@@ -43,6 +43,7 @@ export async function POST(
     const dataSourceId = await dataSourceService.createDataSource(
       orgId,
       userId,
+      filename,
       DataSourceType.FILE_UPLOAD,
       input
     );

@@ -1,3 +1,4 @@
+import { inngest } from "@/src/adapters/inngest/client";
 import fileUploadDataSourceAdapter from "@/src/adapters/knowledge/file-upload/FileUploadDataSourceAdapter";
 import googleDriveDataSourceAdapter from "@/src/adapters/knowledge/google-drive/GoogleDriveDataSourceAdapter";
 import { DataSourceAdapter } from "@/src/adapters/knowledge/types/DataSourceAdapter";
@@ -44,34 +45,80 @@ export class DataSourceService {
   public async createDataSource(
     orgId: string,
     ownerUserId: string,
+    name: string,
     type: DataSourceType,
     data: any
   ) {
-    const dataSourceAdapter = this.getDataSourceAdapter(type);
-    const itemList = await dataSourceAdapter.getDataSourceItemList(
-      orgId,
-      ownerUserId,
-      data
-    );
     const dataSourceId = await this.persistDataSource(
       orgId,
       ownerUserId,
+      name,
       type,
-      itemList
+      data
     );
 
-    const knowledgeList = await this.persistKnowledge(dataSourceId, itemList);
-    const knowledgeListLength = knowledgeList.length;
-    for (let i = 0; i < knowledgeListLength; i++) {
-      const knowledge = knowledgeList[i];
+    await inngest.send({
+      name: "datasources/datasource.persisted",
+      data: {
+        dataSourceId,
+        dataSourceType: type,
+      },
+    });
 
+    return dataSourceId;
+  }
+
+  public async getDataSourceKnowledgeList(dataSourceId: string) {
+    const dataSource = await prismadb.dataSource.findUnique({
+      where: { id: dataSourceId },
+    });
+
+    if (!dataSource) {
+      throw new EntityNotFoundError(
+        `DataSource with id=${dataSourceId} not found`
+      );
+    }
+
+    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
+    const itemList = await dataSourceAdapter.getDataSourceItemList(
+      dataSource.orgId,
+      dataSource.ownerUserId,
+      dataSource.data
+    );
+
+    await this.persistKnowledge(dataSourceId, itemList);
+  }
+
+  public async indexDataSourceKnowlege(dataSourceId: string) {
+    const dataSource = await prismadb.dataSource.findUnique({
+      where: { id: dataSourceId },
+    });
+
+    if (!dataSource) {
+      throw new EntityNotFoundError(
+        `DataSource with id=${dataSourceId} not found`
+      );
+    }
+    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
+
+    const knowledgeList = await prismadb.knowledge.findMany({
+      where: {
+        dataSources: {
+          some: {
+            dataSourceId: dataSource.id,
+          },
+        },
+      },
+    });
+
+    for (const knowledge of knowledgeList) {
       let indexKnowledgeResponse;
       try {
         indexKnowledgeResponse = await dataSourceAdapter.indexKnowledge(
-          orgId,
-          ownerUserId,
+          dataSource.orgId,
+          dataSource.ownerUserId,
           knowledge,
-          data
+          dataSource.data
         );
       } catch (error) {
         console.log(error);
@@ -160,17 +207,19 @@ export class DataSourceService {
   private async persistDataSource(
     orgId: string,
     ownerUserId: string,
+    name: string,
     type: DataSourceType,
-    itemList: DataSourceItemList
+    data: any
   ) {
     const dataSource = await prismadb.dataSource.create({
       data: {
         orgId,
         ownerUserId,
-        name: itemList.dataSourceName,
+        name,
         type,
         indexStatus: DataSourceIndexStatus.INDEXING,
         indexPercentage: 0,
+        data,
       },
     });
     return dataSource.id;
@@ -203,8 +252,6 @@ export class DataSourceService {
     await prismadb.dataSourceKnowledge.createMany({
       data: dataSourceKnowledgeRelations,
     });
-
-    return knowledgeList;
   }
 
   private async onKnowledgeIndexed(

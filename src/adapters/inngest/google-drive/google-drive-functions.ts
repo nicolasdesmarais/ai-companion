@@ -11,6 +11,7 @@ export const googleDriveDataSourceCreationRequested = inngest.createFunction(
       return await dataSourceService.createDataSource(
         event.data.orgId,
         event.data.userId,
+        event.data.input.name,
         DataSourceType.GOOGLE_DRIVE,
         event.data.input
       );
