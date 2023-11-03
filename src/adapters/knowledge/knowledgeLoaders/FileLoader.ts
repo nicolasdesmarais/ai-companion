@@ -45,6 +45,9 @@ export class FileLoader {
       const path = await this.getFilepath(filePathOrBlob);
       const loader = new EPubLoader(path);
       docs = await loader.load();
+    } else if (mimeType === "application/epub+zip") {
+      const loader = new EPubLoader(filePathOrBlob as string);
+      docs = await loader.load();
     } else if (
       mimeType ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
