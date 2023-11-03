@@ -187,7 +187,12 @@ export const AIKnowledge = ({
             className="text-ring h-8 w-8 cursor-pointer"
             onClick={() => router.push(`/ai/${aiId}/edit/knowledge`)}
           />
-          <h1 className="text-lg font-medium">Create Data Source</h1>
+          <h1
+            className="text-lg font-medium cursor-pointer"
+            onClick={() => router.push(`/ai/${aiId}/edit/knowledge`)}
+          >
+            Create Data Source
+          </h1>
         </div>
       )}
       {pathname.endsWith("file") && (

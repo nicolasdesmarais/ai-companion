@@ -23,12 +23,44 @@ export const maxDuration = 300;
 const getKnowledge = async (
   prompt: string,
   history: Message[],
-  knowledgeIds: string[],
+  dataSources: any[],
   availTokens: number
 ) => {
-  if (knowledgeIds.length === 0) {
+  if (dataSources.length === 0) {
     return "";
   }
+
+  const knowledgeIds: string[] = dataSources
+    .map((ds) => ds.dataSource.knowledges.map((k: any) => k.knowledgeId))
+    .reduce((acc, curr) => acc.concat(curr), []);
+
+  const { totalDocs, totalTokens } = dataSources.reduce(
+    (dsAcc, ds) => {
+      const { docs, tokens } = ds.dataSource.knowledges.reduce(
+        (acc: any, k: any) => {
+          if (
+            k.knowledge.metadata &&
+            k.knowledge.metadata.totalTokenCount &&
+            k.knowledge.metadata.documentCount
+          ) {
+            acc.tokens += k.knowledge.metadata.totalTokenCount;
+            acc.docs += k.knowledge.metadata.documentCount;
+            return acc;
+          } else {
+            return { docs: NaN, tokens: NaN };
+          }
+        },
+        { docs: 0, tokens: 0 }
+      );
+      dsAcc.totalDocs += docs;
+      dsAcc.totalTokens += tokens;
+      return dsAcc;
+    },
+    { totalDocs: 0, totalTokens: 0 }
+  );
+  const docDensity = totalTokens / totalDocs;
+  let estDocsNeeded = Math.ceil(availTokens / docDensity) || 100;
+  estDocsNeeded = Math.min(10000, Math.max(estDocsNeeded, 1));
 
   let query = prompt;
   if (history.length > 1) {
@@ -39,14 +71,19 @@ const getKnowledge = async (
   }
 
   const memoryManager = await MemoryManager.getInstance();
-  const similarDocs = await memoryManager.vectorSearch(query, knowledgeIds);
+  const similarDocs = await memoryManager.vectorSearch(
+    query,
+    knowledgeIds,
+    estDocsNeeded
+  );
 
   let knowledge = "";
   if (!!similarDocs && similarDocs.length !== 0) {
     for (let i = 0; i < similarDocs.length; i++) {
       const doc = similarDocs[i];
       const newKnowledge = `${knowledge}\n${doc.pageContent}`;
-      if (getTokenLength(newKnowledge) < availTokens) {
+      const newKnowledgeTokens = getTokenLength(newKnowledge);
+      if (newKnowledgeTokens < availTokens) {
         knowledge = newKnowledge;
       } else {
         break;
@@ -202,9 +239,6 @@ export async function POST(
         }
       }
     }
-    const knowledgeIds: string[] = conversation.ai.dataSources
-      .map((ds) => ds.dataSource.knowledges.map((k) => k.knowledgeId))
-      .reduce((acc, curr) => acc.concat(curr), []);
 
     if (completionModel) {
       const chatHistory = conversation.messages.reduce(
@@ -236,7 +270,7 @@ export async function POST(
       const knowledge = await getKnowledge(
         prompt,
         conversation.messages,
-        knowledgeIds,
+        conversation.ai.dataSources,
         remainingTokens
       );
       let response = await completionModel.call(
@@ -312,7 +346,7 @@ export async function POST(
         knowledge = await getKnowledge(
           prompt,
           conversation.messages,
-          knowledgeIds,
+          conversation.ai.dataSources,
           remainingTokens
         );
       }

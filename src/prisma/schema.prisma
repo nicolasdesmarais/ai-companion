@@ -169,6 +169,7 @@ model Knowledge {
 enum KnowledgeIndexStatus {
   INITIALIZED
   INDEXING
+  PARTIALLY_COMPLETED
   COMPLETED
   FAILED
 }
@@ -244,7 +245,9 @@ enum DataSourceType {
 }
 
 enum DataSourceIndexStatus {
+  INITIALIZED
   INDEXING
+  PARTIALLY_COMPLETED
   COMPLETED
   FAILED
 }
