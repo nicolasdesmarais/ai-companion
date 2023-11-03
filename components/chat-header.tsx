@@ -126,7 +126,7 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
       </div>
       <div>
         <Button
-          variant="secondary"
+          variant="ghost"
           size="icon"
           className="mr-4"
           type="button"
@@ -136,7 +136,7 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="secondary" size="icon">
+            <Button variant="ghost" size="icon">
               <MoreVertical />
             </Button>
           </DropdownMenuTrigger>
