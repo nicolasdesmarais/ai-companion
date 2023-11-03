@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import aiService from "@/src/domain/services/AIService";
 import prismadb from "@/src/lib/prismadb";
+import groupService from "@/src/domain/services/GroupService";
 
 export async function PATCH(
   req: Request,
@@ -19,7 +20,7 @@ export async function PATCH(
       seed,
       categoryId,
       modelId,
-      knowledge,
+      groups,
       visibility,
       options,
     } = body;
@@ -47,6 +48,7 @@ export async function PATCH(
             dataSource: true,
           },
         },
+        groups: true,
       },
       data: {
         categoryId,
@@ -62,6 +64,14 @@ export async function PATCH(
         options,
       },
     });
+
+    if (visibility !== "GROUP") {
+      await groupService.updateAIGroups(ai.id, []);
+      ai.groups = [];
+    } else if (groups && groups.length > 0) {
+      await groupService.updateAIGroups(ai.id, groups);
+      ai.groups = groups;
+    }
 
     return NextResponse.json(ai);
   } catch (error) {

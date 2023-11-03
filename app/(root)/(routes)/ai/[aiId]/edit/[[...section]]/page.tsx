@@ -28,8 +28,13 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
           dataSource: true,
         },
       },
+      groups: true,
     },
   });
+
+  if (initialAi) {
+    initialAi.groups = initialAi.groups.map((g: any) => g.groupId);
+  }
 
   const categories = await prismadb.category.findMany();
 
