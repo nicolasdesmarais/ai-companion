@@ -32,35 +32,40 @@ export class FileLoader {
     let docs;
     console.log(`Loading file ${filename} with mime type ${mimeType}`);
 
-    if (mimeType === "text/csv") {
-      const loader = new CSVLoader(filePathOrBlob);
-      docs = await loader.load();
-    } else if (mimeType === "text/plain" || mimeType === "text/markdown") {
-      const loader = new TextLoader(filePathOrBlob);
-      docs = await loader.load();
-    } else if (
-      mimeType === "application/epub+zip" &&
-      filePathOrBlob instanceof File
-    ) {
-      const path = await this.getFilepath(filePathOrBlob);
-      const loader = new EPubLoader(path);
-      docs = await loader.load();
-    } else if (mimeType === "application/epub+zip") {
-      const loader = new EPubLoader(filePathOrBlob as string);
-      docs = await loader.load();
-    } else if (
-      mimeType ===
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    ) {
-      console.log("Loading docx file");
-      const loader = new DocxLoader(filePathOrBlob);
-      console.log("Initialized DocxLoader");
-      docs = await loader.load();
-    } else if (mimeType === "application/pdf") {
-      const loader = new PDFLoader(filePathOrBlob);
-      docs = await loader.load();
-    } else {
-      throw new BadRequestError(`Unsupported file type ${mimeType}`);
+    try {
+      if (mimeType === "text/csv") {
+        const loader = new CSVLoader(filePathOrBlob);
+        docs = await loader.load();
+      } else if (mimeType === "text/plain" || mimeType === "text/markdown") {
+        const loader = new TextLoader(filePathOrBlob);
+        docs = await loader.load();
+      } else if (
+        mimeType === "application/epub+zip" &&
+        filePathOrBlob instanceof File
+      ) {
+        const path = await this.getFilepath(filePathOrBlob);
+        const loader = new EPubLoader(path);
+        docs = await loader.load();
+      } else if (mimeType === "application/epub+zip") {
+        const loader = new EPubLoader(filePathOrBlob as string);
+        docs = await loader.load();
+      } else if (
+        mimeType ===
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      ) {
+        console.log("Loading docx file");
+        const loader = new DocxLoader(filePathOrBlob);
+        console.log("Initialized DocxLoader");
+        docs = await loader.load();
+      } else if (mimeType === "application/pdf") {
+        const loader = new PDFLoader(filePathOrBlob);
+        docs = await loader.load();
+      } else {
+        throw new BadRequestError(`Unsupported file type ${mimeType}`);
+      }
+    } catch (e) {
+      console.error(e);
+      throw new Error(`Error loading file ${filename}`);
     }
 
     console.log(`Loaded ${docs.length} documents`);
