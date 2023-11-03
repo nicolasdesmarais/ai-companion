@@ -3,6 +3,7 @@ import aiService from "@/src/domain/services/AIService";
 import dataSourceService from "@/src/domain/services/DataSourceService";
 import { auth } from "@clerk/nextjs";
 import { DataSourceType } from "@prisma/client";
+import { writeFile } from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 300;
@@ -35,10 +36,15 @@ export async function POST(
     const data = await request.formData();
     const file: File | null = data.get("file") as unknown as File;
 
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const filepath = `/tmp/${file.name}`;
+    await writeFile(filepath, buffer);
+
     const input: FileUploadDataSourceInput = {
       filename,
       mimetype: type,
-      file,
+      filepath,
     };
     const dataSourceId = await dataSourceService.createDataSource(
       orgId,

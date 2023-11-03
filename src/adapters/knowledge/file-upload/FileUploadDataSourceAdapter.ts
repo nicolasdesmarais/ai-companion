@@ -9,6 +9,8 @@ import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import { DataSourceItemList } from "../types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { FileUploadDataSourceInput } from "./types/FileUploadDataSourceInput";
+import { readFile } from "fs/promises";
+import { read } from "fs";
 
 export class FileUploadDataSourceAdapter implements DataSourceAdapter {
   public async getDataSourceItemList(
@@ -37,7 +39,8 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
   ): Promise<IndexKnowledgeResponse> {
     const input = data as FileUploadDataSourceInput;
 
-    const blob = await put(input.filename, input.file, {
+    const file = await readFile(input.filepath);
+    const blob = await put(input.filename, file, {
       access: "public",
     });
     knowledge.blobUrl = blob.url;
@@ -46,7 +49,7 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
       knowledge.id,
       input.filename,
       input.mimetype,
-      input.file
+      input.filepath
     );
 
     return {
