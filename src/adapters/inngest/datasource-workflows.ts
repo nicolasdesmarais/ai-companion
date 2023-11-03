@@ -1,3 +1,4 @@
+import { DomainEvent } from "@/src/domain/events/domain-event";
 import dataSourceService from "@/src/domain/services/DataSourceService";
 import { inngest } from "./client";
 

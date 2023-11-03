@@ -13,6 +13,7 @@ import {
   KnowledgeIndexStatus,
 } from "@prisma/client";
 import { EntityNotFoundError } from "../errors/Errors";
+import { DomainEvent } from "../events/domain-event";
 
 export class DataSourceService {
   private getDataSourceAdapter(type: DataSourceType): DataSourceAdapter {
