@@ -27,7 +27,10 @@ export const knowledgeEventReceived = inngest.createFunction(
     const { dataSourceType, data } = event.data;
 
     await step.run("handle-knowledge-event-received", async () => {
-      dataSourceService.handleKnowledgeEventReceived(dataSourceType, data);
+      await dataSourceService.handleKnowledgeEventReceived(
+        dataSourceType,
+        data
+      );
     });
   }
 );
