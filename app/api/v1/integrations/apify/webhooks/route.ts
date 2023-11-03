@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     return new Response("", { status: 200 });
   }
 
-  dataSourceService.knowledgeEventReceived(DataSourceType.WEB_URL, event);
+  await dataSourceService.knowledgeEventReceived(DataSourceType.WEB_URL, event);
 
   return new Response("", { status: 200 });
 }
