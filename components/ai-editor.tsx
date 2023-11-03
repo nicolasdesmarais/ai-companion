@@ -6,7 +6,7 @@ import { Form } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/src/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Category, Knowledge, Prisma } from "@prisma/client";
+import { Category, Knowledge, Prisma, Group } from "@prisma/client";
 import axios from "axios";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -52,6 +52,7 @@ const formSchema = z.object({
     .transform((value) => value ?? {})
     .optional(),
   knowledge: z.array(z.custom<Knowledge>()).optional(),
+  groups: z.array(z.string()).optional(),
 });
 
 const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
@@ -69,9 +70,10 @@ type ExtendedAI = Prisma.AIGetPayload<typeof extendedAI>;
 interface AIFormProps {
   categories: Category[];
   initialAi: ExtendedAI | null;
+  groups: Group[];
 }
 
-export const AIEditor = ({ categories, initialAi }: AIFormProps) => {
+export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
   const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
@@ -113,6 +115,7 @@ export const AIEditor = ({ categories, initialAi }: AIFormProps) => {
       modelId: "gpt-4",
       knowledge: [],
       options: {},
+      groups: [],
     },
   });
 
@@ -242,7 +245,9 @@ export const AIEditor = ({ categories, initialAi }: AIFormProps) => {
       name: "Character",
       index: 1,
       route: "edit",
-      content: <AICharacter categories={categories} form={form} />,
+      content: (
+        <AICharacter categories={categories} form={form} groups={groups} />
+      ),
       buttons: (
         <>
           <div>
