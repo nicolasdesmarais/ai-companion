@@ -23,6 +23,7 @@ import { FileUploadKnowledge } from "./file-upload-knowledge";
 import { GoogleDriveForm } from "./google-drive-knowledge";
 import { WebUrlsForm } from "./web-urls-knowledge-form";
 import { KnowledgeIndexStatus } from "@prisma/client";
+import { Banner } from "./ui/banner";
 
 interface SelectDataSourceProps {
   form: any;
@@ -62,6 +63,13 @@ export const AIKnowledge = ({
     setRemoving("");
   };
 
+  const inProgress = dataSources.some(
+    (dataSource: any) =>
+      dataSource.indexPercentage !== "100" &&
+      dataSource.indexStatus !== "FAILED"
+  );
+  console.log(dataSources);
+
   return (
     <div className="h-full p-4 max-w-3xl mx-auto">
       {pathname.endsWith("knowledge") && (
@@ -71,7 +79,13 @@ export const AIKnowledge = ({
             The following files and sources are currently being used to inform
             your AI&apos;s knowledge.
           </p>
-
+          {inProgress && (
+            <Banner className="mt-2">
+              Data sources are being indexed. You can continue without loosing
+              any progress.
+              <div>Return later to check on progress.</div>
+            </Banner>
+          )}
           <div className="max-h-96 overflow-auto">
             <Table
               headers={["NAME", "TYPE", "LAST MODIFIED", "Progress", "Remove"]}

@@ -246,7 +246,9 @@ export const GroupModal = () => {
               {groupModal.groupId &&
                 !isOwner &&
                 selectedOption === GroupAvailability.RESTRICTED && (
-                  <Banner text="Only the group owner can rename or delete this group." />
+                  <Banner>
+                    Only the group owner can rename or delete this group.
+                  </Banner>
                 )}
               <FormField
                 name="name"
