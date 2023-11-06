@@ -4,7 +4,6 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useConversations } from "@/hooks/use-conversations";
 import { cn } from "@/src/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
-import path from "path";
 import { useEffect } from "react";
 
 export const ChatList = () => {
@@ -35,7 +34,7 @@ export const ChatList = () => {
                 "rounded-lg p-2 transition",
                 pathname.endsWith(conversation.id)
                   ? "bg-accent"
-                  : "hover:text-primary hover:bg-primary/10 cursor-pointer"
+                  : "cursor-pointer"
               )}
             >
               <div>
