@@ -430,11 +430,12 @@ export const GroupModal = () => {
                             "Leave Group?",
                             <div>
                               <div>
-                                Are you sure you want to delete the{" "}
+                                Are you sure you want to leave the{" "}
                                 {form.getValues("name")} group?
                               </div>
                               <div>
-                                You will need to be invited again to re-join.
+                                To join again, you will need to ask the owner to
+                                reinvite you.
                               </div>
                             </div>,
                             handleLeaveGroup

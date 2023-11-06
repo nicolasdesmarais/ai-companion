@@ -34,10 +34,8 @@ export const ConfirmModal = () => {
     >
       <DialogContent>
         <DialogHeader className="space-y-4">
-          <DialogTitle className="text-center">
-            {confirmModal.title}
-          </DialogTitle>
-          <DialogDescription className="text-center space-y-2">
+          <DialogTitle className="text-left">{confirmModal.title}</DialogTitle>
+          <DialogDescription className="text-left space-y-2">
             {confirmModal.body}
           </DialogDescription>
         </DialogHeader>
