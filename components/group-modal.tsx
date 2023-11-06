@@ -33,6 +33,7 @@ import { useUser } from "@clerk/nextjs";
 import { GroupAvailability } from "@prisma/client";
 import { Loader, X } from "lucide-react";
 import * as z from "zod";
+import { useConfirmModal } from "@/hooks/use-confirm-modal";
 
 const groupFormSchema = z.object({
   name: z.string().min(1, {
@@ -54,6 +55,7 @@ export const GroupModal = () => {
   const { toast } = useToast();
   const { user } = useUser();
   const groupModal = useGroupModal();
+  const confirmModal = useConfirmModal();
 
   const form = useForm<z.infer<typeof groupFormSchema>>({
     resolver: zodResolver(groupFormSchema),
@@ -390,7 +392,19 @@ export const GroupModal = () => {
                     <Button
                       size="lg"
                       variant="destructive"
-                      onClick={handleDelete}
+                      onClick={() =>
+                        confirmModal.onOpen(
+                          "Delete Group?",
+                          <div>
+                            <div>
+                              Are you sure you want to delete the{" "}
+                              {form.getValues("name")} group?
+                            </div>
+                            <div>This action cannot be undone.</div>
+                          </div>,
+                          handleDelete
+                        )
+                      }
                       className="bg-red-600 hover:bg-red-700"
                       disabled={loading}
                       type="button"
