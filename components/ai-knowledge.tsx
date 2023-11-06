@@ -156,12 +156,12 @@ export const AIKnowledge = ({
           </p>
           <h3 className="text-md font-medium mt-6 mb-2">Data Sources</h3>
           <div className="grid grid-cols-3 gap-4">
-            <DataSourceCard
+            {/* <DataSourceCard
               icon={PlusCircle}
               title="Your Data Stores"
               description="Select a data store you created for a different AI."
               isDisabled={true}
-            />
+            /> */}
             <DataSourceCard
               icon={FileUp}
               title="Upload Files"
@@ -180,7 +180,7 @@ export const AIKnowledge = ({
               description="Import data from a cloud storage bucket."
               onClick={() => router.push(`/ai/${aiId}/edit/knowledge/cloud`)}
             />
-            <DataSourceCard
+            {/* <DataSourceCard
               icon={Database}
               title="SQL Query"
               description="Import data from a SQL table."
@@ -191,7 +191,7 @@ export const AIKnowledge = ({
               title="API"
               description="Import data manually by calling an API."
               isDisabled={true}
-            />
+            /> */}
           </div>
         </>
       )}
