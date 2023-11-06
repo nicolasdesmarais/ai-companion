@@ -31,7 +31,7 @@ import { CreateGroupRequest } from "@/src/domain/types/CreateGroupRequest";
 import { UpdateGroupRequest } from "@/src/domain/types/UpdateGroupRequest";
 import { useUser } from "@clerk/nextjs";
 import { GroupAvailability } from "@prisma/client";
-import { Loader } from "lucide-react";
+import { Loader, X } from "lucide-react";
 import * as z from "zod";
 
 const groupFormSchema = z.object({
@@ -49,6 +49,8 @@ export const GroupModal = () => {
   const [currentTeammates, setCurrentTeammates] = useState<any[]>([]);
   const [removedTeammates, setRemovedTeammates] = useState<any[]>([]);
   const [isOwner, setIsOwner] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filteredTeammates, setFilteredTeammates] = useState<any[]>([]);
   const { toast } = useToast();
   const { user } = useUser();
   const groupModal = useGroupModal();
@@ -72,6 +74,7 @@ export const GroupModal = () => {
       form.setValue("name", response.data.name);
       setSelectedOption(response.data.availability);
       setCurrentTeammates(response.data.users);
+      setFilteredTeammates(response.data.users);
       setIsOwner(response.data.ownerUserId === user?.id);
     } else {
       toast({
@@ -236,7 +239,7 @@ export const GroupModal = () => {
           </div>
         ) : (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 name="name"
                 control={form.control}
@@ -309,7 +312,7 @@ export const GroupModal = () => {
                     name="teammates"
                     control={form.control}
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="border-l border-ring pl-4">
                         <FormLabel>Add teammates</FormLabel>
                         <FormControl>
                           <Textarea
@@ -327,22 +330,48 @@ export const GroupModal = () => {
                         Shared with {currentTeammates.length}{" "}
                         {currentTeammates.length === 1 ? "person" : "people"}
                       </h4>
-                      <ul className="list-disc pl-5 mt-2">
-                        {currentTeammates.map((teammate) => (
-                          <li
-                            key={teammate.id}
-                            className="flex justify-between items-center mb-2"
-                          >
-                            {teammate.email}
-                            <button
-                              onClick={() => handleRemoveTeammate(teammate)}
-                              className="text-red-600 px-2 py-1"
+                      <div className="rounded-md border mt-2">
+                        {currentTeammates.length > 4 && (
+                          <FormItem className="border-b">
+                            <FormControl>
+                              <Input
+                                placeholder="Search"
+                                disabled={loading}
+                                value={search}
+                                className="border-none"
+                                onChange={(e) => {
+                                  setSearch(e.target.value);
+                                  if (e.target.value === "") {
+                                    setFilteredTeammates(currentTeammates);
+                                  } else {
+                                    setFilteredTeammates(
+                                      currentTeammates.filter((teammate) =>
+                                        teammate.email.includes(e.target.value)
+                                      )
+                                    );
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                        <ul className="list-disc mt-2 max-h-44 overflow-auto">
+                          {filteredTeammates.map((teammate) => (
+                            <li
+                              key={teammate.id}
+                              className="flex justify-between items-center mb-2 border-b pl-2 last:border-b-0"
                             >
-                              &#x2716;
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
+                              {teammate.email}
+                              <button
+                                onClick={() => handleRemoveTeammate(teammate)}
+                                className="px-2 py-1"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
                   )}
                 </>
