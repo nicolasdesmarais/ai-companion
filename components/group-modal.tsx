@@ -332,48 +332,52 @@ export const GroupModal = () => {
                         Shared with {currentTeammates.length}{" "}
                         {currentTeammates.length === 1 ? "person" : "people"}
                       </h4>
-                      <div className="rounded-md border mt-2">
-                        {currentTeammates.length > 4 && (
-                          <FormItem className="border-b">
-                            <FormControl>
-                              <Input
-                                placeholder="Search"
-                                disabled={loading}
-                                value={search}
-                                className="border-none"
-                                onChange={(e) => {
-                                  setSearch(e.target.value);
-                                  if (e.target.value === "") {
-                                    setFilteredTeammates(currentTeammates);
-                                  } else {
-                                    setFilteredTeammates(
-                                      currentTeammates.filter((teammate) =>
-                                        teammate.email.includes(e.target.value)
-                                      )
-                                    );
-                                  }
-                                }}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                        <ul className="list-disc mt-2 max-h-44 overflow-auto">
-                          {filteredTeammates.map((teammate) => (
-                            <li
-                              key={teammate.id}
-                              className="flex justify-between items-center mb-2 border-b pl-2 last:border-b-0"
-                            >
-                              {teammate.email}
-                              <button
-                                onClick={() => handleRemoveTeammate(teammate)}
-                                className="px-2 py-1"
+                      {currentTeammates.length > 0 && (
+                        <div className="rounded-md border mt-2">
+                          {currentTeammates.length > 4 && (
+                            <FormItem className="border-b">
+                              <FormControl>
+                                <Input
+                                  placeholder="Search"
+                                  disabled={loading}
+                                  value={search}
+                                  className="border-none"
+                                  onChange={(e) => {
+                                    setSearch(e.target.value);
+                                    if (e.target.value === "") {
+                                      setFilteredTeammates(currentTeammates);
+                                    } else {
+                                      setFilteredTeammates(
+                                        currentTeammates.filter((teammate) =>
+                                          teammate.email.includes(
+                                            e.target.value
+                                          )
+                                        )
+                                      );
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                          <ul className="list-disc mt-2 max-h-44 overflow-auto">
+                            {filteredTeammates.map((teammate) => (
+                              <li
+                                key={teammate.id}
+                                className="flex justify-between items-center mb-2 border-b pl-2 last:border-b-0"
                               >
-                                <X className="w-4 h-4" />
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                                {teammate.email}
+                                <button
+                                  onClick={() => handleRemoveTeammate(teammate)}
+                                  className="px-2 py-1"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   )}
                 </>
