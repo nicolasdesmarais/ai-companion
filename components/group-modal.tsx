@@ -425,7 +425,21 @@ export const GroupModal = () => {
                       <Button
                         size="lg"
                         variant="destructive"
-                        onClick={handleLeaveGroup}
+                        onClick={() =>
+                          confirmModal.onOpen(
+                            "Leave Group?",
+                            <div>
+                              <div>
+                                Are you sure you want to delete the{" "}
+                                {form.getValues("name")} group?
+                              </div>
+                              <div>
+                                You will need to be invited again to re-join.
+                              </div>
+                            </div>,
+                            handleLeaveGroup
+                          )
+                        }
                         className="bg-red-600 hover:bg-red-700"
                         disabled={loading}
                         type="button"
