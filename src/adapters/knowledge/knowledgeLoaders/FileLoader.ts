@@ -6,7 +6,7 @@ import { getTokenLength } from "@/src/lib/tokenCount";
 import { Knowledge } from "@prisma/client";
 import { writeFile } from "fs/promises";
 import { CSVLoader } from "langchain/document_loaders/fs/csv";
-import { DocxLoader } from "langchain/document_loaders/fs/docx";
+import { DocxLoader } from "./DocxLoader";
 import { EPubLoader } from "langchain/document_loaders/fs/epub";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";

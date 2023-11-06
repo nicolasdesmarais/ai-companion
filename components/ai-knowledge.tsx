@@ -23,6 +23,7 @@ import { FileUploadKnowledge } from "./file-upload-knowledge";
 import { GoogleDriveForm } from "./google-drive-knowledge";
 import { WebUrlsForm } from "./web-urls-knowledge-form";
 import { KnowledgeIndexStatus } from "@prisma/client";
+import { Banner } from "./ui/banner";
 
 interface SelectDataSourceProps {
   form: any;
@@ -62,6 +63,13 @@ export const AIKnowledge = ({
     setRemoving("");
   };
 
+  const inProgress = dataSources.some(
+    (dataSource: any) =>
+      dataSource.indexPercentage !== "100" &&
+      dataSource.indexStatus !== "FAILED"
+  );
+  console.log(dataSources);
+
   return (
     <div className="h-full p-4 max-w-3xl mx-auto">
       {pathname.endsWith("knowledge") && (
@@ -71,7 +79,13 @@ export const AIKnowledge = ({
             The following files and sources are currently being used to inform
             your AI&apos;s knowledge.
           </p>
-
+          {inProgress && (
+            <Banner className="mt-2">
+              Data sources are being indexed. You can continue without loosing
+              any progress.
+              <div>Return later to check on progress.</div>
+            </Banner>
+          )}
           <div className="max-h-96 overflow-auto">
             <Table
               headers={["NAME", "TYPE", "LAST MODIFIED", "Progress", "Remove"]}
@@ -142,12 +156,12 @@ export const AIKnowledge = ({
           </p>
           <h3 className="text-md font-medium mt-6 mb-2">Data Sources</h3>
           <div className="grid grid-cols-3 gap-4">
-            <DataSourceCard
+            {/* <DataSourceCard
               icon={PlusCircle}
               title="Your Data Stores"
               description="Select a data store you created for a different AI."
               isDisabled={true}
-            />
+            /> */}
             <DataSourceCard
               icon={FileUp}
               title="Upload Files"
@@ -166,7 +180,7 @@ export const AIKnowledge = ({
               description="Import data from a cloud storage bucket."
               onClick={() => router.push(`/ai/${aiId}/edit/knowledge/cloud`)}
             />
-            <DataSourceCard
+            {/* <DataSourceCard
               icon={Database}
               title="SQL Query"
               description="Import data from a SQL table."
@@ -177,7 +191,7 @@ export const AIKnowledge = ({
               title="API"
               description="Import data manually by calling an API."
               isDisabled={true}
-            />
+            /> */}
           </div>
         </>
       )}

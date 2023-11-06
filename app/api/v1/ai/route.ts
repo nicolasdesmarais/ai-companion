@@ -1,6 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-
+import groupService from "@/src/domain/services/GroupService";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
 
@@ -20,6 +20,7 @@ export async function POST(req: Request) {
       modelId,
       visibility,
       options,
+      groups,
     } = body;
 
     if (!user?.id || !orgId) {
@@ -53,8 +54,17 @@ export async function POST(req: Request) {
             dataSource: true,
           },
         },
+        groups: true,
       },
     });
+
+    if (visibility !== "GROUP") {
+      await groupService.updateAIGroups(ai.id, []);
+      ai.groups = [];
+    } else if (groups && groups.length > 0) {
+      await groupService.updateAIGroups(ai.id, groups);
+      ai.groups = groups;
+    }
 
     return NextResponse.json(ai);
   } catch (error) {

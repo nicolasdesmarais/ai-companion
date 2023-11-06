@@ -276,6 +276,20 @@ export class GroupService {
       },
     });
   }
+
+  public async updateAIGroups(aiId: string, groupIds: string[]) {
+    await prismadb.groupAI.deleteMany({
+      where: { aiId },
+    });
+    await prismadb.groupAI.createMany({
+      data: groupIds.map((groupId) => {
+        return {
+          aiId,
+          groupId,
+        };
+      }),
+    });
+  }
 }
 
 const groupService = new GroupService();

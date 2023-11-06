@@ -18,14 +18,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { Category, Prisma } from "@prisma/client";
+import { Category, Prisma, Group } from "@prisma/client";
 import axios, { AxiosError } from "axios";
-import { Loader, Wand2 } from "lucide-react";
-import { useState } from "react";
+import { Loader, Wand2, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 import { models } from "./ai-models";
+import { useGroupModal } from "@/hooks/use-group-modal";
 
 const PREAMBLE = `You are a fictional character whose name is Elon. You are a visionary entrepreneur and inventor. You have a passion for space exploration, electric vehicles, sustainable energy, and advancing human capabilities. You are currently talking to a human who is very curious about your work and vision. You are ambitious and forward-thinking, with a touch of wit. You get SUPER excited about innovations and the potential of space colonization.
 `;
@@ -58,15 +60,24 @@ type ExtendedAI = Prisma.AIGetPayload<typeof extendedAI>;
 interface AIFormProps {
   categories: Category[];
   form: any;
+  groups: Group[];
 }
 
-export const AICharacter = ({ categories, form }: AIFormProps) => {
+export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
   const { toast } = useToast();
+  const groupModal = useGroupModal();
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatingInstruction, setGeneratingInstruction] = useState(false);
   const [generatingConversation, setGeneratingConversation] = useState(false);
+  const [groupList, setGroupList] = useState<Group[]>(groups || []);
 
   const isLoading = form.formState.isSubmitting;
+
+  useEffect(() => {
+    if (groupModal.data) {
+      setGroupList(groupModal.data);
+    }
+  }, [groupModal.data]);
 
   const generateAvatar = async () => {
     setGeneratingImage(true);
@@ -456,6 +467,47 @@ export const AICharacter = ({ categories, form }: AIFormProps) => {
             </Select>
             <FormDescription>Control who can see your AI</FormDescription>
             <FormMessage />
+            {field.value === "GROUP" ? (
+              <FormField
+                name="groups"
+                control={form.control}
+                render={({ field }) => (
+                  <div className="border-l border-ring pl-4 mt-4">
+                    {groupList.map((group) => (
+                      <div key={group.id}>
+                        <Checkbox
+                          id={group.id}
+                          checked={(field.value || []).includes(group.id)}
+                          onCheckedChange={(val) =>
+                            val
+                              ? field.onChange([
+                                  group.id,
+                                  ...(field.value || []),
+                                ])
+                              : field.onChange(
+                                  field.value?.filter(
+                                    (v: string) => v !== group.id
+                                  )
+                                )
+                          }
+                        >
+                          {group.name}
+                        </Checkbox>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      disabled={isLoading}
+                      variant="ring"
+                      onClick={() => groupModal.onOpen()}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Group
+                    </Button>
+                  </div>
+                )}
+              />
+            ) : null}
           </FormItem>
         )}
       />

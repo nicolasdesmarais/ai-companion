@@ -1,5 +1,6 @@
 import { AIs } from "@/components/ais";
 import { Categories } from "@/components/categories";
+import { ConfirmModal } from "@/components/confirm-modal";
 import { GroupModal } from "@/components/group-modal";
 import { Groups } from "@/components/groups";
 import { InviteButton } from "@/components/invite-button";
@@ -73,6 +74,7 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
       )}
       <AIs data={data} />
       <GroupModal />
+      <ConfirmModal />
     </div>
   );
 };

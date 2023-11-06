@@ -31,8 +31,10 @@ import { CreateGroupRequest } from "@/src/domain/types/CreateGroupRequest";
 import { UpdateGroupRequest } from "@/src/domain/types/UpdateGroupRequest";
 import { useUser } from "@clerk/nextjs";
 import { GroupAvailability } from "@prisma/client";
-import { Loader } from "lucide-react";
+import { Loader, X } from "lucide-react";
 import * as z from "zod";
+import { useConfirmModal } from "@/hooks/use-confirm-modal";
+import { Banner } from "./ui/banner";
 
 const groupFormSchema = z.object({
   name: z.string().min(1, {
@@ -49,9 +51,12 @@ export const GroupModal = () => {
   const [currentTeammates, setCurrentTeammates] = useState<any[]>([]);
   const [removedTeammates, setRemovedTeammates] = useState<any[]>([]);
   const [isOwner, setIsOwner] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filteredTeammates, setFilteredTeammates] = useState<any[]>([]);
   const { toast } = useToast();
   const { user } = useUser();
   const groupModal = useGroupModal();
+  const confirmModal = useConfirmModal();
 
   const form = useForm<z.infer<typeof groupFormSchema>>({
     resolver: zodResolver(groupFormSchema),
@@ -72,6 +77,7 @@ export const GroupModal = () => {
       form.setValue("name", response.data.name);
       setSelectedOption(response.data.availability);
       setCurrentTeammates(response.data.users);
+      setFilteredTeammates(response.data.users);
       setIsOwner(response.data.ownerUserId === user?.id);
     } else {
       toast({
@@ -236,7 +242,14 @@ export const GroupModal = () => {
           </div>
         ) : (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {groupModal.groupId &&
+                !isOwner &&
+                selectedOption === GroupAvailability.RESTRICTED && (
+                  <Banner>
+                    Only the group owner can rename or delete this group.
+                  </Banner>
+                )}
               <FormField
                 name="name"
                 control={form.control}
@@ -309,7 +322,7 @@ export const GroupModal = () => {
                     name="teammates"
                     control={form.control}
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="border-l border-ring pl-4">
                         <FormLabel>Add teammates</FormLabel>
                         <FormControl>
                           <Textarea
@@ -327,22 +340,52 @@ export const GroupModal = () => {
                         Shared with {currentTeammates.length}{" "}
                         {currentTeammates.length === 1 ? "person" : "people"}
                       </h4>
-                      <ul className="list-disc pl-5 mt-2">
-                        {currentTeammates.map((teammate) => (
-                          <li
-                            key={teammate.id}
-                            className="flex justify-between items-center mb-2"
-                          >
-                            {teammate.email}
-                            <button
-                              onClick={() => handleRemoveTeammate(teammate)}
-                              className="text-red-600 px-2 py-1"
-                            >
-                              &#x2716;
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
+                      {currentTeammates.length > 0 && (
+                        <div className="rounded-md border mt-2">
+                          {currentTeammates.length > 4 && (
+                            <FormItem className="border-b">
+                              <FormControl>
+                                <Input
+                                  placeholder="Search"
+                                  disabled={loading}
+                                  value={search}
+                                  className="border-none"
+                                  onChange={(e) => {
+                                    setSearch(e.target.value);
+                                    if (e.target.value === "") {
+                                      setFilteredTeammates(currentTeammates);
+                                    } else {
+                                      setFilteredTeammates(
+                                        currentTeammates.filter((teammate) =>
+                                          teammate.email.includes(
+                                            e.target.value
+                                          )
+                                        )
+                                      );
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                          <ul className="list-disc mt-2 max-h-44 overflow-auto">
+                            {filteredTeammates.map((teammate) => (
+                              <li
+                                key={teammate.id}
+                                className="flex justify-between items-center mb-2 border-b pl-2 last:border-b-0"
+                              >
+                                {teammate.email}
+                                <button
+                                  onClick={() => handleRemoveTeammate(teammate)}
+                                  className="px-2 py-1"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   )}
                 </>
@@ -361,7 +404,19 @@ export const GroupModal = () => {
                     <Button
                       size="lg"
                       variant="destructive"
-                      onClick={handleDelete}
+                      onClick={() =>
+                        confirmModal.onOpen(
+                          "Delete Group?",
+                          <div>
+                            <div>
+                              Are you sure you want to delete the{" "}
+                              {form.getValues("name")} group?
+                            </div>
+                            <div>This action cannot be undone.</div>
+                          </div>,
+                          handleDelete
+                        )
+                      }
                       className="bg-red-600 hover:bg-red-700"
                       disabled={loading}
                       type="button"
@@ -378,7 +433,22 @@ export const GroupModal = () => {
                       <Button
                         size="lg"
                         variant="destructive"
-                        onClick={handleLeaveGroup}
+                        onClick={() =>
+                          confirmModal.onOpen(
+                            "Leave Group?",
+                            <div>
+                              <div>
+                                Are you sure you want to leave the{" "}
+                                {form.getValues("name")} group?
+                              </div>
+                              <div>
+                                To join again, you will need to ask the owner to
+                                reinvite you.
+                              </div>
+                            </div>,
+                            handleLeaveGroup
+                          )
+                        }
                         className="bg-red-600 hover:bg-red-700"
                         disabled={loading}
                         type="button"

@@ -112,21 +112,21 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
       <div className="flex gap-x-2 items-center">
         <BotAvatar src={conversation.ai.src} />
         <div className="flex flex-col gap-y-1">
+          <p className="font-bold">{conversation.ai.name}</p>
           <div className="flex items-center gap-x-2">
-            <p className="font-bold">{conversation.ai.name}</p>
+            <p className="text-xs text-muted-foreground">
+              Created by {conversation.ai.userName}
+            </p>
             <div className="flex items-center text-xs text-muted-foreground">
               <MessagesSquare className="w-3 h-3 mr-1" />
               {conversation._count.messages}
             </div>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Created by {conversation.ai.userName}
-          </p>
         </div>
       </div>
-      <div>
+      <div className="flex">
         <Button
-          variant="secondary"
+          variant="ghost"
           size="icon"
           className="mr-4"
           type="button"
@@ -136,7 +136,7 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="secondary" size="icon">
+            <Button variant="ghost" size="icon">
               <MoreVertical />
             </Button>
           </DropdownMenuTrigger>

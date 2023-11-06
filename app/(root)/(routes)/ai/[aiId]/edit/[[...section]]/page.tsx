@@ -1,6 +1,8 @@
 import { AIEditor } from "@/components/ai-editor";
 import prismadb from "@/src/lib/prismadb";
 import { auth, redirectToSignIn } from "@clerk/nextjs";
+import groupService from "@/src/domain/services/GroupService";
+import { GroupModal } from "@/components/group-modal";
 
 interface AIIdPageProps {
   params: {
@@ -9,7 +11,7 @@ interface AIIdPageProps {
 }
 
 const AIIdPage = async ({ params }: AIIdPageProps) => {
-  const { userId } = auth();
+  const { userId, orgId } = await auth();
 
   if (!userId) {
     return redirectToSignIn();
@@ -26,12 +28,24 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
           dataSource: true,
         },
       },
+      groups: true,
     },
   });
 
+  if (initialAi) {
+    initialAi.groups = initialAi.groups.map((g: any) => g.groupId);
+  }
+
   const categories = await prismadb.category.findMany();
 
-  return <AIEditor initialAi={initialAi} categories={categories} />;
+  const groups = await groupService.findGroupsByUser(orgId, userId);
+
+  return (
+    <>
+      <AIEditor initialAi={initialAi} categories={categories} groups={groups} />
+      <GroupModal />
+    </>
+  );
 };
 
 export default AIIdPage;

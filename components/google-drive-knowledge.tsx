@@ -44,15 +44,23 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
 
   const fetchAccount = async () => {
     setLoading(true);
-    const response = await axios.get(
-      `/api/v1/integrations/google-drive/accounts`
-    );
-    setAccounts(response.data);
-    if (response.data.length > 0) {
-      setSelectedAccount(response.data[0]?.id);
-    } else {
-      setSearching(false);
+    try {
+      const response = await axios.get(
+        `/api/v1/integrations/google-drive/accounts`
+      );
+      setAccounts(response.data);
+      if (response.data.length > 0) {
+        setSelectedAccount(response.data[0]?.id);
+      } else {
+        setSearching(false);
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: "Something went wrong",
+      });
     }
+
     setLoading(false);
   };
 
