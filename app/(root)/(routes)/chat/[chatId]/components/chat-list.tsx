@@ -4,6 +4,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useConversations } from "@/hooks/use-conversations";
 import { cn } from "@/src/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
+import path from "path";
 import { useEffect } from "react";
 
 export const ChatList = () => {
@@ -24,7 +25,7 @@ export const ChatList = () => {
   );
 
   return (
-    <div className="hidden sm:flex flex-col h-full p-2 bg-accent/30 overflow-y-auto w-96">
+    <div className="hidden md:flex flex-col h-full py-4 px-2 bg-accent/30 overflow-y-auto shrink-0 w-80">
       <div className="flex flex-wrap">
         {pinned.map((conversation: any) => (
           <div className="w-1/3 p-1" key={conversation.id}>
@@ -47,23 +48,35 @@ export const ChatList = () => {
           </div>
         ))}
       </div>
-      {unpinned.map((conversation: any) => (
+      {unpinned.map((conversation: any, index) => (
         <div
           onClick={() => router.push(`/chat/${conversation.id}`)}
           className={cn(
-            "flex gap-x-2 items-center h-20 text-primary rounded-lg p-2 mb-2 transition",
-            pathname.endsWith(conversation.id)
-              ? "bg-accent"
-              : "hover:text-primary hover:bg-primary/10 cursor-pointer"
+            "flex gap-x-2 items-center min-h-20 text-primary rounded-lg p-2 mb-2 transition",
+            pathname.endsWith(conversation.id) ? "bg-accent" : "cursor-pointer"
           )}
           key={conversation.id}
         >
           <BotAvatar src={conversation.ai.src} />
-          <div className="flex flex-col gap-y-1 w-full">
+          <div
+            className={cn(
+              "flex flex-col gap-y-1 w-full border-b border-muted-foreground pb-2",
+              index === unpinned.length - 1 ||
+                pathname.endsWith(conversation.id) ||
+                (unpinned[index + 1] &&
+                  pathname.endsWith(unpinned[index + 1].id))
+                ? "border-none"
+                : ""
+            )}
+          >
             <div className="flex items-center gap-x-2">
               <p className="font-bold text-ellipsis">{conversation.name}</p>
             </div>
-            <div className="text-xs text-muted-foreground w-full pb-2 border-b border-muted-foreground text-ellipsis h-9 overflow-hidden">
+            <div
+              className={cn(
+                "text-xs text-muted-foreground w-full text-ellipsis h-8 overflow-hidden"
+              )}
+            >
               {conversation.ai.description}
             </div>
           </div>

@@ -90,7 +90,7 @@ export const ChatClient = ({ conversation }: ChatClientProps) => {
     stream = completion;
   }
   return (
-    <div className="flex flex-col h-full w-full space-y-2 ml-1">
+    <div className="flex flex-col h-full w-full space-y-2 ml-1 shrink">
       <ChatHeader conversation={conversation} />
       <ChatMessages
         ai={conversation.ai}
