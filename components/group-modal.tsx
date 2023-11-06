@@ -34,6 +34,7 @@ import { GroupAvailability } from "@prisma/client";
 import { Loader, X } from "lucide-react";
 import * as z from "zod";
 import { useConfirmModal } from "@/hooks/use-confirm-modal";
+import { Banner } from "./ui/banner";
 
 const groupFormSchema = z.object({
   name: z.string().min(1, {
@@ -242,6 +243,11 @@ export const GroupModal = () => {
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {groupModal.groupId &&
+                !isOwner &&
+                selectedOption === GroupAvailability.RESTRICTED && (
+                  <Banner text="Only the group owner can rename or delete this group." />
+                )}
               <FormField
                 name="name"
                 control={form.control}
