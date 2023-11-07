@@ -34,3 +34,29 @@ export const knowledgeEventReceived = inngest.createFunction(
     });
   }
 );
+
+export const pollIndexingDataSources = inngest.createFunction(
+  { id: "poll-indexing-datasources" },
+  { cron: "0 * * * *" },
+  async ({ step }) => {
+    const dataSources = await step.run("get-indexing-datasources", async () => {
+      return await dataSourceService.getIndexingDataSources();
+    });
+
+    const steps = [];
+    for (const dataSource of dataSources) {
+      steps.push(
+        step.run("poll-datasource", async () => {
+          await dataSourceService.pollDataSource(
+            dataSource.id,
+            dataSource.type
+          );
+        })
+      );
+    }
+
+    if (steps.length > 0) {
+      await Promise.all(steps);
+    }
+  }
+);
