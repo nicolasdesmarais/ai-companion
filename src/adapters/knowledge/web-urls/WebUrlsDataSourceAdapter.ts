@@ -115,7 +115,7 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       `Retrieving actor run result for indexingRunId=${metadata.indexingRunId}`
     );
     const result = await apifyAdapter.getActorRunResult(metadata.indexingRunId);
-    if (!result.isSuccessful) {
+    if (!result.isSuccessful || !result.items) {
       console.log(
         `Actor run for indexingRunId=${metadata.indexingRunId} was unsuccessful`
       );
@@ -124,13 +124,11 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       };
     }
 
-    console.log(
-      `Successful actor run for indexingRunId=${metadata.indexingRunId}, with ${result.items.length} items`
-    );
-
-    const { documentCount, totalTokenCount } = await fileLoader.loadJsonArray(
-      result.items,
-      knowledge.id
+    const { documentCount, totalTokenCount } = await fileLoader.loadFile(
+      knowledge.id,
+      knowledge.name,
+      "text/csv",
+      this.bufferToBlob(result.items)
     );
 
     const cloudBlob = await put(
@@ -150,6 +148,18 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
         totalTokenCount,
       },
     };
+  }
+
+  private bufferToBlob(buffer: Buffer): Blob {
+    const arrayBuffer = new ArrayBuffer(buffer.length);
+    const view = new Uint8Array(arrayBuffer);
+    for (let i = 0; i < buffer.length; ++i) {
+      view[i] = buffer[i];
+    }
+
+    const blob = new Blob([arrayBuffer]);
+
+    return blob;
   }
 }
 

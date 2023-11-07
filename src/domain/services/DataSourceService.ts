@@ -316,13 +316,20 @@ export class DataSourceService {
     await this.updateCompletedKnowledgeDataSources(knowledge.id);
   }
 
-  public async pollDataSourceStatus() {
-    console.log("Polling data source status");
+  /**
+   *
+   * @returns Returns a list of ids of DataSources which are in Indexing status
+   * and haven't been updated in the past hours
+   */
+  public async getIndexingDataSources() {
     const currentDate = new Date();
     const oneHourAgo = new Date(currentDate.getTime() - 60 * 60 * 1000);
 
-    const dataSources = await prismadb.dataSource.findMany({
-      take: 1,
+    return await prismadb.dataSource.findMany({
+      select: {
+        id: true,
+        type: true,
+      },
       where: {
         indexStatus: DataSourceIndexStatus.INDEXING,
         updatedAt: {
@@ -331,35 +338,34 @@ export class DataSourceService {
         type: DataSourceType.WEB_URL, // limit to WEB_URLs for now
       },
     });
+  }
 
-    if (dataSources.length === 0) {
-      return;
-    }
-
-    const dataSource = dataSources[0];
-    const knowledges = await prismadb.knowledge.findMany({
+  public async pollDataSource(
+    dataSourceId: string,
+    dataSourceType: DataSourceType
+  ) {
+    const knowledgeList = await prismadb.knowledge.findMany({
       where: {
         indexStatus: {
           in: [KnowledgeIndexStatus.INITIALIZED, KnowledgeIndexStatus.INDEXING],
         },
         dataSources: {
           some: {
-            dataSourceId: dataSource.id,
+            dataSourceId: dataSourceId,
           },
         },
       },
     });
 
-    console.log(`Polling data source ${dataSource.id}`);
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
-    for (const knowledge of knowledges) {
+    const dataSourceAdapter = this.getDataSourceAdapter(dataSourceType);
+    for (const knowledge of knowledgeList) {
       const indexKnowledgeResponse =
         await dataSourceAdapter.pollKnowledgeIndexingStatus(knowledge);
 
       await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
     }
 
-    await this.updateDataSourceStatus(dataSource.id);
+    await this.updateDataSourceStatus(dataSourceId);
   }
 
   private async persistIndexedKnowledge(

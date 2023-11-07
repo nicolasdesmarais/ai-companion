@@ -1,4 +1,8 @@
-import { ActorStartOptions, ApifyClient } from "apify-client";
+import {
+  ActorStartOptions,
+  ApifyClient,
+  DownloadItemsFormat,
+} from "apify-client";
 
 const client = new ApifyClient({
   token: process.env.APIFY_TOKEN,
@@ -123,27 +127,20 @@ export class ApifyAdapter {
   public async getActorRunResult(actorRunId: string) {
     let result: {
       isSuccessful: boolean;
-      items: any[];
+      items?: Buffer;
     };
 
     const actorRun = await client.run(actorRunId).get();
     if (!actorRun) {
       result = {
         isSuccessful: false,
-        items: [],
       };
 
       return result;
     }
 
     const dataset = await client.run(actorRunId).dataset();
-    const listItems = await dataset.listItems();
-    const items = listItems.items.map((item) => {
-      return {
-        pageTitle: item.pageTitle,
-        allText: item.allText,
-      };
-    });
+    const items = await dataset.downloadItems(DownloadItemsFormat.CSV);
 
     result = {
       isSuccessful: true,
