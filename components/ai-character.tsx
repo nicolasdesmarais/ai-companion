@@ -24,10 +24,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Category, Prisma, Group } from "@prisma/client";
 import axios, { AxiosError } from "axios";
-import { Loader, Wand2, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
-import { models } from "./ai-models";
+import { Loader, Wand2, Plus, Settings } from "lucide-react";
+import { use, useEffect, useState } from "react";
+import { models, imageModels } from "./ai-models";
 import { useGroupModal } from "@/hooks/use-group-modal";
+import { set } from "date-fns";
 
 const PREAMBLE = `You are a fictional character whose name is Elon. You are a visionary entrepreneur and inventor. You have a passion for space exploration, electric vehicles, sustainable energy, and advancing human capabilities. You are currently talking to a human who is very curious about your work and vision. You are ambitious and forward-thinking, with a touch of wit. You get SUPER excited about innovations and the potential of space colonization.
 `;
@@ -70,6 +71,9 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
   const [generatingInstruction, setGeneratingInstruction] = useState(false);
   const [generatingConversation, setGeneratingConversation] = useState(false);
   const [groupList, setGroupList] = useState<Group[]>(groups || []);
+  const [advancedImage, setAdvancedImage] = useState(false);
+  const [imagePrompt, setImagePrompt] = useState("");
+  const [imageModel, setImageModel] = useState("stable-diffusion-xl");
 
   const isLoading = form.formState.isSubmitting;
 
@@ -79,16 +83,25 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
     }
   }, [groupModal.data]);
 
+  useEffect(() => {
+    if (!advancedImage) {
+      const name = form.getValues("name");
+      const description = form.getValues("description");
+      if (name && description) {
+        setImagePrompt(
+          `${name}, ${description}: photorealistic portrait. shot of the sony a7rv 35mm f1.8. HDR. 4k.`
+        );
+      }
+    }
+  }, [advancedImage, form.getValues("name"), form.getValues("description")]);
+
   const generateAvatar = async () => {
     setGeneratingImage(true);
-    const name = form.getValues("name");
-    const description = form.getValues("description");
-    if (name && description) {
+    if (imagePrompt) {
       try {
         const response = await axios.post("/api/image", {
-          prompt: `Image of ${name}, ${description}: intricate, elegant, highly detailed, concept art, smooth, sharp focus, 8K`,
-          amount: 1,
-          resolution: "512x512",
+          prompt: imagePrompt,
+          model: imageModel,
         });
         form.setValue("src", response.data.secure_url, { shouldDirty: true });
       } catch (error) {
@@ -104,7 +117,7 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
       toast({
         variant: "destructive",
         description:
-          "Name and description are required to generate the avatar.",
+          "Name and description or custom prompt is required to generate the avatar.",
         duration: 6000,
       });
     }
@@ -215,19 +228,60 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
                 value={field.value}
               />
             </FormControl>
-            <Button
-              type="button"
-              disabled={isLoading || generatingImage}
-              variant="outline"
-              onClick={() => generateAvatar()}
-            >
-              Generate Avatar Image
-              {generatingImage ? (
-                <Loader className="w-4 h-4 ml-2 spinner" />
-              ) : (
-                <Wand2 className="w-4 h-4 ml-2" />
+            {advancedImage && (
+              <div>
+                <Textarea
+                  disabled={isLoading || generatingImage}
+                  rows={2}
+                  placeholder="Image generation prompt"
+                  className="bg-background resize-none mb-2"
+                  value={imagePrompt}
+                  onChange={(e) => setImagePrompt(e.target.value)}
+                />
+                <Select
+                  disabled={isLoading || generatingImage}
+                  onValueChange={(val) => setImageModel(val)}
+                  value={imageModel}
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="Select a model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {imageModels.map((model) => (
+                      <SelectItem key={model.id} value={model.id}>
+                        {model.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="flex space-x-1">
+              <Button
+                type="button"
+                disabled={isLoading || generatingImage}
+                variant="outline"
+                onClick={() => generateAvatar()}
+              >
+                Generate Avatar Image
+                {generatingImage ? (
+                  <Loader className="w-4 h-4 ml-2 spinner" />
+                ) : (
+                  <Wand2 className="w-4 h-4 ml-2" />
+                )}
+              </Button>
+              {!advancedImage && (
+                <Button
+                  type="button"
+                  disabled={isLoading || generatingImage}
+                  variant="ghost"
+                  onClick={() => setAdvancedImage(true)}
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
               )}
-            </Button>
+            </div>
+
             <FormMessage />
           </FormItem>
         )}

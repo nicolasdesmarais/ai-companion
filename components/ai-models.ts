@@ -142,3 +142,22 @@ export const models = [
   //   },
   // },
 ];
+
+export const imageModels = [
+  {
+    id: "kandinsky-21",
+    name: "Kandinsky 2.1",
+  },
+  {
+    id: "dalle-2",
+    name: "DALLE 2",
+  },
+  {
+    id: "stable-diffusion-xl",
+    name: "Stable Diffusion XL",
+  },
+  {
+    id: "latent-consistency",
+    name: "Latent Consistency",
+  },
+];
