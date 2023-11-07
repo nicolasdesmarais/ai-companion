@@ -73,7 +73,7 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
   const [groupList, setGroupList] = useState<Group[]>(groups || []);
   const [advancedImage, setAdvancedImage] = useState(false);
   const [imagePrompt, setImagePrompt] = useState("");
-  const [imageModel, setImageModel] = useState("stable-diffusion-xl");
+  const [imageModel, setImageModel] = useState("latent-consistency");
 
   const isLoading = form.formState.isSubmitting;
 
