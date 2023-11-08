@@ -36,9 +36,18 @@ export class MemoryManager {
       process.env.PINECONE_INDEX! || ""
     );
 
-    await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
-      pineconeIndex,
-    });
+    await PineconeStore.fromDocuments(
+      docs,
+      new OpenAIEmbeddings({
+        azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
+        azureOpenAIApiVersion: "2023-05-15",
+        azureOpenAIApiInstanceName: "prod-appdirectai-east2",
+        azureOpenAIApiDeploymentName: "text-embedding-ada-002",
+      }),
+      {
+        pineconeIndex,
+      }
+    );
   }
 
   public async vectorSearch(
@@ -53,7 +62,12 @@ export class MemoryManager {
     );
 
     const vectorStore = await PineconeStore.fromExistingIndex(
-      new OpenAIEmbeddings({ openAIApiKey: process.env.OPENAI_API_KEY }),
+      new OpenAIEmbeddings({
+        azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
+        azureOpenAIApiVersion: "2023-05-15",
+        azureOpenAIApiInstanceName: "prod-appdirectai-east2",
+        azureOpenAIApiDeploymentName: "text-embedding-ada-002",
+      }),
       { pineconeIndex }
     );
 
