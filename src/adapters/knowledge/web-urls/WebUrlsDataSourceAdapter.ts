@@ -124,20 +124,17 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       };
     }
 
+    const itemsBlob = this.bufferToBlob(result.items);
     const { documentCount, totalTokenCount } = await fileLoader.loadFile(
       knowledge.id,
       knowledge.name,
       "text/csv",
-      this.bufferToBlob(result.items)
+      itemsBlob
     );
 
-    const cloudBlob = await put(
-      `${knowledge.name}.json`,
-      JSON.stringify(result),
-      {
-        access: "public",
-      }
-    );
+    const cloudBlob = await put(`${knowledge.name}.json`, itemsBlob, {
+      access: "public",
+    });
     knowledge.blobUrl = cloudBlob.url;
     return {
       indexStatus: KnowledgeIndexStatus.COMPLETED,
