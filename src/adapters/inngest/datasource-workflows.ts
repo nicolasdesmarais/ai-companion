@@ -49,6 +49,7 @@ export const knowledgeEventReceived = inngest.createFunction(
         knowledgeIndexingResult.knowledgeId,
         indexingResult
       );
+    });
   }
 );
 
