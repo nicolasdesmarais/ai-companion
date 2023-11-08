@@ -15,12 +15,12 @@ export const TalkModal = () => {
   }, []);
 
   useEffect(() => {
-    if (ref.current) {
-      ref.current.load();
-      ref.current.addEventListener("ended", () => {
+    ref.current?.load();
+    ref.current?.addEventListener("ended", () => {
+      if (ref.current) {
         ref.current.currentTime = 0;
-      });
-    }
+      }
+    });
   }, [talkModal.src]);
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export const TalkModal = () => {
           className="rounded-lg object-cover"
         >
           <p>
-            Your browser doesn't support HTML video. Here is a
+            Your browser doesn&apos;t support HTML video. Here is a
             <a href={talkModal.src}>link to the video</a> instead.
           </p>
         </video>
