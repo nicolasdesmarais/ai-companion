@@ -63,35 +63,35 @@ export class FileLoader {
       } else {
         throw new BadRequestError(`Unsupported file type ${mimeType}`);
       }
+
+      console.log(`Loaded ${docs.length} documents`);
+      let totalTokenCount = 0;
+      for (const doc of docs) {
+        doc.metadata.source = filename;
+        doc.metadata.knowledge = knowledgeId;
+        const tokenCount = getTokenLength(doc.pageContent);
+        totalTokenCount += tokenCount;
+        doc.metadata.tokenCount = tokenCount;
+      }
+
+      const splitter = new RecursiveCharacterTextSplitter({
+        chunkSize: 4000,
+        chunkOverlap: 600,
+      });
+
+      const docOutput = await splitter.splitDocuments(docs);
+
+      const memoryManager = await MemoryManager.getInstance();
+      await memoryManager.vectorUpload(docOutput);
+
+      return {
+        documentCount: docOutput.length,
+        totalTokenCount,
+      };
     } catch (e) {
-      console.error(e);
+      console.error("[FILE LOADER]", e, e.response?.data?.error);
       throw new Error(`Error loading file ${filename}`);
     }
-
-    console.log(`Loaded ${docs.length} documents`);
-    let totalTokenCount = 0;
-    for (const doc of docs) {
-      doc.metadata.source = filename;
-      doc.metadata.knowledge = knowledgeId;
-      const tokenCount = getTokenLength(doc.pageContent);
-      totalTokenCount += tokenCount;
-      doc.metadata.tokenCount = tokenCount;
-    }
-
-    const splitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 4000,
-      chunkOverlap: 600,
-    });
-
-    const docOutput = await splitter.splitDocuments(docs);
-
-    const memoryManager = await MemoryManager.getInstance();
-    await memoryManager.vectorUpload(docOutput);
-
-    return {
-      documentCount: docOutput.length,
-      totalTokenCount,
-    };
   }
 
   public async loadJsonArray(jsonArray: any[], knowlegeId: string) {
