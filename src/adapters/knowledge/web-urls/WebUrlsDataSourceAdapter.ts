@@ -1,18 +1,21 @@
 import { BadRequestError } from "@/src/domain/errors/Errors";
-import {
-  ApifySupportedEvents,
-  ApifyWebhookEvent,
-} from "@/src/domain/types/ApifyWebhookEvent";
+import { ApifyWebhookEvent } from "@/src/domain/types/ApifyWebhookEvent";
+import { logWithTimestamp } from "@/src/lib/logging";
 import {
   DataSourceType,
   Knowledge,
   KnowledgeIndexStatus,
 } from "@prisma/client";
 import { put } from "@vercel/blob";
+import axios from "axios";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import { DataSourceItemList } from "../types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
+import {
+  KnowledgeIndexingResult,
+  KnowledgeIndexingResultStatus,
+} from "../types/KnowlegeIndexingResult";
 import apifyAdapter from "./ApifyAdapter";
 import { WebUrlDataSourceInput } from "./types/WebUrlDataSourceInput";
 import { WebUrlMetadata } from "./types/WebUrlMetadata";
@@ -70,10 +73,10 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
     return event.knowledgeId;
   }
 
-  public async handleKnowledgeIndexedEvent(
+  public async getKnowledgeResultFromEvent(
     knowledge: Knowledge,
     data: any
-  ): Promise<IndexKnowledgeResponse> {
+  ): Promise<KnowledgeIndexingResult> {
     const event = data as ApifyWebhookEvent;
     const metadata = knowledge.metadata as unknown as WebUrlMetadata;
     const actorRunId = event.eventData.actorRunId;
@@ -81,13 +84,52 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       throw new BadRequestError("Event actorRunId does not match metadata");
     }
 
-    if (event.eventType !== ApifySupportedEvents.ACTOR_RUN_SUCCEEDED) {
+    return await this.getActorRunResult(knowledge, metadata);
+  }
+
+  public async loadKnowledgeResult(
+    knowledge: Knowledge,
+    result: KnowledgeIndexingResult
+  ): Promise<IndexKnowledgeResponse> {
+    if (!result.blobUrl) {
       return {
         indexStatus: KnowledgeIndexStatus.FAILED,
       };
     }
 
-    return await this.getActorRunResult(knowledge, metadata);
+    logWithTimestamp(`Loading blob content for knowledge ${knowledge.id}`);
+    const blob = await this.getBlobContent(result.blobUrl);
+    logWithTimestamp(`Loaded blob content for knowledge ${knowledge.id}`);
+
+    const { documentCount, totalTokenCount } = await fileLoader.loadFile(
+      knowledge.id,
+      knowledge.name,
+      "text/csv",
+      blob
+    );
+
+    logWithTimestamp(`Loaded file for knowledge ${knowledge.id}`);
+
+    let indexStatus;
+    switch (result.status) {
+      case KnowledgeIndexingResultStatus.SUCCESSFUL:
+        indexStatus = KnowledgeIndexStatus.COMPLETED;
+        break;
+      case KnowledgeIndexingResultStatus.PARTIAL:
+        indexStatus = KnowledgeIndexStatus.PARTIALLY_COMPLETED;
+        break;
+      case KnowledgeIndexingResultStatus.FAILED:
+        indexStatus = KnowledgeIndexStatus.FAILED;
+    }
+
+    return {
+      indexStatus,
+      blobUrl: result.blobUrl,
+      metadata: {
+        documentCount,
+        totalTokenCount,
+      },
+    };
   }
 
   public async pollKnowledgeIndexingStatus(
@@ -100,7 +142,11 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       };
     }
 
-    return this.getActorRunResult(knowledge, metadata);
+    // return this.getActorRunResult(knowledge, metadata);
+    //TODO: Re-implement
+    return {
+      indexStatus: KnowledgeIndexStatus.INDEXING,
+    };
   }
 
   public async deleteKnowledge(knowledgeId: string): Promise<void> {
@@ -110,41 +156,44 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
   private async getActorRunResult(
     knowledge: Knowledge,
     metadata: WebUrlMetadata
-  ): Promise<IndexKnowledgeResponse> {
-    console.log(
+  ) {
+    logWithTimestamp(
       `Retrieving actor run result for indexingRunId=${metadata.indexingRunId}`
     );
     const result = await apifyAdapter.getActorRunResult(metadata.indexingRunId);
-    if (!result.isSuccessful || !result.items) {
-      console.log(
-        `Actor run for indexingRunId=${metadata.indexingRunId} was unsuccessful`
-      );
-      return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
-      };
-    }
-
-    const itemsBlob = this.bufferToBlob(result.items);
-    const { documentCount, totalTokenCount } = await fileLoader.loadFile(
-      knowledge.id,
-      knowledge.name,
-      "text/csv",
-      itemsBlob
+    logWithTimestamp(
+      `Retrieved actor run result for indexingRunId=${metadata.indexingRunId}`
     );
 
-    const cloudBlob = await put(`${knowledge.name}.json`, itemsBlob, {
-      access: "public",
-    });
-    knowledge.blobUrl = cloudBlob.url;
+    let blobUrl;
+    if (
+      result.items &&
+      (result.status === KnowledgeIndexingResultStatus.PARTIAL ||
+        result.status === KnowledgeIndexingResultStatus.SUCCESSFUL)
+    ) {
+      const itemsBlob = this.bufferToBlob(result.items);
+      const cloudBlob = await put(`${knowledge.name}.json`, itemsBlob, {
+        access: "public",
+      });
+      blobUrl = cloudBlob.url;
+    }
+
     return {
-      indexStatus: KnowledgeIndexStatus.COMPLETED,
-      blobUrl: cloudBlob.url,
-      metadata: {
-        ...metadata,
-        documentCount,
-        totalTokenCount,
-      },
+      status: result.status,
+      blobUrl,
     };
+
+    // const { documentCount, totalTokenCount } = await fileLoader.loadFile(
+    //   knowledge.id,
+    //   knowledge.name,
+    //   "text/csv",
+    //   itemsBlob
+    // );
+
+    // return {
+    //   indexStatus: KnowledgeIndexStatus.INDEXING,
+    //   blobUrl: cloudBlob.url,
+    // };
   }
 
   private bufferToBlob(buffer: Buffer): Blob {
@@ -157,6 +206,23 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
     const blob = new Blob([arrayBuffer]);
 
     return blob;
+  }
+
+  private async getBlobContent(url: string): Promise<Blob> {
+    try {
+      const response = await axios.get(url, {
+        responseType: "blob",
+      });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error fetching data: ", error.message);
+        throw error;
+      } else {
+        console.error("Unexpected error: ", error);
+        throw new Error("An unexpected error occurred");
+      }
+    }
   }
 }
 

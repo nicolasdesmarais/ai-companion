@@ -26,12 +26,29 @@ export const knowledgeEventReceived = inngest.createFunction(
   async ({ event, step }) => {
     const { dataSourceType, data } = event.data;
 
-    await step.run("handle-knowledge-event-received", async () => {
-      await dataSourceService.handleKnowledgeEventReceived(
+    const knowledgeIndexingResult = await step.run(
+      "handle-knowledge-event-received",
+      async () => {
+        return await dataSourceService.getKnowledgeResultFromEvent(
+          dataSourceType,
+          data
+        );
+      }
+    );
+
+    const indexingResult = await step.run("load-knowledge-result", async () => {
+      return await dataSourceService.loadKnowledgeResult(
         dataSourceType,
-        data
+        knowledgeIndexingResult.knowledgeId,
+        knowledgeIndexingResult.result
       );
     });
+
+    await step.run("persist-knowledge-indexing-result", async () => {
+      await dataSourceService.persistIndexingResult(
+        knowledgeIndexingResult.knowledgeId,
+        indexingResult
+      );
   }
 );
 

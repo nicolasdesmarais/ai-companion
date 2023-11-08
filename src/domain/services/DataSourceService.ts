@@ -4,7 +4,9 @@ import googleDriveDataSourceAdapter from "@/src/adapters/knowledge/google-drive/
 import { DataSourceAdapter } from "@/src/adapters/knowledge/types/DataSourceAdapter";
 import { DataSourceItemList } from "@/src/adapters/knowledge/types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "@/src/adapters/knowledge/types/IndexKnowledgeResponse";
+import { KnowledgeIndexingResult } from "@/src/adapters/knowledge/types/KnowlegeIndexingResult";
 import webUrlsDataSourceAdapter from "@/src/adapters/knowledge/web-urls/WebUrlsDataSourceAdapter";
+import { logWithTimestamp } from "@/src/lib/logging";
 import prismadb from "@/src/lib/prismadb";
 import {
   DataSourceIndexStatus,
@@ -294,7 +296,7 @@ export class DataSourceService {
    * @param dataSourceType
    * @param data
    */
-  public async handleKnowledgeEventReceived(
+  public async getKnowledgeResultFromEvent(
     dataSourceType: DataSourceType,
     data: any
   ) {
@@ -309,10 +311,50 @@ export class DataSourceService {
       );
     }
 
-    const indexKnowledgeResponse =
-      await dataSourceAdapter.handleKnowledgeIndexedEvent(knowledge, data);
+    const result = await dataSourceAdapter.getKnowledgeResultFromEvent(
+      knowledge,
+      data
+    );
+    return {
+      knowledgeId: knowledge.id,
+      result,
+    };
+  }
 
+  public async loadKnowledgeResult(
+    dataSourceType: DataSourceType,
+    knowledgeId: string,
+    result: KnowledgeIndexingResult
+  ) {
+    const dataSourceAdapter = this.getDataSourceAdapter(dataSourceType);
+    const knowledge = await prismadb.knowledge.findUnique({
+      where: { id: knowledgeId },
+    });
+    if (!knowledge) {
+      throw new EntityNotFoundError(
+        `Knowledge with id=${knowledgeId} not found`
+      );
+    }
+
+    return await dataSourceAdapter.loadKnowledgeResult(knowledge, result);
+  }
+
+  public async persistIndexingResult(
+    knowledgeId: string,
+    indexKnowledgeResponse: IndexKnowledgeResponse
+  ) {
+    const knowledge = await prismadb.knowledge.findUnique({
+      where: { id: knowledgeId },
+    });
+    if (!knowledge) {
+      throw new EntityNotFoundError(
+        `Knowledge with id=${knowledgeId} not found`
+      );
+    }
+
+    logWithTimestamp("Persisting indexing result");
     await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
+    logWithTimestamp("Updated data source status");
     await this.updateCompletedKnowledgeDataSources(knowledge.id);
   }
 
