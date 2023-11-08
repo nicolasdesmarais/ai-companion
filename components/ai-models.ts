@@ -161,3 +161,42 @@ export const imageModels = [
     name: "Latent Consistency",
   },
 ];
+
+export const voices = [
+  {
+    id: "en-US-JennyNeural",
+    name: "Jenny",
+  },
+  {
+    id: "en-US-GuyNeural",
+    name: "Guy",
+  },
+  {
+    id: "en-US-AriaNeural",
+    name: "Aria",
+  },
+  {
+    id: "en-US-DavisNeural",
+    name: "Davis",
+  },
+  {
+    id: "en-US-JaneNeural",
+    name: "Jane",
+  },
+  {
+    id: "en-US-JasonNeural",
+    name: "Jason",
+  },
+  {
+    id: "en-US-NancyNeural",
+    name: "Nancy",
+  },
+  {
+    id: "en-US-SaraNeural",
+    name: "Sara",
+  },
+  {
+    id: "en-US-JaneNeural",
+    name: "Jane",
+  },
+];

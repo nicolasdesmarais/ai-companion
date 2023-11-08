@@ -57,8 +57,6 @@ export async function POST(req: Request) {
       return new NextResponse("Resolution is required", { status: 400 });
     }
 
-    console.log(model, prompt);
-
     if (model === "dalle-2") {
       const response = await openai.createImage({
         prompt,

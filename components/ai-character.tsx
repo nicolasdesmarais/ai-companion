@@ -24,11 +24,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Category, Prisma, Group } from "@prisma/client";
 import axios, { AxiosError } from "axios";
-import { Loader, Wand2, Plus, Settings } from "lucide-react";
-import { use, useEffect, useState } from "react";
-import { models, imageModels } from "./ai-models";
+import { Loader, Wand2, Plus, Settings, Play } from "lucide-react";
+import { useEffect, useState } from "react";
+import { models, imageModels, voices } from "./ai-models";
 import { useGroupModal } from "@/hooks/use-group-modal";
-import { set } from "date-fns";
+import { useTalkModal } from "@/hooks/use-talk-modal";
+import { TalkModal } from "./talk-modal";
 
 const PREAMBLE = `You are a fictional character whose name is Elon. You are a visionary entrepreneur and inventor. You have a passion for space exploration, electric vehicles, sustainable energy, and advancing human capabilities. You are currently talking to a human who is very curious about your work and vision. You are ambitious and forward-thinking, with a touch of wit. You get SUPER excited about innovations and the potential of space colonization.
 `;
@@ -67,6 +68,7 @@ interface AIFormProps {
 export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
   const { toast } = useToast();
   const groupModal = useGroupModal();
+  const talkModal = useTalkModal();
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatingInstruction, setGeneratingInstruction] = useState(false);
   const [generatingConversation, setGeneratingConversation] = useState(false);
@@ -94,6 +96,40 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
       }
     }
   }, [advancedImage, form.getValues("name"), form.getValues("description")]);
+
+  useEffect(() => {
+    if (form.getValues("src")) {
+      setupTalk();
+    }
+  }, [form.getValues("src")]);
+
+  const setupTalk = async () => {
+    form.setValue("talk", null, {
+      shouldDirty: true,
+    });
+    const create = await axios.post("/api/v1/talk", {
+      prompt: `Hello, I am ${form.getValues("name")}`,
+      imgUrl: form.getValues("src"),
+    });
+    if (create.data.id) {
+      const talk = await axios.get(`/api/v1/talk/${create.data.id}`);
+      if (talk.data.status !== "error") {
+        form.setValue("talk", talk.data.id, {
+          shouldDirty: true,
+        });
+      }
+    }
+  };
+
+  const playTalk = async () => {
+    const talkId = form.getValues("talk");
+    if (talkId) {
+      const talk = await axios.get(`/api/v1/talk/${talkId}`);
+      if (talk.data.status === "done") {
+        talkModal.onOpen(talk.data.result_url);
+      }
+    }
+  };
 
   const generateAvatar = async () => {
     setGeneratingImage(true);
@@ -403,6 +439,51 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
             </FormItem>
           )}
         />
+        <FormField
+          name="talk"
+          control={form.control}
+          render={({ field }) =>
+            field.value && (
+              <FormItem>
+                <FormLabel>Voice</FormLabel>
+                <div className="flex">
+                  <Select
+                    disabled={isLoading}
+                    value="en-US-JennyNeural"
+                    defaultValue="en-US-JennyNeural"
+                  >
+                    <FormControl>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Select a voice"
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {voices.map((model) => (
+                        <SelectItem key={model.id} value={model.id}>
+                          {model.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    type="button"
+                    disabled={isLoading || generatingImage}
+                    variant="ghost"
+                    className="ml-2"
+                    onClick={() => playTalk()}
+                  >
+                    <Play className="w-4 h-4" />
+                  </Button>
+                </div>
+                <FormDescription>Select a voice for your AI</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )
+          }
+        />
       </div>
       <div className="space-y-2 w-full">
         <div>
@@ -565,6 +646,7 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
           </FormItem>
         )}
       />
+      <TalkModal />
     </div>
   );
 };
