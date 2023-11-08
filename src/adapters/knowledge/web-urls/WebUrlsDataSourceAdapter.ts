@@ -1,4 +1,5 @@
 import { BadRequestError } from "@/src/domain/errors/Errors";
+import { DomainEvent } from "@/src/domain/events/domain-event";
 import {
   ApifySupportedEvents,
   ApifyWebhookEvent,
@@ -9,6 +10,7 @@ import {
   KnowledgeIndexStatus,
 } from "@prisma/client";
 import { put } from "@vercel/blob";
+import { publishEvent } from "../../inngest/event-publisher";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import { DataSourceItemList } from "../types/DataSourceItemList";
@@ -100,11 +102,23 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       };
     }
 
+    publishEvent(DomainEvent.WEB_URL_POLLING_REQUESTED, {
+      knowledge,
+      metadata,
+    });
+
     return this.getActorRunResult(knowledge, metadata);
   }
 
   public async deleteKnowledge(knowledgeId: string): Promise<void> {
     fileLoader.deleteKnowledge(knowledgeId);
+  }
+
+  public async getActorRunResults(
+    knowledge: Knowledge,
+    metadata: WebUrlMetadata
+  ): Promise<IndexKnowledgeResponse> {
+    return await apifyAdapter.getActorRunResult(metadata.indexingRunId);
   }
 
   private async getActorRunResult(
