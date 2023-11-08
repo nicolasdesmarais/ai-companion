@@ -53,6 +53,7 @@ const formSchema = z.object({
     .optional(),
   knowledge: z.array(z.custom<Knowledge>()).optional(),
   groups: z.array(z.string()).optional(),
+  talk: z.string().optional(),
 });
 
 const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
