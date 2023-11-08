@@ -98,7 +98,8 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
   }, [advancedImage, form.getValues("name"), form.getValues("description")]);
 
   useEffect(() => {
-    if (form.getValues("src")) {
+    const voiceEnabled = window.location.hostname !== "appdirect.ai";
+    if (voiceEnabled && form.getValues("src")) {
       setupTalk();
     }
   }, [form.getValues("src")]);

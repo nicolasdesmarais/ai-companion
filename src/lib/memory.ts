@@ -43,6 +43,7 @@ export class MemoryManager {
         azureOpenAIApiVersion: "2023-05-15",
         azureOpenAIApiInstanceName: "prod-appdirectai-east2",
         azureOpenAIApiDeploymentName: "text-embedding-ada-002",
+        batchSize: 16,
       }),
       {
         pineconeIndex,
@@ -67,6 +68,7 @@ export class MemoryManager {
         azureOpenAIApiVersion: "2023-05-15",
         azureOpenAIApiInstanceName: "prod-appdirectai-east2",
         azureOpenAIApiDeploymentName: "text-embedding-ada-002",
+        batchSize: 16,
       }),
       { pineconeIndex }
     );
