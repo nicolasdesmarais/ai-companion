@@ -26,7 +26,7 @@ import { Category, Prisma, Group } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { Loader, Wand2, Plus, Settings, Play } from "lucide-react";
 import { useEffect, useState } from "react";
-import { models, imageModels } from "./ai-models";
+import { models, imageModels, voices } from "./ai-models";
 import { useGroupModal } from "@/hooks/use-group-modal";
 import { useTalkModal } from "@/hooks/use-talk-modal";
 import { TalkModal } from "./talk-modal";
@@ -104,26 +104,25 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
   }, [form.getValues("src")]);
 
   const setupTalk = async () => {
-    const talk = await axios.post("/api/v1/talk", {
-      prompt: `Hello, I am ${form.getValues("name")}, ${form.getValues(
-        "description"
-      )}`,
+    console.log("setupTalk", form.getValues("src"));
+    const create = await axios.post("/api/v1/talk", {
+      prompt: `Hello, I am ${form.getValues("name")}`,
       imgUrl: form.getValues("src"),
     });
-    console.log("talk", talk);
-    if (talk.data.id) {
-      form.setValue("talk", talk.data.id, {
-        shouldDirty: true,
-      });
+    if (create.data.id) {
+      const talk = await axios.get(`/api/v1/talk/${create.data.id}`);
+      if (talk.data.status !== "error") {
+        form.setValue("talk", talk.data.id, {
+          shouldDirty: true,
+        });
+      }
     }
   };
 
   const playTalk = async () => {
     const talkId = form.getValues("talk");
-    console.log("talkid", talkId);
     if (talkId) {
       const talk = await axios.get(`/api/v1/talk/${talkId}`);
-      console.log(talk.data);
       if (talk.data.status === "done") {
         talkModal.onOpen(talk.data.result_url);
       }
@@ -448,8 +447,8 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
                 <div className="flex">
                   <Select
                     disabled={isLoading}
-                    value={field.value}
-                    defaultValue={field.value}
+                    value="en-US-JennyNeural"
+                    defaultValue="en-US-JennyNeural"
                   >
                     <FormControl>
                       <SelectTrigger className="bg-background">
@@ -460,7 +459,7 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {models.map((model) => (
+                      {voices.map((model) => (
                         <SelectItem key={model.id} value={model.id}>
                           {model.name}
                         </SelectItem>
@@ -471,6 +470,7 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
                     type="button"
                     disabled={isLoading || generatingImage}
                     variant="ghost"
+                    className="ml-2"
                     onClick={() => playTalk()}
                   >
                     <Play className="w-4 h-4" />
