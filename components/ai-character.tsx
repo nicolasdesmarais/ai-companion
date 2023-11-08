@@ -104,7 +104,9 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
   }, [form.getValues("src")]);
 
   const setupTalk = async () => {
-    console.log("setupTalk", form.getValues("src"));
+    form.setValue("talk", null, {
+      shouldDirty: true,
+    });
     const create = await axios.post("/api/v1/talk", {
       prompt: `Hello, I am ${form.getValues("name")}`,
       imgUrl: form.getValues("src"),
