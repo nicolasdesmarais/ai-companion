@@ -156,7 +156,7 @@ model Knowledge {
   updatedAt                 DateTime @updatedAt @default(now()) @map(name: "updated_at")
   lastIndexedAt             DateTime?                           @map(name: "last_indexed_at")
   userId                    String?                             @map(name: "user_id")
-  name                      String
+  name                      String  @db.Text
   type                      String
   indexStatus               KnowledgeIndexStatus?               @map(name :"index_status")
   blobUrl                   String?                             @map(name: "blob_url")
