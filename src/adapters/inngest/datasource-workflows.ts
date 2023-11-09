@@ -57,7 +57,7 @@ export const loadKnowledgeChunk = inngest.createFunction(
   {
     id: "knowledge-chunk-received",
     concurrency: {
-      limit: 5,
+      limit: 2,
     },
   },
   { event: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED },

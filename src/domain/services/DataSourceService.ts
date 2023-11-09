@@ -238,6 +238,9 @@ export class DataSourceService {
         case KnowledgeIndexStatus.COMPLETED:
           counts.completedKnowledges++;
           break;
+        case KnowledgeIndexStatus.PARTIALLY_COMPLETED:
+          counts.partiallyCompletedKnowledges++;
+          break;
         case KnowledgeIndexStatus.FAILED:
           counts.failedKnowledges++;
           break;
@@ -378,6 +381,7 @@ export class DataSourceService {
         }
       }
       const uniqCompletedChunks = new Set(meta.completedChunks);
+      meta.percentComplete = (uniqCompletedChunks.size / chunkCount) * 100;
       if (chunkCount === uniqCompletedChunks.size) {
         indexKnowledgeResponse.indexStatus = KnowledgeIndexStatus.COMPLETED;
       }
