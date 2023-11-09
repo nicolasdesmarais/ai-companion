@@ -36,20 +36,38 @@ export const knowledgeEventReceived = inngest.createFunction(
       }
     );
 
-    const indexingResult = await step.run("load-knowledge-result", async () => {
-      return await dataSourceService.loadKnowledgeResult(
-        dataSourceType,
-        knowledgeIndexingResult.knowledgeId,
-        knowledgeIndexingResult.result
-      );
-    });
+    if (knowledgeIndexingResult.result.chunkCount) {
+      const events = [];
+      for (let i = 0; i < knowledgeIndexingResult.result.chunkCount; i++) {
+        events.push({
+          name: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
+          data: {
+            knowledgeIndexingResult,
+            dataSourceType,
+            index: i,
+          },
+        });
+      }
+      await step.sendEvent("fan-out-knowledge-chunks", events);
+    }
+  }
+);
 
-    await step.run("persist-knowledge-indexing-result", async () => {
-      await dataSourceService.persistIndexingResult(
-        knowledgeIndexingResult.knowledgeId,
-        indexingResult
-      );
-    });
+export const loadKnowledgeChunk = inngest.createFunction(
+  { id: "knowledge-chunk-received" },
+  { event: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED },
+  async ({ event, step }) => {
+    const indexingResult = await dataSourceService.loadKnowledgeResult(
+      event.data.dataSourceType,
+      event.data.knowledgeIndexingResult.knowledgeId,
+      event.data.knowledgeIndexingResult.result,
+      event.data.index
+    );
+    await dataSourceService.persistIndexingResult(
+      event.data.knowledgeIndexingResult.knowledgeId,
+      indexingResult,
+      event.data.knowledgeIndexingResult.result.chunkCount
+    );
   }
 );
 

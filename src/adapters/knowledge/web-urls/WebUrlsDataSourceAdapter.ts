@@ -89,7 +89,8 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
 
   public async loadKnowledgeResult(
     knowledge: Knowledge,
-    result: KnowledgeIndexingResult
+    result: KnowledgeIndexingResult,
+    index: number
   ): Promise<IndexKnowledgeResponse> {
     if (!result.blobUrl) {
       return {
@@ -104,18 +105,18 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       };
     }
 
-    const { documentCount, totalTokenCount } = await fileLoader.loadJsonArray(
-      response.data.items,
+    let { documentCount, totalTokenCount } = await fileLoader.loadJsonArray(
+      [response.data.items[index]],
       knowledge.id
     );
 
-    logWithTimestamp(`Loaded file for knowledge ${knowledge.id}`);
+    logWithTimestamp(
+      `Loaded file for knowledge ${knowledge.id} index ${index}`
+    );
 
     let indexStatus;
     switch (result.status) {
       case KnowledgeIndexingResultStatus.SUCCESSFUL:
-        indexStatus = KnowledgeIndexStatus.COMPLETED;
-        break;
       case KnowledgeIndexingResultStatus.PARTIAL:
         indexStatus = KnowledgeIndexStatus.PARTIALLY_COMPLETED;
         break;
@@ -129,6 +130,7 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       metadata: {
         documentCount,
         totalTokenCount,
+        completedChunks: [index],
       },
     };
   }
@@ -163,7 +165,7 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
     );
     const result = await apifyAdapter.getActorRunResult(metadata.indexingRunId);
 
-    let blobUrl;
+    let blobUrl, chunkCount;
     if (
       result.items &&
       (result.status === KnowledgeIndexingResultStatus.PARTIAL ||
@@ -177,11 +179,13 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
         }
       );
       blobUrl = cloudBlob.url;
+      chunkCount = result.items.length;
     }
 
     return {
       status: result.status,
       blobUrl,
+      chunkCount,
     };
   }
 }

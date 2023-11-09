@@ -73,7 +73,8 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
 
   loadKnowledgeResult(
     knowledge: Knowledge,
-    result: KnowledgeIndexingResult
+    result: KnowledgeIndexingResult,
+    chunkCount: number
   ): Promise<IndexKnowledgeResponse> {
     throw new Error("Method not supported.");
   }

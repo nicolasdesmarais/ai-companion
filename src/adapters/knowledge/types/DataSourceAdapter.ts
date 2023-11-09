@@ -26,7 +26,8 @@ export interface DataSourceAdapter {
 
   loadKnowledgeResult(
     knowledge: Knowledge,
-    result: KnowledgeIndexingResult
+    result: KnowledgeIndexingResult,
+    chunkCount: number
   ): Promise<IndexKnowledgeResponse>;
 
   pollKnowledgeIndexingStatus(

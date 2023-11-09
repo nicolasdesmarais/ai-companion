@@ -2,6 +2,7 @@ import {
   dataSourceInitialized,
   knowledgeEventReceived,
   pollIndexingDataSources,
+  loadKnowledgeChunk,
 } from "@/src/adapters/inngest/datasource-workflows";
 import { serve } from "inngest/next";
 import { inngest } from "../../../src/adapters/inngest/client";
@@ -13,5 +14,6 @@ export const { GET, POST, PUT } = serve({
   functions: [
     dataSourceInitialized,
     knowledgeEventReceived,
+    loadKnowledgeChunk,
   ],
 });
