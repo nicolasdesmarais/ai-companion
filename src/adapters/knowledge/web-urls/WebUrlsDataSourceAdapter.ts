@@ -98,15 +98,22 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       };
     }
 
-    const response = await axios.get(result.blobUrl);
+    const response = await fetch(result.blobUrl);
     if (response.status !== 200) {
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
+    const data = await response.json();
+
+    if (!data.items || !data.items[index]) {
       return {
         indexStatus: KnowledgeIndexStatus.FAILED,
       };
     }
 
     let { documentCount, totalTokenCount } = await fileLoader.loadJsonArray(
-      [response.data.items[index]],
+      [data.items[index]],
       knowledge.id
     );
 

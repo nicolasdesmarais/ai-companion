@@ -54,7 +54,12 @@ export const knowledgeEventReceived = inngest.createFunction(
 );
 
 export const loadKnowledgeChunk = inngest.createFunction(
-  { id: "knowledge-chunk-received" },
+  {
+    id: "knowledge-chunk-received",
+    concurrency: {
+      limit: 5,
+    },
+  },
   { event: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED },
   async ({ event, step }) => {
     const indexingResult = await dataSourceService.loadKnowledgeResult(
