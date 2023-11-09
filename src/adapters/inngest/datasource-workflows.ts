@@ -57,22 +57,27 @@ export const loadKnowledgeChunk = inngest.createFunction(
   {
     id: "knowledge-chunk-received",
     concurrency: {
-      limit: 2,
+      limit: 1,
     },
   },
   { event: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED },
-  async ({ event, step }) => {
-    const indexingResult = await dataSourceService.loadKnowledgeResult(
-      event.data.dataSourceType,
-      event.data.knowledgeIndexingResult.knowledgeId,
-      event.data.knowledgeIndexingResult.result,
-      event.data.index
-    );
-    await dataSourceService.persistIndexingResult(
-      event.data.knowledgeIndexingResult.knowledgeId,
-      indexingResult,
-      event.data.knowledgeIndexingResult.result.chunkCount
-    );
+  async ({ event }) => {
+    try {
+      const indexingResult = await dataSourceService.loadKnowledgeResult(
+        event.data.dataSourceType,
+        event.data.knowledgeIndexingResult.knowledgeId,
+        event.data.knowledgeIndexingResult.result,
+        event.data.index
+      );
+      await dataSourceService.persistIndexingResult(
+        event.data.knowledgeIndexingResult.knowledgeId,
+        indexingResult,
+        event.data.knowledgeIndexingResult.result.chunkCount
+      );
+    } catch (e) {
+      console.error("[KNOWLEDGE CHUNK]", e);
+      throw (new Error("Error loading knowledge chunk"), e);
+    }
   }
 );
 
