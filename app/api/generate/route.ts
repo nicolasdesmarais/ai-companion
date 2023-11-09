@@ -1,18 +1,18 @@
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-import { OpenAI } from "langchain/llms/openai";
-
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { SystemChatMessage } from "langchain/schema";
 
 export const maxDuration = 300;
 
-const openai = new OpenAI({
-  openAIApiKey: process.env.OPENAI_API_KEY,
-  modelName: "gpt-4"
+const openai = new ChatOpenAI({
+  azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
+  azureOpenAIApiVersion: "2023-05-15",
+  azureOpenAIApiInstanceName: "prod-appdirectai-east2",
+  azureOpenAIApiDeploymentName: "gpt4-32k",
 });
 
-export async function POST(
-  req: Request
-) {
+export async function POST(req: Request) {
   try {
     const { userId } = auth();
     const body = await req.json();
@@ -26,19 +26,11 @@ export async function POST(
       return new NextResponse("Prompt is required", { status: 400 });
     }
 
-    const resp = String(
-      await openai
-          .call(prompt)
-          .catch(console.error)
-    );
+    const resp = await openai.call([new SystemChatMessage(prompt)]);
 
-    const cleaned = resp.replaceAll(",", "");
-    const chunks = cleaned.split("\n");
-    const response = chunks[0];
-
-    return NextResponse.json(response);
+    return NextResponse.json(resp.text);
   } catch (error) {
-    console.error('[GENERATE_ERROR]', error);
+    console.error("[GENERATE_ERROR]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
-};
+}
