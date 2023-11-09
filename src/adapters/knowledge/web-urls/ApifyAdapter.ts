@@ -131,13 +131,14 @@ export class ApifyAdapter {
   public async getActorRunResult(actorRunId: string) {
     let result: {
       status: KnowledgeIndexingResultStatus;
-      items?: Buffer;
+      items: any[];
     };
 
     const actorRun = await client.run(actorRunId).get();
     if (!actorRun) {
       result = {
         status: KnowledgeIndexingResultStatus.FAILED,
+        items: [],
       };
 
       return result;
@@ -153,7 +154,13 @@ export class ApifyAdapter {
     }
 
     const dataset = await client.run(actorRunId).dataset();
-    const items = await dataset.downloadItems(DownloadItemsFormat.CSV);
+    const listItems = await dataset.listItems();
+    const items = listItems.items.map((item) => {
+      return {
+        pageTitle: item.pageTitle,
+        allText: item.allText,
+      };
+    });
 
     result = {
       status,

@@ -80,7 +80,7 @@ export const AIKnowledge = ({
             your AI&apos;s knowledge.
           </p>
           {inProgress && (
-            <Banner className="mt-2">
+            <Banner className="my-2">
               Data sources are being indexed. You can continue without loosing
               any progress.
               <div>Return later to check on progress.</div>

@@ -421,7 +421,7 @@ export class DataSourceService {
       metadata?: any;
     } = {
       indexStatus: indexKnowledgeResponse.indexStatus,
-      blobUrl: knowledge.blobUrl,
+      blobUrl: knowledge.blobUrl || indexKnowledgeResponse.blobUrl || null,
       lastIndexedAt: new Date(),
     };
 

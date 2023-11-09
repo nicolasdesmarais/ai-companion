@@ -97,15 +97,16 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       };
     }
 
-    logWithTimestamp(`Loading blob content for knowledge ${knowledge.id}`);
-    const blob = await this.getBlobContent(result.blobUrl);
-    logWithTimestamp(`Loaded blob content for knowledge ${knowledge.id}`);
+    const response = await axios.get(result.blobUrl);
+    if (response.status !== 200) {
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
 
-    const { documentCount, totalTokenCount } = await fileLoader.loadFile(
-      knowledge.id,
-      knowledge.name,
-      "text/csv",
-      blob
+    const { documentCount, totalTokenCount } = await fileLoader.loadJsonArray(
+      response.data.items,
+      knowledge.id
     );
 
     logWithTimestamp(`Loaded file for knowledge ${knowledge.id}`);
@@ -161,9 +162,6 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       `Retrieving actor run result for indexingRunId=${metadata.indexingRunId}`
     );
     const result = await apifyAdapter.getActorRunResult(metadata.indexingRunId);
-    logWithTimestamp(
-      `Retrieved actor run result for indexingRunId=${metadata.indexingRunId}`
-    );
 
     let blobUrl;
     if (
@@ -171,10 +169,13 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       (result.status === KnowledgeIndexingResultStatus.PARTIAL ||
         result.status === KnowledgeIndexingResultStatus.SUCCESSFUL)
     ) {
-      const itemsBlob = this.bufferToBlob(result.items);
-      const cloudBlob = await put(`${knowledge.name}.json`, itemsBlob, {
-        access: "public",
-      });
+      const cloudBlob = await put(
+        `${knowledge.name}.json`,
+        JSON.stringify(result),
+        {
+          access: "public",
+        }
+      );
       blobUrl = cloudBlob.url;
     }
 
@@ -182,47 +183,6 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       status: result.status,
       blobUrl,
     };
-
-    // const { documentCount, totalTokenCount } = await fileLoader.loadFile(
-    //   knowledge.id,
-    //   knowledge.name,
-    //   "text/csv",
-    //   itemsBlob
-    // );
-
-    // return {
-    //   indexStatus: KnowledgeIndexStatus.INDEXING,
-    //   blobUrl: cloudBlob.url,
-    // };
-  }
-
-  private bufferToBlob(buffer: Buffer): Blob {
-    const arrayBuffer = new ArrayBuffer(buffer.length);
-    const view = new Uint8Array(arrayBuffer);
-    for (let i = 0; i < buffer.length; ++i) {
-      view[i] = buffer[i];
-    }
-
-    const blob = new Blob([arrayBuffer]);
-
-    return blob;
-  }
-
-  private async getBlobContent(url: string): Promise<Blob> {
-    try {
-      const response = await axios.get(url, {
-        responseType: "blob",
-      });
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Error fetching data: ", error.message);
-        throw error;
-      } else {
-        console.error("Unexpected error: ", error);
-        throw new Error("An unexpected error occurred");
-      }
-    }
   }
 }
 
