@@ -6,13 +6,10 @@ import { format } from "date-fns";
 import {
   ChevronLeft,
   Coffee,
-  Database,
   FileUp,
   Globe,
   Loader,
   MinusCircle,
-  Network,
-  PlusCircle,
   Server,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
@@ -68,7 +65,6 @@ export const AIKnowledge = ({
       dataSource.indexPercentage !== "100" &&
       dataSource.indexStatus !== "FAILED"
   );
-  console.log(dataSources);
 
   return (
     <div className="h-full p-4 max-w-3xl mx-auto">
