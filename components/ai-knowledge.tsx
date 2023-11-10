@@ -114,7 +114,7 @@ export const AIKnowledge = ({
                   <td className="p-2">
                     {dataSource.indexStatus === KnowledgeIndexStatus.FAILED
                       ? "Failed"
-                      : dataSource.indexPercentage + "%"}
+                      : Math.round(dataSource.indexPercentage) + "%"}
                   </td>
                   <td className="p-2 text-center">
                     <Button
