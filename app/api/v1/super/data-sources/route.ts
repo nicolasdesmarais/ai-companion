@@ -16,6 +16,11 @@ export async function GET(req: Request) {
             knowledge: true,
           },
         },
+        ais: {
+          include: {
+            ai: true,
+          },
+        },
       },
     });
     return NextResponse.json(datasources);
