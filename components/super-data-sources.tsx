@@ -24,7 +24,7 @@ import { WebUrlsForm } from "./web-urls-knowledge-form";
 import { KnowledgeIndexStatus } from "@prisma/client";
 import { Banner } from "./ui/banner";
 
-export const KnowledgeManager = () => {
+export const SuperDataSources = () => {
   const [dataSources, setDataSources] = useState<any[]>([]);
   const [removing, setRemoving] = useState("");
   const { toast } = useToast();
@@ -33,7 +33,7 @@ export const KnowledgeManager = () => {
 
   const fetchDataSources = async () => {
     try {
-      const response = await axios.get(`/api/v1/data-sources/`);
+      const response = await axios.get(`/api/v1/super/data-sources/`);
       setDataSources(response.data);
     } catch (error: any) {
       toast({

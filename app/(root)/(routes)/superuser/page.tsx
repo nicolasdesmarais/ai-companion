@@ -1,8 +1,7 @@
-import { KnowledgeManager } from "@/components/knowledge-manager";
+import { SuperDataSources } from "@/components/super-data-sources";
+import { isSuperuser } from "@/src/lib/utils";
 import { auth, redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-
-const superusers = ["user_2WXwDNSh5x5zxnabNzpSN2Z1JWs"];
 
 const SettingsPage = async () => {
   const { userId } = await auth();
@@ -11,16 +10,16 @@ const SettingsPage = async () => {
     return redirectToSignIn();
   }
 
-  if (!superusers.includes(userId)) {
+  if (!isSuperuser(userId)) {
     console.log("Superuser attempt", userId);
     return redirect("/");
   }
 
   return (
     <div className="h-full p-4 space-y-2">
-      <h3 className="text-lg font-medium">Knowledge Uploads</h3>
+      <h3 className="text-lg font-medium">All Data Sources</h3>
       <div className="text-muted-foreground text-sm">
-        <KnowledgeManager />
+        <SuperDataSources />
       </div>
     </div>
   );

@@ -9,10 +9,11 @@
     "esbenp.prettier-vscode",
     "christian-kohler.npm-intellisense",
     "jock.svg",
-    "DavidAnson.vscode-markdownlint",
+    "davidanson.vscode-markdownlint",
     "yzhang.markdown-all-in-one",
     "wayou.vscode-todo-highlight",
-    "streetsidesoftware.code-spell-checker"
+    "streetsidesoftware.code-spell-checker",
+    "prisma.prisma"
   ],
   // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
   "unwantedRecommendations": []
