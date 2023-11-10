@@ -240,7 +240,7 @@ export class DataSourceService {
         case KnowledgeIndexStatus.PARTIALLY_COMPLETED:
           partiallyCompletedKnowledges++;
           partiallyCompletedPercents +=
-            (knowledge.metadata as any)?.percentComplete || 0;
+            ((knowledge.metadata as any)?.percentComplete || 0) / 100;
           break;
         case KnowledgeIndexStatus.FAILED:
           failedKnowledges++;
