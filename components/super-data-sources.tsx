@@ -73,7 +73,18 @@ export const SuperDataSources = () => {
                 <div className="max-w-sm truncate">{dataSource.name}</div>
               </td>
               <td className="p-2">
-                {dataSource.ais.map((ai: any) => ai.ai.name)}
+                {dataSource.ais.map((ai: any) => {
+                  return (
+                    <Link
+                      key={ai.ai.id}
+                      target="_blank"
+                      href={`/ai/${ai.ai.id}`}
+                      className="text-ring"
+                    >
+                      {ai.ai.name}
+                    </Link>
+                  );
+                })}
               </td>
               <td className="p-2">
                 {
@@ -115,7 +126,7 @@ export const SuperDataSources = () => {
               <tr key={knowledge.id} className="items-center my-2 text-sm">
                 <td className="p-2 pl-10">
                   <div className="max-w-sm truncate">
-                    {knowledge.metadata.indexingRunId ? (
+                    {knowledge.metadata?.indexingRunId ? (
                       <Link
                         target="_blank"
                         href={`https://console.apify.com/organization/Xn4BErd8aMtmstvY2/actors/moJRLRc85AitArpNN/runs/${knowledge.metadata.indexingRunId}`}
@@ -129,7 +140,18 @@ export const SuperDataSources = () => {
                   </div>
                 </td>
                 <td className="p-2">
-                  {dataSource.ais.map((ai: any) => ai.ai.name)}
+                  {dataSource.ais.map((ai: any) => {
+                    return (
+                      <Link
+                        key={ai.ai.id}
+                        target="_blank"
+                        href={`/ai/${ai.ai.id}`}
+                        className="text-ring"
+                      >
+                        {ai.ai.name}
+                      </Link>
+                    );
+                  })}
                 </td>
                 <td className="p-2">{knowledge.type}</td>
                 <td className="p-2">
@@ -141,7 +163,8 @@ export const SuperDataSources = () => {
                     : null}
                 </td>
                 <td className="p-2">{knowledge.indexStatus}</td>
-                <td className="p-2">{knowledge.metadata.totalTokenCount}</td>
+                <td className="p-2">{knowledge.metadata?.documentCount}</td>
+                <td className="p-2">{knowledge.metadata?.totalTokenCount}</td>
                 <td className="p-2 text-center">
                   <Button
                     type="button"
