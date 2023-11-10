@@ -25,7 +25,7 @@ model AI {
   userName      String                          @map("user_name")
   src           String @db.Text
   name          String @db.Text
-  description   String
+  description   String @db.Text
   instructions  String @db.Text
   seed          String @db.Text
   visibility    AIVisibility @default(PRIVATE)
