@@ -224,37 +224,39 @@ export class DataSourceService {
     }
 
     const knowledgeCount = dataSource.knowledges.length;
-    const counts = {
-      partiallyCompletedKnowledges: 0,
-      indexingKnowledges: 0,
-      completedKnowledges: 0,
-      failedKnowledges: 0,
-    };
+    let partiallyCompletedKnowledges = 0,
+      partiallyCompletedPercents = 0,
+      indexingKnowledges = 0,
+      completedKnowledges = 0,
+      failedKnowledges = 0;
     for (const { knowledge } of dataSource.knowledges) {
       switch (knowledge.indexStatus) {
         case KnowledgeIndexStatus.INDEXING:
-          counts.indexingKnowledges++;
+          indexingKnowledges++;
           break;
         case KnowledgeIndexStatus.COMPLETED:
-          counts.completedKnowledges++;
+          completedKnowledges++;
           break;
         case KnowledgeIndexStatus.PARTIALLY_COMPLETED:
-          counts.partiallyCompletedKnowledges++;
+          partiallyCompletedKnowledges++;
+          partiallyCompletedPercents +=
+            (knowledge.metadata as any)?.percentComplete || 0;
           break;
         case KnowledgeIndexStatus.FAILED:
-          counts.failedKnowledges++;
+          failedKnowledges++;
           break;
       }
     }
-
-    const { indexingKnowledges, completedKnowledges, failedKnowledges } =
-      counts;
 
     let indexPercentage;
     if (knowledgeCount === 0) {
       indexPercentage = 100;
     } else {
-      indexPercentage = (completedKnowledges / knowledgeCount) * 100;
+      indexPercentage =
+        ((partiallyCompletedPercents / partiallyCompletedKnowledges +
+          completedKnowledges) /
+          knowledgeCount) *
+        100;
     }
 
     let indexingStatus;
