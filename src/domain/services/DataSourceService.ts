@@ -253,7 +253,9 @@ export class DataSourceService {
       indexPercentage = 100;
     } else {
       indexPercentage =
-        ((partiallyCompletedPercents / partiallyCompletedKnowledges +
+        (((partiallyCompletedKnowledges === 0
+          ? 0
+          : partiallyCompletedPercents / partiallyCompletedKnowledges) +
           completedKnowledges) /
           knowledgeCount) *
         100;
