@@ -20,6 +20,7 @@ import {
   DataSourceItemList,
 } from "../types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
+import { KnowledgeIndexingResult } from "../types/KnowlegeIndexingResult";
 import { GoogleDriveDataSourceInput } from "./types/GoogleDriveDataSourceInput";
 import { GoogleDriveFileMetadata } from "./types/GoogleDriveFileMetaData";
 
@@ -333,11 +334,19 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     throw new Error("Method not implemented.");
   }
 
-  public async handleKnowledgeIndexedEvent(
+  getKnowledgeResultFromEvent(
     knowledge: Knowledge,
     data: any
+  ): Promise<KnowledgeIndexingResult> {
+    throw new Error("Method not supported.");
+  }
+
+  loadKnowledgeResult(
+    knowledge: Knowledge,
+    result: KnowledgeIndexingResult,
+    chunkCount: number
   ): Promise<IndexKnowledgeResponse> {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not supported.");
   }
 
   public async pollKnowledgeIndexingStatus(

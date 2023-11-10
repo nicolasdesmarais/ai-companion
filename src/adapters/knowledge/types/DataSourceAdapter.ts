@@ -1,6 +1,7 @@
 import { Knowledge } from "@prisma/client";
 import { DataSourceItemList } from "./DataSourceItemList";
 import { IndexKnowledgeResponse } from "./IndexKnowledgeResponse";
+import { KnowledgeIndexingResult } from "./KnowlegeIndexingResult";
 
 export interface DataSourceAdapter {
   getDataSourceItemList(
@@ -18,9 +19,15 @@ export interface DataSourceAdapter {
 
   retrieveKnowledgeIdFromEvent(data: any): string;
 
-  handleKnowledgeIndexedEvent(
+  getKnowledgeResultFromEvent(
     knowledge: Knowledge,
     data: any
+  ): Promise<KnowledgeIndexingResult>;
+
+  loadKnowledgeResult(
+    knowledge: Knowledge,
+    result: KnowledgeIndexingResult,
+    chunkCount: number
   ): Promise<IndexKnowledgeResponse>;
 
   pollKnowledgeIndexingStatus(

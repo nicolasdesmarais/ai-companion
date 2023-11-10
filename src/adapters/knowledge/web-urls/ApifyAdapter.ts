@@ -3,6 +3,7 @@ import {
   ApifyClient,
   DownloadItemsFormat,
 } from "apify-client";
+import { KnowledgeIndexingResultStatus } from "../types/KnowlegeIndexingResult";
 
 const client = new ApifyClient({
   token: process.env.APIFY_TOKEN,
@@ -12,6 +13,9 @@ const webScraperActorId = process.env.APIFY_WEB_SCRAPER_ACTOR_ID;
 const runMode = process.env.APIFY_RUN_MODE;
 const webhookUrl = process.env.APIFY_WEBHOOK_URL;
 const webhookSecret = process.env.APIFY_WEBHOOK_SECRET;
+
+const failedStatuses = ["FAILED", "ABORTING", "ABORTED"];
+const partialStatuses = ["TIMING-OUT", "TIMED-OUT"];
 
 export class ApifyAdapter {
   async startUrlIndexing(knowledgeId: string, url: string) {
@@ -126,24 +130,40 @@ export class ApifyAdapter {
 
   public async getActorRunResult(actorRunId: string) {
     let result: {
-      isSuccessful: boolean;
-      items?: Buffer;
+      status: KnowledgeIndexingResultStatus;
+      items: any[];
     };
 
     const actorRun = await client.run(actorRunId).get();
     if (!actorRun) {
       result = {
-        isSuccessful: false,
+        status: KnowledgeIndexingResultStatus.FAILED,
+        items: [],
       };
 
       return result;
     }
 
+    let status;
+    if (failedStatuses.includes(actorRun.status)) {
+      status = KnowledgeIndexingResultStatus.FAILED;
+    } else if (partialStatuses.includes(actorRun.status)) {
+      status = KnowledgeIndexingResultStatus.PARTIAL;
+    } else {
+      status = KnowledgeIndexingResultStatus.SUCCESSFUL;
+    }
+
     const dataset = await client.run(actorRunId).dataset();
-    const items = await dataset.downloadItems(DownloadItemsFormat.CSV);
+    const listItems = await dataset.listItems();
+    const items = listItems.items.map((item) => {
+      return {
+        pageTitle: item.pageTitle,
+        allText: item.allText,
+      };
+    });
 
     result = {
-      isSuccessful: true,
+      status,
       items,
     };
     return result;

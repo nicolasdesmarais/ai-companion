@@ -4,13 +4,13 @@ import {
   KnowledgeIndexStatus,
 } from "@prisma/client";
 import { put } from "@vercel/blob";
+import { readFile } from "fs/promises";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import { DataSourceItemList } from "../types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
+import { KnowledgeIndexingResult } from "../types/KnowlegeIndexingResult";
 import { FileUploadDataSourceInput } from "./types/FileUploadDataSourceInput";
-import { readFile } from "fs/promises";
-import { read } from "fs";
 
 export class FileUploadDataSourceAdapter implements DataSourceAdapter {
   public async getDataSourceItemList(
@@ -64,11 +64,19 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
   retrieveKnowledgeIdFromEvent(data: any): string {
     throw new Error("Method not implemented.");
   }
-  handleKnowledgeIndexedEvent(
+  getKnowledgeResultFromEvent(
     knowledge: Knowledge,
     data: any
+  ): Promise<KnowledgeIndexingResult> {
+    throw new Error("Method not supported.");
+  }
+
+  loadKnowledgeResult(
+    knowledge: Knowledge,
+    result: KnowledgeIndexingResult,
+    chunkCount: number
   ): Promise<IndexKnowledgeResponse> {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not supported.");
   }
 
   public async pollKnowledgeIndexingStatus(
