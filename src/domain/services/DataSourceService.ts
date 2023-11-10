@@ -258,6 +258,14 @@ export class DataSourceService {
           knowledgeCount) *
         100;
     }
+    console.log(
+      "indexPercentage",
+      indexPercentage,
+      partiallyCompletedPercents,
+      partiallyCompletedKnowledges,
+      completedKnowledges,
+      knowledgeCount
+    );
 
     let indexingStatus;
     if (indexingKnowledges > 0) {
