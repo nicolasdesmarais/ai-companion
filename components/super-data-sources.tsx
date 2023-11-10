@@ -23,6 +23,8 @@ import { GoogleDriveForm } from "./google-drive-knowledge";
 import { WebUrlsForm } from "./web-urls-knowledge-form";
 import { KnowledgeIndexStatus } from "@prisma/client";
 import { Banner } from "./ui/banner";
+import { kn } from "date-fns/locale";
+import Link from "next/link";
 
 export const SuperDataSources = () => {
   const [dataSources, setDataSources] = useState<any[]>([]);
@@ -53,7 +55,15 @@ export const SuperDataSources = () => {
   return (
     <div>
       <Table
-        headers={["NAME", "AIs", "TYPE", "LAST MODIFIED", "Progress", "Remove"]}
+        headers={[
+          "NAME",
+          "AIs",
+          "TYPE",
+          "LAST MODIFIED",
+          "Progress",
+          "Tokens",
+          "Remove",
+        ]}
         className="w-full my-4 max-h-60"
       >
         {dataSources.map((dataSource: any) => (
@@ -85,6 +95,7 @@ export const SuperDataSources = () => {
                   ? "Failed"
                   : Math.round(dataSource.indexPercentage) + "%"}
               </td>
+              <td></td>
               <td className="p-2 text-center">
                 <Button
                   type="button"
@@ -103,7 +114,19 @@ export const SuperDataSources = () => {
             {dataSource.knowledges.map(({ knowledge }: any) => (
               <tr key={knowledge.id} className="items-center my-2 text-sm">
                 <td className="p-2 pl-10">
-                  <div className="max-w-sm truncate">{knowledge.name}</div>
+                  <div className="max-w-sm truncate">
+                    {knowledge.metadata.indexingRunId ? (
+                      <Link
+                        target="_blank"
+                        href={`https://console.apify.com/organization/Xn4BErd8aMtmstvY2/actors/moJRLRc85AitArpNN/runs/${knowledge.metadata.indexingRunId}`}
+                        className="text-ring"
+                      >
+                        {knowledge.name}
+                      </Link>
+                    ) : (
+                      knowledge.name
+                    )}
+                  </div>
                 </td>
                 <td className="p-2">
                   {dataSource.ais.map((ai: any) => ai.ai.name)}
@@ -117,11 +140,8 @@ export const SuperDataSources = () => {
                       )
                     : null}
                 </td>
-                <td className="p-2">
-                  {knowledge.indexStatus === KnowledgeIndexStatus.FAILED
-                    ? "Failed"
-                    : Math.round(knowledge.indexPercentage) + "%"}
-                </td>
+                <td className="p-2">{knowledge.indexStatus}</td>
+                <td className="p-2">{knowledge.metadata.totalTokenCount}</td>
                 <td className="p-2 text-center">
                   <Button
                     type="button"
