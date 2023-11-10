@@ -260,14 +260,6 @@ export class DataSourceService {
           knowledgeCount) *
         100;
     }
-    console.log(
-      "indexPercentage",
-      indexPercentage,
-      partiallyCompletedPercents,
-      partiallyCompletedKnowledges,
-      completedKnowledges,
-      knowledgeCount
-    );
 
     let indexingStatus;
     if (indexingKnowledges > 0) {
@@ -400,11 +392,6 @@ export class DataSourceService {
       console.log(
         `Knowledge ${knowledgeId}: ${uniqCompletedChunks.size} / ${chunkCount} loaded`
       );
-      // for (let i = 0; i < chunkCount; i++) {
-      //   if (!uniqCompletedChunks.has(i)) {
-      //     console.log(`Chunk ${i} not loaded yet`);
-      //   }
-      // }
 
       await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse, tx);
       await this.updateCompletedKnowledgeDataSources(knowledge.id, tx);

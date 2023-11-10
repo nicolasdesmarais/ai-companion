@@ -80,7 +80,6 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
     const popupInterval = setInterval(() => {
       if (popupWindow?.closed) {
         clearInterval(popupInterval);
-        console.log("window closed");
         fetchAccount();
       }
     }, 1000);
