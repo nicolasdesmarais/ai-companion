@@ -4,6 +4,15 @@ import { Document } from "langchain/document";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { PineconeStore } from "langchain/vectorstores/pinecone";
 
+const embeddingsConfig = {
+  azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
+  azureOpenAIApiVersion: "2023-05-15",
+  azureOpenAIApiInstanceName: "prod-appdirectai-east2",
+  azureOpenAIApiDeploymentName: "text-embedding-ada-002",
+  batchSize: 16,
+  maxConcurrency: 200,
+};
+
 export type AIKey = {
   aiName: string;
   modelName: string;
@@ -38,13 +47,7 @@ export class MemoryManager {
 
     await PineconeStore.fromDocuments(
       docs,
-      new OpenAIEmbeddings({
-        azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
-        azureOpenAIApiVersion: "2023-05-15",
-        azureOpenAIApiInstanceName: "prod-appdirectai-east2",
-        azureOpenAIApiDeploymentName: "text-embedding-ada-002",
-        batchSize: 16,
-      }),
+      new OpenAIEmbeddings(embeddingsConfig),
       {
         pineconeIndex,
       }
@@ -63,13 +66,7 @@ export class MemoryManager {
     );
 
     const vectorStore = await PineconeStore.fromExistingIndex(
-      new OpenAIEmbeddings({
-        azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
-        azureOpenAIApiVersion: "2023-05-15",
-        azureOpenAIApiInstanceName: "prod-appdirectai-east2",
-        azureOpenAIApiDeploymentName: "text-embedding-ada-002",
-        batchSize: 16,
-      }),
+      new OpenAIEmbeddings(embeddingsConfig),
       { pineconeIndex }
     );
 
