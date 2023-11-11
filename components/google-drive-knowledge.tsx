@@ -168,7 +168,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
       };
 
       const response = await axios.post(
-        `/api/v1/ai/${aiId}/knowledge/google-drive`,
+        `/api/v1/ai/${aiId}/data-sources/google-drive`,
         createKnowledgeRequest
       );
       goBack();

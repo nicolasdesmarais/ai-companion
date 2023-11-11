@@ -23,7 +23,7 @@ export async function GET(
 
     return NextResponse.json(dataSources);
   } catch (error) {
-    console.log("[KNOWLEDGE_GET]", error);
+    console.log("[DATASOURCE_GET]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
