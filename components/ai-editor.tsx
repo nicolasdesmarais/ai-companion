@@ -6,7 +6,7 @@ import { Form } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/src/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Category, Knowledge, Prisma, Group } from "@prisma/client";
+import { Category, Group, Knowledge, Prisma } from "@prisma/client";
 import axios from "axios";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -85,7 +85,7 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
   useEffect(() => {
     const fetchDataSources = async () => {
       setDataSourcesLoading(true);
-      const response = await axios.get(`/api/v1/ai/${aiId}/knowledge`);
+      const response = await axios.get(`/api/v1/ai/${aiId}/data-sources`);
       setDataSources(response.data);
       setDataSourcesLoading(false);
     };

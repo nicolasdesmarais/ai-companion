@@ -1,6 +1,7 @@
 import { Table } from "@/components/table";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { KnowledgeIndexStatus } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { format } from "date-fns";
 import {
@@ -18,9 +19,8 @@ import DataSourceCard from "./datasource-card";
 import { DataSourceTypes } from "./datasource-types";
 import { FileUploadKnowledge } from "./file-upload-knowledge";
 import { GoogleDriveForm } from "./google-drive-knowledge";
-import { WebUrlsForm } from "./web-urls-knowledge-form";
-import { KnowledgeIndexStatus } from "@prisma/client";
 import { Banner } from "./ui/banner";
+import { WebUrlsForm } from "./web-urls-knowledge-form";
 
 interface SelectDataSourceProps {
   form: any;
@@ -44,7 +44,7 @@ export const AIKnowledge = ({
   const removeDataSource = async (id: string) => {
     setRemoving(id);
     try {
-      await axios.delete(`/api/v1/ai/${aiId}/data-source/${id}/`);
+      await axios.delete(`/api/v1/ai/${aiId}/data-sources/${id}/`);
 
       setDataSource((current: any) => current.filter((i: any) => i.id !== id));
       toast({ description: "Knowledge removed." });

@@ -2,9 +2,9 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Globe, Loader } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface WebUrlsProps {
   aiId: string;
@@ -19,7 +19,7 @@ export const WebUrlsForm = ({ aiId }: WebUrlsProps) => {
   const handleContinue = async () => {
     setLoading(true);
     try {
-      await axios.post(`/api/v1/ai/${aiId}/knowledge/web-urls`, { urls });
+      await axios.post(`/api/v1/ai/${aiId}/data-sources/web-urls`, { urls });
       setLoading(false);
       toast({
         variant: "default",

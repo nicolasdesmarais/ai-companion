@@ -6,11 +6,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useRef, useState } from "react";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import axios, { AxiosError } from "axios";
 import { FileText, Loader } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { useRef, useState } from "react";
 import { knowledgeTypes } from "./knowledge-types";
 
 interface FileUploadKnowledgeProps {
@@ -56,7 +56,7 @@ export const FileUploadKnowledge = ({
       const data = new FormData();
       data.set("file", file);
       await axios.post(
-        `/api/v1/ai/${aiId}/knowledge/file?filename=${encodeURIComponent(
+        `/api/v1/ai/${aiId}/data-sources/file?filename=${encodeURIComponent(
           file.name
         )}&type=${encodeURIComponent(fileType)}`,
         data
