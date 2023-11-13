@@ -9,9 +9,6 @@ import { DataSourceItemList } from "../types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "../types/KnowlegeIndexingResult";
 import { FileUploadDataSourceInput } from "./types/FileUploadDataSourceInput";
-import { Readable } from "stream";
-const { finished } = require("stream/promises");
-import fs from "fs";
 
 export class FileUploadDataSourceAdapter implements DataSourceAdapter {
   public async getDataSourceItemList(
@@ -46,19 +43,13 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
       throw new Error("Missing blobUrl in knowledge");
     }
     const response = await fetch(knowledge.blobUrl);
-    if (!response.body) {
-      throw new Error("Failed to fetch blob");
-    }
-    const fileStream = fs.createWriteStream(`/tmp/${input.filename}`, {
-      flags: "r+",
-    });
-    await finished(Readable.fromWeb(response.body as any).pipe(fileStream));
+    const blob = await response.blob();
 
     const metadata = await fileLoader.loadFile(
       knowledge.id,
       input.filename,
       input.mimetype,
-      input.filepath
+      blob
     );
 
     return {
