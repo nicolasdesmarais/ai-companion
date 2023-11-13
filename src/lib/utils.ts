@@ -12,6 +12,7 @@ export function absoluteUrl(path: string) {
 const superusers = [
   "user_2WXwDNSh5x5zxnabNzpSN2Z1JWs",
   "user_2Wr3B1xXEqC2rZaa9uvzG61sFys",
+  "user_2WztMqfQ9sk2uuJBzSAE846SxSI",
 ];
 export function isSuperuser(userId: string) {
   return superusers.includes(userId);
