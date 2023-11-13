@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/api/inngest/*.ts": {
+      "memory": 3008
+    }
+  }
+}
