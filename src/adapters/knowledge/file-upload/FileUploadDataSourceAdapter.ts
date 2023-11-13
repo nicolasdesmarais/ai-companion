@@ -12,6 +12,7 @@ import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "../types/KnowlegeIndexingResult";
 import { FileUploadDataSourceInput } from "./types/FileUploadDataSourceInput";
 import { Readable } from "stream";
+const { finished } = require("stream/promises");
 import fs from "fs";
 
 export class FileUploadDataSourceAdapter implements DataSourceAdapter {
@@ -31,9 +32,7 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
         {
           name: input.filename,
           type: DataSourceType.FILE_UPLOAD,
-          metadata: {
-            blobUrl: blob.url,
-          },
+          blobUrl: blob.url,
         },
       ],
     };
@@ -47,17 +46,18 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     data: any
   ): Promise<IndexKnowledgeResponse> {
     const input = data as FileUploadDataSourceInput;
-    const meta = knowledge.metadata as any;
-    if (!meta?.blobUrl) {
-      throw new Error("Missing blobUrl in knowledge metadata");
+
+    if (!knowledge.blobUrl) {
+      throw new Error("Missing blobUrl in knowledge");
     }
-    const response = await fetch(meta.blobUrl);
+    const response = await fetch(knowledge.blobUrl);
     if (!response.body) {
       throw new Error("Failed to fetch blob");
     }
-    Readable.fromWeb(response.body as any).pipe(
-      fs.createWriteStream(`/tmp/${input.filename}`)
-    );
+    const fileStream = fs.createWriteStream(`/tmp/${input.filename}`, {
+      flags: "r+",
+    });
+    await finished(Readable.fromWeb(response.body as any).pipe(fileStream));
 
     const metadata = await fileLoader.loadFile(
       knowledge.id,

@@ -139,6 +139,7 @@ export class DataSourceService {
           name: item.name,
           type: item.type,
           indexStatus: KnowledgeIndexStatus.INITIALIZED,
+          blobUrl: item.blobUrl,
           metadata: item.metadata,
         },
       });
