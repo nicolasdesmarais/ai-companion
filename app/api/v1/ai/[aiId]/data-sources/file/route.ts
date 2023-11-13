@@ -5,6 +5,7 @@ import { auth } from "@clerk/nextjs";
 import { DataSourceType } from "@prisma/client";
 import { writeFile } from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
+import { put } from "@vercel/blob";
 
 export const maxDuration = 300;
 
@@ -41,10 +42,15 @@ export async function POST(
     const filepath = `/tmp/${file.name}`;
     await writeFile(filepath, buffer);
 
+    const blob = await put(filename, file, {
+      access: "public",
+    });
+
     const input: FileUploadDataSourceInput = {
       filename,
       mimetype: type,
       filepath,
+      blobUrl: blob.url,
     };
     const dataSourceId = await dataSourceService.createDataSource(
       orgId,

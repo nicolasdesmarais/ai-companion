@@ -3,8 +3,6 @@ import {
   Knowledge,
   KnowledgeIndexStatus,
 } from "@prisma/client";
-import { put } from "@vercel/blob";
-import { readFile } from "fs/promises";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import { DataSourceItemList } from "../types/DataSourceItemList";
@@ -22,17 +20,14 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     data: any
   ): Promise<DataSourceItemList> {
     const input = data as FileUploadDataSourceInput;
-    const file = await readFile(input.filepath);
-    const blob = await put(input.filename, file, {
-      access: "public",
-    });
+
     const result: DataSourceItemList = {
       dataSourceName: input.filename,
       items: [
         {
           name: input.filename,
           type: DataSourceType.FILE_UPLOAD,
-          blobUrl: blob.url,
+          blobUrl: input.blobUrl,
         },
       ],
     };
