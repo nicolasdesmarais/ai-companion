@@ -11,6 +11,8 @@ import { DataSourceItemList } from "../types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "../types/KnowlegeIndexingResult";
 import { FileUploadDataSourceInput } from "./types/FileUploadDataSourceInput";
+import { Readable } from "stream";
+import fs from "fs";
 
 export class FileUploadDataSourceAdapter implements DataSourceAdapter {
   public async getDataSourceItemList(
@@ -19,12 +21,19 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     data: any
   ): Promise<DataSourceItemList> {
     const input = data as FileUploadDataSourceInput;
+    const file = await readFile(input.filepath);
+    const blob = await put(input.filename, file, {
+      access: "public",
+    });
     const result: DataSourceItemList = {
       dataSourceName: input.filename,
       items: [
         {
           name: input.filename,
           type: DataSourceType.FILE_UPLOAD,
+          metadata: {
+            blobUrl: blob.url,
+          },
         },
       ],
     };
@@ -38,12 +47,17 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     data: any
   ): Promise<IndexKnowledgeResponse> {
     const input = data as FileUploadDataSourceInput;
-
-    const file = await readFile(input.filepath);
-    const blob = await put(input.filename, file, {
-      access: "public",
-    });
-    knowledge.blobUrl = blob.url;
+    const meta = knowledge.metadata as any;
+    if (!meta?.blobUrl) {
+      throw new Error("Missing blobUrl in knowledge metadata");
+    }
+    const response = await fetch(meta.blobUrl);
+    if (!response.body) {
+      throw new Error("Failed to fetch blob");
+    }
+    Readable.fromWeb(response.body as any).pipe(
+      fs.createWriteStream(`/tmp/${input.filename}`)
+    );
 
     const metadata = await fileLoader.loadFile(
       knowledge.id,
