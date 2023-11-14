@@ -20,6 +20,8 @@ export const dataSourceInitialized = inngest.createFunction(
   }
 );
 
+const INGEST_EVENT_MAX = 2000;
+
 export const knowledgeEventReceived = inngest.createFunction(
   { id: "knowledge-event-received" },
   { event: DomainEvent.KNOWLEDGE_EVENT_RECEIVED },
@@ -37,7 +39,7 @@ export const knowledgeEventReceived = inngest.createFunction(
     );
 
     if (knowledgeIndexingResult.result.chunkCount) {
-      const events = [];
+      let events = [];
       for (let i = 0; i < knowledgeIndexingResult.result.chunkCount; i++) {
         events.push({
           name: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
@@ -47,8 +49,14 @@ export const knowledgeEventReceived = inngest.createFunction(
             index: i,
           },
         });
+        if (events.length >= INGEST_EVENT_MAX) {
+          await step.sendEvent("fan-out-knowledge-chunks", events);
+          events = [];
+        }
       }
-      await step.sendEvent("fan-out-knowledge-chunks", events);
+      if (events.length > 0) {
+        await step.sendEvent("fan-out-knowledge-chunks", events);
+      }
       return { count: events.length };
     }
   }
