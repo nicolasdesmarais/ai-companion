@@ -11,6 +11,7 @@ import { ChatMessageProps } from "@/components/chat-message";
 import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
+import { useTalkModal } from "@/hooks/use-talk-modal";
 
 interface ChatClientProps {
   conversation: Conversation & {
@@ -29,6 +30,7 @@ export const ChatClient = ({ conversation }: ChatClientProps) => {
   );
   const [streaming, setStreaming] = useState<boolean>(false);
   const { toast } = useToast();
+  const talkModal = useTalkModal();
 
   const saveAnswer = async (answer: string) => {
     const response = await axios.post(
@@ -59,6 +61,7 @@ export const ChatClient = ({ conversation }: ChatClientProps) => {
       });
     },
     onFinish(_prompt, completion) {
+      talkModal.onSpeak(completion);
       setStreaming(false);
       const systemMessage: ChatMessageProps = {
         role: "system",

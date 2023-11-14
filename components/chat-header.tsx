@@ -13,6 +13,7 @@ import {
   PinOff,
   RefreshCw,
   Trash,
+  Video,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -27,7 +28,9 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { useConversations } from "@/hooks/use-conversations";
 import { useState } from "react";
-import { ShareModal } from "./share-modal";
+import { ShareModal } from "@/components/share-modal";
+import { TalkStreamModal } from "@/components/talk-stream-modal";
+import { useTalkModal } from "@/hooks/use-talk-modal";
 
 interface ChatHeaderProps {
   conversation: Conversation & {
@@ -43,6 +46,7 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
   const router = useRouter();
   const { user } = useUser();
   const { toast } = useToast();
+  const talkModal = useTalkModal();
   const { conversations, fetchConversations } = useConversations();
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -130,6 +134,15 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
           size="icon"
           className="mr-4"
           type="button"
+          onClick={() => talkModal.onOpenStream(conversation.ai)}
+        >
+          <Video />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="mr-4"
+          type="button"
           onClick={() => setShowShareModal(true)}
         >
           <ExternalLink />
@@ -180,6 +193,7 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
         setShowModal={setShowShareModal}
         ai={conversation.ai}
       />
+      <TalkStreamModal />
     </div>
   );
 };
