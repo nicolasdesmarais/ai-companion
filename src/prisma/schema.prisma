@@ -159,7 +159,7 @@ model Knowledge {
   name                      String  @db.Text
   type                      String
   indexStatus               KnowledgeIndexStatus?               @map(name :"index_status")
-  blobUrl                   String?                             @map(name: "blob_url")
+  blobUrl                   String? @db.Text                    @map(name: "blob_url")
   metadata                  Json?
   dataSources               DataSourceKnowledge[]
 
