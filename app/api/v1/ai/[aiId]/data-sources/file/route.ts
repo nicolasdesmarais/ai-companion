@@ -9,6 +9,70 @@ import { put } from "@vercel/blob";
 
 export const maxDuration = 300;
 
+/**
+ * @swagger
+ * /api/v1/ai/{aiId}/data-sources/file:
+ *   post:
+ *     summary: Adds a file upload data source for the specified AI
+ *     parameters:
+ *       - in: path
+ *         name: aiId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier for the AI.
+ *       - in: query
+ *         name: filename
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: The name of the file being uploaded.
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: The content type of the file being uploaded (Text, CSV, Markdown, EPub, Docx, PDF).
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       '200':
+ *         description: File uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       '400':
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       '404':
+ *         description: AI not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *
+ * components:
+ *   schemas:
+ *     Error:
+ *       type: object
+ *       properties:
+ *         error:
+ *           type: string
+ */
 export async function POST(
   request: NextRequest,
   { params: { aiId } }: { params: { aiId: string } }
