@@ -11,16 +11,19 @@ export default authMiddleware({
     "/api/v1/integrations/apify/webhooks",
     "/api/inngest",
   ],
+  apiRoutes: ["/api/(.*)"],
 
   afterAuth(auth, req, evt) {
     // handle users who aren't authenticated
-    if (!auth.userId && !auth.isPublicRoute) {
+    if (!auth.userId && !auth.isPublicRoute && !auth.isApiRoute) {
       return redirectToSignIn({ returnBackUrl: req.url });
     }
     // redirect them to organization selection page
     if (
       auth.userId &&
       !auth.orgId &&
+      !auth.isPublicRoute &&
+      !auth.isApiRoute &&
       req.nextUrl.pathname !== "/org-selection"
     ) {
       const orgSelection = new URL("/org-selection", req.url);
