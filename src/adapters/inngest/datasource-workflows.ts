@@ -49,6 +49,7 @@ export const knowledgeEventReceived = inngest.createFunction(
         });
       }
       await step.sendEvent("fan-out-knowledge-chunks", events);
+      return { count: events.length };
     }
   }
 );
