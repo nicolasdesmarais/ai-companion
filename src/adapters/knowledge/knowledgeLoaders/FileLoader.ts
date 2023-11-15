@@ -12,7 +12,7 @@ import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 export class FileLoader {
-  private async getFilepath(file: File) {
+  private async getFilepath(file: Blob) {
     if (!file) {
       throw new Error("Error reading file");
     }
@@ -41,7 +41,7 @@ export class FileLoader {
         docs = await loader.load();
       } else if (
         mimeType === "application/epub+zip" &&
-        filePathOrBlob instanceof File
+        filePathOrBlob instanceof Blob
       ) {
         const path = await this.getFilepath(filePathOrBlob);
         const loader = new EPubLoader(path);
