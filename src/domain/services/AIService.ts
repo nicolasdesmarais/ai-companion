@@ -34,11 +34,8 @@ export class AIService {
         AND: [
           {
             id: aiId,
-            ...this.getBaseWhereCondition(
-              orgId,
-              userId,
-              ListAIsRequestScope.ALL
-            ),
+            userId,
+            orgId,
           },
         ],
       },
