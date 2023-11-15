@@ -17,15 +17,6 @@ export async function PUT(
     const aiId = params.aiId;
     const shareAiRequest: ShareAIRequest = await req.json();
 
-    const ai = await aiService.findAIById(aiId);
-    if (!ai) {
-      return NextResponse.json("Not Found", { status: 404 });
-    }
-
-    if (ai.userId !== userId) {
-      return NextResponse.json("Forbidden", { status: 403 });
-    }
-
     await aiService.shareAi(authentication.orgId, userId, aiId, shareAiRequest);
 
     return NextResponse.json("", { status: 200 });
