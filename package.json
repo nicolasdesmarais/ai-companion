@@ -48,7 +48,7 @@
     "epub2": "^3.0.2",
     "eslint": "8.53.0",
     "eslint-config-next": "13.4.11",
-    "googleapis": "^127.0.0",
+    "googleapis": "^128.0.0",
     "highlight.js": "^11.9.0",
     "html-to-text": "^9.0.5",
     "inngest": "^3.6.0",
