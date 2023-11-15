@@ -1,6 +1,6 @@
 import { models } from "@/components/ai-models";
+import conversationService from "@/src/domain/services/ConversationService";
 import { MemoryManager } from "@/src/lib/memory";
-import prismadb from "@/src/lib/prismadb";
 import { rateLimit } from "@/src/lib/rate-limit";
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { currentUser } from "@clerk/nextjs";
@@ -20,90 +20,68 @@ const BUFFER_TOKENS = 10;
 
 export const maxDuration = 300;
 
-const getKnowledge = async (
-  prompt: string,
-  history: Message[],
-  dataSources: any[],
-  availTokens: number
-) => {
-  if (dataSources.length === 0) {
-    return "";
-  }
-
-  const knowledgeIds: string[] = dataSources
-    .map((ds) => ds.dataSource.knowledges.map((k: any) => k.knowledgeId))
-    .reduce((acc, curr) => acc.concat(curr), []);
-
-  const { totalDocs, totalTokens } = dataSources.reduce(
-    (dsAcc, ds) => {
-      const { docs, tokens } = ds.dataSource.knowledges.reduce(
-        (acc: any, k: any) => {
-          if (
-            k.knowledge.metadata &&
-            k.knowledge.metadata.totalTokenCount &&
-            k.knowledge.metadata.documentCount
-          ) {
-            acc.tokens += k.knowledge.metadata.totalTokenCount;
-            acc.docs += k.knowledge.metadata.documentCount;
-            return acc;
-          } else {
-            return { docs: NaN, tokens: NaN };
-          }
-        },
-        { docs: 0, tokens: 0 }
-      );
-      dsAcc.totalDocs += docs;
-      dsAcc.totalTokens += tokens;
-      return dsAcc;
-    },
-    { totalDocs: 0, totalTokens: 0 }
-  );
-  const docDensity = totalTokens / totalDocs;
-  let estDocsNeeded = Math.ceil(availTokens / docDensity) || 100;
-  estDocsNeeded = Math.min(10000, Math.max(estDocsNeeded, 1));
-
-  let query = prompt;
-  if (history.length > 1) {
-    query = `${history[history.length - 2].content}\n${query}`;
-  }
-  if (history.length > 2) {
-    query = `${history[history.length - 3].content}\n${query}`;
-  }
-
-  const memoryManager = await MemoryManager.getInstance();
-  const similarDocs = await memoryManager.vectorSearch(
-    query,
-    knowledgeIds,
-    estDocsNeeded
-  );
-
-  let knowledge = "";
-  if (!!similarDocs && similarDocs.length !== 0) {
-    for (let i = 0; i < similarDocs.length; i++) {
-      const doc = similarDocs[i];
-      const newKnowledge = `${knowledge}\n${doc.pageContent}`;
-      const newKnowledgeTokens = getTokenLength(newKnowledge);
-      if (newKnowledgeTokens < availTokens) {
-        knowledge = newKnowledge;
-      } else {
-        break;
-      }
-    }
-  }
-  return knowledge;
-};
-
+/**
+ * @swagger
+ * /api/v1/ai/{aiId}/chat:
+ *   post:
+ *     summary: Send a message to the AI chat service
+ *     description: This endpoint allows sending a prompt to an AI and optionally specifying a conversation ID for context.
+ *     operationId: chatWithAI
+ *     parameters:
+ *       - name: aiId
+ *         in: path
+ *         required: true
+ *         description: The identifier of the AI to chat with.
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               prompt:
+ *                 type: string
+ *                 description: The prompt message to send to the AI.
+ *                 required: true
+ *               conversationId:
+ *                 type: string
+ *                 description: An optional conversation identifier for maintaining the context of the chat.
+ *     responses:
+ *       '200':
+ *         description: Successfully received the AI's response.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: The AI's response to the prompt.
+ *                 conversationId:
+ *                   type: string
+ *                   description: The conversation identifier.
+ *       '400':
+ *         description: Bad request when the request body does not contain a valid prompt.
+ *       '404':
+ *         description: Not Found, when the specified AI ID does not exist.
+ *       '500':
+ *         description: Internal Server Error
+ *     security:
+ *       - ApiKeyAuth: []
+ */
 export async function POST(
   request: Request,
-  {
-    params: { aiId, conversationId },
-  }: { params: { aiId: string; conversationId: string } }
+  { params: { aiId } }: { params: { aiId: string } }
 ) {
   try {
-    const { prompt, date } = await request.json();
+    const chatRequest: ChatRequest = await request.json();
+    const { conversationId, prompt } = chatRequest;
+
     const user = await currentUser();
 
-    if (!user || !user.id) {
+    if (!user?.id) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -114,45 +92,12 @@ export async function POST(
       return new NextResponse("Rate limit exceeded", { status: 429 });
     }
 
-    const conversation = await prismadb.conversation.update({
-      where: {
-        id: conversationId,
-      },
-      include: {
-        ai: {
-          include: {
-            dataSources: {
-              include: {
-                dataSource: {
-                  include: {
-                    knowledges: {
-                      include: {
-                        knowledge: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        messages: {
-          orderBy: {
-            createdAt: "asc",
-          },
-        },
-      },
-      data: {
-        messages: {
-          create: {
-            content: prompt,
-            role: "user",
-            userId: user.id,
-            aiId: aiId,
-          },
-        },
-      },
-    });
+    const conversation = await conversationService.updateConversation(
+      aiId,
+      user.id,
+      prompt,
+      conversationId
+    );
 
     if (!conversation) {
       return new NextResponse("Conversation not found", { status: 404 });
@@ -253,7 +198,7 @@ export async function POST(
       );
       const completionPrompt = `
         ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${conversation.ai.name}: prefix.
-        The user date and time is ${date}. Output format is markdown. Open links in new tabs.
+        Output format is markdown. Open links in new tabs.
         ${conversation.ai.instructions}
         Below are relevant details about ${conversation.ai.name}'s past and the conversation you are in:\n
       `;
@@ -313,7 +258,7 @@ export async function POST(
       });
       const engineeredPrompt = `
         Pretend you are ${conversation.ai.name}, ${conversation.ai.description}.
-        The user date and time is ${date}. Output format is markdown. Open links in new tabs.
+        Output format is markdown. Open links in new tabs.
         Here are more details about your character:\n
         ${conversation.ai.instructions}
         Answer questions using this knowledge:\n
@@ -373,3 +318,76 @@ export async function POST(
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
+
+const getKnowledge = async (
+  prompt: string,
+  history: Message[],
+  dataSources: any[],
+  availTokens: number
+) => {
+  if (dataSources.length === 0) {
+    return "";
+  }
+
+  const knowledgeIds: string[] = dataSources
+    .map((ds) => ds.dataSource.knowledges.map((k: any) => k.knowledgeId))
+    .reduce((acc, curr) => acc.concat(curr), []);
+
+  const { totalDocs, totalTokens } = dataSources.reduce(
+    (dsAcc, ds) => {
+      const { docs, tokens } = ds.dataSource.knowledges.reduce(
+        (acc: any, k: any) => {
+          if (
+            k.knowledge.metadata &&
+            k.knowledge.metadata.totalTokenCount &&
+            k.knowledge.metadata.documentCount
+          ) {
+            acc.tokens += k.knowledge.metadata.totalTokenCount;
+            acc.docs += k.knowledge.metadata.documentCount;
+            return acc;
+          } else {
+            return { docs: NaN, tokens: NaN };
+          }
+        },
+        { docs: 0, tokens: 0 }
+      );
+      dsAcc.totalDocs += docs;
+      dsAcc.totalTokens += tokens;
+      return dsAcc;
+    },
+    { totalDocs: 0, totalTokens: 0 }
+  );
+  const docDensity = totalTokens / totalDocs;
+  let estDocsNeeded = Math.ceil(availTokens / docDensity) || 100;
+  estDocsNeeded = Math.min(10000, Math.max(estDocsNeeded, 1));
+
+  let query = prompt;
+  if (history.length > 1) {
+    query = `${history[history.length - 2].content}\n${query}`;
+  }
+  if (history.length > 2) {
+    query = `${history[history.length - 3].content}\n${query}`;
+  }
+
+  const memoryManager = await MemoryManager.getInstance();
+  const similarDocs = await memoryManager.vectorSearch(
+    query,
+    knowledgeIds,
+    estDocsNeeded
+  );
+
+  let knowledge = "";
+  if (!!similarDocs && similarDocs.length !== 0) {
+    for (let i = 0; i < similarDocs.length; i++) {
+      const doc = similarDocs[i];
+      const newKnowledge = `${knowledge}\n${doc.pageContent}`;
+      const newKnowledgeTokens = getTokenLength(newKnowledge);
+      if (newKnowledgeTokens < availTokens) {
+        knowledge = newKnowledge;
+      } else {
+        break;
+      }
+    }
+  }
+  return knowledge;
+};
