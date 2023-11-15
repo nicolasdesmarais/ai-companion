@@ -9,6 +9,11 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const authorization = await auth();
+    const { orgId, userId } = authorization;
+    if (!orgId || !userId) {
+      return NextResponse.json("Unauthorized", { status: 401 });
+    }
+
     const { searchParams } = new URL(req.url);
 
     const scopeParam = searchParams.get("scope");
@@ -33,7 +38,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       search: searchParams.get("search"),
     };
 
-    const ais = await aiService.findAIsForUser(authorization, requestParams);
+    const ais = await aiService.findAIsForUser(orgId, userId, requestParams);
 
     return NextResponse.json(ais);
   } catch (error) {

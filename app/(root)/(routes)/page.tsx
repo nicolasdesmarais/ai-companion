@@ -29,7 +29,7 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
   const orgId = authorization.orgId;
   const userId = authorization.userId;
 
-  if (!userId) {
+  if (!orgId || !userId) {
     return;
   }
 
@@ -53,7 +53,7 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
     search: searchParams.search,
   };
 
-  const data = await aiService.findAIsForUser(authorization, requestParams);
+  const data = await aiService.findAIsForUser(orgId, userId, requestParams);
 
   const groups = await groupService.findGroupsByUser(orgId, userId);
 
