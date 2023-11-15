@@ -51,6 +51,9 @@ export const ChatClient = ({ conversation }: ChatClientProps) => {
     setInput,
   } = useCompletion({
     api: `/api/chat/${conversation.ai.id}/${conversation.id}`,
+    body: {
+      date: new Date().toLocaleTimeString(),
+    },
     onError: (err) => {
       toast({
         variant: "destructive",
