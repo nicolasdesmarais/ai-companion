@@ -48,7 +48,7 @@ export class InvitationService {
       invitations: orgInvitations,
     };
 
-    this.createOrganizationInvitations(createInvitationRequest);
+    await this.createOrganizationInvitations(createInvitationRequest);
   }
 }
 

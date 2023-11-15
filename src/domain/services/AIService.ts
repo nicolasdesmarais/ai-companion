@@ -1,13 +1,9 @@
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
-import {
-  SignedInAuthObject,
-  SignedOutAuthObject,
-  User,
-} from "@clerk/nextjs/server";
+import { User } from "@clerk/nextjs/server";
 import { AI, AIVisibility, GroupAvailability } from "@prisma/client";
-import { EntityNotFoundError, UnauthorizedError } from "../errors/Errors";
+import { EntityNotFoundError } from "../errors/Errors";
 import { ShareAIRequest } from "../types/ShareAIRequest";
 import invitationService from "./InvitationService";
 import {
@@ -28,17 +24,26 @@ export class AIService {
   }
 
   public async shareAi(
-    orgId: string | null | undefined,
+    orgId: string,
     userId: string,
     aiId: string,
     request: ShareAIRequest
   ) {
-    const ai = await prismadb.aI.findUnique({
+    const ai = await prismadb.aI.findMany({
       where: {
-        id: aiId,
+        AND: [
+          {
+            id: aiId,
+            ...this.getBaseWhereCondition(
+              orgId,
+              userId,
+              ListAIsRequestScope.ALL
+            ),
+          },
+        ],
       },
     });
-    if (!ai) {
+    if (ai.length === 0) {
       throw new EntityNotFoundError(`AI with id=${aiId} not found`);
     }
 
@@ -90,13 +95,13 @@ export class AIService {
 
     // Invite users who were not found in Clerk
     if (orgId) {
-      invitationService.createOrganizationInvitationsFromEmails(
+      await invitationService.createOrganizationInvitationsFromEmails(
         orgId,
         userId,
         Array.from(missingUserEmails)
       );
     } else {
-      invitationService.createInvitations(Array.from(missingUserEmails));
+      await invitationService.createInvitations(Array.from(missingUserEmails));
     }
 
     await this.sendAiSharedEmail(ai, clerkUserList);
@@ -118,16 +123,11 @@ export class AIService {
   }
 
   public async findAIsForUser(
-    auth: SignedInAuthObject | SignedOutAuthObject,
+    orgId: string,
+    userId: string,
     request: ListAIsRequestParams
   ) {
-    if (!auth?.userId) {
-      throw new UnauthorizedError("Unauthorized");
-    }
-
-    const userId = auth.userId;
-    const orgId = auth.orgId || "";
-    const scope = this.determineScope(auth, request);
+    const scope = request.scope || ListAIsRequestScope.ALL;
 
     const whereCondition = { AND: [{}] };
     whereCondition.AND.push(this.getBaseWhereCondition(orgId, userId, scope));
@@ -155,17 +155,6 @@ export class AIService {
         },
       },
     });
-  }
-
-  private determineScope(
-    auth: SignedInAuthObject | SignedOutAuthObject,
-    request: ListAIsRequestParams
-  ) {
-    if (!auth?.userId) {
-      return ListAIsRequestScope.PUBLIC;
-    } else {
-      return request.scope || ListAIsRequestScope.ALL;
-    }
   }
 
   private getBaseWhereCondition(
@@ -328,6 +317,17 @@ export class AIService {
       await prismadb.aI.delete({
         where: { id: aiId },
       });
+    });
+  }
+
+  public async populateAiPermissionsUserId(userId: string, email: string) {
+    await prismadb.aIPermissions.updateMany({
+      where: {
+        email,
+      },
+      data: {
+        userId,
+      },
     });
   }
 }

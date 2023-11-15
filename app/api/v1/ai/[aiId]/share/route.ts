@@ -9,15 +9,15 @@ export async function PUT(
 ): Promise<NextResponse> {
   try {
     const authentication = await auth();
-    const userId = authentication?.userId;
-    if (!userId) {
+    const { orgId, userId } = authentication;
+    if (!orgId || !userId) {
       return NextResponse.json("Unauthorized", { status: 401 });
     }
 
     const aiId = params.aiId;
     const shareAiRequest: ShareAIRequest = await req.json();
 
-    await aiService.shareAi(authentication.orgId, userId, aiId, shareAiRequest);
+    await aiService.shareAi(orgId, userId, aiId, shareAiRequest);
 
     return NextResponse.json("", { status: 200 });
   } catch (error) {
