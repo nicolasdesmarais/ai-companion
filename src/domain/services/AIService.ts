@@ -29,7 +29,7 @@ export class AIService {
     aiId: string,
     request: ShareAIRequest
   ) {
-    const ai = await prismadb.aI.findMany({
+    const ais = await prismadb.aI.findMany({
       where: {
         AND: [
           {
@@ -43,9 +43,10 @@ export class AIService {
         ],
       },
     });
-    if (ai.length === 0) {
+    if (ais.length === 0) {
       throw new EntityNotFoundError(`AI with id=${aiId} not found`);
     }
+    const ai = ais[0];
 
     const validEmails = EmailUtils.parseEmailCsv(request.emails);
     if (validEmails.length === 0) {
@@ -94,14 +95,20 @@ export class AIService {
     });
 
     // Invite users who were not found in Clerk
-    if (orgId) {
-      await invitationService.createOrganizationInvitationsFromEmails(
-        orgId,
-        userId,
-        Array.from(missingUserEmails)
-      );
-    } else {
-      await invitationService.createInvitations(Array.from(missingUserEmails));
+    try {
+      if (orgId) {
+        await invitationService.createOrganizationInvitationsFromEmails(
+          orgId,
+          userId,
+          Array.from(missingUserEmails)
+        );
+      } else {
+        await invitationService.createInvitations(
+          Array.from(missingUserEmails)
+        );
+      }
+    } catch (error) {
+      console.error("Error creating invitations", error);
     }
 
     await this.sendAiSharedEmail(ai, clerkUserList);
