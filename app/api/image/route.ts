@@ -1,20 +1,18 @@
 import { auth } from "@clerk/nextjs";
-import { NextResponse } from "next/server";
-import { Configuration, OpenAIApi } from "openai";
 import cloudinary from "cloudinary";
+import { NextResponse } from "next/server";
+import OpenAI from "openai";
 import Replicate from "replicate";
 
 export const maxDuration = 300;
-
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN!,
 });
 
-const openai = new OpenAIApi(configuration);
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 const cloudinaryUpload = async (imageUrl: string) => {
   const data = await cloudinary.v2.uploader.unsigned_upload(
