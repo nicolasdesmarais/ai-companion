@@ -5,7 +5,7 @@ import { rateLimit } from "@/src/lib/rate-limit";
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { CreateChatRequest } from "@/src/ports/api/ChatsApi";
 import { currentUser } from "@clerk/nextjs";
-import { Message } from "@prisma/client";
+import { Message, Role } from "@prisma/client";
 import { JsonObject } from "@prisma/client/runtime/library";
 import { LangChainStream, StreamingTextResponse } from "ai";
 import axios from "axios";
@@ -94,57 +94,6 @@ const getKnowledge = async (
   return knowledge;
 };
 
-/**
- * @swagger
- * /api/v1/ai/{aiId}/chats:
- *   post:
- *     summary: Send a message to the AI chat service
- *     description: This endpoint allows sending a prompt to an AI and optionally specifying a conversation ID for context.
- *     operationId: chatWithAI
- *     parameters:
- *       - name: aiId
- *         in: path
- *         required: true
- *         description: The identifier of the AI to chat with.
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               prompt:
- *                 type: string
- *                 description: The prompt message to send to the AI.
- *                 required: true
- *               conversationId:
- *                 type: string
- *                 description: An optional conversation identifier for maintaining the context of the chat.
- *     responses:
- *       '200':
- *         description: Successfully received the AI's response.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   description: The AI's response to the prompt.
- *                 conversationId:
- *                   type: string
- *                   description: The conversation identifier.
- *       '400':
- *         description: Bad request when the request body does not contain a valid prompt.
- *       '404':
- *         description: Not Found, when the specified AI ID does not exist.
- *       '500':
- *         description: Internal Server Error
- *     security:
- *       - ApiKeyAuth: []
- */
 export async function POST(
   request: Request,
   { params: { aiId } }: { params: { aiId: string } }
@@ -170,6 +119,7 @@ export async function POST(
       aiId,
       user.id,
       prompt,
+      Role.user,
       conversationId
     );
 
@@ -379,7 +329,14 @@ export async function POST(
       }
       chatModel.call(chatLog, {}, [handlers]);
 
-      return new StreamingTextResponse(stream);
+      const transformedStream = transformStreamToUpdateConversation(
+        stream,
+        aiId,
+        user.id,
+        conversation.id
+      );
+
+      return new StreamingTextResponse(transformedStream);
     }
   } catch (error) {
     if (error.response?.data?.error?.message) {
@@ -391,6 +348,37 @@ export async function POST(
     console.error("[CHAT]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
+}
+
+function transformStreamToUpdateConversation(
+  stream: ReadableStream,
+  aiId: string,
+  userId: string,
+  conversationId: string
+) {
+  let answer = "";
+  const contentStream = new TransformStream({
+    transform(chunk, controller) {
+      answer += new TextDecoder("utf-8").decode(chunk);
+
+      // Pass the chunk along to the next destination.
+      controller.enqueue(chunk);
+    },
+    flush(controller) {
+      conversationService.updateConversation(
+        aiId,
+        userId,
+        answer,
+        Role.system,
+        conversationId
+      );
+
+      // Close the stream.
+      controller.terminate();
+    },
+  });
+
+  return stream.pipeThrough(contentStream);
 }
 
 /**
