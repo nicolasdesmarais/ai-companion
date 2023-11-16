@@ -3,7 +3,6 @@
 import axios from "axios";
 import { MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ChatCompletionRequestMessage } from "openai";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
@@ -21,12 +20,15 @@ import { useProModal } from "@/hooks/use-pro-modal";
 import { cn } from "@/src/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import OpenAI from "openai";
 import { formSchema } from "./constants";
 
 const ConversationPage = () => {
   const router = useRouter();
   const proModal = useProModal();
-  const [messages, setMessages] = useState<ChatCompletionRequestMessage[]>([]);
+  const [messages, setMessages] = useState<
+    OpenAI.Chat.ChatCompletionUserMessageParam[]
+  >([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,7 +41,7 @@ const ConversationPage = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const userMessage: ChatCompletionRequestMessage = {
+      const userMessage: OpenAI.Chat.ChatCompletionUserMessageParam = {
         role: "user",
         content: values.prompt,
       };
@@ -127,7 +129,11 @@ const ConversationPage = () => {
           <div className="flex flex-col-reverse gap-y-4">
             {messages.map((message) => (
               <div
-                key={message.content}
+                key={
+                  Array.isArray(message.content)
+                    ? message.content.join("")
+                    : message.content
+                }
                 className={cn(
                   "p-8 w-full flex items-start gap-x-8 rounded-lg",
                   message.role === "user"
@@ -136,7 +142,11 @@ const ConversationPage = () => {
                 )}
               >
                 {message.role === "user" ? <UserAvatar /> : <BotAvatar2 />}
-                <p className="text-sm">{message.content}</p>
+                <p className="text-sm">
+                  {Array.isArray(message.content)
+                    ? message.content.join("")
+                    : message.content || ""}
+                </p>
               </div>
             ))}
           </div>
