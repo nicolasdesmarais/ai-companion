@@ -2,12 +2,16 @@ import { publishEvent } from "@/src/adapters/inngest/event-publisher";
 import fileUploadDataSourceAdapter from "@/src/adapters/knowledge/file-upload/FileUploadDataSourceAdapter";
 import googleDriveDataSourceAdapter from "@/src/adapters/knowledge/google-drive/GoogleDriveDataSourceAdapter";
 import { DataSourceAdapter } from "@/src/adapters/knowledge/types/DataSourceAdapter";
+import { DataSourceItemList } from "@/src/adapters/knowledge/types/DataSourceItemList";
+import { IndexKnowledgeResponse } from "@/src/adapters/knowledge/types/IndexKnowledgeResponse";
+import { KnowledgeIndexingResult } from "@/src/adapters/knowledge/types/KnowlegeIndexingResult";
 import webUrlsDataSourceAdapter from "@/src/adapters/knowledge/web-urls/WebUrlsDataSourceAdapter";
 import prismadb from "@/src/lib/prismadb";
 import { GetDataSourcesResponse } from "@/src/ports/api/DataSourcesApi";
 import {
   DataSourceIndexStatus,
   DataSourceType,
+  Knowledge,
   KnowledgeIndexStatus,
   PrismaClient,
 } from "@prisma/client";
