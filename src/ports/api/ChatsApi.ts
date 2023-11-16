@@ -13,6 +13,7 @@ export interface ChatDto {
 }
 
 export interface CreateChatRequest {
+  date: string;
   conversationId?: string;
   prompt: string;
 }

@@ -100,7 +100,7 @@ export async function POST(
 ) {
   try {
     const chatRequest: CreateChatRequest = await request.json();
-    const { conversationId, prompt } = chatRequest;
+    const { date, conversationId, prompt } = chatRequest;
 
     const user = await currentUser();
 
@@ -222,7 +222,7 @@ export async function POST(
       );
       const completionPrompt = `
         ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${conversation.ai.name}: prefix.
-        Output format is markdown. Open links in new tabs.
+        The user date and time is ${date}. Output format is markdown. Open links in new tabs.
         ${conversation.ai.instructions}
         Below are relevant details about ${conversation.ai.name}'s past and the conversation you are in:\n
       `;
@@ -282,7 +282,7 @@ export async function POST(
       });
       const engineeredPrompt = `
         Pretend you are ${conversation.ai.name}, ${conversation.ai.description}.
-        Output format is markdown. Open links in new tabs.
+        The user date and time is ${date}. Output format is markdown. Open links in new tabs.
         Here are more details about your character:\n
         ${conversation.ai.instructions}
         Answer questions using this knowledge:\n
