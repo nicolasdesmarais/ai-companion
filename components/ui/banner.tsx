@@ -13,7 +13,7 @@ export const Banner = ({ children, className }: BannerProps) => {
       className={cn("flex items-center bg-accent p-2 rounded-lg", className)}
     >
       <Info className="h-5 w-5" />
-      <p className="text-sm text-left ml-2">{children}</p>
+      <div className="text-sm text-left ml-2">{children}</div>
     </div>
   );
 };
