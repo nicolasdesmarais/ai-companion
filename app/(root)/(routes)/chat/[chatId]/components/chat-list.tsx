@@ -39,7 +39,7 @@ export const ChatList = () => {
             >
               <div>
                 <Avatar className="h-18 w-18">
-                  <AvatarImage src={conversation.ai.src} />
+                  <AvatarImage src={conversation.ai.src} crop="w_78,h_78" />
                 </Avatar>
               </div>
               <div className="mt-2 text-xs truncate">{conversation.name}</div>

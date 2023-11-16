@@ -20,13 +20,28 @@ const Avatar = React.forwardRef<
 ));
 Avatar.displayName = AvatarPrimitive.Root.displayName;
 
+const pixelCrop = (src: string | undefined, crop: string) => {
+  if (src) {
+    return src.replace(
+      /image\/upload\/.*\//gm,
+      `image/upload/c_fill,g_auto,${crop}/`
+    );
+  }
+};
+
+export interface AvatarProps
+  extends React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image> {
+  crop?: string;
+}
+
 const AvatarImage = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Image>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
->(({ className, ...props }, ref) => (
+  AvatarProps
+>(({ className, src, crop, ...props }, ref) => (
   <AvatarPrimitive.Image
     ref={ref}
     className={cn("aspect-square h-full w-full", className)}
+    src={crop ? pixelCrop(src, crop) : src}
     {...props}
   />
 ));
