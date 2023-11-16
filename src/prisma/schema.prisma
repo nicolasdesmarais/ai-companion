@@ -78,6 +78,7 @@ model Message {
 
   aiId            String    @map("ai_id")
   userId          String    @map("user_id")
+  metadata        Json?
 
   ai              AI @relation(fields: [aiId], references: [id], onDelete: Cascade)
 

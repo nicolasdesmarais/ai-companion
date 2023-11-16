@@ -35,7 +35,8 @@ export class ConversationService {
     userId: string,
     content: string,
     role: Role,
-    conversationId: string | undefined
+    conversationId: string | undefined,
+    metadata?: any
   ) {
     if (!conversationId) {
       conversationId = await this.getLatestConversationId(aiId, userId);
@@ -76,6 +77,7 @@ export class ConversationService {
             role,
             userId,
             aiId: aiId,
+            metadata,
           },
         },
       },

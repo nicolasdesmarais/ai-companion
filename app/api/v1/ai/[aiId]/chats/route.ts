@@ -28,7 +28,7 @@ const getKnowledge = async (
   availTokens: number
 ) => {
   if (dataSources.length === 0) {
-    return "";
+    return { knowledge: "", docMeta: [] };
   }
 
   const knowledgeIds: string[] = dataSources
@@ -78,7 +78,8 @@ const getKnowledge = async (
     estDocsNeeded
   );
 
-  let knowledge = "";
+  let knowledge = "",
+    docMeta = [];
   if (!!similarDocs && similarDocs.length !== 0) {
     for (let i = 0; i < similarDocs.length; i++) {
       const doc = similarDocs[i];
@@ -86,18 +87,27 @@ const getKnowledge = async (
       const newKnowledgeTokens = getTokenLength(newKnowledge);
       if (newKnowledgeTokens < availTokens) {
         knowledge = newKnowledge;
+        docMeta.push({
+          line: doc.metadata.line,
+          knowledge: doc.metadata.knowledge,
+        });
       } else {
         break;
       }
     }
   }
-  return knowledge;
+  return { knowledge, docMeta };
 };
 
 export async function POST(
   request: Request,
   { params: { aiId } }: { params: { aiId: string } }
 ) {
+  const start = performance.now();
+  let endSetup = start,
+    endKnowledge = start,
+    end = start,
+    knowledgeMeta: any;
   try {
     const chatRequest: CreateChatRequest = await request.json();
     const { date, conversationId, prompt } = chatRequest;
@@ -137,6 +147,35 @@ export async function POST(
 
     const { stream, handlers } = LangChainStream();
 
+    const customHandleLLMEnd = async (_output: any, runId: string) => {
+      end = performance.now();
+      const answer = _output.generations[0][0].text;
+      const setupTime = Math.round(endSetup - start);
+      const knowledgeTime = Math.round(endKnowledge - endSetup);
+      const llmTime = Math.round(end - endKnowledge);
+      const totalTime = Math.round(end - start);
+      conversationService.updateConversation(
+        aiId,
+        user.id,
+        answer,
+        Role.system,
+        conversationId,
+        {
+          setupTime,
+          knowledgeTime,
+          llmTime,
+          totalTime,
+          knowledgeMeta,
+        }
+      );
+      return handlers.handleLLMEnd(_output, runId);
+    };
+
+    const customHandlers = {
+      ...handlers,
+      handleLLMEnd: customHandleLLMEnd,
+    };
+
     let completionModel,
       chatModel,
       options = {} as any;
@@ -157,7 +196,7 @@ export async function POST(
           max_tokens: options.maxTokens,
         },
         apiKey: process.env.REPLICATE_API_TOKEN,
-        callbackManager: CallbackManager.fromHandlers(handlers),
+        callbackManager: CallbackManager.fromHandlers(customHandlers),
       });
     } else if (conversation.ai.modelId === "text-davinci-003") {
       completionModel = new OpenAI({
@@ -209,6 +248,7 @@ export async function POST(
       }
     }
 
+    endSetup = performance.now();
     if (completionModel) {
       const chatHistory = conversation.messages.reduce(
         (acc: string, message: Message) => {
@@ -236,12 +276,14 @@ export async function POST(
         instructionTokens -
         questionTokens -
         BUFFER_TOKENS;
-      const knowledge = await getKnowledge(
+      const { knowledge, docMeta } = await getKnowledge(
         prompt,
         conversation.messages,
         conversation.ai.dataSources,
         remainingTokens
       );
+      knowledgeMeta = docMeta;
+      endKnowledge = performance.now();
       let response = await completionModel.call(
         `${completionPrompt}${knowledge}${seededChatHistory}`
       );
@@ -312,12 +354,14 @@ export async function POST(
         }
       }
       if (!knowledge) {
-        knowledge = await getKnowledge(
+        const vectorKnowledge = await getKnowledge(
           prompt,
           conversation.messages,
           conversation.ai.dataSources,
           remainingTokens
         );
+        knowledge = vectorKnowledge.knowledge;
+        knowledgeMeta = vectorKnowledge.docMeta;
       }
       const chatLog = [
         new SystemChatMessage(`${engineeredPrompt}${knowledge}\n`),
@@ -327,16 +371,9 @@ export async function POST(
       if (!chatModel) {
         return new NextResponse("Missing chat model", { status: 500 });
       }
-      chatModel.call(chatLog, {}, [handlers]);
-
-      const transformedStream = transformStreamToUpdateConversation(
-        stream,
-        aiId,
-        user.id,
-        conversation.id
-      );
-
-      return new StreamingTextResponse(transformedStream);
+      endKnowledge = performance.now();
+      chatModel.call(chatLog, {}, [customHandlers]);
+      return new StreamingTextResponse(stream);
     }
   } catch (error) {
     if (error.response?.data?.error?.message) {
@@ -348,37 +385,6 @@ export async function POST(
     console.error("[CHAT]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
-}
-
-function transformStreamToUpdateConversation(
-  stream: ReadableStream,
-  aiId: string,
-  userId: string,
-  conversationId: string
-) {
-  let answer = "";
-  const contentStream = new TransformStream({
-    transform(chunk, controller) {
-      answer += new TextDecoder("utf-8").decode(chunk);
-
-      // Pass the chunk along to the next destination.
-      controller.enqueue(chunk);
-    },
-    flush(controller) {
-      conversationService.updateConversation(
-        aiId,
-        userId,
-        answer,
-        Role.system,
-        conversationId
-      );
-
-      // Close the stream.
-      controller.terminate();
-    },
-  });
-
-  return stream.pipeThrough(contentStream);
 }
 
 /**
