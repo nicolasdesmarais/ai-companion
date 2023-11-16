@@ -1,19 +1,20 @@
+import { models } from "@/components/ai-models";
+import conversationService from "@/src/domain/services/ConversationService";
+import { MemoryManager } from "@/src/lib/memory";
+import { rateLimit } from "@/src/lib/rate-limit";
+import { getTokenLength } from "@/src/lib/tokenCount";
+import { CreateChatRequest } from "@/src/ports/api/ChatsApi";
 import { currentUser } from "@clerk/nextjs";
+import { Message, Role } from "@prisma/client";
+import { JsonObject } from "@prisma/client/runtime/library";
 import { LangChainStream, StreamingTextResponse } from "ai";
+import axios from "axios";
 import { CallbackManager } from "langchain/callbacks";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { OpenAI } from "langchain/llms/openai";
 import { Replicate } from "langchain/llms/replicate";
 import { HumanChatMessage, SystemChatMessage } from "langchain/schema";
-import { NextResponse } from "next/server";
-import { MemoryManager } from "@/src/lib/memory";
-import prismadb from "@/src/lib/prismadb";
-import { rateLimit } from "@/src/lib/rate-limit";
-import { Message } from "@prisma/client";
-import { getTokenLength } from "@/src/lib/tokenCount";
-import { models } from "@/components/ai-models";
-import { JsonObject } from "@prisma/client/runtime/library";
-import axios from "axios";
+import { NextRequest, NextResponse } from "next/server";
 
 // small buffer so we don't go over the limit
 const BUFFER_TOKENS = 10;
@@ -95,15 +96,15 @@ const getKnowledge = async (
 
 export async function POST(
   request: Request,
-  {
-    params: { aiId, conversationId },
-  }: { params: { aiId: string; conversationId: string } }
+  { params: { aiId } }: { params: { aiId: string } }
 ) {
   try {
-    const { prompt, date } = await request.json();
+    const chatRequest: CreateChatRequest = await request.json();
+    const { date, conversationId, prompt } = chatRequest;
+
     const user = await currentUser();
 
-    if (!user || !user.id) {
+    if (!user?.id) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -114,45 +115,13 @@ export async function POST(
       return new NextResponse("Rate limit exceeded", { status: 429 });
     }
 
-    const conversation = await prismadb.conversation.update({
-      where: {
-        id: conversationId,
-      },
-      include: {
-        ai: {
-          include: {
-            dataSources: {
-              include: {
-                dataSource: {
-                  include: {
-                    knowledges: {
-                      include: {
-                        knowledge: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        messages: {
-          orderBy: {
-            createdAt: "asc",
-          },
-        },
-      },
-      data: {
-        messages: {
-          create: {
-            content: prompt,
-            role: "user",
-            userId: user.id,
-            aiId: aiId,
-          },
-        },
-      },
-    });
+    const conversation = await conversationService.updateConversation(
+      aiId,
+      user.id,
+      prompt,
+      Role.user,
+      conversationId
+    );
 
     if (!conversation) {
       return new NextResponse("Conversation not found", { status: 404 });
@@ -360,7 +329,14 @@ export async function POST(
       }
       chatModel.call(chatLog, {}, [handlers]);
 
-      return new StreamingTextResponse(stream);
+      const transformedStream = transformStreamToUpdateConversation(
+        stream,
+        aiId,
+        user.id,
+        conversation.id
+      );
+
+      return new StreamingTextResponse(transformedStream);
     }
   } catch (error) {
     if (error.response?.data?.error?.message) {
@@ -372,4 +348,115 @@ export async function POST(
     console.error("[CHAT]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
+}
+
+function transformStreamToUpdateConversation(
+  stream: ReadableStream,
+  aiId: string,
+  userId: string,
+  conversationId: string
+) {
+  let answer = "";
+  const contentStream = new TransformStream({
+    transform(chunk, controller) {
+      answer += new TextDecoder("utf-8").decode(chunk);
+
+      // Pass the chunk along to the next destination.
+      controller.enqueue(chunk);
+    },
+    flush(controller) {
+      conversationService.updateConversation(
+        aiId,
+        userId,
+        answer,
+        Role.system,
+        conversationId
+      );
+
+      // Close the stream.
+      controller.terminate();
+    },
+  });
+
+  return stream.pipeThrough(contentStream);
+}
+
+/**
+ * @swagger
+ * /api/v1/ai/{aiId}/chats:
+ *   get:
+ *     summary: Get all chats for the AI
+ *     description: Retrieves a list of all chat sessions associated with the given AI identifier.
+ *     operationId: getAIChats
+ *     parameters:
+ *       - name: aiId
+ *         in: path
+ *         required: true
+ *         description: The identifier of the AI whose chats are to be retrieved.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: A list of chat sessions associated with the AI.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GetChatsResponse'
+ *       '404':
+ *         description: AI not found with the given identifier.
+ *       '500':
+ *         description: Internal Server Error
+ *     security:
+ *       - ApiKeyAuth: []
+ * components:
+ *   schemas:
+ *     GetChatsResponse:
+ *       type: object
+ *       properties:
+ *         chats:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Chat'
+ *     Chat:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: Unique identifier for the chat session.
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: The date and time when the chat session was created.
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: The date and time when the chat session was last updated.
+ *         name:
+ *           type: string
+ *           description: Name of the chat session.
+ *         aiId:
+ *           type: string
+ *           description: Identifier of the AI associated with the chat session.
+ *         userId:
+ *           type: string
+ *           description: Identifier of the user associated with the chat session.
+ *         pinPosition:
+ *           type: integer
+ *           format: int32
+ *           description: The position of the chat in a pinned list or similar.
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { aiId: string } }
+) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
+  const chatsResponse = await conversationService.getAIConversations(
+    params.aiId,
+    user.id
+  );
+  return NextResponse.json(chatsResponse);
 }
