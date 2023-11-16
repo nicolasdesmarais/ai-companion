@@ -1,7 +1,34 @@
 import prismadb from "@/src/lib/prismadb";
+import { GetChatsResponse } from "@/src/ports/api/ChatsApi";
 import { EntityNotFoundError } from "../errors/Errors";
 
 export class ConversationService {
+  public async getAIConversations(
+    aiId: string,
+    userId: string
+  ): Promise<GetChatsResponse> {
+    const conversations = await prismadb.conversation.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        name: true,
+        aiId: true,
+        userId: true,
+        pinPosition: true,
+      },
+      where: {
+        aiId,
+        userId,
+        isDeleted: false,
+      },
+    });
+
+    return {
+      chats: conversations,
+    };
+  }
+
   public async updateConversation(
     aiId: string,
     userId: string,

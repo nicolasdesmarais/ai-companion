@@ -13,6 +13,7 @@ import { ChatOpenAI } from "langchain/chat_models/openai";
 import { OpenAI } from "langchain/llms/openai";
 import { Replicate } from "langchain/llms/replicate";
 import { HumanChatMessage, SystemChatMessage } from "langchain/schema";
+import { NextApiRequest } from "next";
 import { NextResponse } from "next/server";
 
 // small buffer so we don't go over the limit
@@ -22,7 +23,87 @@ export const maxDuration = 300;
 
 /**
  * @swagger
- * /api/v1/ai/{aiId}/chat:
+ * /api/v1/ai/{aiId}/chats:
+ *   get:
+ *     summary: Get all chats for the AI
+ *     description: Retrieves a list of all chat sessions associated with the given AI identifier.
+ *     operationId: getAIChats
+ *     parameters:
+ *       - name: aiId
+ *         in: path
+ *         required: true
+ *         description: The identifier of the AI whose chats are to be retrieved.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: A list of chat sessions associated with the AI.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GetChatsResponse'
+ *       '404':
+ *         description: AI not found with the given identifier.
+ *       '500':
+ *         description: Internal Server Error
+ *     security:
+ *       - ApiKeyAuth: []
+ * components:
+ *   schemas:
+ *     GetChatsResponse:
+ *       type: object
+ *       properties:
+ *         chats:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Chat'
+ *     Chat:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: Unique identifier for the chat session.
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: The date and time when the chat session was created.
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: The date and time when the chat session was last updated.
+ *         name:
+ *           type: string
+ *           description: Name of the chat session.
+ *         aiId:
+ *           type: string
+ *           description: Identifier of the AI associated with the chat session.
+ *         userId:
+ *           type: string
+ *           description: Identifier of the user associated with the chat session.
+ *         pinPosition:
+ *           type: integer
+ *           format: int32
+ *           description: The position of the chat in a pinned list or similar.
+ */
+export async function GET(
+  request: NextApiRequest,
+  { params }: { params: { aiId: string } }
+) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
+  const chatsResponse = await conversationService.getAIConversations(
+    params.aiId,
+    user.id
+  );
+  return NextResponse.json(chatsResponse);
+}
+
+/**
+ * @swagger
+ * /api/v1/ai/{aiId}/chats:
  *   post:
  *     summary: Send a message to the AI chat service
  *     description: This endpoint allows sending a prompt to an AI and optionally specifying a conversation ID for context.
