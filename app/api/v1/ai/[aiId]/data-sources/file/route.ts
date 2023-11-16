@@ -3,9 +3,9 @@ import aiService from "@/src/domain/services/AIService";
 import dataSourceService from "@/src/domain/services/DataSourceService";
 import { auth } from "@clerk/nextjs";
 import { DataSourceType } from "@prisma/client";
+import { put } from "@vercel/blob";
 import { writeFile } from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
-import { put } from "@vercel/blob";
 
 export const maxDuration = 300;
 
@@ -50,7 +50,9 @@ export const maxDuration = 300;
  *             schema:
  *               type: object
  *               properties:
- *                 message:
+ *                 aiId:
+ *                   type: string
+ *                 dataSourceId:
  *                   type: string
  *       '400':
  *         description: Bad request
