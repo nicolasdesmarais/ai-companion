@@ -21,85 +21,78 @@ const BUFFER_TOKENS = 10;
 
 export const maxDuration = 300;
 
-/**
- * @swagger
- * /api/v1/ai/{aiId}/chats:
- *   get:
- *     summary: Get all chats for the AI
- *     description: Retrieves a list of all chat sessions associated with the given AI identifier.
- *     operationId: getAIChats
- *     parameters:
- *       - name: aiId
- *         in: path
- *         required: true
- *         description: The identifier of the AI whose chats are to be retrieved.
- *         schema:
- *           type: string
- *     responses:
- *       '200':
- *         description: A list of chat sessions associated with the AI.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/GetChatsResponse'
- *       '404':
- *         description: AI not found with the given identifier.
- *       '500':
- *         description: Internal Server Error
- *     security:
- *       - ApiKeyAuth: []
- * components:
- *   schemas:
- *     GetChatsResponse:
- *       type: object
- *       properties:
- *         chats:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/Chat'
- *     Chat:
- *       type: object
- *       properties:
- *         id:
- *           type: string
- *           description: Unique identifier for the chat session.
- *         createdAt:
- *           type: string
- *           format: date-time
- *           description: The date and time when the chat session was created.
- *         updatedAt:
- *           type: string
- *           format: date-time
- *           description: The date and time when the chat session was last updated.
- *         name:
- *           type: string
- *           description: Name of the chat session.
- *         aiId:
- *           type: string
- *           description: Identifier of the AI associated with the chat session.
- *         userId:
- *           type: string
- *           description: Identifier of the user associated with the chat session.
- *         pinPosition:
- *           type: integer
- *           format: int32
- *           description: The position of the chat in a pinned list or similar.
- */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { aiId: string } }
-) {
-  const user = await currentUser();
-  if (!user?.id) {
-    return new NextResponse("Unauthorized", { status: 401 });
+const getKnowledge = async (
+  prompt: string,
+  history: Message[],
+  dataSources: any[],
+  availTokens: number
+) => {
+  if (dataSources.length === 0) {
+    return "";
   }
 
-  const chatsResponse = await conversationService.getAIConversations(
-    params.aiId,
-    user.id
+  const knowledgeIds: string[] = dataSources
+    .map((ds) => ds.dataSource.knowledges.map((k: any) => k.knowledgeId))
+    .reduce((acc, curr) => acc.concat(curr), []);
+
+  const { totalDocs, totalTokens } = dataSources.reduce(
+    (dsAcc, ds) => {
+      const { docs, tokens } = ds.dataSource.knowledges.reduce(
+        (acc: any, k: any) => {
+          if (
+            k.knowledge.metadata &&
+            k.knowledge.metadata.totalTokenCount &&
+            k.knowledge.metadata.documentCount
+          ) {
+            acc.tokens += k.knowledge.metadata.totalTokenCount;
+            acc.docs += k.knowledge.metadata.documentCount;
+            return acc;
+          } else {
+            return { docs: NaN, tokens: NaN };
+          }
+        },
+        { docs: 0, tokens: 0 }
+      );
+      dsAcc.totalDocs += docs;
+      dsAcc.totalTokens += tokens;
+      return dsAcc;
+    },
+    { totalDocs: 0, totalTokens: 0 }
   );
-  return NextResponse.json(chatsResponse);
-}
+  const docDensity = totalTokens / totalDocs;
+  let estDocsNeeded = Math.ceil(availTokens / docDensity) || 100;
+  estDocsNeeded = Math.min(10000, Math.max(estDocsNeeded, 1));
+
+  let query = prompt;
+  if (history.length > 1) {
+    query = `${history[history.length - 2].content}\n${query}`;
+  }
+  if (history.length > 2) {
+    query = `${history[history.length - 3].content}\n${query}`;
+  }
+
+  const memoryManager = await MemoryManager.getInstance();
+  const similarDocs = await memoryManager.vectorSearch(
+    query,
+    knowledgeIds,
+    estDocsNeeded
+  );
+
+  let knowledge = "";
+  if (!!similarDocs && similarDocs.length !== 0) {
+    for (let i = 0; i < similarDocs.length; i++) {
+      const doc = similarDocs[i];
+      const newKnowledge = `${knowledge}\n${doc.pageContent}`;
+      const newKnowledgeTokens = getTokenLength(newKnowledge);
+      if (newKnowledgeTokens < availTokens) {
+        knowledge = newKnowledge;
+      } else {
+        break;
+      }
+    }
+  }
+  return knowledge;
+};
 
 /**
  * @swagger
@@ -400,75 +393,82 @@ export async function POST(
   }
 }
 
-const getKnowledge = async (
-  prompt: string,
-  history: Message[],
-  dataSources: any[],
-  availTokens: number
-) => {
-  if (dataSources.length === 0) {
-    return "";
+/**
+ * @swagger
+ * /api/v1/ai/{aiId}/chats:
+ *   get:
+ *     summary: Get all chats for the AI
+ *     description: Retrieves a list of all chat sessions associated with the given AI identifier.
+ *     operationId: getAIChats
+ *     parameters:
+ *       - name: aiId
+ *         in: path
+ *         required: true
+ *         description: The identifier of the AI whose chats are to be retrieved.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: A list of chat sessions associated with the AI.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GetChatsResponse'
+ *       '404':
+ *         description: AI not found with the given identifier.
+ *       '500':
+ *         description: Internal Server Error
+ *     security:
+ *       - ApiKeyAuth: []
+ * components:
+ *   schemas:
+ *     GetChatsResponse:
+ *       type: object
+ *       properties:
+ *         chats:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Chat'
+ *     Chat:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: Unique identifier for the chat session.
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: The date and time when the chat session was created.
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: The date and time when the chat session was last updated.
+ *         name:
+ *           type: string
+ *           description: Name of the chat session.
+ *         aiId:
+ *           type: string
+ *           description: Identifier of the AI associated with the chat session.
+ *         userId:
+ *           type: string
+ *           description: Identifier of the user associated with the chat session.
+ *         pinPosition:
+ *           type: integer
+ *           format: int32
+ *           description: The position of the chat in a pinned list or similar.
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { aiId: string } }
+) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const knowledgeIds: string[] = dataSources
-    .map((ds) => ds.dataSource.knowledges.map((k: any) => k.knowledgeId))
-    .reduce((acc, curr) => acc.concat(curr), []);
-
-  const { totalDocs, totalTokens } = dataSources.reduce(
-    (dsAcc, ds) => {
-      const { docs, tokens } = ds.dataSource.knowledges.reduce(
-        (acc: any, k: any) => {
-          if (
-            k.knowledge.metadata &&
-            k.knowledge.metadata.totalTokenCount &&
-            k.knowledge.metadata.documentCount
-          ) {
-            acc.tokens += k.knowledge.metadata.totalTokenCount;
-            acc.docs += k.knowledge.metadata.documentCount;
-            return acc;
-          } else {
-            return { docs: NaN, tokens: NaN };
-          }
-        },
-        { docs: 0, tokens: 0 }
-      );
-      dsAcc.totalDocs += docs;
-      dsAcc.totalTokens += tokens;
-      return dsAcc;
-    },
-    { totalDocs: 0, totalTokens: 0 }
+  const chatsResponse = await conversationService.getAIConversations(
+    params.aiId,
+    user.id
   );
-  const docDensity = totalTokens / totalDocs;
-  let estDocsNeeded = Math.ceil(availTokens / docDensity) || 100;
-  estDocsNeeded = Math.min(10000, Math.max(estDocsNeeded, 1));
-
-  let query = prompt;
-  if (history.length > 1) {
-    query = `${history[history.length - 2].content}\n${query}`;
-  }
-  if (history.length > 2) {
-    query = `${history[history.length - 3].content}\n${query}`;
-  }
-
-  const memoryManager = await MemoryManager.getInstance();
-  const similarDocs = await memoryManager.vectorSearch(
-    query,
-    knowledgeIds,
-    estDocsNeeded
-  );
-
-  let knowledge = "";
-  if (!!similarDocs && similarDocs.length !== 0) {
-    for (let i = 0; i < similarDocs.length; i++) {
-      const doc = similarDocs[i];
-      const newKnowledge = `${knowledge}\n${doc.pageContent}`;
-      const newKnowledgeTokens = getTokenLength(newKnowledge);
-      if (newKnowledgeTokens < availTokens) {
-        knowledge = newKnowledge;
-      } else {
-        break;
-      }
-    }
-  }
-  return knowledge;
-};
+  return NextResponse.json(chatsResponse);
+}
