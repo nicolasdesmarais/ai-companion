@@ -45,13 +45,25 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
   });
 
   const onSubmit = async (values: z.infer<typeof groupFormSchema>) => {
-    const request: ShareAIRequest = {
-      emails: values.teammates,
-    };
+    try {
+      const request: ShareAIRequest = {
+        emails: values.teammates,
+      };
 
-    const response = await axios.put(`/api/v1/ai/${ai.id}/share`, request);
-    if (response.status === 200) {
-      onSuccess();
+      const response = await axios.put(`/api/v1/ai/${ai.id}/share`, request);
+      if (response.status === 200) {
+        onSuccess();
+      } else {
+        toast({
+          description: `Something went wrong (${response.status})`,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        description: "Something went wrong",
+        variant: "destructive",
+      });
     }
   };
   const onCopy = () => {
