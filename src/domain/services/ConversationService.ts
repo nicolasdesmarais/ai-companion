@@ -1,5 +1,6 @@
 import prismadb from "@/src/lib/prismadb";
 import { GetChatsResponse } from "@/src/ports/api/ChatsApi";
+import { Role } from "@prisma/client";
 import { EntityNotFoundError } from "../errors/Errors";
 
 export class ConversationService {
@@ -32,7 +33,8 @@ export class ConversationService {
   public async updateConversation(
     aiId: string,
     userId: string,
-    prompt: string,
+    content: string,
+    role: Role,
     conversationId: string | undefined
   ) {
     if (!conversationId) {
@@ -70,8 +72,8 @@ export class ConversationService {
       data: {
         messages: {
           create: {
-            content: prompt,
-            role: "user",
+            content: content,
+            role,
             userId,
             aiId: aiId,
           },

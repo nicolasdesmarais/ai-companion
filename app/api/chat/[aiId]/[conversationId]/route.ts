@@ -1,10 +1,11 @@
 import { models } from "@/components/ai-models";
+import conversationService from "@/src/domain/services/ConversationService";
 import { MemoryManager } from "@/src/lib/memory";
 import prismadb from "@/src/lib/prismadb";
 import { rateLimit } from "@/src/lib/rate-limit";
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { currentUser } from "@clerk/nextjs";
-import { Message } from "@prisma/client";
+import { Message, Role } from "@prisma/client";
 import { JsonObject } from "@prisma/client/runtime/library";
 import { LangChainStream, StreamingTextResponse } from "ai";
 import axios from "axios";
@@ -360,21 +361,14 @@ export async function POST(
       }
       chatModel.call(chatLog, {}, [handlers]);
 
-      const monitorStream = new TransformStream({
-        transform(chunk, controller) {
-          // Pass through the chunk unchanged.
-          controller.enqueue(chunk);
-        },
-        flush(controller) {
-          console.log("Stream flushed");
-          // Close the stream.
-          controller.terminate();
-        },
-      });
+      const transformedStream = transformStreamToUpdateConversation(
+        stream,
+        aiId,
+        user.id,
+        conversationId
+      );
 
-      const monitoredStream = stream.pipeThrough(monitorStream);
-
-      return new StreamingTextResponse(monitoredStream);
+      return new StreamingTextResponse(transformedStream);
     }
   } catch (error) {
     if (error.response?.data?.error?.message) {
@@ -386,4 +380,35 @@ export async function POST(
     console.error("[CHAT]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
+}
+
+function transformStreamToUpdateConversation(
+  stream: ReadableStream,
+  aiId: string,
+  userId: string,
+  conversationId: string
+) {
+  let answer = "";
+  const contentStream = new TransformStream({
+    transform(chunk, controller) {
+      answer += new TextDecoder("utf-8").decode(chunk);
+
+      // Pass the chunk along to the next destination.
+      controller.enqueue(chunk);
+    },
+    flush(controller) {
+      conversationService.updateConversation(
+        aiId,
+        userId,
+        answer,
+        Role.system,
+        conversationId
+      );
+
+      // Close the stream.
+      controller.terminate();
+    },
+  });
+
+  return stream.pipeThrough(contentStream);
 }

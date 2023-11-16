@@ -10,7 +10,6 @@ import { ChatHeader } from "@/components/chat-header";
 import { ChatMessageProps } from "@/components/chat-message";
 import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
-import axios from "axios";
 
 interface ChatClientProps {
   conversation: Conversation & {
@@ -29,18 +28,6 @@ export const ChatClient = ({ conversation }: ChatClientProps) => {
   );
   const [streaming, setStreaming] = useState<boolean>(false);
   const { toast } = useToast();
-
-  const saveAnswer = async (answer: string) => {
-    const response = await axios.post(
-      `/api/chat/${conversation.ai.id}/${conversation.id}/answer`,
-      {
-        answer,
-      }
-    );
-    if (response.status !== 200) {
-      toast({ description: "Error updating chat log." });
-    }
-  };
 
   const {
     completion,
@@ -70,7 +57,6 @@ export const ChatClient = ({ conversation }: ChatClientProps) => {
 
       setMessages((current) => [...current, systemMessage]);
       setInput("");
-      saveAnswer(completion);
 
       router.refresh();
     },
