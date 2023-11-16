@@ -360,7 +360,21 @@ export async function POST(
       }
       chatModel.call(chatLog, {}, [handlers]);
 
-      return new StreamingTextResponse(stream);
+      const monitorStream = new TransformStream({
+        transform(chunk, controller) {
+          // Pass through the chunk unchanged.
+          controller.enqueue(chunk);
+        },
+        flush(controller) {
+          console.log("Stream flushed");
+          // Close the stream.
+          controller.terminate();
+        },
+      });
+
+      const monitoredStream = stream.pipeThrough(monitorStream);
+
+      return new StreamingTextResponse(monitoredStream);
     }
   } catch (error) {
     if (error.response?.data?.error?.message) {

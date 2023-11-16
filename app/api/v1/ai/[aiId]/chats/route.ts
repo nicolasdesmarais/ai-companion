@@ -14,8 +14,7 @@ import { ChatOpenAI } from "langchain/chat_models/openai";
 import { OpenAI } from "langchain/llms/openai";
 import { Replicate } from "langchain/llms/replicate";
 import { HumanChatMessage, SystemChatMessage } from "langchain/schema";
-import { NextApiRequest } from "next";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // small buffer so we don't go over the limit
 const BUFFER_TOKENS = 10;
@@ -87,7 +86,7 @@ export const maxDuration = 300;
  *           description: The position of the chat in a pinned list or similar.
  */
 export async function GET(
-  request: NextApiRequest,
+  request: NextRequest,
   { params }: { params: { aiId: string } }
 ) {
   const user = await currentUser();
