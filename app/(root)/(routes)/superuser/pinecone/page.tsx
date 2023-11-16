@@ -1,9 +1,8 @@
-import { SuperDataSources } from "@/components/super-data-sources";
 import { isSuperuser } from "@/src/lib/utils";
 import { auth, redirectToSignIn } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
 import { Pinecone } from "@pinecone-database/pinecone";
 import axios from "axios";
+import { redirect } from "next/navigation";
 
 const pinecone = new Pinecone();
 
@@ -25,7 +24,7 @@ const SuperPineconePage = async () => {
     return redirectToSignIn();
   }
 
-  if (!isSuperuser(userId, user)) {
+  if (!isSuperuser(userId)) {
     console.log("Superuser attempt", userId);
     return redirect("/");
   }
