@@ -1,8 +1,8 @@
 export interface GetChatsResponse {
-  chats: Chat[];
+  chats: ChatDto[];
 }
 
-export interface Chat {
+export interface ChatDto {
   id: string;
   createdAt: Date;
   updatedAt: Date;
@@ -10,4 +10,9 @@ export interface Chat {
   aiId: string;
   userId: string;
   pinPosition: number | null;
+}
+
+export interface CreateChatRequest {
+  conversationId?: string;
+  prompt: string;
 }

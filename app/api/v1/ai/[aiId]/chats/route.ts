@@ -3,6 +3,7 @@ import conversationService from "@/src/domain/services/ConversationService";
 import { MemoryManager } from "@/src/lib/memory";
 import { rateLimit } from "@/src/lib/rate-limit";
 import { getTokenLength } from "@/src/lib/tokenCount";
+import { CreateChatRequest } from "@/src/ports/api/ChatsApi";
 import { currentUser } from "@clerk/nextjs";
 import { Message } from "@prisma/client";
 import { JsonObject } from "@prisma/client/runtime/library";
@@ -157,7 +158,7 @@ export async function POST(
   { params: { aiId } }: { params: { aiId: string } }
 ) {
   try {
-    const chatRequest: ChatRequest = await request.json();
+    const chatRequest: CreateChatRequest = await request.json();
     const { conversationId, prompt } = chatRequest;
 
     const user = await currentUser();
