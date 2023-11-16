@@ -5,25 +5,10 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import axios, { AxiosError } from "axios";
 import { format } from "date-fns";
-import {
-  ChevronRight,
-  ChevronDown,
-  FileUp,
-  Globe,
-  Loader,
-  MinusCircle,
-  Server,
-} from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { ChevronRight, ChevronDown, Loader, MinusCircle } from "lucide-react";
 import { useState } from "react";
-import DataSourceCard from "./datasource-card";
 import { DataSourceTypes } from "./datasource-types";
-import { FileUploadKnowledge } from "./file-upload-knowledge";
-import { GoogleDriveForm } from "./google-drive-knowledge";
-import { WebUrlsForm } from "./web-urls-knowledge-form";
 import { KnowledgeIndexStatus } from "@prisma/client";
-import { Banner } from "./ui/banner";
-import { kn } from "date-fns/locale";
 import Link from "next/link";
 
 export const SuperDataSources = () => {
