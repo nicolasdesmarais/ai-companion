@@ -6,19 +6,19 @@ import { getTokenLength } from "@/src/lib/tokenCount";
 import { Knowledge } from "@prisma/client";
 import { writeFile } from "fs/promises";
 import { CSVLoader } from "langchain/document_loaders/fs/csv";
-import { DocxLoader } from "./DocxLoader";
 import { EPubLoader } from "langchain/document_loaders/fs/epub";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { DocxLoader } from "./DocxLoader";
 export class FileLoader {
-  private async getFilepath(file: Blob) {
+  private async getFilepath(file: Blob, filename: string) {
     if (!file) {
       throw new Error("Error reading file");
     }
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const path = `/tmp/${file.name}`;
+    const path = `/tmp/${filename}`;
     await writeFile(path, buffer);
     return path;
   }
@@ -43,7 +43,7 @@ export class FileLoader {
         mimeType === "application/epub+zip" &&
         filePathOrBlob instanceof Blob
       ) {
-        const path = await this.getFilepath(filePathOrBlob);
+        const path = await this.getFilepath(filePathOrBlob, filename);
         const loader = new EPubLoader(path);
         docs = await loader.load();
       } else if (mimeType === "application/epub+zip") {
