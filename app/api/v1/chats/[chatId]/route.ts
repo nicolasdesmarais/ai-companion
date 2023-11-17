@@ -87,10 +87,7 @@ const getKnowledge = async (
       const newKnowledgeTokens = getTokenLength(newKnowledge);
       if (newKnowledgeTokens < availTokens) {
         knowledge = newKnowledge;
-        docMeta.push({
-          line: doc.metadata.line,
-          knowledge: doc.metadata.knowledge,
-        });
+        docMeta.push(doc.metadata);
       } else {
         break;
       }
