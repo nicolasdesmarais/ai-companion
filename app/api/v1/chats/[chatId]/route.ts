@@ -17,7 +17,7 @@ import { HumanChatMessage, SystemChatMessage } from "langchain/schema";
 import { NextResponse } from "next/server";
 
 // small buffer so we don't go over the limit
-const BUFFER_TOKENS = 10;
+const BUFFER_TOKENS = 200;
 
 export const maxDuration = 300;
 
