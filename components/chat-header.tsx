@@ -125,18 +125,18 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
         </div>
       </div>
       <div className="flex">
-        {user?.id === conversation.ai.userId ||
-          (conversation.ai.visibility === "PUBLIC" && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="mr-4"
-              type="button"
-              onClick={() => setShowShareModal(true)}
-            >
-              <ExternalLink />
-            </Button>
-          ))}
+        {(user?.id === conversation.ai.userId ||
+          conversation.ai.visibility === "PUBLIC") && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mr-4"
+            type="button"
+            onClick={() => setShowShareModal(true)}
+          >
+            <ExternalLink />
+          </Button>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon">
