@@ -1,5 +1,5 @@
 export interface GetChatsResponse {
-  chats: ChatDto[];
+  data: ChatDto[];
 }
 
 export interface ChatDto {
@@ -14,6 +14,5 @@ export interface ChatDto {
 
 export interface CreateChatRequest {
   date: string;
-  conversationId?: string;
   prompt: string;
 }
