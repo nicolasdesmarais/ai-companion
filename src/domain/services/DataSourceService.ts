@@ -60,7 +60,7 @@ export class DataSourceService {
     });
 
     return {
-      dataSources: dataSources.map((dataSource) => ({
+      data: dataSources.map((dataSource) => ({
         ...dataSource,
         indexPercentage: dataSource.indexPercentage.toString(),
       })),

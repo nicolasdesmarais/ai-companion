@@ -34,7 +34,7 @@ import { NextResponse } from "next/server";
  *     GetDataSourcesResponse:
  *       type: object
  *       properties:
- *         dataSources:
+ *         data:
  *           type: array
  *           items:
  *             $ref: '#/components/schemas/DataSource'

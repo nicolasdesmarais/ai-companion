@@ -35,7 +35,7 @@ export const maxDuration = 300;
  *     GetChatsResponse:
  *       type: object
  *       properties:
- *         chats:
+ *         data:
  *           type: array
  *           items:
  *             $ref: '#/components/schemas/Chat'
