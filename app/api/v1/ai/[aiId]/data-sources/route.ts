@@ -1,5 +1,5 @@
 import dataSourceService from "@/src/domain/services/DataSourceService";
-import { auth } from "@clerk/nextjs";
+import { getAuthorizationContext } from "@/src/lib/authorizationUtils";
 import { NextResponse } from "next/server";
 
 /**
@@ -89,13 +89,11 @@ export async function GET(
   { params }: { params: { aiId: string } }
 ) {
   try {
-    const authentication = await auth();
-    const orgId = authentication?.orgId;
-    const userId = authentication?.userId;
-
-    if (!userId || !orgId) {
+    const authorizationContext = await getAuthorizationContext();
+    if (!authorizationContext?.orgId || !authorizationContext?.userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
+    const { orgId, userId } = authorizationContext;
 
     const dataSources = await dataSourceService.getDataSources(
       orgId,
