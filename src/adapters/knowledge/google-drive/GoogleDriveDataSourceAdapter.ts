@@ -331,7 +331,9 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
   ): Promise<IndexKnowledgeResponse> {
     const meta = knowledge.metadata as any;
     if (!knowledge.userId || !meta?.oauthTokenId) {
-      console.error("Missing userId or oauthTokenId in knowledge metadata");
+      console.error(
+        "Missing userId or oauthTokenId in knowledge " + knowledge.id
+      );
       return {
         indexStatus: KnowledgeIndexStatus.FAILED,
       };
