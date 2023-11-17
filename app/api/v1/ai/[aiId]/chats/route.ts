@@ -154,7 +154,7 @@ export async function POST(
       const knowledgeTime = Math.round(endKnowledge - endSetup);
       const llmTime = Math.round(end - endKnowledge);
       const totalTime = Math.round(end - start);
-      conversationService.updateConversation(
+      await conversationService.updateConversation(
         aiId,
         user.id,
         answer,
@@ -168,7 +168,7 @@ export async function POST(
           knowledgeMeta,
         }
       );
-      return handlers.handleLLMEnd(_output, runId);
+      return await handlers.handleLLMEnd(_output, runId);
     };
 
     const customHandlers = {
