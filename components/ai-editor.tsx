@@ -61,7 +61,6 @@ const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
     dataSources: {
       include: {
         dataSource: true,
-        groups: true,
       },
     },
   },
