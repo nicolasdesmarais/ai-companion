@@ -72,11 +72,7 @@ export class MemoryManager {
       process.env.PINECONE_INDEX! || ""
     );
 
-    await pineconeIndex.deleteMany({
-      deleteRequest: {
-        filter: { knowledge: knowledgeId },
-      },
-    });
+    await pineconeIndex.deleteMany({ knowledge: knowledgeId });
   }
 
   public static getInstance(): MemoryManager {

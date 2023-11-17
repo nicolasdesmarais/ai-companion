@@ -8,7 +8,11 @@ import {
 } from "@/src/domain/types/GoogleDriveSearchResponse";
 import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
-import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
+import {
+  DataSourceType,
+  Knowledge,
+  KnowledgeIndexStatus,
+} from "@prisma/client";
 import { put } from "@vercel/blob";
 import { GaxiosResponse } from "gaxios";
 import { drive_v3, google } from "googleapis";
@@ -20,9 +24,14 @@ import {
   DataSourceItemList,
 } from "../types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
-import { KnowledgeIndexingResult } from "../types/KnowlegeIndexingResult";
+import {
+  KnowledgeIndexingResult,
+  KnowledgeIndexingResultStatus,
+} from "../types/KnowlegeIndexingResult";
 import { GoogleDriveDataSourceInput } from "./types/GoogleDriveDataSourceInput";
 import { GoogleDriveFileMetadata } from "./types/GoogleDriveFileMetaData";
+import { publishEvent } from "../../inngest/event-publisher";
+import { DomainEvent } from "@/src/domain/events/domain-event";
 
 const MIME_TYPE_TEXT = "text/plain";
 const MIME_TYPE_CSV = "text/csv";
@@ -211,50 +220,24 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     knowledge: Knowledge,
     data: any
   ): Promise<IndexKnowledgeResponse> {
-    await this.setOAuthCredentials(userId, data.oauthTokenId);
-
-    if (!knowledge.metadata) {
-      throw new Error("Knowledge metadata not found for indexing Google Drive");
-    }
-
-    const { fileId, fileName, mimeType } =
-      knowledge.metadata as unknown as GoogleDriveFileMetadata;
-
-    const { fileResponse, derivedMimeType } = await this.getFileContent(
-      fileId,
-      mimeType
-    );
-
-    return new Promise((resolve) => {
-      if (fileResponse.data instanceof Readable) {
-        const chunks: any[] = [];
-        fileResponse.data.on("data", (chunk) => {
-          chunks.push(chunk);
-        });
-
-        fileResponse.data.on("end", async () => {
-          const buffer = Buffer.concat(chunks);
-          const blob = new Blob([buffer]);
-
-          const cloudBlob = await put(fileName, blob, {
-            access: "public",
-          });
-          knowledge.blobUrl = cloudBlob.url;
-
-          const metadata = await fileLoader.loadFile(
-            knowledge.id,
-            fileName,
-            derivedMimeType,
-            blob
-          );
-
-          resolve({
-            indexStatus: KnowledgeIndexStatus.COMPLETED,
-            metadata,
-          });
-        });
+    const eventResult = await publishEvent(
+      DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
+      {
+        knowledgeIndexingResult: {
+          knowledgeId: knowledge.id,
+          result: {
+            chunkCount: 1,
+          },
+        },
+        dataSourceType: DataSourceType.GOOGLE_DRIVE,
+        index: 0,
       }
-    });
+    );
+    return {
+      userId,
+      indexStatus: KnowledgeIndexStatus.INDEXING,
+      metadata: { eventIds: eventResult.ids, oauthTokenId: data.oauthTokenId },
+    };
   }
 
   private async listAllFiles(fileId: string): Promise<ListFilesResponse> {
@@ -341,12 +324,70 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     throw new Error("Method not supported.");
   }
 
-  loadKnowledgeResult(
+  public async loadKnowledgeResult(
     knowledge: Knowledge,
     result: KnowledgeIndexingResult,
-    chunkCount: number
+    index: number
   ): Promise<IndexKnowledgeResponse> {
-    throw new Error("Method not supported.");
+    const meta = knowledge.metadata as any;
+    if (!knowledge.userId || !meta?.oauthTokenId) {
+      console.error("Missing userId or oauthTokenId in knowledge metadata");
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
+    await this.setOAuthCredentials(knowledge.userId, meta?.oauthTokenId);
+
+    const { fileId, fileName, mimeType } =
+      knowledge.metadata as unknown as GoogleDriveFileMetadata;
+
+    const { fileResponse, derivedMimeType } = await this.getFileContent(
+      fileId,
+      mimeType
+    );
+
+    return new Promise((resolve) => {
+      if (fileResponse.data instanceof Readable) {
+        const chunks: any[] = [];
+        fileResponse.data.on("data", (chunk) => {
+          chunks.push(chunk);
+        });
+
+        fileResponse.data.on("end", async () => {
+          const buffer = Buffer.concat(chunks);
+          const blob = new Blob([buffer]);
+
+          const cloudBlob = await put(fileName, blob, {
+            access: "public",
+          });
+          knowledge.blobUrl = cloudBlob.url;
+
+          const metadata = await fileLoader.loadFile(
+            knowledge.id,
+            fileName,
+            derivedMimeType,
+            blob
+          );
+
+          let indexStatus;
+          switch (result.status) {
+            case KnowledgeIndexingResultStatus.SUCCESSFUL:
+            case KnowledgeIndexingResultStatus.PARTIAL:
+              indexStatus = KnowledgeIndexStatus.PARTIALLY_COMPLETED;
+              break;
+            case KnowledgeIndexingResultStatus.FAILED:
+              indexStatus = KnowledgeIndexStatus.FAILED;
+          }
+          resolve({
+            indexStatus,
+            metadata: {
+              ...metadata,
+              completedChunks: [index],
+            },
+          });
+        });
+      }
+    });
   }
 
   public async pollKnowledgeIndexingStatus(

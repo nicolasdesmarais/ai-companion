@@ -144,12 +144,17 @@ export class DataSourceService {
       dataSource.data
     );
 
-    return await this.initializeKnowledgeList(dataSourceId, itemList);
+    return await this.initializeKnowledgeList(
+      dataSourceId,
+      itemList,
+      dataSource.ownerUserId
+    );
   }
 
   private async initializeKnowledgeList(
     dataSourceId: string,
-    itemList: DataSourceItemList
+    itemList: DataSourceItemList,
+    userId: string
   ) {
     const knowledgeList = [];
     const dataSourceKnowledgeRelations = [];
@@ -157,6 +162,7 @@ export class DataSourceService {
     for (const item of itemList.items) {
       const knowledge = await prismadb.knowledge.create({
         data: {
+          userId,
           name: item.name,
           type: item.type,
           indexStatus: KnowledgeIndexStatus.INITIALIZED,
