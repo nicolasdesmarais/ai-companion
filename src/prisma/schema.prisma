@@ -76,11 +76,11 @@ model Message {
   createdAt       DateTime  @default(now()) @map(name: "created_at")
   updatedAt       DateTime  @updatedAt @map(name: "updated_at")
 
-  aiId            String    @map("ai_id")
+  aiId            String?    @map("ai_id")
   userId          String    @map("user_id")
   metadata        Json?
 
-  ai              AI @relation(fields: [aiId], references: [id], onDelete: Cascade)
+  ai              AI? @relation(fields: [aiId], references: [id], onDelete: Cascade)
 
   conversation    Conversation? @relation(fields: [conversationId], references: [id])
   conversationId  String? @map(name: "conversation_id")

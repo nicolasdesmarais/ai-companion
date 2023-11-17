@@ -37,7 +37,7 @@ export const ChatClient = ({ conversation }: ChatClientProps) => {
     handleSubmit,
     setInput,
   } = useCompletion({
-    api: `/api/v1/ai/${conversation.ai.id}/chats/${conversation.id}`,
+    api: `/api/v1/chats/${conversation.id}`,
     body: {
       date: new Date().toLocaleString(),
     },

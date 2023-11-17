@@ -101,7 +101,7 @@ const getKnowledge = async (
 
 export async function POST(
   request: Request,
-  { params: { aiId, chatId } }: { params: { aiId: string; chatId: string } }
+  { params: { chatId } }: { params: { chatId: string } }
 ) {
   const start = performance.now();
   let endSetup = start,
@@ -116,7 +116,7 @@ export async function POST(
     if (!authorizationContext?.orgId || !authorizationContext?.userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
-    const { orgId, userId } = authorizationContext;
+    const { userId } = authorizationContext;
 
     const identifier = request.url + "-" + userId;
     const { success } = await rateLimit(identifier);
@@ -126,7 +126,6 @@ export async function POST(
     }
 
     const conversation = await conversationService.updateConversation(
-      aiId,
       chatId,
       userId,
       prompt,
@@ -155,7 +154,6 @@ export async function POST(
       const llmTime = Math.round(end - endKnowledge);
       const totalTime = Math.round(end - start);
       await conversationService.updateConversation(
-        aiId,
         chatId,
         userId,
         answer,

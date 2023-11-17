@@ -75,11 +75,30 @@ export async function GET(
   if (!authorizationContext?.orgId || !authorizationContext?.userId) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
-  const { orgId, userId } = authorizationContext;
+  const { userId } = authorizationContext;
 
   const chatsResponse = await conversationService.getAIConversations(
     params.aiId,
     userId
   );
   return NextResponse.json(chatsResponse);
+}
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { aiId: string } }
+) {
+  const authorizationContext = await getAuthorizationContext();
+  if (!authorizationContext?.orgId || !authorizationContext?.userId) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+  const { orgId, userId } = authorizationContext;
+
+  const conversation = await conversationService.createConversation(
+    orgId,
+    userId,
+    params.aiId
+  );
+
+  return NextResponse.json(conversation, { status: 201 });
 }

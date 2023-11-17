@@ -2,6 +2,7 @@ import prismadb from "@/src/lib/prismadb";
 import { GetChatsResponse } from "@/src/ports/api/ChatsApi";
 import { Role } from "@prisma/client";
 import { EntityNotFoundError } from "../errors/Errors";
+import aiService from "./AIService";
 
 export class ConversationService {
   public async getAIConversations(
@@ -30,8 +31,22 @@ export class ConversationService {
     };
   }
 
+  public async createConversation(orgId: string, userId: string, aiId: string) {
+    const ai = await aiService.findAIForUser(orgId, userId, aiId);
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id ${aiId} not found`);
+    }
+
+    return await prismadb.conversation.create({
+      data: {
+        aiId,
+        userId,
+        name: ai.name,
+      },
+    });
+  }
+
   public async updateConversation(
-    aiId: string,
     conversationId: string,
     userId: string,
     content: string,
@@ -43,7 +58,6 @@ export class ConversationService {
       where: {
         id: conversationId,
         userId,
-        aiId,
       },
       include: {
         ai: {
@@ -75,7 +89,6 @@ export class ConversationService {
             content: content,
             role,
             userId,
-            aiId: aiId,
             metadata,
           },
         },
@@ -83,44 +96,6 @@ export class ConversationService {
     });
 
     return conversation;
-  }
-
-  private async getLatestConversationId(aiId: string, userId: string) {
-    const ai = await prismadb.aI.findUnique({
-      where: {
-        id: aiId,
-      },
-      include: {
-        conversations: {
-          where: {
-            userId: userId,
-            isDeleted: false,
-          },
-          orderBy: {
-            updatedAt: "desc",
-          },
-        },
-      },
-    });
-
-    if (!ai) {
-      throw new EntityNotFoundError(`AI with id ${aiId} not found`);
-    }
-
-    let conversation;
-    if (ai.conversations.length === 0) {
-      conversation = await prismadb.conversation.create({
-        data: {
-          aiId,
-          name: ai.name,
-          userId: userId,
-        },
-      });
-    } else {
-      conversation = ai.conversations[0];
-    }
-
-    return conversation.id;
   }
 }
 
