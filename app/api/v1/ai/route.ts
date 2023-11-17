@@ -43,7 +43,7 @@ export async function POST(req: Request) {
         name,
         description,
         instructions,
-        seed,
+        seed: seed ?? "",
         modelId,
         visibility,
         options,
