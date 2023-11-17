@@ -72,13 +72,10 @@ export async function GET(
   { params }: { params: { aiId: string } }
 ) {
   const authorizationContext = await getAuthorizationContext();
-  if (!authorizationContext) {
+  if (!authorizationContext?.orgId || !authorizationContext?.userId) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
   const { orgId, userId } = authorizationContext;
-  if (!orgId || !userId) {
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
 
   const chatsResponse = await conversationService.getAIConversations(
     params.aiId,
