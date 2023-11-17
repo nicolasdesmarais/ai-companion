@@ -4,6 +4,8 @@ import { auth, redirectToSignIn } from "@clerk/nextjs";
 import groupService from "@/src/domain/services/GroupService";
 import { GroupModal } from "@/components/group-modal";
 
+export const maxDuration = 300;
+
 interface AIIdPageProps {
   params: {
     aiId: string;
