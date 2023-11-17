@@ -29,15 +29,13 @@ export class ApiKeyService {
     };
   }
 
-  public async verifyApiKey(apiKey: string) {
-    const hashedApiKey = this.hashApiKey(apiKey);
-    const apiKeyRecord = await prismadb.apiKey.findUnique({
+  public async getApiKeyFromBearerToken(bearerToken: string) {
+    const hashedKey = this.hashApiKey(bearerToken);
+    return await prismadb.apiKey.findUnique({
       where: {
-        key: hashedApiKey,
+        key: hashedKey,
       },
     });
-
-    return apiKeyRecord;
   }
 
   private generateApiKey(): string {
