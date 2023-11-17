@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import {
   CreateApiKeyRequest,
@@ -147,9 +148,12 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
       {/* Modal for creating a new API Key */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Secret Key</DialogTitle>
+          <DialogHeader className="space-y-4">
+            <DialogTitle className="text-center">
+              Create New Secret Key
+            </DialogTitle>
           </DialogHeader>
+          <Separator />
 
           {loading ? (
             <div className="flex justify-center items-center h-32">
@@ -168,7 +172,10 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
             </div>
           ) : (
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onCreateKey)}>
+              <form
+                onSubmit={form.handleSubmit(onCreateKey)}
+                className="space-y-4"
+              >
                 <FormField
                   name="name"
                   control={form.control}
