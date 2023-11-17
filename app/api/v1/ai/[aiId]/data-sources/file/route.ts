@@ -80,7 +80,7 @@ export async function POST(
   { params: { aiId } }: { params: { aiId: string } }
 ): Promise<NextResponse> {
   const authorizationContext = await getAuthorizationContext();
-  if (authorizationContext?.orgId || !authorizationContext?.userId) {
+  if (!authorizationContext?.orgId || !authorizationContext?.userId) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
   const { orgId, userId } = authorizationContext;
