@@ -2,10 +2,14 @@ import prismadb from "@/src/lib/prismadb";
 import {
   CreateApiKeyRequest,
   CreateApiKeyResponse,
+  ListApiKeyResponse,
 } from "@/src/ports/api/ApiKeysApi";
 import { createHash, randomBytes } from "crypto";
 
 export class ApiKeyService {
+  /**
+   * Creates an API key for the given user and organization.
+   */
   public async createApiKey(
     orgId: string,
     userId: string,
@@ -29,6 +33,12 @@ export class ApiKeyService {
     };
   }
 
+  /**
+   * Retrieves an API key by its bearer token.
+   * The bearer token is the API key hashed with SHA256.
+   * @param bearerToken
+   * @returns
+   */
   public async getApiKeyFromBearerToken(bearerToken: string) {
     const hashedKey = this.hashApiKey(bearerToken);
     return await prismadb.apiKey.findUnique({
@@ -38,8 +48,45 @@ export class ApiKeyService {
     });
   }
 
+  /**
+   * Returns a list of all API keys for the given organization and user.
+   * @param orgId
+   * @param userId
+   * @returns
+   */
+  public async getApiKeysByOrgIdAndUserId(
+    orgId: string,
+    userId: string
+  ): Promise<ListApiKeyResponse[]> {
+    return await prismadb.apiKey.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        lastUsedAt: true,
+        orgId: true,
+        userId: true,
+        name: true,
+      },
+      where: {
+        orgId,
+        userId,
+      },
+    });
+  }
+
+  public async deleteApiKey(orgId: string, userId: string, apiKeyId: string) {
+    await prismadb.apiKey.delete({
+      where: {
+        id: apiKeyId,
+        orgId,
+        userId,
+      },
+    });
+  }
+
   private generateApiKey(): string {
-    return randomBytes(32).toString("hex");
+    return "sk-" + randomBytes(24).toString("hex");
   }
 
   private hashApiKey(apiKey: string): string {
