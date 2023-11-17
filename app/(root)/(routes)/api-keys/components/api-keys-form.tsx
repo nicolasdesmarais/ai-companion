@@ -60,17 +60,11 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
     },
   });
 
-  const {
-    reset,
-    formState: { errors },
-  } = useForm<NewAPIKeyFormData>();
-
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => {
-    reset();
+    form.reset();
     setIsModalOpen(false);
     setCreatedKey(undefined);
-    form.setValue("name", "");
   };
 
   const onCreateKey = async (values: z.infer<typeof apiKeyFormSchema>) => {
