@@ -265,11 +265,25 @@ model DataSourceKnowledge {
 }
 
 model AIDataSource {
-  ai                         AI      @relation(fields: [aiId], references: [id])
+  ai                         AI             @relation(fields: [aiId], references: [id])
   aiId                       String         @map(name: "ai_id")
   dataSource                 DataSource     @relation(fields: [dataSourceId], references: [id])
   dataSourceId               String         @map(name: "data_source_id")
 
   @@id([aiId, dataSourceId])
   @@map("ai_data_sources")
+}
+
+model ApiKey {
+  id                        String         @id @default(cuid())
+  createdAt                 DateTime       @default(now()) @map(name: "created_at")
+  updatedAt                 DateTime       @updatedAt       @map(name: "updated_at")
+  lastUsedAt                DateTime?      @map(name: "last_used_at")
+  orgId                     String         @map("org_id")
+  userId                    String         @map("user_id")
+  name                      String
+  key                       String         @unique
+  scopes                    Json?
+
+  @@map("api_keys")
 }
