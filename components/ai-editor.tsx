@@ -167,6 +167,8 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
     if (continueRequested) {
       setContinueRequested("");
       router.push(`/ai/${aiId}${continueRequested}`);
+    } else {
+      router.push(`/ai/${aiId}/edit`);
     }
   };
 
