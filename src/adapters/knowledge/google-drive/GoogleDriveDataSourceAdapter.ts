@@ -380,6 +380,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
           }
           resolve({
             indexStatus,
+            blobUrl: knowledge.blobUrl,
             metadata: {
               ...metadata,
               completedChunks: [index],
