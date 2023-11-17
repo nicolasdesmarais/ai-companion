@@ -26,25 +26,24 @@ export class ConversationService {
     });
 
     return {
-      chats: conversations,
+      data: conversations,
     };
   }
 
   public async updateConversation(
     aiId: string,
+    conversationId: string,
     userId: string,
     content: string,
     role: Role,
-    conversationId: string | undefined,
+
     metadata?: any
   ) {
-    if (!conversationId) {
-      conversationId = await this.getLatestConversationId(aiId, userId);
-    }
-
     const conversation = await prismadb.conversation.update({
       where: {
         id: conversationId,
+        userId,
+        aiId,
       },
       include: {
         ai: {

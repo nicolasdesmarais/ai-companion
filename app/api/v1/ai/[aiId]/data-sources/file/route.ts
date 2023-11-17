@@ -1,7 +1,7 @@
 import { FileUploadDataSourceInput } from "@/src/adapters/knowledge/file-upload/types/FileUploadDataSourceInput";
 import aiService from "@/src/domain/services/AIService";
 import dataSourceService from "@/src/domain/services/DataSourceService";
-import { auth } from "@clerk/nextjs";
+import { getAuthorizationContext } from "@/src/lib/authorizationUtils";
 import { DataSourceType } from "@prisma/client";
 import { put } from "@vercel/blob";
 import { writeFile } from "fs/promises";
@@ -79,13 +79,11 @@ export async function POST(
   request: NextRequest,
   { params: { aiId } }: { params: { aiId: string } }
 ): Promise<NextResponse> {
-  const authentication = await auth();
-  const userId = authentication?.userId;
-  const orgId = authentication.orgId;
-
-  if (!userId || !orgId) {
+  const authorizationContext = await getAuthorizationContext();
+  if (authorizationContext?.orgId || !authorizationContext?.userId) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
+  const { orgId, userId } = authorizationContext;
 
   const { searchParams } = new URL(request.url);
   const filename = searchParams.get("filename");

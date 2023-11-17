@@ -1,7 +1,7 @@
 import { DataSourceIndexStatus, DataSourceType } from "@prisma/client";
 
 export interface GetDataSourcesResponse {
-  dataSources: DataSourceDto[];
+  data: DataSourceDto[];
 }
 
 export interface DataSourceDto {
