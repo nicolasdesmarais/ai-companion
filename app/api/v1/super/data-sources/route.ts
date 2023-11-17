@@ -10,6 +10,11 @@ export async function GET(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
     const datasources = await prismadb.dataSource.findMany({
+      orderBy: [
+        {
+          updatedAt: "desc",
+        },
+      ],
       include: {
         knowledges: {
           include: {
