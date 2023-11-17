@@ -10,7 +10,7 @@ const embeddingsConfig = {
   azureOpenAIApiInstanceName: "prod-appdirectai-east2",
   azureOpenAIApiDeploymentName: "text-embedding-ada-002",
   batchSize: 16,
-  maxConcurrency: 200,
+  maxConcurrency: 100,
 };
 
 export type AIKey = {
