@@ -61,6 +61,7 @@ const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
     dataSources: {
       include: {
         dataSource: true,
+        groups: true,
       },
     },
   },
@@ -106,7 +107,7 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
   }
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: (initialAi as any) || {
+    defaultValues: ({ talk: "", ...initialAi } as any) || {
       name: "",
       description: "",
       instructions: "",
