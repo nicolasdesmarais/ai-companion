@@ -218,7 +218,7 @@ model Conversation {
   ai                        AI @relation(fields: [aiId], references: [id], onDelete: Cascade)
   aiId                      String    @map(name: "ai_id")
 
-  @@map("conversations")
+  @@map("chats")
 }
 
 model DataSource {
