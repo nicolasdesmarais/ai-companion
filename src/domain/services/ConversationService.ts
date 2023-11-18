@@ -31,6 +31,28 @@ export class ConversationService {
     };
   }
 
+  public async getUserConversations(userId: string): Promise<GetChatsResponse> {
+    const conversations = await prismadb.conversation.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        name: true,
+        aiId: true,
+        userId: true,
+        pinPosition: true,
+      },
+      where: {
+        userId,
+        isDeleted: false,
+      },
+    });
+
+    return {
+      data: conversations,
+    };
+  }
+
   public async createConversation(orgId: string, userId: string, aiId: string) {
     const ai = await aiService.findAIForUser(orgId, userId, aiId);
     if (!ai) {
