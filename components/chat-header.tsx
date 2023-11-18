@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { AI, Conversation, Message } from "@prisma/client";
+import { AI, Chat, Message } from "@prisma/client";
 import axios from "axios";
 import {
   CopyPlus,
@@ -25,12 +25,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
-import { useConversations } from "@/hooks/use-conversations";
+import { useChats } from "@/hooks/use-conversations";
 import { useState } from "react";
 import { ShareModal } from "./share-modal";
 
 interface ChatHeaderProps {
-  conversation: Conversation & {
+  conversation: Chat & {
     messages: Message[];
     ai: AI;
     _count: {
@@ -43,7 +43,7 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
   const router = useRouter();
   const { user } = useUser();
   const { toast } = useToast();
-  const { conversations, fetchConversations } = useConversations();
+  const { chats: conversations, fetchConversations } = useChats();
   const [showShareModal, setShowShareModal] = useState(false);
 
   const duplicate = async () => {
