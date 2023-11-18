@@ -40,8 +40,8 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     return redirect("/");
   }
 
-  if (ai.conversations.length === 0) {
-    const conversation = await prismadb.conversation.create({
+  if (ai.chats.length === 0) {
+    const conversation = await prismadb.chat.create({
       data: {
         aiId: params.aiId,
         name: ai.name,
@@ -62,7 +62,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     }
     return redirect(`/chat/${conversation.id}`);
   } else {
-    return redirect(`/chat/${ai.conversations[0].id}`);
+    return redirect(`/chat/${ai.chats[0].id}`);
   }
 };
 

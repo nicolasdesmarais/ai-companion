@@ -12,7 +12,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
     return;
   }
 
-  const conversations = await prismadb.conversation.findMany({
+  const conversations = await prismadb.chat.findMany({
     where: {
       userId: userId,
       isDeleted: false,

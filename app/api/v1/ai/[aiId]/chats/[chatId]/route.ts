@@ -1,5 +1,5 @@
 import { models } from "@/components/ai-models";
-import conversationService from "@/src/domain/services/ConversationService";
+import chatService from "@/src/domain/services/ChatService";
 import { getAuthorizationContext } from "@/src/lib/authorizationUtils";
 import { MemoryManager } from "@/src/lib/memory";
 import { rateLimit } from "@/src/lib/rate-limit";
@@ -122,7 +122,7 @@ export async function POST(
       return new NextResponse("Rate limit exceeded", { status: 429 });
     }
 
-    const conversation = await conversationService.updateConversation(
+    const conversation = await chatService.updateChat(
       aiId,
       chatId,
       userId,
@@ -151,20 +151,13 @@ export async function POST(
       const knowledgeTime = Math.round(endKnowledge - endSetup);
       const llmTime = Math.round(end - endKnowledge);
       const totalTime = Math.round(end - start);
-      await conversationService.updateConversation(
-        aiId,
-        chatId,
-        userId,
-        answer,
-        Role.system,
-        {
-          setupTime,
-          knowledgeTime,
-          llmTime,
-          totalTime,
-          knowledgeMeta,
-        }
-      );
+      await chatService.updateChat(aiId, chatId, userId, answer, Role.system, {
+        setupTime,
+        knowledgeTime,
+        llmTime,
+        totalTime,
+        knowledgeMeta,
+      });
       return await handlers.handleLLMEnd(_output, runId);
     };
 

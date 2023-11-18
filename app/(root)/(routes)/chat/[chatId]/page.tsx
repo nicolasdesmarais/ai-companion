@@ -16,7 +16,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     return redirectToSignIn();
   }
 
-  const conversation = await prismadb.conversation.findUnique({
+  const conversation = await prismadb.chat.findUnique({
     where: {
       id: params.chatId,
     },

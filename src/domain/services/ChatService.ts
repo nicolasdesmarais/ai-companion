@@ -1,14 +1,13 @@
 import prismadb from "@/src/lib/prismadb";
 import { GetChatsResponse } from "@/src/ports/api/ChatsApi";
 import { Role } from "@prisma/client";
-import { EntityNotFoundError } from "../errors/Errors";
 
-export class ConversationService {
-  public async getAIConversations(
+export class ChatService {
+  public async getAIChats(
     aiId: string,
     userId: string
   ): Promise<GetChatsResponse> {
-    const conversations = await prismadb.conversation.findMany({
+    const chats = await prismadb.chat.findMany({
       select: {
         id: true,
         createdAt: true,
@@ -26,11 +25,11 @@ export class ConversationService {
     });
 
     return {
-      data: conversations,
+      data: chats,
     };
   }
 
-  public async updateConversation(
+  public async updateChat(
     aiId: string,
     conversationId: string,
     userId: string,
@@ -39,7 +38,7 @@ export class ConversationService {
 
     metadata?: any
   ) {
-    const conversation = await prismadb.conversation.update({
+    const chat = await prismadb.chat.update({
       where: {
         id: conversationId,
         userId,
@@ -82,47 +81,9 @@ export class ConversationService {
       },
     });
 
-    return conversation;
-  }
-
-  private async getLatestConversationId(aiId: string, userId: string) {
-    const ai = await prismadb.aI.findUnique({
-      where: {
-        id: aiId,
-      },
-      include: {
-        conversations: {
-          where: {
-            userId: userId,
-            isDeleted: false,
-          },
-          orderBy: {
-            updatedAt: "desc",
-          },
-        },
-      },
-    });
-
-    if (!ai) {
-      throw new EntityNotFoundError(`AI with id ${aiId} not found`);
-    }
-
-    let conversation;
-    if (ai.conversations.length === 0) {
-      conversation = await prismadb.conversation.create({
-        data: {
-          aiId,
-          name: ai.name,
-          userId: userId,
-        },
-      });
-    } else {
-      conversation = ai.conversations[0];
-    }
-
-    return conversation.id;
+    return chat;
   }
 }
 
-const conversationService = new ConversationService();
-export default conversationService;
+const chatService = new ChatService();
+export default chatService;
