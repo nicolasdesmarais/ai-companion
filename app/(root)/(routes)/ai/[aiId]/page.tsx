@@ -19,7 +19,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
       id: params.aiId,
     },
     include: {
-      conversations: {
+      chats: {
         where: {
           userId: userId,
           isDeleted: false,

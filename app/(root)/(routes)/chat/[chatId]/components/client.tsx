@@ -1,6 +1,6 @@
 "use client";
 
-import { AI, Conversation, Message } from "@prisma/client";
+import { AI, Chat, Message } from "@prisma/client";
 import { useCompletion } from "ai/react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
@@ -12,7 +12,7 @@ import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
 
 interface ChatClientProps {
-  conversation: Conversation & {
+  conversation: Chat & {
     messages: Message[];
     ai: AI;
     _count: {

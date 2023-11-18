@@ -1,21 +1,21 @@
-import { AI, Conversation } from "@prisma/client";
+import { AI, Chat } from "@prisma/client";
 import { create } from "zustand";
 
-interface useConversationsStore {
-  conversations: (Conversation & {
+interface useChatsStore {
+  chats: (Chat & {
     ai: AI;
   })[];
   fetchConversations: () => void;
 }
 
-export const useConversations = create<useConversationsStore>((set) => ({
-  conversations: [],
-  setConversations: (conversations: any) => set({ conversations }),
+export const useChats = create<useChatsStore>((set) => ({
+  chats: [],
+  setConversations: (conversations: any) => set({ chats: conversations }),
   fetchConversations: async () => {
     const response = await fetch("/api/v1/conversations");
     if (response.status === 200) {
       const data = await response.json();
-      set({ conversations: data });
+      set({ chats: data });
     }
   },
 }));

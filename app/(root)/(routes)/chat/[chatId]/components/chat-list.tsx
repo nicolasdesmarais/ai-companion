@@ -1,13 +1,13 @@
 "use client";
 import { BotAvatar } from "@/components/bot-avatar";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { useConversations } from "@/hooks/use-conversations";
+import { useChats } from "@/hooks/use-conversations";
 import { cn } from "@/src/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export const ChatList = () => {
-  const { conversations, fetchConversations } = useConversations();
+  const { chats: conversations, fetchConversations } = useChats();
   const router = useRouter();
   const pathname = usePathname();
 
