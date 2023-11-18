@@ -16,7 +16,7 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const conversation = await prismadb.conversation.findUnique({
+    const conversation = await prismadb.chat.findUnique({
       where: {
         id: conversationId,
       },
@@ -33,7 +33,7 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const deletedConversation = await prismadb.conversation.update({
+    const deletedConversation = await prismadb.chat.update({
       where: {
         id: conversationId,
       },

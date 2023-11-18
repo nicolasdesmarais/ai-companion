@@ -12,7 +12,7 @@ export async function PUT(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const conversation = await prismadb.conversation.update({
+    const conversation = await prismadb.chat.update({
       where: {
         id: conversationId,
       },
@@ -28,7 +28,7 @@ export async function PUT(
       return new NextResponse("Conversation not found", { status: 404 });
     }
 
-    const newConversation = await prismadb.conversation.create({
+    const newConversation = await prismadb.chat.create({
       data: {
         userId: userId,
         name: conversation.name,

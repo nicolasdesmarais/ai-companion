@@ -39,7 +39,7 @@ model AI {
 
   messages      Message[]
 
-  conversations Conversation[]
+  chats         Chat[]
 
   modelId       String @default("llama2-13b")   @map("model_id")
 
@@ -82,7 +82,7 @@ model Message {
 
   ai              AI? @relation(fields: [aiId], references: [id], onDelete: Cascade)
 
-  conversation    Conversation? @relation(fields: [conversationId], references: [id])
+  chat            Chat? @relation(fields: [conversationId], references: [id])
   conversationId  String? @map(name: "conversation_id")
 
   @@index([aiId])
@@ -204,7 +204,7 @@ enum OAuthTokenProvider{
   GOOGLE
 }
 
-model Conversation {
+model Chat {
   id                        String    @id @default(cuid())
   createdAt                 DateTime  @default(now()) @map(name: "created_at")
   updatedAt                 DateTime  @updatedAt @default(now()) @map(name: "updated_at")

@@ -1,15 +1,13 @@
 import prismadb from "@/src/lib/prismadb";
 import { GetChatsResponse } from "@/src/ports/api/ChatsApi";
 import { Role } from "@prisma/client";
-import { EntityNotFoundError } from "../errors/Errors";
-import aiService from "./AIService";
 
-export class ConversationService {
-  public async getAIConversations(
+export class ChatService {
+  public async getAIChats(
     aiId: string,
     userId: string
   ): Promise<GetChatsResponse> {
-    const conversations = await prismadb.conversation.findMany({
+    const chats = await prismadb.chat.findMany({
       select: {
         id: true,
         createdAt: true,
@@ -27,48 +25,12 @@ export class ConversationService {
     });
 
     return {
-      data: conversations,
+      data: chats,
     };
   }
 
-  public async getUserConversations(userId: string): Promise<GetChatsResponse> {
-    const conversations = await prismadb.conversation.findMany({
-      select: {
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        name: true,
-        aiId: true,
-        userId: true,
-        pinPosition: true,
-      },
-      where: {
-        userId,
-        isDeleted: false,
-      },
-    });
-
-    return {
-      data: conversations,
-    };
-  }
-
-  public async createConversation(orgId: string, userId: string, aiId: string) {
-    const ai = await aiService.findAIForUser(orgId, userId, aiId);
-    if (!ai) {
-      throw new EntityNotFoundError(`AI with id ${aiId} not found`);
-    }
-
-    return await prismadb.conversation.create({
-      data: {
-        aiId,
-        userId,
-        name: ai.name,
-      },
-    });
-  }
-
-  public async updateConversation(
+  public async updateChat(
+    aiId: string,
     conversationId: string,
     userId: string,
     content: string,
@@ -76,10 +38,11 @@ export class ConversationService {
 
     metadata?: any
   ) {
-    const conversation = await prismadb.conversation.update({
+    const chat = await prismadb.chat.update({
       where: {
         id: conversationId,
         userId,
+        aiId,
       },
       include: {
         ai: {
@@ -111,15 +74,16 @@ export class ConversationService {
             content: content,
             role,
             userId,
+            aiId: aiId,
             metadata,
           },
         },
       },
     });
 
-    return conversation;
+    return chat;
   }
 }
 
-const conversationService = new ConversationService();
-export default conversationService;
+const chatService = new ChatService();
+export default chatService;

@@ -12,7 +12,7 @@ export async function PUT(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const conversation = await prismadb.conversation.findUnique({
+    const conversation = await prismadb.chat.findUnique({
       where: {
         id: conversationId,
       },
@@ -25,14 +25,14 @@ export async function PUT(
       return new NextResponse("Conversation not found", { status: 404 });
     }
 
-    const conversationCount = await prismadb.conversation.count({
+    const conversationCount = await prismadb.chat.count({
       where: {
         userId: userId,
         aiId: conversation.ai.id,
       },
     });
 
-    const newConversation = await prismadb.conversation.create({
+    const newConversation = await prismadb.chat.create({
       data: {
         userId: userId,
         name: `${conversation.ai.name} (${conversationCount + 1})`,

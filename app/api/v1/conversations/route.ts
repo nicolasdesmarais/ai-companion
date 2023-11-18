@@ -8,7 +8,7 @@ export async function GET(req: Request) {
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
-    const conversations = await prismadb.conversation.findMany({
+    const conversations = await prismadb.chat.findMany({
       where: {
         userId: userId,
         isDeleted: false,
