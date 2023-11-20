@@ -122,7 +122,7 @@ export const ChatHeader = ({ chat }: ChatHeaderProps) => {
           size="icon"
           className="mr-4"
           type="button"
-          onClick={() => talkModal.onOpenStream(conversation.ai)}
+          onClick={() => talkModal.onOpenStream(chat.ai)}
         >
           <Video />
         </Button>
