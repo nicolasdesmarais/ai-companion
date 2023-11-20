@@ -56,7 +56,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
           userId: userId,
         },
         data: {
-          conversationId: chat.id,
+          chatId: chat.id,
         },
       });
     }

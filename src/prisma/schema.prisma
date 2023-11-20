@@ -82,8 +82,8 @@ model Message {
 
   ai              AI? @relation(fields: [aiId], references: [id], onDelete: Cascade)
 
-  chat            Chat? @relation(fields: [conversationId], references: [id])
-  conversationId  String? @map(name: "chat_id")
+  chat            Chat? @relation(fields: [chatId], references: [id])
+  chatId          String? @map(name: "chat_id")
 
   @@index([aiId])
 
