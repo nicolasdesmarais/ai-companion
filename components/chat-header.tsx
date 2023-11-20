@@ -89,7 +89,7 @@ export const ChatHeader = ({ chat }: ChatHeaderProps) => {
 
   const remove = async () => {
     const response = await axios.delete(`/api/v1/chats/${chat.id}`);
-    if (response.status === 200) {
+    if (response.status === 204) {
       toast({ description: "Chat deleted." });
       router.push(`/chat/`);
     }
