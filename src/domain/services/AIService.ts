@@ -190,6 +190,7 @@ export class AIService {
         chats as c
         INNER JOIN messages as m ON m.chat_id = c.id
       WHERE
+      c.is_deleted = false AND
       c.ai_id IN (${Prisma.join(aiIds)})
       GROUP BY
         c.ai_id`;
