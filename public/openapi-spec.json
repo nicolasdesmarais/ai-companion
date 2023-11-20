@@ -363,6 +363,46 @@
         ]
       }
     },
+    "/api/v1/ai/{aiId}/data-sources/{dataSourceId}": {
+      "delete": {
+        "summary": "Delete a Data Source",
+        "description": "Deletes a specific data source associated with the given AI identifier.",
+        "operationId": "deleteDataSource",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The identifier of the AI associated with the data source.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dataSourceId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the data source to be deleted.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Data source successfully deleted, no content to return."
+          },
+          "404": {
+            "description": "Not Found, the specified data source ID or AI ID does not exist."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/chats/{chatId}": {
       "post": {
         "summary": "Start a chat session",
