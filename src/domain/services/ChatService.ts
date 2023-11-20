@@ -3,6 +3,39 @@ import { GetChatsResponse } from "@/src/ports/api/ChatsApi";
 import { Role } from "@prisma/client";
 
 export class ChatService {
+  /**
+   * Returns all chats for a given user
+   * @param userId
+   * @returns
+   */
+  public async getUserChats(userId: string): Promise<GetChatsResponse> {
+    const conversations = await prismadb.chat.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        name: true,
+        aiId: true,
+        userId: true,
+        pinPosition: true,
+      },
+      where: {
+        userId,
+        isDeleted: false,
+      },
+    });
+
+    return {
+      data: conversations,
+    };
+  }
+
+  /**
+   * Returns all chats for a given AI
+   * @param aiId
+   * @param userId
+   * @returns
+   */
   public async getAIChats(
     aiId: string,
     userId: string
