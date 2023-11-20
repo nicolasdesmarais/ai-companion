@@ -63,7 +63,6 @@ export class ChatService {
   }
 
   public async updateChat(
-    aiId: string,
     chatId: string,
     userId: string,
     content: string,
@@ -75,7 +74,6 @@ export class ChatService {
       where: {
         id: chatId,
         userId,
-        aiId,
       },
       include: {
         ai: {
@@ -107,7 +105,6 @@ export class ChatService {
             content: content,
             role,
             userId,
-            aiId: aiId,
             metadata,
           },
         },
