@@ -10,6 +10,14 @@ export interface ChatDto {
   aiId: string;
   userId: string;
   pinPosition: number | null;
+  ai: ChatAiDto;
+}
+
+export interface ChatAiDto {
+  id: string;
+  name: string;
+  src: string;
+  description: string;
 }
 
 export interface CreateChatRequest {

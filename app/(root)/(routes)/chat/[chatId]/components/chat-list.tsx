@@ -3,6 +3,7 @@ import { BotAvatar } from "@/components/bot-avatar";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useChats } from "@/hooks/use-conversations";
 import { cn } from "@/src/lib/utils";
+import { ChatDto } from "@/src/ports/api/ChatsApi";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -22,7 +23,7 @@ export const ChatList = () => {
   return (
     <div className="hidden md:flex flex-col h-full py-4 px-2 bg-accent/30 overflow-y-auto shrink-0 w-80">
       <div className="flex flex-wrap">
-        {pinned.map((chat: any) => (
+        {pinned.map((chat: ChatDto) => (
           <div className="w-1/3 p-1" key={chat.id}>
             <div
               onClick={() => router.push(`/chat/${chat.id}`)}
@@ -41,7 +42,7 @@ export const ChatList = () => {
           </div>
         ))}
       </div>
-      {unpinned.map((chat: any, index) => (
+      {unpinned.map((chat: ChatDto, index) => (
         <div
           onClick={() => router.push(`/chat/${chat.id}`)}
           className={cn(

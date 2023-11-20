@@ -4,6 +4,24 @@ import { Role } from "@prisma/client";
 import { EntityNotFoundError } from "../errors/Errors";
 import aiService from "./AIService";
 
+const getChatsResponseSelect = {
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  name: true,
+  aiId: true,
+  userId: true,
+  pinPosition: true,
+  ai: {
+    select: {
+      id: true,
+      name: true,
+      src: true,
+      description: true,
+    },
+  },
+};
+
 export class ChatService {
   /**
    * Returns all chats for a given user
@@ -12,15 +30,7 @@ export class ChatService {
    */
   public async getUserChats(userId: string): Promise<GetChatsResponse> {
     const conversations = await prismadb.chat.findMany({
-      select: {
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        name: true,
-        aiId: true,
-        userId: true,
-        pinPosition: true,
-      },
+      select: getChatsResponseSelect,
       where: {
         userId,
         isDeleted: false,
@@ -43,15 +53,7 @@ export class ChatService {
     userId: string
   ): Promise<GetChatsResponse> {
     const chats = await prismadb.chat.findMany({
-      select: {
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        name: true,
-        aiId: true,
-        userId: true,
-        pinPosition: true,
-      },
+      select: getChatsResponseSelect,
       where: {
         aiId,
         userId,
