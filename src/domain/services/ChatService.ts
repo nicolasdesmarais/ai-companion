@@ -1,7 +1,7 @@
 import prismadb from "@/src/lib/prismadb";
 import { GetChatsResponse } from "@/src/ports/api/ChatsApi";
 import { Role } from "@prisma/client";
-import { EntityNotFoundError } from "../errors/Errors";
+import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import aiService from "./AIService";
 
 const getChatsResponseSelect = {
@@ -131,6 +131,31 @@ export class ChatService {
     });
 
     return chat;
+  }
+
+  public async deleteChat(chatId: string, userId: string) {
+    const chat = await prismadb.chat.findUnique({
+      where: {
+        id: chatId,
+      },
+    });
+
+    if (!chat) {
+      throw new EntityNotFoundError(`Chat with id ${chatId} not found`);
+    }
+
+    if (chat.userId !== userId) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    await prismadb.chat.update({
+      where: {
+        id: chatId,
+      },
+      data: {
+        isDeleted: true,
+      },
+    });
   }
 }
 
