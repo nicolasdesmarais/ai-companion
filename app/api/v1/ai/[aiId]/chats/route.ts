@@ -163,12 +163,8 @@ export async function POST(
   const { orgId, userId } = authorizationContext;
 
   try {
-    const conversation = await chatService.createChat(
-      orgId,
-      userId,
-      params.aiId
-    );
-    return NextResponse.json(conversation, { status: 201 });
+    const chat = await chatService.createChat(orgId, userId, params.aiId);
+    return NextResponse.json(chat, { status: 201 });
   } catch (error) {
     if (error instanceof EntityNotFoundError) {
       return new NextResponse(error.message, { status: 404 });

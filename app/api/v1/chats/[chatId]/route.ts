@@ -1,4 +1,8 @@
 import { models } from "@/components/ai-models";
+import {
+  EntityNotFoundError,
+  ForbiddenError,
+} from "@/src/domain/errors/Errors";
 import chatService from "@/src/domain/services/ChatService";
 import { getAuthorizationContext } from "@/src/lib/authorizationUtils";
 import { MemoryManager } from "@/src/lib/memory";
@@ -371,6 +375,61 @@ export async function POST(
       });
     }
     console.error("[CHAT]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
+/**
+ * @swagger
+ * /api/v1/chats/{chatId}:
+ *   delete:
+ *     summary: Delete a chat session
+ *     description: Deletes the chat session with the specified ID.
+ *     operationId: deleteChat
+ *     parameters:
+ *       - name: chatId
+ *         in: path
+ *         required: true
+ *         description: The unique identifier of the chat session to delete.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '204':
+ *         description: Chat session successfully deleted, no content to return.
+ *       '403':
+ *         description: Forbidden, the user is not authorized to perform this action.
+ *       '404':
+ *         description: Not Found, the specified chat ID does not exist.
+ *       '500':
+ *         description: Internal Server Error, any internal error.
+ */
+export async function DELETE(
+  request: Request,
+  {
+    params: { chatId: chatId },
+  }: {
+    params: { chatId: string };
+  }
+) {
+  try {
+    const authorizationContext = await getAuthorizationContext();
+    if (!authorizationContext?.orgId || !authorizationContext?.userId) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+    const { userId } = authorizationContext;
+
+    chatService.deleteChat(chatId, userId);
+
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    if (error instanceof EntityNotFoundError) {
+      return new NextResponse(error.message, { status: 404 });
+    }
+    if (error instanceof ForbiddenError) {
+      return new NextResponse(error.message, { status: 403 });
+    }
+
+    console.error("[DELETE v1/chats/[chatId]]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

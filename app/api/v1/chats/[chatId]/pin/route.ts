@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function PUT(
   req: Request,
-  { params: { conversationId } }: { params: { conversationId: string } }
+  { params: { chatId } }: { params: { chatId: string } }
 ) {
   try {
     const { userId } = await auth();
@@ -14,20 +14,20 @@ export async function PUT(
 
     const chat = await prismadb.chat.update({
       where: {
-        id: conversationId,
+        id: chatId,
       },
       data: {
-        pinPosition: null,
+        pinPosition: 1,
       },
     });
 
     if (!chat) {
-      return new NextResponse("Conversation not found", { status: 404 });
+      return new NextResponse("Chat not found", { status: 404 });
     }
 
     return NextResponse.json(chat);
   } catch (error) {
-    console.error("[PUT v1/conversation/[conversationId]/unpin]", error);
+    console.error("[PUT v1/chats/[chatId]/pin]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

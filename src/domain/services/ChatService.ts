@@ -1,8 +1,26 @@
 import prismadb from "@/src/lib/prismadb";
 import { GetChatsResponse } from "@/src/ports/api/ChatsApi";
 import { Role } from "@prisma/client";
-import { EntityNotFoundError } from "../errors/Errors";
+import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import aiService from "./AIService";
+
+const getChatsResponseSelect = {
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  name: true,
+  aiId: true,
+  userId: true,
+  pinPosition: true,
+  ai: {
+    select: {
+      id: true,
+      name: true,
+      src: true,
+      description: true,
+    },
+  },
+};
 
 export class ChatService {
   /**
@@ -11,16 +29,8 @@ export class ChatService {
    * @returns
    */
   public async getUserChats(userId: string): Promise<GetChatsResponse> {
-    const conversations = await prismadb.chat.findMany({
-      select: {
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        name: true,
-        aiId: true,
-        userId: true,
-        pinPosition: true,
-      },
+    const chats = await prismadb.chat.findMany({
+      select: getChatsResponseSelect,
       where: {
         userId,
         isDeleted: false,
@@ -28,7 +38,7 @@ export class ChatService {
     });
 
     return {
-      data: conversations,
+      data: chats,
     };
   }
 
@@ -43,15 +53,7 @@ export class ChatService {
     userId: string
   ): Promise<GetChatsResponse> {
     const chats = await prismadb.chat.findMany({
-      select: {
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        name: true,
-        aiId: true,
-        userId: true,
-        pinPosition: true,
-      },
+      select: getChatsResponseSelect,
       where: {
         aiId,
         userId,
@@ -129,6 +131,31 @@ export class ChatService {
     });
 
     return chat;
+  }
+
+  public async deleteChat(chatId: string, userId: string) {
+    const chat = await prismadb.chat.findUnique({
+      where: {
+        id: chatId,
+      },
+    });
+
+    if (!chat) {
+      throw new EntityNotFoundError(`Chat with id ${chatId} not found`);
+    }
+
+    if (chat.userId !== userId) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    await prismadb.chat.update({
+      where: {
+        id: chatId,
+      },
+      data: {
+        isDeleted: true,
+      },
+    });
   }
 }
 

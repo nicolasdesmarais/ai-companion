@@ -1,7 +1,8 @@
 import {
   EntityNotFoundError,
-  UnauthorizedError,
+  ForbiddenError,
 } from "@/src/domain/errors/Errors";
+import { DomainEvent } from "@/src/domain/events/domain-event";
 import {
   GoogleDriveSearchResponse,
   mapMimeTypeToEnum,
@@ -17,6 +18,7 @@ import { put } from "@vercel/blob";
 import { GaxiosResponse } from "gaxios";
 import { drive_v3, google } from "googleapis";
 import { Readable } from "stream";
+import { publishEvent } from "../../inngest/event-publisher";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import {
@@ -30,8 +32,6 @@ import {
 } from "../types/KnowlegeIndexingResult";
 import { GoogleDriveDataSourceInput } from "./types/GoogleDriveDataSourceInput";
 import { GoogleDriveFileMetadata } from "./types/GoogleDriveFileMetaData";
-import { publishEvent } from "../../inngest/event-publisher";
-import { DomainEvent } from "@/src/domain/events/domain-event";
 
 const MIME_TYPE_TEXT = "text/plain";
 const MIME_TYPE_CSV = "text/csv";
@@ -98,7 +98,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     }
 
     if (oauthToken.userId !== userId) {
-      throw new UnauthorizedError("Unauthorized access to OAuth token");
+      throw new ForbiddenError("Unauthorized access to OAuth token");
     }
 
     const oauthTokenData = JSON.parse(decryptFromBuffer(oauthToken.data)) as {

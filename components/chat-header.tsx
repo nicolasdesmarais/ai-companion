@@ -25,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
-import { useChats } from "@/hooks/use-conversations";
+import { useChats } from "@/hooks/use-chats";
 import { useState } from "react";
 import { ShareModal } from "./share-modal";
 
@@ -43,23 +43,21 @@ export const ChatHeader = ({ chat }: ChatHeaderProps) => {
   const router = useRouter();
   const { user } = useUser();
   const { toast } = useToast();
-  const { chats: chats, fetchChats: fetchConversations } = useChats();
+  const { chats, fetchChats } = useChats();
   const [showShareModal, setShowShareModal] = useState(false);
 
   const duplicate = async () => {
-    const response = await axios.put(
-      `/api/v1/conversations/${chat.id}/duplicate`
-    );
+    const response = await axios.put(`/api/v1/chats/${chat.id}/duplicate`);
     if (response.status === 200) {
-      toast({ description: "Conversation duplicated." });
+      toast({ description: "Chat duplicated." });
       router.push(`/chat/${response.data.id}`);
     }
   };
 
   const reset = async () => {
-    const response = await axios.put(`/api/v1/conversations/${chat.id}/reset`);
+    const response = await axios.put(`/api/v1/chats/${chat.id}/reset`);
     if (response.status === 200) {
-      toast({ description: "Conversation reset." });
+      toast({ description: "Chat reset." });
       router.push(`/chat/${response.data.id}`);
     }
   };
@@ -74,25 +72,25 @@ export const ChatHeader = ({ chat }: ChatHeaderProps) => {
       });
       return;
     }
-    const response = await axios.put(`/api/v1/conversations/${chat.id}/pin`);
+    const response = await axios.put(`/api/v1/chats/${chat.id}/pin`);
     if (response.status === 200) {
-      toast({ description: "Conversation pinned." });
-      fetchConversations();
+      toast({ description: "Chat pinned." });
+      fetchChats();
     }
   };
 
   const unpin = async () => {
-    const response = await axios.put(`/api/v1/conversations/${chat.id}/unpin`);
+    const response = await axios.put(`/api/v1/chats/${chat.id}/unpin`);
     if (response.status === 200) {
-      toast({ description: "Conversation unpinned." });
-      fetchConversations();
+      toast({ description: "Chat unpinned." });
+      fetchChats();
     }
   };
 
   const remove = async () => {
-    const response = await axios.delete(`/api/v1/conversations/${chat.id}`);
-    if (response.status === 200) {
-      toast({ description: "Conversation deleted." });
+    const response = await axios.delete(`/api/v1/chats/${chat.id}`);
+    if (response.status === 204) {
+      toast({ description: "Chat deleted." });
       router.push(`/chat/`);
     }
   };
