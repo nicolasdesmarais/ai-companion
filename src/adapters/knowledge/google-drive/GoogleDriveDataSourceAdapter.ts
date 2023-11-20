@@ -220,24 +220,84 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     knowledge: Knowledge,
     data: any
   ): Promise<IndexKnowledgeResponse> {
-    const eventResult = await publishEvent(
-      DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
-      {
-        knowledgeIndexingResult: {
-          knowledgeId: knowledge.id,
-          result: {
-            chunkCount: 1,
-          },
-        },
-        dataSourceType: DataSourceType.GOOGLE_DRIVE,
-        index: 0,
-      }
+    if (!userId) {
+      console.error("Missing userId");
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
+    if (!data?.oauthTokenId) {
+      console.error("Missing oauthTokenId");
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
+    await this.setOAuthCredentials(userId, data?.oauthTokenId);
+
+    const { fileId, fileName, mimeType } =
+      knowledge.metadata as unknown as GoogleDriveFileMetadata;
+
+    const { fileResponse, derivedMimeType } = await this.getFileContent(
+      fileId,
+      mimeType
     );
-    return {
-      userId,
-      indexStatus: KnowledgeIndexStatus.INDEXING,
-      metadata: { eventIds: eventResult.ids, oauthTokenId: data.oauthTokenId },
-    };
+
+    return new Promise((resolve) => {
+      if (fileResponse.data instanceof Readable) {
+        const chunks: any[] = [];
+        fileResponse.data.on("data", (chunk) => {
+          chunks.push(chunk);
+        });
+
+        fileResponse.data.on("end", async () => {
+          const buffer = Buffer.concat(chunks);
+          const blob = new Blob([buffer]);
+
+          const { docs, metadata } = await fileLoader.getLangchainDocs(
+            knowledge.id,
+            fileName,
+            derivedMimeType,
+            blob
+          );
+
+          const cloudBlob = await put(
+            `${knowledge.name}.json`,
+            JSON.stringify(docs),
+            {
+              access: "public",
+            }
+          );
+          knowledge.blobUrl = cloudBlob.url;
+
+          const eventIds: string[] = [];
+          for (let i = 0; i < docs.length; i++) {
+            const eventResult = await publishEvent(
+              DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
+              {
+                knowledgeIndexingResult: {
+                  knowledgeId: knowledge.id,
+                  result: {
+                    chunkCount: docs.length,
+                    status: KnowledgeIndexingResultStatus.SUCCESSFUL,
+                  },
+                },
+                dataSourceType: DataSourceType.GOOGLE_DRIVE,
+                index: i,
+              }
+            );
+            eventIds.concat(eventResult.ids);
+          }
+          resolve({
+            userId,
+            indexStatus: KnowledgeIndexStatus.INDEXING,
+            metadata: {
+              eventIds,
+              ...metadata,
+            },
+          });
+        });
+      }
+    });
   }
 
   private async listAllFiles(fileId: string): Promise<ListFilesResponse> {
@@ -329,68 +389,47 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     result: KnowledgeIndexingResult,
     index: number
   ): Promise<IndexKnowledgeResponse> {
-    const meta = knowledge.metadata as any;
-    if (!knowledge.userId || !meta?.oauthTokenId) {
-      console.error(
-        "Missing userId or oauthTokenId in knowledge " + knowledge.id
-      );
+    if (!knowledge.blobUrl) {
+      console.error("loadKnowledgeResult: blob fail");
       return {
         indexStatus: KnowledgeIndexStatus.FAILED,
       };
     }
-    await this.setOAuthCredentials(knowledge.userId, meta?.oauthTokenId);
 
-    const { fileId, fileName, mimeType } =
-      knowledge.metadata as unknown as GoogleDriveFileMetadata;
+    const response = await fetch(knowledge.blobUrl);
+    if (response.status !== 200) {
+      console.error("loadKnowledgeResult: fetch fail");
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
+    const data = await response.json();
+    if (!data || !data[index]) {
+      console.error("loadKnowledgeResult: data fail");
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
 
-    const { fileResponse, derivedMimeType } = await this.getFileContent(
-      fileId,
-      mimeType
-    );
+    const docs = [data[index]];
+    const metadata = await fileLoader.loadDocs(docs);
 
-    return new Promise((resolve) => {
-      if (fileResponse.data instanceof Readable) {
-        const chunks: any[] = [];
-        fileResponse.data.on("data", (chunk) => {
-          chunks.push(chunk);
-        });
-
-        fileResponse.data.on("end", async () => {
-          const buffer = Buffer.concat(chunks);
-          const blob = new Blob([buffer]);
-
-          const cloudBlob = await put(fileName, blob, {
-            access: "public",
-          });
-          knowledge.blobUrl = cloudBlob.url;
-
-          const metadata = await fileLoader.loadFile(
-            knowledge.id,
-            fileName,
-            derivedMimeType,
-            blob
-          );
-
-          let indexStatus;
-          switch (result.status) {
-            case KnowledgeIndexingResultStatus.SUCCESSFUL:
-            case KnowledgeIndexingResultStatus.PARTIAL:
-              indexStatus = KnowledgeIndexStatus.PARTIALLY_COMPLETED;
-              break;
-            case KnowledgeIndexingResultStatus.FAILED:
-              indexStatus = KnowledgeIndexStatus.FAILED;
-          }
-          resolve({
-            indexStatus,
-            blobUrl: knowledge.blobUrl,
-            metadata: {
-              ...metadata,
-              completedChunks: [index],
-            },
-          });
-        });
-      }
-    });
+    let indexStatus;
+    switch (result.status) {
+      case KnowledgeIndexingResultStatus.SUCCESSFUL:
+      case KnowledgeIndexingResultStatus.PARTIAL:
+        indexStatus = KnowledgeIndexStatus.PARTIALLY_COMPLETED;
+        break;
+      case KnowledgeIndexingResultStatus.FAILED:
+        indexStatus = KnowledgeIndexStatus.FAILED;
+    }
+    return {
+      indexStatus,
+      metadata: {
+        ...metadata,
+        completedChunks: [index],
+      },
+    };
   }
 
   public async pollKnowledgeIndexingStatus(
