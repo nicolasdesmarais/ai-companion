@@ -106,16 +106,8 @@ export async function GET(
  *               name:
  *                 type: string
  *                 description: Name of the chat session.
- *               userId:
- *                 type: string
- *                 description: Identifier of the user creating the chat session.
- *               pinPosition:
- *                 type: integer
- *                 format: int32
- *                 description: Optional position of the chat in a pinned list or similar. Can be null.
  *             required:
  *               - name
- *               - userId
  *     responses:
  *       '201':
  *         description: Chat session successfully created.
