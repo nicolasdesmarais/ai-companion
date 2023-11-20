@@ -16,7 +16,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     return redirectToSignIn();
   }
 
-  const conversation = await prismadb.chat.findUnique({
+  const chat = await prismadb.chat.findUnique({
     where: {
       id: params.chatId,
     },
@@ -35,14 +35,14 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     },
   });
 
-  if (!conversation || conversation.isDeleted) {
+  if (!chat || chat.isDeleted) {
     return redirect("/");
   }
 
   return (
     <div className="flex h-full">
       <ChatList />
-      <ChatClient conversation={conversation} />
+      <ChatClient chat={chat} />
     </div>
   );
 };

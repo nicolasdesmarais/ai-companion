@@ -12,7 +12,7 @@ export async function PUT(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const conversation = await prismadb.chat.update({
+    const chat = await prismadb.chat.update({
       where: {
         id: conversationId,
       },
@@ -21,11 +21,11 @@ export async function PUT(
       },
     });
 
-    if (!conversation) {
+    if (!chat) {
       return new NextResponse("Conversation not found", { status: 404 });
     }
 
-    return NextResponse.json(conversation);
+    return NextResponse.json(chat);
   } catch (error) {
     console.error("[PUT v1/conversation/[conversationId]/unpin]", error);
     return new NextResponse("Internal Error", { status: 500 });

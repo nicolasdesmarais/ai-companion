@@ -12,7 +12,7 @@ import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
 
 interface ChatClientProps {
-  conversation: Chat & {
+  chat: Chat & {
     messages: Message[];
     ai: AI;
     _count: {
@@ -21,11 +21,9 @@ interface ChatClientProps {
   };
 }
 
-export const ChatClient = ({ conversation }: ChatClientProps) => {
+export const ChatClient = ({ chat }: ChatClientProps) => {
   const router = useRouter();
-  const [messages, setMessages] = useState<ChatMessageProps[]>(
-    conversation.messages
-  );
+  const [messages, setMessages] = useState<ChatMessageProps[]>(chat.messages);
   const [streaming, setStreaming] = useState<boolean>(false);
   const { toast } = useToast();
 
@@ -37,7 +35,7 @@ export const ChatClient = ({ conversation }: ChatClientProps) => {
     handleSubmit,
     setInput,
   } = useCompletion({
-    api: `/api/v1/ai/${conversation.ai.id}/chats/${conversation.id}`,
+    api: `/api/v1/ai/${chat.ai.id}/chats/${chat.id}`,
     body: {
       date: new Date().toLocaleString(),
     },
@@ -80,9 +78,9 @@ export const ChatClient = ({ conversation }: ChatClientProps) => {
   }
   return (
     <div className="flex flex-col h-full w-full space-y-2 ml-1 shrink">
-      <ChatHeader conversation={conversation} />
+      <ChatHeader chat={chat} />
       <ChatMessages
-        ai={conversation.ai}
+        ai={chat.ai}
         isLoading={isLoading && !stream}
         messages={messages}
         stream={stream}

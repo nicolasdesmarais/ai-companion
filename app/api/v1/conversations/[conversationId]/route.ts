@@ -16,7 +16,7 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const conversation = await prismadb.chat.findUnique({
+    const chat = await prismadb.chat.findUnique({
       where: {
         id: conversationId,
       },
@@ -25,11 +25,11 @@ export async function DELETE(
       },
     });
 
-    if (!conversation) {
+    if (!chat) {
       return new NextResponse("Conversation not found", { status: 404 });
     }
 
-    if (conversation.userId !== userId) {
+    if (chat.userId !== userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
