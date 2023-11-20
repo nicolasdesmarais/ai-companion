@@ -9,7 +9,7 @@
       "ApiKeyAuth": {
         "type": "apiKey",
         "in": "header",
-        "name": "Authorization",
+        "name": "X-Authorization",
         "description": "Enter your bearer token in the format **Bearer {token}**"
       }
     },
