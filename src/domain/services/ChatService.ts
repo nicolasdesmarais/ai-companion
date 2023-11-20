@@ -1,6 +1,8 @@
 import prismadb from "@/src/lib/prismadb";
 import { GetChatsResponse } from "@/src/ports/api/ChatsApi";
 import { Role } from "@prisma/client";
+import { EntityNotFoundError } from "../errors/Errors";
+import aiService from "./AIService";
 
 export class ChatService {
   /**
@@ -60,6 +62,21 @@ export class ChatService {
     return {
       data: chats,
     };
+  }
+
+  public async createChat(orgId: string, userId: string, aiId: string) {
+    const ai = await aiService.findAIForUser(orgId, userId, aiId);
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id ${aiId} not found`);
+    }
+
+    return await prismadb.chat.create({
+      data: {
+        aiId,
+        userId,
+        name: ai.name,
+      },
+    });
   }
 
   public async updateChat(

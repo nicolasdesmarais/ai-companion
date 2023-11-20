@@ -126,6 +126,33 @@ export class AIService {
     }
   }
 
+  /**
+   * Returns an AI by ID, only if it's visible to the given user and organization.
+   * @param orgId
+   * @param userId
+   * @param aiId
+   * @returns
+   */
+  public async findAIForUser(orgId: string, userId: string, aiId: string) {
+    const whereCondition = { AND: [{}] };
+    whereCondition.AND.push(
+      this.getBaseWhereCondition(orgId, userId, ListAIsRequestScope.ALL)
+    );
+    whereCondition.AND.push({ id: aiId });
+
+    return await prismadb.aI.findFirst({
+      where: whereCondition,
+    });
+  }
+
+  /**
+   * Returns a list AIs which are visible to a given user.
+   * The list of AIs is further filtered down based on the provided scope
+   * @param orgId
+   * @param userId
+   * @param request
+   * @returns
+   */
   public async findAIsForUser(
     orgId: string,
     userId: string,
@@ -152,9 +179,13 @@ export class AIService {
         createdAt: "desc",
       },
       include: {
-        _count: {
-          select: {
-            messages: true,
+        chats: {
+          include: {
+            _count: {
+              select: {
+                messages: true,
+              },
+            },
           },
         },
       },
