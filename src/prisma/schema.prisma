@@ -37,8 +37,6 @@ model AI {
   category      Category @relation(fields: [categoryId], references: [id])
   categoryId    String   @map("category_id")
 
-  messages      Message[]
-
   chats         Chat[]
 
   modelId       String @default("llama2-13b")   @map("model_id")
@@ -76,16 +74,13 @@ model Message {
   createdAt       DateTime  @default(now()) @map(name: "created_at")
   updatedAt       DateTime  @updatedAt @map(name: "updated_at")
 
-  aiId            String    @map("ai_id")
   userId          String    @map("user_id")
   metadata        Json?
-
-  ai              AI @relation(fields: [aiId], references: [id], onDelete: Cascade)
 
   chat            Chat? @relation(fields: [chatId], references: [id])
   chatId          String? @map(name: "chat_id")
 
-  @@index([aiId])
+  @@index([chatId])
 
   @@map("messages")
 }

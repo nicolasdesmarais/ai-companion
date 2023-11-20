@@ -2,7 +2,7 @@ import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
-import { AI, AIVisibility, GroupAvailability } from "@prisma/client";
+import { AI, AIVisibility, GroupAvailability, Prisma } from "@prisma/client";
 import { EntityNotFoundError } from "../errors/Errors";
 import { ShareAIRequest } from "../types/ShareAIRequest";
 import invitationService from "./InvitationService";
@@ -126,6 +126,33 @@ export class AIService {
     }
   }
 
+  /**
+   * Returns an AI by ID, only if it's visible to the given user and organization.
+   * @param orgId
+   * @param userId
+   * @param aiId
+   * @returns
+   */
+  public async findAIForUser(orgId: string, userId: string, aiId: string) {
+    const whereCondition = { AND: [{}] };
+    whereCondition.AND.push(
+      this.getBaseWhereCondition(orgId, userId, ListAIsRequestScope.ALL)
+    );
+    whereCondition.AND.push({ id: aiId });
+
+    return await prismadb.aI.findFirst({
+      where: whereCondition,
+    });
+  }
+
+  /**
+   * Returns a list AIs which are visible to a given user.
+   * The list of AIs is further filtered down based on the provided scope
+   * @param orgId
+   * @param userId
+   * @param request
+   * @returns
+   */
   public async findAIsForUser(
     orgId: string,
     userId: string,
@@ -146,19 +173,39 @@ export class AIService {
       whereCondition.AND.push(this.getSearchCriteria(request.search));
     }
 
-    return prismadb.aI.findMany({
+    const ais = await prismadb.aI.findMany({
       where: whereCondition,
       orderBy: {
         createdAt: "desc",
       },
-      include: {
-        _count: {
-          select: {
-            messages: true,
-          },
-        },
-      },
     });
+
+    const aiIds = ais.map((ai) => ai.id);
+
+    const messageCountPerAi: any[] = await prismadb.$queryRaw`
+      SELECT
+        c.ai_id as aiId,
+        COUNT(*) as messageCount
+      FROM
+        chats as c
+        INNER JOIN messages as m ON m.chat_id = c.id
+      WHERE
+      c.is_deleted = false AND
+      c.ai_id IN (${Prisma.join(aiIds)})
+      GROUP BY
+        c.ai_id`;
+
+    const result = ais.map((ai) => {
+      const aiCountRow = messageCountPerAi.find((m) => m.aiId === ai.id);
+      const messageCount = aiCountRow ? Number(aiCountRow.messageCount) : 0;
+
+      return {
+        ...ai,
+        messageCount,
+      };
+    });
+
+    return result;
   }
 
   private getBaseWhereCondition(
