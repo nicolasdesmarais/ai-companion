@@ -123,11 +123,7 @@
       "DataSourceType": {
         "type": "string",
         "description": "The type of the data source.",
-        "enum": [
-          "WEB_URL",
-          "GOOGLE_DRIVE",
-          "FILE_UPLOAD"
-        ]
+        "enum": ["WEB_URL", "GOOGLE_DRIVE", "FILE_UPLOAD"]
       },
       "DataSourceIndexStatus": {
         "type": "string",
@@ -220,9 +216,7 @@
                     "description": "Name of the chat session."
                   }
                 },
-                "required": [
-                  "name"
-                ]
+                "required": ["name"]
               }
             }
           }
@@ -415,10 +409,7 @@
                     "description": "The prompt to use for chatting with an AI."
                   }
                 },
-                "required": [
-                  "date",
-                  "prompt"
-                ]
+                "required": ["date", "prompt"]
               }
             }
           }
@@ -474,6 +465,173 @@
             "description": "Internal Server Error, any internal error."
           }
         }
+      }
+    },
+    "/api/v1/chats/{chatId}/duplicate": {
+      "put": {
+        "summary": "Duplicate a chat session",
+        "description": "Creates a duplicate of the chat session with the specified ID.",
+        "operationId": "duplicateChat",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the chat session to duplicate.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat session successfully duplicated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, when the request contains invalid data."
+          },
+          "404": {
+            "description": "Not found, when the specified chat ID does not exist."
+          },
+          "500": {
+            "description": "Internal Server Error, any internal error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/chats/{chatId}/pin": {
+      "put": {
+        "summary": "Pin a chat session",
+        "description": "Pins the chat session with the specified ID, marking it as important or for easy access.",
+        "operationId": "pinChat",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the chat session to pin.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat session successfully pinned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, when the specified chat ID does not exist."
+          },
+          "500": {
+            "description": "Internal Server Error, any internal error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/chats/{chatId}/unpin": {
+      "put": {
+        "summary": "Unpin a chat session",
+        "description": "Unpins the chat session with the specified ID, removing it from the pinned list.",
+        "operationId": "unpinChat",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the chat session to unpin.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat session successfully unpinned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, when the specified chat ID does not exist."
+          },
+          "500": {
+            "description": "Internal Server Error, any internal error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/chats/{chatId}/reset": {
+      "put": {
+        "summary": "Reset a chat session",
+        "description": "Resets the chat session with the specified ID, clearing its current state or content.",
+        "operationId": "resetChat",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the chat session to reset.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat session successfully reset.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, when the specified chat ID does not exist."
+          },
+          "500": {
+            "description": "Internal Server Error, any internal error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
       }
     },
     "/api/v1/chats": {
