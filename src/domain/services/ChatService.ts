@@ -29,7 +29,7 @@ export class ChatService {
    * @returns
    */
   public async getUserChats(userId: string): Promise<GetChatsResponse> {
-    const conversations = await prismadb.chat.findMany({
+    const chats = await prismadb.chat.findMany({
       select: getChatsResponseSelect,
       where: {
         userId,
@@ -38,7 +38,7 @@ export class ChatService {
     });
 
     return {
-      data: conversations,
+      data: chats,
     };
   }
 

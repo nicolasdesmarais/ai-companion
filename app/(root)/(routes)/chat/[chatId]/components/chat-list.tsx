@@ -1,19 +1,19 @@
 "use client";
 import { BotAvatar } from "@/components/bot-avatar";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { useChats } from "@/hooks/use-conversations";
+import { useChats } from "@/hooks/use-chats";
 import { cn } from "@/src/lib/utils";
 import { ChatDto } from "@/src/ports/api/ChatsApi";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export const ChatList = () => {
-  const { chats: chats, fetchChats: fetchConversations } = useChats();
+  const { chats, fetchChats } = useChats();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    fetchConversations();
+    fetchChats();
   }, []);
 
   const pinned = chats.filter((chat) => chat.pinPosition);

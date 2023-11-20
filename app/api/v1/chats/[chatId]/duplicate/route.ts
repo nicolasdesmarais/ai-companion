@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function PUT(
   req: Request,
-  { params: { conversationId } }: { params: { conversationId: string } }
+  { params: { chatId } }: { params: { chatId: string } }
 ) {
   try {
     const { userId } = await auth();
@@ -12,12 +12,9 @@ export async function PUT(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const chat = await prismadb.chat.update({
+    const chat = await prismadb.chat.findUnique({
       where: {
-        id: conversationId,
-      },
-      data: {
-        isDeleted: true,
+        id: chatId,
       },
       include: {
         ai: true,
@@ -25,20 +22,27 @@ export async function PUT(
     });
 
     if (!chat) {
-      return new NextResponse("Conversation not found", { status: 404 });
+      return new NextResponse("Chat not found", { status: 404 });
     }
 
-    const newConversation = await prismadb.chat.create({
-      data: {
+    const chatCount = await prismadb.chat.count({
+      where: {
         userId: userId,
-        name: chat.name,
         aiId: chat.ai.id,
       },
     });
 
-    return NextResponse.json(newConversation);
+    const newChat = await prismadb.chat.create({
+      data: {
+        userId: userId,
+        name: `${chat.ai.name} (${chatCount + 1})`,
+        aiId: chat.ai.id,
+      },
+    });
+
+    return NextResponse.json(newChat);
   } catch (error) {
-    console.error("[PUT v1/conversation/[conversationId]/reset]", error);
+    console.error("[PUT v1/chats/[chatId]/duplicate]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
