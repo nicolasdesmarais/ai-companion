@@ -5,13 +5,13 @@ interface useChatsStore {
   chats: (Chat & {
     ai: AI;
   })[];
-  fetchConversations: () => void;
+  fetchChats: () => void;
 }
 
 export const useChats = create<useChatsStore>((set) => ({
   chats: [],
-  setConversations: (conversations: any) => set({ chats: conversations }),
-  fetchConversations: async () => {
+  setChats: (chats: any) => set({ chats }),
+  fetchChats: async () => {
     const response = await fetch("/api/v1/conversations");
     if (response.status === 200) {
       const data = await response.json();

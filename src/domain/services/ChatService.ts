@@ -31,7 +31,7 @@ export class ChatService {
 
   public async updateChat(
     aiId: string,
-    conversationId: string,
+    chatId: string,
     userId: string,
     content: string,
     role: Role,
@@ -40,7 +40,7 @@ export class ChatService {
   ) {
     const chat = await prismadb.chat.update({
       where: {
-        id: conversationId,
+        id: chatId,
         userId,
         aiId,
       },

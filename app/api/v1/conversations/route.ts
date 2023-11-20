@@ -8,7 +8,7 @@ export async function GET(req: Request) {
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
-    const conversations = await prismadb.chat.findMany({
+    const chats = await prismadb.chat.findMany({
       where: {
         userId: userId,
         isDeleted: false,
@@ -17,7 +17,7 @@ export async function GET(req: Request) {
         ai: true,
       },
     });
-    return NextResponse.json(conversations);
+    return NextResponse.json(chats);
   } catch (error) {
     console.log("[GET v1/groups]", error);
     return new NextResponse("Internal Error", { status: 500 });
