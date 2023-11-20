@@ -258,24 +258,6 @@
               "type": "string"
             },
             "description": "The unique identifier for the AI."
-          },
-          {
-            "in": "query",
-            "name": "filename",
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "description": "The name of the file being uploaded."
-          },
-          {
-            "in": "query",
-            "name": "type",
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "description": "The content type of the file being uploaded (Text, CSV, Markdown, EPub, Docx, PDF)."
           }
         ],
         "requestBody": {
