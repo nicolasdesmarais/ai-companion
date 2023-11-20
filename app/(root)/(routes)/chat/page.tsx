@@ -9,7 +9,7 @@ const ChatPage = async () => {
     return redirectToSignIn();
   }
 
-  const conversations = await prismadb.conversation.findMany({
+  const chats = await prismadb.chat.findMany({
     where: {
       userId,
       isDeleted: false,
@@ -20,11 +20,11 @@ const ChatPage = async () => {
     take: 1,
   });
 
-  if (!conversations.length) {
+  if (!chats.length) {
     return redirect("/");
   }
 
-  return redirect(`/chat/${conversations[0].id}`);
+  return redirect(`/chat/${chats[0].id}`);
 };
 
 export default ChatPage;

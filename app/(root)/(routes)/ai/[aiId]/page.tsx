@@ -19,7 +19,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
       id: params.aiId,
     },
     include: {
-      conversations: {
+      chats: {
         where: {
           userId: userId,
           isDeleted: false,
@@ -40,8 +40,8 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     return redirect("/");
   }
 
-  if (ai.conversations.length === 0) {
-    const conversation = await prismadb.conversation.create({
+  if (ai.chats.length === 0) {
+    const chat = await prismadb.chat.create({
       data: {
         aiId: params.aiId,
         name: ai.name,
@@ -49,20 +49,20 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
       },
     });
     if (ai._count.messages > 0) {
-      // add legacy messages to new conversation
+      // add legacy messages to new chat
       await prismadb.message.updateMany({
         where: {
           aiId: params.aiId,
           userId: userId,
         },
         data: {
-          conversationId: conversation.id,
+          conversationId: chat.id,
         },
       });
     }
-    return redirect(`/chat/${conversation.id}`);
+    return redirect(`/chat/${chat.id}`);
   } else {
-    return redirect(`/chat/${ai.conversations[0].id}`);
+    return redirect(`/chat/${ai.chats[0].id}`);
   }
 };
 

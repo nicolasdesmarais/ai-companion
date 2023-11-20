@@ -1,4 +1,4 @@
-import conversationService from "@/src/domain/services/ConversationService";
+import chatService from "@/src/domain/services/ChatService";
 import { getAuthorizationContext } from "@/src/lib/authorizationUtils";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -77,9 +77,6 @@ export async function GET(
   }
   const { orgId, userId } = authorizationContext;
 
-  const chatsResponse = await conversationService.getAIConversations(
-    params.aiId,
-    userId
-  );
+  const chatsResponse = await chatService.getAIChats(params.aiId, userId);
   return NextResponse.json(chatsResponse);
 }

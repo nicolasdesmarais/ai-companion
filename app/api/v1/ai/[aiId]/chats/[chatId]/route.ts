@@ -1,5 +1,5 @@
 import { models } from "@/components/ai-models";
-import conversationService from "@/src/domain/services/ConversationService";
+import chatService from "@/src/domain/services/ChatService";
 import { getAuthorizationContext } from "@/src/lib/authorizationUtils";
 import { MemoryManager } from "@/src/lib/memory";
 import { rateLimit } from "@/src/lib/rate-limit";
@@ -122,7 +122,7 @@ export async function POST(
       return new NextResponse("Rate limit exceeded", { status: 429 });
     }
 
-    const conversation = await conversationService.updateConversation(
+    const chat = await chatService.updateChat(
       aiId,
       chatId,
       userId,
@@ -130,14 +130,14 @@ export async function POST(
       Role.user
     );
 
-    if (!conversation) {
+    if (!chat) {
       return new NextResponse("Conversation not found", { status: 404 });
     }
 
-    const model = models.find((model) => model.id === conversation.ai.modelId);
+    const model = models.find((model) => model.id === chat.ai.modelId);
 
     if (!model) {
-      return new NextResponse(`Model ${conversation.ai.modelId} not found`, {
+      return new NextResponse(`Model ${chat.ai.modelId} not found`, {
         status: 404,
       });
     }
@@ -151,20 +151,13 @@ export async function POST(
       const knowledgeTime = Math.round(endKnowledge - endSetup);
       const llmTime = Math.round(end - endKnowledge);
       const totalTime = Math.round(end - start);
-      await conversationService.updateConversation(
-        aiId,
-        chatId,
-        userId,
-        answer,
-        Role.system,
-        {
-          setupTime,
-          knowledgeTime,
-          llmTime,
-          totalTime,
-          knowledgeMeta,
-        }
-      );
+      await chatService.updateChat(aiId, chatId, userId, answer, Role.system, {
+        setupTime,
+        knowledgeTime,
+        llmTime,
+        totalTime,
+        knowledgeMeta,
+      });
       return await handlers.handleLLMEnd(_output, runId);
     };
 
@@ -177,13 +170,13 @@ export async function POST(
       chatModel,
       options = {} as any;
 
-    Object.entries(conversation.ai.options || {}).forEach(([key, value]) => {
+    Object.entries(chat.ai.options || {}).forEach(([key, value]) => {
       if (value && value.length > 0) {
         options[key] = value[0];
       }
     });
 
-    if (conversation.ai.modelId === "llama2-13b") {
+    if (chat.ai.modelId === "llama2-13b") {
       completionModel = new Replicate({
         model:
           "meta/llama-2-13b-chat:f4e2de70d66816a838a89eeeb621910adffb0dd0baba3976c96980970978018d",
@@ -195,13 +188,13 @@ export async function POST(
         apiKey: process.env.REPLICATE_API_TOKEN,
         callbackManager: CallbackManager.fromHandlers(customHandlers),
       });
-    } else if (conversation.ai.modelId === "text-davinci-003") {
+    } else if (chat.ai.modelId === "text-davinci-003") {
       completionModel = new OpenAI({
         openAIApiKey: process.env.OPENAI_API_KEY,
         modelName: "text-davinci-003",
         ...options,
       });
-    } else if (conversation.ai.modelId === "gpt35-16k") {
+    } else if (chat.ai.modelId === "gpt35-16k") {
       chatModel = new ChatOpenAI({
         azureOpenAIApiKey: process.env.AZURE_GPT35_KEY,
         azureOpenAIApiVersion: "2023-05-15",
@@ -222,14 +215,14 @@ export async function POST(
     }
 
     const questionTokens = getTokenLength(prompt);
-    const answerTokens = ((conversation.ai.options as JsonObject)?.maxTokens ||
+    const answerTokens = ((chat.ai.options as JsonObject)?.maxTokens ||
       model.options.maxTokens.default) as number;
 
     let bootstrapKnowledge;
-    if (conversation.ai.dataSources.length === 1) {
-      if (conversation.ai.dataSources[0].dataSource.knowledges.length === 1) {
-        const meta = conversation.ai.dataSources[0].dataSource.knowledges[0]
-          .knowledge.metadata as any;
+    if (chat.ai.dataSources.length === 1) {
+      if (chat.ai.dataSources[0].dataSource.knowledges.length === 1) {
+        const meta = chat.ai.dataSources[0].dataSource.knowledges[0].knowledge
+          .metadata as any;
         if (
           meta &&
           meta.mimeType &&
@@ -237,8 +230,7 @@ export async function POST(
           meta.mimeType === "text/plain"
         ) {
           bootstrapKnowledge = {
-            ...conversation.ai.dataSources[0].dataSource.knowledges[0]
-              .knowledge,
+            ...chat.ai.dataSources[0].dataSource.knowledges[0].knowledge,
             ...meta,
           };
         }
@@ -247,24 +239,24 @@ export async function POST(
 
     endSetup = performance.now();
     if (completionModel) {
-      const chatHistory = conversation.messages.reduce(
+      const chatHistory = chat.messages.reduce(
         (acc: string, message: Message) => {
           if (message.role === "user") {
             return acc + `User: ${message.content}\n`;
           } else {
-            return acc + `${conversation.ai.name}: ${message.content}\n`;
+            return acc + `${chat.ai.name}: ${message.content}\n`;
           }
         },
         ""
       );
       const completionPrompt = `
-        ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${conversation.ai.name}: prefix.
+        ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${chat.ai.name}: prefix.
         The user date and time is ${date}. Output format is markdown. Open links in new tabs.
-        ${conversation.ai.instructions}
-        Below are relevant details about ${conversation.ai.name}'s past and the conversation you are in:\n
+        ${chat.ai.instructions}
+        Below are relevant details about ${chat.ai.name}'s past and the conversation you are in:\n
       `;
       const instructionTokens = getTokenLength(completionPrompt);
-      const seededChatHistory = `${conversation.ai.seed}\n\n${chatHistory}\n${conversation.ai.name}:`;
+      const seededChatHistory = `${chat.ai.seed}\n\n${chatHistory}\n${chat.ai.name}:`;
       const chatHistoryTokens = getTokenLength(seededChatHistory);
       const remainingTokens =
         model.contextSize -
@@ -275,8 +267,8 @@ export async function POST(
         BUFFER_TOKENS;
       const { knowledge, docMeta } = await getKnowledge(
         prompt,
-        conversation.messages,
-        conversation.ai.dataSources,
+        chat.messages,
+        chat.ai.dataSources,
         remainingTokens
       );
       knowledgeMeta = docMeta;
@@ -292,14 +284,14 @@ export async function POST(
       return new StreamingTextResponse(s);
     } else {
       let historySeed = [];
-      if (conversation.ai.seed) {
-        historySeed = conversation.ai.seed
+      if (chat.ai.seed) {
+        historySeed = chat.ai.seed
           .split("\n\n")
           .reduce((result: any, line: string) => {
-            if (line.trimStart().startsWith(conversation.ai.name)) {
+            if (line.trimStart().startsWith(chat.ai.name)) {
               result.push(
                 new SystemChatMessage(
-                  line.replace(conversation.ai.name + ":", "").trimStart()
+                  line.replace(chat.ai.name + ":", "").trimStart()
                 )
               );
             } else {
@@ -312,7 +304,7 @@ export async function POST(
             return result;
           }, []);
       }
-      const convertedMessages = conversation.messages.map((message) => {
+      const convertedMessages = chat.messages.map((message) => {
         if (message.role === "user") {
           return new HumanChatMessage(message.content);
         } else {
@@ -320,10 +312,10 @@ export async function POST(
         }
       });
       const engineeredPrompt = `
-        Pretend you are ${conversation.ai.name}, ${conversation.ai.description}.
+        Pretend you are ${chat.ai.name}, ${chat.ai.description}.
         The user date and time is ${date}. Output format is markdown. Open links in new tabs.
         Here are more details about your character:\n
-        ${conversation.ai.instructions}
+        ${chat.ai.instructions}
         Answer questions using this knowledge:\n
       `;
       const instructionTokens = getTokenLength(engineeredPrompt);
@@ -353,8 +345,8 @@ export async function POST(
       if (!knowledge) {
         const vectorKnowledge = await getKnowledge(
           prompt,
-          conversation.messages,
-          conversation.ai.dataSources,
+          chat.messages,
+          chat.ai.dataSources,
           remainingTokens
         );
         knowledge = vectorKnowledge.knowledge;
