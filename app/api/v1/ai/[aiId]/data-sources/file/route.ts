@@ -86,12 +86,6 @@ export async function POST(
   const { orgId, userId } = authorizationContext;
 
   const { searchParams } = new URL(request.url);
-  const filename = searchParams.get("filename");
-  const type = searchParams.get("type");
-
-  if (!filename || !type) {
-    return new NextResponse("Missing required fields", { status: 400 });
-  }
 
   if (!request.body) {
     return NextResponse.json("Missing file", { status: 400 });
@@ -100,6 +94,8 @@ export async function POST(
   try {
     const data = await request.formData();
     const file: File | null = data.get("file") as unknown as File;
+    const filename = file.name;
+    const type = file.type;
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
