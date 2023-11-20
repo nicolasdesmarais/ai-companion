@@ -332,7 +332,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
       }
     },
     "/api/v1/ai/{aiId}/data-sources": {
@@ -434,7 +439,12 @@
           "500": {
             "description": "Internal Server Error, any internal error."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
       },
       "delete": {
         "summary": "Delete a chat session",
@@ -464,7 +474,12 @@
           "500": {
             "description": "Internal Server Error, any internal error."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
       }
     },
     "/api/v1/chats/{chatId}/duplicate": {
