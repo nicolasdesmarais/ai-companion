@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { AI, Conversation, Message } from "@prisma/client";
+import { AI, Chat, Message } from "@prisma/client";
 import axios from "axios";
 import {
   CopyPlus,
@@ -26,14 +26,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
-import { useConversations } from "@/hooks/use-conversations";
+import { useChats } from "@/hooks/use-chats";
 import { useState } from "react";
 import { ShareModal } from "@/components/share-modal";
 import { TalkStreamModal } from "@/components/talk-stream-modal";
 import { useTalkModal } from "@/hooks/use-talk-modal";
 
 interface ChatHeaderProps {
-  conversation: Conversation & {
+  chat: Chat & {
     messages: Message[];
     ai: AI;
     _count: {
@@ -42,38 +42,32 @@ interface ChatHeaderProps {
   };
 }
 
-export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
+export const ChatHeader = ({ chat }: ChatHeaderProps) => {
   const router = useRouter();
   const { user } = useUser();
   const { toast } = useToast();
   const talkModal = useTalkModal();
-  const { conversations, fetchConversations } = useConversations();
+  const { chats, fetchChats } = useChats();
   const [showShareModal, setShowShareModal] = useState(false);
 
   const duplicate = async () => {
-    const response = await axios.put(
-      `/api/v1/conversations/${conversation.id}/duplicate`
-    );
+    const response = await axios.put(`/api/v1/chats/${chat.id}/duplicate`);
     if (response.status === 200) {
-      toast({ description: "Conversation duplicated." });
+      toast({ description: "Chat duplicated." });
       router.push(`/chat/${response.data.id}`);
     }
   };
 
   const reset = async () => {
-    const response = await axios.put(
-      `/api/v1/conversations/${conversation.id}/reset`
-    );
+    const response = await axios.put(`/api/v1/chats/${chat.id}/reset`);
     if (response.status === 200) {
-      toast({ description: "Conversation reset." });
+      toast({ description: "Chat reset." });
       router.push(`/chat/${response.data.id}`);
     }
   };
 
   const pin = async () => {
-    const pinned = conversations.filter(
-      (conversation) => conversation.pinPosition
-    );
+    const pinned = chats.filter((chat) => chat.pinPosition);
     if (pinned.length >= 9) {
       toast({
         variant: "destructive",
@@ -82,31 +76,25 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
       });
       return;
     }
-    const response = await axios.put(
-      `/api/v1/conversations/${conversation.id}/pin`
-    );
+    const response = await axios.put(`/api/v1/chats/${chat.id}/pin`);
     if (response.status === 200) {
-      toast({ description: "Conversation pinned." });
-      fetchConversations();
+      toast({ description: "Chat pinned." });
+      fetchChats();
     }
   };
 
   const unpin = async () => {
-    const response = await axios.put(
-      `/api/v1/conversations/${conversation.id}/unpin`
-    );
+    const response = await axios.put(`/api/v1/chats/${chat.id}/unpin`);
     if (response.status === 200) {
-      toast({ description: "Conversation unpinned." });
-      fetchConversations();
+      toast({ description: "Chat unpinned." });
+      fetchChats();
     }
   };
 
   const remove = async () => {
-    const response = await axios.delete(
-      `/api/v1/conversations/${conversation.id}`
-    );
-    if (response.status === 200) {
-      toast({ description: "Conversation deleted." });
+    const response = await axios.delete(`/api/v1/chats/${chat.id}`);
+    if (response.status === 204) {
+      toast({ description: "Chat deleted." });
       router.push(`/chat/`);
     }
   };
@@ -114,16 +102,16 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
   return (
     <div className="flex w-full justify-between items-center p-4 bg-accent/30">
       <div className="flex gap-x-2 items-center">
-        <BotAvatar src={conversation.ai.src} />
+        <BotAvatar src={chat.ai.src} />
         <div className="flex flex-col gap-y-1">
-          <p className="font-bold">{conversation.ai.name}</p>
+          <p className="font-bold">{chat.ai.name}</p>
           <div className="flex items-center gap-x-2">
             <p className="text-xs text-muted-foreground">
-              Created by {conversation.ai.userName}
+              Created by {chat.ai.userName}
             </p>
             <div className="flex items-center text-xs text-muted-foreground">
               <MessagesSquare className="w-3 h-3 mr-1" />
-              {conversation._count.messages}
+              {chat._count.messages}
             </div>
           </div>
         </div>
@@ -138,15 +126,17 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
         >
           <Video />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="mr-4"
-          type="button"
-          onClick={() => setShowShareModal(true)}
-        >
-          <ExternalLink />
-        </Button>
+        {(user?.id === chat.ai.userId || chat.ai.visibility === "PUBLIC") && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mr-4"
+            type="button"
+            onClick={() => setShowShareModal(true)}
+          >
+            <ExternalLink />
+          </Button>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon">
@@ -154,7 +144,7 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {conversation.pinPosition ? (
+            {chat.pinPosition ? (
               <DropdownMenuItem onClick={() => unpin()}>
                 <PinOff className="w-4 h-4 mr-2" />
                 Unpin
@@ -177,9 +167,9 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
               <Trash className="w-4 h-4 mr-2" />
               Remove
             </DropdownMenuItem>
-            {user?.id === conversation.ai.userId && (
+            {user?.id === chat.ai.userId && (
               <DropdownMenuItem
-                onClick={() => router.push(`/ai/${conversation.ai.id}/edit`)}
+                onClick={() => router.push(`/ai/${chat.ai.id}/edit`)}
               >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit AI
@@ -191,7 +181,7 @@ export const ChatHeader = ({ conversation }: ChatHeaderProps) => {
       <ShareModal
         showModal={showShareModal}
         setShowModal={setShowShareModal}
-        ai={conversation.ai}
+        ai={chat.ai}
       />
       <TalkStreamModal />
     </div>

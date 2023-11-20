@@ -1,6 +1,6 @@
 "use client";
 
-import { AI, Conversation, Message } from "@prisma/client";
+import { AI, Chat, Message } from "@prisma/client";
 import { useCompletion } from "ai/react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
@@ -10,11 +10,10 @@ import { ChatHeader } from "@/components/chat-header";
 import { ChatMessageProps } from "@/components/chat-message";
 import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
-import axios from "axios";
 import { useTalkModal } from "@/hooks/use-talk-modal";
 
 interface ChatClientProps {
-  conversation: Conversation & {
+  chat: Chat & {
     messages: Message[];
     ai: AI;
     _count: {
@@ -23,26 +22,12 @@ interface ChatClientProps {
   };
 }
 
-export const ChatClient = ({ conversation }: ChatClientProps) => {
+export const ChatClient = ({ chat }: ChatClientProps) => {
   const router = useRouter();
-  const [messages, setMessages] = useState<ChatMessageProps[]>(
-    conversation.messages
-  );
+  const [messages, setMessages] = useState<ChatMessageProps[]>(chat.messages);
   const [streaming, setStreaming] = useState<boolean>(false);
   const { toast } = useToast();
   const talkModal = useTalkModal();
-
-  const saveAnswer = async (answer: string) => {
-    const response = await axios.post(
-      `/api/chat/${conversation.ai.id}/${conversation.id}/answer`,
-      {
-        answer,
-      }
-    );
-    if (response.status !== 200) {
-      toast({ description: "Error updating chat log." });
-    }
-  };
 
   const {
     completion,
@@ -52,7 +37,10 @@ export const ChatClient = ({ conversation }: ChatClientProps) => {
     handleSubmit,
     setInput,
   } = useCompletion({
-    api: `/api/chat/${conversation.ai.id}/${conversation.id}`,
+    api: `/api/v1/chats/${chat.id}`,
+    body: {
+      date: new Date().toLocaleString(),
+    },
     onError: (err) => {
       toast({
         variant: "destructive",
@@ -70,7 +58,6 @@ export const ChatClient = ({ conversation }: ChatClientProps) => {
 
       setMessages((current) => [...current, systemMessage]);
       setInput("");
-      saveAnswer(completion);
 
       router.refresh();
     },
@@ -94,9 +81,9 @@ export const ChatClient = ({ conversation }: ChatClientProps) => {
   }
   return (
     <div className="flex flex-col h-full w-full space-y-2 ml-1 shrink">
-      <ChatHeader conversation={conversation} />
+      <ChatHeader chat={chat} />
       <ChatMessages
-        ai={conversation.ai}
+        ai={chat.ai}
         isLoading={isLoading && !stream}
         messages={messages}
         stream={stream}

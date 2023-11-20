@@ -1,4 +1,5 @@
-import { GroupService } from "@/src/domain/services/GroupService";
+import aiService from "@/src/domain/services/AIService";
+import groupService from "@/src/domain/services/GroupService";
 import {
   SessionWebhookEvent,
   User,
@@ -97,8 +98,8 @@ async function handleUserCreatedEvent(userEvent: UserWebhookEvent) {
     return;
   }
 
-  const groupService = new GroupService();
-  groupService.populateGroupUserId(data.id, primaryEmail);
+  await groupService.populateGroupUserId(data.id, primaryEmail);
+  await aiService.populateAiPermissionsUserId(data.id, primaryEmail);
 }
 
 async function handleSessionCreatedEvent(sessionEvent: SessionWebhookEvent) {

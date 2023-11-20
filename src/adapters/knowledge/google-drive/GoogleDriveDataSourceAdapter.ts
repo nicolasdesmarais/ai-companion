@@ -1,18 +1,24 @@
 import {
   EntityNotFoundError,
-  UnauthorizedError,
+  ForbiddenError,
 } from "@/src/domain/errors/Errors";
+import { DomainEvent } from "@/src/domain/events/domain-event";
 import {
   GoogleDriveSearchResponse,
   mapMimeTypeToEnum,
 } from "@/src/domain/types/GoogleDriveSearchResponse";
 import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
-import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
+import {
+  DataSourceType,
+  Knowledge,
+  KnowledgeIndexStatus,
+} from "@prisma/client";
 import { put } from "@vercel/blob";
 import { GaxiosResponse } from "gaxios";
 import { drive_v3, google } from "googleapis";
 import { Readable } from "stream";
+import { publishEvent } from "../../inngest/event-publisher";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import {
@@ -20,7 +26,10 @@ import {
   DataSourceItemList,
 } from "../types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
-import { KnowledgeIndexingResult } from "../types/KnowlegeIndexingResult";
+import {
+  KnowledgeIndexingResult,
+  KnowledgeIndexingResultStatus,
+} from "../types/KnowlegeIndexingResult";
 import { GoogleDriveDataSourceInput } from "./types/GoogleDriveDataSourceInput";
 import { GoogleDriveFileMetadata } from "./types/GoogleDriveFileMetaData";
 
@@ -89,7 +98,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     }
 
     if (oauthToken.userId !== userId) {
-      throw new UnauthorizedError("Unauthorized access to OAuth token");
+      throw new ForbiddenError("Unauthorized access to OAuth token");
     }
 
     const oauthTokenData = JSON.parse(decryptFromBuffer(oauthToken.data)) as {
@@ -211,11 +220,19 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     knowledge: Knowledge,
     data: any
   ): Promise<IndexKnowledgeResponse> {
-    await this.setOAuthCredentials(userId, data.oauthTokenId);
-
-    if (!knowledge.metadata) {
-      throw new Error("Knowledge metadata not found for indexing Google Drive");
+    if (!userId) {
+      console.error("Missing userId");
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
     }
+    if (!data?.oauthTokenId) {
+      console.error("Missing oauthTokenId");
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
+    await this.setOAuthCredentials(userId, data?.oauthTokenId);
 
     const { fileId, fileName, mimeType } =
       knowledge.metadata as unknown as GoogleDriveFileMetadata;
@@ -236,21 +253,47 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
           const buffer = Buffer.concat(chunks);
           const blob = new Blob([buffer]);
 
-          const cloudBlob = await put(fileName, blob, {
-            access: "public",
-          });
-          knowledge.blobUrl = cloudBlob.url;
-
-          const metadata = await fileLoader.loadFile(
+          const { docs, metadata } = await fileLoader.getLangchainDocs(
             knowledge.id,
             fileName,
             derivedMimeType,
             blob
           );
 
+          const cloudBlob = await put(
+            `${knowledge.name}.json`,
+            JSON.stringify(docs),
+            {
+              access: "public",
+            }
+          );
+          knowledge.blobUrl = cloudBlob.url;
+
+          const eventIds: string[] = [];
+          for (let i = 0; i < docs.length; i++) {
+            const eventResult = await publishEvent(
+              DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
+              {
+                knowledgeIndexingResult: {
+                  knowledgeId: knowledge.id,
+                  result: {
+                    chunkCount: docs.length,
+                    status: KnowledgeIndexingResultStatus.SUCCESSFUL,
+                  },
+                },
+                dataSourceType: DataSourceType.GOOGLE_DRIVE,
+                index: i,
+              }
+            );
+            eventIds.concat(eventResult.ids);
+          }
           resolve({
-            indexStatus: KnowledgeIndexStatus.COMPLETED,
-            metadata,
+            userId,
+            indexStatus: KnowledgeIndexStatus.INDEXING,
+            metadata: {
+              eventIds,
+              ...metadata,
+            },
           });
         });
       }
@@ -341,12 +384,52 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     throw new Error("Method not supported.");
   }
 
-  loadKnowledgeResult(
+  public async loadKnowledgeResult(
     knowledge: Knowledge,
     result: KnowledgeIndexingResult,
-    chunkCount: number
+    index: number
   ): Promise<IndexKnowledgeResponse> {
-    throw new Error("Method not supported.");
+    if (!knowledge.blobUrl) {
+      console.error("loadKnowledgeResult: blob fail");
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
+
+    const response = await fetch(knowledge.blobUrl);
+    if (response.status !== 200) {
+      console.error("loadKnowledgeResult: fetch fail");
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
+    const data = await response.json();
+    if (!data || !data[index]) {
+      console.error("loadKnowledgeResult: data fail");
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
+
+    const docs = [data[index]];
+    const metadata = await fileLoader.loadDocs(docs);
+
+    let indexStatus;
+    switch (result.status) {
+      case KnowledgeIndexingResultStatus.SUCCESSFUL:
+      case KnowledgeIndexingResultStatus.PARTIAL:
+        indexStatus = KnowledgeIndexStatus.PARTIALLY_COMPLETED;
+        break;
+      case KnowledgeIndexingResultStatus.FAILED:
+        indexStatus = KnowledgeIndexStatus.FAILED;
+    }
+    return {
+      indexStatus,
+      metadata: {
+        ...metadata,
+        completedChunks: [index],
+      },
+    };
   }
 
   public async pollKnowledgeIndexingStatus(

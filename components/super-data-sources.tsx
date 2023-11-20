@@ -5,25 +5,10 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import axios, { AxiosError } from "axios";
 import { format } from "date-fns";
-import {
-  ChevronRight,
-  ChevronDown,
-  FileUp,
-  Globe,
-  Loader,
-  MinusCircle,
-  Server,
-} from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { ChevronRight, ChevronDown, Loader, MinusCircle } from "lucide-react";
 import { useState } from "react";
-import DataSourceCard from "./datasource-card";
 import { DataSourceTypes } from "./datasource-types";
-import { FileUploadKnowledge } from "./file-upload-knowledge";
-import { GoogleDriveForm } from "./google-drive-knowledge";
-import { WebUrlsForm } from "./web-urls-knowledge-form";
 import { KnowledgeIndexStatus } from "@prisma/client";
-import { Banner } from "./ui/banner";
-import { kn } from "date-fns/locale";
 import Link from "next/link";
 
 export const SuperDataSources = () => {
@@ -94,7 +79,10 @@ export const SuperDataSources = () => {
       >
         {dataSources.map((dataSource: any) => (
           <>
-            <tr key={dataSource.id} className="items-center my-2 text-sm">
+            <tr
+              key={dataSource.id}
+              className="items-center my-2 text-sm hover:bg-ring/10"
+            >
               <td className="p-2 ">
                 <div
                   onClick={() => toggle(dataSource.id)}
@@ -168,7 +156,10 @@ export const SuperDataSources = () => {
             </tr>
             {expanded.includes(dataSource.id) &&
               dataSource.knowledges.map(({ knowledge }: any) => (
-                <tr key={knowledge.id} className="items-center my-2 text-sm">
+                <tr
+                  key={knowledge.id}
+                  className="items-center my-2 text-sm hover:bg-ring/10"
+                >
                   <td className="p-2 pl-10">
                     <div className="max-w-sm truncate">
                       {knowledge.metadata?.indexingRunId ? (
@@ -213,7 +204,20 @@ export const SuperDataSources = () => {
                   >
                     {knowledge.id}
                   </td>
-                  <td className="p-2">NA</td>
+                  <td className="p-2">
+                    {knowledge.metadata?.eventIds &&
+                    knowledge.metadata?.eventIds.length > 0 ? (
+                      <a
+                        href={`https://app.inngest.com/env/production/events/knowledge.chunk.received/logs/${knowledge.metadata?.eventIds[0]}`}
+                        target="_blank"
+                        className="text-ring"
+                      >
+                        sent
+                      </a>
+                    ) : (
+                      "NA"
+                    )}
+                  </td>
                   <td className="p-2">
                     {knowledge.blobUrl ? (
                       <a

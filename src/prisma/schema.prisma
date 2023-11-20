@@ -37,9 +37,7 @@ model AI {
   category      Category @relation(fields: [categoryId], references: [id])
   categoryId    String   @map("category_id")
 
-  messages      Message[]
-
-  conversations Conversation[]
+  chats         Chat[]
 
   modelId       String @default("llama2-13b")   @map("model_id")
 
@@ -76,15 +74,13 @@ model Message {
   createdAt       DateTime  @default(now()) @map(name: "created_at")
   updatedAt       DateTime  @updatedAt @map(name: "updated_at")
 
-  aiId            String    @map("ai_id")
   userId          String    @map("user_id")
+  metadata        Json?
 
-  ai              AI @relation(fields: [aiId], references: [id], onDelete: Cascade)
+  chat            Chat? @relation(fields: [chatId], references: [id])
+  chatId          String? @map(name: "chat_id")
 
-  conversation    Conversation? @relation(fields: [conversationId], references: [id])
-  conversationId  String? @map(name: "conversation_id")
-
-  @@index([aiId])
+  @@index([chatId])
 
   @@map("messages")
 }
@@ -159,7 +155,7 @@ model Knowledge {
   name                      String  @db.Text
   type                      String
   indexStatus               KnowledgeIndexStatus?               @map(name :"index_status")
-  blobUrl                   String?                             @map(name: "blob_url")
+  blobUrl                   String? @db.Text                    @map(name: "blob_url")
   metadata                  Json?
   dataSources               DataSourceKnowledge[]
 
@@ -203,7 +199,7 @@ enum OAuthTokenProvider{
   GOOGLE
 }
 
-model Conversation {
+model Chat {
   id                        String    @id @default(cuid())
   createdAt                 DateTime  @default(now()) @map(name: "created_at")
   updatedAt                 DateTime  @updatedAt @default(now()) @map(name: "updated_at")
@@ -217,7 +213,7 @@ model Conversation {
   ai                        AI @relation(fields: [aiId], references: [id], onDelete: Cascade)
   aiId                      String    @map(name: "ai_id")
 
-  @@map("conversations")
+  @@map("chats")
 }
 
 model DataSource {
@@ -264,11 +260,25 @@ model DataSourceKnowledge {
 }
 
 model AIDataSource {
-  ai                         AI      @relation(fields: [aiId], references: [id])
+  ai                         AI             @relation(fields: [aiId], references: [id])
   aiId                       String         @map(name: "ai_id")
   dataSource                 DataSource     @relation(fields: [dataSourceId], references: [id])
   dataSourceId               String         @map(name: "data_source_id")
 
   @@id([aiId, dataSourceId])
   @@map("ai_data_sources")
+}
+
+model ApiKey {
+  id                        String         @id @default(cuid())
+  createdAt                 DateTime       @default(now()) @map(name: "created_at")
+  updatedAt                 DateTime       @updatedAt       @map(name: "updated_at")
+  lastUsedAt                DateTime?      @map(name: "last_used_at")
+  orgId                     String         @map("org_id")
+  userId                    String         @map("user_id")
+  name                      String
+  key                       String         @unique
+  scopes                    Json?
+
+  @@map("api_keys")
 }

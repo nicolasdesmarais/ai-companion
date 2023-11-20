@@ -12,10 +12,14 @@ export const MobileSidebar = ({
 }) => {
   return (
     <Sheet>
-      <SheetTrigger className="md:hidden pr-4">
+      <SheetTrigger className="md:hidden pr-4" aria-controls="mobile-sidebar">
         <Menu />
       </SheetTrigger>
-      <SheetContent side="left" className="p-0 bg-secondary pt-10 w-32">
+      <SheetContent
+        side="left"
+        className="p-0 bg-secondary pt-10 w-32"
+        id="mobile-sidebar"
+      >
         <Sidebar isPro={isPro} hasChat={hasChat} />
       </SheetContent>
     </Sheet>

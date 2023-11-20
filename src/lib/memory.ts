@@ -1,4 +1,4 @@
-import { PineconeClient } from "@pinecone-database/pinecone";
+import { Pinecone } from "@pinecone-database/pinecone";
 import { Redis } from "@upstash/redis";
 import { Document } from "langchain/document";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
@@ -10,7 +10,7 @@ const embeddingsConfig = {
   azureOpenAIApiInstanceName: "prod-appdirectai-east2",
   azureOpenAIApiDeploymentName: "text-embedding-ada-002",
   batchSize: 16,
-  maxConcurrency: 200,
+  maxConcurrency: 1,
 };
 
 export type AIKey = {
@@ -22,26 +22,15 @@ export type AIKey = {
 export class MemoryManager {
   private static instance: MemoryManager;
   private history: Redis;
-  private vectorDBClient: PineconeClient;
+  private pinecone: Pinecone;
 
   public constructor() {
     this.history = Redis.fromEnv();
-    this.vectorDBClient = new PineconeClient();
-  }
-
-  public async init() {
-    if (this.vectorDBClient instanceof PineconeClient) {
-      await this.vectorDBClient.init({
-        apiKey: process.env.PINECONE_API_KEY!,
-        environment: process.env.PINECONE_ENVIRONMENT!,
-      });
-    }
+    this.pinecone = new Pinecone();
   }
 
   public async vectorUpload(docs: Document[]) {
-    const pineconeClient = <PineconeClient>this.vectorDBClient;
-
-    const pineconeIndex = pineconeClient.Index(
+    const pineconeIndex = this.pinecone.Index(
       process.env.PINECONE_INDEX! || ""
     );
 
@@ -59,9 +48,7 @@ export class MemoryManager {
     knowledgeIds: string[],
     numDocs = 100
   ) {
-    const pineconeClient = <PineconeClient>this.vectorDBClient;
-
-    const pineconeIndex = pineconeClient.Index(
+    const pineconeIndex = this.pinecone.Index(
       process.env.PINECONE_INDEX! || ""
     );
 
@@ -81,23 +68,16 @@ export class MemoryManager {
   }
 
   public async vectorDelete(knowledgeId: string) {
-    const pineconeClient = <PineconeClient>this.vectorDBClient;
-
-    const pineconeIndex = pineconeClient.Index(
+    const pineconeIndex = this.pinecone.Index(
       process.env.PINECONE_INDEX! || ""
     );
 
-    await pineconeIndex._delete({
-      deleteRequest: {
-        filter: { knowledge: knowledgeId },
-      },
-    });
+    await pineconeIndex.deleteMany({ knowledge: knowledgeId });
   }
 
-  public static async getInstance(): Promise<MemoryManager> {
+  public static getInstance(): MemoryManager {
     if (!MemoryManager.instance) {
       MemoryManager.instance = new MemoryManager();
-      await MemoryManager.instance.init();
     }
     return MemoryManager.instance;
   }

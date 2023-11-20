@@ -1,20 +1,18 @@
 import { auth } from "@clerk/nextjs";
-import { NextResponse } from "next/server";
-import { Configuration, OpenAIApi } from "openai";
 import cloudinary from "cloudinary";
+import { NextResponse } from "next/server";
+import OpenAI from "openai";
 import Replicate from "replicate";
 
 export const maxDuration = 300;
-
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN!,
 });
 
-const openai = new OpenAIApi(configuration);
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 const cloudinaryUpload = async (imageUrl: string) => {
   const data = await cloudinary.v2.uploader.unsigned_upload(
@@ -39,7 +37,7 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    if (!configuration.apiKey) {
+    if (!process.env.OPENAI_API_KEY) {
       return new NextResponse("OpenAI API Key not configured.", {
         status: 500,
       });
@@ -58,14 +56,14 @@ export async function POST(req: Request) {
     }
 
     if (model === "dalle-2") {
-      const response = await openai.createImage({
+      const response = await openai.images.generate({
         prompt,
         n: parseInt(amount, 10),
         size: resolution,
       });
 
-      if (response.data.data && response.data.data.length > 0) {
-        const imageUrl = response.data.data[0].url as string;
+      if (response.data && response.data.length > 0) {
+        const imageUrl = response.data[0].url as string;
         return cloudinaryUpload(imageUrl);
       }
     }

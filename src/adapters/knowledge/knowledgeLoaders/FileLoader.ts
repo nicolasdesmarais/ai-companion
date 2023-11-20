@@ -6,21 +6,100 @@ import { getTokenLength } from "@/src/lib/tokenCount";
 import { Knowledge } from "@prisma/client";
 import { writeFile } from "fs/promises";
 import { CSVLoader } from "langchain/document_loaders/fs/csv";
-import { DocxLoader } from "./DocxLoader";
 import { EPubLoader } from "langchain/document_loaders/fs/epub";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { DocxLoader } from "./DocxLoader";
 export class FileLoader {
-  private async getFilepath(file: File) {
+  private async getFilepath(file: Blob, filename: string) {
     if (!file) {
       throw new Error("Error reading file");
     }
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const path = `/tmp/${file.name}`;
+    const path = `/tmp/${filename}`;
     await writeFile(path, buffer);
     return path;
+  }
+  public async getLangchainDocs(
+    knowledgeId: string,
+    filename: string,
+    mimeType: string,
+    filePathOrBlob: string | Blob
+  ) {
+    let docs;
+    console.log(`Loading file ${filename} with mime type ${mimeType}`);
+
+    try {
+      if (mimeType === "text/csv") {
+        const loader = new CSVLoader(filePathOrBlob);
+        docs = await loader.load();
+      } else if (mimeType === "text/plain" || mimeType === "text/markdown") {
+        const loader = new TextLoader(filePathOrBlob);
+        docs = await loader.load();
+      } else if (
+        mimeType === "application/epub+zip" &&
+        filePathOrBlob instanceof Blob
+      ) {
+        const path = await this.getFilepath(filePathOrBlob, filename);
+        const loader = new EPubLoader(path);
+        docs = await loader.load();
+      } else if (mimeType === "application/epub+zip") {
+        const loader = new EPubLoader(filePathOrBlob as string);
+        docs = await loader.load();
+      } else if (
+        mimeType ===
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      ) {
+        const loader = new DocxLoader(filePathOrBlob);
+        docs = await loader.load();
+      } else if (mimeType === "application/pdf") {
+        const loader = new PDFLoader(filePathOrBlob);
+        docs = await loader.load();
+      } else {
+        throw new BadRequestError(`Unsupported file type ${mimeType}`);
+      }
+
+      let totalTokenCount = 0;
+      for (const doc of docs) {
+        doc.metadata.source = filename;
+        doc.metadata.knowledge = knowledgeId;
+        const tokenCount = getTokenLength(doc.pageContent);
+        totalTokenCount += tokenCount;
+        doc.metadata.tokenCount = tokenCount;
+      }
+
+      const splitter = new RecursiveCharacterTextSplitter({
+        chunkSize: 4000,
+        chunkOverlap: 600,
+      });
+
+      const docOutput = await splitter.splitDocuments(docs);
+
+      return {
+        docs: docOutput,
+        metadata: {
+          documentCount: docOutput.length,
+          totalTokenCount,
+        },
+      };
+    } catch (e) {
+      console.error("[FILE LOADER]", e, e.response?.data?.error);
+      throw new Error(`Error loading file ${filename}`);
+    }
+  }
+
+  public async loadDocs(docs: Document[]) {
+    const memoryManager = await MemoryManager.getInstance();
+    await memoryManager.vectorUpload(docs);
+    const totalTokenCount = docs.reduce((acc, doc) => {
+      return doc.metadata.tokenCount + acc;
+    }, 0);
+    return {
+      documentCount: docs.length,
+      totalTokenCount,
+    };
   }
 
   public async loadFile(
@@ -41,9 +120,9 @@ export class FileLoader {
         docs = await loader.load();
       } else if (
         mimeType === "application/epub+zip" &&
-        filePathOrBlob instanceof File
+        filePathOrBlob instanceof Blob
       ) {
-        const path = await this.getFilepath(filePathOrBlob);
+        const path = await this.getFilepath(filePathOrBlob, filename);
         const loader = new EPubLoader(path);
         docs = await loader.load();
       } else if (mimeType === "application/epub+zip") {

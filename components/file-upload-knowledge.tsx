@@ -55,12 +55,7 @@ export const FileUploadKnowledge = ({
     try {
       const data = new FormData();
       data.set("file", file);
-      await axios.post(
-        `/api/v1/ai/${aiId}/data-sources/file?filename=${encodeURIComponent(
-          file.name
-        )}&type=${encodeURIComponent(fileType)}`,
-        data
-      );
+      await axios.post(`/api/v1/ai/${aiId}/data-sources/file`, data);
       inputFileRef.current.value = "";
       toast({ description: "File uploaded." });
       goBack();

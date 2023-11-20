@@ -4,4 +4,5 @@ export interface IndexKnowledgeResponse {
   indexStatus: KnowledgeIndexStatus;
   metadata?: any;
   blobUrl?: string;
+  userId?: string;
 }

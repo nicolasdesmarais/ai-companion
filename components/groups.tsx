@@ -48,6 +48,8 @@ export const Groups = ({ data }: GroupsProps) => {
       query = { scope: "PUBLIC", groupId: undefined };
     } else if (id === "PRIVATE") {
       query = { scope: "PRIVATE", groupId: undefined };
+    } else if (id === "ORGANIZATION") {
+      query = { scope: "ORGANIZATION", groupId: undefined };
     } else {
       query = { scope: undefined, groupId: id };
     }
@@ -91,6 +93,29 @@ export const Groups = ({ data }: GroupsProps) => {
         )}
       >
         Public
+      </button>
+      <button
+        onClick={() => onClick("ORGANIZATION")}
+        className={cn(
+          `
+          flex
+          items-center
+          text-center
+          text-xs
+          md:text-sm
+          px-2
+          md:px-4
+          py-2
+          md:py-3
+          rounded-md
+          bg-primary/10
+          hover:opacity-75
+          transition
+        `,
+          scope === "ORGANIZATION" ? "bg-accent" : "bg-primary/10"
+        )}
+      >
+        Organization
       </button>
       <button
         onClick={() => onClick("PRIVATE")}

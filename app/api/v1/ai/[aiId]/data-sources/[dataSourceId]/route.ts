@@ -2,6 +2,8 @@ import dataSourceService from "@/src/domain/services/DataSourceService";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
+export const maxDuration = 300;
+
 export async function DELETE(
   request: Request,
   { params }: { params: { aiId: string; dataSourceId: string } }

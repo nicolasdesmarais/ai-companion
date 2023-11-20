@@ -86,7 +86,7 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
     const fetchDataSources = async () => {
       setDataSourcesLoading(true);
       const response = await axios.get(`/api/v1/ai/${aiId}/data-sources`);
-      setDataSources(response.data);
+      setDataSources(response.data.data);
       setDataSourcesLoading(false);
     };
     fetchDataSources();
@@ -106,7 +106,7 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
   }
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: (initialAi as any) || {
+    defaultValues: ({ talk: "", ...initialAi } as any) || {
       name: "",
       description: "",
       instructions: "",
@@ -167,6 +167,8 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
     if (continueRequested) {
       setContinueRequested("");
       router.push(`/ai/${aiId}${continueRequested}`);
+    } else {
+      router.push(`/ai/${aiId}/edit`);
     }
   };
 

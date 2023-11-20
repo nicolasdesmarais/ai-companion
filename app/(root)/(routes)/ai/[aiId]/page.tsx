@@ -1,4 +1,5 @@
-import prismadb from "@/src/lib/prismadb";
+import aiService from "@/src/domain/services/AIService";
+import chatService from "@/src/domain/services/ChatService";
 import { auth, redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
@@ -8,61 +9,23 @@ interface ChatIdPageProps {
   };
 }
 const ChatIdPage = async ({ params }: ChatIdPageProps) => {
-  const { userId } = auth();
+  const { orgId, userId } = auth();
 
-  if (!userId) {
+  if (!orgId || !userId) {
     return redirectToSignIn();
   }
 
-  const ai = await prismadb.aI.findUnique({
-    where: {
-      id: params.aiId,
-    },
-    include: {
-      conversations: {
-        where: {
-          userId: userId,
-          isDeleted: false,
-        },
-        orderBy: {
-          updatedAt: "desc",
-        },
-      },
-      _count: {
-        select: {
-          messages: true,
-        },
-      },
-    },
-  });
-
+  const ai = await aiService.findAIForUser(orgId, userId, params.aiId);
   if (!ai) {
     return redirect("/");
   }
 
-  if (ai.conversations.length === 0) {
-    const conversation = await prismadb.conversation.create({
-      data: {
-        aiId: params.aiId,
-        name: ai.name,
-        userId: userId,
-      },
-    });
-    if (ai._count.messages > 0) {
-      // add legacy messages to new conversation
-      await prismadb.message.updateMany({
-        where: {
-          aiId: params.aiId,
-          userId: userId,
-        },
-        data: {
-          conversationId: conversation.id,
-        },
-      });
-    }
-    return redirect(`/chat/${conversation.id}`);
+  const aiChats = await chatService.getAIChats(params.aiId, userId);
+  if (aiChats.data.length === 0) {
+    const chat = await chatService.createChat(orgId, userId, params.aiId);
+    return redirect(`/chat/${chat.id}`);
   } else {
-    return redirect(`/chat/${ai.conversations[0].id}`);
+    return redirect(`/chat/${aiChats.data[0].id}`);
   }
 };
 

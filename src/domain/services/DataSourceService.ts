@@ -6,8 +6,8 @@ import { DataSourceItemList } from "@/src/adapters/knowledge/types/DataSourceIte
 import { IndexKnowledgeResponse } from "@/src/adapters/knowledge/types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "@/src/adapters/knowledge/types/KnowlegeIndexingResult";
 import webUrlsDataSourceAdapter from "@/src/adapters/knowledge/web-urls/WebUrlsDataSourceAdapter";
-import { logWithTimestamp } from "@/src/lib/logging";
 import prismadb from "@/src/lib/prismadb";
+import { GetDataSourcesResponse } from "@/src/ports/api/DataSourcesApi";
 import {
   DataSourceIndexStatus,
   DataSourceType,
@@ -32,8 +32,22 @@ export class DataSourceService {
     }
   }
 
-  public async getDataSources(orgId: string, userId: string, aiId: string) {
-    return await prismadb.dataSource.findMany({
+  public async getDataSources(
+    orgId: string,
+    userId: string,
+    aiId: string
+  ): Promise<GetDataSourcesResponse> {
+    const dataSources = await prismadb.dataSource.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        lastIndexedAt: true,
+        name: true,
+        type: true,
+        indexStatus: true,
+        indexPercentage: true,
+      },
       where: {
         orgId,
         ownerUserId: userId,
@@ -44,6 +58,13 @@ export class DataSourceService {
         },
       },
     });
+
+    return {
+      data: dataSources.map((dataSource) => ({
+        ...dataSource,
+        indexPercentage: dataSource.indexPercentage.toString(),
+      })),
+    };
   }
 
   /**
@@ -123,12 +144,17 @@ export class DataSourceService {
       dataSource.data
     );
 
-    return await this.initializeKnowledgeList(dataSourceId, itemList);
+    return await this.initializeKnowledgeList(
+      dataSourceId,
+      itemList,
+      dataSource.ownerUserId
+    );
   }
 
   private async initializeKnowledgeList(
     dataSourceId: string,
-    itemList: DataSourceItemList
+    itemList: DataSourceItemList,
+    userId: string
   ) {
     const knowledgeList = [];
     const dataSourceKnowledgeRelations = [];
@@ -136,6 +162,7 @@ export class DataSourceService {
     for (const item of itemList.items) {
       const knowledge = await prismadb.knowledge.create({
         data: {
+          userId,
           name: item.name,
           type: item.type,
           indexStatus: KnowledgeIndexStatus.INITIALIZED,
