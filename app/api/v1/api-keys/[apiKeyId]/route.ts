@@ -4,7 +4,7 @@ import { UpdateApiKeyRequest } from "@/src/ports/api/ApiKeysApi";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
-export async function putHandler(
+async function putHandler(
   request: Request,
   { params }: { params: { apiKeyId: string } }
 ) {
@@ -26,7 +26,7 @@ export async function putHandler(
   return NextResponse.json(updatedKey);
 }
 
-export async function deleteHandler(
+async function deleteHandler(
   request: Request,
   { params }: { params: { apiKeyId: string } }
 ) {
