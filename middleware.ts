@@ -11,7 +11,9 @@ export default authMiddleware({
     "/api/v1/integrations/apify/webhooks",
     "/api/inngest",
   ],
-  apiRoutes: ["/api/(.*)"],
+  apiRoutes: [
+    "/api/((?!webhook|v1/integrations/clerkWebhooks|v1/integrations/apify/webhooks|inngest).*)",
+  ],
 
   afterAuth(auth, req, evt) {
     // handle users who aren't authenticated
