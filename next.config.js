@@ -19,6 +19,10 @@ const nextConfig = {
         contextRegExp: /epub2/,
       })
     );
+    config.experiments = {
+      asyncWebAssembly: true,
+      layers: true,
+    };
     return config;
   },
 };
