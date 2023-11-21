@@ -1,12 +1,11 @@
 import prismadb from "@/src/lib/prismadb";
-import { isSuperuser } from "@/src/lib/utils";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   try {
-    const { userId } = await auth();
-    if (!userId || !isSuperuser(userId)) {
+    const { userId, sessionClaims } = await auth();
+    if (!userId || !(sessionClaims?.meta as any)?.superuser) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
     const datasources = await prismadb.dataSource.findMany({

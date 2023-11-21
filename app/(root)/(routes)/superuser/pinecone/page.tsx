@@ -1,17 +1,15 @@
 import { SuperPinecone } from "@/components/super-pinecone";
-import { isSuperuser } from "@/src/lib/utils";
 import { auth, redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
 const SuperPineconePage = async () => {
-  const { userId, user } = await auth();
+  const { userId, sessionClaims } = await auth();
 
   if (!userId) {
     return redirectToSignIn();
   }
 
-  if (!isSuperuser(userId)) {
-    console.log("Superuser attempt", userId);
+  if (!(sessionClaims?.meta as any)?.superuser) {
     return redirect("/");
   }
   if (!process.env.PINECONE_INDEX) {

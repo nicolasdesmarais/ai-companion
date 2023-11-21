@@ -1,17 +1,15 @@
 import { SuperDataSources } from "@/components/super-data-sources";
-import { isSuperuser } from "@/src/lib/utils";
 import { auth, redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
 const SettingsPage = async () => {
-  const { userId } = await auth();
+  const { userId, sessionClaims } = await auth();
 
   if (!userId) {
     return redirectToSignIn();
   }
 
-  if (!isSuperuser(userId)) {
-    console.log("Superuser attempt", userId);
+  if (!(sessionClaims?.meta as any)?.superuser) {
     return redirect("/");
   }
 
