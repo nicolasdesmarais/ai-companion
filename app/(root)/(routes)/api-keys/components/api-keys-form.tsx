@@ -219,13 +219,15 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
               <Loader className="w-16 h-16 spinner" />
             </div>
           ) : createdKey ? (
-            <div>
-              <div>{createdKey.key}</div>
-              <div>
+            <div className="space-y-2">
+              <div className="text-center font-mono text-sm overflow-x-auto whitespace-nowrap">
+                {createdKey.key}
+              </div>
+              <div className="text-center">
                 Remember, the secret keys are not displayed again once
                 generated.
               </div>
-              <div className="mt-4">
+              <div className="mt-4 flex justify-center">
                 <Button onClick={closeModal}>Close</Button>
               </div>
             </div>
