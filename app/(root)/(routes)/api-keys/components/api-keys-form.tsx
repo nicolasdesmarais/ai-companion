@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import {
+  ApiScope,
   CreateApiKeyRequest,
   CreateApiKeyResponse,
   ListApiKeyResponse,
@@ -33,18 +34,23 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+import { Checkbox } from "@/components/ui/checkbox";
+import { Controller } from "react-hook-form";
+
 interface APIKeysFormProps {
   initialApiKeys: ListApiKeyResponse[];
 }
 
 interface NewAPIKeyFormData {
   name: string;
+  scopes: ApiScope[];
 }
 
 const apiKeyFormSchema = z.object({
-  name: z.string().min(1, {
-    message: "Name is required.",
-  }),
+  name: z.string().min(1, { message: "Name is required." }),
+  scopes: z
+    .array(z.nativeEnum(ApiScope))
+    .nonempty({ message: "At least one scope is required." }),
 });
 
 export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
@@ -54,10 +60,11 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
   const [loading, setLoading] = useState(false);
   const [createdKey, setCreatedKey] = useState<CreateApiKeyResponse>();
 
-  const form = useForm<z.infer<typeof apiKeyFormSchema>>({
+  const form = useForm<NewAPIKeyFormData>({
     resolver: zodResolver(apiKeyFormSchema),
     defaultValues: {
       name: "",
+      scopes: [],
     },
   });
 
@@ -68,12 +75,17 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
     setCreatedKey(undefined);
   };
 
-  const onCreateKey = async (values: z.infer<typeof apiKeyFormSchema>) => {
+  const renderScopes = (scopes: ApiScope[]) => {
+    return scopes.join(", ");
+  };
+
+  const onCreateKey = async (values: NewAPIKeyFormData) => {
     try {
       setLoading(true);
 
       const request: CreateApiKeyRequest = {
         name: values.name,
+        scopes: values.scopes,
       };
 
       const apiKey = await axios.post("/api/v1/api-keys", request);
@@ -113,7 +125,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
         displayed again once generated.
       </p>
       <Table
-        headers={["Name", "Created At", "Last Used", "Action"]}
+        headers={["Name", "Created At", "Scopes", "Action"]}
         className="w-full my-4"
       >
         {apiKeys.map((key) => (
@@ -124,11 +136,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                 ? format(new Date(key.createdAt), "h:mma M/d/yyyy ")
                 : null}
             </td>
-            <td className="p-2">
-              {key.lastUsedAt
-                ? format(new Date(key.lastUsedAt), "h:mma M/d/yyyy ")
-                : "Never"}
-            </td>
+            <td className="p-2">{renderScopes(key.scopes)}</td>
             <td className="p-2">
               <Button
                 type="button"
@@ -189,6 +197,32 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                     </FormItem>
                   )}
                 />
+                <div>
+                  <FormLabel>Scopes</FormLabel>
+                  {Object.values(ApiScope).map((scope) => (
+                    <Controller
+                      key={scope}
+                      name="scopes"
+                      control={form.control}
+                      render={({ field }) => (
+                        <Checkbox
+                          checked={field.value.includes(scope)}
+                          onCheckedChange={(isChecked) => {
+                            if (isChecked) {
+                              field.onChange([...field.value, scope]);
+                            } else {
+                              field.onChange(
+                                field.value.filter((s: ApiScope) => s !== scope)
+                              );
+                            }
+                          }}
+                        >
+                          {scope}
+                        </Checkbox>
+                      )}
+                    />
+                  ))}
+                </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={closeModal}>
                     Cancel

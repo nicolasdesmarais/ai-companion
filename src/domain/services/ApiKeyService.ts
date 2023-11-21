@@ -1,5 +1,6 @@
 import prismadb from "@/src/lib/prismadb";
 import {
+  ApiScope,
   CreateApiKeyRequest,
   CreateApiKeyResponse,
   ListApiKeyResponse,
@@ -23,6 +24,7 @@ export class ApiKeyService {
         orgId,
         userId,
         name: request.name,
+        scopes: request.scopes,
         key: hashedApiKey,
       },
     });
@@ -58,7 +60,7 @@ export class ApiKeyService {
     orgId: string,
     userId: string
   ): Promise<ListApiKeyResponse[]> {
-    return await prismadb.apiKey.findMany({
+    const apiKeys = await prismadb.apiKey.findMany({
       select: {
         id: true,
         createdAt: true,
@@ -67,12 +69,33 @@ export class ApiKeyService {
         orgId: true,
         userId: true,
         name: true,
+        scopes: true,
       },
       where: {
         orgId,
         userId,
       },
     });
+
+    const typedApiKeys = apiKeys.map((key) => {
+      const scopesArray =
+        key.scopes != null && Array.isArray(key.scopes) ? key.scopes : [];
+
+      const scopes = scopesArray.map((scope) => {
+        if (scope !== null && Object.values(ApiScope).includes(scope as any)) {
+          return scope as ApiScope;
+        } else {
+          throw new Error(`Unknown scope: ${scope}`);
+        }
+      });
+
+      return {
+        ...key,
+        scopes,
+      };
+    });
+
+    return typedApiKeys;
   }
 
   public async deleteApiKey(orgId: string, userId: string, apiKeyId: string) {
