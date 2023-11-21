@@ -360,7 +360,7 @@ export async function POST(
             return result;
           }, []);
       }
-      const convertedMessages = chat.messages.map((message) => {
+      const historyMessages = chat.messages.map((message) => {
         if (message.role === "user") {
           return new HumanChatMessage(message.content);
         } else {
@@ -375,9 +375,7 @@ export async function POST(
         Answer questions using this knowledge:\n
       `;
       const instructionTokens = getTokenLength(engineeredPrompt);
-      const chatHistoryTokens = getTokenLength(
-        JSON.stringify(convertedMessages)
-      );
+      const chatHistoryTokens = getTokenLength(JSON.stringify(historyMessages));
       const chatSeedTokens = getTokenLength(JSON.stringify(historySeed));
       const remainingTokens =
         model.contextSize -
@@ -412,7 +410,7 @@ export async function POST(
         new SystemChatMessage(`${engineeredPrompt}${knowledge}\n`),
       ];
       chatLog.push(...historySeed);
-      chatLog.push(...convertedMessages);
+      chatLog.push(...historyMessages);
       if (!chatModel) {
         return new NextResponse("Missing chat model", { status: 500 });
       }

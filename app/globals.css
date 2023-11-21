@@ -150,6 +150,7 @@ body,
   background: hsl(217 37% 68%);
   margin: 10px 0;
   border-radius: 5px;
+  padding: 0 4px;
 }
 .markdown-chat-message pre {
   padding: 0 10px;
