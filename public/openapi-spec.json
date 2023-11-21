@@ -248,7 +248,7 @@
     },
     "/api/v1/ai/{aiId}/data-sources/file": {
       "post": {
-        "summary": "Adds a file upload data source for the specified AI",
+        "summary": "Adds a file upload data source for the specified AI. Max file size: 4.5Mb.",
         "parameters": [
           {
             "in": "path",
