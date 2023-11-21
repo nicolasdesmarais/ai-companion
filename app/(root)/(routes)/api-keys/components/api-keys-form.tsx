@@ -31,8 +31,11 @@ import axios, { AxiosError } from "axios";
 import { format } from "date-fns";
 import { Loader } from "lucide-react";
 import { useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
+
+import { Checkbox } from "@/components/ui/checkbox";
+import { Controller } from "react-hook-form";
 
 interface APIKeysFormProps {
   initialApiKeys: ListApiKeyResponse[];
@@ -45,7 +48,9 @@ interface NewAPIKeyFormData {
 
 const apiKeyFormSchema = z.object({
   name: z.string().min(1, { message: "Name is required." }),
-  scopes: z.array(z.nativeEnum(ApiScope)),
+  scopes: z
+    .array(z.nativeEnum(ApiScope))
+    .nonempty({ message: "At least one scope is required." }),
 });
 
 export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
@@ -63,11 +68,6 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
     },
   });
 
-  const { fields } = useFieldArray({
-    control: form.control,
-    name: "scopes",
-  });
-
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => {
     form.reset();
@@ -75,7 +75,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
     setCreatedKey(undefined);
   };
 
-  const onCreateKey = async (values: z.infer<typeof apiKeyFormSchema>) => {
+  const onCreateKey = async (values: NewAPIKeyFormData) => {
     try {
       setLoading(true);
 
@@ -198,16 +198,29 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                   )}
                 />
                 <div>
-                  <h4>Select Scopes</h4>
-                  {Object.values(ApiScope).map((scope, index) => (
-                    <label key={scope}>
-                      <input
-                        type="checkbox"
-                        value={scope}
-                        {...form.register(`scopes.${index}` as const)}
-                      />
-                      {scope}
-                    </label>
+                  <FormLabel>Scopes</FormLabel>
+                  {Object.values(ApiScope).map((scope) => (
+                    <Controller
+                      key={scope}
+                      name="scopes"
+                      control={form.control}
+                      render={({ field }) => (
+                        <Checkbox
+                          checked={field.value.includes(scope)}
+                          onCheckedChange={(isChecked) => {
+                            if (isChecked) {
+                              field.onChange([...field.value, scope]);
+                            } else {
+                              field.onChange(
+                                field.value.filter((s: ApiScope) => s !== scope)
+                              );
+                            }
+                          }}
+                        >
+                          {scope}
+                        </Checkbox>
+                      )}
+                    />
                   ))}
                 </div>
                 <DialogFooter>
