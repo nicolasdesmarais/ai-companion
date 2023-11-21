@@ -78,11 +78,9 @@ export class ApiKeyService {
     });
 
     const typedApiKeys = apiKeys.map((key) => {
-      // Ensure that scopes is an array
       const scopesArray =
         key.scopes != null && Array.isArray(key.scopes) ? key.scopes : [];
 
-      // Now we can safely map the scopes, casting each one to ApiScope if it matches
       const scopes = scopesArray.map((scope) => {
         if (scope !== null && Object.values(ApiScope).includes(scope as any)) {
           return scope as ApiScope;
