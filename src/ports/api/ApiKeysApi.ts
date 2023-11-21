@@ -15,8 +15,23 @@ export interface CreateApiKeyResponse {
   createdAt: Date;
   updatedAt: Date;
   name: string;
+  orgId: string;
   userId: string;
   key: string;
+}
+
+export interface UpdateApiKeyRequest {
+  name: string;
+  scopes: ApiScope[];
+}
+
+export interface UpdateApiKeyResponse {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  orgId: string;
+  userId: string;
 }
 
 export interface ListApiKeyResponse {

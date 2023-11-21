@@ -4,8 +4,22 @@ import {
   CreateApiKeyRequest,
   CreateApiKeyResponse,
   ListApiKeyResponse,
+  UpdateApiKeyRequest,
+  UpdateApiKeyResponse,
 } from "@/src/ports/api/ApiKeysApi";
 import { createHash, randomBytes } from "crypto";
+import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
+
+const apiKeySelect = {
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastUsedAt: true,
+  orgId: true,
+  userId: true,
+  name: true,
+  scopes: true,
+};
 
 export class ApiKeyService {
   /**
@@ -61,16 +75,7 @@ export class ApiKeyService {
     userId: string
   ): Promise<ListApiKeyResponse[]> {
     const apiKeys = await prismadb.apiKey.findMany({
-      select: {
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        lastUsedAt: true,
-        orgId: true,
-        userId: true,
-        name: true,
-        scopes: true,
-      },
+      select: apiKeySelect,
       where: {
         orgId,
         userId,
@@ -96,6 +101,40 @@ export class ApiKeyService {
     });
 
     return typedApiKeys;
+  }
+
+  public async updateApiKey(
+    orgId: string,
+    userId: string,
+    apiKeyId: string,
+    request: UpdateApiKeyRequest
+  ): Promise<UpdateApiKeyResponse> {
+    const apiKey = await prismadb.apiKey.findUnique({
+      where: {
+        id: apiKeyId,
+      },
+    });
+
+    if (!apiKey) {
+      throw new EntityNotFoundError(`No API key found with id ${apiKeyId}`);
+    }
+
+    if (apiKey.orgId !== orgId || apiKey.userId !== userId) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const updatedKey = await prismadb.apiKey.update({
+      select: apiKeySelect,
+      where: {
+        id: apiKeyId,
+      },
+      data: {
+        name: request.name,
+        scopes: request.scopes,
+      },
+    });
+
+    return updatedKey;
   }
 
   public async deleteApiKey(orgId: string, userId: string, apiKeyId: string) {
