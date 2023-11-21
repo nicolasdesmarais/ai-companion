@@ -17,5 +17,5 @@ async function getHandler(
 }
 
 export const GET = withErrorHandler(
-  withAuthorization(AuthorizationScope.DATA_SOURCES_READ, getHandler)
+  withAuthorization(AuthorizationScope.CHATS_READ, getHandler)
 );
