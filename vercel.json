@@ -3,7 +3,7 @@
     "app/api/inngest/*.ts": {
       "memory": 3008
     },
-    "app/api/v1/ai/*/chats/*/route.ts": {
+    "app/api/v1/chats/*/route.ts": {
       "memory": 3008
     }
   }
