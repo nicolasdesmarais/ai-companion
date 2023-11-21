@@ -21,7 +21,6 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import {
-  ApiScope,
   CreateApiKeyRequest,
   CreateApiKeyResponse,
   ListApiKeyResponse,
@@ -31,11 +30,11 @@ import axios, { AxiosError } from "axios";
 import { format } from "date-fns";
 import { Loader } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { Controller } from "react-hook-form";
+import { AuthorizationScope } from "@/src/domain/types/AuthorizationContext";
 
 interface APIKeysFormProps {
   initialApiKeys: ListApiKeyResponse[];
@@ -43,20 +42,22 @@ interface APIKeysFormProps {
 
 interface NewAPIKeyFormData {
   name: string;
-  scopes: ApiScope[];
+  scopes: AuthorizationScope[];
 }
 
 const apiKeyFormSchema = z.object({
   name: z.string().min(1, { message: "Name is required." }),
   scopes: z
-    .array(z.nativeEnum(ApiScope))
+    .array(z.nativeEnum(AuthorizationScope))
     .nonempty({ message: "At least one scope is required." }),
 });
 
 export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
   const { toast } = useToast();
   const [apiKeys, setApiKeys] = useState<ListApiKeyResponse[]>(initialApiKeys);
+  const [editingKey, setEditingKey] = useState<ListApiKeyResponse | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [createdKey, setCreatedKey] = useState<CreateApiKeyResponse>();
 
@@ -75,7 +76,19 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
     setCreatedKey(undefined);
   };
 
-  const renderScopes = (scopes: ApiScope[]) => {
+  const openEditModal = (key: ListApiKeyResponse) => {
+    form.setValue("name", key.name);
+    form.setValue("scopes", key.scopes);
+
+    setEditingKey(key);
+    setIsEditModalOpen(true);
+  };
+  const closeEditModal = () => {
+    setEditingKey(null);
+    setIsEditModalOpen(false);
+  };
+
+  const renderScopes = (scopes: AuthorizationScope[]) => {
     return scopes.join(", ");
   };
 
@@ -98,6 +111,37 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onUpdateKey = async (data: NewAPIKeyFormData) => {
+    if (!editingKey) return;
+
+    try {
+      setLoading(true);
+
+      const updatePayload = {
+        name: data.name,
+        scopes: data.scopes,
+      };
+
+      const updatedKey = await axios.put(
+        `/api/v1/api-keys/${editingKey.id}`,
+        updatePayload
+      );
+
+      setApiKeys(
+        apiKeys.map((k) => (k.id === editingKey.id ? updatedKey.data : k))
+      );
+      setEditingKey(null); // Reset the editing key
+    } catch (error) {
+      toast({
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+      setIsModalOpen(false); // Close the modal after update
     }
   };
 
@@ -138,6 +182,13 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
             </td>
             <td className="p-2">{renderScopes(key.scopes)}</td>
             <td className="p-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => openEditModal(key)}
+              >
+                Edit
+              </Button>
               <Button
                 type="button"
                 variant="outline"
@@ -199,7 +250,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                 />
                 <div>
                   <FormLabel>Scopes</FormLabel>
-                  {Object.values(ApiScope).map((scope) => (
+                  {Object.values(AuthorizationScope).map((scope) => (
                     <Controller
                       key={scope}
                       name="scopes"
@@ -212,7 +263,9 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                               field.onChange([...field.value, scope]);
                             } else {
                               field.onChange(
-                                field.value.filter((s: ApiScope) => s !== scope)
+                                field.value.filter(
+                                  (s: AuthorizationScope) => s !== scope
+                                )
                               );
                             }
                           }}
@@ -234,6 +287,71 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
           )}
         </DialogContent>
       </Dialog>
+
+      {editingKey && (
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent>
+            <DialogHeader className="space-y-4">
+              <DialogTitle className="text-center">Update API Key</DialogTitle>
+            </DialogHeader>
+            <Separator />
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onUpdateKey)}
+                className="space-y-4"
+              >
+                <FormField
+                  name="name"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div>
+                  <FormLabel>Scopes</FormLabel>
+                  {Object.values(AuthorizationScope).map((scope) => (
+                    <Controller
+                      key={scope}
+                      name="scopes"
+                      control={form.control}
+                      render={({ field }) => (
+                        <Checkbox
+                          checked={field.value.includes(scope)}
+                          onCheckedChange={(isChecked) => {
+                            if (isChecked) {
+                              field.onChange([...field.value, scope]);
+                            } else {
+                              field.onChange(
+                                field.value.filter(
+                                  (s: AuthorizationScope) => s !== scope
+                                )
+                              );
+                            }
+                          }}
+                        >
+                          {scope}
+                        </Checkbox>
+                      )}
+                    />
+                  ))}
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={closeEditModal}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">Update API Key</Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
