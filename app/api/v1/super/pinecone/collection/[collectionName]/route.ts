@@ -5,25 +5,22 @@ import { Pinecone } from "@pinecone-database/pinecone";
 
 const pinecone = new Pinecone();
 
-export async function GET(
+export async function DELETE(
   req: Request,
-  { params: { indexName } }: { params: { indexName: string } }
+  { params: { collectionName } }: { params: { collectionName: string } }
 ) {
   try {
     const { userId } = await auth();
     if (!userId || !isSuperuser(userId)) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
-    const name = `${indexName}-${new Date().toISOString()}`
-      .toLowerCase()
-      .replace(/:/g, "-");
-    await pinecone.createCollection({
-      name,
-      source: indexName,
-    });
+    await pinecone.deleteCollection(collectionName);
     return NextResponse.json("ok");
   } catch (error) {
-    console.error("[GET v1/super/pinecone/[indexName]/backup]", error);
+    console.error(
+      "[DELETE v1/super/pinecone/collection/[collectionName]]",
+      error
+    );
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

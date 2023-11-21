@@ -30,7 +30,8 @@ export async function GET(req: Request) {
         const indexDescription = await pinecone.describeIndex(name);
         const index = pinecone.Index(name);
         const indexStats = await index.describeIndexStats();
-        return { indexDescription, indexStats };
+        const isCurrent = process.env.PINECONE_INDEX === name;
+        return { indexDescription, indexStats, isCurrent };
       })
     );
     const collectionNames = await pinecone.listCollections();
