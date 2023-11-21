@@ -9,7 +9,7 @@ export const maxDuration = 300;
 async function deleteHandler(
   request: Request,
   context: {
-    params: { aiId: string; dataSourceId: string };
+    params: { dataSourceId: string };
     orgId: string;
     userId: string;
   }
