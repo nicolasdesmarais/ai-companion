@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import {
+  ApiScope,
   CreateApiKeyRequest,
   CreateApiKeyResponse,
   ListApiKeyResponse,
@@ -30,7 +31,7 @@ import axios, { AxiosError } from "axios";
 import { format } from "date-fns";
 import { Loader } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
 
 interface APIKeysFormProps {
@@ -39,12 +40,12 @@ interface APIKeysFormProps {
 
 interface NewAPIKeyFormData {
   name: string;
+  scopes: ApiScope[];
 }
 
 const apiKeyFormSchema = z.object({
-  name: z.string().min(1, {
-    message: "Name is required.",
-  }),
+  name: z.string().min(1, { message: "Name is required." }),
+  scopes: z.array(z.nativeEnum(ApiScope)),
 });
 
 export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
@@ -54,11 +55,17 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
   const [loading, setLoading] = useState(false);
   const [createdKey, setCreatedKey] = useState<CreateApiKeyResponse>();
 
-  const form = useForm<z.infer<typeof apiKeyFormSchema>>({
+  const form = useForm<NewAPIKeyFormData>({
     resolver: zodResolver(apiKeyFormSchema),
     defaultValues: {
       name: "",
+      scopes: [],
     },
+  });
+
+  const { fields } = useFieldArray({
+    control: form.control,
+    name: "scopes",
   });
 
   const openModal = () => setIsModalOpen(true);
@@ -74,6 +81,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
 
       const request: CreateApiKeyRequest = {
         name: values.name,
+        scopes: values.scopes,
       };
 
       const apiKey = await axios.post("/api/v1/api-keys", request);
@@ -189,6 +197,19 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                     </FormItem>
                   )}
                 />
+                <div>
+                  <h4>Select Scopes</h4>
+                  {Object.values(ApiScope).map((scope, index) => (
+                    <label key={scope}>
+                      <input
+                        type="checkbox"
+                        value={scope}
+                        {...form.register(`scopes.${index}` as const)}
+                      />
+                      {scope}
+                    </label>
+                  ))}
+                </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={closeModal}>
                     Cancel

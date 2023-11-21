@@ -23,6 +23,7 @@ export class ApiKeyService {
         orgId,
         userId,
         name: request.name,
+        scopes: request.scopes,
         key: hashedApiKey,
       },
     });
