@@ -125,7 +125,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
         displayed again once generated.
       </p>
       <Table
-        headers={["Name", "Created At", "Scopes", "Last Used", "Action"]}
+        headers={["Name", "Created At", "Scopes", "Action"]}
         className="w-full my-4"
       >
         {apiKeys.map((key) => (
@@ -137,11 +137,6 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                 : null}
             </td>
             <td className="p-2">{renderScopes(key.scopes)}</td>
-            <td className="p-2">
-              {key.lastUsedAt
-                ? format(new Date(key.lastUsedAt), "h:mma M/d/yyyy ")
-                : "Never"}
-            </td>
             <td className="p-2">
               <Button
                 type="button"
