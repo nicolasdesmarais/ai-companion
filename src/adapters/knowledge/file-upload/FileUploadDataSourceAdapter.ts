@@ -7,8 +7,14 @@ import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import { DataSourceItemList } from "../types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
-import { KnowledgeIndexingResult } from "../types/KnowlegeIndexingResult";
+import {
+  KnowledgeIndexingResult,
+  KnowledgeIndexingResultStatus,
+} from "../types/KnowlegeIndexingResult";
 import { FileUploadDataSourceInput } from "./types/FileUploadDataSourceInput";
+import { put } from "@vercel/blob";
+import { DomainEvent } from "@/src/domain/events/domain-event";
+import { publishEvent } from "../../inngest/event-publisher";
 
 export class FileUploadDataSourceAdapter implements DataSourceAdapter {
   public async getDataSourceItemList(
@@ -42,21 +48,53 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     if (!knowledge.blobUrl) {
       throw new Error("Missing blobUrl in knowledge");
     }
-    const response = await fetch(knowledge.blobUrl);
+    const originalBlobUrl = knowledge.blobUrl;
+    const response = await fetch(originalBlobUrl);
     const blob = await response.blob();
 
-    const metadata = await fileLoader.loadFile(
+    const { docs, metadata } = await fileLoader.getLangchainDocs(
       knowledge.id,
       input.filename,
       input.mimetype,
       blob
     );
 
+    const cloudBlob = await put(
+      `${knowledge.name}.json`,
+      JSON.stringify(docs),
+      {
+        access: "public",
+      }
+    );
+    knowledge.blobUrl = cloudBlob.url;
+
+    const eventIds: string[] = [];
+    for (let i = 0; i < docs.length; i++) {
+      const eventResult = await publishEvent(
+        DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
+        {
+          knowledgeIndexingResult: {
+            knowledgeId: knowledge.id,
+            result: {
+              chunkCount: docs.length,
+              status: KnowledgeIndexingResultStatus.SUCCESSFUL,
+            },
+          },
+          dataSourceType: DataSourceType.GOOGLE_DRIVE,
+          index: i,
+        }
+      );
+      eventIds.concat(eventResult.ids);
+    }
+
     return {
-      indexStatus: KnowledgeIndexStatus.COMPLETED,
+      userId,
+      indexStatus: KnowledgeIndexStatus.INDEXING,
       metadata: {
         mimeType: input.mimetype,
         fileName: input.filename,
+        eventIds,
+        originalBlobUrl,
         ...metadata,
       },
     };
@@ -71,12 +109,52 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     throw new Error("Method not supported.");
   }
 
-  loadKnowledgeResult(
+  public async loadKnowledgeResult(
     knowledge: Knowledge,
     result: KnowledgeIndexingResult,
-    chunkCount: number
+    index: number
   ): Promise<IndexKnowledgeResponse> {
-    throw new Error("Method not supported.");
+    if (!knowledge.blobUrl) {
+      console.error("loadKnowledgeResult: blob fail");
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
+
+    const response = await fetch(knowledge.blobUrl);
+    if (response.status !== 200) {
+      console.error("loadKnowledgeResult: fetch fail");
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
+    const data = await response.json();
+    if (!data || !data[index]) {
+      console.error("loadKnowledgeResult: data fail");
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
+
+    const docs = [data[index]];
+    const metadata = await fileLoader.loadDocs(docs);
+
+    let indexStatus;
+    switch (result.status) {
+      case KnowledgeIndexingResultStatus.SUCCESSFUL:
+      case KnowledgeIndexingResultStatus.PARTIAL:
+        indexStatus = KnowledgeIndexStatus.PARTIALLY_COMPLETED;
+        break;
+      case KnowledgeIndexingResultStatus.FAILED:
+        indexStatus = KnowledgeIndexStatus.FAILED;
+    }
+    return {
+      indexStatus,
+      metadata: {
+        ...metadata,
+        completedChunks: [index],
+      },
+    };
   }
 
   public async pollKnowledgeIndexingStatus(
