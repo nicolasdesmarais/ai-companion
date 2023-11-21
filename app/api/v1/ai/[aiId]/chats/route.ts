@@ -16,7 +16,7 @@ async function getHandler(
   return NextResponse.json(chatsResponse);
 }
 
-export async function postHandler(
+async function postHandler(
   request: NextRequest,
   context: { params: { aiId: string }; orgId: string; userId: string }
 ) {
