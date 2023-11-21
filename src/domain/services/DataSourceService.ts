@@ -218,7 +218,7 @@ export class DataSourceService {
           dataSource.data
         );
       } catch (error) {
-        console.log(error);
+        console.error(error);
         indexKnowledgeResponse = {
           indexStatus: KnowledgeIndexStatus.FAILED,
         };

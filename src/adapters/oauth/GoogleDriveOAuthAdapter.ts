@@ -41,7 +41,7 @@ export class GoogleDriveOAuthAdapter implements OAuthAdapter {
           },
         };
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
 
       return {
