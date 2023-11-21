@@ -387,7 +387,7 @@
             "description": "Forbidden, the user is not authorized to perform this action."
           },
           "404": {
-            "description": "Not Found, the specified data source ID or AI ID does not exist."
+            "description": "Not Found, the specified data source ID does not exist."
           }
         },
         "security": [
