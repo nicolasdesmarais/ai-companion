@@ -1,14 +1,15 @@
 import prismadb from "@/src/lib/prismadb";
 import {
-  ApiScope,
   CreateApiKeyRequest,
   CreateApiKeyResponse,
   ListApiKeyResponse,
   UpdateApiKeyRequest,
   UpdateApiKeyResponse,
 } from "@/src/ports/api/ApiKeysApi";
+import { JsonValue } from "@prisma/client/runtime/library";
 import { createHash, randomBytes } from "crypto";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
+import { AuthorizationScope } from "../types/AuthorizationContext";
 
 const apiKeySelect = {
   id: true,
@@ -57,11 +58,21 @@ export class ApiKeyService {
    */
   public async getApiKeyFromBearerToken(bearerToken: string) {
     const hashedKey = this.hashApiKey(bearerToken);
-    return await prismadb.apiKey.findUnique({
+    const apiKey = await prismadb.apiKey.findUnique({
       where: {
         key: hashedKey,
       },
     });
+
+    if (!apiKey) {
+      return null;
+    }
+
+    const scopes = this.getScopesFromJson(apiKey.scopes);
+    return {
+      ...apiKey,
+      scopes,
+    };
   }
 
   /**
@@ -83,16 +94,7 @@ export class ApiKeyService {
     });
 
     const typedApiKeys = apiKeys.map((key) => {
-      const scopesArray =
-        key.scopes != null && Array.isArray(key.scopes) ? key.scopes : [];
-
-      const scopes = scopesArray.map((scope) => {
-        if (scope !== null && Object.values(ApiScope).includes(scope as any)) {
-          return scope as ApiScope;
-        } else {
-          throw new Error(`Unknown scope: ${scope}`);
-        }
-      });
+      const scopes = this.getScopesFromJson(key.scopes);
 
       return {
         ...key,
@@ -101,6 +103,22 @@ export class ApiKeyService {
     });
 
     return typedApiKeys;
+  }
+
+  private getScopesFromJson(scopesJson: JsonValue) {
+    const scopesArray =
+      scopesJson != null && Array.isArray(scopesJson) ? scopesJson : [];
+
+    return scopesArray.map((scope) => {
+      if (
+        scope !== null &&
+        Object.values(AuthorizationScope).includes(scope as any)
+      ) {
+        return scope as AuthorizationScope;
+      } else {
+        throw new Error(`Unknown scope: ${scope}`);
+      }
+    });
   }
 
   public async updateApiKey(

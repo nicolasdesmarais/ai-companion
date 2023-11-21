@@ -21,7 +21,6 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import {
-  ApiScope,
   CreateApiKeyRequest,
   CreateApiKeyResponse,
   ListApiKeyResponse,
@@ -35,6 +34,7 @@ import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { Checkbox } from "@/components/ui/checkbox";
+import { AuthorizationScope } from "@/src/domain/types/AuthorizationContext";
 
 interface APIKeysFormProps {
   initialApiKeys: ListApiKeyResponse[];
@@ -42,13 +42,13 @@ interface APIKeysFormProps {
 
 interface NewAPIKeyFormData {
   name: string;
-  scopes: ApiScope[];
+  scopes: AuthorizationScope[];
 }
 
 const apiKeyFormSchema = z.object({
   name: z.string().min(1, { message: "Name is required." }),
   scopes: z
-    .array(z.nativeEnum(ApiScope))
+    .array(z.nativeEnum(AuthorizationScope))
     .nonempty({ message: "At least one scope is required." }),
 });
 
@@ -88,7 +88,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
     setIsEditModalOpen(false);
   };
 
-  const renderScopes = (scopes: ApiScope[]) => {
+  const renderScopes = (scopes: AuthorizationScope[]) => {
     return scopes.join(", ");
   };
 
@@ -250,7 +250,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                 />
                 <div>
                   <FormLabel>Scopes</FormLabel>
-                  {Object.values(ApiScope).map((scope) => (
+                  {Object.values(AuthorizationScope).map((scope) => (
                     <Controller
                       key={scope}
                       name="scopes"
@@ -263,7 +263,9 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                               field.onChange([...field.value, scope]);
                             } else {
                               field.onChange(
-                                field.value.filter((s: ApiScope) => s !== scope)
+                                field.value.filter(
+                                  (s: AuthorizationScope) => s !== scope
+                                )
                               );
                             }
                           }}
@@ -313,7 +315,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                 />
                 <div>
                   <FormLabel>Scopes</FormLabel>
-                  {Object.values(ApiScope).map((scope) => (
+                  {Object.values(AuthorizationScope).map((scope) => (
                     <Controller
                       key={scope}
                       name="scopes"
@@ -326,7 +328,9 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                               field.onChange([...field.value, scope]);
                             } else {
                               field.onChange(
-                                field.value.filter((s: ApiScope) => s !== scope)
+                                field.value.filter(
+                                  (s: AuthorizationScope) => s !== scope
+                                )
                               );
                             }
                           }}

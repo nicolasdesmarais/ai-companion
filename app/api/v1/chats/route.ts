@@ -1,4 +1,5 @@
 import chatService from "@/src/domain/services/ChatService";
+import { AuthorizationScope } from "@/src/domain/types/AuthorizationContext";
 import { getAuthorizationContext } from "@/src/lib/authorizationUtils";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -68,7 +69,10 @@ export async function GET(
   if (!authorizationContext?.orgId || !authorizationContext?.userId) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
-  const { userId } = authorizationContext;
+  const { userId, scopes } = authorizationContext;
+  if (!scopes.includes(AuthorizationScope.CHATS_READ)) {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
 
   const chatsResponse = await chatService.getUserChats(userId);
   return NextResponse.json(chatsResponse);

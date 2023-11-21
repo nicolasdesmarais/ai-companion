@@ -4,6 +4,7 @@ import apiKeyService from "../domain/services/ApiKeyService";
 import {
   AuthorizationContext,
   AuthorizationContextType,
+  AuthorizationScope,
 } from "../domain/types/AuthorizationContext";
 
 const AUTHORIZATION_HEADER = "X-Authorization";
@@ -15,6 +16,7 @@ export async function getAuthorizationContext(): Promise<AuthorizationContext | 
       orgId: authn.orgId,
       userId: authn.userId,
       type: AuthorizationContextType.USER,
+      scopes: Object.values(AuthorizationScope),
     };
   }
 
@@ -22,12 +24,13 @@ export async function getAuthorizationContext(): Promise<AuthorizationContext | 
   const authHeader = headerPayload.get(AUTHORIZATION_HEADER);
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const token = authHeader.split(" ")[1];
-    const verifyApiKey = await apiKeyService.getApiKeyFromBearerToken(token);
-    if (verifyApiKey) {
+    const verifiedApiKey = await apiKeyService.getApiKeyFromBearerToken(token);
+    if (verifiedApiKey) {
       return {
-        orgId: verifyApiKey.orgId,
-        userId: verifyApiKey.userId,
+        orgId: verifiedApiKey.orgId,
+        userId: verifiedApiKey.userId,
         type: AuthorizationContextType.API,
+        scopes: verifiedApiKey.scopes,
       };
     }
   }

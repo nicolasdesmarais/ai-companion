@@ -1,13 +1,8 @@
+import { AuthorizationScope } from "@/src/domain/types/AuthorizationContext";
+
 export interface CreateApiKeyRequest {
   name: string;
-  scopes: ApiScope[];
-}
-
-export enum ApiScope {
-  CHATS_READ = "chats.read",
-  CHATS_WRITE = "chats.write",
-  DATA_SOURCES_READ = "dataSources.read",
-  DATA_SOURCES_WRITE = "dataSources.write",
+  scopes: AuthorizationScope[];
 }
 
 export interface CreateApiKeyResponse {
@@ -22,7 +17,7 @@ export interface CreateApiKeyResponse {
 
 export interface UpdateApiKeyRequest {
   name: string;
-  scopes: ApiScope[];
+  scopes: AuthorizationScope[];
 }
 
 export interface UpdateApiKeyResponse {
@@ -42,5 +37,5 @@ export interface ListApiKeyResponse {
   name: string;
   orgId: string;
   userId: string;
-  scopes: ApiScope[];
+  scopes: AuthorizationScope[];
 }
