@@ -75,6 +75,10 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
     setCreatedKey(undefined);
   };
 
+  const renderScopes = (scopes: ApiScope[]) => {
+    return scopes.join(", ");
+  };
+
   const onCreateKey = async (values: NewAPIKeyFormData) => {
     try {
       setLoading(true);
@@ -121,7 +125,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
         displayed again once generated.
       </p>
       <Table
-        headers={["Name", "Created At", "Last Used", "Action"]}
+        headers={["Name", "Created At", "Scopes", "Last Used", "Action"]}
         className="w-full my-4"
       >
         {apiKeys.map((key) => (
@@ -132,6 +136,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                 ? format(new Date(key.createdAt), "h:mma M/d/yyyy ")
                 : null}
             </td>
+            <td className="p-2">{renderScopes(key.scopes)}</td>
             <td className="p-2">
               {key.lastUsedAt
                 ? format(new Date(key.lastUsedAt), "h:mma M/d/yyyy ")

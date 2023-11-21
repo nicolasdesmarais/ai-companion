@@ -27,4 +27,5 @@ export interface ListApiKeyResponse {
   name: string;
   orgId: string;
   userId: string;
+  scopes: ApiScope[];
 }
