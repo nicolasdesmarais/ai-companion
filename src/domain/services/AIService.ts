@@ -180,6 +180,10 @@ export class AIService {
       },
     });
 
+    if (ais.length === 0) {
+      return [];
+    }
+
     const aiIds = ais.map((ai) => ai.id);
 
     const messageCountPerAi: any[] = await prismadb.$queryRaw`
