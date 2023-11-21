@@ -4,7 +4,7 @@ import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { NextResponse } from "next/server";
 
-export async function getHandler(
+async function getHandler(
   request: Request,
   context: { params: { aiId: string }; orgId: string; userId: string }
 ) {

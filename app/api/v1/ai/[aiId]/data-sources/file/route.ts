@@ -11,7 +11,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 300;
 
-export async function postHandler(
+async function postHandler(
   request: NextRequest,
   context: { params: { aiId: string }; orgId: string; userId: string }
 ): Promise<NextResponse> {

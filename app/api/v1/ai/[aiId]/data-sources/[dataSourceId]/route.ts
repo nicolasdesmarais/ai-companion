@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 
 export const maxDuration = 300;
 
-export async function deleteHandler(
+async function deleteHandler(
   request: Request,
   context: {
     params: { aiId: string; dataSourceId: string };
