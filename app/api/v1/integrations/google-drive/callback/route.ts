@@ -40,7 +40,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     url.pathname = "/close";
     return NextResponse.redirect(url);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return NextResponse.json("Authentication failed", { status: 400 });
   }
 }

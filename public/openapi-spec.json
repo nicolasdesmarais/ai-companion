@@ -1,0 +1,706 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "AppDirect AI API",
+    "version": "1.0"
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Authorization",
+        "description": "Enter your bearer token in the format **Bearer {token}**"
+      }
+    },
+    "schemas": {
+      "GetChatsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Chat"
+            }
+          }
+        }
+      },
+      "Chat": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the chat session."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the chat session was created."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the chat session was last updated."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the chat session."
+          },
+          "aiId": {
+            "type": "string",
+            "description": "Identifier of the AI associated with the chat session."
+          },
+          "userId": {
+            "type": "string",
+            "description": "Identifier of the user associated with the chat session."
+          },
+          "pinPosition": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The position of the chat in a pinned list or similar.",
+            "nullable": true
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "GetDataSourcesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataSource"
+            }
+          }
+        }
+      },
+      "DataSource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the data source."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the data source was created."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the data source was last updated."
+          },
+          "lastIndexedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time when the data source was last indexed, if applicable."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the data source."
+          },
+          "type": {
+            "$ref": "#/components/schemas/DataSourceType"
+          },
+          "indexStatus": {
+            "$ref": "#/components/schemas/DataSourceIndexStatus"
+          },
+          "indexPercentage": {
+            "type": "string",
+            "description": "Percentage of the indexing process completed, if applicable."
+          }
+        }
+      },
+      "DataSourceType": {
+        "type": "string",
+        "description": "The type of the data source.",
+        "enum": ["WEB_URL", "GOOGLE_DRIVE", "FILE_UPLOAD"]
+      },
+      "DataSourceIndexStatus": {
+        "type": "string",
+        "description": "The indexing status of the data source.",
+        "enum": [
+          "INITIALIZED",
+          "INDEXING",
+          "PARTIALLY_COMPLETED",
+          "COMPLETED",
+          "FAILED"
+        ]
+      },
+      "StreamingTextResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "The streaming text response from the AI."
+          }
+        }
+      }
+    }
+  },
+  "security": [],
+  "paths": {
+    "/api/v1/ai/{aiId}/chats": {
+      "get": {
+        "summary": "Get all chats for the AI",
+        "description": "Retrieves a list of all chat sessions associated with the given AI identifier.",
+        "operationId": "getAIChats",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The identifier of the AI whose chats are to be retrieved.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of chat sessions associated with the AI.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetChatsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "AI not found with the given identifier."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create a new chat session for the AI",
+        "description": "Creates a new chat session associated with the given AI identifier and returns the created chat session data.",
+        "operationId": "createAIChat",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The identifier of the AI with which the chat session is to be associated.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the chat session."
+                  }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Chat session successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, when the specified AI ID does not exist or is not visible to the current user."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ai/{aiId}/data-sources/file": {
+      "post": {
+        "summary": "Adds a file upload data source for the specified AI",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "aiId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique identifier for the AI."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "File uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "aiId": {
+                      "type": "string"
+                    },
+                    "dataSourceId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "AI not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ai/{aiId}/data-sources": {
+      "get": {
+        "summary": "Get data sources for the AI",
+        "description": "Retrieves a list of data sources associated with the given AI identifier.",
+        "operationId": "getDataSources",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The identifier of the AI whose data sources are to be retrieved.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of data sources associated with the AI.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDataSourcesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "AI not found with the given identifier."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ai/{aiId}/data-sources/{dataSourceId}": {
+      "delete": {
+        "summary": "Delete a Data Source",
+        "description": "Deletes a specific data source associated with the given AI identifier.",
+        "operationId": "deleteDataSource",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The identifier of the AI associated with the data source.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dataSourceId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the data source to be deleted.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Data source successfully deleted, no content to return."
+          },
+          "404": {
+            "description": "Not Found, the specified data source ID or AI ID does not exist."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/chats/{chatId}": {
+      "post": {
+        "summary": "Start a chat session",
+        "description": "Initiates a chat with the AI using the provided prompt on the specified date.",
+        "operationId": "postChatSession",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the chat session.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The date of the chat."
+                  },
+                  "prompt": {
+                    "type": "string",
+                    "description": "The prompt to use for chatting with an AI."
+                  }
+                },
+                "required": ["date", "prompt"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns a streaming text response from the AI.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingTextResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, when the request body does not contain the required fields or contains invalid data."
+          },
+          "404": {
+            "description": "Not found, when the specified chat ID does not exist."
+          },
+          "500": {
+            "description": "Internal Server Error, any internal error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete a chat session",
+        "description": "Deletes the chat session with the specified ID.",
+        "operationId": "deleteChat",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the chat session to delete.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Chat session successfully deleted, no content to return."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "404": {
+            "description": "Not Found, the specified chat ID does not exist."
+          },
+          "500": {
+            "description": "Internal Server Error, any internal error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/chats/{chatId}/duplicate": {
+      "put": {
+        "summary": "Duplicate a chat session",
+        "description": "Creates a duplicate of the chat session with the specified ID.",
+        "operationId": "duplicateChat",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the chat session to duplicate.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat session successfully duplicated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, when the request contains invalid data."
+          },
+          "404": {
+            "description": "Not found, when the specified chat ID does not exist."
+          },
+          "500": {
+            "description": "Internal Server Error, any internal error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/chats/{chatId}/pin": {
+      "put": {
+        "summary": "Pin a chat session",
+        "description": "Pins the chat session with the specified ID, marking it as important or for easy access.",
+        "operationId": "pinChat",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the chat session to pin.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat session successfully pinned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, when the specified chat ID does not exist."
+          },
+          "500": {
+            "description": "Internal Server Error, any internal error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/chats/{chatId}/unpin": {
+      "put": {
+        "summary": "Unpin a chat session",
+        "description": "Unpins the chat session with the specified ID, removing it from the pinned list.",
+        "operationId": "unpinChat",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the chat session to unpin.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat session successfully unpinned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, when the specified chat ID does not exist."
+          },
+          "500": {
+            "description": "Internal Server Error, any internal error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/chats/{chatId}/reset": {
+      "put": {
+        "summary": "Reset a chat session",
+        "description": "Resets the chat session with the specified ID, clearing its current state or content.",
+        "operationId": "resetChat",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the chat session to reset.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat session successfully reset.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, when the specified chat ID does not exist."
+          },
+          "500": {
+            "description": "Internal Server Error, any internal error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/chats": {
+      "get": {
+        "summary": "Get all chats for the User",
+        "description": "Retrieves a list of all chat sessions associated with the current user",
+        "operationId": "getChats",
+        "responses": {
+          "200": {
+            "description": "A list of chat sessions associated with the AI.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetChatsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "AI not found with the given identifier."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "tags": []
+}

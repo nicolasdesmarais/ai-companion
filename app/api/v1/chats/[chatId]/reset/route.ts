@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function PUT(
   req: Request,
-  { params: { conversationId } }: { params: { conversationId: string } }
+  { params: { chatId } }: { params: { chatId: string } }
 ) {
   try {
     const { userId } = await auth();
@@ -12,22 +12,33 @@ export async function PUT(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const conversation = await prismadb.chat.update({
+    const chat = await prismadb.chat.update({
       where: {
-        id: conversationId,
+        id: chatId,
       },
       data: {
-        pinPosition: 1,
+        isDeleted: true,
+      },
+      include: {
+        ai: true,
       },
     });
 
-    if (!conversation) {
+    if (!chat) {
       return new NextResponse("Conversation not found", { status: 404 });
     }
 
-    return NextResponse.json(conversation);
+    const newChat = await prismadb.chat.create({
+      data: {
+        userId: userId,
+        name: chat.name,
+        aiId: chat.ai.id,
+      },
+    });
+
+    return NextResponse.json(newChat);
   } catch (error) {
-    console.error("[PUT v1/conversation/[conversationId]/pin]", error);
+    console.error("[PUT v1/chats/[chatId]/reset]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

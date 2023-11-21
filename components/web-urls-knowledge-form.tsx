@@ -27,7 +27,7 @@ export const WebUrlsForm = ({ aiId }: WebUrlsProps) => {
       });
       router.push(`/ai/${aiId}/edit/knowledge`);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast({
         variant: "destructive",
         description: "Something went wrong",

@@ -1,4 +1,8 @@
 import { models } from "@/components/ai-models";
+import {
+  EntityNotFoundError,
+  ForbiddenError,
+} from "@/src/domain/errors/Errors";
 import chatService from "@/src/domain/services/ChatService";
 import { getAuthorizationContext } from "@/src/lib/authorizationUtils";
 import { MemoryManager } from "@/src/lib/memory";
@@ -96,9 +100,62 @@ const getKnowledge = async (
   return { knowledge, docMeta };
 };
 
+/**
+ * @swagger
+ * /api/v1/chats/{chatId}:
+ *   post:
+ *     summary: Start a chat session
+ *     description: Initiates a chat with the AI using the provided prompt on the specified date.
+ *     operationId: postChatSession
+ *     parameters:
+ *       - name: chatId
+ *         in: path
+ *         required: true
+ *         description: The unique identifier of the chat session.
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               date:
+ *                 type: string
+ *                 format: date-time
+ *                 description: The date of the chat.
+ *               prompt:
+ *                 type: string
+ *                 description: The prompt to use for chatting with an AI.
+ *             required:
+ *               - date
+ *               - prompt
+ *     responses:
+ *       '200':
+ *         description: Returns a streaming text response from the AI.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/StreamingTextResponse'
+ *       '400':
+ *         description: Bad request, when the request body does not contain the required fields or contains invalid data.
+ *       '404':
+ *         description: Not found, when the specified chat ID does not exist.
+ *       '500':
+ *         description: Internal Server Error, any internal error.
+ * components:
+ *   schemas:
+ *     StreamingTextResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           description: The streaming text response from the AI.
+ */
 export async function POST(
   request: Request,
-  { params: { aiId, chatId } }: { params: { aiId: string; chatId: string } }
+  { params: { chatId } }: { params: { chatId: string } }
 ) {
   const start = performance.now();
   let endSetup = start,
@@ -113,7 +170,7 @@ export async function POST(
     if (!authorizationContext?.orgId || !authorizationContext?.userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
-    const { orgId, userId } = authorizationContext;
+    const { userId } = authorizationContext;
 
     const identifier = request.url + "-" + userId;
     const { success } = await rateLimit(identifier);
@@ -123,7 +180,6 @@ export async function POST(
     }
 
     const chat = await chatService.updateChat(
-      aiId,
       chatId,
       userId,
       prompt,
@@ -151,7 +207,7 @@ export async function POST(
       const knowledgeTime = Math.round(endKnowledge - endSetup);
       const llmTime = Math.round(end - endKnowledge);
       const totalTime = Math.round(end - start);
-      await chatService.updateChat(aiId, chatId, userId, answer, Role.system, {
+      await chatService.updateChat(chatId, userId, answer, Role.system, {
         setupTime,
         knowledgeTime,
         llmTime,
@@ -372,6 +428,61 @@ export async function POST(
       });
     }
     console.error("[CHAT]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
+/**
+ * @swagger
+ * /api/v1/chats/{chatId}:
+ *   delete:
+ *     summary: Delete a chat session
+ *     description: Deletes the chat session with the specified ID.
+ *     operationId: deleteChat
+ *     parameters:
+ *       - name: chatId
+ *         in: path
+ *         required: true
+ *         description: The unique identifier of the chat session to delete.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '204':
+ *         description: Chat session successfully deleted, no content to return.
+ *       '403':
+ *         description: Forbidden, the user is not authorized to perform this action.
+ *       '404':
+ *         description: Not Found, the specified chat ID does not exist.
+ *       '500':
+ *         description: Internal Server Error, any internal error.
+ */
+export async function DELETE(
+  request: Request,
+  {
+    params: { chatId: chatId },
+  }: {
+    params: { chatId: string };
+  }
+) {
+  try {
+    const authorizationContext = await getAuthorizationContext();
+    if (!authorizationContext?.orgId || !authorizationContext?.userId) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+    const { userId } = authorizationContext;
+
+    chatService.deleteChat(chatId, userId);
+
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    if (error instanceof EntityNotFoundError) {
+      return new NextResponse(error.message, { status: 404 });
+    }
+    if (error instanceof ForbiddenError) {
+      return new NextResponse(error.message, { status: 403 });
+    }
+
+    console.error("[DELETE v1/chats/[chatId]]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

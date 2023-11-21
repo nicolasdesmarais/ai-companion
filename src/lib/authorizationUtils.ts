@@ -6,6 +6,8 @@ import {
   AuthorizationContextType,
 } from "../domain/types/AuthorizationContext";
 
+const AUTHORIZATION_HEADER = "X-Authorization";
+
 export async function getAuthorizationContext(): Promise<AuthorizationContext | null> {
   const authn = await auth();
   if (authn?.userId && authn?.orgId) {
@@ -17,7 +19,7 @@ export async function getAuthorizationContext(): Promise<AuthorizationContext | 
   }
 
   const headerPayload = headers();
-  const authHeader = headerPayload.get("Authorization");
+  const authHeader = headerPayload.get(AUTHORIZATION_HEADER);
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const token = authHeader.split(" ")[1];
     const verifyApiKey = await apiKeyService.getApiKeyFromBearerToken(token);

@@ -47,7 +47,7 @@ export class OAuthTokenService {
           validTokens.push(token);
         }
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     }
 

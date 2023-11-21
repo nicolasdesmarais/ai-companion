@@ -6,9 +6,7 @@ import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 
 interface AIsProps {
   data: (AI & {
-    _count: {
-      messages: number;
-    };
+    messageCount: number;
   })[];
 }
 
@@ -49,7 +47,7 @@ export const AIs = ({ data }: AIsProps) => {
                 <div className="lowercase truncate w-11/12">
                   {item.userName}
                 </div>
-                <div className="flex items-center">{item._count.messages}</div>
+                <div className="flex items-center">{item.messageCount}</div>
               </CardFooter>
             </div>
           </Link>
