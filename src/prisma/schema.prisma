@@ -140,12 +140,6 @@ model GroupAI {
   @@map("group_ais")
 }
 
-model PublicDomain {
-  domain                   String     @id
-
-  @@map("public_domains")
-}
-
 model Knowledge {
   id                        String                              @id @default(cuid())
   createdAt                 DateTime @default(now())            @map(name: "created_at")
