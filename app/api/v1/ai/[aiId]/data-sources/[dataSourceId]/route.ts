@@ -1,26 +1,25 @@
 import dataSourceService from "@/src/domain/services/DataSourceService";
-import { auth } from "@clerk/nextjs";
+import { AuthorizationScope } from "@/src/domain/types/AuthorizationContext";
+import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
+import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 300;
 
-export async function DELETE(
+export async function deleteHandler(
   request: Request,
-  { params }: { params: { aiId: string; dataSourceId: string } }
-) {
-  try {
-    const authentication = await auth();
-    const orgId = authentication?.orgId;
-    const userId = authentication?.userId;
-
-    if (!userId || !orgId) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
-    await dataSourceService.deleteDataSource(params.aiId, params.dataSourceId);
-    return new NextResponse(null, { status: 204 });
-  } catch (error) {
-    console.log("[KNOWLEDGE_DELETE]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+  context: {
+    params: { aiId: string; dataSourceId: string };
+    orgId: string;
+    userId: string;
   }
+) {
+  const { params, orgId, userId } = context;
+
+  await dataSourceService.deleteDataSource(orgId, userId, params.dataSourceId);
+  return new NextResponse(null, { status: 204 });
 }
+
+export const DELETE = withErrorHandler(
+  withAuthorization(AuthorizationScope.DATA_SOURCES_WRITE, deleteHandler)
+);
