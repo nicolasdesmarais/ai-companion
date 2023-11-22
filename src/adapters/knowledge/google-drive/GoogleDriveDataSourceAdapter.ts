@@ -187,14 +187,12 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     const listFilesResponse = await this.listAllFiles(input.fileId);
     if (!listFilesResponse?.files || listFilesResponse.files.length === 0) {
       return {
-        dataSourceName: listFilesResponse.rootName,
         items: [],
       };
     }
 
     const items: DataSourceItem[] = [];
     const result: DataSourceItemList = {
-      dataSourceName: listFilesResponse.rootName,
       items,
     };
     for (const file of listFilesResponse.files) {

@@ -232,6 +232,7 @@ enum DataSourceType {
   WEB_URL
   GOOGLE_DRIVE
   FILE_UPLOAD
+  API
 }
 
 enum DataSourceIndexStatus {

@@ -1,8 +1,11 @@
+import { DomainEvent } from "@/src/domain/events/domain-event";
 import {
   DataSourceType,
   Knowledge,
   KnowledgeIndexStatus,
 } from "@prisma/client";
+import { put } from "@vercel/blob";
+import { publishEvent } from "../../inngest/event-publisher";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import { DataSourceItemList } from "../types/DataSourceItemList";
@@ -12,9 +15,6 @@ import {
   KnowledgeIndexingResultStatus,
 } from "../types/KnowlegeIndexingResult";
 import { FileUploadDataSourceInput } from "./types/FileUploadDataSourceInput";
-import { put } from "@vercel/blob";
-import { DomainEvent } from "@/src/domain/events/domain-event";
-import { publishEvent } from "../../inngest/event-publisher";
 
 export class FileUploadDataSourceAdapter implements DataSourceAdapter {
   public async getDataSourceItemList(
@@ -25,7 +25,6 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     const input = data as FileUploadDataSourceInput;
 
     const result: DataSourceItemList = {
-      dataSourceName: input.filename,
       items: [
         {
           name: input.filename,
