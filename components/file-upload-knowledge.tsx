@@ -47,12 +47,16 @@ export const FileUploadKnowledge = ({
     const file = inputFileRef.current.files[0];
     const fileType = file.type || "text/plain";
 
-    if (knowledgeTypes.findIndex((format) => format.type === fileType) === -1) {
+    if (
+      !fileType.startsWith("text/") &&
+      knowledgeTypes.findIndex((format) => format.type === fileType) === -1
+    ) {
       toast({
         variant: "destructive",
         description: `This file format is not supported: ${fileType}.`,
         duration: 6000,
       });
+      setUploading(false);
       return;
     }
     try {
@@ -65,11 +69,10 @@ export const FileUploadKnowledge = ({
       toast({ description: "File uploaded." });
       goBack();
     } catch (error: any) {
+      console.error(error);
       toast({
         variant: "destructive",
-        description:
-          String((error as AxiosError).response?.data) ||
-          "Something went wrong.",
+        description: "Something went wrong.",
         duration: 6000,
       });
     }

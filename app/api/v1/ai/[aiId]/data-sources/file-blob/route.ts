@@ -4,7 +4,6 @@ import dataSourceService from "@/src/domain/services/DataSourceService";
 import { DataSourceType } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
-import { knowledgeTypes } from "@/components/knowledge-types";
 import { auth } from "@clerk/nextjs";
 
 export async function POST(
@@ -19,12 +18,7 @@ export async function POST(
       request,
       onBeforeGenerateToken: async (pathname: string) => {
         const { userId, orgId } = await auth();
-
-        const allowedContentTypes = knowledgeTypes.map(
-          (type: any) => type.type
-        );
         return {
-          allowedContentTypes,
           tokenPayload: JSON.stringify({
             orgId,
             userId,
