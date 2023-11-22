@@ -1,5 +1,12 @@
 import { CreateApiDataSourceRequest } from "@/src/ports/api/DataSourcesApi";
-import { $Enums, DataSourceType, Knowledge, Prisma } from "@prisma/client";
+import {
+  $Enums,
+  DataSourceType,
+  Knowledge,
+  KnowledgeIndexStatus,
+  Prisma,
+} from "@prisma/client";
+import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import { DataSourceItemList } from "../types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
@@ -30,6 +37,19 @@ export class ApiDataSourceAdapter implements DataSourceAdapter {
     data: any
   ): Promise<IndexKnowledgeResponse> {
     const input = data as CreateApiDataSourceRequest;
+
+    const { documentCount, totalTokenCount } = await fileLoader.loadJsonArray(
+      [input.data],
+      knowledge.id
+    );
+
+    return {
+      indexStatus: KnowledgeIndexStatus.COMPLETED,
+      metadata: {
+        documentCount,
+        totalTokenCount,
+      },
+    };
   }
   retrieveKnowledgeIdFromEvent(data: any): string {
     throw new Error("Method not implemented.");
