@@ -23,6 +23,22 @@ const marked = new Marked(
     },
   })
 );
+marked.use({
+  extensions: [
+    {
+      name: "link",
+      renderer: (token): string | false | undefined => {
+        if (!token.text) {
+          return;
+        }
+        if (!token.href) {
+          return token.text;
+        }
+        return `<a href=${token.href} target="_blank">${token.text}</a>`;
+      },
+    },
+  ],
+});
 
 export interface ChatMessageProps {
   role: "system" | "user";
