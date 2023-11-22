@@ -587,9 +587,9 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem key="PUBLIC" value="PUBLIC">
+                {/* <SelectItem key="PUBLIC" value="PUBLIC">
                   Public
-                </SelectItem>
+                </SelectItem> */}
                 <SelectItem key="PRIVATE" value="PRIVATE">
                   Private
                 </SelectItem>

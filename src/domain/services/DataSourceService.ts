@@ -15,7 +15,7 @@ import {
   KnowledgeIndexStatus,
   PrismaClient,
 } from "@prisma/client";
-import { EntityNotFoundError } from "../errors/Errors";
+import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import { DomainEvent } from "../events/domain-event";
 
 export class DataSourceService {
@@ -539,7 +539,11 @@ export class DataSourceService {
     }
   }
 
-  public async deleteDataSource(aiId: string, dataSourceId: string) {
+  public async deleteDataSource(
+    orgId: string,
+    userId: string,
+    dataSourceId: string
+  ) {
     const dataSource = await prismadb.dataSource.findUnique({
       where: { id: dataSourceId },
       include: {
@@ -550,6 +554,10 @@ export class DataSourceService {
       throw new EntityNotFoundError(
         `DataSource with id=${dataSourceId} not found`
       );
+    }
+
+    if (dataSource.orgId !== orgId || dataSource.ownerUserId !== userId) {
+      throw new ForbiddenError("Forbidden");
     }
 
     const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);

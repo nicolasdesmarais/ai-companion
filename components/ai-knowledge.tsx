@@ -44,7 +44,7 @@ export const AIKnowledge = ({
   const removeDataSource = async (id: string) => {
     setRemoving(id);
     try {
-      await axios.delete(`/api/v1/ai/${aiId}/data-sources/${id}/`);
+      await axios.delete(`/api/v1/data-sources/${id}/`);
 
       setDataSource((current: any) => current.filter((i: any) => i.id !== id));
       toast({ description: "Knowledge removed." });
