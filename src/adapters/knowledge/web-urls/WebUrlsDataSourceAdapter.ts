@@ -7,7 +7,6 @@ import {
   KnowledgeIndexStatus,
 } from "@prisma/client";
 import { put } from "@vercel/blob";
-import axios from "axios";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import { DataSourceItemList } from "../types/DataSourceItemList";
@@ -28,7 +27,6 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
   ): Promise<DataSourceItemList> {
     const input = data as WebUrlDataSourceInput;
     const result: DataSourceItemList = {
-      dataSourceName: input.url,
       items: [
         {
           name: input.url,
