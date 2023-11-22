@@ -6,6 +6,8 @@ import {
 import { currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
+export const maxDuration = 300;
+
 export async function POST(req: Request) {
   const user = await currentUser();
   if (!user) {
