@@ -71,7 +71,7 @@ export const Groups = ({ data }: GroupsProps) => {
 
   return (
     <div className="w-full overflow-x-auto space-x-2 flex p-1">
-      <button
+      {/* <button
         onClick={() => onClick("PUBLIC")}
         className={cn(
           `
@@ -93,7 +93,7 @@ export const Groups = ({ data }: GroupsProps) => {
         )}
       >
         Public
-      </button>
+      </button> */}
       <button
         onClick={() => onClick("ORGANIZATION")}
         className={cn(
