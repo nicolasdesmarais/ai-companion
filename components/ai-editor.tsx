@@ -104,20 +104,24 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
       initialAi.options = options;
     }
   }
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: ({ talk: "", ...initialAi } as any) || {
-      name: "",
-      description: "",
-      instructions: "",
-      seed: "",
-      src: "",
-      categoryId: undefined,
-      modelId: "gpt-4",
-      knowledge: [],
-      options: {},
-      groups: [],
-    },
+    defaultValues: initialAi
+      ? ({ talk: "", ...initialAi } as any)
+      : {
+          name: "",
+          description: "",
+          instructions: "",
+          seed: "",
+          src: "",
+          categoryId: undefined,
+          modelId: "gpt-4",
+          visibility: "ORGANIZATION",
+          knowledge: [],
+          options: {},
+          groups: [],
+        },
   });
 
   const aiId = form.getValues("id");
