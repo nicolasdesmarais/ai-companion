@@ -1,4 +1,5 @@
 import { publishEvent } from "@/src/adapters/inngest/event-publisher";
+import apiDataSourceAdapter from "@/src/adapters/knowledge/api/ApiDataSourceAdapter";
 import fileUploadDataSourceAdapter from "@/src/adapters/knowledge/file-upload/FileUploadDataSourceAdapter";
 import googleDriveDataSourceAdapter from "@/src/adapters/knowledge/google-drive/GoogleDriveDataSourceAdapter";
 import { DataSourceAdapter } from "@/src/adapters/knowledge/types/DataSourceAdapter";
@@ -27,6 +28,8 @@ export class DataSourceService {
         return webUrlsDataSourceAdapter;
       case DataSourceType.FILE_UPLOAD:
         return fileUploadDataSourceAdapter;
+      case DataSourceType.API:
+        return apiDataSourceAdapter;
       default:
         throw new Error(`DataSourceType ${type} not supported`);
     }

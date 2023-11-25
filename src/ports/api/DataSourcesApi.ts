@@ -14,3 +14,8 @@ export interface DataSourceDto {
   indexStatus: DataSourceIndexStatus | null;
   indexPercentage: string;
 }
+
+export interface CreateApiDataSourceRequest {
+  name: string;
+  data: any;
+}

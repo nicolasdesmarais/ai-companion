@@ -30,6 +30,7 @@ import { models, imageModels, voices } from "./ai-models";
 import { useGroupModal } from "@/hooks/use-group-modal";
 import { useTalkModal } from "@/hooks/use-talk-modal";
 import { TalkModal } from "./talk-modal";
+import { getDiversityString } from "@/src/lib/diversity";
 
 const PREAMBLE = `You are a fictional character whose name is Elon. You are a visionary entrepreneur and inventor. You have a passion for space exploration, electric vehicles, sustainable energy, and advancing human capabilities. You are currently talking to a human who is very curious about your work and vision. You are ambitious and forward-thinking, with a touch of wit. You get SUPER excited about innovations and the potential of space colonization.
 `;
@@ -76,6 +77,7 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
   const [advancedImage, setAdvancedImage] = useState(false);
   const [imagePrompt, setImagePrompt] = useState("");
   const [imageModel, setImageModel] = useState("latent-consistency");
+  const [diversityString, setDiversityString] = useState("");
 
   const isLoading = form.formState.isSubmitting;
 
@@ -91,11 +93,18 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
       const description = form.getValues("description");
       if (name && description) {
         setImagePrompt(
-          `${name}, ${description}: photorealistic portrait. shot of the sony a7rv 35mm f1.8. HDR. 4k.`
+          `${name}, ${description}: ${
+            diversityString || getDiversityString()
+          }. photorealistic portrait. shot of the sony a7rv 35mm f1.8. HDR. 4k.`
         );
       }
     }
-  }, [advancedImage, form.getValues("name"), form.getValues("description")]);
+  }, [
+    advancedImage,
+    form.getValues("name"),
+    form.getValues("description"),
+    diversityString,
+  ]);
 
   useEffect(() => {
     const voiceEnabled = false && window.location.hostname !== "appdirect.ai";
@@ -158,6 +167,7 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
         duration: 6000,
       });
     }
+    setDiversityString(getDiversityString());
     setGeneratingImage(false);
   };
 
