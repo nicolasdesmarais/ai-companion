@@ -11,4 +11,8 @@ export const DataSourceTypes = [
     name: "Upload",
     type: "FILE_UPLOAD",
   },
+  {
+    name: "API",
+    type: "API",
+  },
 ];
