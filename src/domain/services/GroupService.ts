@@ -5,8 +5,8 @@ import { GroupAvailability } from "@prisma/client";
 import { GroupEntity } from "../entities/GroupEntity";
 import { BadRequestError, EntityNotFoundError } from "../errors/Errors";
 import { CreateGroupRequest, UpdateGroupRequest } from "../ports/api/GroupsApi";
+import { GroupSecurityService } from "./GroupSecurityService";
 import { InvitationService } from "./InvitationService";
-import { GroupSecurityService } from "./SecurityService";
 
 export class GroupService {
   private getGroupCriteria(orgId: string, userId: string) {

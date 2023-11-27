@@ -1,14 +1,18 @@
+import { BadRequestError } from "@/src/domain/errors/Errors";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
 import { AI, AIVisibility, GroupAvailability, Prisma } from "@prisma/client";
-import { EntityNotFoundError } from "../errors/Errors";
+import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
+import { CreateAIRequest, UpdateAIRequest } from "../ports/api/AIApi";
 import {
   ListAIsRequestParams,
   ListAIsRequestScope,
 } from "../ports/api/ListAIsRequestParams";
 import { ShareAIRequest } from "../ports/api/ShareAIRequest";
+import { AISecurityService } from "./AISecurityService";
+import groupService from "./GroupService";
 import invitationService from "./InvitationService";
 
 export class AIService {
@@ -384,6 +388,144 @@ export class AIService {
         userId,
       },
     });
+  }
+
+  /**
+   * Creates a new AI
+   * @param orgId
+   * @param userId
+   * @param request
+   * @returns
+   */
+  public async createAI(
+    orgId: string,
+    userId: string,
+    request: CreateAIRequest
+  ) {
+    const {
+      userName,
+      src,
+      name,
+      description,
+      instructions,
+      seed,
+      categoryId,
+      modelId,
+      visibility,
+      options,
+      groups,
+    } = request;
+
+    if (!src || !name || !description || !instructions || !categoryId) {
+      throw new BadRequestError("Missing required fields");
+    }
+
+    const ai = await prismadb.aI.create({
+      data: {
+        categoryId,
+        orgId,
+        userId,
+        userName,
+        src,
+        name,
+        description,
+        instructions,
+        seed: seed ?? "",
+        modelId,
+        visibility,
+        options: options as any,
+      },
+      include: {
+        dataSources: {
+          include: {
+            dataSource: true,
+          },
+        },
+        groups: true,
+      },
+    });
+
+    await this.updateAIGroups(ai, groups);
+
+    return ai;
+  }
+
+  /**
+   * Updates an existing AI
+   * @param request
+   */
+  public async updateAI(
+    orgId: string,
+    userId: string,
+    aiId: string,
+    request: UpdateAIRequest
+  ) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    const canUpdateAI = AISecurityService.canUpdateAI(orgId, userId, ai);
+    if (!canUpdateAI) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const {
+      src,
+      name,
+      description,
+      instructions,
+      seed,
+      categoryId,
+      modelId,
+      groups,
+      visibility,
+      options,
+    } = request;
+
+    if (!src || !name || !description || !instructions || !categoryId) {
+      throw new BadRequestError("Missing required fields");
+    }
+
+    const updatedAI = await prismadb.aI.update({
+      where: {
+        id: aiId,
+      },
+      include: {
+        dataSources: {
+          include: {
+            dataSource: true,
+          },
+        },
+        groups: true,
+      },
+      data: {
+        categoryId,
+        src,
+        name,
+        description,
+        instructions,
+        seed,
+        modelId,
+        visibility,
+        options: options as any,
+      },
+    });
+
+    await this.updateAIGroups(updatedAI, groups);
+  }
+
+  private async updateAIGroups(ai: AI, groupIds: string[]) {
+    if (ai.visibility !== "GROUP") {
+      await groupService.updateAIGroups(ai.id, []);
+    } else if (groupIds.length > 0) {
+      await groupService.updateAIGroups(ai.id, groupIds);
+    }
   }
 }
 

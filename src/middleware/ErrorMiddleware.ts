@@ -1,10 +1,15 @@
 import { ApiError } from "@/src/domain/ports/api/ApiError";
 import { NextResponse } from "next/server";
-import { EntityNotFoundError, ForbiddenError } from "../domain/errors/Errors";
+import {
+  BadRequestError,
+  EntityNotFoundError,
+  ForbiddenError,
+} from "../domain/errors/Errors";
 
 type Handler = (...args: any[]) => Promise<any>;
 
 const errorStatusMap = new Map<Function, number>([
+  [BadRequestError, 400],
   [EntityNotFoundError, 404],
   [ForbiddenError, 403],
 ]);
