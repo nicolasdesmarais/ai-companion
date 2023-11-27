@@ -1,11 +1,10 @@
 import {
   dataSourceInitialized,
   knowledgeEventReceived,
-  pollIndexingDataSources,
   loadKnowledgeChunk,
-} from "@/src/adapters/inngest/datasource-workflows";
+} from "@/src/adapter/inngest/datasource-workflows";
 import { serve } from "inngest/next";
-import { inngest } from "../../../src/adapters/inngest/client";
+import { inngest } from "../../../src/adapter/inngest/client";
 
 export const maxDuration = 300;
 

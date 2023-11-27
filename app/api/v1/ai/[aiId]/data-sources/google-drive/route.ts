@@ -1,11 +1,11 @@
-import { GoogleDriveDataSourceInput } from "@/src/adapters/knowledge/google-drive/types/GoogleDriveDataSourceInput";
+import { GoogleDriveDataSourceInput } from "@/src/adapter/knowledge/google-drive/types/GoogleDriveDataSourceInput";
 import {
   BadRequestError,
   EntityNotFoundError,
 } from "@/src/domain/errors/Errors";
+import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/ports/api/GoogleDriveApi";
 import aiService from "@/src/domain/services/AIService";
 import dataSourceService from "@/src/domain/services/DataSourceService";
-import { CreateGoogleDriveKnowledgeRequest } from "@/src/ports/api/GoogleDriveApi";
 import { auth } from "@clerk/nextjs";
 import { DataSourceType } from "@prisma/client";
 import { NextResponse } from "next/server";

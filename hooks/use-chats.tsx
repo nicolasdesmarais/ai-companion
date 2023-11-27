@@ -1,4 +1,4 @@
-import { ChatDto, GetChatsResponse } from "@/src/ports/api/ChatsApi";
+import { ChatDto, GetChatsResponse } from "@/src/domain/ports/api/ChatsApi";
 import { create } from "zustand";
 
 interface useChatsStore {

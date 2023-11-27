@@ -1,5 +1,5 @@
+import { GetChatsResponse } from "@/src/domain/ports/api/ChatsApi";
 import prismadb from "@/src/lib/prismadb";
-import { GetChatsResponse } from "@/src/ports/api/ChatsApi";
 import { Role } from "@prisma/client";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import aiService from "./AIService";

@@ -1,10 +1,10 @@
-import { FileUploadDataSourceInput } from "@/src/adapters/knowledge/file-upload/types/FileUploadDataSourceInput";
+import { FileUploadDataSourceInput } from "@/src/adapter/knowledge/file-upload/types/FileUploadDataSourceInput";
 import aiService from "@/src/domain/services/AIService";
 import dataSourceService from "@/src/domain/services/DataSourceService";
-import { DataSourceType } from "@prisma/client";
-import { NextResponse } from "next/server";
-import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { auth } from "@clerk/nextjs";
+import { DataSourceType } from "@prisma/client";
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import { NextResponse } from "next/server";
 
 export async function POST(
   request: Request,

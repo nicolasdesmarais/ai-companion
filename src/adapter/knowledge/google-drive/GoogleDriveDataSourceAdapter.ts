@@ -3,12 +3,12 @@ import {
   ForbiddenError,
 } from "@/src/domain/errors/Errors";
 import { DomainEvent } from "@/src/domain/events/domain-event";
-import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
-import prismadb from "@/src/lib/prismadb";
 import {
   GoogleDriveSearchResponse,
   mapMimeTypeToEnum,
-} from "@/src/ports/api/GoogleDriveApi";
+} from "@/src/domain/ports/api/GoogleDriveApi";
+import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
+import prismadb from "@/src/lib/prismadb";
 import {
   DataSourceType,
   Knowledge,
