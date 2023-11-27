@@ -5,7 +5,7 @@ import { UpdateAIRequest } from "@/src/domain/ports/api/AIApi";
 import aiService from "@/src/domain/services/AIService";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 
-export async function patchHandler(
+async function patchHandler(
   req: Request,
   { params }: { params: { aiId: string } }
 ) {
