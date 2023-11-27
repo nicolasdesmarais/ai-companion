@@ -1,4 +1,4 @@
-import { StaticAIModelRepository } from "@/src/adapter/repositories/AIModelRepository";
+import { StaticAIModelRepository } from "@/src/adapter/repositories/StaticAIModelRepository";
 import { AIModel } from "../models/AIModel";
 import { AIModelRepository } from "../ports/AIModelRepository";
 
