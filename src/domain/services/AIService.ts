@@ -3,13 +3,13 @@ import prismadb from "@/src/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
 import { AI, AIVisibility, GroupAvailability, Prisma } from "@prisma/client";
-import { ShareAIRequest } from "../../ports/api/ShareAIRequest";
-import { EntityNotFoundError } from "../errors/Errors";
-import invitationService from "./InvitationService";
 import {
   ListAIsRequestParams,
   ListAIsRequestScope,
-} from "./dtos/ListAIsRequestParams";
+} from "../../ports/api/ListAIsRequestParams";
+import { ShareAIRequest } from "../../ports/api/ShareAIRequest";
+import { EntityNotFoundError } from "../errors/Errors";
+import invitationService from "./InvitationService";
 
 export class AIService {
   public async findAIById(id: string) {

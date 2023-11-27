@@ -8,11 +8,11 @@ import { SearchInput } from "@/components/search-input";
 import aiService from "@/src/domain/services/AIService";
 import groupService from "@/src/domain/services/GroupService";
 
+import prismadb from "@/src/lib/prismadb";
 import {
   ListAIsRequestParams,
   ListAIsRequestScope,
-} from "@/src/domain/services/dtos/ListAIsRequestParams";
-import prismadb from "@/src/lib/prismadb";
+} from "@/src/ports/api/ListAIsRequestParams";
 import { auth } from "@clerk/nextjs";
 
 interface RootPageProps {
