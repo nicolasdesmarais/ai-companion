@@ -190,6 +190,6 @@ export class StaticAIModelRepository implements AIModelRepository {
 
   public async findById(id: string): Promise<AIModel | null> {
     const model = this.models.find((model) => model.id === id);
-    return model || null;
+    return model ?? null;
   }
 }
