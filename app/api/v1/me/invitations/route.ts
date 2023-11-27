@@ -1,5 +1,6 @@
 import { InvitationService } from "@/src/domain/services/InvitationService";
 import EmailUtils from "@/src/lib/emailUtils";
+import { CreateInvitationRequest } from "@/src/ports/api/InvitationsApi";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
