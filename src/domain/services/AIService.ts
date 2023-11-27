@@ -1,3 +1,4 @@
+import openAIAssistantModelAdapter from "@/src/adapter/ai-model/OpenAIAssistantModelAdapter";
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
@@ -11,6 +12,7 @@ import {
   ListAIsRequestScope,
 } from "../ports/api/ListAIsRequestParams";
 import { ShareAIRequest } from "../ports/api/ShareAIRequest";
+import aiModelService from "./AIModelService";
 import { AISecurityService } from "./AISecurityService";
 import groupService from "./GroupService";
 import invitationService from "./InvitationService";
@@ -446,6 +448,7 @@ export class AIService {
     });
 
     await this.updateAIGroups(ai, groups);
+    await this.createOrUpdateExternalAI(ai);
 
     return ai;
   }
@@ -518,6 +521,7 @@ export class AIService {
     });
 
     await this.updateAIGroups(updatedAI, groups);
+    await this.createOrUpdateExternalAI(updatedAI);
     return updatedAI;
   }
 
@@ -526,6 +530,29 @@ export class AIService {
       await groupService.updateAIGroups(ai.id, []);
     } else if (groupIds.length > 0) {
       await groupService.updateAIGroups(ai.id, groupIds);
+    }
+  }
+
+  private async createOrUpdateExternalAI(ai: AI) {
+    const aiModel = await aiModelService.findAIModelById(ai.modelId);
+    if (!aiModel) {
+      return;
+    }
+
+    // Hardcoded check for now
+    if (aiModel.id === "gpt-4-assistant") {
+      if (!ai.externalId) {
+        const externalId = await openAIAssistantModelAdapter.createExternalAI(
+          ai,
+          aiModel
+        );
+        await prismadb.aI.update({
+          where: { id: ai.id },
+          data: {
+            externalId,
+          },
+        });
+      }
     }
   }
 }

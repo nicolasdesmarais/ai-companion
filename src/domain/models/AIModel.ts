@@ -1,7 +1,7 @@
 export interface AIModel {
   id: string;
   name: string;
-  modelId: string;
+  externalModelId: string;
   contextSize: number;
   options: AIModelOptions;
 }
