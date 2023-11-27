@@ -540,7 +540,7 @@ export class AIService {
     }
 
     // Hardcoded check for now
-    if (aiModel.id === "gpt-4-assistant") {
+    if (aiModel.id === "gpt-4-1106-preview-assistant") {
       if (!ai.externalId) {
         const externalId = await openAIAssistantModelAdapter.createExternalAI(
           ai,
