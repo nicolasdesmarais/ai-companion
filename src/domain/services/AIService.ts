@@ -3,8 +3,8 @@ import prismadb from "@/src/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
 import { AI, AIVisibility, GroupAvailability, Prisma } from "@prisma/client";
+import { ShareAIRequest } from "../../ports/api/ShareAIRequest";
 import { EntityNotFoundError } from "../errors/Errors";
-import { ShareAIRequest } from "../types/ShareAIRequest";
 import invitationService from "./InvitationService";
 import {
   ListAIsRequestParams,

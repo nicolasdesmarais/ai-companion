@@ -26,14 +26,16 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { useConfirmModal } from "@/hooks/use-confirm-modal";
 import { useGroupModal } from "@/hooks/use-group-modal";
-import { CreateGroupRequest } from "@/src/domain/types/CreateGroupRequest";
-import { UpdateGroupRequest } from "@/src/domain/types/UpdateGroupRequest";
+import {
+  CreateGroupRequest,
+  UpdateGroupRequest,
+} from "@/src/ports/api/GroupsApi";
 import { useUser } from "@clerk/nextjs";
 import { GroupAvailability } from "@prisma/client";
 import { Loader, X } from "lucide-react";
 import * as z from "zod";
-import { useConfirmModal } from "@/hooks/use-confirm-modal";
 import { Banner } from "./ui/banner";
 
 const groupFormSchema = z.object({
