@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
+import { AIModel } from "@/src/domain/models/AIModel";
 import { Prisma } from "@prisma/client";
-import { models } from "./ai-models";
 
 const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
   include: {
@@ -26,12 +26,17 @@ type ExtendedAI = Prisma.AIGetPayload<typeof extendedAI>;
 interface SelectDataSourceProps {
   initialAi: ExtendedAI | null;
   form: any;
+  aiModels: AIModel[];
 }
 
-export const AIPersonality = ({ initialAi, form }: SelectDataSourceProps) => {
+export const AIPersonality = ({
+  initialAi,
+  form,
+  aiModels,
+}: SelectDataSourceProps) => {
   const isLoading = form.formState.isSubmitting;
   const modelId = form.getValues("modelId");
-  const model = models.find((model) => model.id === modelId);
+  const model = aiModels.find((model) => model.id === modelId);
 
   if (!model) {
     return null;
