@@ -1,3 +1,14 @@
+export interface CreateGoogleDriveKnowledgeRequest {
+  oauthTokenId: string;
+  fileId: string;
+  filename: string;
+}
+
+export interface GoogleDriveSearchRequest {
+  oauthTokenId: string;
+  searchTerms: string[];
+}
+
 export interface GoogleDriveSearchResponse {
   files: GoogleDriveFile[];
 }

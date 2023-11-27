@@ -5,7 +5,7 @@ import {
 } from "@/src/domain/errors/Errors";
 import aiService from "@/src/domain/services/AIService";
 import dataSourceService from "@/src/domain/services/DataSourceService";
-import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/types/CreateGoogleDriveKnowledgeRequest";
+import { CreateGoogleDriveKnowledgeRequest } from "@/src/ports/api/GoogleDriveApi";
 import { auth } from "@clerk/nextjs";
 import { DataSourceType } from "@prisma/client";
 import { NextResponse } from "next/server";

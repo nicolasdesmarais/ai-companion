@@ -1,7 +1,7 @@
+import { CreateGroupRequest } from "@/src/ports/api/GroupsApi";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import { GroupService } from "../../../../src/domain/services/GroupService";
-import { CreateGroupRequest } from "../../../../src/domain/types/CreateGroupRequest";
 
 export async function POST(req: Request) {
   try {
