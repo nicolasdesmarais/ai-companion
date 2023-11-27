@@ -1,6 +1,6 @@
 import { BadRequestError } from "@/src/domain/errors/Errors";
-import { ApifyWebhookEvent } from "@/src/domain/types/ApifyWebhookEvent";
 import { logWithTimestamp } from "@/src/lib/logging";
+import { ApifyWebhookEvent } from "@/src/ports/api/ApifyWebhookEvent";
 import {
   DataSourceType,
   Knowledge,
