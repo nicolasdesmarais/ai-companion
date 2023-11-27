@@ -518,6 +518,7 @@ export class AIService {
     });
 
     await this.updateAIGroups(updatedAI, groups);
+    return updatedAI;
   }
 
   private async updateAIGroups(ai: AI, groupIds: string[]) {
