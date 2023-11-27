@@ -1,8 +1,8 @@
-import aiService from "@/src/domain/services/AIService";
 import {
   ListAIsRequestParams,
   ListAIsRequestScope,
-} from "@/src/ports/api/ListAIsRequestParams";
+} from "@/src/domain/ports/api/ListAIsRequestParams";
+import aiService from "@/src/domain/services/AIService";
 import { auth } from "@clerk/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 

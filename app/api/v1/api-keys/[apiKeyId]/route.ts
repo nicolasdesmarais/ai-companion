@@ -1,6 +1,6 @@
+import { UpdateApiKeyRequest } from "@/src/domain/ports/api/ApiKeysApi";
 import apiKeyService from "@/src/domain/services/ApiKeyService";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
-import { UpdateApiKeyRequest } from "@/src/ports/api/ApiKeysApi";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 

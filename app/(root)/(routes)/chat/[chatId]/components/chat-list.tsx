@@ -2,8 +2,8 @@
 import { BotAvatar } from "@/components/bot-avatar";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useChats } from "@/hooks/use-chats";
+import { ChatDto } from "@/src/domain/ports/api/ChatsApi";
 import { cn } from "@/src/lib/utils";
-import { ChatDto } from "@/src/ports/api/ChatsApi";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 

@@ -3,12 +3,12 @@ import {
   EntityNotFoundError,
   ForbiddenError,
 } from "@/src/domain/errors/Errors";
+import { CreateChatRequest } from "@/src/domain/ports/api/ChatsApi";
 import chatService from "@/src/domain/services/ChatService";
 import { getAuthorizationContext } from "@/src/lib/authorizationUtils";
 import { MemoryManager } from "@/src/lib/memory";
 import { rateLimit } from "@/src/lib/rate-limit";
 import { getTokenLength } from "@/src/lib/tokenCount";
-import { CreateChatRequest } from "@/src/ports/api/ChatsApi";
 import { Message, Role } from "@prisma/client";
 import { JsonObject } from "@prisma/client/runtime/library";
 import { LangChainStream, StreamingTextResponse } from "ai";

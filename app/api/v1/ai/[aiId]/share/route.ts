@@ -1,5 +1,5 @@
+import { ShareAIRequest } from "@/src/domain/ports/api/ShareAIRequest";
 import aiService from "@/src/domain/services/AIService";
-import { ShareAIRequest } from "@/src/ports/api/ShareAIRequest";
 import { auth } from "@clerk/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 

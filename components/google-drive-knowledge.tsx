@@ -17,7 +17,7 @@ import {
   GoogleDriveFile,
   GoogleDriveSearchRequest,
   getLabelFromFileType,
-} from "@/src/ports/api/GoogleDriveApi";
+} from "@/src/domain/ports/api/GoogleDriveApi";
 import axios from "axios";
 import { format } from "date-fns";
 import { Loader, Server } from "lucide-react";

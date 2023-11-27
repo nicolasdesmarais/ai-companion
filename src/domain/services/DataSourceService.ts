@@ -7,8 +7,8 @@ import { DataSourceItemList } from "@/src/adapter/knowledge/types/DataSourceItem
 import { IndexKnowledgeResponse } from "@/src/adapter/knowledge/types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "@/src/adapter/knowledge/types/KnowlegeIndexingResult";
 import webUrlsDataSourceAdapter from "@/src/adapter/knowledge/web-urls/WebUrlsDataSourceAdapter";
+import { GetDataSourcesResponse } from "@/src/domain/ports/api/DataSourcesApi";
 import prismadb from "@/src/lib/prismadb";
-import { GetDataSourcesResponse } from "@/src/ports/api/DataSourcesApi";
 import {
   DataSourceIndexStatus,
   DataSourceType,

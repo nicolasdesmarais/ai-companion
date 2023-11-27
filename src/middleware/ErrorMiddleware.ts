@@ -1,4 +1,4 @@
-import { ApiError } from "@/src/ports/api/ApiError";
+import { ApiError } from "@/src/domain/ports/api/ApiError";
 import { NextResponse } from "next/server";
 import { EntityNotFoundError, ForbiddenError } from "../domain/errors/Errors";
 

@@ -1,11 +1,11 @@
-import prismadb from "@/src/lib/prismadb";
 import {
   CreateApiKeyRequest,
   CreateApiKeyResponse,
   ListApiKeyResponse,
   UpdateApiKeyRequest,
   UpdateApiKeyResponse,
-} from "@/src/ports/api/ApiKeysApi";
+} from "@/src/domain/ports/api/ApiKeysApi";
+import prismadb from "@/src/lib/prismadb";
 import { JsonValue } from "@prisma/client/runtime/library";
 import { createHash, randomBytes } from "crypto";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";

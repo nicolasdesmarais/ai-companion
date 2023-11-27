@@ -2,7 +2,7 @@ import { clerkClient } from "@clerk/nextjs";
 import {
   CreateOrganizationInvitationRequest,
   OrganizationInvitation,
-} from "../../ports/api/InvitationsApi";
+} from "../ports/api/InvitationsApi";
 
 const DEFAULT_INVITATION_ROLE = "basic_member";
 
