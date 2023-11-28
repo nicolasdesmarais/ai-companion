@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
+import { StarRating } from "@/components/star-rating";
 
 interface AIsProps {
   data: (AI & {
@@ -43,11 +44,20 @@ export const AIs = ({ data }: AIsProps) => {
                 <p className="font-bold">{item.name}</p>
                 <p className="text-xs">{item.description}</p>
               </CardHeader>
-              <CardFooter className="flex justify-between text-xs text-muted-foreground mt-2">
-                <div className="lowercase truncate w-11/12">
-                  {item.userName}
+              <CardFooter className="flex flex-col">
+                <StarRating
+                  rating={0}
+                  count={0}
+                  maxStars={5}
+                  className="mt-2"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                  <div className="lowercase truncate w-11/12">
+                    {item.userName}
+                  </div>
+                  <div className="flex items-center">{item.messageCount}</div>
+                  <span>&nbsp;chats</span>
                 </div>
-                <div className="flex items-center">{item.messageCount}</div>
               </CardFooter>
             </div>
           </Link>
