@@ -203,13 +203,30 @@ export class AIService {
       GROUP BY
         c.ai_id`;
 
+    const ratingPerAi: any[] = await prismadb.$queryRaw`
+      SELECT
+        r.ai_id as aiId,
+        COUNT(*) as ratingCount,
+        AVG(r.rating) as averageRating
+      FROM
+        ai_ratings as r
+      WHERE
+        r.ai_id IN (${Prisma.join(aiIds)})
+      GROUP BY
+        r.ai_id`;
+
     const result = ais.map((ai) => {
       const aiCountRow = messageCountPerAi.find((m) => m.aiId === ai.id);
       const messageCount = aiCountRow ? Number(aiCountRow.messageCount) : 0;
+      const ratingRow = ratingPerAi.find((r) => r.aiId === ai.id);
+      const rating = ratingRow ? Number(ratingRow.averageRating) : 0;
+      const ratingCount = ratingRow ? Number(ratingRow.ratingCount) : 0;
 
       return {
         ...ai,
         messageCount,
+        rating,
+        ratingCount,
       };
     });
 
