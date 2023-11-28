@@ -41,6 +41,8 @@ model AI {
 
   modelId       String @default("llama2-13b")   @map("model_id")
 
+  externalId    String? @map("external_id")
+
   groups        GroupAI[]
 
   permissions   AIPermissions[]
