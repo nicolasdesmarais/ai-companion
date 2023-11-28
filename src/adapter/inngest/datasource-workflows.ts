@@ -8,14 +8,47 @@ export const dataSourceInitialized = inngest.createFunction(
   async ({ event, step }) => {
     const dataSourceId = event.data.dataSourceId;
 
-    await step.run("get-knowledge-list", async () => {
+    const knowledgeIdList = await step.run("get-knowledge-list", async () => {
       return await dataSourceService.createDataSourceKnowledgeList(
         dataSourceId
       );
     });
 
-    await step.run("index-datasource-knowlege", async () => {
-      await dataSourceService.indexDataSourceKnowledge(dataSourceId);
+    let events = [];
+    for (const knowledgeId of knowledgeIdList) {
+      events.push({
+        name: DomainEvent.KNOWLEDGE_INITIALIZED,
+        data: {
+          dataSourceId,
+          knowledgeId,
+        },
+      });
+
+      if (events.length >= INGEST_EVENT_MAX) {
+        await step.sendEvent("fan-out-knowledge-initialized", events);
+        events = [];
+      }
+    }
+
+    if (events.length >= 0) {
+      await step.sendEvent("fan-out-knowledge-initialized", events);
+      events = [];
+    }
+  }
+);
+
+export const knowledgeInitialized = inngest.createFunction(
+  { id: "knowledge-initialized" },
+  { event: DomainEvent.KNOWLEDGE_INITIALIZED },
+  async ({ event, step }) => {
+    const dataSourceId = event.data.dataSourceId;
+    const knowledgeId = event.data.knowledgeId;
+
+    await step.run("index-knowledge", async () => {
+      await dataSourceService.indexDataSourceKnowledge(
+        dataSourceId,
+        knowledgeId
+      );
     });
   }
 );
