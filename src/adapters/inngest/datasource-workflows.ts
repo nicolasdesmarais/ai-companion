@@ -84,7 +84,12 @@ export const loadKnowledgeChunk = inngest.createFunction(
         event.data.knowledgeIndexingResult.result.chunkCount
       );
     } catch (e) {
-      console.error("[KNOWLEDGE CHUNK]", e);
+      console.error(
+        "[KNOWLEDGE CHUNK]",
+        event.data.knowledgeIndexingResult.knowledgeId,
+        event.data.index,
+        e
+      );
       throw (new Error("Error loading knowledge chunk"), e);
     }
   }
