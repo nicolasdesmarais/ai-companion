@@ -28,7 +28,7 @@ export const RateModal = ({ showModal, setShowModal, ai }: RateModalProps) => {
   const onSuccess = () => {
     setShowModal(false);
     toast({
-      description: "AI shared successfully.",
+      description: "Thank you for rating this AI.",
     });
   };
 

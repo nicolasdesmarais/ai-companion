@@ -9,11 +9,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { ShareAIRequest } from "@/src/domain/ports/api/ShareAIRequest";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AI, AIVisibility } from "@prisma/client";
+import { AI } from "@prisma/client";
 import axios from "axios";
-import { Copy } from "lucide-react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useToast } from "./ui/use-toast";

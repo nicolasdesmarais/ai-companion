@@ -528,6 +528,33 @@ export class AIService {
       await groupService.updateAIGroups(ai.id, groupIds);
     }
   }
+
+  public async rateAi(
+    orgId: string,
+    userId: string,
+    aiId: string,
+    rating: number,
+    review: string
+  ) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    await prismadb.aIRating.create({
+      data: {
+        aiId,
+        userId,
+        rating,
+        review,
+      },
+    });
+  }
 }
 
 const aiService = new AIService();
