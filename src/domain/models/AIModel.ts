@@ -4,6 +4,7 @@ export interface AIModel {
   externalModelId: string;
   contextSize: number;
   options: AIModelOptions;
+  isVisible: boolean;
 }
 
 export interface AIModelOptions {

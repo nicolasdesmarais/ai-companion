@@ -8,6 +8,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       name: "GPT-4 (32K Context)",
       externalModelId: "gpt-4",
       contextSize: 32768,
+      isVisible: true,
       options: {
         temperature: {
           default: 1,
@@ -46,6 +47,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       name: "GPT-3.5 (16K Context)",
       externalModelId: "gpt35-16k",
       contextSize: 16384,
+      isVisible: true,
       options: {
         temperature: {
           default: 1,
@@ -84,6 +86,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       name: "GPT-4 Turbo (Assistant) (32K Context)",
       externalModelId: "gpt-4-1106-preview",
       contextSize: 128000,
+      isVisible: false,
       options: {
         temperature: {
           default: 1,
@@ -188,7 +191,7 @@ export class StaticAIModelRepository implements AIModelRepository {
   ];
 
   public async findAll(): Promise<AIModel[]> {
-    return this.models;
+    return this.models.filter((model) => model.isVisible);
   }
 
   public async findById(id: string): Promise<AIModel | null> {
