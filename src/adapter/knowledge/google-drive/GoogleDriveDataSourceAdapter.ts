@@ -267,7 +267,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
           );
           knowledge.blobUrl = cloudBlob.url;
 
-          const eventIds: string[] = [];
+          let eventIds: string[] = [];
           for (let i = 0; i < docs.length; i++) {
             const eventResult = await publishEvent(
               DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
@@ -283,7 +283,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
                 index: i,
               }
             );
-            eventIds.concat(eventResult.ids);
+            eventIds = eventIds.concat(eventResult.ids);
           }
           resolve({
             userId,
