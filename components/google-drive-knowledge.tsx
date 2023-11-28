@@ -12,11 +12,12 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { UserOAuthTokenEntity } from "@/src/domain/entities/OAuthTokenEntity";
 import { EntityNotFoundError } from "@/src/domain/errors/Errors";
-import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/types/CreateGoogleDriveKnowledgeRequest";
 import {
+  CreateGoogleDriveKnowledgeRequest,
   GoogleDriveFile,
+  GoogleDriveSearchRequest,
   getLabelFromFileType,
-} from "@/src/domain/types/GoogleDriveSearchResponse";
+} from "@/src/domain/ports/api/GoogleDriveApi";
 import axios from "axios";
 import { format } from "date-fns";
 import { Loader, Server } from "lucide-react";

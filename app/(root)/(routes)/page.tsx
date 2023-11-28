@@ -11,7 +11,7 @@ import groupService from "@/src/domain/services/GroupService";
 import {
   ListAIsRequestParams,
   ListAIsRequestScope,
-} from "@/src/domain/services/dtos/ListAIsRequestParams";
+} from "@/src/domain/ports/api/ListAIsRequestParams";
 import prismadb from "@/src/lib/prismadb";
 import { auth } from "@clerk/nextjs";
 

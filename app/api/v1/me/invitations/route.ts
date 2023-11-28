@@ -1,3 +1,4 @@
+import { CreateInvitationRequest } from "@/src/domain/ports/api/InvitationsApi";
 import { InvitationService } from "@/src/domain/services/InvitationService";
 import EmailUtils from "@/src/lib/emailUtils";
 import { auth } from "@clerk/nextjs";

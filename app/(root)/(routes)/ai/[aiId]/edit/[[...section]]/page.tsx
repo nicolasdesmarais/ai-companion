@@ -1,8 +1,9 @@
 import { AIEditor } from "@/components/ai-editor";
+import { GroupModal } from "@/components/group-modal";
+import aiModelService from "@/src/domain/services/AIModelService";
+import groupService from "@/src/domain/services/GroupService";
 import prismadb from "@/src/lib/prismadb";
 import { auth, redirectToSignIn } from "@clerk/nextjs";
-import groupService from "@/src/domain/services/GroupService";
-import { GroupModal } from "@/components/group-modal";
 
 export const maxDuration = 300;
 
@@ -38,13 +39,20 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
     initialAi.groups = initialAi.groups.map((g: any) => g.groupId);
   }
 
+  const models = await aiModelService.getAIModels();
+
   const categories = await prismadb.category.findMany();
 
   const groups = await groupService.findGroupsByUser(orgId, userId);
 
   return (
     <>
-      <AIEditor initialAi={initialAi} categories={categories} groups={groups} />
+      <AIEditor
+        initialAi={initialAi}
+        aiModels={models}
+        categories={categories}
+        groups={groups}
+      />
       <GroupModal />
     </>
   );

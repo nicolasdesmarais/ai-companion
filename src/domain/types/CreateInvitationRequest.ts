@@ -1,3 +1,0 @@
-interface CreateInvitationRequest {
-  emails: string;
-}

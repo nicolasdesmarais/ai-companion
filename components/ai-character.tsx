@@ -2,6 +2,7 @@
 
 import { ImageUpload } from "@/components/image-upload";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   FormControl,
   FormDescription,
@@ -18,19 +19,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { Category, Prisma, Group } from "@prisma/client";
-import axios, { AxiosError } from "axios";
-import { Loader, Wand2, Plus, Settings, Play } from "lucide-react";
-import { useEffect, useState } from "react";
-import { models, imageModels, voices } from "./ai-models";
 import { useGroupModal } from "@/hooks/use-group-modal";
 import { useTalkModal } from "@/hooks/use-talk-modal";
-import { TalkModal } from "./talk-modal";
+import { AIModel } from "@/src/domain/models/AIModel";
 import { getDiversityString } from "@/src/lib/diversity";
+import { Category, Group, Prisma } from "@prisma/client";
+import axios, { AxiosError } from "axios";
+import { Loader, Play, Plus, Settings, Wand2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { imageModels, voices } from "./ai-models";
+import { TalkModal } from "./talk-modal";
 
 const PREAMBLE = `You are a fictional character whose name is Elon. You are a visionary entrepreneur and inventor. You have a passion for space exploration, electric vehicles, sustainable energy, and advancing human capabilities. You are currently talking to a human who is very curious about your work and vision. You are ambitious and forward-thinking, with a touch of wit. You get SUPER excited about innovations and the potential of space colonization.
 `;
@@ -61,12 +62,18 @@ const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
 type ExtendedAI = Prisma.AIGetPayload<typeof extendedAI>;
 
 interface AIFormProps {
+  aiModels: AIModel[];
   categories: Category[];
   form: any;
   groups: Group[];
 }
 
-export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
+export const AICharacter = ({
+  aiModels,
+  categories,
+  form,
+  groups,
+}: AIFormProps) => {
   const { toast } = useToast();
   const groupModal = useGroupModal();
   const talkModal = useTalkModal();
@@ -414,7 +421,7 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
               <Select
                 disabled={isLoading}
                 onValueChange={(val) => {
-                  const model = models.find((model) => model.id === val);
+                  const model = aiModels.find((model) => model.id === val);
                   if (model) {
                     Object.entries(model.options).forEach(([key, value]) => {
                       if (value.default) {
@@ -438,7 +445,7 @@ export const AICharacter = ({ categories, form, groups }: AIFormProps) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {models.map((model) => (
+                  {aiModels.map((model) => (
                     <SelectItem key={model.id} value={model.id}>
                       {model.name}
                     </SelectItem>

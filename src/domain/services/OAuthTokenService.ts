@@ -1,5 +1,5 @@
-import googleDriveOAuthAdapter from "@/src/adapters/oauth/GoogleDriveOAuthAdapter";
-import { OAuthAdapter } from "@/src/adapters/oauth/OAuthAdapter";
+import googleDriveOAuthAdapter from "@/src/adapter/oauth/GoogleDriveOAuthAdapter";
+import { OAuthAdapter } from "@/src/adapter/oauth/OAuthAdapter";
 import { decryptFromBuffer, encryptAsBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import { OAuthTokenProvider } from "@prisma/client";

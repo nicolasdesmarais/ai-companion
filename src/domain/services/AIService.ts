@@ -1,15 +1,21 @@
+import openAIAssistantModelAdapter from "@/src/adapter/ai-model/OpenAIAssistantModelAdapter";
+import { BadRequestError } from "@/src/domain/errors/Errors";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
 import { AI, AIVisibility, GroupAvailability, Prisma } from "@prisma/client";
-import { EntityNotFoundError } from "../errors/Errors";
-import { ShareAIRequest } from "../types/ShareAIRequest";
-import invitationService from "./InvitationService";
+import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
+import { CreateAIRequest, UpdateAIRequest } from "../ports/api/AIApi";
 import {
   ListAIsRequestParams,
   ListAIsRequestScope,
-} from "./dtos/ListAIsRequestParams";
+} from "../ports/api/ListAIsRequestParams";
+import { ShareAIRequest } from "../ports/api/ShareAIRequest";
+import aiModelService from "./AIModelService";
+import { AISecurityService } from "./AISecurityService";
+import groupService from "./GroupService";
+import invitationService from "./InvitationService";
 
 export class AIService {
   public async findAIById(id: string) {
@@ -384,6 +390,170 @@ export class AIService {
         userId,
       },
     });
+  }
+
+  /**
+   * Creates a new AI
+   * @param orgId
+   * @param userId
+   * @param request
+   * @returns
+   */
+  public async createAI(
+    orgId: string,
+    userId: string,
+    request: CreateAIRequest
+  ) {
+    const {
+      userName,
+      src,
+      name,
+      description,
+      instructions,
+      seed,
+      categoryId,
+      modelId,
+      visibility,
+      options,
+      groups,
+    } = request;
+
+    if (!src || !name || !description || !instructions || !categoryId) {
+      throw new BadRequestError("Missing required fields");
+    }
+
+    const ai = await prismadb.aI.create({
+      data: {
+        categoryId,
+        orgId,
+        userId,
+        userName,
+        src,
+        name,
+        description,
+        instructions,
+        seed: seed ?? "",
+        modelId,
+        visibility,
+        options: options as any,
+      },
+      include: {
+        dataSources: {
+          include: {
+            dataSource: true,
+          },
+        },
+        groups: true,
+      },
+    });
+
+    await this.updateAIGroups(ai, groups);
+    await this.createOrUpdateExternalAI(ai);
+
+    return ai;
+  }
+
+  /**
+   * Updates an existing AI
+   * @param request
+   */
+  public async updateAI(
+    orgId: string,
+    userId: string,
+    aiId: string,
+    request: UpdateAIRequest
+  ) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    const canUpdateAI = AISecurityService.canUpdateAI(orgId, userId, ai);
+    if (!canUpdateAI) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const {
+      src,
+      name,
+      description,
+      instructions,
+      seed,
+      categoryId,
+      modelId,
+      groups,
+      visibility,
+      options,
+    } = request;
+
+    if (!src || !name || !description || !instructions || !categoryId) {
+      throw new BadRequestError("Missing required fields");
+    }
+
+    const updatedAI = await prismadb.aI.update({
+      where: {
+        id: aiId,
+      },
+      include: {
+        dataSources: {
+          include: {
+            dataSource: true,
+          },
+        },
+        groups: true,
+      },
+      data: {
+        categoryId,
+        src,
+        name,
+        description,
+        instructions,
+        seed,
+        modelId,
+        visibility,
+        options: options as any,
+      },
+    });
+
+    await this.updateAIGroups(updatedAI, groups);
+    await this.createOrUpdateExternalAI(updatedAI);
+    return updatedAI;
+  }
+
+  private async updateAIGroups(ai: AI, groupIds: string[]) {
+    if (ai.visibility !== "GROUP") {
+      await groupService.updateAIGroups(ai.id, []);
+    } else if (groupIds.length > 0) {
+      await groupService.updateAIGroups(ai.id, groupIds);
+    }
+  }
+
+  private async createOrUpdateExternalAI(ai: AI) {
+    const aiModel = await aiModelService.findAIModelById(ai.modelId);
+    if (!aiModel) {
+      return;
+    }
+
+    // Hardcoded check for now
+    if (aiModel.id === "gpt-4-1106-preview-assistant") {
+      if (!ai.externalId) {
+        const externalId = await openAIAssistantModelAdapter.createExternalAI(
+          ai,
+          aiModel
+        );
+        await prismadb.aI.update({
+          where: { id: ai.id },
+          data: {
+            externalId,
+          },
+        });
+      }
+    }
   }
 }
 

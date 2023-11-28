@@ -4,6 +4,7 @@ import LeavePageBlocker from "@/components/leave-page-blocker";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
+import { AIModel } from "@/src/domain/models/AIModel";
 import { cn } from "@/src/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Category, Group, Knowledge, Prisma } from "@prisma/client";
@@ -14,7 +15,6 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { AICharacter } from "./ai-character";
 import { AIKnowledge } from "./ai-knowledge";
-import { models } from "./ai-models";
 import { AIPersonality } from "./ai-personality";
 
 const formSchema = z.object({
@@ -69,12 +69,18 @@ const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
 type ExtendedAI = Prisma.AIGetPayload<typeof extendedAI>;
 
 interface AIFormProps {
+  aiModels: AIModel[];
   categories: Category[];
   initialAi: ExtendedAI | null;
   groups: Group[];
 }
 
-export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
+export const AIEditor = ({
+  aiModels,
+  categories,
+  initialAi,
+  groups,
+}: AIFormProps) => {
   const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
@@ -93,7 +99,7 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
   }, []);
 
   if (initialAi && !initialAi.options) {
-    const model = models.find((model) => model.id === initialAi.modelId);
+    const model = aiModels.find((model) => model.id === initialAi.modelId);
     if (model) {
       const options = {} as any;
       Object.entries(model.options).forEach(([key, value]) => {
@@ -253,7 +259,12 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
       index: 1,
       route: "edit",
       content: (
-        <AICharacter categories={categories} form={form} groups={groups} />
+        <AICharacter
+          aiModels={aiModels}
+          categories={categories}
+          form={form}
+          groups={groups}
+        />
       ),
       buttons: (
         <>
@@ -365,7 +376,9 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
       name: "Personality",
       route: "edit/personality",
       index: 3,
-      content: <AIPersonality initialAi={initialAi} form={form} />,
+      content: (
+        <AIPersonality initialAi={initialAi} form={form} aiModels={aiModels} />
+      ),
       buttons: (
         <>
           <div>{backButton("edit/knowledge")}</div>

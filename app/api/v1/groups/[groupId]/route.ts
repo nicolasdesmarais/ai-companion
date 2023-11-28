@@ -1,5 +1,5 @@
+import { UpdateGroupRequest } from "@/src/domain/ports/api/GroupsApi";
 import { GroupService } from "@/src/domain/services/GroupService";
-import { UpdateGroupRequest } from "@/src/domain/types/UpdateGroupRequest";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import { EntityNotFoundError } from "../../../../../src/domain/errors/Errors";

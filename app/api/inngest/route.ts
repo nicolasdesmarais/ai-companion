@@ -1,11 +1,11 @@
 import {
   dataSourceInitialized,
   knowledgeEventReceived,
-  pollIndexingDataSources,
+  knowledgeInitialized,
   loadKnowledgeChunk,
-} from "@/src/adapters/inngest/datasource-workflows";
+} from "@/src/adapter/inngest/datasource-workflows";
 import { serve } from "inngest/next";
-import { inngest } from "../../../src/adapters/inngest/client";
+import { inngest } from "../../../src/adapter/inngest/client";
 
 export const maxDuration = 300;
 
@@ -13,6 +13,7 @@ export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
     dataSourceInitialized,
+    knowledgeInitialized,
     knowledgeEventReceived,
     loadKnowledgeChunk,
   ],

@@ -1,8 +1,9 @@
-import { GoogleDriveDataSourceAdapter } from "@/src/adapters/knowledge/google-drive/GoogleDriveDataSourceAdapter";
+import { GoogleDriveDataSourceAdapter } from "@/src/adapter/knowledge/google-drive/GoogleDriveDataSourceAdapter";
 import {
   BadRequestError,
   EntityNotFoundError,
 } from "@/src/domain/errors/Errors";
+import { GoogleDriveSearchRequest } from "@/src/domain/ports/api/GoogleDriveApi";
 import { currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
