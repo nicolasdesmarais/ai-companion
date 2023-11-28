@@ -159,7 +159,7 @@ export class DataSourceService {
     itemList: DataSourceItemList,
     userId: string
   ) {
-    const knowledgeList = [];
+    const knowledgeIdList = [];
     const dataSourceKnowledgeRelations = [];
 
     for (const item of itemList.items) {
@@ -173,7 +173,7 @@ export class DataSourceService {
           metadata: item.metadata,
         },
       });
-      knowledgeList.push(knowledge);
+      knowledgeIdList.push(knowledge.id);
 
       dataSourceKnowledgeRelations.push({
         dataSourceId,
@@ -185,54 +185,54 @@ export class DataSourceService {
       data: dataSourceKnowledgeRelations,
     });
 
-    return knowledgeList;
+    return knowledgeIdList;
   }
 
-  public async indexDataSourceKnowledge(dataSourceId: string) {
+  /**
+   * Indexes a knowledge for the specified data source
+   * @param dataSourceId
+   * @param knowledgeId
+   */
+  public async indexDataSourceKnowledge(
+    dataSourceId: string,
+    knowledgeId: string
+  ) {
     const dataSource = await prismadb.dataSource.findUnique({
       where: { id: dataSourceId },
     });
-
     if (!dataSource) {
       throw new EntityNotFoundError(
         `DataSource with id=${dataSourceId} not found`
       );
     }
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
 
-    const knowledgeList = await prismadb.knowledge.findMany({
-      where: {
-        indexStatus: KnowledgeIndexStatus.INITIALIZED,
-        dataSources: {
-          some: {
-            dataSourceId: dataSource.id,
-          },
-        },
-      },
+    const knowledge = await prismadb.knowledge.findUnique({
+      where: { id: knowledgeId },
     });
-
-    for (const knowledge of knowledgeList) {
-      let indexKnowledgeResponse;
-      try {
-        indexKnowledgeResponse = await dataSourceAdapter.indexKnowledge(
-          dataSource.orgId,
-          dataSource.ownerUserId,
-          knowledge,
-          dataSource.data
-        );
-      } catch (error) {
-        console.error(error);
-        indexKnowledgeResponse = {
-          indexStatus: KnowledgeIndexStatus.FAILED,
-        };
-      }
-
-      await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
+    if (!knowledge) {
+      throw new EntityNotFoundError(
+        `Knowledge with id=${knowledgeId} not found`
+      );
     }
 
-    await this.updateDataSourceStatus(dataSourceId);
+    let indexKnowledgeResponse;
+    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
+    try {
+      indexKnowledgeResponse = await dataSourceAdapter.indexKnowledge(
+        dataSource.orgId,
+        dataSource.ownerUserId,
+        knowledge,
+        dataSource.data
+      );
+    } catch (error) {
+      console.error(error);
+      indexKnowledgeResponse = {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      };
+    }
 
-    return dataSourceId;
+    await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
+    await this.updateDataSourceStatus(dataSourceId);
   }
 
   private async updateDataSourceStatus(
