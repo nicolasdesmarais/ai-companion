@@ -45,12 +45,7 @@ export const AIs = ({ data }: AIsProps) => {
                 <p className="text-xs">{item.description}</p>
               </CardHeader>
               <CardFooter className="flex flex-col">
-                <StarRating
-                  rating={0}
-                  count={0}
-                  maxStars={5}
-                  className="mt-2"
-                />
+                <StarRating value={0} count={0} maxStars={5} className="mt-2" />
                 <div className="flex justify-between text-xs text-muted-foreground mt-2">
                   <div className="lowercase truncate w-11/12">
                     {item.userName}

@@ -64,9 +64,22 @@ export const RateAIForm = ({ ai, onSuccess }: RateAIFormProps) => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <h3 className="text-lg font-medium">Review AI - {ai.name}</h3>
-          <div className="flex items-center">
-            <StarRating rating={0} />
-          </div>
+
+          <FormField
+            name="rating"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Your Rating</FormLabel>
+                <FormControl>
+                  <div className="flex items-center">
+                    <StarRating size="large" {...field} />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             name="review"
             control={form.control}
