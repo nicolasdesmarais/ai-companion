@@ -219,10 +219,8 @@ export class DataSourceService {
     const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
     try {
       indexKnowledgeResponse = await dataSourceAdapter.indexKnowledge(
-        dataSource.orgId,
-        dataSource.ownerUserId,
-        knowledge,
-        dataSource.data
+        dataSource,
+        knowledge
       );
     } catch (error) {
       console.error(error);

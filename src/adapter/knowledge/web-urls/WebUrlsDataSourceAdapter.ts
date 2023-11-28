@@ -2,6 +2,7 @@ import { BadRequestError } from "@/src/domain/errors/Errors";
 import { ApifyWebhookEvent } from "@/src/domain/ports/api/ApifyWebhookEvent";
 import { logWithTimestamp } from "@/src/lib/logging";
 import {
+  DataSource,
   DataSourceType,
   Knowledge,
   KnowledgeIndexStatus,
@@ -38,11 +39,10 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
   }
 
   public async indexKnowledge(
-    orgId: string,
-    userId: string,
-    knowledge: Knowledge,
-    data: any
+    dataSource: DataSource,
+    knowledge: Knowledge
   ): Promise<IndexKnowledgeResponse> {
+    const data = dataSource.data as any;
     const input = data as WebUrlDataSourceInput;
     const actorRunId = await apifyAdapter.startUrlIndexing(
       knowledge.id,

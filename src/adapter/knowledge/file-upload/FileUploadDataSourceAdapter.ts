@@ -1,5 +1,6 @@
 import { DomainEvent } from "@/src/domain/events/domain-event";
 import {
+  DataSource,
   DataSourceType,
   Knowledge,
   KnowledgeIndexStatus,
@@ -37,11 +38,11 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
   }
 
   public async indexKnowledge(
-    orgId: string,
-    userId: string,
-    knowledge: Knowledge,
-    data: any
+    dataSource: DataSource,
+    knowledge: Knowledge
   ): Promise<IndexKnowledgeResponse> {
+    const data = dataSource.data as any;
+    const userId = dataSource.ownerUserId;
     const input = data as FileUploadDataSourceInput;
 
     if (!knowledge.blobUrl) {

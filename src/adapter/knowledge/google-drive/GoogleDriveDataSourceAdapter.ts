@@ -10,6 +10,7 @@ import {
 import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import {
+  DataSource,
   DataSourceType,
   Knowledge,
   KnowledgeIndexStatus,
@@ -213,11 +214,11 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
   }
 
   public async indexKnowledge(
-    orgId: string,
-    userId: string,
-    knowledge: Knowledge,
-    data: any
+    dataSource: DataSource,
+    knowledge: Knowledge
   ): Promise<IndexKnowledgeResponse> {
+    const data = dataSource.data as any;
+    const userId = dataSource.ownerUserId;
     if (!userId) {
       console.error("Missing userId");
       return {

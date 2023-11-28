@@ -1,6 +1,7 @@
 import { CreateApiDataSourceRequest } from "@/src/domain/ports/api/DataSourcesApi";
 import {
   $Enums,
+  DataSource,
   DataSourceType,
   Knowledge,
   KnowledgeIndexStatus,
@@ -31,11 +32,10 @@ export class ApiDataSourceAdapter implements DataSourceAdapter {
     return result;
   }
   public async indexKnowledge(
-    orgId: string,
-    userId: string,
-    knowledge: Knowledge,
-    data: any
+    dataSource: DataSource,
+    knowledge: Knowledge
   ): Promise<IndexKnowledgeResponse> {
+    const data = dataSource.data as any;
     const input = data as CreateApiDataSourceRequest;
 
     const { documentCount, totalTokenCount } = await fileLoader.loadJsonArray(
