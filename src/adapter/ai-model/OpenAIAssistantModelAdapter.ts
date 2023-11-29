@@ -138,8 +138,6 @@ export class OpenAIAssistantModelAdapter {
       for (const content of threadMessage.content) {
         if (content.type === "text") {
           responseText = content.text.value;
-          responseText.replace(/^"|"$/g, "");
-          responseText.replace(/\\n/g, "\n");
 
           await chatService.updateChat(
             chatId,
