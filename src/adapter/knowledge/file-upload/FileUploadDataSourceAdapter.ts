@@ -67,11 +67,12 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     );
     knowledge.blobUrl = cloudBlob.url;
 
-    const eventIds: string[] = [];
+    const events = [];
     for (let i = 0; i < docs.length; i++) {
-      const eventResult = await publishEvent(
-        DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
-        {
+      const event = {
+        id: `kn-chunk-${knowledge.id}-${i}`,
+        name: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
+        data: {
           knowledgeIndexingResult: {
             knowledgeId: knowledge.id,
             result: {
@@ -79,20 +80,20 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
               status: KnowledgeIndexingResultStatus.SUCCESSFUL,
             },
           },
-          dataSourceType: DataSourceType.GOOGLE_DRIVE,
+          dataSourceType: DataSourceType.FILE_UPLOAD,
           index: i,
-        }
-      );
-      eventIds.concat(eventResult.ids);
+        },
+      };
+      events.push(event);
     }
 
     return {
       userId,
       indexStatus: KnowledgeIndexStatus.INDEXING,
+      events,
       metadata: {
         mimeType: input.mimetype,
         fileName: input.filename,
-        eventIds,
         originalBlobUrl,
         ...metadata,
       },

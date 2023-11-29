@@ -44,12 +44,18 @@ export const knowledgeInitialized = inngest.createFunction(
     const dataSourceId = event.data.dataSourceId;
     const knowledgeId = event.data.knowledgeId;
 
-    await step.run("index-knowledge", async () => {
-      await dataSourceService.indexDataSourceKnowledge(
+    const result = await step.run("index-knowledge", async () => {
+      return await dataSourceService.indexDataSourceKnowledge(
         dataSourceId,
         knowledgeId
       );
     });
+    if (result?.events?.length && result?.events?.length > 0) {
+      while (result.events.length) {
+        const eventBatch = result.events.splice(0, INGEST_EVENT_MAX);
+        await step.sendEvent("fan-out-knowledge-chunks", eventBatch);
+      }
+    }
   }
 );
 

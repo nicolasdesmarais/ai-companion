@@ -251,6 +251,7 @@ export class DataSourceService {
 
     await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
     await this.updateDataSourceStatus(dataSourceId);
+    return indexKnowledgeResponse;
   }
 
   private async updateDataSourceStatus(
