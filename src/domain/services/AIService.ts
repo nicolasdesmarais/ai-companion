@@ -205,13 +205,30 @@ export class AIService {
       GROUP BY
         c.ai_id`;
 
+    const ratingPerAi: any[] = await prismadb.$queryRaw`
+      SELECT
+        r.ai_id as aiId,
+        COUNT(*) as ratingCount,
+        AVG(r.rating) as averageRating
+      FROM
+        ai_ratings as r
+      WHERE
+        r.ai_id IN (${Prisma.join(aiIds)})
+      GROUP BY
+        r.ai_id`;
+
     const result = ais.map((ai) => {
       const aiCountRow = messageCountPerAi.find((m) => m.aiId === ai.id);
       const messageCount = aiCountRow ? Number(aiCountRow.messageCount) : 0;
+      const ratingRow = ratingPerAi.find((r) => r.aiId === ai.id);
+      const rating = ratingRow ? Number(ratingRow.averageRating) : 0;
+      const ratingCount = ratingRow ? Number(ratingRow.ratingCount) : 0;
 
       return {
         ...ai,
         messageCount,
+        rating,
+        ratingCount,
       };
     });
 
@@ -554,6 +571,71 @@ export class AIService {
         });
       }
     }
+  }
+
+  public async rateAi(
+    userId: string,
+    aiId: string,
+    rating: number,
+    review: string
+  ) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    const existingRating = await prismadb.aIRating.findMany({
+      take: 1,
+      where: {
+        userId,
+        aiId,
+      },
+    });
+    if (existingRating.length > 0) {
+      await prismadb.aIRating.update({
+        where: {
+          id: existingRating[0].id,
+        },
+        data: {
+          rating,
+          review,
+        },
+      });
+    } else {
+      await prismadb.aIRating.create({
+        data: {
+          aiId,
+          userId,
+          rating,
+          review,
+        },
+      });
+    }
+  }
+
+  public async getUserAiRating(userId: string, aiId: string) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    return await prismadb.aIRating.findMany({
+      take: 1,
+      where: {
+        userId,
+        aiId,
+      },
+    });
   }
 }
 
