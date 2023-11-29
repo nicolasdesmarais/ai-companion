@@ -85,7 +85,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       id: "gpt-4-1106-preview-assistant",
       name: "GPT-4 Turbo (Assistant) (32K Context)",
       externalModelId: "gpt-4-1106-preview",
-      contextSize: 128000,
+      contextSize: 32768,
       isVisible: false,
       options: {
         temperature: {

@@ -1,3 +1,4 @@
+import openAIAssistantModelAdapter from "@/src/adapter/ai-model/OpenAIAssistantModelAdapter";
 import { GetChatsResponse } from "@/src/domain/ports/api/ChatsApi";
 import prismadb from "@/src/lib/prismadb";
 import { Role } from "@prisma/client";
@@ -72,13 +73,21 @@ export class ChatService {
       throw new EntityNotFoundError(`AI with id ${aiId} not found`);
     }
 
-    return await prismadb.chat.create({
+    let externalId;
+    if (ai.modelId === "gpt-4-1106-preview-assistant") {
+      externalId = await openAIAssistantModelAdapter.createExternalChat();
+    }
+
+    const chat = await prismadb.chat.create({
       data: {
         aiId,
         userId,
         name: ai.name,
+        externalId,
       },
     });
+
+    return chat;
   }
 
   public async updateChat(

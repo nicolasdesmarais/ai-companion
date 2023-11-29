@@ -1,3 +1,4 @@
+import openAIAssistantModelAdapter from "@/src/adapter/ai-model/OpenAIAssistantModelAdapter";
 import { CreateChatRequest } from "@/src/domain/ports/api/ChatsApi";
 import aiModelService from "@/src/domain/services/AIModelService";
 import chatService from "@/src/domain/services/ChatService";
@@ -196,6 +197,13 @@ async function postHandler(
       streaming: true,
       ...options,
     });
+  } else if (chat.ai.modelId === "gpt-4-1106-preview-assistant") {
+    const aiAssistantResponse = await openAIAssistantModelAdapter.postToChat(
+      chatId,
+      userId,
+      prompt
+    );
+    return NextResponse.json(aiAssistantResponse);
   } else {
     chatModel = new ChatOpenAI({
       azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
