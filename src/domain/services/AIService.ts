@@ -547,7 +547,6 @@ export class AIService {
   }
 
   public async rateAi(
-    orgId: string,
     userId: string,
     aiId: string,
     rating: number,
@@ -563,12 +562,51 @@ export class AIService {
       throw new EntityNotFoundError(`AI with id=${aiId} not found`);
     }
 
-    await prismadb.aIRating.create({
-      data: {
-        aiId,
+    const existingRating = await prismadb.aIRating.findMany({
+      take: 1,
+      where: {
         userId,
-        rating,
-        review,
+        aiId,
+      },
+    });
+    if (existingRating.length > 0) {
+      await prismadb.aIRating.update({
+        where: {
+          id: existingRating[0].id,
+        },
+        data: {
+          rating,
+          review,
+        },
+      });
+    } else {
+      await prismadb.aIRating.create({
+        data: {
+          aiId,
+          userId,
+          rating,
+          review,
+        },
+      });
+    }
+  }
+
+  public async getUserAiRating(userId: string, aiId: string) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    return await prismadb.aIRating.findMany({
+      take: 1,
+      where: {
+        userId,
+        aiId,
       },
     });
   }
