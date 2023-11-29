@@ -577,7 +577,7 @@ export class AIService {
     userId: string,
     aiId: string,
     rating: number,
-    review: string
+    review: string = ""
   ) {
     const ai = await prismadb.aI.findUnique({
       where: {
