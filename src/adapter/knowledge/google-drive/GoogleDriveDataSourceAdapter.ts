@@ -218,6 +218,11 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     knowledge: Knowledge,
     data: any
   ): Promise<IndexKnowledgeResponse> {
+    if (knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
+      return {
+        indexStatus: KnowledgeIndexStatus.COMPLETED,
+      };
+    }
     if (!userId) {
       console.error("Missing userId");
       return {

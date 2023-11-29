@@ -163,16 +163,34 @@ export class DataSourceService {
     const dataSourceKnowledgeRelations = [];
 
     for (const item of itemList.items) {
-      const knowledge = await prismadb.knowledge.create({
-        data: {
-          userId,
-          name: item.name,
-          type: item.type,
-          indexStatus: KnowledgeIndexStatus.INITIALIZED,
-          blobUrl: item.blobUrl,
-          metadata: item.metadata,
-        },
-      });
+      let knowledge,
+        existingKnowledge = [] as Knowledge[];
+      const fileId = item.metadata?.fileId;
+      if (fileId) {
+        existingKnowledge = await prismadb.knowledge.findMany({
+          take: 1,
+          where: {
+            metadata: {
+              path: "$.fileId",
+              equals: fileId,
+            },
+          },
+        });
+      }
+      if (existingKnowledge.length > 0) {
+        knowledge = existingKnowledge[0];
+      } else {
+        knowledge = await prismadb.knowledge.create({
+          data: {
+            userId,
+            name: item.name,
+            type: item.type,
+            indexStatus: KnowledgeIndexStatus.INITIALIZED,
+            blobUrl: item.blobUrl,
+            metadata: item.metadata,
+          },
+        });
+      }
       knowledgeIdList.push(knowledge.id);
 
       dataSourceKnowledgeRelations.push({
@@ -580,7 +598,17 @@ export class DataSourceService {
       });
 
       await prismadb.knowledge.deleteMany({
-        where: { id: { in: knowledgeIds } },
+        where: {
+          id: { in: knowledgeIds },
+          NOT: {
+            indexStatus: {
+              in: [
+                KnowledgeIndexStatus.COMPLETED,
+                KnowledgeIndexStatus.PARTIALLY_COMPLETED,
+              ],
+            },
+          },
+        },
       });
 
       await prismadb.dataSource.delete({ where: { id: dataSourceId } });
