@@ -28,7 +28,7 @@ export const withErrorHandler = (handler: Handler) => {
       // Call the original handler
       return await handler(...args);
     } catch (error) {
-      // Check if error type is known and has a mapped status code
+      console.log(error);
       const status = errorStatusMap.get(error.constructor);
       if (status) {
         return createApiErrorResponse(error.message, status);
