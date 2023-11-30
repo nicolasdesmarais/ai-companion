@@ -11,6 +11,10 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { AIModel } from "@/src/domain/models/AIModel";
 import { Prisma } from "@prisma/client";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
+
+const SAMPLE_DESCRIPTION = `The AI you've engaged is engineered with advanced capabilities, designed to address and respond to an array of questions you might have, regardless of their complexity. It is backed by a rich and extensive compilation of documents that have meticulously uploaded, providing a broad and deep knowledge base to draw from. This AI, with its vast knowledge, stands ready to offer insightful answers to your diverse queries, whether you're seeking simple clarifications or deep, complex explorations. Its singular aim is to ensure you receive the precise information you need, with speed and accuracy, thereby streamlining your decision-making process and enhancing your productivity.`;
 
 const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
   include: {
@@ -46,6 +50,51 @@ export const AIProfile = ({
           </p>
         </div>
         <Separator className="bg-primary/10" />
+      </div>
+      <div className="pt-2 space-y-4">
+        <FormField
+          name="headline"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem className="col-span-2 md:col-span-1">
+              <FormLabel>Headline</FormLabel>
+              <FormDescription>
+                One sentence or short paragraph to describe your AI for users.
+              </FormDescription>
+              <FormControl>
+                <Input
+                  disabled={isLoading}
+                  placeholder="The ultimate solution to all your AI needs."
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          name="profileDescription"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormDescription>
+                One paragraph or brief summary of the purpose and capabilities
+                of your AI.
+              </FormDescription>
+              <FormControl>
+                <Textarea
+                  disabled={isLoading}
+                  rows={9}
+                  className="bg-background resize-none"
+                  placeholder={SAMPLE_DESCRIPTION}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
     </div>
   );
