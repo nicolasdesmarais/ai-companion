@@ -13,6 +13,7 @@ import { AIModel } from "@/src/domain/models/AIModel";
 import { Prisma } from "@prisma/client";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import { Checkbox } from "./ui/checkbox";
 
 const SAMPLE_DESCRIPTION = `The AI you've engaged is engineered with advanced capabilities, designed to address and respond to an array of questions you might have, regardless of their complexity. It is backed by a rich and extensive compilation of documents that have meticulously uploaded, providing a broad and deep knowledge base to draw from. This AI, with its vast knowledge, stands ready to offer insightful answers to your diverse queries, whether you're seeking simple clarifications or deep, complex explorations. Its singular aim is to ensure you receive the precise information you need, with speed and accuracy, thereby streamlining your decision-making process and enhancing your productivity.`;
 
@@ -95,6 +96,80 @@ export const AIProfile = ({
             </FormItem>
           )}
         />
+      </div>
+      <div className="space-y-2 w-full col-span-2 pt-4">
+        <div>
+          <h3 className="text-lg font-medium">
+            Training Specifications Visibility
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Decide what information you trained the AI on is visible to the
+            users
+          </p>
+        </div>
+        <Separator className="bg-primary/10" />
+        <div className="pt-2 space-y-8">
+          <FormField
+            name="showCharacter"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem className="col-span-2 md:col-span-1">
+                <FormControl>
+                  <Checkbox>
+                    <div>
+                      Show Character Information
+                      <FormDescription>
+                        Checking this box will make the Character instructions
+                        and example conversations visible on the AI profile.
+                      </FormDescription>
+                    </div>
+                  </Checkbox>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="showTraining"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem className="col-span-2 md:col-span-1">
+                <FormControl>
+                  <Checkbox>
+                    <div>
+                      Show Training Materials
+                      <FormDescription>
+                        Checking this box will make the names of all websites
+                        and files visible on the AI profile.
+                      </FormDescription>
+                    </div>
+                  </Checkbox>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="showCharacter"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem className="col-span-2 md:col-span-1">
+                <FormControl>
+                  <Checkbox>
+                    <div>
+                      Show Personality Settings
+                      <FormDescription>
+                        Checking this box will make the personality settings
+                        visible on the AI profile.
+                      </FormDescription>
+                    </div>
+                  </Checkbox>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </div>
     </div>
   );
