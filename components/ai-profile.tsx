@@ -14,6 +14,8 @@ import { Prisma } from "@prisma/client";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Checkbox } from "./ui/checkbox";
+import { Button } from "./ui/button";
+import { Trash } from "lucide-react";
 
 const SAMPLE_DESCRIPTION = `The AI you've engaged is engineered with advanced capabilities, designed to address and respond to an array of questions you might have, regardless of their complexity. It is backed by a rich and extensive compilation of documents that have meticulously uploaded, providing a broad and deep knowledge base to draw from. This AI, with its vast knowledge, stands ready to offer insightful answers to your diverse queries, whether you're seeking simple clarifications or deep, complex explorations. Its singular aim is to ensure you receive the precise information you need, with speed and accuracy, thereby streamlining your decision-making process and enhancing your productivity.`;
 
@@ -92,6 +94,62 @@ export const AIProfile = ({
                   {...field}
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          name="profileFeatures"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Features</FormLabel>
+              <FormDescription>
+                Write a few features of your AI to help explain its value to
+                users.
+              </FormDescription>
+              {(field.value || [{}]).map((feature: any, index: number) => (
+                <div key={index} className="">
+                  <FormLabel>Feature {index + 1}</FormLabel>
+                  <Button
+                    disabled={isLoading}
+                    onClick={() => {
+                      field.onChange([
+                        ...field.value.slice(0, index),
+                        ...field.value.slice(index + 1),
+                      ]);
+                    }}
+                    size="icon"
+                    variant="ghost"
+                    type="button"
+                  >
+                    <Trash className="w-4 h-4" />
+                  </Button>
+                  <div>
+                    <FormLabel>Feature Title</FormLabel>
+                    <FormControl>
+                      <Input disabled={isLoading} placeholder="Very Smart" />
+                    </FormControl>
+                    <FormLabel>Feature Short Description</FormLabel>
+                    <FormControl>
+                      <Input
+                        disabled={isLoading}
+                        placeholder="This AI is very intelligent and able to understand complete sentences."
+                      />
+                    </FormControl>
+                  </div>
+                </div>
+              ))}
+              <Button
+                onClick={() => {
+                  field.onChange([...(field.value || [{}]), {}]);
+                }}
+                disabled={isLoading}
+                variant="ring"
+                type="button"
+              >
+                Add Another Feature
+              </Button>
               <FormMessage />
             </FormItem>
           )}
