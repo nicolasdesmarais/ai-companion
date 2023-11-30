@@ -150,7 +150,15 @@ export const AIEditor = ({
 
   const handleTabClick = (route: string, isDisabled: boolean) => {
     if (!isDisabled) {
-      router.push(`/ai/${aiId}/${route}` as any);
+      if (form.formState.isDirty) {
+        toast({
+          variant: "destructive",
+          description: "Changes detected. Please save to continue.",
+          duration: 3000,
+        });
+      } else {
+        router.push(`/ai/${aiId}/${route}` as any);
+      }
     }
   };
 
@@ -165,7 +173,7 @@ export const AIEditor = ({
           response = await axios.post("/api/v1/ai", values);
         }
         aiId = response.data.id;
-        form.reset(response.data);
+        form.reset({ talk: "", ...response.data }); //TODO: remove talk
         toast({
           description: "AI Saved.",
           duration: 2000,
@@ -182,7 +190,7 @@ export const AIEditor = ({
       setContinueRequested("");
       router.push(`/ai/${aiId}${continueRequested}`);
     } else {
-      router.push(`/ai/${aiId}/edit`);
+      router.push(pathname);
     }
   };
 
@@ -240,7 +248,7 @@ export const AIEditor = ({
 
   const backButton = (route: string) => (
     <Button
-      onClick={() => router.push(`/ai/${aiId}/${route}`)}
+      onClick={() => handleTabClick(route, false)}
       variant="link"
       type="button"
     >
