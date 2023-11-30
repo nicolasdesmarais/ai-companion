@@ -98,16 +98,20 @@ export const AIEditor = ({
     fetchDataSources();
   }, []);
 
-  if (initialAi && !initialAi.options) {
+  if (initialAi) {
     const model = aiModels.find((model) => model.id === initialAi.modelId);
     if (model) {
       const options = {} as any;
       Object.entries(model.options).forEach(([key, value]) => {
-        if (value.default) {
+        if (value.default !== undefined) {
           options[key] = [value.default];
         }
       });
-      initialAi.options = options;
+      if (initialAi.options) {
+        initialAi.options = { ...options, ...(initialAi.options as any) };
+      } else {
+        initialAi.options = options;
+      }
     }
   }
 
