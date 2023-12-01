@@ -1,6 +1,7 @@
 import { DavinciModel } from "@/src/adapter/ai-model/chat-models/DavinciModel";
 import { Gpt35Model } from "@/src/adapter/ai-model/chat-models/Gpt35Model";
 import { Gpt4Model } from "@/src/adapter/ai-model/chat-models/Gpt4Model";
+import { GptAssistantModel } from "@/src/adapter/ai-model/chat-models/GptAssistantModel";
 import { LLamaModel } from "@/src/adapter/ai-model/chat-models/LLamaModel";
 import { StaticAIModelRepository } from "@/src/adapter/repositories/StaticAIModelRepository";
 import { AIModel } from "../models/AIModel";
@@ -9,6 +10,7 @@ import { AIModelRepository } from "../ports/AIModelRepository";
 const CHAT_MODELS = [
   new Gpt4Model(),
   new Gpt35Model(),
+  new GptAssistantModel(),
   new DavinciModel(),
   new LLamaModel(),
 ];
