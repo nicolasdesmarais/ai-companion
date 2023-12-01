@@ -16,6 +16,8 @@ import { Textarea } from "./ui/textarea";
 import { Checkbox } from "./ui/checkbox";
 import { Button } from "./ui/button";
 import { Trash } from "lucide-react";
+import { Drawer } from "./drawer";
+import { TestChat } from "./test-chat";
 
 const SAMPLE_DESCRIPTION = `The AI you've engaged is engineered with advanced capabilities, designed to address and respond to an array of questions you might have, regardless of their complexity. It is backed by a rich and extensive compilation of documents that have meticulously uploaded, providing a broad and deep knowledge base to draw from. This AI, with its vast knowledge, stands ready to offer insightful answers to your diverse queries, whether you're seeking simple clarifications or deep, complex explorations. Its singular aim is to ensure you receive the precise information you need, with speed and accuracy, thereby streamlining your decision-making process and enhancing your productivity.`;
 
@@ -41,6 +43,9 @@ export const AIProfile = ({
   form,
   aiModels,
 }: ProfileSourceProps) => {
+  if (!initialAi) {
+    return null;
+  }
   const isLoading = form.formState.isSubmitting;
 
   return (
@@ -181,6 +186,45 @@ export const AIProfile = ({
                   Add Another Feature
                 </Button>
               </div>
+            </FormItem>
+          )}
+        />
+        <FormField
+          name="profile.conversations"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Example Conversations</FormLabel>
+              <FormDescription>
+                Provide example question and answer so that users can understand
+                the type of conversations your AI is good at.
+              </FormDescription>
+
+              <Drawer trigger={<div>Add Conversation</div>}>
+                <TestChat
+                  ai={initialAi}
+                  className="w-96"
+                  actions={
+                    <div className="flex justify-between">
+                      <Button
+                        onClick={() => {}}
+                        disabled={isLoading}
+                        type="button"
+                      >
+                        Restart Chat
+                      </Button>
+                      <Button
+                        onClick={() => {}}
+                        disabled={isLoading}
+                        variant="ring"
+                        type="button"
+                      >
+                        Save Example Chat
+                      </Button>
+                    </div>
+                  }
+                />
+              </Drawer>
             </FormItem>
           )}
         />
