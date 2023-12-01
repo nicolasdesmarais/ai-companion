@@ -1,10 +1,11 @@
 import { AIModel } from "@/src/domain/models/AIModel";
 import { AI, Chat, Message } from "@prisma/client";
+import { VectorKnowledgeResponse } from "../../knowledge/vector-database/VectorDatabaseAdapter";
 
 export interface ChatModel {
   supports(modelId: string): boolean;
 
-  postToChat(input: PostToChatInput): Promise<any>;
+  postToChat(input: PostToChatInput): Promise<PostToChatResponse>;
 }
 
 export interface PostToChatInput {
@@ -14,9 +15,14 @@ export interface PostToChatInput {
   aiModel: AIModel;
   prompt: string;
   date: string;
-  answerTokens: number;
-  questionTokens: number;
-  bootstrapKnowledge: any;
   options: any;
+  getKnowledgeCallback: (
+    tokensUsed: number
+  ) => Promise<VectorKnowledgeResponse>;
   endCallback: (answer: string) => void;
+}
+
+export interface PostToChatResponse {
+  isStream: boolean;
+  response: String | ReadableStream<any>;
 }

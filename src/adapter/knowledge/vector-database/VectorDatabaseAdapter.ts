@@ -2,13 +2,18 @@ import { MemoryManager } from "@/src/lib/memory";
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { Message } from "@prisma/client";
 
-export class PineconeAdapter {
+export interface VectorKnowledgeResponse {
+  knowledge: string;
+  docMeta: Record<string, any>[];
+}
+
+export class VectorDatabaseAdapter {
   public async getKnowledge(
     prompt: string,
     history: Message[],
     dataSources: any[],
     availTokens: number
-  ) {
+  ): Promise<VectorKnowledgeResponse> {
     if (dataSources.length === 0) {
       return { knowledge: "", docMeta: [] };
     }
@@ -79,5 +84,5 @@ export class PineconeAdapter {
   }
 }
 
-const pineconeAdapter = new PineconeAdapter();
-export default pineconeAdapter;
+const vectorDatabaseAdapter = new VectorDatabaseAdapter();
+export default vectorDatabaseAdapter;

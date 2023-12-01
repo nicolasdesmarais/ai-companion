@@ -1,5 +1,7 @@
 import openAIAssistantModelAdapter from "@/src/adapter/ai-model/OpenAIAssistantModelAdapter";
-import pineconeAdapter from "@/src/adapter/knowledge/pinecone/PineconeAdapter";
+import vectorDatabaseAdapter, {
+  VectorKnowledgeResponse,
+} from "@/src/adapter/knowledge/vector-database/VectorDatabaseAdapter";
 import {
   CreateChatRequest,
   GetChatsResponse,
@@ -8,9 +10,12 @@ import prismadb from "@/src/lib/prismadb";
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { Role } from "@prisma/client";
 import { JsonObject } from "@prisma/client/runtime/library";
+import axios from "axios";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import aiModelService from "./AIModelService";
 import aiService from "./AIService";
+
+const BUFFER_TOKENS = 200;
 
 const getChatsResponseSelect = {
   id: true,
@@ -205,6 +210,13 @@ export class ChatService {
       );
     }
 
+    let options = {} as any;
+    Object.entries(chat.ai.options || {}).forEach(([key, value]) => {
+      if (value && value.length > 0) {
+        options[key] = value[0];
+      }
+    });
+
     const endCallback = async (answer: string) => {
       const end = performance.now();
       const setupTime = Math.round(endSetup - start);
@@ -220,71 +232,84 @@ export class ChatService {
       });
     };
 
-    let options = {} as any;
-    Object.entries(chat.ai.options || {}).forEach(([key, value]) => {
-      if (value && value.length > 0) {
-        options[key] = value[0];
-      }
-    });
-
     const chatModel = aiModelService.getChatModelInstance(model.id);
     if (!chatModel) {
       throw new Error(`Chat model with id ${model.id} not found`);
     }
 
-    const questionTokens = getTokenLength(request.prompt);
-    const answerTokens = ((chat.ai.options as JsonObject)?.maxTokens ||
-      model.options.maxTokens.default) as number;
-
-    let bootstrapKnowledge;
-    if (chat.ai.dataSources.length === 1) {
-      if (chat.ai.dataSources[0].dataSource.knowledges.length === 1) {
-        const meta = chat.ai.dataSources[0].dataSource.knowledges[0].knowledge
-          .metadata as any;
-        if (
-          meta &&
-          meta.mimeType &&
-          meta.totalTokenCount &&
-          meta.mimeType === "text/plain"
-        ) {
-          bootstrapKnowledge = {
-            ...chat.ai.dataSources[0].dataSource.knowledges[0].knowledge,
-            ...meta,
-          };
-        }
-      }
-    }
     endSetup = performance.now();
 
-    const getVectorKnowledge = async (tokensUsed: number) => {
-      return await pineconeAdapter.getKnowledge(
+    const getKnowledgeCallback = async (
+      tokensUsed: number
+    ): Promise<VectorKnowledgeResponse> => {
+      let bootstrapKnowledge;
+      if (chat.ai.dataSources.length === 1) {
+        if (chat.ai.dataSources[0].dataSource.knowledges.length === 1) {
+          const meta = chat.ai.dataSources[0].dataSource.knowledges[0].knowledge
+            .metadata as any;
+          if (
+            meta &&
+            meta.mimeType &&
+            meta.totalTokenCount &&
+            meta.mimeType === "text/plain"
+          ) {
+            bootstrapKnowledge = {
+              ...chat.ai.dataSources[0].dataSource.knowledges[0].knowledge,
+              ...meta,
+            };
+          }
+        }
+      }
+
+      const questionTokens = getTokenLength(prompt);
+      const answerTokens = ((chat.ai.options as JsonObject)?.maxTokens ||
+        model.options.maxTokens.default) as number;
+
+      const remainingTokens =
+        model.contextSize -
+        answerTokens -
+        questionTokens -
+        tokensUsed -
+        BUFFER_TOKENS;
+
+      let knowledge;
+      if (
+        bootstrapKnowledge &&
+        bootstrapKnowledge.blobUrl &&
+        remainingTokens > bootstrapKnowledge.totalTokenCount
+      ) {
+        const resp = await axios.get(bootstrapKnowledge.blobUrl);
+        if (resp.status === 200) {
+          knowledge = resp.data;
+        }
+      }
+      if (!knowledge) {
+        const vectorKnowledge = await getKnowledgeCallback(tokensUsed);
+        knowledge = vectorKnowledge.knowledge;
+      }
+
+      const vectorKnowledge = await vectorDatabaseAdapter.getKnowledge(
         prompt,
         chat.messages,
         chat.ai.dataSources,
         remainingTokens
       );
+      knowledgeMeta = vectorKnowledge.docMeta;
+      endKnowledge = performance.now();
+      return vectorKnowledge;
     };
 
-    chatModel.postToChat({
+    return await chatModel.postToChat({
       ai: chat.ai,
       chat,
       messages: chat.messages,
       aiModel: model,
       prompt,
       date,
-      answerTokens,
-      questionTokens,
-      bootstrapKnowledge,
       options,
+      getKnowledgeCallback,
       endCallback,
     });
-
-    // const { knowledge, docMeta } = await pineconeAdapter.getKnowledge(
-    //   request.prompt,
-    //   chat.messages,
-    //   chat.ai.dataSources,
-    //   remainingTokens
-    // );
   }
 }
 

@@ -9,7 +9,6 @@ import { JsonObject } from "@prisma/client/runtime/library";
 import { OpenAIAssistantRunnable } from "langchain/experimental/openai_assistant";
 import OpenAI from "openai";
 import { ThreadMessage } from "openai/resources/beta/threads/messages/messages.mjs";
-import pineconeAdapter from "../knowledge/pinecone/PineconeAdapter";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

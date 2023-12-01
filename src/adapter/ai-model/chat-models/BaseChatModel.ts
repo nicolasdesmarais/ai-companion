@@ -1,35 +1,19 @@
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { LangChainStream } from "ai";
-import axios from "axios";
 import {
   ChatOpenAI,
   ChatOpenAICallOptions,
 } from "langchain/chat_models/openai";
 import { HumanMessage, SystemMessage } from "langchain/schema";
-import pineconeAdapter from "../../knowledge/pinecone/PineconeAdapter";
-import { PostToChatInput } from "./ChatModel";
-
-const BUFFER_TOKENS = 200;
+import { PostToChatInput, PostToChatResponse } from "./ChatModel";
 
 export abstract class BaseChatModel {
   protected abstract getChatModelInstance(
     options: any
   ): ChatOpenAI<ChatOpenAICallOptions>;
 
-  public async postToChat(input: PostToChatInput) {
-    const {
-      ai,
-      chat,
-      messages,
-      aiModel,
-      prompt,
-      date,
-      answerTokens,
-      questionTokens,
-      bootstrapKnowledge,
-      options,
-      endCallback,
-    } = input;
+  public async postToChat(input: PostToChatInput): Promise<PostToChatResponse> {
+    const { ai, messages, date, getKnowledgeCallback, endCallback } = input;
 
     const chatModel = this.getChatModelInstance(input.options);
 
@@ -80,41 +64,17 @@ export abstract class BaseChatModel {
     const instructionTokens = getTokenLength(engineeredPrompt);
     const chatHistoryTokens = getTokenLength(JSON.stringify(historyMessages));
     const chatSeedTokens = getTokenLength(JSON.stringify(historySeed));
-    const remainingTokens =
-      aiModel.contextSize -
-      answerTokens -
-      chatHistoryTokens -
-      chatSeedTokens -
-      instructionTokens -
-      questionTokens -
-      BUFFER_TOKENS;
-    let knowledge;
-    if (
-      bootstrapKnowledge &&
-      bootstrapKnowledge.blobUrl &&
-      remainingTokens > bootstrapKnowledge.totalTokenCount
-    ) {
-      const resp = await axios.get(bootstrapKnowledge.blobUrl);
-      if (resp.status === 200) {
-        knowledge = resp.data;
-      }
-    }
-    if (!knowledge) {
-      const vectorKnowledge = await pineconeAdapter.getKnowledge(
-        prompt,
-        messages,
-        ai.dataSources,
-        remainingTokens
-      );
-      knowledge = vectorKnowledge.knowledge;
-      knowledgeMeta = vectorKnowledge.docMeta;
-    }
+    const tokensUsed = instructionTokens + chatHistoryTokens + chatSeedTokens;
+
+    let knowledge = await getKnowledgeCallback(tokensUsed);
     const chatLog = [new SystemMessage(`${engineeredPrompt}${knowledge}\n`)];
     chatLog.push(...historySeed);
     chatLog.push(...historyMessages);
 
-    endKnowledge = performance.now();
     chatModel.call(chatLog, {}, [customHandlers]);
-    return stream;
+    return {
+      isStream: true,
+      response: stream,
+    };
   }
 }
