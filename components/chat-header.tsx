@@ -13,6 +13,7 @@ import {
   PinOff,
   RefreshCw,
   Trash,
+  Star,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -28,6 +29,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useChats } from "@/hooks/use-chats";
 import { useState } from "react";
 import { ShareModal } from "./share-modal";
+import { RateModal } from "./rate-modal";
 
 interface ChatHeaderProps {
   chat: Chat & {
@@ -45,6 +47,7 @@ export const ChatHeader = ({ chat }: ChatHeaderProps) => {
   const { toast } = useToast();
   const { chats, fetchChats } = useChats();
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showRateModal, setShowRateModal] = useState(false);
 
   const duplicate = async () => {
     const response = await axios.put(`/api/v1/chats/${chat.id}/duplicate`);
@@ -154,6 +157,10 @@ export const ChatHeader = ({ chat }: ChatHeaderProps) => {
               <Trash className="w-4 h-4 mr-2" />
               Remove
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setShowRateModal(true)}>
+              <Star className="w-4 h-4 mr-2" />
+              Rate
+            </DropdownMenuItem>
             {user?.id === chat.ai.userId && (
               <DropdownMenuItem
                 onClick={() => router.push(`/ai/${chat.ai.id}/edit`)}
@@ -168,6 +175,11 @@ export const ChatHeader = ({ chat }: ChatHeaderProps) => {
       <ShareModal
         showModal={showShareModal}
         setShowModal={setShowShareModal}
+        ai={chat.ai}
+      />
+      <RateModal
+        showModal={showRateModal}
+        setShowModal={setShowRateModal}
         ai={chat.ai}
       />
     </div>

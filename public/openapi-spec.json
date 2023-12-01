@@ -246,6 +246,93 @@
         ]
       }
     },
+    "/api/v1/ai/{aiId}/data-sources/api": {
+      "post": {
+        "summary": "Create a new API data source for the specified AI",
+        "description": "Adds a new API data source with a specified name and JSON payload for the given AI.",
+        "operationId": "createApiDataSource",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier for the AI.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the data source."
+                  },
+                  "data": {
+                    "type": "object",
+                    "description": "The JSON payload to be used as the data source's knowledge."
+                  }
+                },
+                "required": ["name", "data"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Data source successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "aiId": {
+                      "type": "string"
+                    },
+                    "dataSourceId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "AI not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/ai/{aiId}/data-sources/file": {
       "post": {
         "summary": "Adds a file upload data source for the specified AI. Max file size: 4.5Mb.",
@@ -527,88 +614,6 @@
           },
           "400": {
             "description": "Bad request, when the request contains invalid data."
-          },
-          "404": {
-            "description": "Not found, when the specified chat ID does not exist."
-          },
-          "500": {
-            "description": "Internal Server Error, any internal error."
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ]
-      }
-    },
-    "/api/v1/chats/{chatId}/pin": {
-      "put": {
-        "summary": "Pin a chat session",
-        "description": "Pins the chat session with the specified ID, marking it as important or for easy access.",
-        "operationId": "pinChat",
-        "parameters": [
-          {
-            "name": "chatId",
-            "in": "path",
-            "required": true,
-            "description": "The unique identifier of the chat session to pin.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Chat session successfully pinned.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Chat"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found, when the specified chat ID does not exist."
-          },
-          "500": {
-            "description": "Internal Server Error, any internal error."
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ]
-      }
-    },
-    "/api/v1/chats/{chatId}/unpin": {
-      "put": {
-        "summary": "Unpin a chat session",
-        "description": "Unpins the chat session with the specified ID, removing it from the pinned list.",
-        "operationId": "unpinChat",
-        "parameters": [
-          {
-            "name": "chatId",
-            "in": "path",
-            "required": true,
-            "description": "The unique identifier of the chat session to unpin.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Chat session successfully unpinned.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Chat"
-                }
-              }
-            }
           },
           "404": {
             "description": "Not found, when the specified chat ID does not exist."

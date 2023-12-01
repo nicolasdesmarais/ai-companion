@@ -49,6 +49,8 @@ model AI {
 
   dataSources   AIDataSource[]
 
+  ratings       AIRating[]
+
   @@index([categoryId])
   @@index([visibility])
   @@index([userId])
@@ -279,4 +281,15 @@ model ApiKey {
   scopes                    Json?
 
   @@map("api_keys")
+}
+
+model AIRating {
+  id                        Int         @id @default(autoincrement())
+  userId                    String?     @map(name: "user_id")
+  ai                        AI          @relation(fields: [aiId], references: [id])
+  aiId                      String      @map(name: "ai_id")
+  review                    String      @db.Text
+  rating                    Int
+
+  @@map("ai_ratings")
 }

@@ -5,4 +5,5 @@ export interface IndexKnowledgeResponse {
   metadata?: any;
   blobUrl?: string;
   userId?: string;
+  events?: any[];
 }
