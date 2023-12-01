@@ -24,5 +24,5 @@ export interface PostToChatInput {
 
 export interface PostToChatResponse {
   isStream: boolean;
-  response: String | ReadableStream<any>;
+  response: string | ReadableStream<any>;
 }
