@@ -27,9 +27,11 @@ export const TestChat = ({ ai, className, actions }: Props) => {
     handleSubmit,
     setInput,
   } = useCompletion({
-    api: `/api/v1/chats/clplhebdc0002h5m9oxu09pto`,
+    api: `/api/v1/chats/test-chat`,
     body: {
       date: new Date().toLocaleString(),
+      aiId: ai.id,
+      messages,
     },
     onError: (err) => {
       toast({

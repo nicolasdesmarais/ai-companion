@@ -17,6 +17,7 @@ import { OpenAI } from "langchain/llms/openai";
 import { Replicate } from "langchain/llms/replicate";
 import { HumanMessage, SystemMessage } from "langchain/schema";
 import { NextResponse } from "next/server";
+import prismadb from "@/src/lib/prismadb";
 
 // small buffer so we don't go over the limit
 const BUFFER_TOKENS = 200;
@@ -112,7 +113,7 @@ async function postHandler(
   const chatId = params.chatId;
 
   const chatRequest: CreateChatRequest = await request.json();
-  const { date, prompt } = chatRequest;
+  const { date, prompt, aiId, messages } = chatRequest;
 
   const identifier = request.url + "-" + userId;
   const { success } = await rateLimit(identifier);
@@ -121,7 +122,15 @@ async function postHandler(
     return new NextResponse("Rate limit exceeded", { status: 429 });
   }
 
-  const chat = await chatService.updateChat(chatId, userId, prompt, Role.user);
+  let chat: any;
+  if (chatId === "test-chat") {
+    if (!aiId) {
+      return new NextResponse("AI not found", { status: 404 });
+    }
+    chat = await chatService.getTestChat(aiId, userId, messages || [], prompt);
+  } else {
+    chat = await chatService.updateChat(chatId, userId, prompt, Role.user);
+  }
 
   if (!chat) {
     return new NextResponse("Conversation not found", { status: 404 });
@@ -138,19 +147,21 @@ async function postHandler(
   const { stream, handlers } = LangChainStream();
 
   const customHandleLLMEnd = async (_output: any, runId: string) => {
-    end = performance.now();
-    const answer = _output.generations[0][0].text;
-    const setupTime = Math.round(endSetup - start);
-    const knowledgeTime = Math.round(endKnowledge - endSetup);
-    const llmTime = Math.round(end - endKnowledge);
-    const totalTime = Math.round(end - start);
-    await chatService.updateChat(chatId, userId, answer, Role.system, {
-      setupTime,
-      knowledgeTime,
-      llmTime,
-      totalTime,
-      knowledgeMeta,
-    });
+    if (chatId !== "test-chat") {
+      end = performance.now();
+      const answer = _output.generations[0][0].text;
+      const setupTime = Math.round(endSetup - start);
+      const knowledgeTime = Math.round(endKnowledge - endSetup);
+      const llmTime = Math.round(end - endKnowledge);
+      const totalTime = Math.round(end - start);
+      await chatService.updateChat(chatId, userId, answer, Role.system, {
+        setupTime,
+        knowledgeTime,
+        llmTime,
+        totalTime,
+        knowledgeMeta,
+      });
+    }
     return await handlers.handleLLMEnd(_output, runId);
   };
 

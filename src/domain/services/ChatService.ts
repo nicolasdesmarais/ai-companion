@@ -86,7 +86,6 @@ export class ChatService {
     userId: string,
     content: string,
     role: Role,
-
     metadata?: any
   ) {
     const chat = await prismadb.chat.update({
@@ -130,6 +129,29 @@ export class ChatService {
       },
     });
 
+    return chat;
+  }
+
+  public async getTestChat(
+    aiId: string,
+    userId: string,
+    messages: any[],
+    prompt: string
+  ) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+      include: {
+        dataSources: true,
+      },
+    });
+    const chat = { ai, messages: messages || [] };
+    chat.messages.push({
+      content: prompt,
+      role: Role.user,
+      userId,
+    });
     return chat;
   }
 
