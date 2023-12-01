@@ -108,71 +108,79 @@ export const AIProfile = ({
                 Write a few features of your AI to help explain its value to
                 users.
               </FormDescription>
-              {(field.value || [{}]).map((feature: any, index: number) => (
-                <div key={index} className="">
-                  <FormLabel>Feature {index + 1}</FormLabel>
-                  <Button
-                    disabled={isLoading}
-                    onClick={() => {
-                      field.onChange([
-                        ...field.value.slice(0, index),
-                        ...field.value.slice(index + 1),
-                      ]);
-                    }}
-                    size="icon"
-                    variant="ghost"
-                    type="button"
-                  >
-                    <Trash className="w-4 h-4" />
-                  </Button>
-                  <div>
-                    <FormField
-                      name={`profile.features[${index}].title`}
-                      control={form.control}
-                      render={({ field }) => (
-                        <>
-                          <FormLabel>Feature Title</FormLabel>
-                          <FormControl>
-                            <Input
-                              disabled={isLoading}
-                              placeholder="Very Smart"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </>
-                      )}
-                    />
-                    <FormField
-                      name={`profile.features[${index}].description`}
-                      control={form.control}
-                      render={({ field }) => (
-                        <>
-                          <FormLabel>Feature Short Description</FormLabel>
-                          <FormControl>
-                            <Input
-                              disabled={isLoading}
-                              placeholder="This AI is very intelligent and able to understand complete sentences."
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </>
-                      )}
-                    />
+              <div className="border-l border-ring pl-4 mt-4">
+                {(field.value || [{}]).map((feature: any, index: number) => (
+                  <div key={index}>
+                    <div className="flex items-center">
+                      <FormLabel className="mr-2">
+                        Feature {index + 1}
+                      </FormLabel>
+                      <Button
+                        disabled={isLoading}
+                        onClick={() => {
+                          field.onChange([
+                            ...field.value.slice(0, index),
+                            ...field.value.slice(index + 1),
+                          ]);
+                        }}
+                        size="icon"
+                        variant="ghost"
+                        type="button"
+                      >
+                        <Trash className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <div className="border-l border-ring pl-4 pb-2 mt-2 mb-4 space-y-2">
+                      <FormField
+                        name={`profile.features[${index}].title`}
+                        control={form.control}
+                        render={({ field }) => (
+                          <div>
+                            <FormLabel>Feature Title</FormLabel>
+                            <FormControl>
+                              <Input
+                                disabled={isLoading}
+                                placeholder="Very Smart"
+                                className="mt-2"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </div>
+                        )}
+                      />
+                      <FormField
+                        name={`profile.features[${index}].description`}
+                        control={form.control}
+                        render={({ field }) => (
+                          <div>
+                            <FormLabel>Feature Short Description</FormLabel>
+                            <FormControl>
+                              <Input
+                                disabled={isLoading}
+                                placeholder="This AI is very intelligent and able to understand complete sentences."
+                                className="mt-2"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </div>
+                        )}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
-              <Button
-                onClick={() => {
-                  field.onChange([...(field.value || [{}]), {}]);
-                }}
-                disabled={isLoading}
-                variant="ring"
-                type="button"
-              >
-                Add Another Feature
-              </Button>
+                ))}
+                <Button
+                  onClick={() => {
+                    field.onChange([...(field.value || [{}]), {}]);
+                  }}
+                  disabled={isLoading}
+                  variant="ring"
+                  type="button"
+                >
+                  Add Another Feature
+                </Button>
+              </div>
             </FormItem>
           )}
         />
