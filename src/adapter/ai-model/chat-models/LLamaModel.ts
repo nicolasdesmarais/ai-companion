@@ -1,6 +1,6 @@
 import { CallbackManager } from "langchain/callbacks";
 import { Replicate } from "langchain/llms/replicate";
-import { ChatModel, PostToChatInput } from "./ChatModel";
+import { ChatModel, PostToChatInput, PostToChatResponse } from "./ChatModel";
 
 const MODEL_ID = "llama2-13b";
 const REPLICATE_MODEL =
@@ -24,7 +24,7 @@ export class LLamaModel implements ChatModel {
     });
   }
 
-  public async postToChat(input: PostToChatInput) {
+  public async postToChat(input: PostToChatInput): Promise<PostToChatResponse> {
     throw new Error("Method not implemented.");
   }
 }

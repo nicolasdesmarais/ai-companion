@@ -1,5 +1,5 @@
 import { OpenAI } from "langchain/llms/openai";
-import { ChatModel, PostToChatInput } from "./ChatModel";
+import { ChatModel, PostToChatInput, PostToChatResponse } from "./ChatModel";
 
 const MODEL_ID = "text-davinci-003";
 
@@ -15,7 +15,7 @@ export class DavinciModel implements ChatModel {
     });
   }
 
-  public async postToChat(input: PostToChatInput): Promise<any> {
+  public async postToChat(input: PostToChatInput): Promise<PostToChatResponse> {
     throw new Error("Method not implemented.");
   }
 }

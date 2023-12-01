@@ -284,19 +284,17 @@ export class ChatService {
         }
       }
       if (!knowledge) {
-        const vectorKnowledge = await getKnowledgeCallback(tokensUsed);
+        const vectorKnowledge = await vectorDatabaseAdapter.getKnowledge(
+          prompt,
+          chat.messages,
+          chat.ai.dataSources,
+          remainingTokens
+        );
         knowledge = vectorKnowledge.knowledge;
       }
 
-      const vectorKnowledge = await vectorDatabaseAdapter.getKnowledge(
-        prompt,
-        chat.messages,
-        chat.ai.dataSources,
-        remainingTokens
-      );
-      knowledgeMeta = vectorKnowledge.docMeta;
       endKnowledge = performance.now();
-      return vectorKnowledge;
+      return knowledge;
     };
 
     return await chatModel.postToChat({
