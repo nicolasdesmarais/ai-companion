@@ -506,6 +506,7 @@ export class AIService {
       groups,
       visibility,
       options,
+      profile,
     } = request;
 
     if (!src || !name || !description || !instructions || !categoryId) {
@@ -534,6 +535,7 @@ export class AIService {
         modelId,
         visibility,
         options: options as any,
+        profile: profile as any,
       },
     });
 

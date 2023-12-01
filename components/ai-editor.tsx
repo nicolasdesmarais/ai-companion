@@ -55,6 +55,29 @@ const formSchema = z.object({
   knowledge: z.array(z.custom<Knowledge>()).optional(),
   groups: z.array(z.string()).optional(),
   talk: z.string().optional(),
+  profile: z.object({
+    headline: z.string().min(1, {
+      message: "Headline is required.",
+    }),
+    description: z.string().min(1, {
+      message: "Description is required.",
+    }),
+    features: z
+      .array(
+        z.object({
+          title: z.string().min(1, {
+            message: "Feature title is required.",
+          }),
+          description: z.string().min(1, {
+            message: "Feature description is required.",
+          }),
+        })
+      )
+      .optional(),
+    showCharacter: z.boolean().optional(),
+    showTraining: z.boolean().optional(),
+    showPersonality: z.boolean().optional(),
+  }),
 });
 
 const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({

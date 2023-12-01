@@ -56,7 +56,7 @@ export const AIProfile = ({
       </div>
       <div className="pt-2 space-y-4">
         <FormField
-          name="headline"
+          name="profile.headline"
           control={form.control}
           render={({ field }) => (
             <FormItem className="col-span-2 md:col-span-1">
@@ -76,7 +76,7 @@ export const AIProfile = ({
           )}
         />
         <FormField
-          name="profileDescription"
+          name="profile.description"
           control={form.control}
           render={({ field }) => (
             <FormItem>
@@ -99,7 +99,7 @@ export const AIProfile = ({
           )}
         />
         <FormField
-          name="profileFeatures"
+          name="profile.features"
           control={form.control}
           render={({ field }) => (
             <FormItem>
@@ -126,17 +126,40 @@ export const AIProfile = ({
                     <Trash className="w-4 h-4" />
                   </Button>
                   <div>
-                    <FormLabel>Feature Title</FormLabel>
-                    <FormControl>
-                      <Input disabled={isLoading} placeholder="Very Smart" />
-                    </FormControl>
-                    <FormLabel>Feature Short Description</FormLabel>
-                    <FormControl>
-                      <Input
-                        disabled={isLoading}
-                        placeholder="This AI is very intelligent and able to understand complete sentences."
-                      />
-                    </FormControl>
+                    <FormField
+                      name={`profile.features[${index}].title`}
+                      control={form.control}
+                      render={({ field }) => (
+                        <>
+                          <FormLabel>Feature Title</FormLabel>
+                          <FormControl>
+                            <Input
+                              disabled={isLoading}
+                              placeholder="Very Smart"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </>
+                      )}
+                    />
+                    <FormField
+                      name={`profile.features[${index}].description`}
+                      control={form.control}
+                      render={({ field }) => (
+                        <>
+                          <FormLabel>Feature Short Description</FormLabel>
+                          <FormControl>
+                            <Input
+                              disabled={isLoading}
+                              placeholder="This AI is very intelligent and able to understand complete sentences."
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </>
+                      )}
+                    />
                   </div>
                 </div>
               ))}
@@ -150,7 +173,6 @@ export const AIProfile = ({
               >
                 Add Another Feature
               </Button>
-              <FormMessage />
             </FormItem>
           )}
         />
@@ -168,12 +190,18 @@ export const AIProfile = ({
         <Separator className="bg-primary/10" />
         <div className="pt-2 space-y-8">
           <FormField
-            name="showCharacter"
+            name="profile.showCharacter"
             control={form.control}
             render={({ field }) => (
               <FormItem className="col-span-2 md:col-span-1">
                 <FormControl>
-                  <Checkbox>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={(val) => {
+                      field.onChange(val);
+                    }}
+                    {...field}
+                  >
                     <div>
                       Show Character Information
                       <FormDescription>
@@ -188,12 +216,18 @@ export const AIProfile = ({
             )}
           />
           <FormField
-            name="showTraining"
+            name="profile.showTraining"
             control={form.control}
             render={({ field }) => (
               <FormItem className="col-span-2 md:col-span-1">
                 <FormControl>
-                  <Checkbox>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={(val) => {
+                      field.onChange(val);
+                    }}
+                    {...field}
+                  >
                     <div>
                       Show Training Materials
                       <FormDescription>
@@ -208,12 +242,18 @@ export const AIProfile = ({
             )}
           />
           <FormField
-            name="showCharacter"
+            name="profile.showPersonality"
             control={form.control}
             render={({ field }) => (
               <FormItem className="col-span-2 md:col-span-1">
                 <FormControl>
-                  <Checkbox>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={(val) => {
+                      field.onChange(val);
+                    }}
+                    {...field}
+                  >
                     <div>
                       Show Personality Settings
                       <FormDescription>

@@ -30,6 +30,7 @@ model AI {
   seed          String @db.Text
   visibility    AIVisibility @default(PRIVATE)
   options       Json?
+  profile       Json?
 
   createdAt     DateTime @default(now()) @map(name: "created_at")
   updatedAt     DateTime @updatedAt       @map(name: "updated_at")

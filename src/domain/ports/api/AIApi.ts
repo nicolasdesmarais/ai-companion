@@ -9,6 +9,19 @@ export interface CreateAIRequest extends AIRequest {
 
 export interface UpdateAIRequest extends AIRequest {}
 
+export interface AIProfileFeature {
+  title: string;
+  description: string;
+}
+export interface AIProfile {
+  headline: string;
+  description: string;
+  features: AIProfileFeature[];
+  showCharacter: boolean;
+  showTraining: boolean;
+  showPersonality: boolean;
+}
+
 export interface AIRequest {
   categoryId: string;
   src: string;
@@ -20,4 +33,5 @@ export interface AIRequest {
   visibility: AIVisibility;
   options: AIModelOptions;
   groups: string[];
+  profile: AIProfile;
 }
