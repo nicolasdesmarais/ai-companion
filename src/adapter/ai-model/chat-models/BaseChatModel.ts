@@ -66,7 +66,7 @@ export abstract class BaseChatModel {
     const chatSeedTokens = getTokenLength(JSON.stringify(historySeed));
     const tokensUsed = instructionTokens + chatHistoryTokens + chatSeedTokens;
 
-    let knowledge = await getKnowledgeCallback(tokensUsed);
+    const knowledge = await getKnowledgeCallback(tokensUsed);
     const chatLog = [new SystemMessage(`${engineeredPrompt}${knowledge}\n`)];
     chatLog.push(...historySeed);
     chatLog.push(...historyMessages);

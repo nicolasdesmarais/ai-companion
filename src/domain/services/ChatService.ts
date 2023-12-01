@@ -272,7 +272,10 @@ export class ChatService {
         tokensUsed -
         BUFFER_TOKENS;
 
-      let knowledge;
+      let knowledgeResponse: VectorKnowledgeResponse = {
+        knowledge: "",
+        docMeta: [],
+      };
       if (
         bootstrapKnowledge &&
         bootstrapKnowledge.blobUrl &&
@@ -280,21 +283,21 @@ export class ChatService {
       ) {
         const resp = await axios.get(bootstrapKnowledge.blobUrl);
         if (resp.status === 200) {
-          knowledge = resp.data;
+          knowledgeResponse.knowledge = resp.data;
         }
       }
-      if (!knowledge) {
+      if (!knowledgeResponse.knowledge) {
         const vectorKnowledge = await vectorDatabaseAdapter.getKnowledge(
           prompt,
           chat.messages,
           chat.ai.dataSources,
           remainingTokens
         );
-        knowledge = vectorKnowledge.knowledge;
+        knowledgeResponse.knowledge = vectorKnowledge.knowledge;
       }
 
       endKnowledge = performance.now();
-      return knowledge;
+      return knowledgeResponse;
     };
 
     return await chatModel.postToChat({

@@ -16,8 +16,7 @@ export class GptAssistantModel implements ChatModel {
       throw new Error("AI does not have an external ID");
     }
 
-    const knowledgeResponse = await getKnowledgeCallback(0);
-    const knowledge = knowledgeResponse.knowledge;
+    const { knowledge } = await getKnowledgeCallback(0);
 
     let promptWithKnowledge;
     if (knowledge.length === 0) {
