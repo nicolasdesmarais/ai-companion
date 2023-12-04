@@ -15,7 +15,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Checkbox } from "./ui/checkbox";
 import { Button } from "./ui/button";
-import { Plus, Trash } from "lucide-react";
+import { Loader, Plus, Trash, Wand2 } from "lucide-react";
 import { Drawer } from "./drawer";
 import { TestChat } from "./test-chat";
 import { ChatMessageProps } from "@/components/chat-message";
@@ -44,19 +44,46 @@ interface ProfileSourceProps {
 export const AIProfile = ({ ai, form, aiModels }: ProfileSourceProps) => {
   const [messages, setMessages] = useState<ChatMessageProps[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
+  const [generatingProfile, setGeneratingProfile] = useState(false);
   if (!ai) {
     return null;
   }
   const isLoading = form.formState.isSubmitting;
 
+  const generateProfile = async () => {
+    setGeneratingProfile(true);
+    const response = await fetch(`/api/v1/ai/${ai.id}/generate-profile`, {
+      method: "POST",
+    });
+    const data = await response.json();
+    if (data.success) {
+      form.setValue("profile", data.profile);
+    }
+    setGeneratingProfile(false);
+  };
+
   return (
     <div className="h-full p-4 space-y-2 max-w-3xl mx-auto">
       <div className="space-y-2 w-full col-span-2">
-        <div>
+        <div className="relative">
           <h3 className="text-lg font-medium">Profile Information</h3>
           <p className="text-sm text-muted-foreground">
             Text and images to display in the catalog of AIs.
           </p>
+          <Button
+            className="absolute top-0 right-0"
+            type="button"
+            disabled={isLoading || generatingProfile}
+            variant="outline"
+            onClick={() => generateProfile()}
+          >
+            Generate Profile
+            {generatingProfile ? (
+              <Loader className="w-4 h-4 ml-2 spinner" />
+            ) : (
+              <Wand2 className="w-4 h-4 ml-2" />
+            )}
+          </Button>
         </div>
         <Separator className="bg-primary/10" />
       </div>
@@ -264,6 +291,7 @@ export const AIProfile = ({ ai, form, aiModels }: ProfileSourceProps) => {
                           ...field.value.slice(index + 1),
                         ]);
                       }}
+                      variant="outline"
                       size="icon"
                       type="button"
                     >
