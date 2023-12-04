@@ -19,7 +19,7 @@ export interface PostToChatInput {
   getKnowledgeCallback: (
     tokensUsed: number
   ) => Promise<VectorKnowledgeResponse>;
-  endCallback: (answer: string) => void;
+  endCallback: (answer: string, externalChatId?: string) => void;
 }
 
 export interface PostToChatResponse {

@@ -1,4 +1,3 @@
-import openAIAssistantModelAdapter from "@/src/adapter/ai-model/OpenAIAssistantModelAdapter";
 import vectorDatabaseAdapter, {
   VectorKnowledgeResponse,
 } from "@/src/adapter/knowledge/vector-database/VectorDatabaseAdapter";
@@ -85,17 +84,11 @@ export class ChatService {
       throw new EntityNotFoundError(`AI with id ${aiId} not found`);
     }
 
-    let externalId;
-    if (ai.modelId === "gpt-4-1106-preview-assistant") {
-      externalId = await openAIAssistantModelAdapter.createExternalChat();
-    }
-
     const chat = await prismadb.chat.create({
       data: {
         aiId,
         userId,
         name: ai.name,
-        externalId,
       },
     });
 
@@ -217,7 +210,7 @@ export class ChatService {
       }
     });
 
-    const endCallback = async (answer: string) => {
+    const endCallback = async (answer: string, externalChatId?: string) => {
       const end = performance.now();
       const setupTime = Math.round(endSetup - start);
       const knowledgeTime = Math.round(endKnowledge - endSetup);
@@ -229,6 +222,7 @@ export class ChatService {
         llmTime,
         totalTime,
         knowledgeMeta,
+        externalChatId,
       });
     };
 

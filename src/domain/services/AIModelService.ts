@@ -1,3 +1,5 @@
+import { AssistantChatModel } from "@/src/adapter/ai-model/chat-models/AssistantChatModel";
+import { ChatModel } from "@/src/adapter/ai-model/chat-models/ChatModel";
 import { DavinciModel } from "@/src/adapter/ai-model/chat-models/DavinciModel";
 import { Gpt35Model } from "@/src/adapter/ai-model/chat-models/Gpt35Model";
 import { Gpt4Model } from "@/src/adapter/ai-model/chat-models/Gpt4Model";
@@ -15,6 +17,8 @@ const CHAT_MODELS = [
   new LLamaModel(),
 ];
 
+const ASSISTANT_MODELS = [new GptAssistantModel()];
+
 export class AIModelService {
   constructor(private aiModelRepository: AIModelRepository) {}
 
@@ -26,9 +30,19 @@ export class AIModelService {
     return await this.aiModelRepository.findById(id);
   }
 
-  public getChatModelInstance(modelId: string) {
+  public getChatModelInstance(modelId: string): ChatModel | null {
     const supportedModels = CHAT_MODELS.filter((chatModel) =>
       chatModel.supports(modelId)
+    );
+    if (supportedModels.length > 0) {
+      return supportedModels[0];
+    }
+    return null;
+  }
+
+  public getAssistantModelInstance(modelId: string): AssistantChatModel | null {
+    const supportedModels = ASSISTANT_MODELS.filter((assistantModel) =>
+      assistantModel.supports(modelId)
     );
     if (supportedModels.length > 0) {
       return supportedModels[0];
