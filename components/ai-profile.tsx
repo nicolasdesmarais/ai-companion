@@ -15,7 +15,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Checkbox } from "./ui/checkbox";
 import { Button } from "./ui/button";
-import { Trash } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import { Drawer } from "./drawer";
 import { TestChat } from "./test-chat";
 import { ChatMessageProps } from "@/components/chat-message";
@@ -201,52 +201,78 @@ export const AIProfile = ({ ai, form, aiModels }: ProfileSourceProps) => {
                 the type of conversations your AI is good at.
               </FormDescription>
               <div className="flex col-flex flex-wrap">
+                <div
+                  key={`example-conversation-add`}
+                  className="mt-4 w-1/3 h-64 p-2 justify-center flex items-center"
+                >
+                  <Drawer
+                    trigger={
+                      <div className="cursor-pointer hover:bg-primary/10 rounded-md text-muted-foreground">
+                        <Plus className="w-24 h-24" />
+                      </div>
+                    }
+                    open={chatOpen}
+                    setOpen={setChatOpen}
+                  >
+                    <TestChat
+                      ai={ai}
+                      messages={messages}
+                      setMessages={setMessages}
+                      actions={
+                        <div className="flex justify-between">
+                          <Button
+                            onClick={() => {
+                              setMessages([]);
+                            }}
+                            disabled={isLoading}
+                            type="button"
+                          >
+                            Restart Chat
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              const currentConversations = field.value || [];
+                              field.onChange([
+                                { messages },
+                                ...currentConversations,
+                              ]);
+                              setMessages([]);
+                              setChatOpen(false);
+                            }}
+                            disabled={isLoading}
+                            variant="ring"
+                            type="button"
+                          >
+                            Save Example Chat
+                          </Button>
+                        </div>
+                      }
+                    />
+                  </Drawer>
+                </div>
                 {field.value?.map((conversation: any, index: number) => (
                   <div
                     key={`example-conversation-${index}`}
-                    className="mt-4 w-1/3 h-64 p-2"
+                    className="mt-4 w-1/3 h-64 p-2 relative"
                   >
+                    <Button
+                      className="absolute bottom-4 right-4 z-10"
+                      disabled={isLoading}
+                      onClick={() => {
+                        field.onChange([
+                          ...field.value.slice(0, index),
+                          ...field.value.slice(index + 1),
+                        ]);
+                      }}
+                      size="icon"
+                      type="button"
+                    >
+                      <Trash className="w-4 h-4" />
+                    </Button>
                     <ExampleChat messages={conversation.messages} ai={ai} />
                   </div>
                 ))}
               </div>
-              <Drawer
-                trigger={<div>Add Conversation</div>}
-                open={chatOpen}
-                setOpen={setChatOpen}
-              >
-                <TestChat
-                  ai={ai}
-                  messages={messages}
-                  setMessages={setMessages}
-                  actions={
-                    <div className="flex justify-between">
-                      <Button
-                        onClick={() => {
-                          setMessages([]);
-                        }}
-                        disabled={isLoading}
-                        type="button"
-                      >
-                        Restart Chat
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          const currentMessages = field.value || [];
-                          field.onChange([...currentMessages, { messages }]);
-                          setMessages([]);
-                          setChatOpen(false);
-                        }}
-                        disabled={isLoading}
-                        variant="ring"
-                        type="button"
-                      >
-                        Save Example Chat
-                      </Button>
-                    </div>
-                  }
-                />
-              </Drawer>
             </FormItem>
           )}
         />
