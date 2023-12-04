@@ -2,7 +2,13 @@
 
 import { AI, Chat, Message } from "@prisma/client";
 import { useCompletion } from "ai/react";
-import { FormEvent, ReactNode, useState } from "react";
+import {
+  Dispatch,
+  FormEvent,
+  ReactNode,
+  SetStateAction,
+  useState,
+} from "react";
 import { ChatForm } from "@/components/chat-form";
 import { ChatMessageProps } from "@/components/chat-message";
 import { ChatMessages } from "@/components/chat-messages";
@@ -12,10 +18,17 @@ type Props = {
   ai: AI;
   className?: string;
   actions: ReactNode;
+  messages: ChatMessageProps[];
+  setMessages: Dispatch<SetStateAction<ChatMessageProps[]>>;
 };
 
-export const TestChat = ({ ai, className, actions }: Props) => {
-  const [messages, setMessages] = useState<ChatMessageProps[]>([]);
+export const TestChat = ({
+  ai,
+  className,
+  actions,
+  messages,
+  setMessages,
+}: Props) => {
   const [streaming, setStreaming] = useState<boolean>(false);
   const { toast } = useToast();
 
@@ -62,6 +75,7 @@ export const TestChat = ({ ai, className, actions }: Props) => {
 
     setStreaming(true);
     handleSubmit(e);
+    e.stopPropagation();
   };
 
   let stream = "";

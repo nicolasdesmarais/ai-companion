@@ -74,6 +74,18 @@ const formSchema = z.object({
         })
       )
       .optional(),
+    conversations: z
+      .array(
+        z.object({
+          messages: z.array(
+            z.object({
+              role: z.string(),
+              content: z.string(),
+            })
+          ),
+        })
+      )
+      .optional(),
     showCharacter: z.boolean().optional(),
     showTraining: z.boolean().optional(),
     showPersonality: z.boolean().optional(),
