@@ -566,34 +566,40 @@ export class AIService {
     });
   }
 
-  private async updateAssistant(existingAI: AI, updatedAI: AI) {
-    const existingExternalId = existingAI.externalId;
+  private async updateAssistant(currentAI: AI, updatedAI: AI) {
+    const existingExternalId = currentAI.externalId;
     if (!existingExternalId) {
-      // External assistant has not been created.
+      // Create a new assistant if it doesn't exist externally
       await this.createAssistant(updatedAI);
       return;
     }
 
-    const newAssistantModel = aiModelService.getAssistantModelInstance(
-      updatedAI.modelId
-    );
-    const existingAssistantModel = aiModelService.getAssistantModelInstance(
-      existingAI.modelId
-    );
+    const shouldUpdateModel = currentAI.modelId !== updatedAI.modelId;
+    if (shouldUpdateModel) {
+      const newAssistantModel = aiModelService.getAssistantModelInstance(
+        updatedAI.modelId
+      );
+      const existingAssistantModel = aiModelService.getAssistantModelInstance(
+        currentAI.modelId
+      );
 
-    if (existingAI.modelId === updatedAI.modelId) {
-      // No change to model. Update existing assistant, where applicable
-      if (existingAssistantModel) {
-        await existingAssistantModel.updateAssistant({ ai: updatedAI });
+      // Create a new assistant with the updated model
+      if (newAssistantModel) {
+        await this.createAssistant(updatedAI);
       }
-      return;
-    }
 
-    if (newAssistantModel) {
-      await this.createAssistant(updatedAI);
-    }
-    if (existingAssistantModel) {
-      await existingAssistantModel.deleteAssistant(existingExternalId);
+      // Delete the old assistant associated with the existing model
+      if (existingAssistantModel) {
+        await existingAssistantModel.deleteAssistant(existingExternalId);
+      }
+    } else {
+      // Update existing assistant without changing the model
+      const assistantModel = aiModelService.getAssistantModelInstance(
+        currentAI.modelId
+      );
+      if (assistantModel) {
+        await assistantModel.updateAssistant({ ai: updatedAI });
+      }
     }
   }
 
