@@ -31,23 +31,18 @@ export class AIModelService {
   }
 
   public getChatModelInstance(modelId: string): ChatModel | null {
-    const supportedModels = CHAT_MODELS.filter((chatModel) =>
-      chatModel.supports(modelId)
+    return (
+      CHAT_MODELS.find((assistantModel) => assistantModel.supports(modelId)) ??
+      null
     );
-    if (supportedModels.length > 0) {
-      return supportedModels[0];
-    }
-    return null;
   }
 
   public getAssistantModelInstance(modelId: string): AssistantChatModel | null {
-    const supportedModels = ASSISTANT_MODELS.filter((assistantModel) =>
-      assistantModel.supports(modelId)
+    return (
+      ASSISTANT_MODELS.find((assistantModel) =>
+        assistantModel.supports(modelId)
+      ) ?? null
     );
-    if (supportedModels.length > 0) {
-      return supportedModels[0];
-    }
-    return null;
   }
 }
 
