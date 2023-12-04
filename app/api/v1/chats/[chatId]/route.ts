@@ -35,7 +35,7 @@ async function postHandler(
     return new StreamingTextResponse(chatResponse.response as ReadableStream);
   }
 
-  return NextResponse.json(chatResponse.response as string);
+  return new NextResponse(chatResponse.response as string, { status: 200 });
 }
 
 async function deleteHandler(

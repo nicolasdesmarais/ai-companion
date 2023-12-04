@@ -100,7 +100,7 @@ export class ChatService {
     userId: string,
     content: string,
     role: Role,
-
+    externalChatId?: string,
     metadata?: any
   ) {
     const chat = await prismadb.chat.update({
@@ -133,6 +133,7 @@ export class ChatService {
         },
       },
       data: {
+        externalId: externalChatId,
         messages: {
           create: {
             content: content,
@@ -216,14 +217,20 @@ export class ChatService {
       const knowledgeTime = Math.round(endKnowledge - endSetup);
       const llmTime = Math.round(end - endKnowledge);
       const totalTime = Math.round(end - start);
-      await this.updateChat(chatId, userId, answer, Role.system, {
-        setupTime,
-        knowledgeTime,
-        llmTime,
-        totalTime,
-        knowledgeMeta,
+      await this.updateChat(
+        chatId,
+        userId,
+        answer,
+        Role.system,
         externalChatId,
-      });
+        {
+          setupTime,
+          knowledgeTime,
+          llmTime,
+          totalTime,
+          knowledgeMeta,
+        }
+      );
     };
 
     const chatModel = aiModelService.getChatModelInstance(model.id);
