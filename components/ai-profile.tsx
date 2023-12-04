@@ -20,6 +20,7 @@ import { Drawer } from "./drawer";
 import { TestChat } from "./test-chat";
 import { ChatMessageProps } from "@/components/chat-message";
 import { useState } from "react";
+import { ExampleChat } from "./example-chat";
 
 const SAMPLE_DESCRIPTION = `The AI you've engaged is engineered with advanced capabilities, designed to address and respond to an array of questions you might have, regardless of their complexity. It is backed by a rich and extensive compilation of documents that have meticulously uploaded, providing a broad and deep knowledge base to draw from. This AI, with its vast knowledge, stands ready to offer insightful answers to your diverse queries, whether you're seeking simple clarifications or deep, complex explorations. Its singular aim is to ensure you receive the precise information you need, with speed and accuracy, thereby streamlining your decision-making process and enhancing your productivity.`;
 
@@ -35,19 +36,15 @@ const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
 
 type ExtendedAI = Prisma.AIGetPayload<typeof extendedAI>;
 interface ProfileSourceProps {
-  initialAi: ExtendedAI | null;
+  ai: ExtendedAI | null;
   form: any;
   aiModels: AIModel[];
 }
 
-export const AIProfile = ({
-  initialAi,
-  form,
-  aiModels,
-}: ProfileSourceProps) => {
+export const AIProfile = ({ ai, form, aiModels }: ProfileSourceProps) => {
   const [messages, setMessages] = useState<ChatMessageProps[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
-  if (!initialAi) {
+  if (!ai) {
     return null;
   }
   const isLoading = form.formState.isSubmitting;
@@ -203,14 +200,23 @@ export const AIProfile = ({
                 Provide example question and answer so that users can understand
                 the type of conversations your AI is good at.
               </FormDescription>
-
+              <div className="flex col-flex flex-wrap">
+                {field.value?.map((conversation: any, index: number) => (
+                  <div
+                    key={`example-conversation-${index}`}
+                    className="mt-4 w-1/3 h-64 p-2"
+                  >
+                    <ExampleChat messages={conversation.messages} ai={ai} />
+                  </div>
+                ))}
+              </div>
               <Drawer
                 trigger={<div>Add Conversation</div>}
                 open={chatOpen}
                 setOpen={setChatOpen}
               >
                 <TestChat
-                  ai={initialAi}
+                  ai={ai}
                   messages={messages}
                   setMessages={setMessages}
                   actions={

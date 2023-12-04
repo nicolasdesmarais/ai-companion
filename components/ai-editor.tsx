@@ -444,9 +444,7 @@ export const AIEditor = ({
       name: "Profile",
       route: "edit/profile",
       index: 4,
-      content: (
-        <AIProfile initialAi={initialAi} form={form} aiModels={aiModels} />
-      ),
+      content: <AIProfile ai={initialAi} form={form} aiModels={aiModels} />,
       buttons: (
         <>
           <div>{backButton("edit/knowledge")}</div>
