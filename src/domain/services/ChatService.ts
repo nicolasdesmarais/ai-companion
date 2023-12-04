@@ -277,8 +277,7 @@ export class ChatService {
         docMeta: [],
       };
       if (
-        bootstrapKnowledge &&
-        bootstrapKnowledge.blobUrl &&
+        bootstrapKnowledge?.blobUrl &&
         remainingTokens > bootstrapKnowledge.totalTokenCount
       ) {
         const resp = await axios.get(bootstrapKnowledge.blobUrl);
