@@ -1,8 +1,20 @@
-import { GetChatsResponse } from "@/src/domain/ports/api/ChatsApi";
+import vectorDatabaseAdapter, {
+  VectorKnowledgeResponse,
+} from "@/src/adapter/knowledge/vector-database/VectorDatabaseAdapter";
+import {
+  CreateChatRequest,
+  GetChatsResponse,
+} from "@/src/domain/ports/api/ChatsApi";
 import prismadb from "@/src/lib/prismadb";
+import { getTokenLength } from "@/src/lib/tokenCount";
 import { Role } from "@prisma/client";
+import { JsonObject } from "@prisma/client/runtime/library";
+import axios from "axios";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
+import aiModelService from "./AIModelService";
 import aiService from "./AIService";
+
+const BUFFER_TOKENS = 200;
 
 const getChatsResponseSelect = {
   id: true,
@@ -72,13 +84,15 @@ export class ChatService {
       throw new EntityNotFoundError(`AI with id ${aiId} not found`);
     }
 
-    return await prismadb.chat.create({
+    const chat = await prismadb.chat.create({
       data: {
         aiId,
         userId,
         name: ai.name,
       },
     });
+
+    return chat;
   }
 
   public async updateChat(
@@ -86,7 +100,7 @@ export class ChatService {
     userId: string,
     content: string,
     role: Role,
-
+    externalChatId?: string,
     metadata?: any
   ) {
     const chat = await prismadb.chat.update({
@@ -119,6 +133,7 @@ export class ChatService {
         },
       },
       data: {
+        externalId: externalChatId,
         messages: {
           create: {
             content: content,
@@ -155,6 +170,146 @@ export class ChatService {
       data: {
         isDeleted: true,
       },
+    });
+  }
+
+  public async postToChat(
+    chatId: string,
+    userId: string,
+    request: CreateChatRequest
+  ) {
+    const { prompt, date } = request;
+
+    const start = performance.now();
+    let endSetup = start,
+      endKnowledge = start,
+      knowledgeMeta: any;
+
+    // Save prompt as a new message to chat
+    const chat = await this.updateChat(
+      chatId,
+      userId,
+      request.prompt,
+      Role.user
+    );
+
+    if (!chat) {
+      throw new EntityNotFoundError(`Chat with id ${chatId} not found`);
+    }
+
+    const model = await aiModelService.findAIModelById(chat.ai.modelId);
+    if (!model) {
+      throw new EntityNotFoundError(
+        `AI model with id ${chat.ai.modelId} not found`
+      );
+    }
+
+    let options = {} as any;
+    Object.entries(chat.ai.options || {}).forEach(([key, value]) => {
+      if (value && value.length > 0) {
+        options[key] = value[0];
+      }
+    });
+
+    const endCallback = async (answer: string, externalChatId?: string) => {
+      const end = performance.now();
+      const setupTime = Math.round(endSetup - start);
+      const knowledgeTime = Math.round(endKnowledge - endSetup);
+      const llmTime = Math.round(end - endKnowledge);
+      const totalTime = Math.round(end - start);
+      await this.updateChat(
+        chatId,
+        userId,
+        answer,
+        Role.system,
+        externalChatId,
+        {
+          setupTime,
+          knowledgeTime,
+          llmTime,
+          totalTime,
+          knowledgeMeta,
+        }
+      );
+    };
+
+    const chatModel = aiModelService.getChatModelInstance(model.id);
+    if (!chatModel) {
+      throw new Error(`Chat model with id ${model.id} not found`);
+    }
+
+    endSetup = performance.now();
+
+    const getKnowledgeCallback = async (
+      tokensUsed: number
+    ): Promise<VectorKnowledgeResponse> => {
+      let bootstrapKnowledge;
+      if (chat.ai.dataSources.length === 1) {
+        if (chat.ai.dataSources[0].dataSource.knowledges.length === 1) {
+          const meta = chat.ai.dataSources[0].dataSource.knowledges[0].knowledge
+            .metadata as any;
+          if (
+            meta &&
+            meta.mimeType &&
+            meta.totalTokenCount &&
+            meta.mimeType === "text/plain"
+          ) {
+            bootstrapKnowledge = {
+              ...chat.ai.dataSources[0].dataSource.knowledges[0].knowledge,
+              ...meta,
+            };
+          }
+        }
+      }
+
+      const questionTokens = getTokenLength(prompt);
+      const answerTokens = ((chat.ai.options as JsonObject)?.maxTokens ||
+        model.options.maxTokens.default) as number;
+
+      const remainingTokens =
+        model.contextSize -
+        answerTokens -
+        questionTokens -
+        tokensUsed -
+        BUFFER_TOKENS;
+
+      let knowledgeResponse: VectorKnowledgeResponse = {
+        knowledge: "",
+        docMeta: [],
+      };
+      if (
+        bootstrapKnowledge?.blobUrl &&
+        remainingTokens > bootstrapKnowledge.totalTokenCount
+      ) {
+        const resp = await axios.get(bootstrapKnowledge.blobUrl);
+        if (resp.status === 200) {
+          knowledgeResponse.knowledge = resp.data;
+        }
+      }
+      if (!knowledgeResponse.knowledge) {
+        const vectorKnowledge = await vectorDatabaseAdapter.getKnowledge(
+          prompt,
+          chat.messages,
+          chat.ai.dataSources,
+          remainingTokens
+        );
+        knowledgeResponse.knowledge = vectorKnowledge.knowledge;
+      }
+
+      endKnowledge = performance.now();
+      return knowledgeResponse;
+    };
+
+    return await chatModel.postToChat({
+      ai: chat.ai,
+      chat,
+      messages: chat.messages,
+      aiModel: model,
+      prompt,
+      date,
+      options,
+      getKnowledgeCallback,
+      endCallback,
     });
   }
 }

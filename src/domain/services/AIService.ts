@@ -1,4 +1,3 @@
-import openAIAssistantModelAdapter from "@/src/adapter/ai-model/OpenAIAssistantModelAdapter";
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
@@ -465,7 +464,7 @@ export class AIService {
     });
 
     await this.updateAIGroups(ai, groups);
-    await this.createOrUpdateExternalAI(ai);
+    await this.createAssistant(ai);
 
     return ai;
   }
@@ -538,7 +537,7 @@ export class AIService {
     });
 
     await this.updateAIGroups(updatedAI, groups);
-    await this.createOrUpdateExternalAI(updatedAI);
+    await this.updateAssistant(ai, updatedAI);
     return updatedAI;
   }
 
@@ -550,25 +549,56 @@ export class AIService {
     }
   }
 
-  private async createOrUpdateExternalAI(ai: AI) {
-    const aiModel = await aiModelService.findAIModelById(ai.modelId);
-    if (!aiModel) {
+  private async createAssistant(ai: AI) {
+    const assistantModel = aiModelService.getAssistantModelInstance(ai.modelId);
+    if (!assistantModel) {
       return;
     }
 
-    // Hardcoded check for now
-    if (aiModel.id === "gpt-4-1106-preview-assistant") {
-      if (!ai.externalId) {
-        const externalId = await openAIAssistantModelAdapter.createExternalAI(
-          ai,
-          aiModel
-        );
-        await prismadb.aI.update({
-          where: { id: ai.id },
-          data: {
-            externalId,
-          },
-        });
+    const externalId = await assistantModel.createAssistant({
+      ai,
+    });
+    await prismadb.aI.update({
+      where: { id: ai.id },
+      data: {
+        externalId,
+      },
+    });
+  }
+
+  private async updateAssistant(currentAI: AI, updatedAI: AI) {
+    const existingExternalId = currentAI.externalId;
+    if (!existingExternalId) {
+      // Create a new assistant if it doesn't exist externally
+      await this.createAssistant(updatedAI);
+      return;
+    }
+
+    const shouldUpdateModel = currentAI.modelId !== updatedAI.modelId;
+    if (shouldUpdateModel) {
+      const newAssistantModel = aiModelService.getAssistantModelInstance(
+        updatedAI.modelId
+      );
+      const existingAssistantModel = aiModelService.getAssistantModelInstance(
+        currentAI.modelId
+      );
+
+      // Create a new assistant with the updated model
+      if (newAssistantModel) {
+        await this.createAssistant(updatedAI);
+      }
+
+      // Delete the old assistant associated with the existing model
+      if (existingAssistantModel) {
+        await existingAssistantModel.deleteAssistant(existingExternalId);
+      }
+    } else {
+      // Update existing assistant without changing the model
+      const assistantModel = aiModelService.getAssistantModelInstance(
+        currentAI.modelId
+      );
+      if (assistantModel) {
+        await assistantModel.updateAssistant({ ai: updatedAI });
       }
     }
   }

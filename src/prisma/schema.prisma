@@ -205,6 +205,7 @@ model Chat {
   pinPosition               Int?      @map(name: "pin_position")
   isDeleted                 Boolean   @default(false) @map("is_deleted")
   userId                    String                    @map("user_id")
+  externalId                String?   @map("external_id")
 
   messages                  Message[]
 
