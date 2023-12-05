@@ -7,18 +7,24 @@ import {
   GoogleDriveSearchResponse,
   mapMimeTypeToEnum,
 } from "@/src/domain/ports/api/GoogleDriveApi";
+import orgClientCredentialsService from "@/src/domain/services/OrgClientCredentialsService";
 import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import {
   DataSourceType,
   Knowledge,
   KnowledgeIndexStatus,
+  OAuthTokenProvider,
 } from "@prisma/client";
 import { put } from "@vercel/blob";
 import { GaxiosResponse } from "gaxios";
-import { drive_v3, google } from "googleapis";
+import { drive_v3 } from "googleapis";
 import { Readable } from "stream";
 import { publishEvent } from "../../inngest/event-publisher";
+import {
+  googleDriveClient,
+  googleDriveOauth2Client,
+} from "../../oauth/GoogleDriveClient";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import {
@@ -58,14 +64,6 @@ const SUPPORTED_MIME_TYPES = [
 
 const FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
 
-const OAUTH2_CLIENT = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_CALLBACK_URL
-);
-
-const DRIVE_CLIENT = google.drive({ version: "v3", auth: OAUTH2_CLIENT });
-
 interface ListFilesResponse {
   rootName: string;
   files: drive_v3.Schema$File[];
@@ -86,7 +84,11 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     return mimeTypes.map((type) => `mimeType='${type}'`).join(" or ");
   }
 
-  private async setOAuthCredentials(userId: string, oauthTokenId: string) {
+  private async setOAuthCredentials(
+    orgId: string,
+    userId: string,
+    oauthTokenId: string
+  ) {
     const oauthToken = await prismadb.oAuthToken.findUnique({
       where: {
         id: oauthTokenId,
@@ -106,14 +108,23 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       refresh_token: string;
     };
 
-    OAUTH2_CLIENT.setCredentials({
+    const orgClientCredentialData =
+      await orgClientCredentialsService.getOrgClientCredentialData(
+        orgId,
+        OAuthTokenProvider.GOOGLE
+      );
+
+    const oauth2Client = googleDriveOauth2Client(orgClientCredentialData);
+    oauth2Client.setCredentials({
       access_token: oauthTokenData.access_token,
       refresh_token: oauthTokenData.refresh_token,
     });
+
+    return oauth2Client;
   }
 
-  private async listFiles(query: string) {
-    return await DRIVE_CLIENT.files.list({
+  private async listFiles(googleDriveClient: drive_v3.Drive, query: string) {
+    return await googleDriveClient.files.list({
       q: query,
       fields: "files(id, name, mimeType, owners, modifiedTime)",
       supportsAllDrives: true,
@@ -121,8 +132,11 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     });
   }
 
-  private async getFileAsStream(fileId: string) {
-    return await DRIVE_CLIENT.files.get(
+  private async getFileAsStream(
+    googleDriveClient: drive_v3.Drive,
+    fileId: string
+  ) {
+    return await googleDriveClient.files.get(
       {
         fileId: fileId,
         alt: "media",
@@ -132,8 +146,12 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     );
   }
 
-  private async getGoogleDocContent(fileId: string, exportedMimeType: string) {
-    const response = await DRIVE_CLIENT.files.export(
+  private async getGoogleDocContent(
+    googleDriveClient: drive_v3.Drive,
+    fileId: string,
+    exportedMimeType: string
+  ) {
+    const response = await googleDriveClient.files.export(
       {
         fileId: fileId,
         mimeType: exportedMimeType,
@@ -147,11 +165,18 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
   }
 
   public async search(
+    orgId: string,
     userId: string,
     oauthTokenId: string,
     searchTerms: string[]
   ) {
-    await this.setOAuthCredentials(userId, oauthTokenId);
+    const oauth2Client = await this.setOAuthCredentials(
+      orgId,
+      userId,
+      oauthTokenId
+    );
+
+    const driveClient = await googleDriveClient(oauth2Client);
 
     let query;
     if (searchTerms.length > 0) {
@@ -162,7 +187,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       query = `(${this.getMimeTypeQuery(true)}) and trashed = false`;
     }
 
-    const googleDriveSearchResponse = await this.listFiles(query);
+    const googleDriveSearchResponse = await this.listFiles(driveClient, query);
     const files = googleDriveSearchResponse.data.files?.map((file) => {
       return {
         id: file.id ?? "",
@@ -182,9 +207,17 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
   public async getDataSourceItemList(orgId: string, userId: string, data: any) {
     const input = data as GoogleDriveDataSourceInput;
 
-    await this.setOAuthCredentials(userId, input.oauthTokenId);
+    const oauth2Client = await this.setOAuthCredentials(
+      orgId,
+      userId,
+      input.oauthTokenId
+    );
+    const driveClient = googleDriveClient(oauth2Client);
 
-    const listFilesResponse = await this.listAllFiles(input.fileId);
+    const listFilesResponse = await this.listAllFiles(
+      driveClient,
+      input.fileId
+    );
     if (!listFilesResponse?.files || listFilesResponse.files.length === 0) {
       return {
         items: [],
@@ -235,12 +268,19 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
         indexStatus: KnowledgeIndexStatus.FAILED,
       };
     }
-    await this.setOAuthCredentials(userId, data?.oauthTokenId);
+
+    const oauth2Client = await this.setOAuthCredentials(
+      orgId,
+      userId,
+      data?.oauthTokenId
+    );
+    const driveClient = googleDriveClient(oauth2Client);
 
     const { fileId, fileName, mimeType } =
       knowledge.metadata as unknown as GoogleDriveFileMetadata;
 
     const { fileResponse, derivedMimeType } = await this.getFileContent(
+      driveClient,
       fileId,
       mimeType
     );
@@ -303,7 +343,10 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     });
   }
 
-  private async listAllFiles(fileId: string): Promise<ListFilesResponse> {
+  private async listAllFiles(
+    googleDriveClient: drive_v3.Drive,
+    fileId: string
+  ): Promise<ListFilesResponse> {
     const files: drive_v3.Schema$File[] = [];
 
     const listFilesRecursive = async (folderId: string): Promise<void> => {
@@ -311,7 +354,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
         true
       )}) and trashed=false`;
 
-      const response = await this.listFiles(query);
+      const response = await this.listFiles(googleDriveClient, query);
 
       if (!response.data.files) return;
 
@@ -324,7 +367,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       }
     };
 
-    const initialFile = await DRIVE_CLIENT.files.get({
+    const initialFile = await googleDriveClient.files.get({
       fileId,
       fields: "id, name, mimeType",
       supportsAllDrives: true,
@@ -350,24 +393,40 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     };
   }
 
-  private async getFileContent(fileId: string, mimeType: string) {
+  private async getFileContent(
+    googleDriveClient: drive_v3.Drive,
+    fileId: string,
+    mimeType: string
+  ) {
     let fileResponse: GaxiosResponse<Readable>;
     let derivedMimeType = mimeType;
     switch (mimeType) {
       case MIME_TYPE_GOOGLE_DOC:
-        fileResponse = await this.getGoogleDocContent(fileId, MIME_TYPE_DOCX);
+        fileResponse = await this.getGoogleDocContent(
+          googleDriveClient,
+          fileId,
+          MIME_TYPE_DOCX
+        );
         derivedMimeType = MIME_TYPE_DOCX;
         break;
       case MIME_TYPE_GOOGLE_SHEETS:
-        fileResponse = await this.getGoogleDocContent(fileId, MIME_TYPE_CSV);
+        fileResponse = await this.getGoogleDocContent(
+          googleDriveClient,
+          fileId,
+          MIME_TYPE_CSV
+        );
         derivedMimeType = MIME_TYPE_CSV;
         break;
       case MIME_TYPE_GOOGLE_SLIDES:
-        fileResponse = await this.getGoogleDocContent(fileId, MIME_TYPE_PDF);
+        fileResponse = await this.getGoogleDocContent(
+          googleDriveClient,
+          fileId,
+          MIME_TYPE_PDF
+        );
         derivedMimeType = MIME_TYPE_PDF;
         break;
       default:
-        fileResponse = await this.getFileAsStream(fileId);
+        fileResponse = await this.getFileAsStream(googleDriveClient, fileId);
     }
 
     return {

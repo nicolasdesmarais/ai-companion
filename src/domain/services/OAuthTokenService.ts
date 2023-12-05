@@ -99,7 +99,7 @@ export class OAuthTokenService {
     userId: string,
     provider: OAuthTokenProvider
   ): Promise<UserOAuthTokenEntity[]> {
-    const orgClientCredentialData = this.getOrgClientCredentialData(
+    const orgClientCredentialData = await this.getOrgClientCredentialData(
       orgId,
       provider
     );

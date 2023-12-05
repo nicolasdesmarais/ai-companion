@@ -13,3 +13,7 @@ export const googleDriveOauth2Client = (clientCredentialData: any) => {
 
   return new google.auth.OAuth2(clientId, clientSecret, GOOGLE_CALLBACK_URL);
 };
+
+export const googleDriveClient = (oauth2Client: any) => {
+  return google.drive({ version: "v3", auth: oauth2Client });
+};
