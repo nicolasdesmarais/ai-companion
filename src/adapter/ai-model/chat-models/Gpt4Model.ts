@@ -21,7 +21,7 @@ export class Gpt4Model extends BaseChatModel implements ChatModel {
     options: any
   ): ChatOpenAI<ChatOpenAICallOptions> {
     return new ChatOpenAI({
-      azureOpenAIApiKey: process.env.AZURE_GPT35_KEY,
+      azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
       azureOpenAIApiVersion: AZURE_OPENAI_API_VERSION,
       azureOpenAIApiInstanceName: AZURE_OPENAI_API_INSTANCE_NAME,
       azureOpenAIApiDeploymentName: AZURE_OPENAI_API_DEPLOYMENT_NAME,
