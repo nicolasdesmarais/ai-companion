@@ -3,7 +3,7 @@ import prismadb from "@/src/lib/prismadb";
 import { OAuthTokenProvider } from "@prisma/client";
 
 export class OrgClientCredentialsService {
-  public async getOrgClientCredentials(
+  public async getOrgClientCredentialData(
     orgId: string,
     provider: OAuthTokenProvider
   ) {

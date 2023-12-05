@@ -16,23 +16,42 @@ export class OAuthTokenService {
     }
   }
 
+  private async getOrgClientCredentialData(
+    orgId: string,
+    provider: OAuthTokenProvider
+  ) {
+    const orgClientCredentialData =
+      await orgClientCredentialsService.getOrgClientCredentialData(
+        orgId,
+        provider
+      );
+
+    if (!orgClientCredentialData) {
+      throw new Error(
+        `Missing client credentials for ${provider}, for org ${orgId}`
+      );
+    }
+
+    return orgClientCredentialData;
+  }
+  /**
+   * Return a list of OAuth tokens for the given user and provider.
+   * @param orgId
+   * @param userId
+   * @param provider
+   * @returns
+   */
   public async getOAuthTokens(
     orgId: string,
     userId: string,
     provider: OAuthTokenProvider
   ): Promise<UserOAuthTokenEntity[]> {
-    const oauthAdapter = await this.getOAuthAdapter(provider);
-    const orgClientCredentials =
-      await orgClientCredentialsService.getOrgClientCredentials(
-        orgId,
-        provider
-      );
+    const orgClientCredentialData = this.getOrgClientCredentialData(
+      orgId,
+      provider
+    );
 
-    if (!orgClientCredentials) {
-      throw new Error(
-        `Missing client credentials for ${provider}, for org ${orgId}`
-      );
-    }
+    const oauthAdapter = await this.getOAuthAdapter(provider);
 
     const tokens = await prismadb.oAuthToken.findMany({
       where: {
@@ -49,7 +68,7 @@ export class OAuthTokenService {
       try {
         const tokenData = JSON.parse(decryptFromBuffer(token.data));
         const tokenInfo = await oauthAdapter.getOAuthTokenInfo(
-          orgClientCredentials.data,
+          orgClientCredentialData,
           tokenData
         );
         if (tokenInfo.isExistingTokenValid) {
@@ -69,6 +88,10 @@ export class OAuthTokenService {
     return validTokens;
   }
 
+  /**
+   * Upsert the OAuth token for the given user, email and provider
+   * @param token
+   */
   public async upsertToken(token: UserOAuthTokenEntity) {
     const encryptedData = encryptAsBuffer(JSON.stringify(token.data));
 
@@ -90,6 +113,19 @@ export class OAuthTokenService {
         data: encryptedData,
       },
     });
+  }
+
+  public async getOAuthRedirectUrl(
+    orgId: string,
+    provider: OAuthTokenProvider
+  ) {
+    const oauthAdapter = await this.getOAuthAdapter(provider);
+    const orgClientCredentialData = await this.getOrgClientCredentialData(
+      orgId,
+      provider
+    );
+
+    return oauthAdapter.getOAuthRedirectUrl(orgClientCredentialData);
   }
 }
 

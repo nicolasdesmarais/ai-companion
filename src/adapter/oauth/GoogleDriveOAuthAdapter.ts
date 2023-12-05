@@ -2,7 +2,23 @@ import { googleDriveOauth2Client } from "./GoogleDriveClient";
 import { OAuthAdapter } from "./OAuthAdapter";
 import { OAuthTokenInfo } from "./OAuthTokenInfo";
 
+const SCOPE = [
+  "https://www.googleapis.com/auth/drive.readonly",
+  "https://www.googleapis.com/auth/userinfo.email",
+  "https://www.googleapis.com/auth/userinfo.profile",
+];
+
 export class GoogleDriveOAuthAdapter implements OAuthAdapter {
+  public getOAuthRedirectUrl(clientCredentialData: any): string {
+    const oauth2Client = googleDriveOauth2Client(clientCredentialData);
+
+    return oauth2Client.generateAuthUrl({
+      prompt: "consent",
+      access_type: "offline",
+      scope: SCOPE,
+    });
+  }
+
   public async getOAuthTokenInfo(
     clientCredentialData: any,
     token: any
