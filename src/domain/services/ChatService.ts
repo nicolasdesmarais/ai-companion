@@ -232,8 +232,8 @@ export class ChatService {
 
     let options = {} as any;
     Object.entries(chat.ai.options || {}).forEach(([key, value]) => {
-      if (value && value.length > 0) {
-        options[key] = value[0];
+      if (value && (value as any[]).length > 0) {
+        options[key] = (value as any[])[0];
       }
     });
 
