@@ -1,25 +1,21 @@
 import oauthTokenService from "@/src/domain/services/OAuthTokenService";
+import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { currentUser } from "@clerk/nextjs";
 import { OAuthTokenProvider } from "@prisma/client";
 import { NextResponse } from "next/server";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { aiId: string } }
-) {
+async function getHandler(req: Request) {
   const user = await currentUser();
   if (!user) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  try {
-    const oauthTokens = await oauthTokenService.getOAuthTokens(
-      OAuthTokenProvider.GOOGLE,
-      user.id
-    );
+  const oauthTokens = await oauthTokenService.getOAuthTokens(
+    OAuthTokenProvider.GOOGLE,
+    user.id
+  );
 
-    return NextResponse.json(oauthTokens);
-  } catch (e) {
-    return new NextResponse(e.message, { status: 500 });
-  }
+  return NextResponse.json(oauthTokens);
 }
+
+export const GET = withErrorHandler(getHandler);
