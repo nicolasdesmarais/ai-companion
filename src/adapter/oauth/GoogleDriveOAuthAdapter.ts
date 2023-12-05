@@ -1,5 +1,7 @@
+import { Credentials } from "google-auth-library";
+import { google } from "googleapis";
 import { googleDriveOauth2Client } from "./GoogleDriveClient";
-import { OAuthAdapter } from "./OAuthAdapter";
+import { OAuthAdapter, TokensFromRedirect } from "./OAuthAdapter";
 import { OAuthTokenInfo } from "./OAuthTokenInfo";
 
 const SCOPE = [
@@ -17,6 +19,49 @@ export class GoogleDriveOAuthAdapter implements OAuthAdapter {
       access_type: "offline",
       scope: SCOPE,
     });
+  }
+
+  public async getTokensFromRedirect(
+    clientCredentialData: any,
+    searchParams: URLSearchParams
+  ): Promise<TokensFromRedirect> {
+    const oauth2Client = googleDriveOauth2Client(clientCredentialData);
+
+    const code = searchParams.get("code");
+    const { tokens } = await oauth2Client.getToken(code as string);
+    const email = await this.getEmailAddressFromToken(
+      clientCredentialData,
+      tokens
+    );
+    if (!email) {
+      throw new Error("Unable to get email address from token");
+    }
+
+    return {
+      email,
+      tokens,
+    };
+  }
+
+  private async getEmailAddressFromToken(
+    clientCredentialData: any,
+    tokens: Credentials
+  ) {
+    const oauth2Client = googleDriveOauth2Client(clientCredentialData);
+    oauth2Client.setCredentials(tokens);
+
+    const people = google.people({ version: "v1", auth: oauth2Client });
+
+    const user = await people.people.get({
+      resourceName: "people/me",
+      personFields: "emailAddresses",
+    });
+
+    for (const emailAddress of user.data.emailAddresses || []) {
+      if (emailAddress.metadata?.primary) {
+        return emailAddress.value;
+      }
+    }
   }
 
   public async getOAuthTokenInfo(

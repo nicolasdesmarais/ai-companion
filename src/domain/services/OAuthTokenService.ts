@@ -34,6 +34,59 @@ export class OAuthTokenService {
 
     return orgClientCredentialData;
   }
+
+  /**
+   * Generates the redirect URL for an OAuth 2 flow, for the given org and provider.
+   * @param orgId
+   * @param provider
+   * @returns
+   */
+  public async getOAuthRedirectUrl(
+    orgId: string,
+    provider: OAuthTokenProvider
+  ) {
+    const oauthAdapter = await this.getOAuthAdapter(provider);
+    const orgClientCredentialData = await this.getOrgClientCredentialData(
+      orgId,
+      provider
+    );
+
+    return oauthAdapter.getOAuthRedirectUrl(orgClientCredentialData);
+  }
+
+  /**
+   * Handles the callback from an OAuth 2 flow, extracting and storing OAuth tokens
+   * for the given user and provider
+   * @param orgId
+   * @param userId
+   * @param provider
+   * @param searchParams
+   */
+  public async handleOAuthCallback(
+    orgId: string,
+    userId: string,
+    provider: OAuthTokenProvider,
+    searchParams: URLSearchParams
+  ) {
+    const oauthAdapter = await this.getOAuthAdapter(provider);
+    const orgClientCredentialData = await this.getOrgClientCredentialData(
+      orgId,
+      provider
+    );
+
+    const { tokens, email } = await oauthAdapter.getTokensFromRedirect(
+      orgClientCredentialData,
+      searchParams
+    );
+
+    await this.upsertToken({
+      userId,
+      provider,
+      email: email,
+      data: tokens,
+    });
+  }
+
   /**
    * Return a list of OAuth tokens for the given user and provider.
    * @param orgId
@@ -113,19 +166,6 @@ export class OAuthTokenService {
         data: encryptedData,
       },
     });
-  }
-
-  public async getOAuthRedirectUrl(
-    orgId: string,
-    provider: OAuthTokenProvider
-  ) {
-    const oauthAdapter = await this.getOAuthAdapter(provider);
-    const orgClientCredentialData = await this.getOrgClientCredentialData(
-      orgId,
-      provider
-    );
-
-    return oauthAdapter.getOAuthRedirectUrl(orgClientCredentialData);
   }
 }
 
