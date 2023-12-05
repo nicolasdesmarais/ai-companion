@@ -21,6 +21,7 @@ import { useState } from "react";
 import { ExampleChat } from "./example-chat";
 
 const SAMPLE_DESCRIPTION = `The AI you've engaged is engineered with advanced capabilities, designed to address and respond to an array of questions you might have, regardless of their complexity. It is backed by a rich and extensive compilation of documents that have meticulously uploaded, providing a broad and deep knowledge base to draw from. This AI, with its vast knowledge, stands ready to offer insightful answers to your diverse queries, whether you're seeking simple clarifications or deep, complex explorations. Its singular aim is to ensure you receive the precise information you need, with speed and accuracy, thereby streamlining your decision-making process and enhancing your productivity.`;
+const SAMPLE_TRAINING = `This AI is trained on a variety of sources, including websites, documents, and files. It is also trained on a variety of websites, including Wikipedia, Google, and StackOverflow.`;
 
 const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
   include: {
@@ -333,6 +334,31 @@ export const AIProfile = ({ ai, form }: ProfileSourceProps) => {
         </div>
         <Separator className="bg-primary/10" />
         <div className="pt-2">
+          <div className="pb-8">
+            <FormField
+              name="profile.trainingDescription"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Training Description</FormLabel>
+                  <FormDescription>
+                    One paragraph or brief summary explaining what information
+                    this AI is trained on.
+                  </FormDescription>
+                  <FormControl>
+                    <Textarea
+                      disabled={isLoading}
+                      rows={9}
+                      className="bg-background resize-none"
+                      placeholder={SAMPLE_TRAINING}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <FormField
             name="profile.showCharacter"
             control={form.control}
