@@ -55,41 +55,38 @@ const formSchema = z.object({
   knowledge: z.array(z.custom<Knowledge>()).optional(),
   groups: z.array(z.string()).optional(),
   talk: z.string().optional(),
-  profile: z.object({
-    headline: z.string().min(1, {
-      message: "Headline is required.",
-    }),
-    description: z.string().min(1, {
-      message: "Description is required.",
-    }),
-    features: z
-      .array(
-        z.object({
-          title: z.string().min(1, {
-            message: "Feature title is required.",
-          }),
-          description: z.string().min(1, {
-            message: "Feature description is required.",
-          }),
-        })
-      )
-      .optional(),
-    conversations: z
-      .array(
-        z.object({
-          messages: z.array(
-            z.object({
-              role: z.string(),
-              content: z.string(),
-            })
-          ),
-        })
-      )
-      .optional(),
-    showCharacter: z.boolean().optional(),
-    showTraining: z.boolean().optional(),
-    showPersonality: z.boolean().optional(),
-  }),
+  profile: z
+    .object({
+      headline: z.string().optional().nullable(),
+      description: z.string().optional().nullable(),
+      features: z
+        .array(
+          z.object({
+            title: z.string().optional().nullable(),
+            description: z.string().optional().nullable(),
+          })
+        )
+        .optional()
+        .nullable(),
+      conversations: z
+        .array(
+          z.object({
+            messages: z.array(
+              z.object({
+                role: z.string(),
+                content: z.string(),
+              })
+            ),
+          })
+        )
+        .optional()
+        .nullable(),
+      showCharacter: z.boolean().optional().nullable(),
+      showTraining: z.boolean().optional().nullable(),
+      showPersonality: z.boolean().optional().nullable(),
+    })
+    .optional()
+    .nullable(),
 });
 
 const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
