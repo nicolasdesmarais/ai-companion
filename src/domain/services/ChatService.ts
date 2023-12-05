@@ -201,25 +201,28 @@ export class ChatService {
     userId: string,
     request: CreateChatRequest
   ) {
-    const { prompt, date } = request;
+    const { prompt, date, messages, aiId } = request;
 
     const start = performance.now();
     let endSetup = start,
       endKnowledge = start,
-      knowledgeMeta: any;
+      knowledgeMeta: any,
+      chat: any;
 
-    // Save prompt as a new message to chat
-    const chat = await this.updateChat(
-      chatId,
-      userId,
-      request.prompt,
-      Role.user
-    );
+    if (chatId === "test-chat") {
+      if (!aiId) {
+        throw new Error("AI id not found");
+      }
+      chat = await this.getTestChat(aiId, userId, messages || [], prompt);
+    } else {
+      // Save prompt as a new message to chat
+      chat = await this.updateChat(chatId, userId, request.prompt, Role.user);
+    }
 
     if (!chat) {
       throw new EntityNotFoundError(`Chat with id ${chatId} not found`);
     }
-
+    console.log("ai", chat);
     const model = await aiModelService.findAIModelById(chat.ai.modelId);
     if (!model) {
       throw new EntityNotFoundError(
@@ -235,25 +238,27 @@ export class ChatService {
     });
 
     const endCallback = async (answer: string, externalChatId?: string) => {
-      const end = performance.now();
-      const setupTime = Math.round(endSetup - start);
-      const knowledgeTime = Math.round(endKnowledge - endSetup);
-      const llmTime = Math.round(end - endKnowledge);
-      const totalTime = Math.round(end - start);
-      await this.updateChat(
-        chatId,
-        userId,
-        answer,
-        Role.system,
-        externalChatId,
-        {
-          setupTime,
-          knowledgeTime,
-          llmTime,
-          totalTime,
-          knowledgeMeta,
-        }
-      );
+      if (chatId !== "test-chat") {
+        const end = performance.now();
+        const setupTime = Math.round(endSetup - start);
+        const knowledgeTime = Math.round(endKnowledge - endSetup);
+        const llmTime = Math.round(end - endKnowledge);
+        const totalTime = Math.round(end - start);
+        await this.updateChat(
+          chatId,
+          userId,
+          answer,
+          Role.system,
+          externalChatId,
+          {
+            setupTime,
+            knowledgeTime,
+            llmTime,
+            totalTime,
+            knowledgeMeta,
+          }
+        );
+      }
     };
 
     const chatModel = aiModelService.getChatModelInstance(model.id);
