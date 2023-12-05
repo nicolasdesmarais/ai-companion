@@ -4,6 +4,7 @@ import { decryptFromBuffer, encryptAsBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import { OAuthTokenProvider } from "@prisma/client";
 import { UserOAuthTokenEntity } from "../entities/OAuthTokenEntity";
+import orgClientCredentialsService from "./OrgClientCredentialsService";
 
 export class OAuthTokenService {
   private getOAuthAdapter(provider: OAuthTokenProvider): OAuthAdapter {
@@ -16,10 +17,22 @@ export class OAuthTokenService {
   }
 
   public async getOAuthTokens(
-    provider: OAuthTokenProvider,
-    userId: string
+    orgId: string,
+    userId: string,
+    provider: OAuthTokenProvider
   ): Promise<UserOAuthTokenEntity[]> {
     const oauthAdapter = await this.getOAuthAdapter(provider);
+    const orgClientCredentials =
+      await orgClientCredentialsService.getOrgClientCredentials(
+        orgId,
+        provider
+      );
+
+    if (!orgClientCredentials) {
+      throw new Error(
+        `Missing client credentials for ${provider}, for org ${orgId}`
+      );
+    }
 
     const tokens = await prismadb.oAuthToken.findMany({
       where: {
@@ -35,7 +48,10 @@ export class OAuthTokenService {
       }
       try {
         const tokenData = JSON.parse(decryptFromBuffer(token.data));
-        const tokenInfo = await oauthAdapter.getOAuthTokenInfo(tokenData);
+        const tokenInfo = await oauthAdapter.getOAuthTokenInfo(
+          orgClientCredentials.data,
+          tokenData
+        );
         if (tokenInfo.isExistingTokenValid) {
           validTokens.push(token);
         } else if (tokenInfo.refreshedToken) {
