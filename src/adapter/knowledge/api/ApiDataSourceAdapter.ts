@@ -103,8 +103,8 @@ export class ApiDataSourceAdapter implements DataSourceAdapter {
   }): Promise<IndexKnowledgeResponse> {
     throw new Error("Method not implemented.");
   }
-  deleteKnowledge(knowledgeId: string): Promise<void> {
-    throw new Error("Method not implemented.");
+  public async deleteKnowledge(knowledgeId: string): Promise<void> {
+    await fileLoader.deleteKnowledge(knowledgeId);
   }
 }
 
