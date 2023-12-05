@@ -33,9 +33,8 @@ export class OAuthTokenService {
       if (!token.data) {
         continue;
       }
-      const tokenData = JSON.parse(decryptFromBuffer(token.data));
-
       try {
+        const tokenData = JSON.parse(decryptFromBuffer(token.data));
         const tokenInfo = await oauthAdapter.getOAuthTokenInfo(tokenData);
         if (tokenInfo.isExistingTokenValid) {
           validTokens.push(token);
