@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import { ChatOpenAI } from "langchain/chat_models/openai";
-import { SystemChatMessage } from "langchain/schema";
+import { SystemMessage } from "langchain/schema";
 
 export const maxDuration = 300;
 
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       return new NextResponse("Prompt is required", { status: 400 });
     }
 
-    const resp = await openai.call([new SystemChatMessage(prompt)]);
+    const resp = await openai.call([new SystemMessage(prompt)]);
 
     return NextResponse.json(resp.text);
   } catch (error) {

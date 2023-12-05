@@ -53,11 +53,30 @@ export const AIProfile = ({ ai, form, aiModels }: ProfileSourceProps) => {
   const generateProfile = async () => {
     setGeneratingProfile(true);
     const response = await fetch(`/api/v1/ai/${ai.id}/generate-profile`, {
-      method: "POST",
+      method: "PUT",
     });
-    const data = await response.json();
-    if (data.success) {
-      form.setValue("profile", data.profile);
+    if (response.ok) {
+      const data = await response.json();
+      const currentProfile = form.getValues("profile");
+      for (let i = 0; i < data.features.length; i++) {
+        form.setValue(`profile.features[${i}].title`, data.features[i].title, {
+          shouldDirty: true,
+        });
+        form.setValue(
+          `profile.features[${i}].description`,
+          data.features[i].description,
+          {
+            shouldDirty: true,
+          }
+        );
+      }
+      form.setValue(
+        "profile",
+        { ...currentProfile, ...data },
+        {
+          shouldDirty: true,
+        }
+      );
     }
     setGeneratingProfile(false);
   };

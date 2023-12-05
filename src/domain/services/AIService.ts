@@ -16,6 +16,15 @@ import aiModelService from "./AIModelService";
 import { AISecurityService } from "./AISecurityService";
 import groupService from "./GroupService";
 import invitationService from "./InvitationService";
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { SystemMessage } from "langchain/schema";
+
+const openai = new ChatOpenAI({
+  azureOpenAIApiKey: process.env.AZURE_GPT35_KEY,
+  azureOpenAIApiVersion: "2023-05-15",
+  azureOpenAIApiInstanceName: "appdirect-prod-ai-useast",
+  azureOpenAIApiDeploymentName: "ai-prod-16k",
+});
 
 export class AIService {
   public async findAIById(id: string) {
@@ -638,6 +647,61 @@ export class AIService {
         aiId,
       },
     });
+  }
+
+  public async generate(prompt: string) {
+    const response = await openai.call([new SystemMessage(prompt)]);
+    return response.content;
+  }
+
+  public async generateAIProfile(userId: string, aiId: string) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    if (ai.userId !== userId) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const intro =
+      "You are making a marketing profile for an AI chatbot. This AI will be part of many other AIs that are part of a larger AI marketplace. Call to action is to get people to try to talk to this AI.";
+
+    const background = `for the following AI chatbot:  ${ai.name}, ${ai.description}. Here are more details for this AI: ${ai.instructions}`;
+
+    const headline = await this.generate(
+      `${intro} Create a short, one sentence headline ${background}`
+    );
+
+    const description = await this.generate(
+      `${intro} Create one paragraph description ${background}`
+    );
+
+    const featureTitle = await this.generate(
+      `${intro} Create one three word feature ${background}`
+    );
+
+    const featureDescription = await this.generate(
+      `${intro} This AI has the following feature: ${featureTitle}. Give a one sentence description of this feature ${background}`
+    );
+
+    const aiProfile = {
+      headline,
+      description,
+      features: [
+        {
+          title: featureTitle,
+          description: featureDescription,
+        },
+      ],
+    };
+
+    return aiProfile;
   }
 }
 
