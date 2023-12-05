@@ -8,8 +8,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
-import { AIModel } from "@/src/domain/models/AIModel";
 import { Prisma } from "@prisma/client";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -38,10 +36,9 @@ type ExtendedAI = Prisma.AIGetPayload<typeof extendedAI>;
 interface ProfileSourceProps {
   ai: ExtendedAI | null;
   form: any;
-  aiModels: AIModel[];
 }
 
-export const AIProfile = ({ ai, form, aiModels }: ProfileSourceProps) => {
+export const AIProfile = ({ ai, form }: ProfileSourceProps) => {
   const [messages, setMessages] = useState<ChatMessageProps[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
   const [generatingProfile, setGeneratingProfile] = useState(false);
@@ -90,7 +87,7 @@ export const AIProfile = ({ ai, form, aiModels }: ProfileSourceProps) => {
             Text and images to display in the catalog of AIs.
           </p>
           <Button
-            className="absolute top-0 right-0"
+            className="mt-2 md:absolute top-0 right-0"
             type="button"
             disabled={isLoading || generatingProfile}
             variant="outline"
@@ -246,7 +243,7 @@ export const AIProfile = ({ ai, form, aiModels }: ProfileSourceProps) => {
                 Provide example question and answer so that users can understand
                 the type of conversations your AI is good at.
               </FormDescription>
-              <div className="flex col-flex flex-wrap">
+              <div className="flex flex-wrap">
                 <div
                   key={`example-conversation-add`}
                   className="mt-4 w-1/3 h-64 p-2 justify-center flex items-center"
@@ -335,12 +332,12 @@ export const AIProfile = ({ ai, form, aiModels }: ProfileSourceProps) => {
           </p>
         </div>
         <Separator className="bg-primary/10" />
-        <div className="pt-2 space-y-8">
+        <div className="pt-2">
           <FormField
             name="profile.showCharacter"
             control={form.control}
             render={({ field }) => (
-              <FormItem className="col-span-2 md:col-span-1">
+              <FormItem>
                 <FormControl>
                   <Checkbox
                     checked={field.value}
@@ -351,10 +348,12 @@ export const AIProfile = ({ ai, form, aiModels }: ProfileSourceProps) => {
                   >
                     <div>
                       Show Character Information
-                      <FormDescription>
-                        Checking this box will make the Character instructions
-                        and example conversations visible on the AI profile.
-                      </FormDescription>
+                      <div>
+                        <FormDescription>
+                          Checking this box will make the Character instructions
+                          and example conversations visible on the AI profile.
+                        </FormDescription>
+                      </div>
                     </div>
                   </Checkbox>
                 </FormControl>
@@ -366,7 +365,7 @@ export const AIProfile = ({ ai, form, aiModels }: ProfileSourceProps) => {
             name="profile.showTraining"
             control={form.control}
             render={({ field }) => (
-              <FormItem className="col-span-2 md:col-span-1">
+              <FormItem>
                 <FormControl>
                   <Checkbox
                     checked={field.value}
@@ -377,10 +376,12 @@ export const AIProfile = ({ ai, form, aiModels }: ProfileSourceProps) => {
                   >
                     <div>
                       Show Training Materials
-                      <FormDescription>
-                        Checking this box will make the names of all websites
-                        and files visible on the AI profile.
-                      </FormDescription>
+                      <div>
+                        <FormDescription>
+                          Checking this box will make the names of all websites
+                          and files visible on the AI profile.
+                        </FormDescription>
+                      </div>
                     </div>
                   </Checkbox>
                 </FormControl>
@@ -392,7 +393,7 @@ export const AIProfile = ({ ai, form, aiModels }: ProfileSourceProps) => {
             name="profile.showPersonality"
             control={form.control}
             render={({ field }) => (
-              <FormItem className="col-span-2 md:col-span-1">
+              <FormItem>
                 <FormControl>
                   <Checkbox
                     checked={field.value}

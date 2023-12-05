@@ -313,7 +313,7 @@ export const AIEditor = ({
       ),
       buttons: (
         <>
-          <div>
+          <div className="flex flex-col md:flex-row items-center">
             {aiId && (
               <Button
                 size="lg"
@@ -334,7 +334,7 @@ export const AIEditor = ({
               Back to Browse
             </Button>
           </div>
-          <div>
+          <div className="flex flex-col md:flex-row items-center">
             {saveProgressButton}
             {continueButton(
               "/edit/knowledge",
@@ -352,7 +352,7 @@ export const AIEditor = ({
       buttons: (
         <>
           <div>{backButton("edit")}</div>
-          <div>
+          <div className="flex flex-col md:flex-row items-center">
             {saveProgressButton}
             {continueButton(
               "/edit/personality",
@@ -370,7 +370,7 @@ export const AIEditor = ({
       buttons: (
         <>
           <div>{backButton("edit/knowledge")}</div>
-          <div>
+          <div className="flex flex-col md:flex-row items-center">
             {saveProgressButton}
             {continueButton(
               "/edit/personality",
@@ -389,7 +389,7 @@ export const AIEditor = ({
       buttons: (
         <>
           <div>{backButton("edit/knowledge")}</div>
-          <div>
+          <div className="flex flex-col md:flex-row items-center">
             {saveProgressButton}
             {continueButton(
               "/edit/personality",
@@ -407,7 +407,7 @@ export const AIEditor = ({
       buttons: (
         <>
           <div>{backButton("edit/knowledge")}</div>
-          <div>
+          <div className="flex flex-col md:flex-row items-center">
             {saveProgressButton}
             {continueButton(
               "/edit/personality",
@@ -427,7 +427,7 @@ export const AIEditor = ({
       buttons: (
         <>
           <div>{backButton("edit/knowledge")}</div>
-          <div>
+          <div className="flex flex-col md:flex-row items-center">
             {saveProgressButton}
             {continueButton(
               "/edit/profile",
@@ -441,11 +441,11 @@ export const AIEditor = ({
       name: "Profile",
       route: "edit/profile",
       index: 4,
-      content: <AIProfile ai={initialAi} form={form} aiModels={aiModels} />,
+      content: <AIProfile ai={initialAi} form={form} />,
       buttons: (
         <>
           <div>{backButton("edit/knowledge")}</div>
-          <div>
+          <div className="flex flex-col md:flex-row items-center">
             {saveProgressButton}
             {continueButton(
               "/",
@@ -465,7 +465,7 @@ export const AIEditor = ({
     <div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="pb-10">
-          <div className="flex h-full p-4 space-x-1 max-w-3xl mx-auto">
+          <div className="flex h-full p-1 md:p-4 space-x-1 max-w-3xl mx-auto">
             {tabs.map((tab, index) =>
               tab.secondary ? null : (
                 <div
@@ -476,7 +476,7 @@ export const AIEditor = ({
                   key={index}
                   onClick={() => handleTabClick(tab.route, !aiId && index > 0)}
                 >
-                  <div className="bg-secondary rounded-lg px-2 text-ring">
+                  <div className="bg-secondary rounded-lg px-2 text-ring hidden md:block">
                     {tab.index}
                   </div>
                   <div className="ml-2">{tab.name}</div>
@@ -485,7 +485,7 @@ export const AIEditor = ({
             )}
           </div>
           <div>{activeTab?.content}</div>
-          <div className="w-full flex justify-between max-w-3xl mx-auto mt-8">
+          <div className="w-full flex flex-col md:flex-row items-center justify-between max-w-3xl mx-auto mt-8">
             {activeTab?.buttons}
           </div>
         </form>

@@ -10,7 +10,7 @@ const Checkbox = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
 >(({ className, children, id, ...props }, ref) => (
   <div className="flex my-2 items-center">
-    <div className="h-5">
+    <div className="h-5 self-start mt-1">
       <CheckboxPrimitive.Root
         id={id}
         className={cn(
@@ -24,7 +24,7 @@ const Checkbox = React.forwardRef<
         </CheckboxPrimitive.Indicator>
       </CheckboxPrimitive.Root>
     </div>
-    <div className="ml-2 h-6 align-middle">
+    <div className="ml-2 align-middle">
       <label htmlFor={id}>{children}</label>
     </div>
   </div>
