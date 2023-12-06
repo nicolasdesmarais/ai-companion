@@ -14,7 +14,7 @@ import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import aiModelService from "./AIModelService";
 import aiService from "./AIService";
 
-const BUFFER_TOKENS = 1000;
+const BUFFER_TOKENS = 200;
 
 const getChatsResponseSelect = {
   id: true,
