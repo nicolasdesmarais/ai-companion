@@ -34,7 +34,10 @@ import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { AuthorizationScope } from "@/src/domain/types/AuthorizationContext";
+import {
+  AuthorizationScope,
+  visibleAuthorizationScopes,
+} from "@/src/domain/types/AuthorizationContext";
 
 interface APIKeysFormProps {
   initialApiKeys: ListApiKeyResponse[];
@@ -252,7 +255,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                 />
                 <div>
                   <FormLabel>Scopes</FormLabel>
-                  {Object.values(AuthorizationScope).map((scope) => (
+                  {visibleAuthorizationScopes.map((scope) => (
                     <Controller
                       key={scope}
                       name="scopes"
@@ -317,7 +320,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                 />
                 <div>
                   <FormLabel>Scopes</FormLabel>
-                  {Object.values(AuthorizationScope).map((scope) => (
+                  {visibleAuthorizationScopes.map((scope) => (
                     <Controller
                       key={scope}
                       name="scopes"

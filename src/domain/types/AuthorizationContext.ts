@@ -15,4 +15,12 @@ export enum AuthorizationScope {
   CHATS_WRITE = "chats.write",
   DATA_SOURCES_READ = "dataSources.read",
   DATA_SOURCES_WRITE = "dataSources.write",
+  ORG_CLIENT_CREDENTIALS_WRITE = "orgClientCredentials.write",
 }
+
+export const visibleAuthorizationScopes = [
+  AuthorizationScope.CHATS_READ,
+  AuthorizationScope.CHATS_WRITE,
+  AuthorizationScope.DATA_SOURCES_READ,
+  AuthorizationScope.DATA_SOURCES_WRITE,
+];

@@ -198,6 +198,18 @@ enum OAuthTokenProvider{
   GOOGLE
 }
 
+model OrgClientCredentials {
+  id                        String                        @id @default(cuid())
+  provider                  OAuthTokenProvider
+  orgId                     String                        @map(name: "org_id")
+  data                      Bytes?                        @db.Blob
+  createdAt                 DateTime                      @default(now()) @map(name: "created_at")
+  updatedAt                 DateTime                      @updatedAt @default(now()) @map(name: "updated_at")
+
+  @@unique([orgId, provider])
+  @@map("org_client_credentials")
+ }
+
 model Chat {
   id                        String    @id @default(cuid())
   createdAt                 DateTime  @default(now()) @map(name: "created_at")
