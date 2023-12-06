@@ -1,5 +1,5 @@
-import { getAuthorizationContext } from "../lib/authorizationUtils";
 import { AuthorizationScope } from "../security/models/AuthorizationContext";
+import { getAuthorizationContext } from "../security/utils/authorizationUtils";
 
 export const withAuthorization = (
   requiredScope: AuthorizationScope,
