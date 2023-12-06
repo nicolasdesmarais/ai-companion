@@ -1,4 +1,4 @@
-import { FileUploadDataSourceInput } from "@/src/adapter/knowledge/file-upload/types/FileUploadDataSourceInput";
+import { FileUploadDataSourceInput } from "@/src/adapter-out/knowledge/file-upload/types/FileUploadDataSourceInput";
 import aiService from "@/src/domain/services/AIService";
 import dataSourceService from "@/src/domain/services/DataSourceService";
 import { auth } from "@clerk/nextjs";

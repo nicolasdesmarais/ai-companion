@@ -1,6 +1,6 @@
 import vectorDatabaseAdapter, {
   VectorKnowledgeResponse,
-} from "@/src/adapter/knowledge/vector-database/VectorDatabaseAdapter";
+} from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 import {
   CreateChatRequest,
   GetChatsResponse,

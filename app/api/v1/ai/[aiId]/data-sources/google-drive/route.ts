@@ -1,4 +1,4 @@
-import { GoogleDriveDataSourceInput } from "@/src/adapter/knowledge/google-drive/types/GoogleDriveDataSourceInput";
+import { GoogleDriveDataSourceInput } from "@/src/adapter-out/knowledge/google-drive/types/GoogleDriveDataSourceInput";
 import {
   BadRequestError,
   EntityNotFoundError,

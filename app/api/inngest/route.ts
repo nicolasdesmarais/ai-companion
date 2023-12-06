@@ -3,9 +3,9 @@ import {
   knowledgeEventReceived,
   knowledgeInitialized,
   loadKnowledgeChunk,
-} from "@/src/adapter/inngest/datasource-workflows";
+} from "@/src/adapter-out/inngest/datasource-workflows";
 import { serve } from "inngest/next";
-import { inngest } from "../../../src/adapter/inngest/client";
+import { inngest } from "../../../src/adapter-out/inngest/client";
 
 export const maxDuration = 300;
 

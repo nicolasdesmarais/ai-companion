@@ -1,12 +1,12 @@
-import { publishEvent } from "@/src/adapter/inngest/event-publisher";
-import apiDataSourceAdapter from "@/src/adapter/knowledge/api/ApiDataSourceAdapter";
-import fileUploadDataSourceAdapter from "@/src/adapter/knowledge/file-upload/FileUploadDataSourceAdapter";
-import googleDriveDataSourceAdapter from "@/src/adapter/knowledge/google-drive/GoogleDriveDataSourceAdapter";
-import { DataSourceAdapter } from "@/src/adapter/knowledge/types/DataSourceAdapter";
-import { DataSourceItemList } from "@/src/adapter/knowledge/types/DataSourceItemList";
-import { IndexKnowledgeResponse } from "@/src/adapter/knowledge/types/IndexKnowledgeResponse";
-import { KnowledgeIndexingResult } from "@/src/adapter/knowledge/types/KnowlegeIndexingResult";
-import webUrlsDataSourceAdapter from "@/src/adapter/knowledge/web-urls/WebUrlsDataSourceAdapter";
+import { publishEvent } from "@/src/adapter-out/inngest/event-publisher";
+import apiDataSourceAdapter from "@/src/adapter-out/knowledge/api/ApiDataSourceAdapter";
+import fileUploadDataSourceAdapter from "@/src/adapter-out/knowledge/file-upload/FileUploadDataSourceAdapter";
+import googleDriveDataSourceAdapter from "@/src/adapter-out/knowledge/google-drive/GoogleDriveDataSourceAdapter";
+import { DataSourceAdapter } from "@/src/adapter-out/knowledge/types/DataSourceAdapter";
+import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceItemList";
+import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
+import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
+import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
 import { GetDataSourcesResponse } from "@/src/domain/ports/api/DataSourcesApi";
 import prismadb from "@/src/lib/prismadb";
 import {

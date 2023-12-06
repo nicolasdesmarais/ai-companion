@@ -1,4 +1,4 @@
-import { WebUrlDataSourceInput } from "@/src/adapter/knowledge/web-urls/types/WebUrlDataSourceInput";
+import { WebUrlDataSourceInput } from "@/src/adapter-out/knowledge/web-urls/types/WebUrlDataSourceInput";
 import {
   BadRequestError,
   EntityNotFoundError,
