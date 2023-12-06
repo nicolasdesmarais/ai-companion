@@ -1,9 +1,9 @@
 import { CreateChatRequest } from "@/src/domain/ports/api/ChatsApi";
 import chatService from "@/src/domain/services/ChatService";
-import { AuthorizationScope } from "@/src/domain/types/AuthorizationContext";
 import { rateLimit } from "@/src/lib/rate-limit";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
+import { AuthorizationScope } from "@/src/security/models/AuthorizationContext";
 import { StreamingTextResponse } from "ai";
 import { NextResponse } from "next/server";
 

@@ -1,4 +1,4 @@
-import { AuthorizationScope } from "@/src/domain/types/AuthorizationContext";
+import { AuthorizationScope } from "@/src/security/models/AuthorizationContext";
 
 export interface CreateApiKeyRequest {
   name: string;

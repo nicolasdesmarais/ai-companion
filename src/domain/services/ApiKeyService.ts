@@ -8,8 +8,8 @@ import {
 import prismadb from "@/src/lib/prismadb";
 import { JsonValue } from "@prisma/client/runtime/library";
 import { createHash, randomBytes } from "crypto";
+import { AuthorizationScope } from "../../security/models/AuthorizationContext";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
-import { AuthorizationScope } from "../types/AuthorizationContext";
 
 const apiKeySelect = {
   id: true,

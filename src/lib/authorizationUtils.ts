@@ -5,7 +5,7 @@ import {
   AuthorizationContext,
   AuthorizationContextType,
   AuthorizationScope,
-} from "../domain/types/AuthorizationContext";
+} from "../security/models/AuthorizationContext";
 
 const AUTHORIZATION_HEADER = "X-Authorization";
 

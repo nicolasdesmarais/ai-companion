@@ -37,7 +37,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   AuthorizationScope,
   visibleAuthorizationScopes,
-} from "@/src/domain/types/AuthorizationContext";
+} from "@/src/security/models/AuthorizationContext";
 
 interface APIKeysFormProps {
   initialApiKeys: ListApiKeyResponse[];
