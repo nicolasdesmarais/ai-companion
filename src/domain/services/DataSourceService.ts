@@ -1,4 +1,4 @@
-import { publishEvent } from "@/src/adapter-out/inngest/event-publisher";
+import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
 import apiDataSourceAdapter from "@/src/adapter-out/knowledge/api/ApiDataSourceAdapter";
 import fileUploadDataSourceAdapter from "@/src/adapter-out/knowledge/file-upload/FileUploadDataSourceAdapter";
 import googleDriveDataSourceAdapter from "@/src/adapter-out/knowledge/google-drive/GoogleDriveDataSourceAdapter";
