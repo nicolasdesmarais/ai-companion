@@ -39,10 +39,27 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     return redirect("/");
   }
 
+  const rating = await prismadb.aIRating.aggregate({
+    _avg: {
+      rating: true,
+    },
+    _count: {
+      rating: true,
+    },
+    where: {
+      aiId: chat.ai.id,
+    },
+  });
   return (
     <div className="flex h-full">
       <ChatList />
-      <ChatClient chat={chat} />
+      <ChatClient
+        chat={chat}
+        rating={{
+          averageRating: rating._avg.rating,
+          ratingCount: rating._count.rating,
+        }}
+      />
     </div>
   );
 };

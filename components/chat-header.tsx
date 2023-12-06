@@ -30,6 +30,7 @@ import { useChats } from "@/hooks/use-chats";
 import { useState } from "react";
 import { ShareModal } from "./share-modal";
 import { RateModal } from "./rate-modal";
+import { StarRating } from "./star-rating";
 
 interface ChatHeaderProps {
   chat: Chat & {
@@ -39,9 +40,10 @@ interface ChatHeaderProps {
       messages: number;
     };
   };
+  rating?: any;
 }
 
-export const ChatHeader = ({ chat }: ChatHeaderProps) => {
+export const ChatHeader = ({ chat, rating }: ChatHeaderProps) => {
   const router = useRouter();
   const { user } = useUser();
   const { toast } = useToast();
@@ -99,7 +101,7 @@ export const ChatHeader = ({ chat }: ChatHeaderProps) => {
   };
 
   return (
-    <div className="flex w-full justify-between items-center p-4 bg-accent/30">
+    <div className="flex w-full justify-between items-center p-4 pb-3 bg-accent/30">
       <div className="flex gap-x-2 items-center">
         <BotAvatar src={chat.ai.src} />
         <div className="flex flex-col gap-y-1">
@@ -111,6 +113,19 @@ export const ChatHeader = ({ chat }: ChatHeaderProps) => {
             <div className="flex items-center text-xs text-muted-foreground">
               <MessagesSquare className="w-3 h-3 mr-1" />
               {chat._count.messages}
+            </div>
+          </div>
+          <div className="flex">
+            <StarRating
+              value={Math.round(rating.averageRating)}
+              count={rating.ratingCount}
+              className=""
+            />
+            <div className="text-xs text-muted-foreground ml-2">
+              |
+              <Button variant="link" size="xs" type="button">
+                View Profile
+              </Button>
             </div>
           </div>
         </div>
