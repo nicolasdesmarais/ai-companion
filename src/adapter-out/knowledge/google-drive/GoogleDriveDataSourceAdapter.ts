@@ -20,7 +20,7 @@ import { put } from "@vercel/blob";
 import { GaxiosResponse } from "gaxios";
 import { drive_v3 } from "googleapis";
 import { Readable } from "stream";
-import { publishEvent } from "../../inngest/event-publisher";
+import { publishEvent } from "../../../adapter-in/inngest/event-publisher";
 import {
   googleDriveClient,
   googleDriveOauth2Client,

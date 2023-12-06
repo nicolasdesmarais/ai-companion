@@ -5,7 +5,6 @@ import {
   KnowledgeIndexStatus,
 } from "@prisma/client";
 import { put } from "@vercel/blob";
-import { publishEvent } from "../../inngest/event-publisher";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import { DataSourceItemList } from "../types/DataSourceItemList";
