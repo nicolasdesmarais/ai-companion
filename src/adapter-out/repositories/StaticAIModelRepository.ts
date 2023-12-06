@@ -1,6 +1,8 @@
 import { AIModelRepository } from "@/src/domain/ports/AIModelRepository";
 import { AIModel } from "../../domain/models/AIModel";
 
+const SHOW_ALL_AI_MODELS = process.env.SHOW_ALL_AI_MODELS !== "false";
+
 export class StaticAIModelRepository implements AIModelRepository {
   private models: AIModel[] = [
     {
@@ -86,7 +88,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       name: "GPT-4 Turbo w/ Assistant API (Beta)",
       externalModelId: "gpt-4-1106-preview",
       contextSize: 32768,
-      isVisible: true,
+      isVisible: false,
       options: {
         temperature: {
           default: 1,
@@ -191,6 +193,10 @@ export class StaticAIModelRepository implements AIModelRepository {
   ];
 
   public async findAll(): Promise<AIModel[]> {
+    if (SHOW_ALL_AI_MODELS) {
+      return this.models;
+    }
+
     return this.models.filter((model) => model.isVisible);
   }
 
