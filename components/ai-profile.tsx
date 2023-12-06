@@ -4,6 +4,8 @@ import React from "react";
 import { useAIProfile } from "@/hooks/use-ai-profile";
 import { StarRating } from "./star-rating";
 import Image from "next/image";
+import { X } from "lucide-react";
+import { Button } from "./ui/button";
 
 interface Props {
   ai: AI & { profile: any };
@@ -15,6 +17,11 @@ export const AIProfile = ({ ai, rating }: Props) => {
   if (!isOpen) return null;
   return (
     <div className="bg-accent/30">
+      <div className="absolute top-4 right-4">
+        <Button onClick={onClose} variant="ghost">
+          <X className="h-6 w-6" />
+        </Button>
+      </div>
       <div className="relative w-40 h-40">
         <Image
           fill
