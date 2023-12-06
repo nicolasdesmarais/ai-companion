@@ -31,6 +31,7 @@ import { useState } from "react";
 import { ShareModal } from "./share-modal";
 import { RateModal } from "./rate-modal";
 import { StarRating } from "./star-rating";
+import { useAIProfile } from "@/hooks/use-ai-profile";
 
 interface ChatHeaderProps {
   chat: Chat & {
@@ -48,6 +49,7 @@ export const ChatHeader = ({ chat, rating }: ChatHeaderProps) => {
   const { user } = useUser();
   const { toast } = useToast();
   const { chats, fetchChats } = useChats();
+  const aiProfile = useAIProfile();
   const [showShareModal, setShowShareModal] = useState(false);
   const [showRateModal, setShowRateModal] = useState(false);
 
@@ -123,7 +125,12 @@ export const ChatHeader = ({ chat, rating }: ChatHeaderProps) => {
             />
             <div className="text-xs text-muted-foreground ml-2">
               |
-              <Button variant="link" size="xs" type="button">
+              <Button
+                variant="link"
+                size="xs"
+                type="button"
+                onClick={() => aiProfile.onOpen()}
+              >
                 View Profile
               </Button>
             </div>
