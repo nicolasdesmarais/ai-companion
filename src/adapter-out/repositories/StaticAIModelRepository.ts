@@ -200,7 +200,7 @@ export class StaticAIModelRepository implements AIModelRepository {
     return this.models.filter((model) => model.isVisible);
   }
 
-  public async findById(id: string): Promise<AIModel | null> {
+  public findById(id: string): AIModel | null {
     const model = this.models.find((model) => model.id === id);
     return model ?? null;
   }

@@ -26,8 +26,8 @@ export class AIModelService {
     return this.aiModelRepository.findAll();
   }
 
-  public async findAIModelById(id: string): Promise<AIModel | null> {
-    return await this.aiModelRepository.findById(id);
+  public findAIModelById(id: string): AIModel | null {
+    return this.aiModelRepository.findById(id);
   }
 
   public getChatModelInstance(modelId: string): ChatModel | null {

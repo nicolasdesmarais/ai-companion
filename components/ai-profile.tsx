@@ -6,7 +6,9 @@ import { StarRating } from "./star-rating";
 import Image from "next/image";
 import { X } from "lucide-react";
 import { Button } from "./ui/button";
+import { StaticAIModelRepository } from "@/src/adapter-out/repositories/StaticAIModelRepository";
 
+const aiModelRepository = new StaticAIModelRepository();
 interface Props {
   ai: AI & { profile: any };
   rating?: any;
@@ -44,11 +46,11 @@ export const AIProfile = ({ ai, rating }: Props) => {
         </div>
         <div className="flex flex-col justify-between">
           <div>
-            <div className="text-2xl font-bold">{ai.name}</div>
+            <div className="text-xl font-bold">{ai.name}</div>
             <div className="text-sm text-muted-foreground">
               By {ai.userName}
             </div>
-            <div className="mt-1">{ai.description}</div>
+            <div className="mt-1 text-sm">{ai.description}</div>
           </div>
           <StarRating
             value={Math.round(rating.averageRating)}
@@ -57,23 +59,44 @@ export const AIProfile = ({ ai, rating }: Props) => {
           />
         </div>
       </div>
-      <div className="text-3xl font-bold">{ai.profile?.headline}</div>
-      <div>{ai.profile?.description}</div>
-      <div className="text-3xl font-bold">Features</div>
+      <div className="text-2xl font-bold">{ai.profile?.headline}</div>
+      <div className="text-sm">{ai.profile?.description}</div>
+      <div className="text-2xl font-bold">
+        <span className="border-b border-ring pb-1 pr-4">Features</span>
+      </div>
       {ai.profile?.features.map((feature: any, index: number) => (
         <div key={`feature-${index}`}>
-          <div>{feature.title}</div>
-          <div>{feature.description}</div>
+          <div className="text-xl font-bold mb-2">{feature.title}</div>
+          <div className="text-sm">{feature.description}</div>
         </div>
       ))}
-      <div className="text-3xl font-bold">Training Specifications</div>
-      {ai.profile?.showCharacter && <div>Character</div>}
+      <div className="text-2xl font-bold">
+        <span className="border-b border-ring pb-1 pr-4">
+          Training Specifications
+        </span>
+      </div>
+
+      <div className="text-sm">{ai.profile?.trainingDescription}</div>
+      {ai.profile?.showCharacter && (
+        <div>
+          <div className="text-xl font-bold mb-2">AI Model</div>
+          <div className="text-sm">
+            {aiModelRepository.findById(ai.modelId)?.name}
+          </div>
+          <div className="text-xl font-bold my-2">Instructions</div>
+          <div className="text-sm">{ai.instructions}</div>
+          <div className="text-xl font-bold my-2">Visibility</div>
+          <div className="text-sm">{ai.visibility}</div>
+        </div>
+      )}
 
       {ai.profile?.showPersonality && <div>Personality</div>}
 
       {ai.profile?.showTraining && <div>showTraining</div>}
 
-      <div className="text-3xl font-bold">Reviews</div>
+      <div className="text-3xl font-bold">
+        <span className="border-b border-ring pb-1 pr-4">Reviews</span>
+      </div>
     </div>
   );
 };

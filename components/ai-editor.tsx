@@ -81,6 +81,7 @@ const formSchema = z.object({
         )
         .optional()
         .nullable(),
+      trainingDescription: z.string().optional().nullable(),
       showCharacter: z.boolean().optional().nullable(),
       showTraining: z.boolean().optional().nullable(),
       showPersonality: z.boolean().optional().nullable(),

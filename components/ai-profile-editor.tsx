@@ -348,7 +348,7 @@ export const AIProfileEditor = ({ ai, form }: ProfileSourceProps) => {
                   <FormControl>
                     <Textarea
                       disabled={isLoading}
-                      rows={9}
+                      rows={6}
                       className="bg-background resize-none"
                       placeholder={SAMPLE_TRAINING}
                       {...field}
