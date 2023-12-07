@@ -226,6 +226,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
 
     const items: DataSourceItem[] = [];
     const result: DataSourceItemList = {
+      type: DataSourceType.GOOGLE_DRIVE,
       items,
     };
     for (const file of listFilesResponse.files) {
@@ -233,10 +234,13 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
         fileId: file.id ?? "",
         fileName: file.name ?? "",
         mimeType: file.mimeType ?? "",
+        modifiedTime: file.modifiedTime ?? "",
       };
+
+      const uniqueId = `${metadata.fileId}-${metadata.modifiedTime}`;
       const item: DataSourceItem = {
         name: file.name ?? "",
-        type: "FILE",
+        uniqueId,
         metadata,
       };
       items.push(item);

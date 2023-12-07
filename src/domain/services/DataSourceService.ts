@@ -147,44 +147,30 @@ export class DataSourceService {
       dataSource.data
     );
 
-    return await this.initializeKnowledgeList(
-      dataSourceId,
-      itemList,
-      dataSource.ownerUserId
-    );
+    return await this.initializeKnowledgeList(dataSourceId, itemList);
   }
 
   private async initializeKnowledgeList(
     dataSourceId: string,
-    itemList: DataSourceItemList,
-    userId: string
+    itemList: DataSourceItemList
   ) {
     const knowledgeIdList = [];
     const dataSourceKnowledgeRelations = [];
 
+    const existingKnowledgeMap = await this.getExistingKnowledgeMap(itemList);
+
     for (const item of itemList.items) {
-      let knowledge,
-        existingKnowledge = [] as Knowledge[];
-      const fileId = item.metadata?.fileId;
-      if (fileId) {
-        existingKnowledge = await prismadb.knowledge.findMany({
-          take: 1,
-          where: {
-            metadata: {
-              path: "$.fileId",
-              equals: fileId,
-            },
-          },
-        });
-      }
-      if (existingKnowledge.length > 0) {
-        knowledge = existingKnowledge[0];
+      const existingKnowledge = existingKnowledgeMap.get(item.uniqueId!);
+
+      let knowledge;
+      if (existingKnowledge) {
+        knowledge = existingKnowledge;
       } else {
         knowledge = await prismadb.knowledge.create({
           data: {
-            userId,
             name: item.name,
-            type: item.type,
+            type: itemList.type,
+            uniqueId: item.uniqueId,
             indexStatus: KnowledgeIndexStatus.INITIALIZED,
             blobUrl: item.blobUrl,
             metadata: item.metadata,
@@ -204,6 +190,28 @@ export class DataSourceService {
     });
 
     return knowledgeIdList;
+  }
+
+  private async getExistingKnowledgeMap(itemList: DataSourceItemList) {
+    const existingKnowledgeMap = new Map<string, Knowledge>();
+    const uniqueIds = itemList.items
+      .map((item) => item.uniqueId)
+      .filter((uniqueId): uniqueId is string => uniqueId !== undefined);
+
+    if (uniqueIds.length > 0) {
+      const existingKnowledge = await prismadb.knowledge.findMany({
+        where: {
+          type: itemList.type,
+          uniqueId: { in: uniqueIds },
+        },
+      });
+
+      existingKnowledge.forEach((knowledge) => {
+        existingKnowledgeMap.set(knowledge.uniqueId!, knowledge);
+      });
+    }
+
+    return existingKnowledgeMap;
   }
 
   /**

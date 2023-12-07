@@ -21,10 +21,10 @@ export class ApiDataSourceAdapter implements DataSourceAdapter {
     const input = data as CreateApiDataSourceRequest;
 
     const result: DataSourceItemList = {
+      type: DataSourceType.API,
       items: [
         {
           name: data.name,
-          type: DataSourceType.API,
         },
       ],
     };

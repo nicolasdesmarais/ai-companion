@@ -27,10 +27,10 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
   ): Promise<DataSourceItemList> {
     const input = data as WebUrlDataSourceInput;
     const result: DataSourceItemList = {
+      type: DataSourceType.WEB_URL,
       items: [
         {
           name: input.url,
-          type: DataSourceType.WEB_URL,
         },
       ],
     };
