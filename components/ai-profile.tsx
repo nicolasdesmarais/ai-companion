@@ -43,7 +43,7 @@ export const AIProfile = ({ ai, rating }: Props) => {
         anchor.scrollIntoView({ behavior: "smooth" });
       }
     }
-  }, [isOpen, params, window?.location?.hash]);
+  }, [isOpen, params]);
 
   useEffect(() => {
     const fetchDataSources = async () => {

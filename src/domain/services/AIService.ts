@@ -618,7 +618,8 @@ export class AIService {
     userId: string,
     aiId: string,
     rating: number,
-    review: string = ""
+    review: string = "",
+    headline: string = ""
   ) {
     const ai = await prismadb.aI.findUnique({
       where: {
@@ -645,6 +646,7 @@ export class AIService {
         data: {
           rating,
           review,
+          headline,
         },
       });
     } else {
@@ -654,6 +656,7 @@ export class AIService {
           userId,
           rating,
           review,
+          headline,
         },
       });
     }
