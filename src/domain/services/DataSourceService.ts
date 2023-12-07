@@ -305,8 +305,13 @@ export class DataSourceService {
       partiallyCompletedPercents = 0,
       indexingKnowledges = 0,
       completedKnowledges = 0,
-      failedKnowledges = 0;
+      failedKnowledges = 0,
+      totalDocumentCount = 0,
+      totalTokenCount = 0;
     for (const { knowledge } of dataSource.knowledges) {
+      totalDocumentCount += knowledge.documentCount ?? 0;
+      totalTokenCount += knowledge.tokenCount ?? 0;
+
       switch (knowledge.indexStatus) {
         case KnowledgeIndexStatus.INDEXING:
           indexingKnowledges++;
@@ -358,6 +363,8 @@ export class DataSourceService {
         indexStatus: indexingStatus,
         indexPercentage,
         lastIndexedAt,
+        documentCount: totalDocumentCount,
+        tokenCount: totalTokenCount,
       },
     });
   }
@@ -536,11 +543,15 @@ export class DataSourceService {
       indexStatus: KnowledgeIndexStatus;
       blobUrl: string | null;
       lastIndexedAt: Date;
+      documentCount?: number;
+      tokenCount?: number;
       metadata?: any;
     } = {
       indexStatus: indexKnowledgeResponse.indexStatus,
       blobUrl: knowledge.blobUrl || indexKnowledgeResponse.blobUrl || null,
       lastIndexedAt: new Date(),
+      documentCount: indexKnowledgeResponse.documentCount,
+      tokenCount: indexKnowledgeResponse.tokenCount,
     };
 
     if (indexKnowledgeResponse.metadata) {

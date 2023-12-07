@@ -156,6 +156,8 @@ model Knowledge {
   indexStatus               KnowledgeIndexStatus?               @map(name :"index_status")
   blobUrl                   String? @db.Text                    @map(name: "blob_url")
   metadata                  Json?
+  documentCount             Int?                                @map(name: "document_count")
+  tokenCount                Int?                                @map(name: "token_count")
   dataSources               DataSourceKnowledge[]
 
   @@map("knowledge")
@@ -239,6 +241,8 @@ model DataSource {
   type                      DataSourceType
   indexStatus               DataSourceIndexStatus?      @map(name :"index_status")
   indexPercentage           Decimal                     @map(name: "index_percentage")
+  documentCount             Int?                        @map(name: "document_count")
+  tokenCount                Int?                        @map(name: "token_count")
   knowledges                DataSourceKnowledge[]
   ais                       AIDataSource[]
   data                      Json?
