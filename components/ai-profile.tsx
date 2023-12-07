@@ -4,12 +4,13 @@ import React, { useEffect, useState } from "react";
 import { useAIProfile } from "@/hooks/use-ai-profile";
 import { StarRating } from "./star-rating";
 import Image from "next/image";
-import { X, Star } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "./ui/button";
 import { StaticAIModelRepository } from "@/src/adapter-out/repositories/StaticAIModelRepository";
 import axios from "axios";
 import { StarSvg } from "./svg/star-svg";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { useParams, useRouter } from "next/navigation";
 
 const aiModelRepository = new StaticAIModelRepository();
 interface Props {
@@ -18,10 +19,30 @@ interface Props {
 }
 
 export const AIProfile = ({ ai, rating }: Props) => {
-  const { isOpen, onClose } = useAIProfile();
+  const { isOpen, onClose, onOpen } = useAIProfile();
   const [dataSources, setDataSources] = useState<any[]>([]);
   const [ratings, setRatings] = useState<any[]>([]);
   const [ratingDistributions, setRatingDistributions] = useState<any[]>([]);
+
+  const params = useParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    const hashes = ["#profile", "#specifications", "#user-ratings"];
+    if (hashes.includes(window.location.hash)) {
+      onOpen();
+    }
+  }, [params]);
+
+  useEffect(() => {
+    console.log(window.location, isOpen);
+    if (isOpen && window.location.hash) {
+      const anchor = document.querySelector(window.location.hash);
+      if (anchor) {
+        anchor.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [isOpen, params, window?.location?.hash]);
 
   useEffect(() => {
     const fetchDataSources = async () => {
@@ -43,22 +64,51 @@ export const AIProfile = ({ ai, rating }: Props) => {
   return (
     <div className="bg-accent/30 px-6 space-y-4 w-2/3 w-full overflow-auto ml-1 pb-16">
       <div className="absolute top-4 right-4">
-        <Button onClick={onClose} variant="ghost" size="icon" type="button">
+        <Button
+          onClick={() => {
+            router.push("#");
+            onClose();
+          }}
+          variant="ghost"
+          size="icon"
+          type="button"
+        >
           <X className="h-6 w-6" />
         </Button>
       </div>
       <div className="pt-1">
-        <Button variant="link" size="sm" type="button">
-          Profile
-        </Button>
-        <Button variant="link" size="sm" type="button">
-          Specifications
-        </Button>
-        <Button variant="link" size="sm" type="button">
-          Reviews
-        </Button>
+        <a href="#profile">
+          <Button
+            variant="link"
+            size="sm"
+            type="button"
+            onClick={() => router.push("#profile")}
+          >
+            Profile
+          </Button>
+        </a>
+        <a href="#specifications">
+          <Button
+            variant="link"
+            size="sm"
+            type="button"
+            onClick={() => router.push("#specifications")}
+          >
+            Specifications
+          </Button>
+        </a>
+        <a href="#user-ratings">
+          <Button
+            variant="link"
+            size="sm"
+            type="button"
+            onClick={() => router.push("#user-ratings")}
+          >
+            Reviews
+          </Button>
+        </a>
       </div>
-      <div className="flex">
+      <div className="flex" id="profile">
         <div className="relative w-40 h-40 mr-4 shrink-0">
           <Image
             fill
@@ -93,7 +143,7 @@ export const AIProfile = ({ ai, rating }: Props) => {
           <div className="text-sm">{feature.description}</div>
         </div>
       ))}
-      <div className="text-2xl font-bold">
+      <div className="text-2xl font-bold" id="specifications">
         <span className="border-b border-ring pb-1 pr-4">
           Training Specifications
         </span>
@@ -143,7 +193,7 @@ export const AIProfile = ({ ai, rating }: Props) => {
         </div>
       )}
 
-      <div className="text-3xl font-bold">
+      <div className="text-3xl font-bold" id="user-ratings">
         <span className="border-b border-ring pb-1 pr-4">User Ratings</span>
       </div>
       <div className="flex justify-between">
@@ -180,7 +230,7 @@ export const AIProfile = ({ ai, rating }: Props) => {
             >
               <div
                 className={"rounded-md bg-[#eecc50] h-full"}
-                style={{ width: `${ratingDistributions[4 - i]}%` }}
+                style={{ width: `${ratingDistributions[4 - i] || 0}%` }}
               ></div>
             </div>
             <div key={`rating-3-${i}`} className="text-ring">
