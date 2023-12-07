@@ -220,6 +220,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     );
     if (!listFilesResponse?.files || listFilesResponse.files.length === 0) {
       return {
+        type: DataSourceType.GOOGLE_DRIVE,
         items: [],
       };
     }
