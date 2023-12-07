@@ -9,7 +9,10 @@ import {
 import { put } from "@vercel/blob";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
-import { DataSourceItemList } from "../types/DataSourceItemList";
+import {
+  DataSourceItem,
+  DataSourceItemList,
+} from "../types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import {
   KnowledgeIndexingResult,
@@ -27,10 +30,10 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
   ): Promise<DataSourceItemList> {
     const input = data as WebUrlDataSourceInput;
     const result: DataSourceItemList = {
+      type: DataSourceType.WEB_URL,
       items: [
         {
           name: input.url,
-          type: DataSourceType.WEB_URL,
         },
       ],
     };
@@ -61,6 +64,13 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       indexStatus: KnowledgeIndexStatus.INDEXING,
       metadata,
     };
+  }
+
+  public shouldReindexKnowledge(
+    knowledge: Knowledge,
+    item: DataSourceItem
+  ): boolean {
+    return knowledge.uniqueId !== item.uniqueId;
   }
 
   public retrieveKnowledgeIdFromEvent(data: any): string {

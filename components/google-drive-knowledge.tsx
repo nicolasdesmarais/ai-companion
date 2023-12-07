@@ -10,8 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { UserOAuthTokenEntity } from "@/src/domain/entities/OAuthTokenEntity";
 import { EntityNotFoundError } from "@/src/domain/errors/Errors";
+import { UserOAuthTokenEntity } from "@/src/domain/models/OAuthTokenEntity";
 import {
   CreateGoogleDriveKnowledgeRequest,
   GoogleDriveFile,
