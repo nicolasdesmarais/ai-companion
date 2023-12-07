@@ -338,6 +338,8 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
           resolve({
             userId,
             indexStatus: KnowledgeIndexStatus.INDEXING,
+            documentCount: metadata.documentCount,
+            tokenCount: metadata.totalTokenCount,
             metadata: {
               eventIds,
               ...metadata,

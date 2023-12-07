@@ -46,6 +46,8 @@ export class ApiDataSourceAdapter implements DataSourceAdapter {
 
     return {
       indexStatus: KnowledgeIndexStatus.COMPLETED,
+      documentCount: documentCount,
+      tokenCount: totalTokenCount,
       metadata: {
         documentCount,
         totalTokenCount,

@@ -93,6 +93,8 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     return {
       userId,
       indexStatus: KnowledgeIndexStatus.INDEXING,
+      documentCount: metadata.documentCount,
+      tokenCount: metadata.totalTokenCount,
       events,
       metadata: {
         mimeType: input.mimetype,
