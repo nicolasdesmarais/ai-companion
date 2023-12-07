@@ -11,16 +11,20 @@ async function getHandler(
 
   const reviews = await aiService.getAllReviews(params.aiId);
 
+  let distributions = [0, 0, 0, 0, 0];
   if (reviews.length) {
     const userId = reviews.map((review) => review.userId) as string[];
     const userList = await clerkClient.users.getUserList({ userId });
+    const starCounts = [0, 0, 0, 0, 0];
     reviews.forEach((review: any) => {
       const user = userList.find((user) => user.id === review.userId);
       review.user = user;
+      const stars = Math.round(review.rating);
+      starCounts[stars - 1]++;
     });
+    distributions = starCounts.map((count) => (count / reviews.length) * 100);
   }
-
-  return NextResponse.json(reviews);
+  return NextResponse.json({ reviews, distributions });
 }
 
 export const GET = withErrorHandler(getHandler);

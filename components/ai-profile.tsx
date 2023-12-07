@@ -21,6 +21,7 @@ export const AIProfile = ({ ai, rating }: Props) => {
   const { isOpen, onClose } = useAIProfile();
   const [dataSources, setDataSources] = useState<any[]>([]);
   const [ratings, setRatings] = useState<any[]>([]);
+  const [ratingDistributions, setRatingDistributions] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchDataSources = async () => {
@@ -29,7 +30,8 @@ export const AIProfile = ({ ai, rating }: Props) => {
     };
     const fetchRatings = async () => {
       const response = await axios.get(`/api/v1/ai/${ai.id}/rating/all`);
-      setRatings(response.data);
+      setRatings(response.data.reviews);
+      setRatingDistributions(response.data.distributions);
     };
     if (ai.profile?.showTraining) {
       fetchDataSources();
@@ -166,7 +168,7 @@ export const AIProfile = ({ ai, rating }: Props) => {
           Write a Review
         </Button>
       </div>
-      <div className="grid rating-histogram-grid gap-3">
+      <div className="grid gap-3 grid-cols-[50px_auto_50px]">
         {[...Array(5)].map((_, i) => (
           <>
             <div key={`rating-1-${i}`} className="text-ring">
@@ -174,10 +176,15 @@ export const AIProfile = ({ ai, rating }: Props) => {
             </div>
             <div
               key={`rating-2-${i}`}
-              className="border border-ring/30 rounded-md grow"
-            ></div>
+              className="border border-ring/30 rounded-md"
+            >
+              <div
+                className={"rounded-md bg-[#eecc50] h-full"}
+                style={{ width: `${ratingDistributions[4 - i]}%` }}
+              ></div>
+            </div>
             <div key={`rating-3-${i}`} className="text-ring">
-              0 %
+              {ratingDistributions[4 - i]} %
             </div>
           </>
         ))}
