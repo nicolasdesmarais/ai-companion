@@ -24,6 +24,7 @@ interface StarRatingProps {
   size?: string;
   value?: number;
   onChange?: (src: number) => void;
+  hideCount?: boolean;
 }
 
 export const StarRating = ({
@@ -33,6 +34,7 @@ export const StarRating = ({
   count,
   size = "small",
   onChange,
+  hideCount,
 }: StarRatingProps) => {
   const [hover, setHover] = useState<number | null>(null);
   return (
@@ -56,7 +58,7 @@ export const StarRating = ({
             />
           </button>
         ))}
-        {!onChange && (
+        {!onChange && !hideCount && (
           <span
             className={cn(
               "text-xs ml-1",

@@ -9,6 +9,7 @@ import { Button } from "./ui/button";
 import { StaticAIModelRepository } from "@/src/adapter-out/repositories/StaticAIModelRepository";
 import axios from "axios";
 import { StarSvg } from "./svg/star-svg";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 const aiModelRepository = new StaticAIModelRepository();
 interface Props {
@@ -19,21 +20,26 @@ interface Props {
 export const AIProfile = ({ ai, rating }: Props) => {
   const { isOpen, onClose } = useAIProfile();
   const [dataSources, setDataSources] = useState<any[]>([]);
+  const [ratings, setRatings] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchDataSources = async () => {
       const response = await axios.get(`/api/v1/ai/${ai.id}/data-sources`);
       setDataSources(response.data.data);
     };
+    const fetchRatings = async () => {
+      const response = await axios.get(`/api/v1/ai/${ai.id}/rating/all`);
+      setRatings(response.data);
+    };
     if (ai.profile?.showTraining) {
       fetchDataSources();
     }
+    fetchRatings();
   }, []);
 
   if (!isOpen) return null;
-  console.log(ai);
   return (
-    <div className="bg-accent/30 px-6 space-y-4 w-2/3 w-full overflow-auto ml-1">
+    <div className="bg-accent/30 px-6 space-y-4 w-2/3 w-full overflow-auto ml-1 pb-16">
       <div className="absolute top-4 right-4">
         <Button onClick={onClose} variant="ghost" size="icon" type="button">
           <X className="h-6 w-6" />
@@ -143,6 +149,7 @@ export const AIProfile = ({ ai, rating }: Props) => {
           value={Math.round(rating.averageRating)}
           count={rating.ratingCount}
           className=""
+          hideCount={true}
         />
         <div>{rating.ratingCount} User Ratings</div>
         <div>{rating.averageRating.toFixed(1)} out of 5</div>
@@ -155,7 +162,7 @@ export const AIProfile = ({ ai, rating }: Props) => {
         {[...Array(5)].map((_, i) => (
           <>
             <div key={`rating-1-${i}`} className="text-ring">
-              {i + 1} star
+              {5 - i} star
             </div>
             <div
               key={`rating-2-${i}`}
@@ -170,6 +177,22 @@ export const AIProfile = ({ ai, rating }: Props) => {
       <div className="text-xl font-bold">
         <span className="border-b border-ring pb-1 pr-8">Recent Reviews</span>
       </div>
+      {ratings.map((rating: any, index: number) => (
+        <div key={`rating-${index}`} className="">
+          <div className="flex items-center mb-2">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={rating.user.imageUrl} crop="w_48,h_48" />
+            </Avatar>
+            <div className="text-md ml-4">
+              {rating.user.firstName} {rating.user.lastName}
+            </div>
+          </div>
+          <div className="flex">
+            <StarRating value={rating.rating} hideCount={true} />
+            <div className="text-md font-bold ml-4">{rating.review}</div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

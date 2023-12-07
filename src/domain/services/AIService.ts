@@ -679,6 +679,24 @@ export class AIService {
     });
   }
 
+  public async getAllReviews(aiId: string) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    return await prismadb.aIRating.findMany({
+      where: {
+        aiId,
+      },
+    });
+  }
+
   public async generate(prompt: string) {
     const response = await openai.call([new SystemMessage(prompt)]);
     return response.content;
