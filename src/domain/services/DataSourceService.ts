@@ -607,12 +607,9 @@ export class DataSourceService {
       throw new ForbiddenError("Forbidden");
     }
 
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
-    const knowledgeIds: string[] = [];
-    for (const knowledge of dataSource.knowledges) {
-      await dataSourceAdapter.deleteKnowledge(knowledge.knowledgeId);
-      knowledgeIds.push(knowledge.knowledgeId);
-    }
+    const knowledgeIds: string[] = dataSource.knowledges.map(
+      (dataSourceKnowledge) => dataSourceKnowledge.knowledgeId
+    );
 
     await prismadb.$transaction(async (tx) => {
       await prismadb.aIDataSource.deleteMany({
