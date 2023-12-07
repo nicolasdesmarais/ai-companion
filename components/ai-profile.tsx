@@ -11,6 +11,7 @@ import axios from "axios";
 import { StarSvg } from "./svg/star-svg";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useParams, useRouter } from "next/navigation";
+import { useRateAI } from "@/hooks/use-rate-ai";
 
 const aiModelRepository = new StaticAIModelRepository();
 interface Props {
@@ -23,7 +24,7 @@ export const AIProfile = ({ ai, rating }: Props) => {
   const [dataSources, setDataSources] = useState<any[]>([]);
   const [ratings, setRatings] = useState<any[]>([]);
   const [ratingDistributions, setRatingDistributions] = useState<any[]>([]);
-
+  const rateAI = useRateAI();
   const params = useParams();
   const router = useRouter();
 
@@ -213,7 +214,7 @@ export const AIProfile = ({ ai, rating }: Props) => {
             {rating.ratingCount} User Ratings
           </div>
         </div>
-        <Button variant="ring">
+        <Button variant="ring" onClick={() => rateAI.onOpen()}>
           <StarSvg className="h-4 w-4 mr-2 mb-1" fill="white" />
           Write a Review
         </Button>

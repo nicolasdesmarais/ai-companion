@@ -32,6 +32,7 @@ import { ShareModal } from "./share-modal";
 import { RateModal } from "./rate-modal";
 import { StarRating } from "./star-rating";
 import { useAIProfile } from "@/hooks/use-ai-profile";
+import { useRateAI } from "@/hooks/use-rate-ai";
 
 interface ChatHeaderProps {
   chat: Chat & {
@@ -51,7 +52,7 @@ export const ChatHeader = ({ chat, rating }: ChatHeaderProps) => {
   const { chats, fetchChats } = useChats();
   const aiProfile = useAIProfile();
   const [showShareModal, setShowShareModal] = useState(false);
-  const [showRateModal, setShowRateModal] = useState(false);
+  const rateAI = useRateAI();
 
   const duplicate = async () => {
     const response = await axios.put(`/api/v1/chats/${chat.id}/duplicate`);
@@ -179,7 +180,7 @@ export const ChatHeader = ({ chat, rating }: ChatHeaderProps) => {
               <Trash className="w-4 h-4 mr-2" />
               Remove
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setShowRateModal(true)}>
+            <DropdownMenuItem onClick={() => rateAI.onOpen()}>
               <Star className="w-4 h-4 mr-2" />
               Rate
             </DropdownMenuItem>
@@ -199,11 +200,7 @@ export const ChatHeader = ({ chat, rating }: ChatHeaderProps) => {
         setShowModal={setShowShareModal}
         ai={chat.ai}
       />
-      <RateModal
-        showModal={showRateModal}
-        setShowModal={setShowRateModal}
-        ai={chat.ai}
-      />
+      <RateModal ai={chat.ai} />
     </div>
   );
 };
