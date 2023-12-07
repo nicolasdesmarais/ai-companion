@@ -4,6 +4,8 @@ import dataSourceService from "@/src/domain/services/DataSourceService";
 import { auth } from "@clerk/nextjs";
 import { DataSourceType } from "@prisma/client";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import crypto from "crypto";
+import fs from "fs";
 import { NextResponse } from "next/server";
 
 export async function POST(
@@ -30,11 +32,19 @@ export async function POST(
           throw new Error("Missing tokenPayload");
         }
         const { orgId, userId } = JSON.parse(tokenPayload);
+
+        const fileContent = fs.readFileSync(blob.pathname);
+        const fileHash = crypto
+          .createHash("sha256")
+          .update(fileContent)
+          .digest("hex");
+
         try {
           const input: FileUploadDataSourceInput = {
             filename: blob.pathname,
             mimetype: blob.contentType,
             blobUrl: blob.url,
+            fileHash,
           };
           const dataSourceId = await dataSourceService.createDataSource(
             orgId,

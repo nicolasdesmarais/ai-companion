@@ -3,4 +3,5 @@ export interface FileUploadDataSourceInput {
   mimetype: string;
   filepath?: string;
   blobUrl?: string;
+  fileHash?: string;
 }

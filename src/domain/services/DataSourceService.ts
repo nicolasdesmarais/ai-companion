@@ -147,11 +147,16 @@ export class DataSourceService {
       dataSource.data
     );
 
-    return await this.initializeKnowledgeList(dataSourceId, itemList);
+    return await this.initializeKnowledgeList(
+      dataSourceId,
+      dataSourceAdapter,
+      itemList
+    );
   }
 
   private async initializeKnowledgeList(
     dataSourceId: string,
+    dataSourceAdapter: DataSourceAdapter,
     itemList: DataSourceItemList
   ) {
     const knowledgeIdList = [];
@@ -165,6 +170,18 @@ export class DataSourceService {
       let knowledge;
       if (existingKnowledge) {
         knowledge = existingKnowledge;
+        const shouldReindexKnowledge = dataSourceAdapter.shouldReindexKnowledge(
+          existingKnowledge,
+          item
+        );
+        if (shouldReindexKnowledge) {
+          await prismadb.knowledge.update({
+            where: { id: existingKnowledge.id },
+            data: {
+              indexStatus: KnowledgeIndexStatus.INITIALIZED,
+            },
+          });
+        }
       } else {
         knowledge = await prismadb.knowledge.create({
           data: {

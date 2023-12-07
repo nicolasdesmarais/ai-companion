@@ -7,7 +7,10 @@ import {
 import { put } from "@vercel/blob";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
-import { DataSourceItemList } from "../types/DataSourceItemList";
+import {
+  DataSourceItem,
+  DataSourceItemList,
+} from "../types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import {
   KnowledgeIndexingResult,
@@ -29,6 +32,7 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
         {
           name: input.filename,
           blobUrl: input.blobUrl,
+          uniqueId: input.fileHash,
         },
       ],
     };
@@ -98,6 +102,14 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
       },
     };
   }
+
+  public shouldReindexKnowledge(
+    knowledge: Knowledge,
+    item: DataSourceItem
+  ): boolean {
+    return knowledge.uniqueId !== item.uniqueId;
+  }
+
   retrieveKnowledgeIdFromEvent(data: any): string {
     throw new Error("Method not implemented.");
   }

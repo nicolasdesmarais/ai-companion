@@ -238,7 +238,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
         modifiedTime: file.modifiedTime ?? "",
       };
 
-      const uniqueId = `${metadata.fileId}-${metadata.modifiedTime}`;
+      const uniqueId = `${metadata.fileId}`;
       const item: DataSourceItem = {
         name: file.name ?? "",
         uniqueId,
@@ -346,6 +346,15 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
         });
       }
     });
+  }
+
+  public shouldReindexKnowledge(
+    knowledge: Knowledge,
+    item: DataSourceItem
+  ): boolean {
+    const { modifiedTime } =
+      knowledge.metadata as unknown as GoogleDriveFileMetadata;
+    return modifiedTime !== item.metadata.modifiedTime;
   }
 
   private async listAllFiles(
