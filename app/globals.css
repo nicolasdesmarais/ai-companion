@@ -176,3 +176,7 @@ body,
 .text-nano {
   font-size: 0.25rem;
 }
+
+.rating-histogram-grid {
+  grid-template-columns: 50px auto 40px;
+}

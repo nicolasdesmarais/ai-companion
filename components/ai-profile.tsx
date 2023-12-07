@@ -4,10 +4,11 @@ import React, { useEffect, useState } from "react";
 import { useAIProfile } from "@/hooks/use-ai-profile";
 import { StarRating } from "./star-rating";
 import Image from "next/image";
-import { X } from "lucide-react";
+import { X, Star } from "lucide-react";
 import { Button } from "./ui/button";
 import { StaticAIModelRepository } from "@/src/adapter-out/repositories/StaticAIModelRepository";
 import axios from "axios";
+import { StarSvg } from "./svg/star-svg";
 
 const aiModelRepository = new StaticAIModelRepository();
 interface Props {
@@ -135,7 +136,39 @@ export const AIProfile = ({ ai, rating }: Props) => {
       )}
 
       <div className="text-3xl font-bold">
-        <span className="border-b border-ring pb-1 pr-4">Reviews</span>
+        <span className="border-b border-ring pb-1 pr-4">User Ratings</span>
+      </div>
+      <div>
+        <StarRating
+          value={Math.round(rating.averageRating)}
+          count={rating.ratingCount}
+          className=""
+        />
+        <div>{rating.ratingCount} User Ratings</div>
+        <div>{rating.averageRating.toFixed(1)} out of 5</div>
+        <Button variant="ring">
+          <StarSvg className="h-4 w-4 mr-2 mb-1" fill="white" />
+          Write a Review
+        </Button>
+      </div>
+      <div className="grid rating-histogram-grid gap-3">
+        {[...Array(5)].map((_, i) => (
+          <>
+            <div key={`rating-1-${i}`} className="text-ring">
+              {i + 1} star
+            </div>
+            <div
+              key={`rating-2-${i}`}
+              className="border border-ring/30 rounded-md grow"
+            ></div>
+            <div key={`rating-3-${i}`} className="text-ring">
+              0 %
+            </div>
+          </>
+        ))}
+      </div>
+      <div className="text-xl font-bold">
+        <span className="border-b border-ring pb-1 pr-8">Recent Reviews</span>
       </div>
     </div>
   );
