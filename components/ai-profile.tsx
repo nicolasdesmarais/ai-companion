@@ -1,12 +1,13 @@
 "use client";
 import { AI } from "@prisma/client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useAIProfile } from "@/hooks/use-ai-profile";
 import { StarRating } from "./star-rating";
 import Image from "next/image";
 import { X } from "lucide-react";
 import { Button } from "./ui/button";
 import { StaticAIModelRepository } from "@/src/adapter-out/repositories/StaticAIModelRepository";
+import axios from "axios";
 
 const aiModelRepository = new StaticAIModelRepository();
 interface Props {
@@ -16,7 +17,20 @@ interface Props {
 
 export const AIProfile = ({ ai, rating }: Props) => {
   const { isOpen, onClose } = useAIProfile();
+  const [dataSources, setDataSources] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchDataSources = async () => {
+      const response = await axios.get(`/api/v1/ai/${ai.id}/data-sources`);
+      setDataSources(response.data.data);
+    };
+    if (ai.profile?.showTraining) {
+      fetchDataSources();
+    }
+  }, []);
+
   if (!isOpen) return null;
+  console.log(ai);
   return (
     <div className="bg-accent/30 px-6 space-y-4 w-2/3 w-full overflow-auto ml-1">
       <div className="absolute top-4 right-4">
@@ -90,9 +104,35 @@ export const AIProfile = ({ ai, rating }: Props) => {
         </div>
       )}
 
-      {ai.profile?.showPersonality && <div>Personality</div>}
+      {ai.profile?.showPersonality && (
+        <div>
+          <div className="text-xl font-bold my-2">Personality</div>
+          <div className="text-sm">
+            <div>Temperature: {(ai.options as any).temperature[0]}</div>
+            <div>TopP: {(ai.options as any).topP[0]}</div>
+            <div>Max Tokens: {(ai.options as any).maxTokens[0]}</div>
+            <div>
+              Frequency Penalty: {(ai.options as any).frequencyPenalty[0]}
+            </div>
+            <div>
+              Presence Penalty: {(ai.options as any).presencePenalty[0]}
+            </div>
+          </div>
+        </div>
+      )}
 
-      {ai.profile?.showTraining && <div>showTraining</div>}
+      {ai.profile?.showTraining && !!dataSources.length && (
+        <div>
+          <div className="text-xl font-bold my-2">Training Knowledge</div>
+          <ul className="list-disc pl-4">
+            {dataSources.map((dataSource: any, index: number) => (
+              <li key={`knowledge-${index}`}>
+                <div className="text-sm truncate">{dataSource.name}</div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="text-3xl font-bold">
         <span className="border-b border-ring pb-1 pr-4">Reviews</span>
