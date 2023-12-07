@@ -144,15 +144,23 @@ export const AIProfile = ({ ai, rating }: Props) => {
       <div className="text-3xl font-bold">
         <span className="border-b border-ring pb-1 pr-4">User Ratings</span>
       </div>
-      <div>
-        <StarRating
-          value={Math.round(rating.averageRating)}
-          count={rating.ratingCount}
-          className=""
-          hideCount={true}
-        />
-        <div>{rating.ratingCount} User Ratings</div>
-        <div>{rating.averageRating.toFixed(1)} out of 5</div>
+      <div className="flex justify-between">
+        <div>
+          <div className="flex">
+            <StarRating
+              value={Math.round(rating.averageRating)}
+              count={rating.ratingCount}
+              size="medium"
+              hideCount={true}
+            />
+            <div className="ml-2 text-md">
+              {rating.averageRating.toFixed(1)} out of 5
+            </div>
+          </div>
+          <div className="text-xs text-muted-foreground mt-2">
+            {rating.ratingCount} User Ratings
+          </div>
+        </div>
         <Button variant="ring">
           <StarSvg className="h-4 w-4 mr-2 mb-1" fill="white" />
           Write a Review
