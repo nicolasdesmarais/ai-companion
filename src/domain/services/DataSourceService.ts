@@ -259,22 +259,24 @@ export class DataSourceService {
     }
 
     let indexKnowledgeResponse;
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
-    try {
-      indexKnowledgeResponse = await dataSourceAdapter.indexKnowledge(
-        dataSource.orgId,
-        dataSource.ownerUserId,
-        knowledge,
-        dataSource.data
-      );
-    } catch (error) {
-      console.error(error);
-      indexKnowledgeResponse = {
-        indexStatus: KnowledgeIndexStatus.FAILED,
-      };
-    }
+    if (knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED) {
+      const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
+      try {
+        indexKnowledgeResponse = await dataSourceAdapter.indexKnowledge(
+          dataSource.orgId,
+          dataSource.ownerUserId,
+          knowledge,
+          dataSource.data
+        );
+      } catch (error) {
+        console.error(error);
+        indexKnowledgeResponse = {
+          indexStatus: KnowledgeIndexStatus.FAILED,
+        };
+      }
 
-    await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
+      await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
+    }
     await this.updateDataSourceStatus(dataSourceId);
     return indexKnowledgeResponse;
   }
