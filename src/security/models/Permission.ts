@@ -49,8 +49,8 @@ export const decodePermission = (permission: string): Permission => {
   };
 };
 
-export const isValidPermission = (permission: string): boolean => {
-  const { resourceType, action, accessLevel } = decodePermission(permission);
+export const isValidScope = (scope: string): boolean => {
+  const { resourceType, action, accessLevel } = decodePermission(scope);
   return (
     Object.values(SecuredResourceType).includes(resourceType) &&
     Object.values(SecuredAction).includes(action) &&

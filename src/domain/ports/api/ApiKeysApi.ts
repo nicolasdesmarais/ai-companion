@@ -1,6 +1,6 @@
 export interface CreateApiKeyRequest {
   name: string;
-  permissions: string[];
+  scopes: string[];
 }
 
 export interface CreateApiKeyResponse {
@@ -15,7 +15,7 @@ export interface CreateApiKeyResponse {
 
 export interface UpdateApiKeyRequest {
   name: string;
-  permissions: string[];
+  scopes: string[];
 }
 
 export interface UpdateApiKeyResponse {
@@ -35,5 +35,5 @@ export interface ListApiKeyResponse {
   name: string;
   orgId: string;
   userId: string;
-  permissions: string[];
+  scopes: string[];
 }

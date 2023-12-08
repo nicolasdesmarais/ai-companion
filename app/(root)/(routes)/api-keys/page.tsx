@@ -23,7 +23,7 @@ const ApiKeysPage = async () => {
 
   return (
     <APIKeysForm
-      userPermissions={availableApiPermissions}
+      userScopes={availableApiPermissions}
       initialApiKeys={apiKeys}
     />
   );

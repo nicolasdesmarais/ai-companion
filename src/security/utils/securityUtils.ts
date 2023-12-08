@@ -4,8 +4,7 @@ import {
   AuthorizationContext,
   AuthorizationContextType,
 } from "../models/AuthorizationContext";
-import { Permission } from "../models/Permission";
-
+import { Permission, decodePermission } from "../models/Permission";
 
 import { auth } from "@clerk/nextjs";
 import { rolePermissions } from "../models/Permission";
@@ -52,10 +51,9 @@ export async function getApiAuthorizationContext(): Promise<AuthorizationContext
   const token = authHeader.split(" ")[1];
   const verifiedApiKey = await apiKeyService.getApiKeyFromBearerToken(token);
   if (verifiedApiKey) {
-    const permissions: Permission[] = [];
-    // const permissions: Permission[] = verifiedApiKey.scopes.map((scope) => {
-    //   return this.decodePermission(scope.toString());
-    // });
+    const permissions: Permission[] = verifiedApiKey.scopes.map((scope) =>
+      decodePermission(scope)
+    );
 
     return {
       orgId: verifiedApiKey.orgId,

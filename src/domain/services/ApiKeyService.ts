@@ -6,7 +6,7 @@ import {
   UpdateApiKeyResponse,
 } from "@/src/domain/ports/api/ApiKeysApi";
 import prismadb from "@/src/lib/prismadb";
-import { isValidPermission } from "@/src/security/models/Permission";
+import { isValidScope } from "@/src/security/models/Permission";
 import { JsonValue } from "@prisma/client/runtime/library";
 import { createHash, randomBytes } from "crypto";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
@@ -19,7 +19,7 @@ const apiKeySelect = {
   orgId: true,
   userId: true,
   name: true,
-  permissions: true,
+  scopes: true,
 };
 
 export class ApiKeyService {
@@ -41,10 +41,10 @@ export class ApiKeyService {
       return null;
     }
 
-    const permissions = this.getPermissionsFromJson(apiKey.permissions);
+    const scopes = this.getScopesFromJson(apiKey.scopes);
     return {
       ...apiKey,
-      permissions,
+      scopes,
     };
   }
 
@@ -67,11 +67,11 @@ export class ApiKeyService {
     });
 
     const typedApiKeys = apiKeys.map((key) => {
-      const permissions = this.getPermissionsFromJson(key.permissions);
+      const scopes = this.getScopesFromJson(key.scopes);
 
       return {
         ...key,
-        permissions,
+        scopes,
       };
     });
 
@@ -89,14 +89,14 @@ export class ApiKeyService {
     const apiKey = this.generateApiKey();
     const hashedApiKey = this.hashApiKey(apiKey);
 
-    const validPermissions = this.getValidPermissions(request.permissions);
+    const validScopes = this.getValidScopes(request.scopes);
 
     const createdApiKey = await prismadb.apiKey.create({
       data: {
         orgId,
         userId,
         name: request.name,
-        permissions: validPermissions,
+        scopes: validScopes,
         key: hashedApiKey,
       },
     });
@@ -107,7 +107,7 @@ export class ApiKeyService {
     };
   }
 
-  private getPermissionsFromJson(scopesJson: JsonValue): string[] {
+  private getScopesFromJson(scopesJson: JsonValue): string[] {
     const scopesArray =
       scopesJson != null && Array.isArray(scopesJson) ? scopesJson : [];
 
@@ -140,7 +140,7 @@ export class ApiKeyService {
       throw new ForbiddenError("Forbidden");
     }
 
-    const validPermissions = this.getValidPermissions(request.permissions);
+    const validScopes = this.getValidScopes(request.scopes);
 
     const updatedKey = await prismadb.apiKey.update({
       select: apiKeySelect,
@@ -149,15 +149,15 @@ export class ApiKeyService {
       },
       data: {
         name: request.name,
-        permissions: validPermissions,
+        scopes: validScopes,
       },
     });
 
     return updatedKey;
   }
 
-  private getValidPermissions(permissions: string[]): string[] {
-    return permissions.filter(isValidPermission);
+  private getValidScopes(scopes: string[]): string[] {
+    return scopes.filter(isValidScope);
   }
 
   public async deleteApiKey(orgId: string, userId: string, apiKeyId: string) {

@@ -295,7 +295,7 @@ model ApiKey {
   userId                    String         @map("user_id")
   name                      String
   key                       String         @unique
-  permissions               Json?
+  scopes                    Json?
 
   @@map("api_keys")
 }
