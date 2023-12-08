@@ -1,5 +1,5 @@
 import { Knowledge } from "@prisma/client";
-import { DataSourceItemList } from "./DataSourceItemList";
+import { DataSourceItem, DataSourceItemList } from "./DataSourceItemList";
 import { IndexKnowledgeResponse } from "./IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "./KnowlegeIndexingResult";
 
@@ -16,6 +16,8 @@ export interface DataSourceAdapter {
     knowledge: Knowledge,
     data: any
   ): Promise<IndexKnowledgeResponse>;
+
+  shouldReindexKnowledge(knowledge: Knowledge, item: DataSourceItem): boolean;
 
   retrieveKnowledgeIdFromEvent(data: any): string;
 

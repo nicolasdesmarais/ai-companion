@@ -220,12 +220,14 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     );
     if (!listFilesResponse?.files || listFilesResponse.files.length === 0) {
       return {
+        type: DataSourceType.GOOGLE_DRIVE,
         items: [],
       };
     }
 
     const items: DataSourceItem[] = [];
     const result: DataSourceItemList = {
+      type: DataSourceType.GOOGLE_DRIVE,
       items,
     };
     for (const file of listFilesResponse.files) {
@@ -233,10 +235,13 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
         fileId: file.id ?? "",
         fileName: file.name ?? "",
         mimeType: file.mimeType ?? "",
+        modifiedTime: file.modifiedTime ?? "",
       };
+
+      const uniqueId = `${metadata.fileId}`;
       const item: DataSourceItem = {
         name: file.name ?? "",
-        type: "FILE",
+        uniqueId,
         metadata,
       };
       items.push(item);
@@ -333,6 +338,8 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
           resolve({
             userId,
             indexStatus: KnowledgeIndexStatus.INDEXING,
+            documentCount: metadata.documentCount,
+            tokenCount: metadata.totalTokenCount,
             metadata: {
               eventIds,
               ...metadata,
@@ -341,6 +348,15 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
         });
       }
     });
+  }
+
+  public shouldReindexKnowledge(
+    knowledge: Knowledge,
+    item: DataSourceItem
+  ): boolean {
+    const { modifiedTime } =
+      knowledge.metadata as unknown as GoogleDriveFileMetadata;
+    return modifiedTime !== item.metadata.modifiedTime;
   }
 
   private async listAllFiles(

@@ -149,42 +149,45 @@ export class DataSourceService {
 
     return await this.initializeKnowledgeList(
       dataSourceId,
-      itemList,
-      dataSource.ownerUserId
+      dataSourceAdapter,
+      itemList
     );
   }
 
   private async initializeKnowledgeList(
     dataSourceId: string,
-    itemList: DataSourceItemList,
-    userId: string
+    dataSourceAdapter: DataSourceAdapter,
+    itemList: DataSourceItemList
   ) {
     const knowledgeIdList = [];
     const dataSourceKnowledgeRelations = [];
 
+    const existingKnowledgeMap = await this.getExistingKnowledgeMap(itemList);
+
     for (const item of itemList.items) {
-      let knowledge,
-        existingKnowledge = [] as Knowledge[];
-      const fileId = item.metadata?.fileId;
-      if (fileId) {
-        existingKnowledge = await prismadb.knowledge.findMany({
-          take: 1,
-          where: {
-            metadata: {
-              path: "$.fileId",
-              equals: fileId,
+      const existingKnowledge = existingKnowledgeMap.get(item.uniqueId!);
+
+      let knowledge;
+      if (existingKnowledge) {
+        knowledge = existingKnowledge;
+        const shouldReindexKnowledge = dataSourceAdapter.shouldReindexKnowledge(
+          existingKnowledge,
+          item
+        );
+        if (shouldReindexKnowledge) {
+          await prismadb.knowledge.update({
+            where: { id: existingKnowledge.id },
+            data: {
+              indexStatus: KnowledgeIndexStatus.INITIALIZED,
             },
-          },
-        });
-      }
-      if (existingKnowledge.length > 0) {
-        knowledge = existingKnowledge[0];
+          });
+        }
       } else {
         knowledge = await prismadb.knowledge.create({
           data: {
-            userId,
             name: item.name,
-            type: item.type,
+            type: itemList.type,
+            uniqueId: item.uniqueId,
             indexStatus: KnowledgeIndexStatus.INITIALIZED,
             blobUrl: item.blobUrl,
             metadata: item.metadata,
@@ -204,6 +207,28 @@ export class DataSourceService {
     });
 
     return knowledgeIdList;
+  }
+
+  private async getExistingKnowledgeMap(itemList: DataSourceItemList) {
+    const existingKnowledgeMap = new Map<string, Knowledge>();
+    const uniqueIds = itemList.items
+      .map((item) => item.uniqueId)
+      .filter((uniqueId): uniqueId is string => uniqueId !== undefined);
+
+    if (uniqueIds.length > 0) {
+      const existingKnowledge = await prismadb.knowledge.findMany({
+        where: {
+          type: itemList.type,
+          uniqueId: { in: uniqueIds },
+        },
+      });
+
+      existingKnowledge.forEach((knowledge) => {
+        existingKnowledgeMap.set(knowledge.uniqueId!, knowledge);
+      });
+    }
+
+    return existingKnowledgeMap;
   }
 
   /**
@@ -234,22 +259,24 @@ export class DataSourceService {
     }
 
     let indexKnowledgeResponse;
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
-    try {
-      indexKnowledgeResponse = await dataSourceAdapter.indexKnowledge(
-        dataSource.orgId,
-        dataSource.ownerUserId,
-        knowledge,
-        dataSource.data
-      );
-    } catch (error) {
-      console.error(error);
-      indexKnowledgeResponse = {
-        indexStatus: KnowledgeIndexStatus.FAILED,
-      };
-    }
+    if (knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED) {
+      const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
+      try {
+        indexKnowledgeResponse = await dataSourceAdapter.indexKnowledge(
+          dataSource.orgId,
+          dataSource.ownerUserId,
+          knowledge,
+          dataSource.data
+        );
+      } catch (error) {
+        console.error(error);
+        indexKnowledgeResponse = {
+          indexStatus: KnowledgeIndexStatus.FAILED,
+        };
+      }
 
-    await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
+      await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
+    }
     await this.updateDataSourceStatus(dataSourceId);
     return indexKnowledgeResponse;
   }
@@ -278,8 +305,13 @@ export class DataSourceService {
       partiallyCompletedPercents = 0,
       indexingKnowledges = 0,
       completedKnowledges = 0,
-      failedKnowledges = 0;
+      failedKnowledges = 0,
+      totalDocumentCount = 0,
+      totalTokenCount = 0;
     for (const { knowledge } of dataSource.knowledges) {
+      totalDocumentCount += knowledge.documentCount ?? 0;
+      totalTokenCount += knowledge.tokenCount ?? 0;
+
       switch (knowledge.indexStatus) {
         case KnowledgeIndexStatus.INDEXING:
           indexingKnowledges++;
@@ -331,6 +363,8 @@ export class DataSourceService {
         indexStatus: indexingStatus,
         indexPercentage,
         lastIndexedAt,
+        documentCount: totalDocumentCount,
+        tokenCount: totalTokenCount,
       },
     });
   }
@@ -509,11 +543,15 @@ export class DataSourceService {
       indexStatus: KnowledgeIndexStatus;
       blobUrl: string | null;
       lastIndexedAt: Date;
+      documentCount?: number;
+      tokenCount?: number;
       metadata?: any;
     } = {
       indexStatus: indexKnowledgeResponse.indexStatus,
       blobUrl: knowledge.blobUrl || indexKnowledgeResponse.blobUrl || null,
       lastIndexedAt: new Date(),
+      documentCount: indexKnowledgeResponse.documentCount,
+      tokenCount: indexKnowledgeResponse.tokenCount,
     };
 
     if (indexKnowledgeResponse.metadata) {
@@ -582,12 +620,9 @@ export class DataSourceService {
       throw new ForbiddenError("Forbidden");
     }
 
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
-    const knowledgeIds: string[] = [];
-    for (const knowledge of dataSource.knowledges) {
-      await dataSourceAdapter.deleteKnowledge(knowledge.knowledgeId);
-      knowledgeIds.push(knowledge.knowledgeId);
-    }
+    const knowledgeIds: string[] = dataSource.knowledges.map(
+      (dataSourceKnowledge) => dataSourceKnowledge.knowledgeId
+    );
 
     await prismadb.$transaction(async (tx) => {
       await prismadb.aIDataSource.deleteMany({

@@ -6,6 +6,7 @@ import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { AuthorizationScope } from "@/src/security/models/AuthorizationContext";
 import { DataSourceType } from "@prisma/client";
 import { put } from "@vercel/blob";
+import crypto from "crypto";
 import { writeFile } from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -28,6 +29,10 @@ async function postHandler(
 
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
+
+  // Calculate a hash for the file
+  const fileHash = crypto.createHash("sha256").update(buffer).digest("hex");
+
   const filepath = `/tmp/${file.name}`;
   await writeFile(filepath, buffer);
 
@@ -40,6 +45,7 @@ async function postHandler(
     mimetype: type,
     filepath,
     blobUrl: blob.url,
+    fileHash,
   };
   const dataSourceId = await dataSourceService.createDataSource(
     orgId,

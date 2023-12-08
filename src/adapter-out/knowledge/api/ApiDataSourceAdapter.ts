@@ -1,14 +1,15 @@
 import { CreateApiDataSourceRequest } from "@/src/domain/ports/api/DataSourcesApi";
 import {
-  $Enums,
   DataSourceType,
   Knowledge,
   KnowledgeIndexStatus,
-  Prisma,
 } from "@prisma/client";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
-import { DataSourceItemList } from "../types/DataSourceItemList";
+import {
+  DataSourceItem,
+  DataSourceItemList,
+} from "../types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "../types/KnowlegeIndexingResult";
 
@@ -21,10 +22,10 @@ export class ApiDataSourceAdapter implements DataSourceAdapter {
     const input = data as CreateApiDataSourceRequest;
 
     const result: DataSourceItemList = {
+      type: DataSourceType.API,
       items: [
         {
           name: data.name,
-          type: DataSourceType.API,
         },
       ],
     };
@@ -45,62 +46,41 @@ export class ApiDataSourceAdapter implements DataSourceAdapter {
 
     return {
       indexStatus: KnowledgeIndexStatus.COMPLETED,
+      documentCount: documentCount,
+      tokenCount: totalTokenCount,
       metadata: {
         documentCount,
         totalTokenCount,
       },
     };
   }
-  retrieveKnowledgeIdFromEvent(data: any): string {
+
+  public shouldReindexKnowledge(
+    knowledge: Knowledge,
+    item: DataSourceItem
+  ): boolean {
+    return true;
+  }
+
+  public retrieveKnowledgeIdFromEvent(data: any): string {
     throw new Error("Method not implemented.");
   }
-  getKnowledgeResultFromEvent(
-    knowledge: {
-      id: string;
-      createdAt: Date;
-      updatedAt: Date;
-      lastIndexedAt: Date | null;
-      userId: string | null;
-      name: string;
-      type: string;
-      indexStatus: $Enums.KnowledgeIndexStatus | null;
-      blobUrl: string | null;
-      metadata: Prisma.JsonValue;
-    },
+  public async getKnowledgeResultFromEvent(
+    knowledge: Knowledge,
     data: any
   ): Promise<KnowledgeIndexingResult> {
     throw new Error("Method not implemented.");
   }
   loadKnowledgeResult(
-    knowledge: {
-      id: string;
-      createdAt: Date;
-      updatedAt: Date;
-      lastIndexedAt: Date | null;
-      userId: string | null;
-      name: string;
-      type: string;
-      indexStatus: $Enums.KnowledgeIndexStatus | null;
-      blobUrl: string | null;
-      metadata: Prisma.JsonValue;
-    },
+    knowledge: Knowledge,
     result: KnowledgeIndexingResult,
     chunkCount: number
   ): Promise<IndexKnowledgeResponse> {
     throw new Error("Method not implemented.");
   }
-  pollKnowledgeIndexingStatus(knowledge: {
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    lastIndexedAt: Date | null;
-    userId: string | null;
-    name: string;
-    type: string;
-    indexStatus: $Enums.KnowledgeIndexStatus | null;
-    blobUrl: string | null;
-    metadata: Prisma.JsonValue;
-  }): Promise<IndexKnowledgeResponse> {
+  pollKnowledgeIndexingStatus(
+    knowledge: Knowledge
+  ): Promise<IndexKnowledgeResponse> {
     throw new Error("Method not implemented.");
   }
   public async deleteKnowledge(knowledgeId: string): Promise<void> {

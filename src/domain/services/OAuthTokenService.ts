@@ -3,7 +3,7 @@ import { OAuthAdapter } from "@/src/adapter-out/oauth/OAuthAdapter";
 import { decryptFromBuffer, encryptAsBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import { OAuthTokenProvider } from "@prisma/client";
-import { UserOAuthTokenEntity } from "../entities/OAuthTokenEntity";
+import { UserOAuthTokenEntity } from "../models/OAuthTokenEntity";
 import orgClientCredentialsService from "./OrgClientCredentialsService";
 
 export class OAuthTokenService {
