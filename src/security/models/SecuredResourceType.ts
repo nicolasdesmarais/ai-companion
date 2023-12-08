@@ -4,3 +4,8 @@ export enum SecuredResourceType {
   GROUPS = "groups",
   ORG_CLIENT_CREDENTIALS = "org-client-credentials",
 }
+
+export const availableApiResourceTypes = [
+  SecuredResourceType.CHATS,
+  SecuredResourceType.DATA_SOURCES,
+];

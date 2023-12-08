@@ -34,28 +34,29 @@ import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  AuthorizationScope,
-  visibleAuthorizationScopes,
-} from "@/src/security/models/AuthorizationContext";
+import { isValidPermission } from "@/src/security/models/Permission";
 
 interface APIKeysFormProps {
+  userPermissions: string[];
   initialApiKeys: ListApiKeyResponse[];
 }
 
 interface NewAPIKeyFormData {
   name: string;
-  scopes: AuthorizationScope[];
+  permissions: string[];
 }
 
 const apiKeyFormSchema = z.object({
   name: z.string().min(1, { message: "Name is required." }),
-  scopes: z
-    .array(z.nativeEnum(AuthorizationScope))
+  permissions: z
+    .array(z.string())
     .nonempty({ message: "At least one scope is required." }),
 });
 
-export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
+export const APIKeysForm: React.FC<APIKeysFormProps> = ({
+  userPermissions,
+  initialApiKeys,
+}) => {
   const { toast } = useToast();
   const [apiKeys, setApiKeys] = useState<ListApiKeyResponse[]>(initialApiKeys);
   const [editingKey, setEditingKey] = useState<ListApiKeyResponse | null>(null);
@@ -68,22 +69,25 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
     resolver: zodResolver(apiKeyFormSchema),
     defaultValues: {
       name: "",
-      scopes: [],
+      permissions: [],
     },
   });
 
-  const openModal = () => setIsModalOpen(true);
+  const openModal = () => {
+    form.reset();
+    setIsModalOpen(true);
+  };
   const closeModal = () => {
     form.reset();
     setIsModalOpen(false);
     setCreatedKey(undefined);
   };
 
-  const openEditModal = (key: ListApiKeyResponse) => {
-    form.setValue("name", key.name);
-    form.setValue("scopes", key.scopes);
+  const openEditModal = (listApiKeyResponse: ListApiKeyResponse) => {
+    form.setValue("name", listApiKeyResponse.name);
+    form.setValue("permissions", listApiKeyResponse.permissions);
 
-    setEditingKey(key);
+    setEditingKey(listApiKeyResponse);
     setIsEditModalOpen(true);
   };
   const closeEditModal = () => {
@@ -91,8 +95,8 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
     setIsEditModalOpen(false);
   };
 
-  const renderScopes = (scopes: AuthorizationScope[]) => {
-    return scopes.join(", ");
+  const renderPermissions = (permissions: string[]) => {
+    return permissions.filter(isValidPermission).join(", ");
   };
 
   const onCreateKey = async (values: NewAPIKeyFormData) => {
@@ -101,7 +105,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
 
       const request: CreateApiKeyRequest = {
         name: values.name,
-        scopes: values.scopes,
+        permissions: values.permissions,
       };
 
       const apiKey = await axios.post("/api/v1/api-keys", request);
@@ -125,7 +129,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
 
       const updatePayload = {
         name: data.name,
-        scopes: data.scopes,
+        permissions: data.permissions,
       };
 
       const updatedKey = await axios.put(
@@ -183,7 +187,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                 ? format(new Date(key.createdAt), "h:mma M/d/yyyy ")
                 : null}
             </td>
-            <td className="p-2">{renderScopes(key.scopes)}</td>
+            <td className="p-2">{renderPermissions(key.permissions)}</td>
             <td className="p-2">
               <Button
                 type="button"
@@ -255,27 +259,25 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                 />
                 <div>
                   <FormLabel>Scopes</FormLabel>
-                  {visibleAuthorizationScopes.map((scope) => (
+                  {userPermissions.map((permission) => (
                     <Controller
-                      key={scope}
-                      name="scopes"
+                      key={permission}
+                      name="permissions"
                       control={form.control}
                       render={({ field }) => (
                         <Checkbox
-                          checked={field.value.includes(scope)}
+                          checked={field.value.includes(permission)}
                           onCheckedChange={(isChecked) => {
                             if (isChecked) {
-                              field.onChange([...field.value, scope]);
+                              field.onChange([...field.value, permission]);
                             } else {
                               field.onChange(
-                                field.value.filter(
-                                  (s: AuthorizationScope) => s !== scope
-                                )
+                                field.value.filter((s) => s !== permission)
                               );
                             }
                           }}
                         >
-                          {scope}
+                          {permission}
                         </Checkbox>
                       )}
                     />
@@ -320,27 +322,25 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                 />
                 <div>
                   <FormLabel>Scopes</FormLabel>
-                  {visibleAuthorizationScopes.map((scope) => (
+                  {userPermissions.map((permission) => (
                     <Controller
-                      key={scope}
-                      name="scopes"
+                      key={permission}
+                      name="permissions"
                       control={form.control}
                       render={({ field }) => (
                         <Checkbox
-                          checked={field.value.includes(scope)}
+                          checked={field.value.includes(permission)}
                           onCheckedChange={(isChecked) => {
                             if (isChecked) {
-                              field.onChange([...field.value, scope]);
+                              field.onChange([...field.value, permission]);
                             } else {
                               field.onChange(
-                                field.value.filter(
-                                  (s: AuthorizationScope) => s !== scope
-                                )
+                                field.value.filter((s) => s !== permission)
                               );
                             }
                           }}
                         >
-                          {scope}
+                          {permission}
                         </Checkbox>
                       )}
                     />

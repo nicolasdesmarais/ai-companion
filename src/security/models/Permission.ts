@@ -9,10 +9,6 @@ export type Permission = {
   accessLevel: SecuredResourceAccessLevel;
 };
 
-export const encodePermission = (permission: Permission) => {
-  return `${permission.resourceType}.${permission.action}.${permission.accessLevel}`;
-};
-
 export const rolePermissions: Record<SecuredRole, Permission[]> = {
   [SecuredRole.SUPERUSER]: Object.values(SecuredResourceType).flatMap(
     (resourceType) =>
@@ -38,4 +34,26 @@ export const rolePermissions: Record<SecuredRole, Permission[]> = {
         accessLevel: SecuredResourceAccessLevel.SELF,
       }))
   ),
+};
+
+export const encodePermission = (permission: Permission) => {
+  return `${permission.resourceType}.${permission.action}.${permission.accessLevel}`;
+};
+
+export const decodePermission = (permission: string): Permission => {
+  const [resourceType, action, accessLevel] = permission.split(".");
+  return {
+    resourceType: resourceType as any,
+    action: action as any,
+    accessLevel: accessLevel as any,
+  };
+};
+
+export const isValidPermission = (permission: string): boolean => {
+  const { resourceType, action, accessLevel } = decodePermission(permission);
+  return (
+    Object.values(SecuredResourceType).includes(resourceType) &&
+    Object.values(SecuredAction).includes(action) &&
+    Object.values(SecuredResourceAccessLevel).includes(accessLevel)
+  );
 };

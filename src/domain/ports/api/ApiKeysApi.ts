@@ -1,8 +1,6 @@
-import { AuthorizationScope } from "@/src/security/models/AuthorizationContext";
-
 export interface CreateApiKeyRequest {
   name: string;
-  scopes: AuthorizationScope[];
+  permissions: string[];
 }
 
 export interface CreateApiKeyResponse {
@@ -17,7 +15,7 @@ export interface CreateApiKeyResponse {
 
 export interface UpdateApiKeyRequest {
   name: string;
-  scopes: AuthorizationScope[];
+  permissions: string[];
 }
 
 export interface UpdateApiKeyResponse {
@@ -37,5 +35,5 @@ export interface ListApiKeyResponse {
   name: string;
   orgId: string;
   userId: string;
-  scopes: AuthorizationScope[];
+  permissions: string[];
 }
