@@ -7,12 +7,12 @@ import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import {
   Atom,
+  LockKeyhole,
   MessageSquare,
   Plus,
   Settings,
   Store,
   UserPlus,
-  Wrench,
 } from "lucide-react";
 import {
   ReadonlyURLSearchParams,
@@ -111,10 +111,16 @@ export const Sidebar = ({ isPro, hasChat }: SidebarProps) => {
       pro: false,
     },
     {
-      icon: Wrench,
-      href: "/dashboard",
-      label: "Tools",
-      pro: true,
+      icon: LockKeyhole,
+      href: "/api-keys",
+      label: "API Keys",
+      pro: false,
+    },
+    {
+      icon: Settings,
+      href: "/organization-settings",
+      label: "Organization Settings",
+      pro: false,
     },
     {
       icon: Settings,

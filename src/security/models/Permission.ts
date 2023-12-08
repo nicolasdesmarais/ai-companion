@@ -1,6 +1,9 @@
 import { SecuredAction } from "./SecuredAction";
 import { SecuredResourceAccessLevel } from "./SecuredResourceAccessLevel";
-import { SecuredResourceType } from "./SecuredResourceType";
+import {
+  SecuredResourceType,
+  orgOnlyResourceTypes,
+} from "./SecuredResourceType";
 import { SecuredRole } from "./SecuredRoles";
 
 export type Permission = {
@@ -26,14 +29,15 @@ export const rolePermissions: Record<SecuredRole, Permission[]> = {
         accessLevel: SecuredResourceAccessLevel.ORGANIZATION,
       }))
   ),
-  [SecuredRole.USER]: Object.values(SecuredResourceType).flatMap(
-    (resourceType) =>
+  [SecuredRole.USER]: Object.values(SecuredResourceType)
+    .filter((resourceType) => orgOnlyResourceTypes.includes(resourceType))
+    .flatMap((resourceType) =>
       Object.values(SecuredAction).map((action) => ({
         resourceType,
         action,
         accessLevel: SecuredResourceAccessLevel.SELF,
       }))
-  ),
+    ),
 };
 
 export const encodePermission = (permission: Permission) => {
