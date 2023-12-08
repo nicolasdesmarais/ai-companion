@@ -1,4 +1,5 @@
 export enum SecuredResourceType {
+  AI = "ai",
   CHATS = "chats",
   DATA_SOURCES = "data-sources",
   GROUPS = "groups",
