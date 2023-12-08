@@ -35,3 +35,24 @@ export interface AIRequest {
   groups: string[];
   profile: AIProfile;
 }
+
+export interface ListAIsResponse {
+  data: ListAIDto[];
+}
+
+export interface ListAIDto {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  description: string;
+  src: string;
+  profile: AIProfile;
+  userId: string;
+  userName: string;
+  orgId: string;
+  categoryId: string;
+  messageCount: number;
+  rating: number;
+  ratingCount: number;
+}
