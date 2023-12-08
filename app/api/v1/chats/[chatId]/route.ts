@@ -55,7 +55,7 @@ export const POST = withErrorHandler(
   withAuthorization(
     SecuredResourceType.CHATS,
     SecuredAction.WRITE,
-    Object.values(SecuredResourceAccessLevel),
+    [SecuredResourceAccessLevel.SELF],
     postHandler
   )
 );
@@ -64,7 +64,7 @@ export const DELETE = withErrorHandler(
   withAuthorization(
     SecuredResourceType.CHATS,
     SecuredAction.WRITE,
-    Object.values(SecuredResourceAccessLevel),
+    [SecuredResourceAccessLevel.SELF],
     deleteHandler
   )
 );
