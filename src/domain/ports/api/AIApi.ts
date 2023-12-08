@@ -48,9 +48,7 @@ export interface ListAIDto {
   description: string;
   src: string;
   profile: AIProfile;
-  userId: string;
   userName: string;
-  orgId: string;
   categoryId: string;
   messageCount: number;
   rating: number;
