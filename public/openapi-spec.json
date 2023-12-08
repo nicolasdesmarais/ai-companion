@@ -762,7 +762,7 @@
         ]
       }
     },
-    "/api/v1/chats": {
+    "/api/v1/me/chats": {
       "get": {
         "summary": "Get all chats for the User",
         "description": "Retrieves a list of all chat sessions associated with the current user",
