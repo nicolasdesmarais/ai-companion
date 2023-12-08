@@ -8,6 +8,7 @@ export enum SecuredResourceType {
 }
 
 export const availableApiResourceTypes = [
+  SecuredResourceType.AI,
   SecuredResourceType.CHATS,
   SecuredResourceType.DATA_SOURCES,
 ];
