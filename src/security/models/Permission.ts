@@ -30,7 +30,7 @@ export const rolePermissions: Record<SecuredRole, Permission[]> = {
       }))
   ),
   [SecuredRole.USER]: Object.values(SecuredResourceType)
-    .filter((resourceType) => orgOnlyResourceTypes.includes(resourceType))
+    .filter((resourceType) => !orgOnlyResourceTypes.includes(resourceType))
     .flatMap((resourceType) =>
       Object.values(SecuredAction).map((action) => ({
         resourceType,
