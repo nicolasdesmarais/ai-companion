@@ -183,13 +183,7 @@
           "profile": {
             "$ref": "#/components/schemas/AIProfile"
           },
-          "userId": {
-            "type": "string"
-          },
           "userName": {
-            "type": "string"
-          },
-          "orgId": {
             "type": "string"
           },
           "categoryId": {
@@ -203,6 +197,43 @@
           },
           "ratingCount": {
             "type": "integer"
+          }
+        }
+      },
+      "AIProfile": {
+        "type": "object",
+        "properties": {
+          "headline": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AIProfileFeature"
+            }
+          },
+          "showCharacter": {
+            "type": "boolean"
+          },
+          "showTraining": {
+            "type": "boolean"
+          },
+          "showPersonality": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AIProfileFeature": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
           }
         }
       }
