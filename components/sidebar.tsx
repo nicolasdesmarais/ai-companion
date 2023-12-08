@@ -82,7 +82,7 @@ export const Sidebar = ({ isPro, hasChat, userPermissions }: SidebarProps) => {
       return false;
     }
 
-    const hasPermission = !userPermissions.some((permission) => {
+    const hasPermission = userPermissions.some((permission) => {
       return (
         permission.resourceType === requiredRoutePermission.resourceType &&
         permission.action === requiredRoutePermission.action &&
