@@ -24,7 +24,9 @@ const OrganizationSettingsPage = async () => {
     return redirect("/");
   }
 
-  return <OrganizationSettingsForm />;
+  const orgClientCrediantials = "";
+
+  return <OrganizationSettingsForm data={orgClientCrediantials} />;
 };
 
 export default OrganizationSettingsPage;

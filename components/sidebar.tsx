@@ -111,15 +111,15 @@ export const Sidebar = ({ isPro, hasChat }: SidebarProps) => {
       pro: false,
     },
     {
-      icon: LockKeyhole,
-      href: "/api-keys",
-      label: "API Keys",
+      icon: Settings,
+      href: "/organization-settings",
+      label: "Settings",
       pro: false,
     },
     {
-      icon: Settings,
-      href: "/organization-settings",
-      label: "Organization Settings",
+      icon: LockKeyhole,
+      href: "/api-keys",
+      label: "API Keys",
       pro: false,
     },
     {
