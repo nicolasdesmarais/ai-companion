@@ -123,7 +123,7 @@
       "DataSourceType": {
         "type": "string",
         "description": "The type of the data source.",
-        "enum": ["WEB_URL", "GOOGLE_DRIVE", "FILE_UPLOAD"]
+        "enum": ["API", "FILE_UPLOAD", "GOOGLE_DRIVE", "WEB_URL"]
       },
       "DataSourceIndexStatus": {
         "type": "string",
@@ -144,22 +144,21 @@
             "description": "The streaming text response from the AI."
           }
         }
-      }
-    },
-    "ListAIsRequestScope": {
-      "type": "string",
-      "enum": [
-        "PRIVATE",
-        "OWNED",
-        "GROUP",
-        "SHARED",
-        "ORGANIZATION",
-        "PUBLIC",
-        "ALL"
-      ]
-    },
-    "ListAIDto": {
-      "type": "object",
+      },
+      "ListAIsRequestScope": {
+        "type": "string",
+        "enum": [
+          "PRIVATE",
+          "OWNED",
+          "GROUP",
+          "SHARED",
+          "ORGANIZATION",
+          "PUBLIC",
+          "ALL"
+        ]
+      },
+      "ListAIDto": {
+        "type": "object",
       "properties": {
         "id": {
           "type": "string"
