@@ -340,10 +340,15 @@ export class ChatService {
       return knowledgeResponse;
     };
 
+    //TODO: fix timeout for long chat history
+    let prunedMessages = chat.messages;
+    if (prunedMessages?.length > 60) {
+      prunedMessages = prunedMessages.slice(prunedMessages.length - 60);
+    }
     return await chatModel.postToChat({
       ai: chat.ai,
       chat,
-      messages: chat.messages,
+      messages: prunedMessages,
       aiModel: model,
       prompt,
       date,
