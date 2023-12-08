@@ -35,7 +35,7 @@ export abstract class BaseCompletionModel {
     }, "");
     const completionPrompt = `
         ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${ai.name}: prefix.
-        The user date and time is ${date}. Output format is markdown. Open links in new tabs.
+        The user date and time is ${date}. Output format is markdown, including tables.
         ${ai.instructions}
         Below are relevant details about ${ai.name}'s past and the conversation you are in:\n
       `;

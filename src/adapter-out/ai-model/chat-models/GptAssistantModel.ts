@@ -24,7 +24,7 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
   private getInstructions(ai: AI) {
     return `
         Pretend you are ${ai.name}, ${ai.description}.
-        Output format is markdown. Open links in new tabs.
+        Output format is markdown, including tables.
         Here are more details about your character:\n
         ${ai.instructions}
 
