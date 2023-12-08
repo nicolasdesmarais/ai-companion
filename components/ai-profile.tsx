@@ -12,12 +12,23 @@ import { StarSvg } from "./svg/star-svg";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useParams, useRouter } from "next/navigation";
 import { useRateAI } from "@/hooks/use-rate-ai";
+import { cn } from "@/src/lib/utils";
 
 const aiModelRepository = new StaticAIModelRepository();
 interface Props {
   ai: AI & { profile: any };
   rating?: any;
 }
+
+const getUserName = (user: any) => {
+  if (user.firstName && user.lastName) {
+    return `${user.firstName} ${user.lastName}`;
+  }
+  if (user.emailAddresses.length && user.emailAddresses[0].emailAddress) {
+    return user.emailAddresses[0].emailAddress;
+  }
+  return "User";
+};
 
 export const AIProfile = ({ ai, rating }: Props) => {
   const { isOpen, onClose, onOpen } = useAIProfile();
@@ -230,7 +241,10 @@ export const AIProfile = ({ ai, rating }: Props) => {
               className="border border-ring/30 rounded-md"
             >
               <div
-                className={"rounded-md bg-[#eecc50] h-full"}
+                className={cn(
+                  "rounded-md bg-[#eecc50] h-full",
+                  ratingDistributions[4 - i] < 100 && "rounded-r-none"
+                )}
                 style={{ width: `${ratingDistributions[4 - i] || 0}%` }}
               ></div>
             </div>
@@ -244,19 +258,22 @@ export const AIProfile = ({ ai, rating }: Props) => {
         <span className="border-b border-ring pb-1 pr-8">Recent Reviews</span>
       </div>
       {ratings.map((rating: any, index: number) => (
-        <div key={`rating-${index}`} className="">
+        <div key={`rating-${index}`} className="pb-6">
           <div className="flex items-center mb-2">
             <Avatar className="h-10 w-10">
               <AvatarImage src={rating.user.imageUrl} crop="w_48,h_48" />
             </Avatar>
-            <div className="text-md ml-4">
-              {rating.user.firstName} {rating.user.lastName}
-            </div>
+            <div className="text-md ml-4">{getUserName(rating.user)}</div>
           </div>
           <div className="flex">
             <StarRating value={rating.rating} hideCount={true} />
-            <div className="text-md font-bold ml-4">{rating.review}</div>
+            <div className="text-md font-bold ml-4">
+              {rating.headline || rating.review}
+            </div>
           </div>
+          {rating.headline && (
+            <div className="text-sm mt-2">{rating.review}</div>
+          )}
         </div>
       ))}
     </div>
