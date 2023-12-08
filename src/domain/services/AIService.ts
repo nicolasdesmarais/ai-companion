@@ -1,12 +1,18 @@
-import openAIAssistantModelAdapter from "@/src/adapter/ai-model/OpenAIAssistantModelAdapter";
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
 import { AI, AIVisibility, GroupAvailability, Prisma } from "@prisma/client";
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { SystemMessage } from "langchain/schema";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
-import { CreateAIRequest, UpdateAIRequest } from "../ports/api/AIApi";
+import {
+  AIProfile,
+  CreateAIRequest,
+  ListAIDto,
+  UpdateAIRequest,
+} from "../ports/api/AIApi";
 import {
   ListAIsRequestParams,
   ListAIsRequestScope,
@@ -16,6 +22,13 @@ import aiModelService from "./AIModelService";
 import { AISecurityService } from "./AISecurityService";
 import groupService from "./GroupService";
 import invitationService from "./InvitationService";
+
+const openai = new ChatOpenAI({
+  azureOpenAIApiKey: process.env.AZURE_GPT35_KEY,
+  azureOpenAIApiVersion: "2023-05-15",
+  azureOpenAIApiInstanceName: "appdirect-prod-ai-useast",
+  azureOpenAIApiDeploymentName: "ai-prod-16k",
+});
 
 export class AIService {
   public async findAIById(id: string) {
@@ -163,7 +176,7 @@ export class AIService {
     orgId: string,
     userId: string,
     request: ListAIsRequestParams
-  ) {
+  ): Promise<ListAIDto[]> {
     const scope = request.scope || ListAIsRequestScope.ALL;
 
     const whereCondition = { AND: [{}] };
@@ -180,6 +193,17 @@ export class AIService {
     }
 
     const ais = await prismadb.aI.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        name: true,
+        description: true,
+        src: true,
+        profile: true,
+        userName: true,
+        categoryId: true,
+      },
       where: whereCondition,
       orderBy: {
         createdAt: "desc",
@@ -223,9 +247,11 @@ export class AIService {
       const ratingRow = ratingPerAi.find((r) => r.aiId === ai.id);
       const rating = ratingRow ? Number(ratingRow.averageRating) : 0;
       const ratingCount = ratingRow ? Number(ratingRow.ratingCount) : 0;
+      const profile = ai.profile as unknown as AIProfile;
 
       return {
         ...ai,
+        profile,
         messageCount,
         rating,
         ratingCount,
@@ -465,7 +491,7 @@ export class AIService {
     });
 
     await this.updateAIGroups(ai, groups);
-    await this.createOrUpdateExternalAI(ai);
+    await this.createAssistant(ai);
 
     return ai;
   }
@@ -506,6 +532,7 @@ export class AIService {
       groups,
       visibility,
       options,
+      profile,
     } = request;
 
     if (!src || !name || !description || !instructions || !categoryId) {
@@ -534,11 +561,12 @@ export class AIService {
         modelId,
         visibility,
         options: options as any,
+        profile: profile as any,
       },
     });
 
     await this.updateAIGroups(updatedAI, groups);
-    await this.createOrUpdateExternalAI(updatedAI);
+    await this.updateAssistant(ai, updatedAI);
     return updatedAI;
   }
 
@@ -550,25 +578,56 @@ export class AIService {
     }
   }
 
-  private async createOrUpdateExternalAI(ai: AI) {
-    const aiModel = await aiModelService.findAIModelById(ai.modelId);
-    if (!aiModel) {
+  private async createAssistant(ai: AI) {
+    const assistantModel = aiModelService.getAssistantModelInstance(ai.modelId);
+    if (!assistantModel) {
       return;
     }
 
-    // Hardcoded check for now
-    if (aiModel.id === "gpt-4-1106-preview-assistant") {
-      if (!ai.externalId) {
-        const externalId = await openAIAssistantModelAdapter.createExternalAI(
-          ai,
-          aiModel
-        );
-        await prismadb.aI.update({
-          where: { id: ai.id },
-          data: {
-            externalId,
-          },
-        });
+    const externalId = await assistantModel.createAssistant({
+      ai,
+    });
+    await prismadb.aI.update({
+      where: { id: ai.id },
+      data: {
+        externalId,
+      },
+    });
+  }
+
+  private async updateAssistant(currentAI: AI, updatedAI: AI) {
+    const existingExternalId = currentAI.externalId;
+    if (!existingExternalId) {
+      // Create a new assistant if it doesn't exist externally
+      await this.createAssistant(updatedAI);
+      return;
+    }
+
+    const shouldUpdateModel = currentAI.modelId !== updatedAI.modelId;
+    if (shouldUpdateModel) {
+      const newAssistantModel = aiModelService.getAssistantModelInstance(
+        updatedAI.modelId
+      );
+      const existingAssistantModel = aiModelService.getAssistantModelInstance(
+        currentAI.modelId
+      );
+
+      // Create a new assistant with the updated model
+      if (newAssistantModel) {
+        await this.createAssistant(updatedAI);
+      }
+
+      // Delete the old assistant associated with the existing model
+      if (existingAssistantModel) {
+        await existingAssistantModel.deleteAssistant(existingExternalId);
+      }
+    } else {
+      // Update existing assistant without changing the model
+      const assistantModel = aiModelService.getAssistantModelInstance(
+        currentAI.modelId
+      );
+      if (assistantModel) {
+        await assistantModel.updateAssistant({ ai: updatedAI });
       }
     }
   }
@@ -577,7 +636,8 @@ export class AIService {
     userId: string,
     aiId: string,
     rating: number,
-    review: string = ""
+    review: string = "",
+    headline: string = ""
   ) {
     const ai = await prismadb.aI.findUnique({
       where: {
@@ -604,6 +664,7 @@ export class AIService {
         data: {
           rating,
           review,
+          headline,
         },
       });
     } else {
@@ -613,6 +674,7 @@ export class AIService {
           userId,
           rating,
           review,
+          headline,
         },
       });
     }
@@ -636,6 +698,79 @@ export class AIService {
         aiId,
       },
     });
+  }
+
+  public async getAllReviews(aiId: string) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    return await prismadb.aIRating.findMany({
+      where: {
+        aiId,
+      },
+    });
+  }
+
+  public async generate(prompt: string) {
+    const response = await openai.call([new SystemMessage(prompt)]);
+    return response.content;
+  }
+
+  public async generateAIProfile(userId: string, aiId: string) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    if (ai.userId !== userId) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const intro =
+      "You are making a marketing profile for an AI chatbot. This AI will be part of many other AIs that are part of a larger AI marketplace. Call to action is to get people to try to talk to this AI.";
+
+    const background = `for the following AI chatbot:  ${ai.name}, ${ai.description}. Here are more details for this AI: ${ai.instructions}`;
+
+    const headline = await this.generate(
+      `${intro} Create a short, one sentence headline ${background}`
+    );
+
+    const description = await this.generate(
+      `${intro} Create one paragraph description ${background}`
+    );
+
+    const featureTitle = await this.generate(
+      `${intro} Create one three word feature ${background}`
+    );
+
+    const featureDescription = await this.generate(
+      `${intro} This AI has the following feature: ${featureTitle}. Give a one sentence description of this feature ${background}`
+    );
+
+    const aiProfile = {
+      headline,
+      description,
+      features: [
+        {
+          title: featureTitle,
+          description: featureDescription,
+        },
+      ],
+    };
+
+    return aiProfile;
   }
 }
 

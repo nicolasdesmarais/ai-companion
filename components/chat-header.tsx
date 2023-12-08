@@ -30,6 +30,9 @@ import { useChats } from "@/hooks/use-chats";
 import { useState } from "react";
 import { ShareModal } from "./share-modal";
 import { RateModal } from "./rate-modal";
+import { StarRating } from "./star-rating";
+import { useAIProfile } from "@/hooks/use-ai-profile";
+import { useRateAI } from "@/hooks/use-rate-ai";
 
 interface ChatHeaderProps {
   chat: Chat & {
@@ -39,16 +42,18 @@ interface ChatHeaderProps {
       messages: number;
     };
   };
+  rating?: any;
 }
 
-export const ChatHeader = ({ chat }: ChatHeaderProps) => {
+export const ChatHeader = ({ chat, rating }: ChatHeaderProps) => {
   const router = useRouter();
   const { user } = useUser();
   const { toast } = useToast();
   const { chats, fetchChats } = useChats();
+  const aiProfile = useAIProfile();
   const [showShareModal, setShowShareModal] = useState(false);
-  const [showRateModal, setShowRateModal] = useState(false);
-
+  const rateAI = useRateAI();
+  console.log(chat.ai);
   const duplicate = async () => {
     const response = await axios.put(`/api/v1/chats/${chat.id}/duplicate`);
     if (response.status === 200) {
@@ -99,89 +104,115 @@ export const ChatHeader = ({ chat }: ChatHeaderProps) => {
   };
 
   return (
-    <div className="flex w-full justify-between items-center p-4 bg-accent/30">
-      <div className="flex gap-x-2 items-center">
-        <BotAvatar src={chat.ai.src} />
-        <div className="flex flex-col gap-y-1">
-          <p className="font-bold">{chat.ai.name}</p>
-          <div className="flex items-center gap-x-2">
-            <p className="text-xs text-muted-foreground">
-              Created by {chat.ai.userName}
-            </p>
-            <div className="flex items-center text-xs text-muted-foreground">
-              <MessagesSquare className="w-3 h-3 mr-1" />
-              {chat._count.messages}
+    <div className="flex flex-col p-4 pb-3 bg-accent/30">
+      <div className="flex w-full justify-between items-center">
+        <div className="flex gap-x-2 items-center">
+          <BotAvatar src={chat.ai.src} />
+          <div className="flex flex-col gap-y-1">
+            <p className="font-bold">{chat.ai.name}</p>
+            <div className="flex items-center gap-x-2">
+              <p className="text-xs text-muted-foreground">
+                Created by {chat.ai.userName}
+              </p>
+              <div className="flex items-center text-xs text-muted-foreground">
+                <MessagesSquare className="w-3 h-3 mr-1" />
+                {chat._count.messages}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div className="flex">
-        {(user?.id === chat.ai.userId || chat.ai.visibility === "PUBLIC") && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="mr-4"
-            type="button"
-            onClick={() => setShowShareModal(true)}
-          >
-            <ExternalLink />
-          </Button>
-        )}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreVertical />
+        <div className="flex">
+          {(user?.id === chat.ai.userId || chat.ai.visibility === "PUBLIC") && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="mr-4"
+              type="button"
+              onClick={() => setShowShareModal(true)}
+            >
+              <ExternalLink />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {chat.pinPosition ? (
-              <DropdownMenuItem onClick={() => unpin()}>
-                <PinOff className="w-4 h-4 mr-2" />
-                Unpin
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreVertical />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {chat.pinPosition ? (
+                <DropdownMenuItem onClick={() => unpin()}>
+                  <PinOff className="w-4 h-4 mr-2" />
+                  Unpin
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={() => pin()}>
+                  <Pin className="w-4 h-4 mr-2" />
+                  Pin
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={() => reset()}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Reset
               </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem onClick={() => pin()}>
-                <Pin className="w-4 h-4 mr-2" />
-                Pin
+              <DropdownMenuItem onClick={() => duplicate()}>
+                <CopyPlus className="w-4 h-4 mr-2" />
+                Duplicate
               </DropdownMenuItem>
-            )}
-            <DropdownMenuItem onClick={() => reset()}>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Reset
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => duplicate()}>
-              <CopyPlus className="w-4 h-4 mr-2" />
-              Duplicate
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => remove()}>
-              <Trash className="w-4 h-4 mr-2" />
-              Remove
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setShowRateModal(true)}>
-              <Star className="w-4 h-4 mr-2" />
-              Rate
-            </DropdownMenuItem>
-            {user?.id === chat.ai.userId && (
-              <DropdownMenuItem
-                onClick={() => router.push(`/ai/${chat.ai.id}/edit`)}
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Edit AI
+              <DropdownMenuItem onClick={() => remove()}>
+                <Trash className="w-4 h-4 mr-2" />
+                Remove
               </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuItem onClick={() => rateAI.onOpen()}>
+                <Star className="w-4 h-4 mr-2" />
+                Rate
+              </DropdownMenuItem>
+              {user?.id === chat.ai.userId && (
+                <DropdownMenuItem
+                  onClick={() => router.push(`/ai/${chat.ai.id}/edit`)}
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit AI
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+      <div className="flex ml-14">
+        <StarRating
+          value={Math.round(rating.averageRating)}
+          count={rating.ratingCount}
+          hideCount={true}
+          onClick={() => router.push("#user-ratings")}
+        />
+        <div className="text-xs text-muted-foreground">
+          <Button
+            variant="link"
+            size="xs"
+            type="button"
+            onClick={() => router.push("#user-ratings")}
+          >
+            {rating.ratingCount}{" "}
+            {rating.ratingCount === 1 ? "Rating" : "Ratings"}
+          </Button>
+          |
+          <Button
+            variant="link"
+            size="xs"
+            type="button"
+            onClick={() => aiProfile.onOpen()}
+          >
+            View Profile
+          </Button>
+        </div>
       </div>
       <ShareModal
         showModal={showShareModal}
         setShowModal={setShowShareModal}
         ai={chat.ai}
       />
-      <RateModal
-        showModal={showRateModal}
-        setShowModal={setShowRateModal}
-        ai={chat.ai}
-      />
+      <RateModal ai={chat.ai} />
     </div>
   );
 };

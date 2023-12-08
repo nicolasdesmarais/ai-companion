@@ -1,27 +1,31 @@
 import { ShareAIRequest } from "@/src/domain/ports/api/ShareAIRequest";
 import aiService from "@/src/domain/services/AIService";
-import { auth } from "@clerk/nextjs";
+import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
+import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PUT(
+async function postHandler(
   req: NextRequest,
-  { params }: { params: { aiId: string } }
+  context: { params: { aiId: string }; orgId: string; userId: string }
 ): Promise<NextResponse> {
-  try {
-    const authentication = await auth();
-    const { orgId, userId } = authentication;
-    if (!orgId || !userId) {
-      return NextResponse.json("Unauthorized", { status: 401 });
-    }
+  const { params, orgId, userId } = context;
 
-    const aiId = params.aiId;
-    const shareAiRequest: ShareAIRequest = await req.json();
+  const aiId = params.aiId;
+  const shareAiRequest: ShareAIRequest = await req.json();
 
-    await aiService.shareAi(orgId, userId, aiId, shareAiRequest);
+  await aiService.shareAi(orgId, userId, aiId, shareAiRequest);
 
-    return NextResponse.json("", { status: 200 });
-  } catch (error) {
-    console.log("Error on [PUT /v1/me/ai]", error);
-    return NextResponse.json("Internal Error", { status: 500 });
-  }
+  return NextResponse.json("", { status: 200 });
 }
+
+export const POST = withErrorHandler(
+  withAuthorization(
+    SecuredResourceType.AI,
+    SecuredAction.WRITE,
+    Object.values(SecuredResourceAccessLevel),
+    postHandler
+  )
+);

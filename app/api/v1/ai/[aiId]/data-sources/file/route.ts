@@ -1,12 +1,14 @@
-import { FileUploadDataSourceInput } from "@/src/adapter/knowledge/file-upload/types/FileUploadDataSourceInput";
+import { FileUploadDataSourceInput } from "@/src/adapter-out/knowledge/file-upload/types/FileUploadDataSourceInput";
 import aiService from "@/src/domain/services/AIService";
 import dataSourceService from "@/src/domain/services/DataSourceService";
-import { AuthorizationScope } from "@/src/domain/types/AuthorizationContext";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { DataSourceType } from "@prisma/client";
 import { put } from "@vercel/blob";
-import { writeFile } from "fs/promises";
+import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 300;
@@ -28,8 +30,9 @@ async function postHandler(
 
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
-  const filepath = `/tmp/${file.name}`;
-  await writeFile(filepath, buffer);
+
+  // Calculate a hash for the file
+  const fileHash = crypto.createHash("sha256").update(buffer).digest("hex");
 
   const blob = await put(filename, file, {
     access: "public",
@@ -38,8 +41,8 @@ async function postHandler(
   const input: FileUploadDataSourceInput = {
     filename,
     mimetype: type,
-    filepath,
     blobUrl: blob.url,
+    fileHash,
   };
   const dataSourceId = await dataSourceService.createDataSource(
     orgId,
@@ -57,5 +60,10 @@ async function postHandler(
 }
 
 export const POST = withErrorHandler(
-  withAuthorization(AuthorizationScope.DATA_SOURCES_WRITE, postHandler)
+  withAuthorization(
+    SecuredResourceType.DATA_SOURCES,
+    SecuredAction.WRITE,
+    Object.values(SecuredResourceAccessLevel),
+    postHandler
+  )
 );

@@ -34,25 +34,29 @@ import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { AuthorizationScope } from "@/src/domain/types/AuthorizationContext";
+import { isValidScope } from "@/src/security/models/Permission";
 
 interface APIKeysFormProps {
+  userScopes: string[];
   initialApiKeys: ListApiKeyResponse[];
 }
 
 interface NewAPIKeyFormData {
   name: string;
-  scopes: AuthorizationScope[];
+  scopes: string[];
 }
 
 const apiKeyFormSchema = z.object({
   name: z.string().min(1, { message: "Name is required." }),
   scopes: z
-    .array(z.nativeEnum(AuthorizationScope))
+    .array(z.string())
     .nonempty({ message: "At least one scope is required." }),
 });
 
-export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
+export const APIKeysForm: React.FC<APIKeysFormProps> = ({
+  userScopes,
+  initialApiKeys,
+}) => {
   const { toast } = useToast();
   const [apiKeys, setApiKeys] = useState<ListApiKeyResponse[]>(initialApiKeys);
   const [editingKey, setEditingKey] = useState<ListApiKeyResponse | null>(null);
@@ -69,18 +73,21 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
     },
   });
 
-  const openModal = () => setIsModalOpen(true);
+  const openModal = () => {
+    form.reset();
+    setIsModalOpen(true);
+  };
   const closeModal = () => {
     form.reset();
     setIsModalOpen(false);
     setCreatedKey(undefined);
   };
 
-  const openEditModal = (key: ListApiKeyResponse) => {
-    form.setValue("name", key.name);
-    form.setValue("scopes", key.scopes);
+  const openEditModal = (listApiKeyResponse: ListApiKeyResponse) => {
+    form.setValue("name", listApiKeyResponse.name);
+    form.setValue("scopes", listApiKeyResponse.scopes);
 
-    setEditingKey(key);
+    setEditingKey(listApiKeyResponse);
     setIsEditModalOpen(true);
   };
   const closeEditModal = () => {
@@ -88,8 +95,8 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
     setIsEditModalOpen(false);
   };
 
-  const renderScopes = (scopes: AuthorizationScope[]) => {
-    return scopes.join(", ");
+  const renderScopes = (scopes: string[]) => {
+    return scopes.filter(isValidScope).join(", ");
   };
 
   const onCreateKey = async (values: NewAPIKeyFormData) => {
@@ -252,7 +259,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                 />
                 <div>
                   <FormLabel>Scopes</FormLabel>
-                  {Object.values(AuthorizationScope).map((scope) => (
+                  {userScopes.map((scope) => (
                     <Controller
                       key={scope}
                       name="scopes"
@@ -265,9 +272,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                               field.onChange([...field.value, scope]);
                             } else {
                               field.onChange(
-                                field.value.filter(
-                                  (s: AuthorizationScope) => s !== scope
-                                )
+                                field.value.filter((s) => s !== scope)
                               );
                             }
                           }}
@@ -317,7 +322,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                 />
                 <div>
                   <FormLabel>Scopes</FormLabel>
-                  {Object.values(AuthorizationScope).map((scope) => (
+                  {userScopes.map((scope) => (
                     <Controller
                       key={scope}
                       name="scopes"
@@ -330,9 +335,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({ initialApiKeys }) => {
                               field.onChange([...field.value, scope]);
                             } else {
                               field.onChange(
-                                field.value.filter(
-                                  (s: AuthorizationScope) => s !== scope
-                                )
+                                field.value.filter((s) => s !== scope)
                               );
                             }
                           }}

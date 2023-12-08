@@ -151,7 +151,7 @@ export const AIKnowledge = ({
             Choose a data source for your data store
           </p>
           <h3 className="text-md font-medium mt-6 mb-2">Data Sources</h3>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* <DataSourceCard
               icon={PlusCircle}
               title="Your Data Stores"

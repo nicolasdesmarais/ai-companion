@@ -23,4 +23,6 @@ export interface ChatAiDto {
 export interface CreateChatRequest {
   date: string;
   prompt: string;
+  aiId?: string;
+  messages?: any[];
 }

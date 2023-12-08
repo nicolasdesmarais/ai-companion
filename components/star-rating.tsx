@@ -24,7 +24,22 @@ interface StarRatingProps {
   size?: string;
   value?: number;
   onChange?: (src: number) => void;
+  hideCount?: boolean;
+  onClick?: () => void;
 }
+
+const getSizeClass = (size: string) => {
+  switch (size) {
+    case "small":
+      return "w-4 h-4";
+    case "medium":
+      return "w-6 h-6";
+    case "large":
+      return "w-12 h-12";
+    default:
+      return "w-4 h-4";
+  }
+};
 
 export const StarRating = ({
   maxStars = 5,
@@ -33,11 +48,13 @@ export const StarRating = ({
   count,
   size = "small",
   onChange,
+  hideCount,
+  onClick,
 }: StarRatingProps) => {
   const [hover, setHover] = useState<number | null>(null);
   return (
     <>
-      <div className={cn(className, "flex items-center")}>
+      <div className={cn(className, "flex items-center")} onClick={onClick}>
         {[...Array(maxStars)].map((_, i) => (
           <button
             type="button"
@@ -48,7 +65,7 @@ export const StarRating = ({
           >
             <StarSvg
               className={cn(
-                size === "small" ? "w-4 h-4" : "w-12 h-12",
+                getSizeClass(size),
                 count ? "text-primary" : "text-primary/20",
                 !!onChange && "cursor-pointer"
               )}
@@ -56,7 +73,7 @@ export const StarRating = ({
             />
           </button>
         ))}
-        {!onChange && (
+        {!onChange && !hideCount && (
           <span
             className={cn(
               "text-xs ml-1",

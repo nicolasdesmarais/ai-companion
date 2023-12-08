@@ -172,3 +172,7 @@ body,
 .markdown-chat-message ul li {
   list-style: disc;
 }
+
+.text-nano {
+  font-size: 0.25rem;
+}

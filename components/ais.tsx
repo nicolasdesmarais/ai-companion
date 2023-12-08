@@ -1,16 +1,12 @@
-import { AI } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { StarRating } from "@/components/star-rating";
+import { Card, CardFooter, CardHeader } from "@/components/ui/card";
+import { ListAIDto } from "@/src/domain/ports/api/AIApi";
 
 interface AIsProps {
-  data: (AI & {
-    messageCount: number;
-    rating: number;
-    ratingCount: number;
-  })[];
+  data: ListAIDto[];
 }
 
 export const AIs = ({ data }: AIsProps) => {

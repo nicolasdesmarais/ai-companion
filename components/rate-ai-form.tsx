@@ -18,9 +18,11 @@ import { useToast } from "./ui/use-toast";
 import { StarRating } from "./star-rating";
 import { useEffect, useState } from "react";
 import { Loader } from "lucide-react";
+import { Input } from "./ui/input";
 
 const rateFormSchema = z.object({
   rating: z.number().min(1).max(5),
+  headline: z.string().optional(),
   review: z.string().optional(),
 });
 
@@ -93,6 +95,19 @@ export const RateAIForm = ({ ai, onSuccess }: RateAIFormProps) => {
                       <div className="flex items-center">
                         <StarRating size="large" {...field} />
                       </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="headline"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Headline</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Great AI" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
