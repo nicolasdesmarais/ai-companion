@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button"; // Assuming a Button component is available
@@ -22,6 +22,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/use-toast";
+import { UpsertClientCredentialsRequest } from "@/src/domain/ports/api/OrgClientCredentialsApi";
+import { OAuthTokenProvider } from "@prisma/client";
+import axios from "axios";
+import { Loader } from "lucide-react";
 
 interface OrganizationSettingsFormProps {
   data: any;
@@ -39,8 +44,11 @@ interface GoogleIntegrationFormData {
 
 export const OrganizationSettingsForm: React.FC<
   OrganizationSettingsFormProps
-> = (data) => {
+> = ({ data }) => {
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
+  const [googleIntegrationData, setGoogleIntegrationData] =
+    useState<GoogleIntegrationFormData>(data);
 
   const form = useForm<GoogleIntegrationFormData>({
     resolver: zodResolver(googleIntegrationFormSchema),
@@ -50,16 +58,42 @@ export const OrganizationSettingsForm: React.FC<
     },
   });
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<GoogleIntegrationFormData>({
-    resolver: zodResolver(googleIntegrationFormSchema),
-  });
+  const openModal = () => {
+    form.reset();
 
-  const onSubmit: SubmitHandler<GoogleIntegrationFormData> = (data) => {
-    console.log(data);
+    form.setValue("clientId", googleIntegrationData.clientId);
+    form.setValue("clientSecret", googleIntegrationData.clientSecret);
+
+    setShowModal(true);
+  };
+  const onSaveGoogleDrive = async (values: GoogleIntegrationFormData) => {
+    try {
+      setLoading(true);
+
+      const updatedData = {
+        clientId: values.clientId,
+        clientSecret: values.clientSecret,
+      };
+
+      setGoogleIntegrationData(updatedData);
+
+      const request: UpsertClientCredentialsRequest = {
+        provider: OAuthTokenProvider.GOOGLE,
+        data: updatedData,
+      };
+
+      const apiKey = await axios.post(
+        "/api/v1/org-client-credentials",
+        request
+      );
+    } catch (error) {
+      toast({
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -68,11 +102,7 @@ export const OrganizationSettingsForm: React.FC<
 
       <div className="flex items-center justify-between my-4">
         <span>Google Drive</span>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setShowModal(true)}
-        >
+        <Button type="button" variant="outline" onClick={() => openModal()}>
           Edit
         </Button>
       </div>
@@ -83,52 +113,61 @@ export const OrganizationSettingsForm: React.FC<
             <DialogHeader>
               <DialogTitle>Google Drive Integration Settings</DialogTitle>
             </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  name="clientId"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Client ID</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Client ID" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  name="clientSecret"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Client Secret</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Client Secret" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            {loading ? (
+              <div className="flex justify-center items-center h-32">
+                <Loader className="w-16 h-16 spinner" />
+              </div>
+            ) : (
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSaveGoogleDrive)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    name="clientId"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Client ID</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Client ID" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    name="clientSecret"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Client Secret</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Client Secret" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <div>
-                  <label className="block mb-2 text-sm font-medium">
-                    Scopes
-                  </label>
-                  <ul>
-                    <li>https://www.googleapis.com/auth/userinfo.email</li>
-                    <li>https://www.googleapis.com/auth/userinfo.profile</li>
-                  </ul>
-                </div>
-                <DialogFooter>
-                  <Button type="button" onClick={() => setShowModal(false)}>
-                    Close
-                  </Button>
-                  <Button type="submit">Save Changes</Button>
-                </DialogFooter>
-              </form>
-            </Form>
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">
+                      Scopes
+                    </label>
+                    <ul>
+                      <li>https://www.googleapis.com/auth/userinfo.email</li>
+                      <li>https://www.googleapis.com/auth/userinfo.profile</li>
+                    </ul>
+                  </div>
+                  <DialogFooter>
+                    <Button type="button" onClick={() => setShowModal(false)}>
+                      Close
+                    </Button>
+                    <Button type="submit">Save Changes</Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            )}
           </DialogContent>
         </Dialog>
       )}
