@@ -24,6 +24,8 @@ export async function getAuthorizationContext(): Promise<AuthorizationContext | 
       permissions.push(...rolePermissions[SecuredRole.ORG_ADMIN]);
     }
 
+    permissions.push(...rolePermissions[SecuredRole.USER]);
+
     return {
       orgId: authn.orgId,
       userId: authn.userId,
