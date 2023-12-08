@@ -1,8 +1,12 @@
-import { AuthorizationScope } from "../security/models/AuthorizationContext";
-import { getAuthorizationContext } from "../security/utils/authorizationUtils";
+import { SecuredAction } from "../security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "../security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "../security/models/SecuredResourceType";
+import { getAuthorizationContext } from "../security/utils/securityUtils";
 
 export const withAuthorization = (
-  requiredScope: AuthorizationScope,
+  resourceType: SecuredResourceType,
+  action: SecuredAction,
+  allowedAccessLevels: SecuredResourceAccessLevel[],
   handler: Function
 ) => {
   return async (request: Request, context: any) => {
@@ -12,16 +16,22 @@ export const withAuthorization = (
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const { orgId, userId, scopes } = authorizationContext;
+    const { orgId, userId, permissions } = authorizationContext;
+    const hasRequiredPermission = permissions.some((permission) => {
+      return (
+        permission.resourceType === resourceType &&
+        permission.action === action &&
+        allowedAccessLevels.includes(permission.accessLevel)
+      );
+    });
 
-    const hasRequiredScopes = scopes.includes(requiredScope);
-
-    if (!hasRequiredScopes) {
+    if (!hasRequiredPermission) {
       return new Response("Forbidden", { status: 403 });
     }
 
     context.orgId = orgId;
     context.userId = userId;
+    context.permissions = permissions;
 
     return handler(request, context);
   };
