@@ -9,7 +9,6 @@ import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { DataSourceType } from "@prisma/client";
 import { put } from "@vercel/blob";
 import crypto from "crypto";
-import { writeFile } from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 300;
@@ -35,9 +34,6 @@ async function postHandler(
   // Calculate a hash for the file
   const fileHash = crypto.createHash("sha256").update(buffer).digest("hex");
 
-  const filepath = `/tmp/${file.name}`;
-  await writeFile(filepath, buffer);
-
   const blob = await put(filename, file, {
     access: "public",
   });
@@ -45,7 +41,6 @@ async function postHandler(
   const input: FileUploadDataSourceInput = {
     filename,
     mimetype: type,
-    filepath,
     blobUrl: blob.url,
     fileHash,
   };
