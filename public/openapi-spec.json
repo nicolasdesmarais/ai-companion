@@ -123,7 +123,7 @@
       "DataSourceType": {
         "type": "string",
         "description": "The type of the data source.",
-        "enum": ["WEB_URL", "GOOGLE_DRIVE", "FILE_UPLOAD"]
+        "enum": ["API", "FILE_UPLOAD", "GOOGLE_DRIVE", "WEB_URL"]
       },
       "DataSourceIndexStatus": {
         "type": "string",
@@ -142,6 +142,98 @@
           "message": {
             "type": "string",
             "description": "The streaming text response from the AI."
+          }
+        }
+      },
+      "ListAIsRequestScope": {
+        "type": "string",
+        "enum": [
+          "PRIVATE",
+          "OWNED",
+          "GROUP",
+          "SHARED",
+          "ORGANIZATION",
+          "PUBLIC",
+          "ALL"
+        ]
+      },
+      "ListAIDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "src": {
+            "type": "string"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/AIProfile"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "messageCount": {
+            "type": "integer"
+          },
+          "rating": {
+            "type": "number"
+          },
+          "ratingCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "AIProfile": {
+        "type": "object",
+        "properties": {
+          "headline": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AIProfileFeature"
+            }
+          },
+          "showCharacter": {
+            "type": "boolean"
+          },
+          "showTraining": {
+            "type": "boolean"
+          },
+          "showPersonality": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AIProfileFeature": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
           }
         }
       }
@@ -698,6 +790,65 @@
             "ApiKeyAuth": []
           }
         ]
+      }
+    },
+    "/api/v1/me/ai": {
+      "get": {
+        "summary": "List AIs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "$ref": "#/components/schemas/ListAIsRequestScope"
+            },
+            "description": "The scope to filter results by"
+          },
+          {
+            "in": "query",
+            "name": "groupId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The id of a group to filter results by"
+          },
+          {
+            "in": "query",
+            "name": "categoryId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The id of a category to filter results by"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ListAIDto"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   },

@@ -4,8 +4,15 @@ import prismadb from "@/src/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
 import { AI, AIVisibility, GroupAvailability, Prisma } from "@prisma/client";
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { SystemMessage } from "langchain/schema";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
-import { CreateAIRequest, UpdateAIRequest } from "../ports/api/AIApi";
+import {
+  AIProfile,
+  CreateAIRequest,
+  ListAIDto,
+  UpdateAIRequest,
+} from "../ports/api/AIApi";
 import {
   ListAIsRequestParams,
   ListAIsRequestScope,
@@ -15,8 +22,6 @@ import aiModelService from "./AIModelService";
 import { AISecurityService } from "./AISecurityService";
 import groupService from "./GroupService";
 import invitationService from "./InvitationService";
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { SystemMessage } from "langchain/schema";
 
 const openai = new ChatOpenAI({
   azureOpenAIApiKey: process.env.AZURE_GPT35_KEY,
@@ -171,7 +176,7 @@ export class AIService {
     orgId: string,
     userId: string,
     request: ListAIsRequestParams
-  ) {
+  ): Promise<ListAIDto[]> {
     const scope = request.scope || ListAIsRequestScope.ALL;
 
     const whereCondition = { AND: [{}] };
@@ -188,6 +193,17 @@ export class AIService {
     }
 
     const ais = await prismadb.aI.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        name: true,
+        description: true,
+        src: true,
+        profile: true,
+        userName: true,
+        categoryId: true,
+      },
       where: whereCondition,
       orderBy: {
         createdAt: "desc",
@@ -231,9 +247,11 @@ export class AIService {
       const ratingRow = ratingPerAi.find((r) => r.aiId === ai.id);
       const rating = ratingRow ? Number(ratingRow.averageRating) : 0;
       const ratingCount = ratingRow ? Number(ratingRow.ratingCount) : 0;
+      const profile = ai.profile as unknown as AIProfile;
 
       return {
         ...ai,
+        profile,
         messageCount,
         rating,
         ratingCount,
