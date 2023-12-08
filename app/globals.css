@@ -102,22 +102,13 @@ body,
   background: linear-gradient(349deg, rgba(16,16,59,1) 0%, rgba(28,39,88,1) 65%, rgba(155,217,249,1) 126%);
 }
 
-.auth-side-panel {
-  width: 500px;
-}
-
-.teaser {
-  height: 500px;
-  overflow: hidden;
-}
-
 .teaser-blur {
   width: 500px;
   height: 250px;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   -webkit-mask: linear-gradient(180deg, transparent, rgba(16,16,59,1) 70%);
-  margin-top: -200px;
+  margin-top: -400px;
 }
 
 .organizationPreviewTextContainer,

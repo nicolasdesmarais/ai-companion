@@ -7,7 +7,7 @@ export function Avatar() {
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="blue-bg flex flex-col h-full">
+    <div className="blue-bg flex flex-col md:h-full md:overflow-hidden">
       <div className="flex justify-center items-center flex-col">
         <Image
           src="/AppDirect-Mark_White.png"
@@ -21,7 +21,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         </h1>
       </div>
       <div className="flex justify-center h-full my-16">
-        <div className="auth-side-panel hidden md:block">
+        <div className="w-[500px] hidden md:block">
           <h2 className="me-4 mb-4 font-extrabold leading-none tracking-tight text-gray-900 text-4xl dark:text-white">
             Let AI change the way you work.
           </h2>
@@ -32,9 +32,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
           <AITeaser />
         </div>
-        <div className="auth-side-panel flex flex-col items-center">
-          {children}
-        </div>
+        <div className="w-[500px] flex flex-col items-center">{children}</div>
       </div>
     </div>
   );

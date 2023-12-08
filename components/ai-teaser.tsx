@@ -1,33 +1,37 @@
 import Image from "next/image";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
+import { StarRating } from "./star-rating";
 
 export const AITeaser = () => {
   return (
     <>
-      <div className="flex flex-wrap teaser">
+      <div className="flex flex-wrap w-[500px] overflow-hidden">
         <div>
           <div className="m-3 w-56">
             <Card className="bg-card rounded-xl cursor-pointer hover:opacity-75 transition border-0 p-1">
               <div className="h-full flex flex-col justify-between">
                 <CardHeader className="flex">
-                  <div className="relative w-full h-56">
+                  <div className="relative w-full h-56 mb-2">
                     <Image
-                      src="/poet_jobs.png"
-                      alt="Poet Jobs"
+                      src="/help_support.png"
+                      alt="Help Support"
                       width="220"
                       height="220"
                       className="rounded-xl object-cover"
                     />
                   </div>
-                  <p className="font-bold">Steve Jobs Poet</p>
+                  <p className="font-bold">Help and Support</p>
                   <p className="text-xs">
-                    Steve Jobs waxes poetic over 21st century technology or any
-                    other subjects you wish to bring...
+                    Here to help you with all the settings and support it takes
+                    to run a marketplace.
                   </p>
                 </CardHeader>
-                <CardFooter className="flex justify-between text-xs text-muted-foreground mt-2">
-                  <p className="lowercase">@jasper</p>
-                  <div className="flex items-center">23</div>
+                <CardFooter className="flex flex-col">
+                  <StarRating value={5} count={3} className="mt-2" />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                    <p className="lowercase">@jasper</p>
+                    <div className="flex items-center">2 chats</div>
+                  </div>
                 </CardFooter>
               </div>
             </Card>
@@ -36,24 +40,27 @@ export const AITeaser = () => {
             <Card className="bg-card rounded-xl cursor-pointer hover:opacity-75 transition border-0 p-1">
               <div className="h-full flex flex-col justify-between">
                 <CardHeader className="flex">
-                  <div className="relative w-full h-56">
+                  <div className="relative w-full h-56 mb-2">
                     <Image
-                      src="/monalisa.png"
-                      alt="Monalisa"
+                      src="/quote_support.png"
+                      alt="Quote Support"
                       width="220"
                       height="220"
                       className="rounded-xl object-cover"
                     />
                   </div>
-                  <p className="font-bold">Monalisa</p>
+                  <p className="font-bold">Quote Support</p>
                   <p className="text-xs">
-                    The famous painting by Leonardo da Vinci comes to life and
-                    speaks to you...
+                    Quote Support can generate a quote for you right here, right
+                    now and you can download it directly from chat.
                   </p>
                 </CardHeader>
-                <CardFooter className="flex justify-between text-xs text-muted-foreground mt-2">
-                  <p className="lowercase">@jasper</p>
-                  <div className="flex items-center">23</div>
+                <CardFooter className="flex flex-col">
+                  <StarRating value={0} count={0} className="mt-2" />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                    <p className="lowercase">@jasper</p>
+                    <div className="flex items-center">23</div>
+                  </div>
                 </CardFooter>
               </div>
             </Card>
@@ -66,22 +73,25 @@ export const AITeaser = () => {
                 <CardHeader className="flex">
                   <div className="relative w-full h-56">
                     <Image
-                      src="/queen_jazz.png"
-                      alt="Queen of Jazz"
+                      src="/commission_guru.png"
+                      alt="Commission Guru"
                       width="220"
                       height="220"
                       className="rounded-xl object-cover"
                     />
                   </div>
-                  <p className="font-bold">Queen of Jazz</p>
+                  <p className="font-bold">Commission Guru</p>
                   <p className="text-xs">
-                    Ella Fitzgerald takes you through a journey of jazz music
-                    and history...
+                    Discover insights into your business based on analytics of
+                    big data sets from your commissions data.
                   </p>
                 </CardHeader>
-                <CardFooter className="flex justify-between text-xs text-muted-foreground mt-2">
-                  <p className="lowercase">@andy</p>
-                  <div className="flex items-center">34</div>
+                <CardFooter className="flex flex-col">
+                  <StarRating value={0} count={0} className="mt-2" />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                    <p className="lowercase">@andy</p>
+                    <div className="flex items-center">34 chats</div>
+                  </div>
                 </CardFooter>
               </div>
             </Card>
@@ -92,22 +102,23 @@ export const AITeaser = () => {
                 <CardHeader className="flex">
                   <div className="relative w-full h-56">
                     <Image
-                      src="/stark.png"
-                      alt="Tony Stark"
+                      src="/deal_architect.png"
+                      alt="Deal Architect"
                       width="220"
                       height="220"
                       className="rounded-xl object-cover"
                     />
                   </div>
-                  <p className="font-bold">Tony Stark</p>
+                  <p className="font-bold">Deal Architect</p>
                   <p className="text-xs">
-                    Tony Stark, the genius, billionaire, playboy,
-                    philanthropist...
+                    Here to help support you with service availability &
+                    pricing. He can also help you draft proposals for your
+                    customer.
                   </p>
                 </CardHeader>
                 <CardFooter className="flex justify-between text-xs text-muted-foreground mt-2">
                   <p className="lowercase">@jasper</p>
-                  <div className="flex items-center">23</div>
+                  <div className="flex items-center">23 chats</div>
                 </CardFooter>
               </div>
             </Card>
