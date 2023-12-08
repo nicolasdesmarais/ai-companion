@@ -1,4 +1,4 @@
-import { CreateOrgClientCredentialsRequest as UpsertOrgClientCredentialsRequest } from "@/src/domain/ports/api/OrgClientCredentialsApi";
+import { UpsertClientCredentialsRequest as UpsertOrgClientCredentialsRequest } from "@/src/domain/ports/api/OrgClientCredentialsApi";
 import orgClientCredentialsService from "@/src/domain/services/OrgClientCredentialsService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";

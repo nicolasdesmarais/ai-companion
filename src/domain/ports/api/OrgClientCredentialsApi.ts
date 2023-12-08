@@ -1,6 +1,6 @@
 import { OAuthTokenProvider } from "@prisma/client";
 
-export interface CreateOrgClientCredentialsRequest {
+export interface UpsertClientCredentialsRequest {
   provider: OAuthTokenProvider;
   data: any;
 }
