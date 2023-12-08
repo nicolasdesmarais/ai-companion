@@ -32,13 +32,16 @@ export const GET = withErrorHandler(
   withAuthorization(
     SecuredResourceType.CHATS,
     SecuredAction.READ,
-    Object.values(SecuredResourceAccessLevel),
+    [SecuredResourceAccessLevel.SELF],
     getHandler
   )
 );
 
 export const POST = withErrorHandler(
-  withAuthorization(SecuredResourceType.CHATS,
+  withAuthorization(
+    SecuredResourceType.CHATS,
     SecuredAction.WRITE,
-    Object.values(SecuredResourceAccessLevel), postHandler)
+    [SecuredResourceAccessLevel.SELF],
+    postHandler
+  )
 );
