@@ -47,7 +47,6 @@ export const AIProfile = ({ ai, rating }: Props) => {
   }, [params]);
 
   useEffect(() => {
-    console.log(window.location, isOpen);
     if (isOpen && window.location.hash) {
       const anchor = document.querySelector(window.location.hash);
       if (anchor) {

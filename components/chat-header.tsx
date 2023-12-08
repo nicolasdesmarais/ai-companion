@@ -53,7 +53,7 @@ export const ChatHeader = ({ chat, rating }: ChatHeaderProps) => {
   const aiProfile = useAIProfile();
   const [showShareModal, setShowShareModal] = useState(false);
   const rateAI = useRateAI();
-  console.log(chat.ai);
+
   const duplicate = async () => {
     const response = await axios.put(`/api/v1/chats/${chat.id}/duplicate`);
     if (response.status === 200) {
