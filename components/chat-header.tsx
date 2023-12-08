@@ -53,7 +53,7 @@ export const ChatHeader = ({ chat, rating }: ChatHeaderProps) => {
   const aiProfile = useAIProfile();
   const [showShareModal, setShowShareModal] = useState(false);
   const rateAI = useRateAI();
-
+  console.log(chat.ai);
   const duplicate = async () => {
     const response = await axios.put(`/api/v1/chats/${chat.id}/duplicate`);
     if (response.status === 200) {
@@ -122,9 +122,19 @@ export const ChatHeader = ({ chat, rating }: ChatHeaderProps) => {
             <StarRating
               value={Math.round(rating.averageRating)}
               count={rating.ratingCount}
-              className=""
+              hideCount={true}
+              onClick={() => router.push("#user-ratings")}
             />
-            <div className="text-xs text-muted-foreground ml-2">
+            <div className="text-xs text-muted-foreground">
+              <Button
+                variant="link"
+                size="xs"
+                type="button"
+                onClick={() => router.push("#user-ratings")}
+              >
+                {rating.ratingCount}{" "}
+                {rating.ratingCount === 1 ? "Rating" : "Ratings"}
+              </Button>
               |
               <Button
                 variant="link"

@@ -73,6 +73,13 @@ export const AIProfile = ({ ai, rating }: Props) => {
   }, []);
 
   if (!isOpen) return null;
+
+  const showTraining =
+    ai.profile?.showCharacter ||
+    ai.profile?.showTraining ||
+    ai.profile?.showPersonality ||
+    ai.profile?.trainingDescription;
+
   return (
     <div className="bg-accent/30 px-6 space-y-4 w-2/3 w-full overflow-auto ml-1 pb-16">
       <div className="absolute top-4 right-4">
@@ -99,16 +106,18 @@ export const AIProfile = ({ ai, rating }: Props) => {
             Profile
           </Button>
         </a>
-        <a href="#specifications">
-          <Button
-            variant="link"
-            size="sm"
-            type="button"
-            onClick={() => router.push("#specifications")}
-          >
-            Specifications
-          </Button>
-        </a>
+        {showTraining && (
+          <a href="#specifications">
+            <Button
+              variant="link"
+              size="sm"
+              type="button"
+              onClick={() => router.push("#specifications")}
+            >
+              Specifications
+            </Button>
+          </a>
+        )}
         <a href="#user-ratings">
           <Button
             variant="link"
@@ -146,20 +155,24 @@ export const AIProfile = ({ ai, rating }: Props) => {
       </div>
       <div className="text-2xl font-bold">{ai.profile?.headline}</div>
       <div className="text-sm">{ai.profile?.description}</div>
-      <div className="text-2xl font-bold">
-        <span className="border-b border-ring pb-1 pr-4">Features</span>
-      </div>
+      {ai.profile?.features.length > 0 && (
+        <div className="text-2xl font-bold">
+          <span className="border-b border-ring pb-1 pr-4">Features</span>
+        </div>
+      )}
       {ai.profile?.features.map((feature: any, index: number) => (
         <div key={`feature-${index}`}>
           <div className="text-xl font-bold mb-2">{feature.title}</div>
           <div className="text-sm">{feature.description}</div>
         </div>
       ))}
-      <div className="text-2xl font-bold" id="specifications">
-        <span className="border-b border-ring pb-1 pr-4">
-          Training Specifications
-        </span>
-      </div>
+      {showTraining && (
+        <div className="text-2xl font-bold" id="specifications">
+          <span className="border-b border-ring pb-1 pr-4">
+            Training Specifications
+          </span>
+        </div>
+      )}
 
       <div className="text-sm">{ai.profile?.trainingDescription}</div>
       {ai.profile?.showCharacter && (
@@ -218,7 +231,8 @@ export const AIProfile = ({ ai, rating }: Props) => {
               hideCount={true}
             />
             <div className="ml-2 text-md">
-              {rating.averageRating.toFixed(1)} out of 5
+              {rating.averageRating &&
+                `${rating.averageRating.toFixed(1)} out of 5`}
             </div>
           </div>
           <div className="text-xs text-muted-foreground mt-2">
@@ -230,52 +244,58 @@ export const AIProfile = ({ ai, rating }: Props) => {
           Write a Review
         </Button>
       </div>
-      <div className="grid gap-3 grid-cols-[50px_auto_50px]">
-        {[...Array(5)].map((_, i) => (
-          <>
-            <div key={`rating-1-${i}`} className="text-ring">
-              {5 - i} star
-            </div>
-            <div
-              key={`rating-2-${i}`}
-              className="border border-ring/30 rounded-md"
-            >
-              <div
-                className={cn(
-                  "rounded-md bg-[#eecc50] h-full",
-                  ratingDistributions[4 - i] < 100 && "rounded-r-none"
-                )}
-                style={{ width: `${ratingDistributions[4 - i] || 0}%` }}
-              ></div>
-            </div>
-            <div key={`rating-3-${i}`} className="text-ring">
-              {ratingDistributions[4 - i]} %
-            </div>
-          </>
-        ))}
-      </div>
-      <div className="text-xl font-bold">
-        <span className="border-b border-ring pb-1 pr-8">Recent Reviews</span>
-      </div>
-      {ratings.map((rating: any, index: number) => (
-        <div key={`rating-${index}`} className="pb-6">
-          <div className="flex items-center mb-2">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={rating.user.imageUrl} crop="w_48,h_48" />
-            </Avatar>
-            <div className="text-md ml-4">{getUserName(rating.user)}</div>
+      {rating.averageRating && (
+        <>
+          <div className="grid gap-3 grid-cols-[50px_auto_50px]">
+            {[...Array(5)].map((_, i) => (
+              <>
+                <div key={`rating-1-${i}`} className="text-ring">
+                  {5 - i} star
+                </div>
+                <div
+                  key={`rating-2-${i}`}
+                  className="border border-ring/30 rounded-md"
+                >
+                  <div
+                    className={cn(
+                      "rounded-md bg-[#eecc50] h-full",
+                      ratingDistributions[4 - i] < 100 && "rounded-r-none"
+                    )}
+                    style={{ width: `${ratingDistributions[4 - i] || 0}%` }}
+                  ></div>
+                </div>
+                <div key={`rating-3-${i}`} className="text-ring">
+                  {ratingDistributions[4 - i]} %
+                </div>
+              </>
+            ))}
           </div>
-          <div className="flex">
-            <StarRating value={rating.rating} hideCount={true} />
-            <div className="text-md font-bold ml-4">
-              {rating.headline || rating.review}
-            </div>
+          <div className="text-xl font-bold">
+            <span className="border-b border-ring pb-1 pr-8">
+              Recent Reviews
+            </span>
           </div>
-          {rating.headline && (
-            <div className="text-sm mt-2">{rating.review}</div>
-          )}
-        </div>
-      ))}
+          {ratings.map((rating: any, index: number) => (
+            <div key={`rating-${index}`} className="pb-6">
+              <div className="flex items-center mb-2">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={rating.user.imageUrl} crop="w_48,h_48" />
+                </Avatar>
+                <div className="text-md ml-4">{getUserName(rating.user)}</div>
+              </div>
+              <div className="flex">
+                <StarRating value={rating.rating} hideCount={true} />
+                <div className="text-md font-bold ml-4">
+                  {rating.headline || rating.review}
+                </div>
+              </div>
+              {rating.headline && (
+                <div className="text-sm mt-2">{rating.review}</div>
+              )}
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 };

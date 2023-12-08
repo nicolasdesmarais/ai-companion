@@ -25,6 +25,7 @@ interface StarRatingProps {
   value?: number;
   onChange?: (src: number) => void;
   hideCount?: boolean;
+  onClick?: () => void;
 }
 
 const getSizeClass = (size: string) => {
@@ -48,11 +49,12 @@ export const StarRating = ({
   size = "small",
   onChange,
   hideCount,
+  onClick,
 }: StarRatingProps) => {
   const [hover, setHover] = useState<number | null>(null);
   return (
     <>
-      <div className={cn(className, "flex items-center")}>
+      <div className={cn(className, "flex items-center")} onClick={onClick}>
         {[...Array(maxStars)].map((_, i) => (
           <button
             type="button"
