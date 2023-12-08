@@ -19,9 +19,10 @@ interface ChatClientProps {
       messages: number;
     };
   };
+  rating?: any;
 }
 
-export const ChatClient = ({ chat }: ChatClientProps) => {
+export const ChatClient = ({ chat, rating }: ChatClientProps) => {
   const router = useRouter();
   const [messages, setMessages] = useState<ChatMessageProps[]>(chat.messages);
   const [streaming, setStreaming] = useState<boolean>(false);
@@ -78,7 +79,7 @@ export const ChatClient = ({ chat }: ChatClientProps) => {
   }
   return (
     <div className="flex flex-col h-full w-full space-y-2 ml-1 shrink">
-      <ChatHeader chat={chat} />
+      <ChatHeader chat={chat} rating={rating} />
       <ChatMessages
         ai={chat.ai}
         isLoading={isLoading && !stream}

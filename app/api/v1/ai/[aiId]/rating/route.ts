@@ -14,9 +14,9 @@ export async function PUT(
     }
 
     const aiId = params.aiId;
-    const { rating, review } = await req.json();
+    const { rating, review, headline } = await req.json();
 
-    await aiService.rateAi(userId, aiId, rating, review);
+    await aiService.rateAi(userId, aiId, rating, review, headline);
 
     return NextResponse.json("OK", { status: 200 });
   } catch (error) {

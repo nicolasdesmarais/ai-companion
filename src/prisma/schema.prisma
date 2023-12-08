@@ -303,9 +303,12 @@ model ApiKey {
 model AIRating {
   id                        Int         @id @default(autoincrement())
   userId                    String?     @map(name: "user_id")
+  createdAt                 DateTime    @default(now()) @map(name: "created_at")
+  updatedAt                 DateTime    @default(now()) @updatedAt @map(name: "updated_at")
   ai                        AI          @relation(fields: [aiId], references: [id])
   aiId                      String      @map(name: "ai_id")
   review                    String      @db.Text
+  headline                  String?      
   rating                    Int
 
   @@map("ai_ratings")

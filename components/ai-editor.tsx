@@ -16,7 +16,7 @@ import * as z from "zod";
 import { AICharacter } from "./ai-character";
 import { AIKnowledge } from "./ai-knowledge";
 import { AIPersonality } from "./ai-personality";
-import { AIProfile } from "./ai-profile";
+import { AIProfileEditor } from "./ai-profile-editor";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -81,6 +81,7 @@ const formSchema = z.object({
         )
         .optional()
         .nullable(),
+      trainingDescription: z.string().optional().nullable(),
       showCharacter: z.boolean().optional().nullable(),
       showTraining: z.boolean().optional().nullable(),
       showPersonality: z.boolean().optional().nullable(),
@@ -441,7 +442,7 @@ export const AIEditor = ({
       name: "Profile",
       route: "edit/profile",
       index: 4,
-      content: <AIProfile ai={initialAi} form={form} />,
+      content: <AIProfileEditor ai={initialAi} form={form} />,
       buttons: (
         <>
           <div>{backButton("edit/knowledge")}</div>
