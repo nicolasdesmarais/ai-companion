@@ -1,7 +1,9 @@
 import dataSourceService from "@/src/domain/services/DataSourceService";
-import { AuthorizationScope } from "@/src/domain/types/AuthorizationContext";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { NextResponse } from "next/server";
 
 async function getHandler(
@@ -20,5 +22,10 @@ async function getHandler(
 }
 
 export const GET = withErrorHandler(
-  withAuthorization(AuthorizationScope.DATA_SOURCES_READ, getHandler)
+  withAuthorization(
+    SecuredResourceType.DATA_SOURCES,
+    SecuredAction.READ,
+    Object.values(SecuredResourceAccessLevel),
+    getHandler
+  )
 );

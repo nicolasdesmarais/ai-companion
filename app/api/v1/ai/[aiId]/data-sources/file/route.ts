@@ -1,9 +1,11 @@
 import { FileUploadDataSourceInput } from "@/src/adapter-out/knowledge/file-upload/types/FileUploadDataSourceInput";
 import aiService from "@/src/domain/services/AIService";
 import dataSourceService from "@/src/domain/services/DataSourceService";
-import { AuthorizationScope } from "@/src/domain/types/AuthorizationContext";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { DataSourceType } from "@prisma/client";
 import { put } from "@vercel/blob";
 import crypto from "crypto";
@@ -63,5 +65,10 @@ async function postHandler(
 }
 
 export const POST = withErrorHandler(
-  withAuthorization(AuthorizationScope.DATA_SOURCES_WRITE, postHandler)
+  withAuthorization(
+    SecuredResourceType.DATA_SOURCES,
+    SecuredAction.WRITE,
+    Object.values(SecuredResourceAccessLevel),
+    postHandler
+  )
 );

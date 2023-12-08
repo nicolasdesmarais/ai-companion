@@ -1,9 +1,11 @@
 import { CreateChatRequest } from "@/src/domain/ports/api/ChatsApi";
 import chatService from "@/src/domain/services/ChatService";
-import { AuthorizationScope } from "@/src/domain/types/AuthorizationContext";
 import { rateLimit } from "@/src/lib/rate-limit";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { StreamingTextResponse } from "ai";
 import { NextResponse } from "next/server";
 
@@ -50,9 +52,19 @@ async function deleteHandler(
 }
 
 export const POST = withErrorHandler(
-  withAuthorization(AuthorizationScope.CHATS_WRITE, postHandler)
+  withAuthorization(
+    SecuredResourceType.CHATS,
+    SecuredAction.WRITE,
+    Object.values(SecuredResourceAccessLevel),
+    postHandler
+  )
 );
 
 export const DELETE = withErrorHandler(
-  withAuthorization(AuthorizationScope.CHATS_WRITE, deleteHandler)
+  withAuthorization(
+    SecuredResourceType.CHATS,
+    SecuredAction.WRITE,
+    Object.values(SecuredResourceAccessLevel),
+    deleteHandler
+  )
 );

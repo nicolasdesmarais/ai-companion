@@ -1,8 +1,10 @@
 import { CreateOrgClientCredentialsRequest as UpsertOrgClientCredentialsRequest } from "@/src/domain/ports/api/OrgClientCredentialsApi";
 import orgClientCredentialsService from "@/src/domain/services/OrgClientCredentialsService";
-import { AuthorizationScope } from "@/src/domain/types/AuthorizationContext";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { NextResponse } from "next/server";
 
 async function postHandler(
@@ -24,7 +26,9 @@ async function postHandler(
 
 export const POST = withErrorHandler(
   withAuthorization(
-    AuthorizationScope.ORG_CLIENT_CREDENTIALS_WRITE,
+    SecuredResourceType.ORG_CLIENT_CREDENTIALS,
+    SecuredAction.WRITE,
+    [SecuredResourceAccessLevel.ORGANIZATION],
     postHandler
   )
 );

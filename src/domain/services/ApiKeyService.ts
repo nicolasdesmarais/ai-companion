@@ -6,10 +6,10 @@ import {
   UpdateApiKeyResponse,
 } from "@/src/domain/ports/api/ApiKeysApi";
 import prismadb from "@/src/lib/prismadb";
+import { isValidScope } from "@/src/security/models/Permission";
 import { JsonValue } from "@prisma/client/runtime/library";
 import { createHash, randomBytes } from "crypto";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
-import { AuthorizationScope } from "../types/AuthorizationContext";
 
 const apiKeySelect = {
   id: true,
@@ -23,33 +23,6 @@ const apiKeySelect = {
 };
 
 export class ApiKeyService {
-  /**
-   * Creates an API key for the given user and organization.
-   */
-  public async createApiKey(
-    orgId: string,
-    userId: string,
-    request: CreateApiKeyRequest
-  ): Promise<CreateApiKeyResponse> {
-    const apiKey = this.generateApiKey();
-    const hashedApiKey = this.hashApiKey(apiKey);
-
-    const createdApiKey = await prismadb.apiKey.create({
-      data: {
-        orgId,
-        userId,
-        name: request.name,
-        scopes: request.scopes,
-        key: hashedApiKey,
-      },
-    });
-
-    return {
-      ...createdApiKey,
-      key: apiKey,
-    };
-  }
-
   /**
    * Retrieves an API key by its bearer token.
    * The bearer token is the API key hashed with SHA256.
@@ -105,16 +78,42 @@ export class ApiKeyService {
     return typedApiKeys;
   }
 
-  private getScopesFromJson(scopesJson: JsonValue) {
+  /**
+   * Creates an API key for the given user and organization.
+   */
+  public async createApiKey(
+    orgId: string,
+    userId: string,
+    request: CreateApiKeyRequest
+  ): Promise<CreateApiKeyResponse> {
+    const apiKey = this.generateApiKey();
+    const hashedApiKey = this.hashApiKey(apiKey);
+
+    const validScopes = this.getValidScopes(request.scopes);
+
+    const createdApiKey = await prismadb.apiKey.create({
+      data: {
+        orgId,
+        userId,
+        name: request.name,
+        scopes: validScopes,
+        key: hashedApiKey,
+      },
+    });
+
+    return {
+      ...createdApiKey,
+      key: apiKey,
+    };
+  }
+
+  private getScopesFromJson(scopesJson: JsonValue): string[] {
     const scopesArray =
       scopesJson != null && Array.isArray(scopesJson) ? scopesJson : [];
 
     return scopesArray.map((scope) => {
-      if (
-        scope !== null &&
-        Object.values(AuthorizationScope).includes(scope as any)
-      ) {
-        return scope as AuthorizationScope;
+      if (scope !== null) {
+        return scope as string;
       } else {
         throw new Error(`Unknown scope: ${scope}`);
       }
@@ -141,6 +140,8 @@ export class ApiKeyService {
       throw new ForbiddenError("Forbidden");
     }
 
+    const validScopes = this.getValidScopes(request.scopes);
+
     const updatedKey = await prismadb.apiKey.update({
       select: apiKeySelect,
       where: {
@@ -148,11 +149,15 @@ export class ApiKeyService {
       },
       data: {
         name: request.name,
-        scopes: request.scopes,
+        scopes: validScopes,
       },
     });
 
     return updatedKey;
+  }
+
+  private getValidScopes(scopes: string[]): string[] {
+    return scopes.filter(isValidScope);
   }
 
   public async deleteApiKey(orgId: string, userId: string, apiKeyId: string) {
