@@ -81,7 +81,7 @@ export const AIProfile = ({ ai, rating }: Props) => {
     ai.profile?.trainingDescription;
 
   return (
-    <div className="bg-accent/30 px-6 space-y-4 w-2/3 w-full overflow-auto ml-1 pb-16">
+    <div className="bg-[#0f111e] px-6 space-y-4 w-full md:w-auto lg:w-2/3 absolute left-0 md:left-[400px] right-0 top-0 bottom-0 lg:static overflow-auto ml-1 pb-16">
       <div className="absolute top-4 right-4">
         <Button
           onClick={() => {
@@ -221,7 +221,7 @@ export const AIProfile = ({ ai, rating }: Props) => {
       <div className="text-3xl font-bold" id="user-ratings">
         <span className="border-b border-ring pb-1 pr-4">User Ratings</span>
       </div>
-      <div className="flex justify-between">
+      <div className="flex justify-between flex-wrap">
         <div>
           <div className="flex">
             <StarRating
@@ -235,7 +235,7 @@ export const AIProfile = ({ ai, rating }: Props) => {
                 `${rating.averageRating.toFixed(1)} out of 5`}
             </div>
           </div>
-          <div className="text-xs text-muted-foreground mt-2">
+          <div className="text-xs text-muted-foreground mt-2 mb-2">
             {rating.ratingCount} User Ratings
           </div>
         </div>

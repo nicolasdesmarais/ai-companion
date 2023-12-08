@@ -104,106 +104,108 @@ export const ChatHeader = ({ chat, rating }: ChatHeaderProps) => {
   };
 
   return (
-    <div className="flex w-full justify-between items-center p-4 pb-3 bg-accent/30">
-      <div className="flex gap-x-2 items-center">
-        <BotAvatar src={chat.ai.src} />
-        <div className="flex flex-col gap-y-1">
-          <p className="font-bold">{chat.ai.name}</p>
-          <div className="flex items-center gap-x-2">
-            <p className="text-xs text-muted-foreground">
-              Created by {chat.ai.userName}
-            </p>
-            <div className="flex items-center text-xs text-muted-foreground">
-              <MessagesSquare className="w-3 h-3 mr-1" />
-              {chat._count.messages}
-            </div>
-          </div>
-          <div className="flex">
-            <StarRating
-              value={Math.round(rating.averageRating)}
-              count={rating.ratingCount}
-              hideCount={true}
-              onClick={() => router.push("#user-ratings")}
-            />
-            <div className="text-xs text-muted-foreground">
-              <Button
-                variant="link"
-                size="xs"
-                type="button"
-                onClick={() => router.push("#user-ratings")}
-              >
-                {rating.ratingCount}{" "}
-                {rating.ratingCount === 1 ? "Rating" : "Ratings"}
-              </Button>
-              |
-              <Button
-                variant="link"
-                size="xs"
-                type="button"
-                onClick={() => aiProfile.onOpen()}
-              >
-                View Profile
-              </Button>
+    <div className="flex flex-col p-4 pb-3 bg-accent/30">
+      <div className="flex w-full justify-between items-center">
+        <div className="flex gap-x-2 items-center">
+          <BotAvatar src={chat.ai.src} />
+          <div className="flex flex-col gap-y-1">
+            <p className="font-bold">{chat.ai.name}</p>
+            <div className="flex items-center gap-x-2">
+              <p className="text-xs text-muted-foreground">
+                Created by {chat.ai.userName}
+              </p>
+              <div className="flex items-center text-xs text-muted-foreground">
+                <MessagesSquare className="w-3 h-3 mr-1" />
+                {chat._count.messages}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div className="flex">
-        {(user?.id === chat.ai.userId || chat.ai.visibility === "PUBLIC") && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="mr-4"
-            type="button"
-            onClick={() => setShowShareModal(true)}
-          >
-            <ExternalLink />
-          </Button>
-        )}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreVertical />
+        <div className="flex">
+          {(user?.id === chat.ai.userId || chat.ai.visibility === "PUBLIC") && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="mr-4"
+              type="button"
+              onClick={() => setShowShareModal(true)}
+            >
+              <ExternalLink />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {chat.pinPosition ? (
-              <DropdownMenuItem onClick={() => unpin()}>
-                <PinOff className="w-4 h-4 mr-2" />
-                Unpin
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreVertical />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {chat.pinPosition ? (
+                <DropdownMenuItem onClick={() => unpin()}>
+                  <PinOff className="w-4 h-4 mr-2" />
+                  Unpin
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={() => pin()}>
+                  <Pin className="w-4 h-4 mr-2" />
+                  Pin
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={() => reset()}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Reset
               </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem onClick={() => pin()}>
-                <Pin className="w-4 h-4 mr-2" />
-                Pin
+              <DropdownMenuItem onClick={() => duplicate()}>
+                <CopyPlus className="w-4 h-4 mr-2" />
+                Duplicate
               </DropdownMenuItem>
-            )}
-            <DropdownMenuItem onClick={() => reset()}>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Reset
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => duplicate()}>
-              <CopyPlus className="w-4 h-4 mr-2" />
-              Duplicate
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => remove()}>
-              <Trash className="w-4 h-4 mr-2" />
-              Remove
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => rateAI.onOpen()}>
-              <Star className="w-4 h-4 mr-2" />
-              Rate
-            </DropdownMenuItem>
-            {user?.id === chat.ai.userId && (
-              <DropdownMenuItem
-                onClick={() => router.push(`/ai/${chat.ai.id}/edit`)}
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Edit AI
+              <DropdownMenuItem onClick={() => remove()}>
+                <Trash className="w-4 h-4 mr-2" />
+                Remove
               </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuItem onClick={() => rateAI.onOpen()}>
+                <Star className="w-4 h-4 mr-2" />
+                Rate
+              </DropdownMenuItem>
+              {user?.id === chat.ai.userId && (
+                <DropdownMenuItem
+                  onClick={() => router.push(`/ai/${chat.ai.id}/edit`)}
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit AI
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+      <div className="flex ml-14">
+        <StarRating
+          value={Math.round(rating.averageRating)}
+          count={rating.ratingCount}
+          hideCount={true}
+          onClick={() => router.push("#user-ratings")}
+        />
+        <div className="text-xs text-muted-foreground">
+          <Button
+            variant="link"
+            size="xs"
+            type="button"
+            onClick={() => router.push("#user-ratings")}
+          >
+            {rating.ratingCount}{" "}
+            {rating.ratingCount === 1 ? "Rating" : "Ratings"}
+          </Button>
+          |
+          <Button
+            variant="link"
+            size="xs"
+            type="button"
+            onClick={() => aiProfile.onOpen()}
+          >
+            View Profile
+          </Button>
+        </div>
       </div>
       <ShareModal
         showModal={showShareModal}
