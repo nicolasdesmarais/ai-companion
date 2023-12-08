@@ -25,7 +25,11 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="h-full">
-      <Navbar isPro={isPro} hasChat={chats.length > 0} />
+      <Navbar
+        isPro={isPro}
+        hasChat={chats.length > 0}
+        userPermissions={permissions}
+      />
       <div className="hidden md:flex h-full w-20 flex-col fixed inset-y-0 z-40">
         <Sidebar
           isPro={isPro}
