@@ -132,10 +132,6 @@
           "userName": {
             "type": "string",
             "description": "The user name of the AI's owner."
-          },
-          "visibility": {
-            "type": "string",
-            "description": "The AI's visibility setting."
           }
         }
       },
