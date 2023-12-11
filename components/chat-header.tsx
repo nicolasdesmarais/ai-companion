@@ -48,7 +48,7 @@ export const ChatHeader = ({ ai, chat }: ChatHeaderProps) => {
   const aiProfile = useAIProfile();
   const [showShareModal, setShowShareModal] = useState(false);
   const rateAI = useRateAI();
-  console.log(chat.ai);
+  console.log(ai);
   const duplicate = async () => {
     const response = await axios.put(`/api/v1/chats/${chat.id}/duplicate`);
     if (response.status === 200) {
@@ -102,12 +102,12 @@ export const ChatHeader = ({ ai, chat }: ChatHeaderProps) => {
     <div className="flex flex-col p-4 pb-3 bg-accent/30">
       <div className="flex w-full justify-between items-center">
         <div className="flex gap-x-2 items-center">
-          <BotAvatar src={chat.ai.src} />
+          <BotAvatar src={ai.src} />
           <div className="flex flex-col gap-y-1">
-            <p className="font-bold">{chat.ai.name}</p>
+            <p className="font-bold">{ai.name}</p>
             <div className="flex items-center gap-x-2">
               <p className="text-xs text-muted-foreground">
-                Created by {chat.ai.userName}
+                Created by {ai.userName}
               </p>
               <div className="flex items-center text-xs text-muted-foreground">
                 <MessagesSquare className="w-3 h-3 mr-1" />
@@ -117,7 +117,7 @@ export const ChatHeader = ({ ai, chat }: ChatHeaderProps) => {
           </div>
         </div>
         <div className="flex">
-          {(user?.id === chat.ai.userId || chat.ai.visibility === "PUBLIC") && (
+          {(user?.id === ai.userId || ai.visibility === "PUBLIC") && (
             <Button
               variant="ghost"
               size="icon"
@@ -162,9 +162,9 @@ export const ChatHeader = ({ ai, chat }: ChatHeaderProps) => {
                 <Star className="w-4 h-4 mr-2" />
                 Rate
               </DropdownMenuItem>
-              {user?.id === chat.ai.userId && (
+              {user?.id === ai.userId && (
                 <DropdownMenuItem
-                  onClick={() => router.push(`/ai/${chat.ai.id}/edit`)}
+                  onClick={() => router.push(`/ai/${ai.id}/edit`)}
                 >
                   <Edit className="w-4 h-4 mr-2" />
                   Edit AI
