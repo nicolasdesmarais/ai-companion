@@ -12,10 +12,10 @@ import { AuthorizationContext } from "@/src/security/models/AuthorizationContext
 import { Prisma, Role } from "@prisma/client";
 import { JsonObject } from "@prisma/client/runtime/library";
 import axios from "axios";
+import { ChatSecurityService } from "../../security/services/ChatSecurityService";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import aiModelService from "./AIModelService";
 import aiService from "./AIService";
-import { ChatSecurityService } from "./ChatSecurity";
 
 const BUFFER_TOKENS = 200;
 

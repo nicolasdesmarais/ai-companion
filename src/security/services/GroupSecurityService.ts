@@ -1,4 +1,4 @@
-import { GroupEntity } from "../models/GroupEntity";
+import { GroupEntity } from "../../domain/models/GroupEntity";
 
 export class GroupSecurityService {
   public static getGroupPermissions(
