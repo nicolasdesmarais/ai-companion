@@ -20,12 +20,12 @@
           "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Chat"
+              "$ref": "#/components/schemas/ChatSummary"
             }
           }
         }
       },
-      "Chat": {
+      "ChatSummary": {
         "type": "object",
         "properties": {
           "id": {
@@ -58,6 +58,51 @@
           },
           "ai": {
             "$ref": "#/components/schemas/ChatAI"
+          }
+        }
+      },
+      "ChatDetails": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChatSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "messages": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ChatMessage"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ChatMessage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the chat message."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the chat message was created."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the chat message was last updated."
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the message"
+          },
+          "role": {
+            "type": "string",
+            "description": "The role of the message sender, either user or system"
           }
         }
       },
@@ -339,7 +384,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Chat"
+                  "$ref": "#/components/schemas/ChatSummary"
                 }
               }
             }
@@ -597,6 +642,48 @@
       }
     },
     "/api/v1/chats/{chatId}": {
+      "get": {
+        "summary": "Get a chat session",
+        "description": "Retrieves the chat session with the specified ID.",
+        "operationId": "getChat",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the chat session to retrieve.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat session successfully retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "404": {
+            "description": "Not found, when the specified chat ID does not exist."
+          },
+          "500": {
+            "description": "Internal Server Error, any internal error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
       "post": {
         "summary": "Start a chat session",
         "description": "Initiates a chat with the AI using the provided prompt on the specified date.",
@@ -719,7 +806,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Chat"
+                  "$ref": "#/components/schemas/ChatSummary"
                 }
               }
             }
