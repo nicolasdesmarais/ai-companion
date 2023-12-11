@@ -80,7 +80,9 @@ export const LandingForm = () => {
               </FormItem>
             )}
           />
-          <Button className="mt-5 rounded-none col-span-2">Sign me up</Button>
+          <Button className="mt-5 rounded-none col-span-2" variant="ring">
+            Sign me up
+          </Button>
         </div>
       </form>
     </Form>

@@ -17,7 +17,7 @@ const LandingPage = () => {
                 height="64"
                 className="mt-5"
               />
-              <span className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
+              <span className="mt-5 ml-2 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
                 AppDirect
               </span>
             </div>
@@ -50,7 +50,7 @@ const LandingPage = () => {
       </div>
 
       <div className="flex justify-center p-14">
-        <div className="m-5 w-96 space-y-4">
+        <div className="m-8 w-96 space-y-4">
           <h3 className="text-3xl font-bold">Browse the AI Marketplace</h3>
           <div>
             Explore the rich catalog of AI&apos;s for everything from data
@@ -75,33 +75,33 @@ const LandingPage = () => {
           alt="Create AI Page"
           width="512"
           height="360"
-          className="mt-5 drop-shadow-2xl"
+          className="mt-5 shadow-glow"
         />
-        <div className="m-5 w-96 space-y-4">
-          <div className="mt-5 w-96">
-            <h3 className="text-3xl font-bold">Create your own AI</h3>
-            <div>
-              Create custom AIs for yourself, your team, or your customers in
-              under 30 minutes. No coding required.
-            </div>
-            <div>
-              Whether you&apos;re a seasoned developer or a newcomer to the AI
-              scene, our platform provides a guided user-friendly experience to
-              create and manage AIs.
-            </div>
+        <div className="ml-8 mt-8 w-96 space-y-4 text-right">
+          <h3 className="text-3xl font-bold">Create your own AI</h3>
+          <div>
+            Create custom AIs for yourself, your team, or your customers in
+            under 30 minutes. No coding required.
+          </div>
+          <div>
+            Whether you&apos;re a seasoned developer or a newcomer to the AI
+            scene, our platform provides a guided user-friendly experience to
+            create and manage AIs.
           </div>
         </div>
       </div>
 
-      <div className="flex justify-center items-center">
-        <div className="mt-5 w-96">
+      <div className="flex justify-center p-14">
+        <div className="m-8 w-96 space-y-4">
           <h3 className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
             Interact with AIs
           </h3>
           <div>
             Chat with AIs to ask broad questions that help you summarize complex
-            data sets or dig into the details quickly with specific queries. AIs
-            learn what is most helpful for you with every interaction.
+            data sets or dig into the details quickly with specific queries.
+          </div>
+          <div>
+            AIs learn what is most helpful for you with every interaction.
           </div>
         </div>
         <Image
@@ -109,54 +109,67 @@ const LandingPage = () => {
           alt="Chat Page"
           width="512"
           height="360"
-          className="mt-5"
+          className="mt-5 shadow-glow"
         />
       </div>
 
-      <div className="blue-bg flex justify-center items-center">
+      <div className="blue-bg flex justify-center  p-14">
         <Image
           src="/share_screenshot.jpg"
           alt="Chat Page"
           width="512"
           height="377"
-          className="mt-5"
+          className="mt-5 shadow-glow"
         />
-        <div className="mt-5 w-96">
+        <div className="ml-8 mt-4 w-96 space-y-4 text-right">
           <h3 className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
             Share with confidence
           </h3>
           <div>
             Sharing your AI bot securely is paramount. AppDirect delivers robust
-            enterprise-grade access control. You can specify who can interact
-            with your bot and to what extent, safeguarding sensitive information
-            and ensuring proper usage.
+            enterprise-grade access control.
+          </div>
+          <div>
+            You can specify who can interact with your bot and to what extent,
+            safeguarding sensitive information and ensuring proper usage.
           </div>
         </div>
       </div>
 
-      <div className="flex justify-center items-center flex-col pb-40">
-        <Image
-          src="/AppDirect-Mark_White.png"
-          alt="AppDirect Logo"
-          width="64"
-          height="64"
-          className="mt-5"
-        />
-        <h2 className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
-          Interested?
-        </h2>
-        <h2 className="mt-4">
-          Be first on the list when this becomes available.
-        </h2>
-        <LandingForm />
+      <div
+        className="flex justify-center items-center flex-col pb-40"
+        id="waitlist"
+      >
+        <div className="text-3xl font-bold mt-16 mb-4 text-ring">
+          AI MARKETPLACE
+        </div>
+        <div className="text-xl font-bold mb-16">Coming Soon...</div>
         <div>
-          For press inquiries, please contact{" "}
+          <div className="m-4">
+            <h2 className="mt-5 text-2xl">Interested?</h2>
+            <h2 className="">
+              Be the first on the list when AppDirect AI becomes available.
+            </h2>
+          </div>
+          <LandingForm />
+        </div>
+        <div>
           <a
             href="mailto:prforappdirect@bospar.com"
             className="text-ring cursor-pointer"
           >
-            prforappdirect@bospar.com
+            For press inquiries, please contact prforappdirect@bospar.com.
           </a>
+        </div>
+        <div className="flex items-center justify-center pb-4 mb-4 mt-16">
+          <Image
+            src="/AppDirect-Mark_White.png"
+            alt="AppDirect Logo"
+            width="64"
+            height="64"
+            className="mt-5"
+          />
+          <span className="mt-5 ml-2 text-3xl">AppDirect</span>
         </div>
       </div>
     </div>
