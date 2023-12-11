@@ -735,6 +735,9 @@
           "400": {
             "description": "Bad request, when the request body does not contain the required fields or contains invalid data."
           },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
           "404": {
             "description": "Not found, when the specified chat ID does not exist."
           },
@@ -806,7 +809,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChatSummary"
+                  "$ref": "#/components/schemas/ChatDetail"
                 }
               }
             }
@@ -850,7 +853,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Chat"
+                  "$ref": "#/components/schemas/ChatDetail"
                 }
               }
             }
