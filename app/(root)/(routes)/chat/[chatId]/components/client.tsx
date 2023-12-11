@@ -1,30 +1,24 @@
 "use client";
 
-import { AI, Chat, Message } from "@prisma/client";
 import { useCompletion } from "ai/react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 import { ChatForm } from "@/components/chat-form";
 import { ChatHeader } from "@/components/chat-header";
-import { ChatMessageProps } from "@/components/chat-message";
 import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
+import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
+import { ChatDetailDto, ChatMessageDto } from "@/src/domain/ports/api/ChatsApi";
 
 interface ChatClientProps {
-  chat: Chat & {
-    messages: Message[];
-    ai: AI;
-    _count: {
-      messages: number;
-    };
-  };
-  rating?: any;
+  ai: AIDetailDto;
+  chat: ChatDetailDto;
 }
 
-export const ChatClient = ({ chat, rating }: ChatClientProps) => {
+export const ChatClient = ({ ai, chat }: ChatClientProps) => {
   const router = useRouter();
-  const [messages, setMessages] = useState<ChatMessageProps[]>(chat.messages);
+  const [messages, setMessages] = useState<ChatMessageDto[]>(chat.messages);
   const [streaming, setStreaming] = useState<boolean>(false);
   const { toast } = useToast();
 
@@ -49,7 +43,9 @@ export const ChatClient = ({ chat, rating }: ChatClientProps) => {
     },
     onFinish(_prompt, completion) {
       setStreaming(false);
-      const systemMessage: ChatMessageProps = {
+      const systemMessage: ChatMessageDto = {
+        createdAt: new Date(),
+        updatedAt: new Date(),
         role: "system",
         content: completion,
       };
@@ -62,7 +58,9 @@ export const ChatClient = ({ chat, rating }: ChatClientProps) => {
   });
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    const userMessage: ChatMessageProps = {
+    const userMessage: ChatMessageDto = {
+      createdAt: new Date(),
+      updatedAt: new Date(),
       role: "user",
       content: input,
     };
@@ -79,11 +77,11 @@ export const ChatClient = ({ chat, rating }: ChatClientProps) => {
   }
   return (
     <div className="flex flex-col h-full w-full space-y-2 ml-1 shrink">
-      <ChatHeader chat={chat} rating={rating} />
+      <ChatHeader ai={ai} chat={chat} />
       <ChatMessages
-        ai={chat.ai}
+        ai={ai}
         isLoading={isLoading && !stream}
-        messages={messages}
+        messages={chat.messages}
         stream={stream}
       />
       <ChatForm

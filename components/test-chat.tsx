@@ -1,6 +1,10 @@
 "use client";
 
-import { AI, Chat, Message } from "@prisma/client";
+import { ChatForm } from "@/components/chat-form";
+import { ChatMessages } from "@/components/chat-messages";
+import { useToast } from "@/components/ui/use-toast";
+import { ChatMessageDto } from "@/src/domain/ports/api/ChatsApi";
+import { AI } from "@prisma/client";
 import { useCompletion } from "ai/react";
 import {
   Dispatch,
@@ -9,17 +13,13 @@ import {
   SetStateAction,
   useState,
 } from "react";
-import { ChatForm } from "@/components/chat-form";
-import { ChatMessageProps } from "@/components/chat-message";
-import { ChatMessages } from "@/components/chat-messages";
-import { useToast } from "@/components/ui/use-toast";
 
 type Props = {
   ai: AI;
   className?: string;
   actions: ReactNode;
-  messages: ChatMessageProps[];
-  setMessages: Dispatch<SetStateAction<ChatMessageProps[]>>;
+  messages: ChatMessageDto[];
+  setMessages: Dispatch<SetStateAction<ChatMessageDto[]>>;
 };
 
 export const TestChat = ({
@@ -55,7 +55,9 @@ export const TestChat = ({
     },
     onFinish(_prompt, completion) {
       setStreaming(false);
-      const systemMessage: ChatMessageProps = {
+      const systemMessage: ChatMessageDto = {
+        createdAt: new Date(),
+        updatedAt: new Date(),
         role: "system",
         content: completion,
       };
@@ -66,7 +68,9 @@ export const TestChat = ({
   });
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    const userMessage: ChatMessageProps = {
+    const userMessage: ChatMessageDto = {
+      createdAt: new Date(),
+      updatedAt: new Date(),
       role: "user",
       content: input,
     };

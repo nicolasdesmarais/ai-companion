@@ -1,3 +1,5 @@
+import { Role } from "@prisma/client";
+
 export interface ListChatsResponse {
   data: ChatSummaryDto[];
 }
@@ -17,10 +19,10 @@ export interface ChatDetailDto extends ChatSummaryDto {
 }
 
 export interface ChatMessageDto {
-  id: string;
+  id?: string;
   createdAt: Date;
   updatedAt: Date;
-  role: string;
+  role: Role;
   content: string;
 }
 
@@ -29,6 +31,8 @@ export interface ChatAiDto {
   name: string;
   src: string;
   description: string;
+  userId: string;
+  userName: string;
 }
 
 export interface CreateChatRequest {

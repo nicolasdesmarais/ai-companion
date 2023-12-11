@@ -1,16 +1,19 @@
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
 import { AI, AIVisibility, GroupAvailability, Prisma } from "@prisma/client";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { SystemMessage } from "langchain/schema";
+import { AISecurityService } from "../../security/services/AISecurityService";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
+import { AIModelOptions } from "../models/AIModel";
 import {
+  AIDetailDto,
   AIProfile,
   CreateAIRequest,
-  ListAIDto,
   UpdateAIRequest,
 } from "../ports/api/AIApi";
 import {
@@ -19,7 +22,6 @@ import {
 } from "../ports/api/ListAIsRequestParams";
 import { ShareAIRequest } from "../ports/api/ShareAIRequest";
 import aiModelService from "./AIModelService";
-import { AISecurityService } from "./AISecurityService";
 import groupService from "./GroupService";
 import invitationService from "./InvitationService";
 
@@ -29,6 +31,23 @@ const openai = new ChatOpenAI({
   azureOpenAIApiInstanceName: "appdirect-prod-ai-useast",
   azureOpenAIApiDeploymentName: "ai-prod-16k",
 });
+
+const listAIResponseSelect: Prisma.AISelect = {
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  name: true,
+  description: true,
+  src: true,
+  profile: true,
+  userId: true,
+  userName: true,
+  categoryId: true,
+  visibility: true,
+  modelId: true,
+  options: true,
+  instructions: true,
+};
 
 export class AIService {
   public async findAIById(id: string) {
@@ -152,16 +171,31 @@ export class AIService {
    * @param aiId
    * @returns
    */
-  public async findAIForUser(orgId: string, userId: string, aiId: string) {
+  public async findAIForUser(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ): Promise<AIDetailDto> {
+    const { orgId, userId } = authorizationContext;
+
     const whereCondition = { AND: [{}] };
     whereCondition.AND.push(
       this.getBaseWhereCondition(orgId, userId, ListAIsRequestScope.ALL)
     );
     whereCondition.AND.push({ id: aiId });
 
-    return await prismadb.aI.findFirst({
+    const ai = await prismadb.aI.findFirst({
+      select: listAIResponseSelect,
       where: whereCondition,
     });
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    const messageCountPerAi: any[] = await this.getMessageCountPerAi([ai.id]);
+    const ratingPerAi: any[] = await this.getRatingPerAi([ai.id]);
+
+    const aiDto = this.mapToAIDto(ai, messageCountPerAi, ratingPerAi);
+    return aiDto;
   }
 
   /**
@@ -176,7 +210,7 @@ export class AIService {
     orgId: string,
     userId: string,
     request: ListAIsRequestParams
-  ): Promise<ListAIDto[]> {
+  ): Promise<AIDetailDto[]> {
     const scope = request.scope || ListAIsRequestScope.ALL;
 
     const whereCondition = { AND: [{}] };
@@ -193,17 +227,7 @@ export class AIService {
     }
 
     const ais = await prismadb.aI.findMany({
-      select: {
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        name: true,
-        description: true,
-        src: true,
-        profile: true,
-        userName: true,
-        categoryId: true,
-      },
+      select: listAIResponseSelect,
       where: whereCondition,
       orderBy: {
         createdAt: "desc",
@@ -216,6 +240,17 @@ export class AIService {
 
     const aiIds = ais.map((ai) => ai.id);
 
+    const messageCountPerAi: any[] = await this.getMessageCountPerAi(aiIds);
+    const ratingPerAi: any[] = await this.getRatingPerAi(aiIds);
+
+    const result = ais.map((ai) => {
+      return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi);
+    });
+
+    return result;
+  }
+
+  private async getMessageCountPerAi(aiIds: string[]) {
     const messageCountPerAi: any[] = await prismadb.$queryRaw`
       SELECT
         c.ai_id as aiId,
@@ -228,7 +263,10 @@ export class AIService {
       c.ai_id IN (${Prisma.join(aiIds)})
       GROUP BY
         c.ai_id`;
+    return messageCountPerAi;
+  }
 
+  private async getRatingPerAi(aiIds: string[]) {
     const ratingPerAi: any[] = await prismadb.$queryRaw`
       SELECT
         r.ai_id as aiId,
@@ -240,25 +278,47 @@ export class AIService {
         r.ai_id IN (${Prisma.join(aiIds)})
       GROUP BY
         r.ai_id`;
+    return ratingPerAi;
+  }
 
-    const result = ais.map((ai) => {
-      const aiCountRow = messageCountPerAi.find((m) => m.aiId === ai.id);
-      const messageCount = aiCountRow ? Number(aiCountRow.messageCount) : 0;
-      const ratingRow = ratingPerAi.find((r) => r.aiId === ai.id);
-      const rating = ratingRow ? Number(ratingRow.averageRating) : 0;
-      const ratingCount = ratingRow ? Number(ratingRow.ratingCount) : 0;
-      const profile = ai.profile as unknown as AIProfile;
+  private mapToAIDto(
+    ai: AI,
+    messageCountPerAi: any[],
+    ratingPerAi: any[]
+  ): AIDetailDto {
+    const aiCountRow = messageCountPerAi.find((m) => m.aiId === ai.id);
+    const messageCount = Number(aiCountRow?.messageCount) ?? 0;
 
-      return {
-        ...ai,
-        profile,
-        messageCount,
-        rating,
-        ratingCount,
-      };
-    });
+    const ratingRow = ratingPerAi.find((r) => r.aiId === ai.id);
+    const rating = Number(ratingRow?.averageRating) ?? 0;
+    const ratingCount = Number(ratingRow?.ratingCount) ?? 0;
 
-    return result;
+    const profile = ai.profile as unknown as AIProfile;
+
+    const { options, ...aiWithoutOptions } = ai;
+    let aiModelOptions: AIModelOptions;
+    if (profile.showPersonality) {
+      aiModelOptions = options as unknown as AIModelOptions;
+    } else {
+      aiModelOptions = {} as AIModelOptions;
+    }
+
+    let filteredAi;
+    const { modelId, instructions, visibility, ...aiWithoutCharacter } = ai;
+    if (!profile.showTraining) {
+      filteredAi = aiWithoutCharacter;
+    } else {
+      filteredAi = ai;
+    }
+
+    return {
+      ...filteredAi,
+      options: aiModelOptions,
+      profile,
+      messageCount,
+      rating,
+      ratingCount,
+    };
   }
 
   private getBaseWhereCondition(
@@ -395,18 +455,22 @@ export class AIService {
     });
   }
 
-  public async deleteAI(orgId: string, userId: string, aiId: string) {
+  public async deleteAI(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ) {
     const ai = await prismadb.aI.findUnique({
       where: {
         id: aiId,
-        orgId,
-        userId,
       },
     });
     if (!ai) {
-      throw new EntityNotFoundError(
-        `AI with id=${aiId} not found, for user=${userId} and org=${orgId}`
-      );
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    const canDeleteAI = AISecurityService.canDeleteAI(authorizationContext, ai);
+    if (!canDeleteAI) {
+      throw new ForbiddenError("Forbidden");
     }
 
     await prismadb.$transaction(async (tx) => {
@@ -501,8 +565,7 @@ export class AIService {
    * @param request
    */
   public async updateAI(
-    orgId: string,
-    userId: string,
+    authorizationContext: AuthorizationContext,
     aiId: string,
     request: UpdateAIRequest
   ) {
@@ -516,7 +579,7 @@ export class AIService {
       throw new EntityNotFoundError(`AI with id=${aiId} not found`);
     }
 
-    const canUpdateAI = AISecurityService.canUpdateAI(orgId, userId, ai);
+    const canUpdateAI = AISecurityService.canUpdateAI(authorizationContext, ai);
     if (!canUpdateAI) {
       throw new ForbiddenError("Forbidden");
     }
