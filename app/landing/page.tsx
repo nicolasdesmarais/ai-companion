@@ -7,17 +7,19 @@ const LandingPage = () => {
   return (
     <div className="bg-black flex flex-col">
       <div className="blue-bg flex justify-center h-screen py-16">
-        <div className="">
-          <Image
-            src="/AppDirect-Mark_White.png"
-            alt="AppDirect Logo"
-            width="64"
-            height="64"
-            className="mt-5"
-          />
-          <span className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
-            AppDirect
-          </span>
+        <div className="mt-16">
+          <div className="flex items-center justify-center border-b border-white">
+            <Image
+              src="/AppDirect-Mark_White.png"
+              alt="AppDirect Logo"
+              width="64"
+              height="64"
+              className="mt-5"
+            />
+            <span className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
+              AppDirect
+            </span>
+          </div>
           <div>AI MARKETPLACE</div>
           <h2
             className="me-4 mb-4 font-extrabold leading-none tracking-tight text-gray-900 text-4xl dark:text-white"
@@ -38,7 +40,7 @@ const LandingPage = () => {
       {/* <AITeaser /> */}
 
       <div className="flex justify-center items-center">
-        <div>
+        <div className="mt-5 w-96">
           <h3 className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
             Browse the AI Marketplace
           </h3>
@@ -51,8 +53,8 @@ const LandingPage = () => {
         <Image
           src="/browse_screenshot.jpg"
           alt="Browse Page"
-          width="1370"
-          height="1010"
+          width="512"
+          height="377"
           className="mt-5"
         />
       </div>
@@ -65,7 +67,7 @@ const LandingPage = () => {
           height="360"
           className="mt-5"
         />
-        <div>
+        <div className="mt-5 w-96">
           <h3 className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
             Create your own AI
           </h3>
@@ -79,7 +81,7 @@ const LandingPage = () => {
       </div>
 
       <div className="flex justify-center items-center">
-        <div>
+        <div className="mt-5 w-96">
           <h3 className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
             Interact with AIs
           </h3>
@@ -92,14 +94,21 @@ const LandingPage = () => {
         <Image
           src="/interact_screenshot.jpg"
           alt="Chat Page"
-          width="1357"
-          height="955"
+          width="512"
+          height="360"
           className="mt-5"
         />
       </div>
 
       <div className="blue-bg flex justify-center items-center">
-        <div>
+        <Image
+          src="/share_screenshot.jpg"
+          alt="Chat Page"
+          width="512"
+          height="377"
+          className="mt-5"
+        />
+        <div className="mt-5 w-96">
           <h3 className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
             Share with confidence
           </h3>
@@ -110,16 +119,9 @@ const LandingPage = () => {
             and ensuring proper usage.
           </div>
         </div>
-        <Image
-          src="/share_screenshot.jpg"
-          alt="Chat Page"
-          width="512"
-          height="377"
-          className="mt-5"
-        />
       </div>
 
-      <div className="flex justify-center items-center flex-col">
+      <div className="flex justify-center items-center flex-col pb-40">
         <Image
           src="/AppDirect-Mark_White.png"
           alt="AppDirect Logo"

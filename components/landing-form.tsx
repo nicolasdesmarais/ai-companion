@@ -31,15 +31,18 @@ export const LandingForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="pb-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 m-4">
           <FormField
             name="name"
             control={form.control}
             render={({ field }) => (
-              <FormItem className="col-span-2 md:col-span-1">
-                <FormLabel>Name</FormLabel>
+              <FormItem className="col-span-2">
                 <FormControl>
-                  <Input {...field} className="rounded-none" />
+                  <Input
+                    {...field}
+                    className="rounded-none"
+                    placeholder="Full Name"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -50,9 +53,12 @@ export const LandingForm = () => {
             control={form.control}
             render={({ field }) => (
               <FormItem className="col-span-2 md:col-span-1">
-                <FormLabel>Work email:</FormLabel>
                 <FormControl>
-                  <Input {...field} className="rounded-none" />
+                  <Input
+                    {...field}
+                    className="rounded-none"
+                    placeholder="Work Email"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -63,15 +69,18 @@ export const LandingForm = () => {
             control={form.control}
             render={({ field }) => (
               <FormItem className="col-span-2 md:col-span-1">
-                <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input {...field} className="rounded-none" />
+                  <Input
+                    {...field}
+                    className="rounded-none"
+                    placeholder="Company Name"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button className="mt-5 rounded-none">Sign me up</Button>
+          <Button className="mt-5 rounded-none col-span-2">Sign me up</Button>
         </div>
       </form>
     </Form>
