@@ -1,9 +1,12 @@
+"use client";
 import { AITeaser } from "@/components/ai-teaser";
 import { LandingForm } from "@/components/landing-form";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { ElementRef, useRef } from "react";
 
 const LandingPage = () => {
+  const waitlist = useRef<ElementRef<"div">>(null);
   return (
     <div className="bg-black flex flex-col">
       <div className="blue-bg  h-screen py-16 overflow-hidden flex flex-col">
@@ -41,6 +44,13 @@ const LandingPage = () => {
               type="button"
               variant="ring"
               size="lg"
+              onClick={() => {
+                if (waitlist.current) {
+                  (waitlist.current as any).scrollIntoView({
+                    behavior: "smooth",
+                  });
+                }
+              }}
             >
               Sign up to get notified
             </Button>
@@ -77,7 +87,7 @@ const LandingPage = () => {
           height="360"
           className="mt-5 shadow-glow"
         />
-        <div className="ml-8 mt-8 w-96 space-y-4 text-right">
+        <div className="ml-8 mt-8 w-[395px] space-y-4 text-right">
           <h3 className="text-3xl font-bold">Create your own AI</h3>
           <div>
             Create custom AIs for yourself, your team, or your customers in
@@ -121,7 +131,7 @@ const LandingPage = () => {
           height="377"
           className="mt-5 shadow-glow"
         />
-        <div className="ml-8 mt-4 w-96 space-y-4 text-right">
+        <div className="ml-8 mt-4 w-[400px] space-y-4 text-right">
           <h3 className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
             Share with confidence
           </h3>
@@ -138,7 +148,7 @@ const LandingPage = () => {
 
       <div
         className="flex justify-center items-center flex-col pb-40"
-        id="waitlist"
+        ref={waitlist}
       >
         <div className="text-3xl font-bold mt-16 mb-4 text-ring">
           AI MARKETPLACE
