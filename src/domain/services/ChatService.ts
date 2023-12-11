@@ -1,15 +1,11 @@
 import vectorDatabaseAdapter, {
   VectorKnowledgeResponse,
 } from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
-import {
-  ChatDto,
-  CreateChatRequest,
-  ListChatsResponse,
-} from "@/src/domain/ports/api/ChatsApi";
+import { ChatDto, ListChatsResponse } from "@/src/domain/ports/api/ChatsApi";
 import prismadb from "@/src/lib/prismadb";
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
-import { Role } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { JsonObject } from "@prisma/client/runtime/library";
 import axios from "axios";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
@@ -19,7 +15,7 @@ import { ChatSecurityService } from "./ChatSecurity";
 
 const BUFFER_TOKENS = 200;
 
-const listChatsResponseSelect = {
+const listChatsResponseSelect: Prisma.ChatSelect = {
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -36,7 +32,7 @@ const listChatsResponseSelect = {
   },
 };
 
-const getChatResponseSelect = {
+const getChatResponseSelect: Prisma.ChatSelect = {
   ...listChatsResponseSelect,
   messages: {
     select: {
