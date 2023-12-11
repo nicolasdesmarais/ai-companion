@@ -1,7 +1,11 @@
 import vectorDatabaseAdapter, {
   VectorKnowledgeResponse,
 } from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
-import { ChatDto, ListChatsResponse } from "@/src/domain/ports/api/ChatsApi";
+import {
+  ChatDto,
+  CreateChatRequest,
+  ListChatsResponse,
+} from "@/src/domain/ports/api/ChatsApi";
 import prismadb from "@/src/lib/prismadb";
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
