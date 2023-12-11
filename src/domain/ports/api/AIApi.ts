@@ -48,6 +48,7 @@ export interface AISummaryDto {
   name: string;
   description: string;
   src: string;
+  orgId: string;
   userId: string;
   userName: string;
   categoryId: string;

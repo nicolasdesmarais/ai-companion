@@ -38,9 +38,10 @@ import { StarRating } from "./star-rating";
 interface ChatHeaderProps {
   ai: AIDetailDto;
   chat: ChatDetailDto;
+  canEditAi: boolean;
 }
 
-export const ChatHeader = ({ ai, chat }: ChatHeaderProps) => {
+export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
   const router = useRouter();
   const { user } = useUser();
   const { toast } = useToast();
@@ -162,7 +163,7 @@ export const ChatHeader = ({ ai, chat }: ChatHeaderProps) => {
                 <Star className="w-4 h-4 mr-2" />
                 Rate
               </DropdownMenuItem>
-              {user?.id === ai.userId && (
+              {canEditAi && (
                 <DropdownMenuItem
                   onClick={() => router.push(`/ai/${ai.id}/edit`)}
                 >
