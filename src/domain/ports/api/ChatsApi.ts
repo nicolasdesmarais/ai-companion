@@ -1,4 +1,4 @@
-import { AIVisibility, Role } from "@prisma/client";
+import { Role } from "@prisma/client";
 
 export interface ListChatsResponse {
   data: ChatSummaryDto[];
@@ -33,7 +33,6 @@ export interface ChatAiDto {
   description: string;
   userId: string;
   userName: string;
-  visibility: AIVisibility;
 }
 
 export interface CreateChatRequest {

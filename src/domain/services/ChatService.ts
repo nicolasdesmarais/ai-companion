@@ -34,7 +34,6 @@ const listChatsResponseSelect: Prisma.ChatSelect = {
       description: true,
       userId: true,
       userName: true,
-      visibility: true,
     },
   },
 };
