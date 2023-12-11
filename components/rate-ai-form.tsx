@@ -9,7 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { AIDto } from "@/src/domain/ports/api/AIApi";
+import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { Loader } from "lucide-react";
@@ -27,7 +27,7 @@ const rateFormSchema = z.object({
 });
 
 interface RateAIFormProps {
-  ai: AIDto;
+  ai: AIDetailDto;
   onSuccess: () => void;
 }
 

@@ -5,12 +5,12 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { ShareAIForm } from "@/components/share-ai-form";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { AIDto } from "@/src/domain/ports/api/AIApi";
+import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
 
 interface InviteModalProps {
   showModal: boolean;
   setShowModal: Dispatch<SetStateAction<boolean>>;
-  ai: AIDto;
+  ai: AIDetailDto;
 }
 
 export const ShareModal = ({

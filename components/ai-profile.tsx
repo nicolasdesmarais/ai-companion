@@ -3,7 +3,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useAIProfile } from "@/hooks/use-ai-profile";
 import { useRateAI } from "@/hooks/use-rate-ai";
 import { StaticAIModelRepository } from "@/src/adapter-out/repositories/StaticAIModelRepository";
-import { AIDto } from "@/src/domain/ports/api/AIApi";
+import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
 import { cn } from "@/src/lib/utils";
 import axios from "axios";
 import { X } from "lucide-react";
@@ -16,7 +16,7 @@ import { Button } from "./ui/button";
 
 const aiModelRepository = new StaticAIModelRepository();
 interface Props {
-  ai: AIDto;
+  ai: AIDetailDto;
 }
 
 const getUserName = (user: any) => {

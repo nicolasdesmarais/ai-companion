@@ -8,11 +8,11 @@ import { ChatForm } from "@/components/chat-form";
 import { ChatHeader } from "@/components/chat-header";
 import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
-import { AIDto } from "@/src/domain/ports/api/AIApi";
+import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
 import { ChatDetailDto, ChatMessageDto } from "@/src/domain/ports/api/ChatsApi";
 
 interface ChatClientProps {
-  ai: AIDto;
+  ai: AIDetailDto;
   chat: ChatDetailDto;
 }
 

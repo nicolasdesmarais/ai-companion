@@ -8,17 +8,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
+import { ChatMessageDto } from "@/src/domain/ports/api/ChatsApi";
 import { Prisma } from "@prisma/client";
+import { Loader, Plus, Trash, Wand2 } from "lucide-react";
+import { useState } from "react";
+import { Drawer } from "./drawer";
+import { ExampleChat } from "./example-chat";
+import { TestChat } from "./test-chat";
+import { Button } from "./ui/button";
+import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { Checkbox } from "./ui/checkbox";
-import { Button } from "./ui/button";
-import { Loader, Plus, Trash, Wand2 } from "lucide-react";
-import { Drawer } from "./drawer";
-import { TestChat } from "./test-chat";
-import { ChatMessageProps } from "@/components/chat-message";
-import { useState } from "react";
-import { ExampleChat } from "./example-chat";
 
 const SAMPLE_DESCRIPTION = `The AI you've engaged is engineered with advanced capabilities, designed to address and respond to an array of questions you might have, regardless of their complexity. It is backed by a rich and extensive compilation of documents that have meticulously uploaded, providing a broad and deep knowledge base to draw from. This AI, with its vast knowledge, stands ready to offer insightful answers to your diverse queries, whether you're seeking simple clarifications or deep, complex explorations. Its singular aim is to ensure you receive the precise information you need, with speed and accuracy, thereby streamlining your decision-making process and enhancing your productivity.`;
 const SAMPLE_TRAINING = `This AI is trained on a variety of sources, including websites, documents, and files. It is also trained on a variety of websites, including Wikipedia, Google, and StackOverflow.`;
@@ -40,7 +40,7 @@ interface ProfileSourceProps {
 }
 
 export const AIProfileEditor = ({ ai, form }: ProfileSourceProps) => {
-  const [messages, setMessages] = useState<ChatMessageProps[]>([]);
+  const [messages, setMessages] = useState<ChatMessageDto[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
   const [generatingProfile, setGeneratingProfile] = useState(false);
   if (!ai) {

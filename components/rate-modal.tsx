@@ -6,10 +6,10 @@ import { RateAIForm } from "@/components/rate-ai-form";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useRateAI } from "@/hooks/use-rate-ai";
-import { AIDto } from "@/src/domain/ports/api/AIApi";
+import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
 
 interface RateModalProps {
-  ai: AIDto;
+  ai: AIDetailDto;
 }
 
 export const RateModal = ({ ai }: RateModalProps) => {

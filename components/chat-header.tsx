@@ -28,7 +28,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAIProfile } from "@/hooks/use-ai-profile";
 import { useChats } from "@/hooks/use-chats";
 import { useRateAI } from "@/hooks/use-rate-ai";
-import { AIDto } from "@/src/domain/ports/api/AIApi";
+import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
 import { ChatDetailDto } from "@/src/domain/ports/api/ChatsApi";
 import { useState } from "react";
 import { RateModal } from "./rate-modal";
@@ -36,7 +36,7 @@ import { ShareModal } from "./share-modal";
 import { StarRating } from "./star-rating";
 
 interface ChatHeaderProps {
-  ai: AIDto;
+  ai: AIDetailDto;
   chat: ChatDetailDto;
 }
 

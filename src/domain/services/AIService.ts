@@ -11,7 +11,7 @@ import { AISecurityService } from "../../security/services/AISecurityService";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import { AIModelOptions } from "../models/AIModel";
 import {
-  AIDto,
+  AIDetailDto,
   AIProfile,
   CreateAIRequest,
   UpdateAIRequest,
@@ -174,7 +174,7 @@ export class AIService {
   public async findAIForUser(
     authorizationContext: AuthorizationContext,
     aiId: string
-  ): Promise<AIDto> {
+  ): Promise<AIDetailDto> {
     const { orgId, userId } = authorizationContext;
 
     const whereCondition = { AND: [{}] };
@@ -210,7 +210,7 @@ export class AIService {
     orgId: string,
     userId: string,
     request: ListAIsRequestParams
-  ): Promise<AIDto[]> {
+  ): Promise<AIDetailDto[]> {
     const scope = request.scope || ListAIsRequestScope.ALL;
 
     const whereCondition = { AND: [{}] };
@@ -285,7 +285,7 @@ export class AIService {
     ai: AI,
     messageCountPerAi: any[],
     ratingPerAi: any[]
-  ): AIDto {
+  ): AIDetailDto {
     const aiCountRow = messageCountPerAi.find((m) => m.aiId === ai.id);
     const messageCount = Number(aiCountRow?.messageCount) ?? 0;
 

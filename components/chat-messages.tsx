@@ -3,13 +3,13 @@
 import { ElementRef, useEffect, useRef, useState } from "react";
 
 import { ChatMessage } from "@/components/chat-message";
-import { AIDto } from "@/src/domain/ports/api/AIApi";
+import { AISummaryDto } from "@/src/domain/ports/api/AIApi";
 import { ChatMessageDto } from "@/src/domain/ports/api/ChatsApi";
 
 interface ChatMessagesProps {
   messages: ChatMessageDto[];
   isLoading: boolean;
-  ai: AIDto;
+  ai: AISummaryDto;
   stream: string;
 }
 
