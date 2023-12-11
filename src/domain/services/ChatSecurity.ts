@@ -2,12 +2,12 @@ import { AuthorizationContext } from "@/src/security/models/AuthorizationContext
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
-import { ChatDto } from "../ports/api/ChatsApi";
+import { ChatDetailDto } from "../ports/api/ChatsApi";
 
 export class ChatSecurityService {
   public static canReadChat(
     authorizationContext: AuthorizationContext,
-    chat: ChatDto
+    chat: ChatDetailDto
   ): boolean {
     const { userId, permissions } = authorizationContext;
 

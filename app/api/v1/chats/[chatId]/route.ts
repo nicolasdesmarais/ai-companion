@@ -1,4 +1,7 @@
-import { ChatDto, CreateChatRequest } from "@/src/domain/ports/api/ChatsApi";
+import {
+  ChatDetailDto,
+  CreateChatRequest,
+} from "@/src/domain/ports/api/ChatsApi";
 import chatService from "@/src/domain/services/ChatService";
 import { rateLimit } from "@/src/lib/rate-limit";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
@@ -22,7 +25,10 @@ async function getHandler(
   const { params, authorizationContext } = context;
   const chatId = params.chatId;
 
-  const chat: ChatDto = await chatService.getChat(authorizationContext, chatId);
+  const chat: ChatDetailDto = await chatService.getChat(
+    authorizationContext,
+    chatId
+  );
   return NextResponse.json(chat);
 }
 

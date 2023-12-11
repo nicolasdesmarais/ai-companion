@@ -2,7 +2,7 @@ import vectorDatabaseAdapter, {
   VectorKnowledgeResponse,
 } from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 import {
-  ChatDto,
+  ChatDetailDto,
   CreateChatRequest,
   ListChatsResponse,
 } from "@/src/domain/ports/api/ChatsApi";
@@ -56,7 +56,7 @@ export class ChatService {
   public async getChat(
     authorizationContext: AuthorizationContext,
     chatId: string
-  ): Promise<ChatDto> {
+  ): Promise<ChatDetailDto> {
     const chat = await prismadb.chat.findUnique({
       select: getChatResponseSelect,
       where: {

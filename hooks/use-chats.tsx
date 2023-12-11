@@ -1,11 +1,11 @@
 import {
-  ChatListDto,
+  ChatSummaryDto,
   ListChatsResponse,
 } from "@/src/domain/ports/api/ChatsApi";
 import { create } from "zustand";
 
 interface useChatsStore {
-  chats: ChatListDto[];
+  chats: ChatSummaryDto[];
   fetchChats: () => void;
 }
 

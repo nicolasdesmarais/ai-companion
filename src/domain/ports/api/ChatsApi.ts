@@ -1,8 +1,18 @@
 export interface ListChatsResponse {
-  data: ChatListDto[];
+  data: ChatSummaryDto[];
 }
 
-export interface ChatDto extends ChatListDto {
+export interface ChatSummaryDto {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  userId: string;
+  pinPosition: number | null;
+  ai: ChatAiDto;
+}
+
+export interface ChatDetailDto extends ChatSummaryDto {
   messages: ChatMessageDto[];
 }
 
@@ -12,16 +22,6 @@ export interface ChatMessageDto {
   updatedAt: Date;
   role: string;
   content: string;
-}
-
-export interface ChatListDto {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  userId: string;
-  pinPosition: number | null;
-  ai: ChatAiDto;
 }
 
 export interface ChatAiDto {
