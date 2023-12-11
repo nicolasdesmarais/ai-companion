@@ -2,21 +2,24 @@ import vectorDatabaseAdapter, {
   VectorKnowledgeResponse,
 } from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 import {
+  ChatDto,
   CreateChatRequest,
   ListChatsResponse,
 } from "@/src/domain/ports/api/ChatsApi";
 import prismadb from "@/src/lib/prismadb";
 import { getTokenLength } from "@/src/lib/tokenCount";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { Role } from "@prisma/client";
 import { JsonObject } from "@prisma/client/runtime/library";
 import axios from "axios";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import aiModelService from "./AIModelService";
 import aiService from "./AIService";
+import { ChatSecurityService } from "./ChatSecurity";
 
 const BUFFER_TOKENS = 200;
 
-const getChatsResponseSelect = {
+const listChatsResponseSelect = {
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -33,7 +36,49 @@ const getChatsResponseSelect = {
   },
 };
 
+const getChatResponseSelect = {
+  ...listChatsResponseSelect,
+  messages: {
+    select: {
+      id: true,
+      createdAt: true,
+      updatedAt: true,
+      role: true,
+      content: true,
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  },
+};
+
 export class ChatService {
+  public async getChat(
+    authorizationContext: AuthorizationContext,
+    chatId: string
+  ): Promise<ChatDto> {
+    const chat = await prismadb.chat.findUnique({
+      select: getChatResponseSelect,
+      where: {
+        id: chatId,
+      },
+    });
+
+    if (!chat) {
+      throw new EntityNotFoundError(`Chat with id ${chatId} not found`);
+    }
+
+    const hasPermission = ChatSecurityService.canReadChat(
+      authorizationContext,
+      chat
+    );
+    if (!hasPermission) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    return chat;
+  }
+
   /**
    * Returns all chats for a given user
    * @param userId
@@ -41,7 +86,7 @@ export class ChatService {
    */
   public async getUserChats(userId: string): Promise<ListChatsResponse> {
     const chats = await prismadb.chat.findMany({
-      select: getChatsResponseSelect,
+      select: listChatsResponseSelect,
       where: {
         userId,
         isDeleted: false,
@@ -64,7 +109,7 @@ export class ChatService {
     userId: string
   ): Promise<ListChatsResponse> {
     const chats = await prismadb.chat.findMany({
-      select: getChatsResponseSelect,
+      select: listChatsResponseSelect,
       where: {
         aiId,
         userId,
