@@ -10,7 +10,7 @@ async function putHandler(
   req: Request,
   context: { params: { chatId: string }; orgId: string; userId: string }
 ) {
-  const { params, userId } = context;
+  const { params, orgId, userId } = context;
   const chatId = params.chatId;
 
   const chat = await prismadb.chat.update({
@@ -31,7 +31,8 @@ async function putHandler(
 
   const newChat = await prismadb.chat.create({
     data: {
-      userId: userId,
+      orgId,
+      userId,
       name: chat.name,
       aiId: chat.ai.id,
     },
