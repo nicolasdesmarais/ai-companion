@@ -287,11 +287,11 @@ export class AIService {
     ratingPerAi: any[]
   ): AIDetailDto {
     const aiCountRow = messageCountPerAi.find((m) => m.aiId === ai.id);
-    const messageCount = Number(aiCountRow?.messageCount) ?? 0;
+    const messageCount = aiCountRow ? Number(aiCountRow.messageCount) : 0;
 
     const ratingRow = ratingPerAi.find((r) => r.aiId === ai.id);
-    const rating = Number(ratingRow?.averageRating) ?? 0;
-    const ratingCount = Number(ratingRow?.ratingCount) ?? 0;
+    const rating = ratingRow ? Number(ratingRow.averageRating) : 0;
+    const ratingCount = ratingRow ? Number(ratingRow.ratingCount) : 0;
 
     const profile = ai.profile as unknown as AIProfile;
 
