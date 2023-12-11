@@ -2,10 +2,10 @@ import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
 import { clerkClient } from "@clerk/nextjs";
 import { GroupAvailability } from "@prisma/client";
+import { GroupSecurityService } from "../../security/services/GroupSecurityService";
 import { BadRequestError, EntityNotFoundError } from "../errors/Errors";
 import { GroupEntity } from "../models/GroupEntity";
 import { CreateGroupRequest, UpdateGroupRequest } from "../ports/api/GroupsApi";
-import { GroupSecurityService } from "./GroupSecurityService";
 import { InvitationService } from "./InvitationService";
 
 export class GroupService {

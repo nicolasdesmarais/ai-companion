@@ -56,7 +56,7 @@ export abstract class BaseChatModel {
     });
     const engineeredPrompt = `
         Pretend you are ${ai.name}, ${ai.description}.
-        The user date and time is ${date}. Output format is markdown. Open links in new tabs.
+        The user date and time is ${date}. Output format is markdown, including tables.
         Here are more details about your character:\n
         ${ai.instructions}
         Answer questions using this knowledge:\n
