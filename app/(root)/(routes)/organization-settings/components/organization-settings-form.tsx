@@ -61,8 +61,8 @@ export const OrganizationSettingsForm: React.FC<
   const openModal = () => {
     form.reset();
 
-    form.setValue("clientId", googleIntegrationData.clientId);
-    form.setValue("clientSecret", googleIntegrationData.clientSecret);
+    form.setValue("clientId", googleIntegrationData?.clientId);
+    form.setValue("clientSecret", googleIntegrationData?.clientSecret);
 
     setShowModal(true);
   };
