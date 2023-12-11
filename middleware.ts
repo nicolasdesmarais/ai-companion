@@ -19,10 +19,10 @@ export default authMiddleware({
   afterAuth(auth, req, evt) {
     // handle users who aren't authenticated
     if (!auth.userId && !auth.isPublicRoute && !auth.isApiRoute) {
-      const landing = new URL("/landing", req.url);
-      return NextResponse.redirect(landing);
-      // uncomment when going public
-      // return redirectToSignIn({ returnBackUrl: req.url });
+      // uncomment to hide login
+      // const landing = new URL("/landing", req.url);
+      // return NextResponse.redirect(landing);
+      return redirectToSignIn({ returnBackUrl: req.url });
     }
     // redirect them to organization selection page
     if (
