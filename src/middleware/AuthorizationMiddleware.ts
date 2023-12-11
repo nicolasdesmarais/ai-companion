@@ -31,7 +31,7 @@ export const withAuthorization = (
 
     context.orgId = orgId;
     context.userId = userId;
-    context.permissions = permissions;
+    context.authorizationContext = authorizationContext;
 
     return handler(request, context);
   };
