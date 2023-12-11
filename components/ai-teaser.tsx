@@ -1,11 +1,16 @@
 import Image from "next/image";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { StarRating } from "./star-rating";
+import { cn } from "@/src/lib/utils";
 
-export const AITeaser = () => {
+interface Props {
+  className?: string;
+}
+
+export const AITeaser = ({ className = "" }: Props) => {
   return (
-    <>
-      <div className="flex flex-wrap w-[500px] overflow-hidden">
+    <div className={className}>
+      <div className={cn("flex flex-wrap w-[500px] overflow-hidden")}>
         <div>
           <div className="m-3 w-56">
             <Card className="bg-card rounded-xl cursor-pointer hover:opacity-75 transition border-0 p-1">
@@ -126,6 +131,6 @@ export const AITeaser = () => {
         </div>
       </div>
       <div className="teaser-blur"></div>
-    </>
+    </div>
   );
 };

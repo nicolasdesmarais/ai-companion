@@ -6,48 +6,58 @@ import Image from "next/image";
 const LandingPage = () => {
   return (
     <div className="bg-black flex flex-col">
-      <div className="blue-bg flex justify-center h-screen py-16">
-        <div className="mt-16">
-          <div className="flex items-center justify-center border-b border-white">
-            <Image
-              src="/AppDirect-Mark_White.png"
-              alt="AppDirect Logo"
-              width="64"
-              height="64"
-              className="mt-5"
-            />
-            <span className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
-              AppDirect
-            </span>
-          </div>
-          <div>AI MARKETPLACE</div>
-          <h2
-            className="me-4 mb-4 font-extrabold leading-none tracking-tight text-gray-900 text-4xl dark:text-white"
-            title="AI made simple"
-          >
-            Lets add AI bots to your team
-          </h2>
+      <div className="blue-bg  h-screen py-16 overflow-hidden flex flex-col">
+        <div className="flex justify-center items-center">
           <div>
-            Transform AI bot ideas into reality without needing any coding
-            skills.
+            <div className="flex items-center justify-center border-b-2 border-white pb-4 mb-4 ">
+              <Image
+                src="/AppDirect-Mark_White.png"
+                alt="AppDirect Logo"
+                width="64"
+                height="64"
+                className="mt-5"
+              />
+              <span className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
+                AppDirect
+              </span>
+            </div>
+            <div className="text-3xl font-bold">AI MARKETPLACE</div>
           </div>
-          <Button className="mt-5 rounded-none" type="button">
-            Sign up to get notified
-          </Button>
+        </div>
+        <div className="flex justify-center">
+          <div className="mt-40 mx-16 w-96 ">
+            <h2
+              className="me-4 mb-4 font-extrabold leading-none tracking-tight text-gray-900 text-4xl dark:text-white"
+              title="AI made simple"
+            >
+              Lets add AI bots to your team
+            </h2>
+            <div>
+              Transform AI bot ideas into reality without needing any coding
+              skills.
+            </div>
+            <Button
+              className="mt-5 rounded-none w-full"
+              type="button"
+              variant="ring"
+              size="lg"
+            >
+              Sign up to get notified
+            </Button>
+          </div>
+          <AITeaser className="mt-20" />
         </div>
       </div>
 
-      {/* <AITeaser /> */}
-
-      <div className="flex justify-center items-center">
-        <div className="mt-5 w-96">
-          <h3 className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
-            Browse the AI Marketplace
-          </h3>
+      <div className="flex justify-center p-14">
+        <div className="m-5 w-96 space-y-4">
+          <h3 className="text-3xl font-bold">Browse the AI Marketplace</h3>
           <div>
             Explore the rich catalog of AI&apos;s for everything from data
-            analytics to legal support to marketing content. Search by category
-            to quickly access the AI for your specific needs.
+            analytics to legal support to marketing content.
+          </div>
+          <div>
+            Search by category to quickly access the AI for your specific needs.
           </div>
         </div>
         <Image
@@ -55,27 +65,30 @@ const LandingPage = () => {
           alt="Browse Page"
           width="512"
           height="377"
-          className="mt-5"
+          className="mt-5 shadow-glow"
         />
       </div>
 
-      <div className="blue-bg flex justify-center items-center">
+      <div className="blue-bg flex justify-center p-14">
         <Image
           src="/datasources_screenshot.jpg"
           alt="Create AI Page"
           width="512"
           height="360"
-          className="mt-5"
+          className="mt-5 drop-shadow-2xl"
         />
-        <div className="mt-5 w-96">
-          <h3 className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
-            Create your own AI
-          </h3>
-          <div>
-            Create custom AIs for yourself, your team, or your customers in
-            under 30 minutes. No coding required. Whether you&apos;re a seasoned
-            developer or a newcomer to the AI scene, our platform provides a
-            guided user-friendly experience to create and manage AIs.
+        <div className="m-5 w-96 space-y-4">
+          <div className="mt-5 w-96">
+            <h3 className="text-3xl font-bold">Create your own AI</h3>
+            <div>
+              Create custom AIs for yourself, your team, or your customers in
+              under 30 minutes. No coding required.
+            </div>
+            <div>
+              Whether you&apos;re a seasoned developer or a newcomer to the AI
+              scene, our platform provides a guided user-friendly experience to
+              create and manage AIs.
+            </div>
           </div>
         </div>
       </div>

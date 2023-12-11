@@ -2,11 +2,11 @@
 module.exports = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-	],
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   theme: {
     container: {
       center: true,
@@ -71,6 +71,9 @@ module.exports = {
         "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
+    boxShadow: {
+      glow: "0 0 25px 10px rgba(255, 255, 255, 0.15)",
+    },
   },
   plugins: [require("tailwindcss-animate")],
-}
+};
