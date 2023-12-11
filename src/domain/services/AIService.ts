@@ -297,7 +297,7 @@ export class AIService {
 
     const { options, ...aiWithoutOptions } = ai;
     let aiModelOptions: AIModelOptions;
-    if (profile.showPersonality) {
+    if (profile?.showPersonality) {
       aiModelOptions = options as unknown as AIModelOptions;
     } else {
       aiModelOptions = {} as AIModelOptions;
@@ -305,7 +305,7 @@ export class AIService {
 
     let filteredAi;
     const { modelId, instructions, visibility, ...aiWithoutCharacter } = ai;
-    if (!profile.showTraining) {
+    if (!profile?.showTraining) {
       filteredAi = aiWithoutCharacter;
     } else {
       filteredAi = ai;
