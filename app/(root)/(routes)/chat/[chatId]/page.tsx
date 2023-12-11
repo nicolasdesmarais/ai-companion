@@ -1,6 +1,7 @@
 import { AIProfile } from "@/components/ai-profile";
 import aiService from "@/src/domain/services/AIService";
 import chatService from "@/src/domain/services/ChatService";
+import { AISecurityService } from "@/src/security/services/AISecurityService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
@@ -26,10 +27,12 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     return redirect("/");
   }
 
+  const canEditAi = AISecurityService.canUpdateAI(authorizationContext, ai);
+
   return (
     <div className="flex h-full">
       <ChatList />
-      <ChatClient ai={ai} chat={chat} />
+      <ChatClient ai={ai} chat={chat} canEditAi={canEditAi} />
       <AIProfile ai={ai} />
     </div>
   );

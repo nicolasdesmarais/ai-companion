@@ -219,7 +219,7 @@ model Chat {
   name                      String
   pinPosition               Int?      @map(name: "pin_position")
   isDeleted                 Boolean   @default(false) @map("is_deleted")
-  orgId                     String?    @map(name: "org_id")
+  orgId                     String    @map(name: "org_id")
   userId                    String                    @map("user_id")
   externalId                String?   @map("external_id")
 

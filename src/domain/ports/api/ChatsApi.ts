@@ -9,6 +9,7 @@ export interface ChatSummaryDto {
   createdAt: Date;
   updatedAt: Date;
   name: string;
+  orgId: string;
   userId: string;
   pinPosition: number | null;
   ai: ChatAiDto;

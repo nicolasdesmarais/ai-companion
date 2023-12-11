@@ -24,6 +24,7 @@ const listChatsResponseSelect: Prisma.ChatSelect = {
   createdAt: true,
   updatedAt: true,
   name: true,
+  orgId: true,
   userId: true,
   pinPosition: true,
   ai: {

@@ -1,3 +1,4 @@
+import { AISummaryDto } from "@/src/domain/ports/api/AIApi";
 import { AI } from "@prisma/client";
 import { AuthorizationContext } from "../models/AuthorizationContext";
 import { SecuredAction } from "../models/SecuredAction";
@@ -7,7 +8,7 @@ import { SecuredResourceType } from "../models/SecuredResourceType";
 export class AISecurityService {
   public static canUpdateAI(
     authorizationContext: AuthorizationContext,
-    ai: AI
+    ai: AISummaryDto
   ) {
     const { orgId, userId, permissions } = authorizationContext;
 
