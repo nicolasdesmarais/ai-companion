@@ -1,8 +1,11 @@
-import { ChatDto, GetChatsResponse } from "@/src/domain/ports/api/ChatsApi";
+import {
+  ChatListDto,
+  ListChatsResponse,
+} from "@/src/domain/ports/api/ChatsApi";
 import { create } from "zustand";
 
 interface useChatsStore {
-  chats: ChatDto[];
+  chats: ChatListDto[];
   fetchChats: () => void;
 }
 
@@ -12,7 +15,7 @@ export const useChats = create<useChatsStore>((set) => ({
   fetchChats: async () => {
     const response = await fetch("/api/v1/me/chats");
     if (response.status === 200) {
-      const body: GetChatsResponse = await response.json();
+      const body: ListChatsResponse = await response.json();
       set({ chats: body.data });
     }
   },

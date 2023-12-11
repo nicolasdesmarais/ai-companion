@@ -1,13 +1,12 @@
-export interface GetChatsResponse {
-  data: ChatDto[];
+export interface ListChatsResponse {
+  data: ChatListDto[];
 }
 
-export interface ChatDto {
+export interface ChatListDto {
   id: string;
   createdAt: Date;
   updatedAt: Date;
   name: string;
-  aiId: string;
   userId: string;
   pinPosition: number | null;
   ai: ChatAiDto;

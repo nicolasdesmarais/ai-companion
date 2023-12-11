@@ -14,7 +14,7 @@
       }
     },
     "schemas": {
-      "GetChatsResponse": {
+      "ListChatsResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -46,10 +46,6 @@
             "type": "string",
             "description": "Name of the chat session."
           },
-          "aiId": {
-            "type": "string",
-            "description": "Identifier of the AI associated with the chat session."
-          },
           "userId": {
             "type": "string",
             "description": "Identifier of the user associated with the chat session."
@@ -59,6 +55,30 @@
             "format": "int32",
             "description": "The position of the chat in a pinned list or similar.",
             "nullable": true
+          },
+          "ai": {
+            "$ref": "#/components/schemas/ChatAI"
+          }
+        }
+      },
+      "ChatAI": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID of the AI."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the AI."
+          },
+          "src": {
+            "type": "string",
+            "description": "URL for the AI's image."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the AI."
           }
         }
       },
@@ -263,7 +283,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetChatsResponse"
+                  "$ref": "#/components/schemas/ListChatsResponse"
                 }
               }
             }
@@ -773,7 +793,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetChatsResponse"
+                  "$ref": "#/components/schemas/ListChatsResponse"
                 }
               }
             }

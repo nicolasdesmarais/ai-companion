@@ -3,7 +3,7 @@ import vectorDatabaseAdapter, {
 } from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 import {
   CreateChatRequest,
-  GetChatsResponse,
+  ListChatsResponse,
 } from "@/src/domain/ports/api/ChatsApi";
 import prismadb from "@/src/lib/prismadb";
 import { getTokenLength } from "@/src/lib/tokenCount";
@@ -21,7 +21,6 @@ const getChatsResponseSelect = {
   createdAt: true,
   updatedAt: true,
   name: true,
-  aiId: true,
   userId: true,
   pinPosition: true,
   ai: {
@@ -40,7 +39,7 @@ export class ChatService {
    * @param userId
    * @returns
    */
-  public async getUserChats(userId: string): Promise<GetChatsResponse> {
+  public async getUserChats(userId: string): Promise<ListChatsResponse> {
     const chats = await prismadb.chat.findMany({
       select: getChatsResponseSelect,
       where: {
@@ -63,7 +62,7 @@ export class ChatService {
   public async getAIChats(
     aiId: string,
     userId: string
-  ): Promise<GetChatsResponse> {
+  ): Promise<ListChatsResponse> {
     const chats = await prismadb.chat.findMany({
       select: getChatsResponseSelect,
       where: {
