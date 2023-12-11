@@ -9,9 +9,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import { AIDto } from "@/src/domain/ports/api/AIApi";
 import { ShareAIRequest } from "@/src/domain/ports/api/ShareAIRequest";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AI, AIVisibility } from "@prisma/client";
+import { AIVisibility } from "@prisma/client";
 import axios from "axios";
 import { Copy } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -29,7 +30,7 @@ const groupFormSchema = z.object({
 });
 
 interface ShareAIFormProps {
-  ai: AI;
+  ai: AIDto;
   onSuccess: () => void;
 }
 

@@ -1,14 +1,15 @@
 "use client";
 
-import { AI } from "@prisma/client";
 import { ElementRef, useEffect, useRef, useState } from "react";
 
-import { ChatMessage, ChatMessageProps } from "@/components/chat-message";
+import { ChatMessage } from "@/components/chat-message";
+import { AIDto } from "@/src/domain/ports/api/AIApi";
+import { ChatMessageDto } from "@/src/domain/ports/api/ChatsApi";
 
 interface ChatMessagesProps {
-  messages: ChatMessageProps[];
+  messages: ChatMessageDto[];
   isLoading: boolean;
-  ai: AI;
+  ai: AIDto;
   stream: string;
 }
 

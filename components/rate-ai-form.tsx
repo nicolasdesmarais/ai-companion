@@ -9,16 +9,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import { AIDto } from "@/src/domain/ports/api/AIApi";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AI } from "@prisma/client";
 import axios from "axios";
+import { Loader } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useToast } from "./ui/use-toast";
 import { StarRating } from "./star-rating";
-import { useEffect, useState } from "react";
-import { Loader } from "lucide-react";
 import { Input } from "./ui/input";
+import { useToast } from "./ui/use-toast";
 
 const rateFormSchema = z.object({
   rating: z.number().min(1).max(5),
@@ -27,7 +27,7 @@ const rateFormSchema = z.object({
 });
 
 interface RateAIFormProps {
-  ai: AI;
+  ai: AIDto;
   onSuccess: () => void;
 }
 

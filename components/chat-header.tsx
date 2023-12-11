@@ -1,7 +1,6 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { AI, Chat, Message } from "@prisma/client";
 import axios from "axios";
 import {
   CopyPlus,
@@ -12,8 +11,8 @@ import {
   Pin,
   PinOff,
   RefreshCw,
-  Trash,
   Star,
+  Trash,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -26,26 +25,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
-import { useChats } from "@/hooks/use-chats";
-import { useState } from "react";
-import { ShareModal } from "./share-modal";
-import { RateModal } from "./rate-modal";
-import { StarRating } from "./star-rating";
 import { useAIProfile } from "@/hooks/use-ai-profile";
+import { useChats } from "@/hooks/use-chats";
 import { useRateAI } from "@/hooks/use-rate-ai";
+import { AIDto } from "@/src/domain/ports/api/AIApi";
+import { ChatDetailDto } from "@/src/domain/ports/api/ChatsApi";
+import { useState } from "react";
+import { RateModal } from "./rate-modal";
+import { ShareModal } from "./share-modal";
+import { StarRating } from "./star-rating";
 
 interface ChatHeaderProps {
-  chat: Chat & {
-    messages: Message[];
-    ai: AI;
-    _count: {
-      messages: number;
-    };
-  };
-  rating?: any;
+  ai: AIDto;
+  chat: ChatDetailDto;
 }
 
-export const ChatHeader = ({ chat, rating }: ChatHeaderProps) => {
+export const ChatHeader = ({ ai, chat }: ChatHeaderProps) => {
   const router = useRouter();
   const { user } = useUser();
   const { toast } = useToast();
@@ -116,7 +111,7 @@ export const ChatHeader = ({ chat, rating }: ChatHeaderProps) => {
               </p>
               <div className="flex items-center text-xs text-muted-foreground">
                 <MessagesSquare className="w-3 h-3 mr-1" />
-                {chat._count.messages}
+                {ai.messageCount}
               </div>
             </div>
           </div>
@@ -181,8 +176,8 @@ export const ChatHeader = ({ chat, rating }: ChatHeaderProps) => {
       </div>
       <div className="flex ml-14">
         <StarRating
-          value={Math.round(rating.averageRating)}
-          count={rating.ratingCount}
+          value={Math.round(ai.rating)}
+          count={ai.ratingCount}
           hideCount={true}
           onClick={() => router.push("#user-ratings")}
         />
@@ -193,8 +188,7 @@ export const ChatHeader = ({ chat, rating }: ChatHeaderProps) => {
             type="button"
             onClick={() => router.push("#user-ratings")}
           >
-            {rating.ratingCount}{" "}
-            {rating.ratingCount === 1 ? "Rating" : "Ratings"}
+            {ai.ratingCount} {ai.ratingCount === 1 ? "Rating" : "Ratings"}
           </Button>
           |
           <Button
@@ -210,9 +204,9 @@ export const ChatHeader = ({ chat, rating }: ChatHeaderProps) => {
       <ShareModal
         showModal={showShareModal}
         setShowModal={setShowShareModal}
-        ai={chat.ai}
+        ai={ai}
       />
-      <RateModal ai={chat.ai} />
+      <RateModal ai={ai} />
     </div>
   );
 };

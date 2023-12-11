@@ -32,6 +32,9 @@ const listChatsResponseSelect: Prisma.ChatSelect = {
       name: true,
       src: true,
       description: true,
+      userId: true,
+      userName: true,
+      visibility: true,
     },
   },
 };
@@ -61,6 +64,7 @@ export class ChatService {
       select: getChatResponseSelect,
       where: {
         id: chatId,
+        isDeleted: false,
       },
     });
 
@@ -105,9 +109,10 @@ export class ChatService {
    * @returns
    */
   public async getAIChats(
-    aiId: string,
-    userId: string
+    authorizationContext: AuthorizationContext,
+    aiId: string
   ): Promise<ListChatsResponse> {
+    const { userId } = authorizationContext;
     const chats = await prismadb.chat.findMany({
       select: listChatsResponseSelect,
       where: {
@@ -122,15 +127,21 @@ export class ChatService {
     };
   }
 
-  public async createChat(orgId: string, userId: string, aiId: string) {
-    const ai = await aiService.findAIForUser(orgId, userId, aiId);
+  public async createChat(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ) {
+    const ai = await aiService.findAIForUser(authorizationContext, aiId);
     if (!ai) {
       throw new EntityNotFoundError(`AI with id ${aiId} not found`);
     }
 
+    const { orgId, userId } = authorizationContext;
+
     const chat = await prismadb.chat.create({
       data: {
         aiId,
+        orgId,
         userId,
         name: ai.name,
       },

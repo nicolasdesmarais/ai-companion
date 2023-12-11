@@ -1,3 +1,5 @@
+import { AIVisibility, Role } from "@prisma/client";
+
 export interface ListChatsResponse {
   data: ChatSummaryDto[];
 }
@@ -20,7 +22,7 @@ export interface ChatMessageDto {
   id: string;
   createdAt: Date;
   updatedAt: Date;
-  role: string;
+  role: Role;
   content: string;
 }
 
@@ -29,6 +31,9 @@ export interface ChatAiDto {
   name: string;
   src: string;
   description: string;
+  userId: string;
+  userName: string;
+  visibility: AIVisibility;
 }
 
 export interface CreateChatRequest {

@@ -20,6 +20,7 @@ export interface AIProfile {
   showCharacter: boolean;
   showTraining: boolean;
   showPersonality: boolean;
+  trainingDescription: string;
 }
 
 export interface AIRequest {
@@ -37,10 +38,10 @@ export interface AIRequest {
 }
 
 export interface ListAIsResponse {
-  data: ListAIDto[];
+  data: AIDto[];
 }
 
-export interface ListAIDto {
+export interface AIDto {
   id: string;
   createdAt: Date;
   updatedAt: Date;
@@ -48,9 +49,16 @@ export interface ListAIDto {
   description: string;
   src: string;
   profile: AIProfile;
+  userId: string;
   userName: string;
   categoryId: string;
   messageCount: number;
   rating: number;
   ratingCount: number;
+
+  // Only included based on profile settings
+  modelId?: string;
+  instructions?: string;
+  options?: AIModelOptions;
+  visibility?: AIVisibility;
 }

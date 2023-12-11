@@ -1,15 +1,15 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
+import { RateAIForm } from "@/components/rate-ai-form";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { AI } from "@prisma/client";
-import { RateAIForm } from "@/components/rate-ai-form";
 import { useRateAI } from "@/hooks/use-rate-ai";
+import { AIDto } from "@/src/domain/ports/api/AIApi";
 
 interface RateModalProps {
-  ai: AI;
+  ai: AIDto;
 }
 
 export const RateModal = ({ ai }: RateModalProps) => {
