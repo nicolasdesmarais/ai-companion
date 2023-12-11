@@ -1,11 +1,13 @@
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
 import { AI, AIVisibility, GroupAvailability, Prisma } from "@prisma/client";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { SystemMessage } from "langchain/schema";
+import { AISecurityService } from "../../security/services/AISecurityService";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import {
   AIProfile,
@@ -19,7 +21,6 @@ import {
 } from "../ports/api/ListAIsRequestParams";
 import { ShareAIRequest } from "../ports/api/ShareAIRequest";
 import aiModelService from "./AIModelService";
-import { AISecurityService } from "./AISecurityService";
 import groupService from "./GroupService";
 import invitationService from "./InvitationService";
 
@@ -395,18 +396,22 @@ export class AIService {
     });
   }
 
-  public async deleteAI(orgId: string, userId: string, aiId: string) {
+  public async deleteAI(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ) {
     const ai = await prismadb.aI.findUnique({
       where: {
         id: aiId,
-        orgId,
-        userId,
       },
     });
     if (!ai) {
-      throw new EntityNotFoundError(
-        `AI with id=${aiId} not found, for user=${userId} and org=${orgId}`
-      );
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    const canDeleteAI = AISecurityService.canDeleteAI(authorizationContext, ai);
+    if (!canDeleteAI) {
+      throw new ForbiddenError("Forbidden");
     }
 
     await prismadb.$transaction(async (tx) => {
@@ -501,8 +506,7 @@ export class AIService {
    * @param request
    */
   public async updateAI(
-    orgId: string,
-    userId: string,
+    authorizationContext: AuthorizationContext,
     aiId: string,
     request: UpdateAIRequest
   ) {
@@ -516,7 +520,7 @@ export class AIService {
       throw new EntityNotFoundError(`AI with id=${aiId} not found`);
     }
 
-    const canUpdateAI = AISecurityService.canUpdateAI(orgId, userId, ai);
+    const canUpdateAI = AISecurityService.canUpdateAI(authorizationContext, ai);
     if (!canUpdateAI) {
       throw new ForbiddenError("Forbidden");
     }
