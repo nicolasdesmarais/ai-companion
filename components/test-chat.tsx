@@ -56,7 +56,6 @@ export const TestChat = ({
     onFinish(_prompt, completion) {
       setStreaming(false);
       const systemMessage: ChatMessageDto = {
-        id: "",
         createdAt: new Date(),
         updatedAt: new Date(),
         role: "system",
@@ -70,7 +69,6 @@ export const TestChat = ({
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     const userMessage: ChatMessageDto = {
-      id: "",
       createdAt: new Date(),
       updatedAt: new Date(),
       role: "user",

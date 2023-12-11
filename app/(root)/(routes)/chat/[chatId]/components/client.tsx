@@ -44,7 +44,6 @@ export const ChatClient = ({ ai, chat }: ChatClientProps) => {
     onFinish(_prompt, completion) {
       setStreaming(false);
       const systemMessage: ChatMessageDto = {
-        id: "",
         createdAt: new Date(),
         updatedAt: new Date(),
         role: "system",
@@ -60,7 +59,6 @@ export const ChatClient = ({ ai, chat }: ChatClientProps) => {
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     const userMessage: ChatMessageDto = {
-      id: "",
       createdAt: new Date(),
       updatedAt: new Date(),
       role: "user",

@@ -19,7 +19,7 @@ export interface ChatDetailDto extends ChatSummaryDto {
 }
 
 export interface ChatMessageDto {
-  id: string;
+  id?: string;
   createdAt: Date;
   updatedAt: Date;
   role: Role;
