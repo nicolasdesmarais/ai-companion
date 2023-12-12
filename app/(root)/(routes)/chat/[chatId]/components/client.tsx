@@ -82,7 +82,7 @@ export const ChatClient = ({ ai, chat, canEditAi }: ChatClientProps) => {
       <ChatMessages
         ai={ai}
         isLoading={isLoading && !stream}
-        messages={chat.messages}
+        messages={messages}
         stream={stream}
       />
       <ChatForm
