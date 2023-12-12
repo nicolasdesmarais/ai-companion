@@ -21,6 +21,8 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
     return redirectToSignIn();
   }
 
+  const { userId } = authorizationContext;
+
   const initialAi = await aiService.findAIForUser(
     authorizationContext,
     params.aiId
@@ -30,8 +32,7 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
 
   const categories = await prismadb.category.findMany();
 
-  const { orgId, userId } = authorizationContext;
-  const groups = await groupService.findGroupsByUser(orgId, userId);
+  const groups = await groupService.findGroupsByUser(authorizationContext);
 
   return (
     <>
