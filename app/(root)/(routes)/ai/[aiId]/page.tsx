@@ -1,4 +1,3 @@
-import aiService from "@/src/domain/services/AIService";
 import chatService from "@/src/domain/services/ChatService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { redirectToSignIn } from "@clerk/nextjs";
@@ -14,11 +13,6 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
 
   if (!authorizationContext) {
     return redirectToSignIn();
-  }
-
-  const ai = await aiService.findAIForUser(authorizationContext, params.aiId);
-  if (!ai) {
-    return redirect("/");
   }
 
   const aiChats = await chatService.getAIChats(
