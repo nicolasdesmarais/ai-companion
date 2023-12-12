@@ -28,7 +28,7 @@ const LandingPage = () => {
           </div>
         </div>
         <div className="flex justify-center">
-          <div className="mt-40 mx-16 w-96 ">
+          <div className="mt-40 mx-16 w-96 text-center lg:text-left">
             <h2
               className="me-4 mb-4 font-extrabold leading-none tracking-tight text-4xl text-white"
               title="AI made simple"
@@ -55,12 +55,12 @@ const LandingPage = () => {
               Sign up to get notified
             </Button>
           </div>
-          <AITeaser className="mt-20" />
+          <AITeaser className="mt-20 hidden lg:block" />
         </div>
       </div>
 
-      <div className="flex justify-center p-14">
-        <div className="m-8 w-96 space-y-4">
+      <div className="flex flex-col lg:flex-row justify-center p-8 lg:p-14 items-center lg:items-start">
+        <div className="md:m-8 lg:w-96 space-y-4">
           <h3 className="text-3xl font-bold">Browse the AI Marketplace</h3>
           <div>
             Explore the rich catalog of AI&apos;s for everything from data
@@ -79,7 +79,7 @@ const LandingPage = () => {
         />
       </div>
 
-      <div className="blue-bg flex justify-center p-14">
+      <div className="blue-bg flex flex-col lg:flex-row justify-center p-8 lg:p-14 items-center lg:items-start">
         <Image
           src="/datasources_screenshot.jpg"
           alt="Create AI Page"
@@ -87,7 +87,7 @@ const LandingPage = () => {
           height="360"
           className="mt-5 shadow-glow"
         />
-        <div className="ml-8 mt-8 w-[395px] space-y-4 text-right">
+        <div className="md:ml-8 mt-8 lg:w-[395px] space-y-4 text-left lg:text-right">
           <h3 className="text-3xl font-bold">Create your own AI</h3>
           <div>
             Create custom AIs for yourself, your team, or your customers in
@@ -101,8 +101,8 @@ const LandingPage = () => {
         </div>
       </div>
 
-      <div className="flex justify-center p-14">
-        <div className="m-8 w-96 space-y-4">
+      <div className="flex flex-col lg:flex-row justify-center p-8 lg:p-14 items-center lg:items-start">
+        <div className="md:m-8 lg:w-96 space-y-4">
           <h3 className="mt-5 text-3xl font-bold">Interact with AIs</h3>
           <div>
             Chat with AIs to ask broad questions that help you summarize complex
@@ -121,7 +121,7 @@ const LandingPage = () => {
         />
       </div>
 
-      <div className="blue-bg flex justify-center  p-14">
+      <div className="blue-bg flex flex-col lg:flex-row justify-center p-8 lg:p-14 items-center lg:items-start">
         <Image
           src="/share_screenshot.jpg"
           alt="Chat Page"
@@ -129,7 +129,7 @@ const LandingPage = () => {
           height="377"
           className="mt-5 shadow-glow"
         />
-        <div className="ml-8 mt-4 w-[400px] space-y-4 text-right">
+        <div className="md:ml-8 mt-4 lg:w-[400px] space-y-4 text-left lg:text-right">
           <h3 className="mt-5 text-3xl font-bold">Share with confidence</h3>
           <div>
             Sharing your AI bot securely is paramount. AppDirect delivers robust
@@ -159,7 +159,7 @@ const LandingPage = () => {
           </div>
           <WaitListForm />
         </div>
-        <div>
+        <div className="text-center">
           <a
             href="mailto:prforappdirect@bospar.com"
             className="text-ring cursor-pointer"
