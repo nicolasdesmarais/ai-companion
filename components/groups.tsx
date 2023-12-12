@@ -22,18 +22,18 @@ export const Groups = () => {
   const groupId = searchParams.get("groupId");
   const scope = searchParams.get("scope");
 
-  useEffect(() => {
-    if (groupModal.data) {
-      setGroups(groupModal.data);
-    }
-  }, [groupModal.data]);
-
   const fetchGroups = async () => {
     const response = await axios.get("/api/v1/me/groups");
     if (response.status === 200 && Array.isArray(response.data)) {
       setGroups(response.data);
     }
   };
+
+  useEffect(() => {
+    if (groupModal.areGroupsUpdated) {
+      fetchGroups();
+    }
+  }, [groupModal.areGroupsUpdated]);
 
   useEffect(() => {
     fetchGroups();

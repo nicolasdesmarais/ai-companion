@@ -21,7 +21,7 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
     return redirectToSignIn();
   }
 
-  const { userId, orgId } = authorizationContext;
+  const { userId } = authorizationContext;
 
   const initialAi = await prismadb.aI.findUnique({
     where: {

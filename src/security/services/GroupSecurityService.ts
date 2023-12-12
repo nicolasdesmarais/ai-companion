@@ -1,41 +1,41 @@
-import { GroupEntity } from "../../domain/models/GroupEntity";
+import { GroupSummaryDto } from "@/src/domain/ports/api/GroupsApi";
+import { AuthorizationContext } from "../models/AuthorizationContext";
 
 export class GroupSecurityService {
   public static getGroupPermissions(
-    orgId: string,
-    userId: string,
-    group: GroupEntity
+    authorizationContext: AuthorizationContext,
+    group: GroupSummaryDto
   ) {
     return {
-      canUpdateGroup: this.canUpdateGroup(orgId, userId, group),
-      canInviteUsersToGroup: this.canInviteUsersToGroup(orgId, userId, group),
+      canUpdateGroup: this.canUpdateGroup(authorizationContext, group),
+      canInviteUsersToGroup: this.canInviteUsersToGroup(
+        authorizationContext,
+        group
+      ),
       canRemoveUsersFromGroup: this.canRemoveUsersFromGroup(
-        orgId,
-        userId,
+        authorizationContext,
         group
       ),
     };
   }
 
   public static canUpdateGroup(
-    orgId: string,
-    userId: string,
-    group: GroupEntity
+    authorizationContext: AuthorizationContext,
+    group: GroupSummaryDto
   ) {
+    const { userId } = authorizationContext;
     return group.ownerUserId === userId;
   }
 
   public static canInviteUsersToGroup(
-    orgId: string,
-    userId: string,
-    group: GroupEntity
+    authorizationContext: AuthorizationContext,
+    group: GroupSummaryDto
   ) {
     return true;
   }
   public static canRemoveUsersFromGroup(
-    orgId: string,
-    userId: string,
-    group: GroupEntity
+    authorizationContext: AuthorizationContext,
+    group: GroupSummaryDto
   ) {
     return true;
   }
