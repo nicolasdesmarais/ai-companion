@@ -47,13 +47,18 @@ async function putHandler(
   }
 
   const updateGroupRequest: UpdateGroupRequest = await req.json();
-  await groupService.updateGroup(
+
+  const updatedGroup: GroupDetailDto | null = await groupService.updateGroup(
     authorizationContext,
     params.groupId,
     updateGroupRequest
   );
-  const groups = await groupService.findGroupsByUser(authorizationContext);
-  return NextResponse.json(groups);
+
+  if (!updatedGroup) {
+    throw new Error("Error updating group");
+  }
+
+  return NextResponse.json(updatedGroup);
 }
 
 async function deleteHandler(

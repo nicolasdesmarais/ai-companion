@@ -351,7 +351,7 @@
           {
             "type": "object",
             "properties": {
-              "messages": {
+              "users": {
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/GroupUser"
@@ -996,6 +996,146 @@
           },
           "403": {
             "description": "User does not have permission to create a group."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/api/v1/groups/{groupId}": {
+      "put": {
+        "summary": "Update a group",
+        "description": "Updates the details of a specific group and manages its member list.",
+        "operationId": "updateGroup",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the group to update.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the group."
+                  },
+                  "availability": {
+                    "$ref": "#/components/schemas/GroupAvailability"
+                  },
+                  "memberEmailsToAdd": {
+                    "type": "string",
+                    "description": "A comma-separated list of emails of users to be added to the group."
+                  },
+                  "memberEmailsToRemove": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "A comma-separated list of emails of users to be removed from the group."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Group details updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, when the input data is invalid."
+          },
+          "403": {
+            "description": "Forbidden, the user does not have permission to update the group."
+          },
+          "404": {
+            "description": "Not found, when the specified group ID does not exist."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a group",
+        "description": "Deletes the group with the specified identifier.",
+        "operationId": "deleteGroup",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the group to delete.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Group successfully deleted, no content to return."
+          },
+          "400": {
+            "description": "Bad request, when the request is malformed."
+          },
+          "403": {
+            "description": "Forbidden, the user does not have permission to delete the group."
+          },
+          "404": {
+            "description": "Not found, when the specified group ID does not exist."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/api/v1/groups/{groupId}/leave": {
+      "put": {
+        "summary": "Leave a group",
+        "description": "Allows the current user to leave the group specified by the groupId.",
+        "operationId": "leaveGroup",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the group to leave.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully left the group, no content to return."
+          },
+          "400": {
+            "description": "Bad request, when the request is malformed."
+          },
+          "403": {
+            "description": "Forbidden, the user does not have permission to leave the group or is not a member of the group."
+          },
+          "404": {
+            "description": "Not found, when the specified group ID does not exist."
           },
           "500": {
             "description": "Server error."

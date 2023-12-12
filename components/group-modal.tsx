@@ -113,7 +113,9 @@ export const GroupModal = () => {
       toast({
         description: "Group updated successfully",
       });
-      groupModal.onUpdate(response.data);
+
+      groupModal.onUpdateGroup(response.data, groupModal.data);
+
       form.reset();
     } else {
       throw new Error(response.data.message);
@@ -128,11 +130,14 @@ export const GroupModal = () => {
     };
 
     const response = await axios.post(`/api/v1/groups`, request);
-    if (response.status === 200) {
+    if (response.status === 201) {
       toast({
         description: "Group created successfully",
       });
-      groupModal.onUpdate(response.data);
+
+      const groupModalData = groupModal.data || [];
+      groupModalData.push(response.data);
+      groupModal.onUpdate(groupModalData);
       form.reset();
     } else {
       throw new Error(response.data.message);
@@ -163,11 +168,12 @@ export const GroupModal = () => {
       const response = await axios.delete(
         `/api/v1/groups/${groupModal.groupId}`
       );
-      if (response.status === 200) {
+      if (response.status === 204) {
         toast({
           description: "Group deleted successfully",
         });
         groupModal.onUpdate(response.data);
+
         form.reset();
       } else {
         throw new Error(response.data.message);

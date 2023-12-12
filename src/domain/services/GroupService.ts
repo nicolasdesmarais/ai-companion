@@ -89,6 +89,12 @@ export class GroupService {
     });
   }
 
+  /**
+   * Creates a new group
+   * @param authorizationContext
+   * @param createGroupRequest
+   * @returns
+   */
   public async createGroup(
     authorizationContext: AuthorizationContext,
     createGroupRequest: CreateGroupRequest
@@ -285,10 +291,15 @@ export class GroupService {
     });
   }
 
+  /**
+   * Deletes a group
+   * @param authorizationContext
+   * @param groupId
+   */
   public async deleteGroup(
     authorizationContext: AuthorizationContext,
     groupId: string
-  ) {
+  ): Promise<void> {
     const existingGroup = await this.findGroupById(
       authorizationContext,
       groupId
@@ -314,7 +325,7 @@ export class GroupService {
   public async leaveGroup(
     authorizationContext: AuthorizationContext,
     groupId: string
-  ) {
+  ): Promise<void> {
     const existingGroup = await this.findGroupById(
       authorizationContext,
       groupId
