@@ -62,26 +62,25 @@ export class AIService {
   }
 
   public async shareAi(
-    orgId: string,
-    userId: string,
+    authorizationContext: AuthorizationContext,
     aiId: string,
     request: ShareAIRequest
   ) {
-    const ais = await prismadb.aI.findMany({
+    const { orgId, userId } = authorizationContext;
+
+    const ai = await prismadb.aI.findUnique({
       where: {
-        AND: [
-          {
-            id: aiId,
-            userId,
-            orgId,
-          },
-        ],
+        id: aiId,
       },
     });
-    if (ais.length === 0) {
+    if (!ai) {
       throw new EntityNotFoundError(`AI with id=${aiId} not found`);
     }
-    const ai = ais[0];
+
+    const canShareAI = AISecurityService.canUpdateAI(authorizationContext, ai);
+    if (!canShareAI) {
+      throw new ForbiddenError("Forbidden");
+    }
 
     const validEmails = EmailUtils.parseEmailCsv(request.emails);
     if (validEmails.length === 0) {
@@ -786,7 +785,10 @@ export class AIService {
     return response.content;
   }
 
-  public async generateAIProfile(userId: string, aiId: string) {
+  public async generateAIProfile(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ) {
     const ai = await prismadb.aI.findUnique({
       where: {
         id: aiId,
@@ -797,7 +799,8 @@ export class AIService {
       throw new EntityNotFoundError(`AI with id=${aiId} not found`);
     }
 
-    if (ai.userId !== userId) {
+    const canUpdateAi = AISecurityService.canUpdateAI(authorizationContext, ai);
+    if (!canUpdateAi) {
       throw new ForbiddenError("Forbidden");
     }
 
