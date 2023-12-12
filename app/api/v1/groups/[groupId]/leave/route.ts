@@ -21,8 +21,7 @@ async function putHandler(
 
   await groupService.leaveGroup(authorizationContext, params.groupId);
 
-  const groups = await groupService.findGroupsByUser(authorizationContext);
-  return NextResponse.json(groups);
+  return new NextResponse(null, { status: 204 });
 }
 
 export const PUT = withErrorHandler(
