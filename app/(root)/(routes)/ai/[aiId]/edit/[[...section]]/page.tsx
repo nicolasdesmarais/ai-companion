@@ -21,8 +21,6 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
     return redirectToSignIn();
   }
 
-  const { userId } = authorizationContext;
-
   const initialAi = await aiService.findAIForUser(
     authorizationContext,
     params.aiId
