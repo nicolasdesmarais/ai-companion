@@ -1,110 +1,101 @@
-import { UpdateGroupRequest } from "@/src/domain/ports/api/GroupsApi";
-import { GroupService } from "@/src/domain/services/GroupService";
-import { auth } from "@clerk/nextjs";
+import {
+  GroupDetailDto,
+  UpdateGroupRequest,
+} from "@/src/domain/ports/api/GroupsApi";
+import groupService from "@/src/domain/services/GroupService";
+import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
+import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { NextResponse } from "next/server";
-import { EntityNotFoundError } from "../../../../../src/domain/errors/Errors";
 
-export async function GET(
+async function getHandler(
   req: Request,
-  { params }: { params: { groupId: string } }
-) {
-  try {
-    if (!params.groupId) {
-      return new NextResponse("Group ID required", { status: 400 });
-    }
-
-    const authentication = await auth();
-    if (!authentication?.userId || !authentication?.orgId) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-    const groupService = new GroupService();
-    const group = await groupService.findGroupById(
-      authentication.orgId,
-      authentication.userId,
-      params.groupId
-    );
-
-    if (!group) {
-      return new NextResponse("Group not found", { status: 404 });
-    }
-
-    return NextResponse.json(group);
-  } catch (error) {
-    console.log("Error in [GET v1/me/groups/{groupId}]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+  context: {
+    params: { groupId: string };
+    authorizationContext: AuthorizationContext;
   }
+) {
+  const { params, authorizationContext } = context;
+  if (!params.groupId) {
+    return new NextResponse("Group ID required", { status: 400 });
+  }
+
+  const group: GroupDetailDto | null = await groupService.findGroupById(
+    authorizationContext,
+    params.groupId
+  );
+  if (!group) {
+    return new NextResponse("Group not found", { status: 404 });
+  }
+
+  return NextResponse.json(group);
 }
 
-export async function PUT(
+async function putHandler(
   req: Request,
-  { params }: { params: { groupId: string } }
-) {
-  try {
-    if (!params.groupId) {
-      return new NextResponse("Group ID required", { status: 400 });
-    }
-
-    const authentication = await auth();
-    if (!authentication?.userId || !authentication?.orgId) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
-    const updateGroupRequest: UpdateGroupRequest = await req.json();
-    const groupService = new GroupService();
-    await groupService.updateGroup(
-      authentication.orgId,
-      authentication.userId,
-      params.groupId,
-      updateGroupRequest
-    );
-    const groups = await groupService.findGroupsByUser(
-      authentication.orgId,
-      authentication.userId
-    );
-    return NextResponse.json(groups);
-  } catch (error) {
-    console.log("Error in [PUT v1/groups/{groupId}]", error);
-
-    if (error instanceof EntityNotFoundError) {
-      return new NextResponse("Group not found", { status: 404 });
-    }
-
-    return new NextResponse("Internal Error", { status: 500 });
+  context: {
+    params: { groupId: string };
+    authorizationContext: AuthorizationContext;
   }
+) {
+  const { params, authorizationContext } = context;
+  if (!params.groupId) {
+    return new NextResponse("Group ID required", { status: 400 });
+  }
+
+  const updateGroupRequest: UpdateGroupRequest = await req.json();
+  await groupService.updateGroup(
+    authorizationContext,
+    params.groupId,
+    updateGroupRequest
+  );
+  const groups = await groupService.findGroupsByUser(authorizationContext);
+  return NextResponse.json(groups);
 }
 
-export async function DELETE(
+async function deleteHandler(
   req: Request,
-  { params }: { params: { groupId: string } }
-) {
-  try {
-    if (!params.groupId) {
-      return new NextResponse("Group ID required", { status: 400 });
-    }
-
-    const authentication = await auth();
-    if (!authentication?.userId || !authentication?.orgId) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
-    const groupService = new GroupService();
-    await groupService.deleteGroup(
-      authentication.orgId,
-      authentication.userId,
-      params.groupId
-    );
-    const groups = await groupService.findGroupsByUser(
-      authentication.orgId,
-      authentication.userId
-    );
-    return NextResponse.json(groups);
-  } catch (error) {
-    console.log("Error in [DELETE v1/groups/{groupId}]", error);
-
-    if (error instanceof EntityNotFoundError) {
-      return new NextResponse("Group not found", { status: 404 });
-    }
-
-    return new NextResponse("Internal Error", { status: 500 });
+  context: {
+    params: { groupId: string };
+    authorizationContext: AuthorizationContext;
   }
+) {
+  const { params, authorizationContext } = context;
+  if (!params.groupId) {
+    return new NextResponse("Group ID required", { status: 400 });
+  }
+
+  await groupService.deleteGroup(authorizationContext, params.groupId);
+  const groups = await groupService.findGroupsByUser(authorizationContext);
+  return NextResponse.json(groups);
 }
+
+export const GET = withErrorHandler(
+  withAuthorization(
+    SecuredResourceType.GROUPS,
+    SecuredAction.READ,
+    Object.values(SecuredResourceAccessLevel),
+    getHandler
+  )
+);
+
+export const PUT = withErrorHandler(
+  withAuthorization(
+    SecuredResourceType.GROUPS,
+    SecuredAction.WRITE,
+    Object.values(SecuredResourceAccessLevel),
+    putHandler
+  )
+);
+
+export const DELETE = withErrorHandler(
+  withAuthorization(
+    SecuredResourceType.GROUPS,
+    SecuredAction.WRITE,
+    Object.values(SecuredResourceAccessLevel),
+    deleteHandler
+  )
+);

@@ -5,7 +5,6 @@ import { clerkClient } from "@clerk/nextjs";
 import { GroupAvailability, Prisma } from "@prisma/client";
 import { GroupSecurityService } from "../../security/services/GroupSecurityService";
 import { BadRequestError, EntityNotFoundError } from "../errors/Errors";
-import { GroupEntity } from "../models/GroupEntity";
 import {
   CreateGroupRequest,
   GroupDetailDto,
@@ -52,20 +51,33 @@ export class GroupService {
     };
   }
 
+  /**
+   * Finds a Group by ID.
+   * Returns null if the group does not exist or is not visible to the user
+   * @param authorizationContext
+   * @param groupId
+   * @returns
+   */
   public async findGroupById(
-    orgId: string,
-    userId: string,
+    authorizationContext: AuthorizationContext,
     groupId: string
-  ): Promise<GroupEntity | null> {
+  ): Promise<GroupDetailDto | null> {
+    const { orgId, userId } = authorizationContext;
+
     return await prismadb.group.findUnique({
+      select: groupDetailSelect,
       where: {
         id: groupId,
         ...this.getGroupCriteria(orgId, userId),
       },
-      include: { users: true },
     });
   }
 
+  /**
+   * Returns the list of Groups which are visible to the user
+   * @param authorizationContext
+   * @returns
+   */
   public async findGroupsByUser(
     authorizationContext: AuthorizationContext
   ): Promise<GroupSummaryDto[]> {
@@ -105,26 +117,28 @@ export class GroupService {
       select: groupDetailSelect,
       where: {
         id: group.id,
-      }
+      },
     });
 
     return groupWithUsers;
   }
 
   public async updateGroup(
-    orgId: string,
-    userId: string,
+    authorizationContext: AuthorizationContext,
     groupId: string,
     updateGroupRequest: UpdateGroupRequest
-  ) {
-    const existingGroup = await this.findGroupById(orgId, userId, groupId);
+  ): Promise<GroupDetailDto | null> {
+    const { orgId, userId } = authorizationContext;
+    const existingGroup = await this.findGroupById(
+      authorizationContext,
+      groupId
+    );
     if (!existingGroup) {
       throw new EntityNotFoundError("Group not found");
     }
 
     const groupPermissions = GroupSecurityService.getGroupPermissions(
-      orgId,
-      userId,
+      authorizationContext,
       existingGroup
     );
 
@@ -176,14 +190,13 @@ export class GroupService {
       }
     }
 
-    return await prismadb.group.findUnique({
+    const groupWithUsers = await prismadb.group.findUnique({
+      select: groupDetailSelect,
       where: {
         id: groupId,
       },
-      include: {
-        users: true,
-      },
     });
+    return groupWithUsers;
   }
 
   private async addUsersToGroup(
@@ -272,8 +285,14 @@ export class GroupService {
     });
   }
 
-  public async deleteGroup(orgId: string, userId: string, groupId: string) {
-    const existingGroup = await this.findGroupById(orgId, userId, groupId);
+  public async deleteGroup(
+    authorizationContext: AuthorizationContext,
+    groupId: string
+  ) {
+    const existingGroup = await this.findGroupById(
+      authorizationContext,
+      groupId
+    );
     if (!existingGroup) {
       throw new EntityNotFoundError("Group not found");
     }
@@ -292,12 +311,19 @@ export class GroupService {
     ]);
   }
 
-  public async leaveGroup(orgId: string, userId: string, groupId: string) {
-    const existingGroup = await this.findGroupById(orgId, userId, groupId);
+  public async leaveGroup(
+    authorizationContext: AuthorizationContext,
+    groupId: string
+  ) {
+    const existingGroup = await this.findGroupById(
+      authorizationContext,
+      groupId
+    );
     if (!existingGroup) {
       throw new EntityNotFoundError("Group not found");
     }
 
+    const { userId } = authorizationContext;
     if (existingGroup.ownerUserId === userId) {
       throw new BadRequestError("Owner cannot leave group");
     }
