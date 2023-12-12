@@ -4,7 +4,13 @@ import prismadb from "@/src/lib/prismadb";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
-import { AI, AIVisibility, GroupAvailability, Prisma } from "@prisma/client";
+import {
+  AI,
+  AIVisibility,
+  DataSourceType,
+  GroupAvailability,
+  Prisma,
+} from "@prisma/client";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { SystemMessage } from "langchain/schema";
 import { AISecurityService } from "../../security/services/AISecurityService";
@@ -22,6 +28,7 @@ import {
 } from "../ports/api/ListAIsRequestParams";
 import { ShareAIRequest } from "../ports/api/ShareAIRequest";
 import aiModelService from "./AIModelService";
+import dataSourceService from "./DataSourceService";
 import groupService from "./GroupService";
 import invitationService from "./InvitationService";
 
@@ -445,8 +452,36 @@ export class AIService {
     };
   }
 
-  public createAIDataSource(aiId: string, dataSourceId: string) {
-    return prismadb.aIDataSource.create({
+  public async createAIDataSource(
+    authorizationContext: AuthorizationContext,
+    aiId: string,
+    name: string,
+    type: DataSourceType,
+    data: any
+  ) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    const canUpdateAI = AISecurityService.canUpdateAI(authorizationContext, ai);
+    if (!canUpdateAI) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const dataSourceId = await dataSourceService.createDataSource(
+      authorizationContext,
+      name,
+      type,
+      data
+    );
+
+    return await prismadb.aIDataSource.create({
       data: {
         aiId,
         dataSourceId,

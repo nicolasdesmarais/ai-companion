@@ -1,8 +1,8 @@
 import { FileUploadDataSourceInput } from "@/src/adapter-out/knowledge/file-upload/types/FileUploadDataSourceInput";
 import aiService from "@/src/domain/services/AIService";
-import dataSourceService from "@/src/domain/services/DataSourceService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
@@ -15,9 +15,12 @@ export const maxDuration = 300;
 
 async function postHandler(
   request: NextRequest,
-  context: { params: { aiId: string }; orgId: string; userId: string }
+  context: {
+    params: { aiId: string };
+    authorizationContext: AuthorizationContext;
+  }
 ): Promise<NextResponse> {
-  const { params, orgId, userId } = context;
+  const { params, authorizationContext } = context;
 
   if (!request.body) {
     return NextResponse.json("Missing file", { status: 400 });
@@ -44,16 +47,13 @@ async function postHandler(
     blobUrl: blob.url,
     fileHash,
   };
-  const dataSourceId = await dataSourceService.createDataSource(
-    orgId,
-    userId,
+
+  const dataSource = await aiService.createAIDataSource(
+    authorizationContext,
+    params.aiId,
     filename,
     DataSourceType.FILE_UPLOAD,
     input
-  );
-  const dataSource = await aiService.createAIDataSource(
-    params.aiId,
-    dataSourceId
   );
 
   return NextResponse.json(dataSource, { status: 201 });
