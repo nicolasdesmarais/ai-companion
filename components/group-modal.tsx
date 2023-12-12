@@ -186,7 +186,7 @@ export const GroupModal = () => {
     setLoading(true);
     try {
       const response = await axios.put(
-        `/api/v1/me/groups/${groupModal.groupId}/leave`
+        `/api/v1/groups/${groupModal.groupId}/leave`
       );
       if (response.status === 200) {
         toast({
