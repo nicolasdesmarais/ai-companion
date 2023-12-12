@@ -103,7 +103,7 @@ export class ChatService {
   }
 
   /**
-   * Returns all chats for a given AI
+   * Returns all chats for a given AI and user
    * @param aiId
    * @param userId
    * @returns
@@ -112,11 +112,12 @@ export class ChatService {
     authorizationContext: AuthorizationContext,
     aiId: string
   ): Promise<ListChatsResponse> {
-    const { userId } = authorizationContext;
+    const { orgId, userId } = authorizationContext;
     const chats = await prismadb.chat.findMany({
       select: listChatsResponseSelect,
       where: {
         aiId,
+        orgId,
         userId,
         isDeleted: false,
       },

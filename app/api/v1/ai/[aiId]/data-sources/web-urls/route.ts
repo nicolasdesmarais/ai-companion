@@ -1,8 +1,8 @@
 import { WebUrlDataSourceInput } from "@/src/adapter-out/knowledge/web-urls/types/WebUrlDataSourceInput";
 import aiService from "@/src/domain/services/AIService";
-import dataSourceService from "@/src/domain/services/DataSourceService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
@@ -11,14 +11,12 @@ import { NextResponse } from "next/server";
 
 async function postHandler(
   req: Request,
-  context: { params: { aiId: string }; orgId: string; userId: string }
-) {
-  const { params, orgId, userId } = context;
-
-  const ai = await aiService.findAIById(params.aiId);
-  if (!ai) {
-    return new NextResponse("AI not found", { status: 404 });
+  context: {
+    params: { aiId: string };
+    authorizationContext: AuthorizationContext;
   }
+) {
+  const { params, authorizationContext } = context;
 
   const body = await req.json();
   const { urls } = body;
@@ -29,15 +27,14 @@ async function postHandler(
       url,
     };
 
-    const dataSourceId = await dataSourceService.createDataSource(
-      orgId,
-      userId,
+    const dataSource = await aiService.createAIDataSource(
+      authorizationContext,
+      params.aiId,
       url,
       DataSourceType.WEB_URL,
       input
     );
 
-    const dataSource = await aiService.createAIDataSource(ai.id, dataSourceId);
     dataSources.push(dataSource);
   }
 

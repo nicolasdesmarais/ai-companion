@@ -9,6 +9,7 @@ import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/Knowl
 import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
 import { GetDataSourcesResponse } from "@/src/domain/ports/api/DataSourcesApi";
 import prismadb from "@/src/lib/prismadb";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import {
   DataSourceIndexStatus,
   DataSourceType,
@@ -73,23 +74,22 @@ export class DataSourceService {
   /**
    * Create and persist a data source entity.
    * Publishes a DATASOURCE_PERSISTED event.
-   * @param orgId
-   * @param ownerUserId
+   * @param authorizationContext
    * @param name
    * @param type
    * @param data
    * @returns
    */
   public async createDataSource(
-    orgId: string,
-    ownerUserId: string,
+    authorizationContext: AuthorizationContext,
     name: string,
     type: DataSourceType,
     data: any
   ) {
+    const { orgId, userId } = authorizationContext;
     const dataSourceId = await this.initializeDataSource(
       orgId,
-      ownerUserId,
+      userId,
       name,
       type,
       data
