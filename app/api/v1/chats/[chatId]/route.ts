@@ -67,7 +67,7 @@ async function deleteHandler(
 ) {
   const { params, userId } = context;
 
-  chatService.deleteChat(params.chatId, userId);
+  await chatService.deleteChat(params.chatId, userId);
 
   return new NextResponse(null, { status: 204 });
 }

@@ -47,6 +47,7 @@ const listAIResponseSelect: Prisma.AISelect = {
   description: true,
   src: true,
   profile: true,
+  orgId: true,
   userId: true,
   userName: true,
   categoryId: true,
