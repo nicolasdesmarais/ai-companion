@@ -2,8 +2,6 @@ import { AIVisibility } from "@prisma/client";
 import { AIModelOptions } from "../../models/AIModel";
 
 export interface CreateAIRequest extends AIRequest {
-  orgId: string;
-  userId: string;
   userName: string;
 }
 
@@ -64,7 +62,8 @@ export interface AIDetailDto extends AISummaryDto {
   rating: number;
   ratingCount: number;
 
-  // Only included based on profile settings
+  // Only included based on access and profile settings
+  groups?: string[];
   options?: AIModelOptions;
   visibility?: AIVisibility;
 }

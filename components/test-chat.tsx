@@ -3,8 +3,8 @@
 import { ChatForm } from "@/components/chat-form";
 import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
+import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
 import { ChatMessageDto } from "@/src/domain/ports/api/ChatsApi";
-import { AI } from "@prisma/client";
 import { useCompletion } from "ai/react";
 import {
   Dispatch,
@@ -15,7 +15,7 @@ import {
 } from "react";
 
 type Props = {
-  ai: AI;
+  ai: AIDetailDto;
   className?: string;
   actions: ReactNode;
   messages: ChatMessageDto[];

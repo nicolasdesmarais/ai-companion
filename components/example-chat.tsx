@@ -1,26 +1,13 @@
-import React from "react";
-import { ChatMessageProps } from "./chat-message";
-import { Prisma } from "@prisma/client";
-import { cn } from "@/src/lib/utils";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { marked } from "marked";
+import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
+import { cn } from "@/src/lib/utils";
 import { useUser } from "@clerk/nextjs";
-
-const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
-  include: {
-    dataSources: {
-      include: {
-        dataSource: true,
-      },
-    },
-  },
-});
-
-type ExtendedAI = Prisma.AIGetPayload<typeof extendedAI>;
+import { marked } from "marked";
+import { ChatMessageProps } from "./chat-message";
 
 interface Props {
   messages: ChatMessageProps[];
-  ai: ExtendedAI | null;
+  ai: AIDetailDto | null;
   className?: string;
 }
 

@@ -1,11 +1,9 @@
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
-import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
 import {
-  AI,
   AIVisibility,
   DataSourceType,
   GroupAvailability,
@@ -16,17 +14,8 @@ import { SystemMessage } from "langchain/schema";
 import { AISecurityService } from "../../security/services/AISecurityService";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import { AIModelOptions } from "../models/AIModel";
-import {
-  AIDetailDto,
-  AIProfile,
-  CreateAIRequest,
-  UpdateAIRequest,
-} from "../ports/api/AIApi";
-import {
-  ListAIsRequestParams,
-  ListAIsRequestScope,
-} from "../ports/api/ListAIsRequestParams";
-import { ShareAIRequest } from "../ports/api/ShareAIRequest";
+import { AIProfile } from "../ports/api/AIApi";
+import { ListAIsRequestScope } from "../ports/api/ListAIsRequestParams";
 import aiModelService from "./AIModelService";
 import dataSourceService from "./DataSourceService";
 import groupService from "./GroupService";
@@ -54,6 +43,16 @@ const listAIResponseSelect: Prisma.AISelect = {
   modelId: true,
   options: true,
   instructions: true,
+  groups: {
+    select: {
+      group: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  },
 };
 
 export class AIService {
@@ -541,8 +540,7 @@ export class AIService {
    * @returns
    */
   public async createAI(
-    orgId: string,
-    userId: string,
+    authorizationContext: AuthorizationContext,
     request: CreateAIRequest
   ) {
     const {
@@ -562,6 +560,8 @@ export class AIService {
     if (!src || !name || !description || !instructions || !categoryId) {
       throw new BadRequestError("Missing required fields");
     }
+
+    const { orgId, userId } = authorizationContext;
 
     const ai = await prismadb.aI.create({
       data: {
