@@ -6,7 +6,6 @@ import { Groups } from "@/components/groups";
 import { InviteButton } from "@/components/invite-button";
 import { SearchInput } from "@/components/search-input";
 import aiService from "@/src/domain/services/AIService";
-import groupService from "@/src/domain/services/GroupService";
 
 import {
   ListAIsRequestParams,
@@ -55,8 +54,6 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
 
   const data = await aiService.findAIsForUser(orgId, userId, requestParams);
 
-  const groups = await groupService.findGroupsByUser(orgId, userId);
-
   const categories = await prismadb.category.findMany();
 
   return (
@@ -65,7 +62,7 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
         <h1 className="text-4xl font-bold whitespace-nowrap pt-2 pr-2">
           Browse AIs
         </h1>
-        <Groups data={groups} />
+        <Groups />
         <InviteButton />
       </div>
       <SearchInput />

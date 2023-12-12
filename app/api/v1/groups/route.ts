@@ -1,51 +1,40 @@
-import { CreateGroupRequest } from "@/src/domain/ports/api/GroupsApi";
-import { auth } from "@clerk/nextjs";
+import {
+  CreateGroupRequest,
+  GroupDetailDto,
+} from "@/src/domain/ports/api/GroupsApi";
+import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
+import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { NextResponse } from "next/server";
-import { GroupService } from "../../../../src/domain/services/GroupService";
+import groupService from "../../../../src/domain/services/GroupService";
 
-export async function POST(req: Request) {
-  try {
-    const authentication = await auth();
-    if (!authentication?.userId || !authentication?.orgId) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+async function postHandler(
+  req: Request,
+  context: { authorizationContext: AuthorizationContext }
+) {
+  const { authorizationContext } = context;
 
-    const createGroupRequest: CreateGroupRequest = await req.json();
+  const createGroupRequest: CreateGroupRequest = await req.json();
 
-    const groupService = new GroupService();
-    await groupService.createGroup(
-      authentication.orgId,
-      authentication.userId,
-      createGroupRequest
-    );
-
-    const groups = await groupService.findGroupsByUser(
-      authentication.orgId,
-      authentication.userId
-    );
-    return NextResponse.json(groups);
-  } catch (error) {
-    console.log("[POST v1/groups]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+  const group: GroupDetailDto | null = await groupService.createGroup(
+    authorizationContext,
+    createGroupRequest
+  );
+  if (!group) {
+    throw new Error("Error creating group");
   }
+
+  return new NextResponse(JSON.stringify(group), { status: 201 });
 }
 
-export async function GET(req: Request) {
-  try {
-    const { userId, orgId } = await auth();
-    if (!userId) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
-    if (!orgId) {
-      return NextResponse.json([]);
-    }
-
-    const groupService = new GroupService();
-    const groups = await groupService.findGroupsByUser(orgId, userId);
-    return NextResponse.json(groups);
-  } catch (error) {
-    console.log("[GET v1/groups]", error);
-    return new NextResponse("Internal Error", { status: 500 });
-  }
-}
+export const POST = withErrorHandler(
+  withAuthorization(
+    SecuredResourceType.GROUPS,
+    SecuredAction.WRITE,
+    Object.values(SecuredResourceAccessLevel),
+    postHandler
+  )
+);

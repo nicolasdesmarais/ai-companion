@@ -309,6 +309,77 @@
             "type": "string"
           }
         }
+      },
+      "GroupAvailability": {
+        "type": "string",
+        "enum": ["EVERYONE", "RESTRICTED"],
+        "description": "Availability status of the group."
+      },
+      "GroupSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orgId": {
+            "type": "string"
+          },
+          "ownerUserId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "availability": {
+            "$ref": "#/components/schemas/GroupAvailability"
+          }
+        }
+      },
+      "GroupDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GroupSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "messages": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/GroupUser"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "GroupUser": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "userId": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string"
+          }
+        }
       }
     }
   },
@@ -880,34 +951,56 @@
         ]
       }
     },
-    "/api/v1/me/chats": {
-      "get": {
-        "summary": "Get all chats for the User",
-        "description": "Retrieves a list of all chat sessions associated with the current user",
-        "operationId": "getChats",
+    "/api/v1/groups": {
+      "post": {
+        "summary": "Create a new group",
+        "description": "Creates a new group with the specified details.",
+        "operationId": "createGroup",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the group."
+                  },
+                  "availability": {
+                    "$ref": "#/components/schemas/GroupAvailability"
+                  },
+                  "memberEmails": {
+                    "type": "string",
+                    "description": "A comma-separated list of emails of users who should be added to the group."
+                  }
+                },
+                "required": ["name", "availability", "memberEmails"]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "A list of chat sessions associated with the AI.",
+            "description": "Group successfully created.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListChatsResponse"
+                  "$ref": "#/components/schemas/GroupDetail"
                 }
               }
             }
           },
-          "404": {
-            "description": "AI not found with the given identifier."
+          "401": {
+            "description": "User is not authenticated."
+          },
+          "403": {
+            "description": "User does not have permission to create a group."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Server error."
           }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ]
+        }
       }
     },
     "/api/v1/me/ai": {
@@ -965,6 +1058,67 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/v1/me/chats": {
+      "get": {
+        "summary": "Get all chats for the User",
+        "description": "Retrieves a list of all chat sessions associated with the current user",
+        "operationId": "getChats",
+        "responses": {
+          "200": {
+            "description": "A list of chat sessions associated with the AI.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListChatsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "AI not found with the given identifier."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/me/groups": {
+      "get": {
+        "summary": "Get groups of the current user",
+        "description": "Retrieves a list of groups associated with the current user.",
+        "operationId": "getUserGroups",
+        "responses": {
+          "200": {
+            "description": "A list of groups associated with the current user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GroupSummary"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User is not authenticated."
+          },
+          "403": {
+            "description": "User does not have permission to view the groups."
+          },
+          "500": {
+            "description": "Server error."
           }
         }
       }
