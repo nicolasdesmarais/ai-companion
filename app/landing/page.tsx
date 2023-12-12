@@ -9,7 +9,7 @@ const LandingPage = () => {
   const waitlist = useRef<ElementRef<"div">>(null);
   return (
     <div className="bg-black flex flex-col">
-      <div className="blue-bg max-h-[900px] h-screen py-16 overflow-hidden flex flex-col">
+      <div className="blue-bg max-h-[885px] h-screen py-16 overflow-hidden flex flex-col">
         <div className="flex justify-center items-center">
           <div>
             <div className="flex items-center justify-center border-b-2 border-white pb-4 mb-4">
@@ -20,7 +20,7 @@ const LandingPage = () => {
                 height="64"
                 className="mt-5"
               />
-              <span className="mt-5 ml-2 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
+              <span className="mt-5 ml-2 leading-none tracking-tight text-4xl text-white">
                 AppDirect
               </span>
             </div>
@@ -30,7 +30,7 @@ const LandingPage = () => {
         <div className="flex justify-center">
           <div className="mt-40 mx-16 w-96 ">
             <h2
-              className="me-4 mb-4 font-extrabold leading-none tracking-tight text-gray-900 text-4xl dark:text-white"
+              className="me-4 mb-4 font-extrabold leading-none tracking-tight text-4xl text-white"
               title="AI made simple"
             >
               Lets add AI bots to your team
@@ -103,9 +103,7 @@ const LandingPage = () => {
 
       <div className="flex justify-center p-14">
         <div className="m-8 w-96 space-y-4">
-          <h3 className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
-            Interact with AIs
-          </h3>
+          <h3 className="mt-5 text-3xl font-bold">Interact with AIs</h3>
           <div>
             Chat with AIs to ask broad questions that help you summarize complex
             data sets or dig into the details quickly with specific queries.
@@ -132,9 +130,7 @@ const LandingPage = () => {
           className="mt-5 shadow-glow"
         />
         <div className="ml-8 mt-4 w-[400px] space-y-4 text-right">
-          <h3 className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
-            Share with confidence
-          </h3>
+          <h3 className="mt-5 text-3xl font-bold">Share with confidence</h3>
           <div>
             Sharing your AI bot securely is paramount. AppDirect delivers robust
             enterprise-grade access control.
@@ -156,7 +152,7 @@ const LandingPage = () => {
         <div className="text-xl font-bold mb-16">Coming Soon...</div>
         <div>
           <div className="m-4">
-            <h2 className="mt-5 text-2xl">Interested?</h2>
+            <h2 className="mt-5 text-2xl font-bold">Interested?</h2>
             <h2 className="">
               Be the first on the list when AppDirect AI becomes available.
             </h2>
