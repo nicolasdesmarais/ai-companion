@@ -214,7 +214,19 @@ export class ChatService {
         id: aiId,
       },
       include: {
-        dataSources: true,
+        dataSources: {
+          include: {
+            dataSource: {
+              include: {
+                knowledges: {
+                  include: {
+                    knowledge: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
     const chat = { ai, messages: messages || [] };
@@ -277,7 +289,7 @@ export class ChatService {
     if (!chat) {
       throw new EntityNotFoundError(`Chat with id ${chatId} not found`);
     }
-    console.log("ai", chat);
+
     const model = await aiModelService.findAIModelById(chat.ai.modelId);
     if (!model) {
       throw new EntityNotFoundError(
@@ -383,10 +395,15 @@ export class ChatService {
       return knowledgeResponse;
     };
 
+    //TODO: fix timeout for long chat history
+    let prunedMessages = chat.messages;
+    if (prunedMessages?.length > 60) {
+      prunedMessages = prunedMessages.slice(prunedMessages.length - 60);
+    }
     return await chatModel.postToChat({
       ai: chat.ai,
       chat,
-      messages: chat.messages,
+      messages: prunedMessages,
       aiModel: model,
       prompt,
       date,
