@@ -10,6 +10,7 @@ import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
 import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
 import { ChatDetailDto, ChatMessageDto } from "@/src/domain/ports/api/ChatsApi";
+import { Role } from "@prisma/client";
 
 interface ChatClientProps {
   ai: AIDetailDto;
@@ -47,7 +48,7 @@ export const ChatClient = ({ ai, chat, canEditAi }: ChatClientProps) => {
       const systemMessage: ChatMessageDto = {
         createdAt: new Date(),
         updatedAt: new Date(),
-        role: "system",
+        role: Role.system,
         content: completion,
       };
 
@@ -62,7 +63,7 @@ export const ChatClient = ({ ai, chat, canEditAi }: ChatClientProps) => {
     const userMessage: ChatMessageDto = {
       createdAt: new Date(),
       updatedAt: new Date(),
-      role: "user",
+      role: Role.user,
       content: input,
     };
 
@@ -82,7 +83,7 @@ export const ChatClient = ({ ai, chat, canEditAi }: ChatClientProps) => {
       <ChatMessages
         ai={ai}
         isLoading={isLoading && !stream}
-        messages={chat.messages}
+        messages={messages}
         stream={stream}
       />
       <ChatForm
