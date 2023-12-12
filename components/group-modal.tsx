@@ -30,7 +30,6 @@ import { useConfirmModal } from "@/hooks/use-confirm-modal";
 import { useGroupModal } from "@/hooks/use-group-modal";
 import {
   CreateGroupRequest,
-  GroupDetailDto,
   UpdateGroupRequest,
 } from "@/src/domain/ports/api/GroupsApi";
 import { useUser } from "@clerk/nextjs";
@@ -115,16 +114,7 @@ export const GroupModal = () => {
         description: "Group updated successfully",
       });
 
-      const updatedGroup: GroupDetailDto = response.data;
-      const groupModalData = groupModal.data ?? [];
-      const newData = groupModalData?.map((group) => {
-        if (group.id === updatedGroup.id) {
-          return updatedGroup;
-        }
-        return group;
-      });
-
-      groupModal.onUpdate(newData);
+      groupModal.onUpdate();
 
       form.reset();
     } else {
@@ -145,9 +135,7 @@ export const GroupModal = () => {
         description: "Group created successfully",
       });
 
-      const groupModalData = groupModal.data ?? [];
-      groupModalData.push(response.data);
-      groupModal.onUpdate(groupModalData);
+      groupModal.onUpdate();
       form.reset();
     } else {
       throw new Error(response.data.message);
@@ -183,11 +171,7 @@ export const GroupModal = () => {
           description: "Group deleted successfully",
         });
 
-        const groupModalData = groupModal.data?.filter(
-          (group) => group.id !== groupModal.groupId
-        );
-
-        groupModal.onUpdate(groupModalData ?? []);
+        groupModal.onUpdate();
 
         form.reset();
       } else {
@@ -214,11 +198,7 @@ export const GroupModal = () => {
           description: "You have left the group",
         });
 
-        const groupModalData = groupModal.data?.filter(
-          (group) => group.id !== groupModal.groupId
-        );
-
-        groupModal.onUpdate(groupModalData ?? []);
+        groupModal.onUpdate();
 
         form.reset();
       } else {
