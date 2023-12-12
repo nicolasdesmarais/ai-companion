@@ -30,6 +30,7 @@ import { useConfirmModal } from "@/hooks/use-confirm-modal";
 import { useGroupModal } from "@/hooks/use-group-modal";
 import {
   CreateGroupRequest,
+  GroupDetailDto,
   UpdateGroupRequest,
 } from "@/src/domain/ports/api/GroupsApi";
 import { useUser } from "@clerk/nextjs";
@@ -114,7 +115,16 @@ export const GroupModal = () => {
         description: "Group updated successfully",
       });
 
-      groupModal.onUpdateGroup(response.data, groupModal.data);
+      const updatedGroup: GroupDetailDto = response.data;
+      const groupModalData = groupModal.data ?? [];
+      const newData = groupModalData?.map((group) => {
+        if (group.id === updatedGroup.id) {
+          return updatedGroup;
+        }
+        return group;
+      });
+
+      groupModal.onUpdate(newData);
 
       form.reset();
     } else {
@@ -135,7 +145,7 @@ export const GroupModal = () => {
         description: "Group created successfully",
       });
 
-      const groupModalData = groupModal.data || [];
+      const groupModalData = groupModal.data ?? [];
       groupModalData.push(response.data);
       groupModal.onUpdate(groupModalData);
       form.reset();
@@ -172,7 +182,12 @@ export const GroupModal = () => {
         toast({
           description: "Group deleted successfully",
         });
-        groupModal.onUpdate(response.data);
+
+        const groupModalData = groupModal.data?.filter(
+          (group) => group.id !== groupModal.groupId
+        );
+
+        groupModal.onUpdate(groupModalData ?? []);
 
         form.reset();
       } else {
@@ -194,11 +209,17 @@ export const GroupModal = () => {
       const response = await axios.put(
         `/api/v1/groups/${groupModal.groupId}/leave`
       );
-      if (response.status === 200) {
+      if (response.status === 204) {
         toast({
           description: "You have left the group",
         });
-        groupModal.onUpdate(response.data);
+
+        const groupModalData = groupModal.data?.filter(
+          (group) => group.id !== groupModal.groupId
+        );
+
+        groupModal.onUpdate(groupModalData ?? []);
+
         form.reset();
       } else {
         throw new Error(response.data.message);
