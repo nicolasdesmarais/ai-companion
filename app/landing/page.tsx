@@ -9,10 +9,10 @@ const LandingPage = () => {
   const waitlist = useRef<ElementRef<"div">>(null);
   return (
     <div className="bg-black flex flex-col">
-      <div className="blue-bg  h-screen py-16 overflow-hidden flex flex-col">
+      <div className="blue-bg max-h-[900px] h-screen py-16 overflow-hidden flex flex-col">
         <div className="flex justify-center items-center">
           <div>
-            <div className="flex items-center justify-center border-b-2 border-white pb-4 mb-4 ">
+            <div className="flex items-center justify-center border-b-2 border-white pb-4 mb-4">
               <Image
                 src="/AppDirect-Mark_White.png"
                 alt="AppDirect Logo"
