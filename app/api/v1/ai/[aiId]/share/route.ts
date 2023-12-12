@@ -8,7 +8,7 @@ import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourc
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { NextRequest, NextResponse } from "next/server";
 
-async function postHandler(
+async function putHandler(
   req: NextRequest,
   context: {
     params: { aiId: string };
@@ -25,11 +25,11 @@ async function postHandler(
   return NextResponse.json("", { status: 200 });
 }
 
-export const POST = withErrorHandler(
+export const PUT = withErrorHandler(
   withAuthorization(
     SecuredResourceType.AI,
     SecuredAction.WRITE,
     Object.values(SecuredResourceAccessLevel),
-    postHandler
+    putHandler
   )
 );
