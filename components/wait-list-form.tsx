@@ -5,14 +5,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import {
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import axios from "axios";
+import { useToast } from "./ui/use-toast";
+import { useState } from "react";
+import { Loader } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -20,13 +22,40 @@ const formSchema = z.object({
   company: z.string().min(1, "Company is required"),
 });
 
-export const LandingForm = () => {
+export const WaitListForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log("haha", values);
+    setLoading(true);
+    try {
+      const resp = await axios.post("/api/v1/waitlist", values);
+      if (resp.status === 200) {
+        form.setValue("email", "");
+        form.setValue("name", "");
+        form.setValue("company", "");
+        toast({
+          description: "Thank you for signing up!",
+          duration: 3000,
+        });
+      } else {
+        toast({
+          description: "Something went wrong.",
+          variant: "destructive",
+          duration: 3000,
+        });
+      }
+    } catch (error) {
+      toast({
+        description: error.response?.data || "Something went wrong.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
+    setLoading(false);
   };
   return (
     <Form {...form}>
@@ -40,6 +69,7 @@ export const LandingForm = () => {
                 <FormControl>
                   <Input
                     {...field}
+                    disabled={loading}
                     className="rounded-none"
                     placeholder="Full Name"
                   />
@@ -56,6 +86,7 @@ export const LandingForm = () => {
                 <FormControl>
                   <Input
                     {...field}
+                    disabled={loading}
                     className="rounded-none"
                     placeholder="Work Email"
                   />
@@ -72,6 +103,7 @@ export const LandingForm = () => {
                 <FormControl>
                   <Input
                     {...field}
+                    disabled={loading}
                     className="rounded-none"
                     placeholder="Company Name"
                   />
@@ -82,6 +114,7 @@ export const LandingForm = () => {
           />
           <Button className="mt-5 rounded-none col-span-2" variant="ring">
             Sign me up
+            {loading ? <Loader className="w-4 h-4 spinner ml-2" /> : null}
           </Button>
         </div>
       </form>

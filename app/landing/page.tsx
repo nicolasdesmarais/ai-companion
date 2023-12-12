@@ -1,6 +1,6 @@
 "use client";
 import { AITeaser } from "@/components/ai-teaser";
-import { LandingForm } from "@/components/landing-form";
+import { WaitListForm } from "@/components/wait-list-form";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { ElementRef, useRef } from "react";
@@ -157,7 +157,7 @@ const LandingPage = () => {
               Be the first on the list when AppDirect AI becomes available.
             </h2>
           </div>
-          <LandingForm />
+          <WaitListForm />
         </div>
         <div>
           <a
