@@ -156,12 +156,6 @@ export const Sidebar = ({
       label: "API Keys",
       pro: false,
     },
-    {
-      icon: LockKeyhole,
-      href: "/api-keys",
-      label: "API Keys",
-      pro: false,
-    },
   ] as Route[];
   return (
     <div
