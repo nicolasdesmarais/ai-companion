@@ -64,7 +64,7 @@ async function deleteHandler(
 export const GET = withErrorHandler(
   withAuthorization(
     SecuredResourceType.AI,
-    SecuredAction.WRITE,
+    SecuredAction.READ,
     Object.values(SecuredResourceAccessLevel),
     getHandler
   )

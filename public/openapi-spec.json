@@ -230,7 +230,7 @@
           "ALL"
         ]
       },
-      "ListAIDto": {
+      "AIDetail": {
         "type": "object",
         "properties": {
           "id": {
@@ -385,6 +385,50 @@
   },
   "security": [],
   "paths": {
+    "/api/v1/ai/{aiId}": {
+      "get": {
+        "summary": "Get AI Details",
+        "description": "Retrieves details of the AI specified by the given identifier.",
+        "operationId": "getAIDetails",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The identifier of the AI whose details are to be retrieved.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the specified AI.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "404": {
+            "description": "AI not found with the given identifier."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/ai/{aiId}/chats": {
       "get": {
         "summary": "Get all chats for the AI",
@@ -1191,7 +1235,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/ListAIDto"
+                        "$ref": "#/components/schemas/AIDetail"
                       }
                     }
                   }
