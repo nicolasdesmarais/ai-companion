@@ -146,7 +146,7 @@ export const Sidebar = ({
       requiredPermission: {
         resourceType: SecuredResourceType.ORG_SETTINGS,
         action: SecuredAction.WRITE,
-        accessLevel: SecuredResourceAccessLevel.ORGANIZATION,
+        accessLevel: SecuredResourceAccessLevel.INSTANCE,
       },
       pro: false,
     },
