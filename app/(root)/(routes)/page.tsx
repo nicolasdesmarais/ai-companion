@@ -12,7 +12,7 @@ import {
   ListAIsRequestScope,
 } from "@/src/domain/ports/api/ListAIsRequestParams";
 import prismadb from "@/src/lib/prismadb";
-import { auth } from "@clerk/nextjs";
+import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 
 interface RootPageProps {
   searchParams: {
@@ -24,11 +24,8 @@ interface RootPageProps {
 }
 
 const RootPage = async ({ searchParams }: RootPageProps) => {
-  const authorization = await auth();
-  const orgId = authorization.orgId;
-  const userId = authorization.userId;
-
-  if (!orgId || !userId) {
+  const authorizationContext = getUserAuthorizationContext();
+  if (!authorizationContext) {
     return;
   }
 
@@ -52,7 +49,10 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
     search: searchParams.search,
   };
 
-  const data = await aiService.findAIsForUser(orgId, userId, requestParams);
+  const data = await aiService.findAIsForUser(
+    authorizationContext,
+    requestParams
+  );
 
   const categories = await prismadb.category.findMany();
 

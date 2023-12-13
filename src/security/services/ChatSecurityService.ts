@@ -16,7 +16,7 @@ export class ChatSecurityService {
     authorizationContext: AuthorizationContext,
     chat: ChatSummaryDto
   ): boolean {
-    return BaseEntitySecurityService.hasPermission(
+    return BaseEntitySecurityService.hasPermissionOnEntity(
       authorizationContext,
       chat,
       SecuredResourceType.CHATS,

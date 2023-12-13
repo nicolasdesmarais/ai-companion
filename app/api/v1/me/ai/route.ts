@@ -5,6 +5,7 @@ import {
 import aiService from "@/src/domain/services/AIService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
@@ -12,9 +13,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 async function getHandler(
   req: NextRequest,
-  context: { orgId: string; userId: string }
+  context: { authorizationContext: AuthorizationContext }
 ) {
-  const { orgId, userId } = context;
+  const { authorizationContext } = context;
 
   const { searchParams } = new URL(req.url);
 
@@ -39,7 +40,10 @@ async function getHandler(
     search: searchParams.get("search"),
   };
 
-  const ais = await aiService.findAIsForUser(orgId, userId, requestParams);
+  const ais = await aiService.findAIsForUser(
+    authorizationContext,
+    requestParams
+  );
 
   return NextResponse.json(ais);
 }
