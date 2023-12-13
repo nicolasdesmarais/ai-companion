@@ -8,8 +8,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
+import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
 import { ChatMessageDto } from "@/src/domain/ports/api/ChatsApi";
-import { Prisma } from "@prisma/client";
 import { Loader, Plus, Trash, Wand2 } from "lucide-react";
 import { useState } from "react";
 import { Drawer } from "./drawer";
@@ -23,19 +23,8 @@ import { Textarea } from "./ui/textarea";
 const SAMPLE_DESCRIPTION = `The AI you've engaged is engineered with advanced capabilities, designed to address and respond to an array of questions you might have, regardless of their complexity. It is backed by a rich and extensive compilation of documents that have meticulously uploaded, providing a broad and deep knowledge base to draw from. This AI, with its vast knowledge, stands ready to offer insightful answers to your diverse queries, whether you're seeking simple clarifications or deep, complex explorations. Its singular aim is to ensure you receive the precise information you need, with speed and accuracy, thereby streamlining your decision-making process and enhancing your productivity.`;
 const SAMPLE_TRAINING = `This AI is trained on a variety of sources, including websites, documents, and files. It is also trained on a variety of websites, including Wikipedia, Google, and StackOverflow.`;
 
-const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
-  include: {
-    dataSources: {
-      include: {
-        dataSource: true,
-      },
-    },
-  },
-});
-
-type ExtendedAI = Prisma.AIGetPayload<typeof extendedAI>;
 interface ProfileSourceProps {
-  ai: ExtendedAI | null;
+  ai: AIDetailDto | null;
   form: any;
 }
 

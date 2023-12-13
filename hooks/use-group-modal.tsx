@@ -1,9 +1,7 @@
-import { GroupSummaryDto } from "@/src/domain/ports/api/GroupsApi";
 import { create } from "zustand";
 
 interface UseGroupModalStore {
   isOpen: boolean;
-  data?: GroupSummaryDto[];
   groupId?: string;
   areGroupsUpdated: boolean;
   onOpen: (groupId?: string) => void;

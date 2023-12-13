@@ -10,6 +10,7 @@ import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUr
 import { GetDataSourcesResponse } from "@/src/domain/ports/api/DataSourcesApi";
 import prismadb from "@/src/lib/prismadb";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
+import { AISecurityService } from "@/src/security/services/AISecurityService";
 import {
   DataSourceIndexStatus,
   DataSourceType,
@@ -37,10 +38,24 @@ export class DataSourceService {
   }
 
   public async getDataSources(
-    orgId: string,
-    userId: string,
+    authorizationContext: AuthorizationContext,
     aiId: string
   ): Promise<GetDataSourcesResponse> {
+    const ai = await prismadb.aI.findUnique({
+      where: { id: aiId },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    const canReadAi = AISecurityService.canReadAI(authorizationContext, ai);
+    if (!canReadAi) {
+      throw new ForbiddenError(
+        "User is not authorized to read AI with id=${aiId}"
+      );
+    }
+
     const dataSources = await prismadb.dataSource.findMany({
       select: {
         id: true,
@@ -53,8 +68,6 @@ export class DataSourceService {
         indexPercentage: true,
       },
       where: {
-        orgId,
-        ownerUserId: userId,
         ais: {
           some: {
             aiId,

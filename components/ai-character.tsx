@@ -25,8 +25,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { useGroupModal } from "@/hooks/use-group-modal";
 import { useTalkModal } from "@/hooks/use-talk-modal";
 import { AIModel } from "@/src/domain/models/AIModel";
+import { GroupSummaryDto } from "@/src/domain/ports/api/GroupsApi";
 import { getDiversityString } from "@/src/lib/diversity";
-import { Category, Group, Prisma } from "@prisma/client";
+import { useOrganization } from "@clerk/nextjs";
+import { Category } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { Loader, Play, Plus, Settings, Wand2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -49,23 +51,11 @@ Human: It's fascinating to see your vision unfold. Any new projects or innovatio
 Elon: Always! But right now, I'm particularly excited about Neuralink. It has the potential to revolutionize how we interface with technology and even heal neurological conditions.
 `;
 
-const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
-  include: {
-    dataSources: {
-      include: {
-        dataSource: true,
-      },
-    },
-  },
-});
-
-type ExtendedAI = Prisma.AIGetPayload<typeof extendedAI>;
-
 interface AIFormProps {
   aiModels: AIModel[];
   categories: Category[];
   form: any;
-  groups: Group[];
+  groups: GroupSummaryDto[];
 }
 
 export const AICharacter = ({
@@ -80,19 +70,27 @@ export const AICharacter = ({
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatingInstruction, setGeneratingInstruction] = useState(false);
   const [generatingConversation, setGeneratingConversation] = useState(false);
-  const [groupList, setGroupList] = useState<Group[]>(groups || []);
+  const [groupList, setGroupList] = useState<GroupSummaryDto[]>(groups || []);
   const [advancedImage, setAdvancedImage] = useState(false);
   const [imagePrompt, setImagePrompt] = useState("");
   const [imageModel, setImageModel] = useState("latent-consistency");
   const [diversityString, setDiversityString] = useState("");
+  const { organization } = useOrganization();
 
   const isLoading = form.formState.isSubmitting;
 
-  useEffect(() => {
-    if (groupModal.data) {
-      setGroupList(groupModal.data);
+  const fetchGroups = async () => {
+    const response = await axios.get("/api/v1/me/groups");
+    if (response.status === 200 && Array.isArray(response.data)) {
+      setGroupList(response.data);
     }
-  }, [groupModal.data]);
+  };
+
+  useEffect(() => {
+    if (groupModal.areGroupsUpdated) {
+      fetchGroups();
+    }
+  }, [groupModal.areGroupsUpdated]);
 
   useEffect(() => {
     if (!advancedImage) {

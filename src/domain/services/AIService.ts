@@ -55,6 +55,17 @@ const listAIResponseSelect: Prisma.AISelect = {
   modelId: true,
   options: true,
   instructions: true,
+  seed: true,
+  groups: {
+    select: {
+      group: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  },
 };
 
 export class AIService {
@@ -198,10 +209,17 @@ export class AIService {
       throw new EntityNotFoundError(`AI with id=${aiId} not found`);
     }
 
+    const canUpdateAI = AISecurityService.canUpdateAI(authorizationContext, ai);
+
     const messageCountPerAi: any[] = await this.getMessageCountPerAi([ai.id]);
     const ratingPerAi: any[] = await this.getRatingPerAi([ai.id]);
 
-    const aiDto = this.mapToAIDto(ai, messageCountPerAi, ratingPerAi);
+    const aiDto = this.mapToAIDto(
+      ai,
+      messageCountPerAi,
+      ratingPerAi,
+      canUpdateAI
+    );
     return aiDto;
   }
 
@@ -291,7 +309,8 @@ export class AIService {
   private mapToAIDto(
     ai: AI,
     messageCountPerAi: any[],
-    ratingPerAi: any[]
+    ratingPerAi: any[],
+    forUpdate: boolean = false
   ): AIDetailDto {
     const aiCountRow = messageCountPerAi.find((m) => m.aiId === ai.id);
     const messageCount = aiCountRow ? Number(aiCountRow.messageCount) : 0;
@@ -304,7 +323,7 @@ export class AIService {
 
     const { options, ...aiWithoutOptions } = ai;
     let aiModelOptions: AIModelOptions;
-    if (profile?.showPersonality) {
+    if (forUpdate || profile?.showPersonality) {
       aiModelOptions = options as unknown as AIModelOptions;
     } else {
       aiModelOptions = {} as AIModelOptions;
@@ -312,10 +331,17 @@ export class AIService {
 
     let filteredAi;
     const { modelId, instructions, visibility, ...aiWithoutCharacter } = ai;
-    if (!profile?.showTraining) {
-      filteredAi = aiWithoutCharacter;
-    } else {
+    if (forUpdate || profile?.showCharacter) {
       filteredAi = ai;
+    } else {
+      filteredAi = aiWithoutCharacter;
+    }
+
+    const { seed, ...aiWithoutSeed } = filteredAi;
+    if (forUpdate) {
+      filteredAi = filteredAi;
+    } else {
+      filteredAi = aiWithoutSeed;
     }
 
     return {
@@ -542,8 +568,7 @@ export class AIService {
    * @returns
    */
   public async createAI(
-    orgId: string,
-    userId: string,
+    authorizationContext: AuthorizationContext,
     request: CreateAIRequest
   ) {
     const {
@@ -563,6 +588,8 @@ export class AIService {
     if (!src || !name || !description || !instructions || !categoryId) {
       throw new BadRequestError("Missing required fields");
     }
+
+    const { orgId, userId } = authorizationContext;
 
     const ai = await prismadb.aI.create({
       data: {

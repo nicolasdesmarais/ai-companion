@@ -6,11 +6,23 @@ import { SecuredResourceType } from "../models/SecuredResourceType";
 import { BaseEntitySecurityService } from "./BaseEntitySecurityService";
 
 export class AISecurityService {
+  public static canReadAI(
+    authorizationContext: AuthorizationContext,
+    ai: AISummaryDto
+  ) {
+    return BaseEntitySecurityService.hasPermission(
+      authorizationContext,
+      ai,
+      SecuredResourceType.AI,
+      SecuredAction.READ
+    );
+  }
+
   public static canUpdateAI(
     authorizationContext: AuthorizationContext,
     ai: AISummaryDto
   ) {
-    return BaseEntitySecurityService.canUpdateEntity(
+    return BaseEntitySecurityService.hasPermission(
       authorizationContext,
       ai,
       SecuredResourceType.AI,

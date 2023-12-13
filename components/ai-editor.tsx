@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
 import { AIModel } from "@/src/domain/models/AIModel";
+import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
+import { GroupSummaryDto } from "@/src/domain/ports/api/GroupsApi";
 import { cn } from "@/src/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Category, Group, Knowledge, Prisma } from "@prisma/client";
+import { Category, Knowledge } from "@prisma/client";
 import axios from "axios";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -90,23 +92,11 @@ const formSchema = z.object({
     .nullable(),
 });
 
-const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
-  include: {
-    dataSources: {
-      include: {
-        dataSource: true,
-      },
-    },
-  },
-});
-
-type ExtendedAI = Prisma.AIGetPayload<typeof extendedAI>;
-
 interface AIFormProps {
   aiModels: AIModel[];
   categories: Category[];
-  initialAi: ExtendedAI | null;
-  groups: Group[];
+  initialAi: AIDetailDto | null;
+  groups: GroupSummaryDto[];
 }
 
 export const AIEditor = ({

@@ -1,6 +1,7 @@
 import { AIEditor } from "@/components/ai-editor";
 import { GroupModal } from "@/components/group-modal";
 import aiModelService from "@/src/domain/services/AIModelService";
+import aiService from "@/src/domain/services/AIService";
 import groupService from "@/src/domain/services/GroupService";
 import prismadb from "@/src/lib/prismadb";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
@@ -16,31 +17,14 @@ interface AIIdPageProps {
 
 const AIIdPage = async ({ params }: AIIdPageProps) => {
   const authorizationContext = getUserAuthorizationContext();
-
   if (!authorizationContext) {
     return redirectToSignIn();
   }
 
-  const { userId } = authorizationContext;
-
-  const initialAi = await prismadb.aI.findUnique({
-    where: {
-      id: params.aiId,
-      userId,
-    },
-    include: {
-      dataSources: {
-        include: {
-          dataSource: true,
-        },
-      },
-      groups: true,
-    },
-  });
-
-  if (initialAi) {
-    initialAi.groups = initialAi.groups.map((g: any) => g.groupId);
-  }
+  const initialAi = await aiService.findAIForUser(
+    authorizationContext,
+    params.aiId
+  );
 
   const models = await aiModelService.getAIModels();
 

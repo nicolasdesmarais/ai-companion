@@ -10,21 +10,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { AIModel } from "@/src/domain/models/AIModel";
-import { Prisma } from "@prisma/client";
+import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
 
-const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
-  include: {
-    dataSources: {
-      include: {
-        dataSource: true,
-      },
-    },
-  },
-});
-
-type ExtendedAI = Prisma.AIGetPayload<typeof extendedAI>;
 interface SelectDataSourceProps {
-  initialAi: ExtendedAI | null;
+  initialAi: AIDetailDto | null;
   form: any;
   aiModels: AIModel[];
 }
