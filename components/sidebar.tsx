@@ -92,7 +92,7 @@ export const Sidebar = ({
       return (
         permission.resourceType === requiredRoutePermission.resourceType &&
         permission.action === requiredRoutePermission.action &&
-        permission.accessLevel == requiredRoutePermission.accessLevel
+        permission.accessLevel === requiredRoutePermission.accessLevel
       );
     });
 
@@ -144,7 +144,7 @@ export const Sidebar = ({
       href: "/organization-settings",
       label: "Settings",
       requiredPermission: {
-        resource: SecuredResourceType.ORG_SETTINGS,
+        resourceType: SecuredResourceType.ORG_SETTINGS,
         action: SecuredAction.WRITE,
         accessLevel: SecuredResourceAccessLevel.ORGANIZATION,
       },
