@@ -7,6 +7,7 @@ import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import {
   Atom,
+  LockKeyhole,
   MessageSquare,
   Plus,
   Settings,
@@ -122,6 +123,12 @@ export const Sidebar = ({ isPro, hasChat, className }: SidebarProps) => {
       href: "/settings",
       label: "Settings",
       pro: true,
+    },
+    {
+      icon: LockKeyhole,
+      href: "/api-keys",
+      label: "API Keys",
+      pro: false,
     },
   ] as Route[];
   return (
