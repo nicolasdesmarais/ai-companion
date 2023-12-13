@@ -34,7 +34,10 @@ export const ChatList = ({ className, isMobile = false }: Props) => {
     >
       <div className="flex flex-wrap">
         {pinned.map((chat: ChatSummaryDto) => (
-          <div className="w-1/3 p-1" key={chat.id}>
+          <div
+            className="w-full @4xs:w-1/2 @2xs:w-1/3 @sm:w-1/4 @lg:w-1/5 p-1"
+            key={chat.id}
+          >
             <div
               onClick={() => router.push(`/chat/${chat.id}`)}
               className={cn(
@@ -47,7 +50,9 @@ export const ChatList = ({ className, isMobile = false }: Props) => {
                   <AvatarImage src={chat.ai.src} crop="w_78,h_78" />
                 </Avatar>
               </div>
-              <div className="mt-2 text-xs truncate">{chat.name}</div>
+              <div className="mt-2 text-xs truncate text-center @4xs:text-left">
+                {chat.name}
+              </div>
             </div>
           </div>
         ))}
@@ -61,7 +66,12 @@ export const ChatList = ({ className, isMobile = false }: Props) => {
           )}
           key={chat.id}
         >
-          <BotAvatar src={chat.ai.src} />
+          <div className="flex flex-col items-center">
+            <BotAvatar src={chat.ai.src} />
+            <div className="block @4xs:hidden mt-2 text-xs truncate text-center @4xs:text-left">
+              {chat.name}
+            </div>
+          </div>
           <div
             className={cn(
               "hidden @4xs:flex flex-col gap-y-1 w-full border-b border-muted-foreground pb-2",
