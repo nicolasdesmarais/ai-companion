@@ -11,10 +11,10 @@ import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import {
   Atom,
+  Eye,
   LockKeyhole,
   MessageSquare,
   Plus,
-  PlusCircle,
   Settings,
   Store,
   UserPlus,
@@ -141,7 +141,7 @@ export const Sidebar = ({
       pro: false,
     },
     {
-      icon: PlusCircle,
+      icon: Eye,
       href: "/?scope=INSTANCE",
       pathname: "/",
       searchparams: { scope: "INSTANCE" },
