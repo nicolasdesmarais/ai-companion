@@ -3,6 +3,10 @@
 import { ModeToggle } from "@/components/mode-toggle";
 import { useProModal } from "@/hooks/use-pro-modal";
 import { cn } from "@/src/lib/utils";
+import { Permission } from "@/src/security/models/Permission";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import {
@@ -13,7 +17,6 @@ import {
   Settings,
   Store,
   UserPlus,
-  Wrench,
 } from "lucide-react";
 import {
   ReadonlyURLSearchParams,
@@ -26,6 +29,7 @@ interface SidebarProps {
   isPro: boolean;
   hasChat: boolean;
   className?: string;
+  userPermissions: Permission[];
 }
 
 interface Route {
@@ -36,6 +40,7 @@ interface Route {
   label: string;
   pro: boolean;
   regex: RegExp;
+  requiredPermission?: Permission;
 }
 
 const isActive = (
@@ -66,11 +71,33 @@ const isActive = (
   return pathActive;
 };
 
-export const Sidebar = ({ isPro, hasChat, className }: SidebarProps) => {
+export const Sidebar = ({
+  isPro,
+  hasChat,
+  className,
+  userPermissions,
+}: SidebarProps) => {
   const proModal = useProModal();
   const router = useRouter();
   const pathname = usePathname();
   const searchparams = useSearchParams();
+
+  const shouldHideRoute = (route: Route) => {
+    const requiredRoutePermission = route.requiredPermission;
+    if (!requiredRoutePermission) {
+      return false;
+    }
+
+    const hasPermission = userPermissions.some((permission) => {
+      return (
+        permission.resourceType === requiredRoutePermission.resourceType &&
+        permission.action === requiredRoutePermission.action &&
+        permission.accessLevel === requiredRoutePermission.accessLevel
+      );
+    });
+
+    return !hasPermission;
+  };
 
   const onNavigate = (url: string, pro: boolean) => {
     if (pro && !isPro) {
@@ -113,16 +140,15 @@ export const Sidebar = ({ isPro, hasChat, className }: SidebarProps) => {
       pro: false,
     },
     {
-      icon: Wrench,
-      href: "/dashboard",
-      label: "Tools",
-      pro: true,
-    },
-    {
       icon: Settings,
-      href: "/settings",
+      href: "/organization-settings",
       label: "Settings",
-      pro: true,
+      requiredPermission: {
+        resourceType: SecuredResourceType.ORG_SETTINGS,
+        action: SecuredAction.WRITE,
+        accessLevel: SecuredResourceAccessLevel.INSTANCE,
+      },
+      pro: false,
     },
     {
       icon: LockKeyhole,
@@ -171,7 +197,7 @@ export const Sidebar = ({ isPro, hasChat, className }: SidebarProps) => {
               "text-muted-foreground text-xs group py-3 px-8 flex w-full justify-center font-medium cursor-pointer hover:text-primary hover:bg-primary/10 rounded-lg transition",
               isActive(route, pathname, searchparams) &&
                 "bg-accent text-primary",
-              route.pro && "hidden"
+              shouldHideRoute(route) && "hidden"
             )}
           >
             <div className="flex flex-col items-center flex-1">
