@@ -7,6 +7,7 @@ import { redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { ChatList } from "./components/chat-list";
 import { ChatClient } from "./components/client";
+import { ResizePanel } from "@/components/resize-panel";
 
 interface ChatIdPageProps {
   params: {
@@ -31,7 +32,9 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
 
   return (
     <div className="flex h-full">
-      <ChatList />
+      <ResizePanel>
+        <ChatList />
+      </ResizePanel>
       <ChatClient ai={ai} chat={chat} canEditAi={canEditAi} />
       <AIProfile ai={ai} />
     </div>

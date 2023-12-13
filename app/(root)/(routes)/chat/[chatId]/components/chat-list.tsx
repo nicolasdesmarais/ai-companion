@@ -21,7 +21,7 @@ export const ChatList = () => {
   const unpinned = chats.filter((chat) => !chat.pinPosition);
 
   return (
-    <div className="hidden md:flex flex-col h-full py-4 px-2 bg-accent/30 overflow-y-auto shrink-0 w-80">
+    <div className="hidden md:flex flex-col h-full py-4 px-2 bg-accent/30 overflow-y-auto w-full">
       <div className="flex flex-wrap">
         {pinned.map((chat: ChatSummaryDto) => (
           <div className="w-1/3 p-1" key={chat.id}>

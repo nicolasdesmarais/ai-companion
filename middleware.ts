@@ -11,6 +11,8 @@ export default authMiddleware({
     "/api/v1/integrations/apify/webhooks",
     "/api/inngest",
     "/landing",
+    "/api/v1/waitlist/export",
+    "/api/v1/waitlist",
   ],
   apiRoutes: [
     "/api/((?!webhook|v1/integrations/clerkWebhooks|v1/integrations/apify/webhooks|inngest).*)",
