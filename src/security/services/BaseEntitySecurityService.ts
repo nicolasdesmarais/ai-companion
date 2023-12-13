@@ -9,7 +9,7 @@ type BaseEntity = {
 };
 
 export class BaseEntitySecurityService {
-  public static canUpdateEntity(
+  public static hasPermission(
     authorizationContext: AuthorizationContext,
     entity: BaseEntity,
     resourceType: SecuredResourceType,
