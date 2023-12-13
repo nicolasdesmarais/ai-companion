@@ -4,6 +4,7 @@ import { ChatList } from "@/components/chat-list";
 import { Sidebar } from "@/components/sidebar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/src/lib/utils";
+import { Permission } from "@/src/security/models/Permission";
 import { usePathname } from "next/navigation";
 
 export const MobileSidebar = ({
@@ -31,7 +32,11 @@ export const MobileSidebar = ({
       >
         <div className="flex h-full">
           <div className="w-32">
-            <Sidebar isPro={isPro} hasChat={hasChat} />
+            <Sidebar
+              isPro={isPro}
+              hasChat={hasChat}
+              userPermissions={userPermissions}
+            />
           </div>
           {pathname.startsWith("/chat") && (
             <div className="w-32 flex justify-center">
