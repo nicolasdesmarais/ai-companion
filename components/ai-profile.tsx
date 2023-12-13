@@ -1,23 +1,22 @@
 "use client";
-import { AI } from "@prisma/client";
-import React, { useEffect, useState } from "react";
-import { useAIProfile } from "@/hooks/use-ai-profile";
-import { StarRating } from "./star-rating";
-import Image from "next/image";
-import { X } from "lucide-react";
-import { Button } from "./ui/button";
-import { StaticAIModelRepository } from "@/src/adapter-out/repositories/StaticAIModelRepository";
-import axios from "axios";
-import { StarSvg } from "./svg/star-svg";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { useParams, useRouter } from "next/navigation";
+import { useAIProfile } from "@/hooks/use-ai-profile";
 import { useRateAI } from "@/hooks/use-rate-ai";
+import { StaticAIModelRepository } from "@/src/adapter-out/repositories/StaticAIModelRepository";
+import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
 import { cn } from "@/src/lib/utils";
+import axios from "axios";
+import { X } from "lucide-react";
+import Image from "next/image";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { StarRating } from "./star-rating";
+import { StarSvg } from "./svg/star-svg";
+import { Button } from "./ui/button";
 
 const aiModelRepository = new StaticAIModelRepository();
 interface Props {
-  ai: AI & { profile: any };
-  rating?: any;
+  ai: AIDetailDto;
 }
 
 const getUserName = (user: any) => {
@@ -30,7 +29,7 @@ const getUserName = (user: any) => {
   return "User";
 };
 
-export const AIProfile = ({ ai, rating }: Props) => {
+export const AIProfile = ({ ai }: Props) => {
   const { isOpen, onClose, onOpen } = useAIProfile();
   const [dataSources, setDataSources] = useState<any[]>([]);
   const [ratings, setRatings] = useState<any[]>([]);
@@ -47,7 +46,6 @@ export const AIProfile = ({ ai, rating }: Props) => {
   }, [params]);
 
   useEffect(() => {
-    console.log(window.location, isOpen);
     if (isOpen && window.location.hash) {
       const anchor = document.querySelector(window.location.hash);
       if (anchor) {
@@ -81,7 +79,7 @@ export const AIProfile = ({ ai, rating }: Props) => {
     ai.profile?.trainingDescription;
 
   return (
-    <div className="bg-accent/30 px-6 space-y-4 w-2/3 w-full overflow-auto ml-1 pb-16">
+    <div className="bg-[#0f111e] px-6 space-y-4 w-full md:w-auto lg:w-2/3 absolute left-0 md:left-[400px] right-0 top-[64px] md:top-0 bottom-0 lg:static overflow-auto ml-1 pb-16">
       <div className="absolute top-4 right-4">
         <Button
           onClick={() => {
@@ -147,8 +145,8 @@ export const AIProfile = ({ ai, rating }: Props) => {
             <div className="mt-1 text-sm">{ai.description}</div>
           </div>
           <StarRating
-            value={Math.round(rating.averageRating)}
-            count={rating.ratingCount}
+            value={Math.round(ai.rating)}
+            count={ai.ratingCount}
             className=""
           />
         </div>
@@ -179,7 +177,7 @@ export const AIProfile = ({ ai, rating }: Props) => {
         <div>
           <div className="text-xl font-bold mb-2">AI Model</div>
           <div className="text-sm">
-            {aiModelRepository.findById(ai.modelId)?.name}
+            {ai.modelId ? aiModelRepository.findById(ai.modelId)?.name : ""}
           </div>
           <div className="text-xl font-bold my-2">Instructions</div>
           <div className="text-sm">{ai.instructions}</div>
@@ -221,22 +219,21 @@ export const AIProfile = ({ ai, rating }: Props) => {
       <div className="text-3xl font-bold" id="user-ratings">
         <span className="border-b border-ring pb-1 pr-4">User Ratings</span>
       </div>
-      <div className="flex justify-between">
+      <div className="flex justify-between flex-wrap">
         <div>
           <div className="flex">
             <StarRating
-              value={Math.round(rating.averageRating)}
-              count={rating.ratingCount}
+              value={Math.round(ai.rating)}
+              count={ai.ratingCount}
               size="medium"
               hideCount={true}
             />
             <div className="ml-2 text-md">
-              {rating.averageRating &&
-                `${rating.averageRating.toFixed(1)} out of 5`}
+              {ai.rating && `${ai.rating.toFixed(1)} out of 5`}
             </div>
           </div>
-          <div className="text-xs text-muted-foreground mt-2">
-            {rating.ratingCount} User Ratings
+          <div className="text-xs text-muted-foreground mt-2 mb-2">
+            {ai.ratingCount} User Ratings
           </div>
         </div>
         <Button variant="ring" onClick={() => rateAI.onOpen()}>
@@ -244,7 +241,7 @@ export const AIProfile = ({ ai, rating }: Props) => {
           Write a Review
         </Button>
       </div>
-      {rating.averageRating && (
+      {ai.rating && (
         <>
           <div className="grid gap-3 grid-cols-[50px_auto_50px]">
             {[...Array(5)].map((_, i) => (

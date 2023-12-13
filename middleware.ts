@@ -10,6 +10,9 @@ export default authMiddleware({
     "/api/v1/integrations/clerkWebhooks",
     "/api/v1/integrations/apify/webhooks",
     "/api/inngest",
+    "/landing",
+    "/api/v1/waitlist/export",
+    "/api/v1/waitlist",
   ],
   apiRoutes: [
     "/api/((?!webhook|v1/integrations/clerkWebhooks|v1/integrations/apify/webhooks|inngest).*)",
@@ -18,7 +21,9 @@ export default authMiddleware({
   afterAuth(auth, req, evt) {
     // handle users who aren't authenticated
     if (!auth.userId && !auth.isPublicRoute && !auth.isApiRoute) {
-      return redirectToSignIn({ returnBackUrl: req.url });
+      const landing = new URL("/landing", req.url);
+      return NextResponse.redirect(landing);
+      // return redirectToSignIn({ returnBackUrl: req.url });
     }
     // redirect them to organization selection page
     if (

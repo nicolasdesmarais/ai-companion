@@ -9,6 +9,8 @@ import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/Knowl
 import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
 import { GetDataSourcesResponse } from "@/src/domain/ports/api/DataSourcesApi";
 import prismadb from "@/src/lib/prismadb";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
+import { AISecurityService } from "@/src/security/services/AISecurityService";
 import {
   DataSourceIndexStatus,
   DataSourceType,
@@ -36,10 +38,24 @@ export class DataSourceService {
   }
 
   public async getDataSources(
-    orgId: string,
-    userId: string,
+    authorizationContext: AuthorizationContext,
     aiId: string
   ): Promise<GetDataSourcesResponse> {
+    const ai = await prismadb.aI.findUnique({
+      where: { id: aiId },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    const canReadAi = AISecurityService.canReadAI(authorizationContext, ai);
+    if (!canReadAi) {
+      throw new ForbiddenError(
+        "User is not authorized to read AI with id=${aiId}"
+      );
+    }
+
     const dataSources = await prismadb.dataSource.findMany({
       select: {
         id: true,
@@ -52,8 +68,6 @@ export class DataSourceService {
         indexPercentage: true,
       },
       where: {
-        orgId,
-        ownerUserId: userId,
         ais: {
           some: {
             aiId,
@@ -73,23 +87,22 @@ export class DataSourceService {
   /**
    * Create and persist a data source entity.
    * Publishes a DATASOURCE_PERSISTED event.
-   * @param orgId
-   * @param ownerUserId
+   * @param authorizationContext
    * @param name
    * @param type
    * @param data
    * @returns
    */
   public async createDataSource(
-    orgId: string,
-    ownerUserId: string,
+    authorizationContext: AuthorizationContext,
     name: string,
     type: DataSourceType,
     data: any
   ) {
+    const { orgId, userId } = authorizationContext;
     const dataSourceId = await this.initializeDataSource(
       orgId,
-      ownerUserId,
+      userId,
       name,
       type,
       data

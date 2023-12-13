@@ -2,26 +2,29 @@ import vectorDatabaseAdapter, {
   VectorKnowledgeResponse,
 } from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 import {
+  ChatDetailDto,
   CreateChatRequest,
-  GetChatsResponse,
+  ListChatsResponse,
 } from "@/src/domain/ports/api/ChatsApi";
 import prismadb from "@/src/lib/prismadb";
 import { getTokenLength } from "@/src/lib/tokenCount";
-import { Role } from "@prisma/client";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
+import { Prisma, Role } from "@prisma/client";
 import { JsonObject } from "@prisma/client/runtime/library";
 import axios from "axios";
+import { ChatSecurityService } from "../../security/services/ChatSecurityService";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import aiModelService from "./AIModelService";
 import aiService from "./AIService";
 
 const BUFFER_TOKENS = 200;
 
-const getChatsResponseSelect = {
+const listChatsResponseSelect: Prisma.ChatSelect = {
   id: true,
   createdAt: true,
   updatedAt: true,
   name: true,
-  aiId: true,
+  orgId: true,
   userId: true,
   pinPosition: true,
   ai: {
@@ -30,19 +33,64 @@ const getChatsResponseSelect = {
       name: true,
       src: true,
       description: true,
+      userId: true,
+      userName: true,
+    },
+  },
+};
+
+const getChatResponseSelect: Prisma.ChatSelect = {
+  ...listChatsResponseSelect,
+  messages: {
+    select: {
+      id: true,
+      createdAt: true,
+      updatedAt: true,
+      role: true,
+      content: true,
+    },
+    orderBy: {
+      createdAt: "asc",
     },
   },
 };
 
 export class ChatService {
+  public async getChat(
+    authorizationContext: AuthorizationContext,
+    chatId: string
+  ): Promise<ChatDetailDto> {
+    const chat = await prismadb.chat.findUnique({
+      select: getChatResponseSelect,
+      where: {
+        id: chatId,
+        isDeleted: false,
+      },
+    });
+
+    if (!chat) {
+      throw new EntityNotFoundError(`Chat with id ${chatId} not found`);
+    }
+
+    const hasPermission = ChatSecurityService.canReadChat(
+      authorizationContext,
+      chat
+    );
+    if (!hasPermission) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    return chat;
+  }
+
   /**
    * Returns all chats for a given user
    * @param userId
    * @returns
    */
-  public async getUserChats(userId: string): Promise<GetChatsResponse> {
+  public async getUserChats(userId: string): Promise<ListChatsResponse> {
     const chats = await prismadb.chat.findMany({
-      select: getChatsResponseSelect,
+      select: listChatsResponseSelect,
       where: {
         userId,
         isDeleted: false,
@@ -55,19 +103,21 @@ export class ChatService {
   }
 
   /**
-   * Returns all chats for a given AI
+   * Returns all chats for a given AI and user
    * @param aiId
    * @param userId
    * @returns
    */
   public async getAIChats(
-    aiId: string,
-    userId: string
-  ): Promise<GetChatsResponse> {
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ): Promise<ListChatsResponse> {
+    const { orgId, userId } = authorizationContext;
     const chats = await prismadb.chat.findMany({
-      select: getChatsResponseSelect,
+      select: listChatsResponseSelect,
       where: {
         aiId,
+        orgId,
         userId,
         isDeleted: false,
       },
@@ -78,15 +128,17 @@ export class ChatService {
     };
   }
 
-  public async createChat(orgId: string, userId: string, aiId: string) {
-    const ai = await aiService.findAIForUser(orgId, userId, aiId);
-    if (!ai) {
-      throw new EntityNotFoundError(`AI with id ${aiId} not found`);
-    }
+  public async createChat(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ) {
+    const ai = await aiService.findAIForUser(authorizationContext, aiId);
 
+    const { orgId, userId } = authorizationContext;
     const chat = await prismadb.chat.create({
       data: {
         aiId,
+        orgId,
         userId,
         name: ai.name,
       },
@@ -159,7 +211,19 @@ export class ChatService {
         id: aiId,
       },
       include: {
-        dataSources: true,
+        dataSources: {
+          include: {
+            dataSource: {
+              include: {
+                knowledges: {
+                  include: {
+                    knowledge: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
     const chat = { ai, messages: messages || [] };
@@ -222,7 +286,7 @@ export class ChatService {
     if (!chat) {
       throw new EntityNotFoundError(`Chat with id ${chatId} not found`);
     }
-    console.log("ai", chat);
+
     const model = await aiModelService.findAIModelById(chat.ai.modelId);
     if (!model) {
       throw new EntityNotFoundError(
@@ -328,10 +392,15 @@ export class ChatService {
       return knowledgeResponse;
     };
 
+    //TODO: fix timeout for long chat history
+    let prunedMessages = chat.messages;
+    if (prunedMessages?.length > 60) {
+      prunedMessages = prunedMessages.slice(prunedMessages.length - 60);
+    }
     return await chatModel.postToChat({
       ai: chat.ai,
       chat,
-      messages: chat.messages,
+      messages: prunedMessages,
       aiModel: model,
       prompt,
       date,

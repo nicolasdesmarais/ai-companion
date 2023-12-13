@@ -13,6 +13,7 @@ export const withAuthorization = (
     const authorizationContext = await getAuthorizationContext();
 
     if (!authorizationContext?.orgId || !authorizationContext?.userId) {
+      console.log("Unauthorized: No Authorization Context");
       return new Response("Unauthorized", { status: 401 });
     }
 
@@ -26,12 +27,15 @@ export const withAuthorization = (
     });
 
     if (!hasRequiredPermission) {
+      console.log(
+        `Forbidden - Missing Required Permission: ${resourceType}.${action}.[${allowedAccessLevels}] `
+      );
       return new Response("Forbidden", { status: 403 });
     }
 
     context.orgId = orgId;
     context.userId = userId;
-    context.permissions = permissions;
+    context.authorizationContext = authorizationContext;
 
     return handler(request, context);
   };

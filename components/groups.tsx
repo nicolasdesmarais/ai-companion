@@ -1,42 +1,39 @@
 "use client";
 
 import { useGroupModal } from "@/hooks/use-group-modal";
+import { GroupSummaryDto } from "@/src/domain/ports/api/GroupsApi";
 import { cn } from "@/src/lib/utils";
 import { useOrganization, useUser } from "@clerk/nextjs";
-import { Group, GroupAvailability } from "@prisma/client";
+import { GroupAvailability } from "@prisma/client";
 import axios from "axios";
 import { MoreVertical, Plus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
 import { useEffect, useState } from "react";
 
-interface GroupsProps {
-  data: Group[];
-}
-
-export const Groups = ({ data }: GroupsProps) => {
+export const Groups = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const groupModal = useGroupModal();
   const { user } = useUser();
   const { organization } = useOrganization();
-  const [groups, setGroups] = useState<Group[]>(data || []);
+  const [groups, setGroups] = useState<GroupSummaryDto[]>([]);
 
   const groupId = searchParams.get("groupId");
   const scope = searchParams.get("scope");
 
-  useEffect(() => {
-    if (groupModal.data) {
-      setGroups(groupModal.data);
-    }
-  }, [groupModal.data]);
-
   const fetchGroups = async () => {
-    const response = await axios.get("/api/v1/groups");
+    const response = await axios.get("/api/v1/me/groups");
     if (response.status === 200 && Array.isArray(response.data)) {
       setGroups(response.data);
     }
   };
+
+  useEffect(() => {
+    if (groupModal.areGroupsUpdated) {
+      fetchGroups();
+    }
+  }, [groupModal.areGroupsUpdated]);
 
   useEffect(() => {
     fetchGroups();

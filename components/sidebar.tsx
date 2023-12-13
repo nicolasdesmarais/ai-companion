@@ -28,6 +28,7 @@ import {
 interface SidebarProps {
   isPro: boolean;
   hasChat: boolean;
+  className?: string;
   userPermissions: Permission[];
 }
 
@@ -70,7 +71,12 @@ const isActive = (
   return pathActive;
 };
 
-export const Sidebar = ({ isPro, hasChat, userPermissions }: SidebarProps) => {
+export const Sidebar = ({
+  isPro,
+  hasChat,
+  className,
+  userPermissions,
+}: SidebarProps) => {
   const proModal = useProModal();
   const router = useRouter();
   const pathname = usePathname();
@@ -150,9 +156,20 @@ export const Sidebar = ({ isPro, hasChat, userPermissions }: SidebarProps) => {
       label: "API Keys",
       pro: false,
     },
+    {
+      icon: LockKeyhole,
+      href: "/api-keys",
+      label: "API Keys",
+      pro: false,
+    },
   ] as Route[];
   return (
-    <div className="p-3 flex-1 flex justify-between flex-col h-full">
+    <div
+      className={cn(
+        "p-3 flex-1 flex justify-between flex-col h-full",
+        className
+      )}
+    >
       <div className="space-y-2 flex flex-col items-center">
         <div className="h-16">
           <OrganizationSwitcher

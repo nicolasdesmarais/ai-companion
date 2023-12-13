@@ -3,10 +3,10 @@ import Link from "next/link";
 
 import { StarRating } from "@/components/star-rating";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
-import { ListAIDto } from "@/src/domain/ports/api/AIApi";
+import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
 
 interface AIsProps {
-  data: ListAIDto[];
+  data: AIDetailDto[];
 }
 
 export const AIs = ({ data }: AIsProps) => {

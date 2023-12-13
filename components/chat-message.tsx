@@ -9,10 +9,11 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { UserAvatar } from "@/components/user-avatar";
 import { cn } from "@/src/lib/utils";
-import { Marked } from "marked";
-import { markedHighlight } from "marked-highlight";
+import { Role } from "@prisma/client";
 import hljs from "highlight.js";
 import "highlight.js/styles/github.css";
+import { Marked } from "marked";
+import { markedHighlight } from "marked-highlight";
 
 const marked = new Marked(
   markedHighlight({
@@ -41,7 +42,7 @@ marked.use({
 });
 
 export interface ChatMessageProps {
-  role: "system" | "user";
+  role: Role;
   content?: string;
   isLoading?: boolean;
   src?: string;

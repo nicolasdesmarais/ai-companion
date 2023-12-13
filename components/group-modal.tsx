@@ -113,7 +113,9 @@ export const GroupModal = () => {
       toast({
         description: "Group updated successfully",
       });
-      groupModal.onUpdate(response.data);
+
+      groupModal.onUpdate();
+
       form.reset();
     } else {
       throw new Error(response.data.message);
@@ -128,11 +130,12 @@ export const GroupModal = () => {
     };
 
     const response = await axios.post(`/api/v1/groups`, request);
-    if (response.status === 200) {
+    if (response.status === 201) {
       toast({
         description: "Group created successfully",
       });
-      groupModal.onUpdate(response.data);
+
+      groupModal.onUpdate();
       form.reset();
     } else {
       throw new Error(response.data.message);
@@ -163,11 +166,13 @@ export const GroupModal = () => {
       const response = await axios.delete(
         `/api/v1/groups/${groupModal.groupId}`
       );
-      if (response.status === 200) {
+      if (response.status === 204) {
         toast({
           description: "Group deleted successfully",
         });
-        groupModal.onUpdate(response.data);
+
+        groupModal.onUpdate();
+
         form.reset();
       } else {
         throw new Error(response.data.message);
@@ -186,13 +191,15 @@ export const GroupModal = () => {
     setLoading(true);
     try {
       const response = await axios.put(
-        `/api/v1/me/groups/${groupModal.groupId}/leave`
+        `/api/v1/groups/${groupModal.groupId}/leave`
       );
-      if (response.status === 200) {
+      if (response.status === 204) {
         toast({
           description: "You have left the group",
         });
-        groupModal.onUpdate(response.data);
+
+        groupModal.onUpdate();
+
         form.reset();
       } else {
         throw new Error(response.data.message);

@@ -1,27 +1,32 @@
 import { FileUploadDataSourceInput } from "@/src/adapter-out/knowledge/file-upload/types/FileUploadDataSourceInput";
 import aiService from "@/src/domain/services/AIService";
-import dataSourceService from "@/src/domain/services/DataSourceService";
+import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
-import { auth } from "@clerk/nextjs";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { DataSourceType } from "@prisma/client";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 
 async function postHandler(
   request: Request,
-  { params: { aiId } }: { params: { aiId: string } }
+  context: {
+    params: { aiId: string };
+    authorizationContext: AuthorizationContext;
+  }
 ): Promise<NextResponse> {
+  const { params, authorizationContext } = context;
   const body = (await request.json()) as HandleUploadBody;
 
   const jsonResponse = await handleUpload({
     body,
     request,
     onBeforeGenerateToken: async (pathname: string) => {
-      const { userId, orgId } = await auth();
       return {
         tokenPayload: JSON.stringify({
-          orgId,
-          userId,
+          authorizationContext,
         }),
       };
     },
@@ -29,25 +34,32 @@ async function postHandler(
       if (!tokenPayload) {
         throw new Error("Missing tokenPayload");
       }
-      const { orgId, userId } = JSON.parse(tokenPayload);
+      const { authorizationContext } = JSON.parse(tokenPayload);
 
       const input: FileUploadDataSourceInput = {
         filename: blob.pathname,
         mimetype: blob.contentType,
         blobUrl: blob.url,
       };
-      const dataSourceId = await dataSourceService.createDataSource(
-        orgId,
-        userId,
+
+      await aiService.createAIDataSource(
+        authorizationContext,
+        params.aiId,
         blob.pathname,
         DataSourceType.FILE_UPLOAD,
         input
       );
-      await aiService.createAIDataSource(aiId, dataSourceId);
     },
   });
 
   return NextResponse.json(jsonResponse);
 }
 
-export const POST = withErrorHandler(postHandler);
+export const POST = withErrorHandler(
+  withAuthorization(
+    SecuredResourceType.DATA_SOURCES,
+    SecuredAction.WRITE,
+    Object.values(SecuredResourceAccessLevel),
+    postHandler
+  )
+);

@@ -1,22 +1,30 @@
-import { auth } from "@clerk/nextjs";
+import { GroupSummaryDto } from "@/src/domain/ports/api/GroupsApi";
+import groupService from "@/src/domain/services/GroupService";
+import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
+import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { NextResponse } from "next/server";
-import { GroupService } from "../../../../../src/domain/services/GroupService";
 
-export async function GET(req: Request) {
-  try {
-    const authentication = await auth();
-    const orgId = authentication.orgId;
-    const userId = authentication.userId;
-    if (!userId) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+async function getHandler(
+  req: Request,
+  context: { authorizationContext: AuthorizationContext }
+) {
+  const { authorizationContext } = context;
 
-    const groupService = new GroupService();
-    const groups = await groupService.findGroupsByUser(orgId, userId);
-
-    return NextResponse.json(groups);
-  } catch (error) {
-    console.log("Error in [GET v1/me/groups]", error);
-    return new NextResponse("Internal Error", { status: 500 });
-  }
+  const groups: GroupSummaryDto[] = await groupService.findGroupsByUser(
+    authorizationContext
+  );
+  return NextResponse.json(groups);
 }
+
+export const GET = withErrorHandler(
+  withAuthorization(
+    SecuredResourceType.GROUPS,
+    SecuredAction.READ,
+    Object.values(SecuredResourceAccessLevel),
+    getHandler
+  )
+);

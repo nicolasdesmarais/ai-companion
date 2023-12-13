@@ -219,6 +219,7 @@ model Chat {
   name                      String
   pinPosition               Int?      @map(name: "pin_position")
   isDeleted                 Boolean   @default(false) @map("is_deleted")
+  orgId                     String    @map(name: "org_id")
   userId                    String                    @map("user_id")
   externalId                String?   @map("external_id")
 
@@ -312,4 +313,15 @@ model AIRating {
   rating                    Int
 
   @@map("ai_ratings")
+}
+
+model WaitList {
+  id                        Int         @id @default(autoincrement())
+  createdAt                 DateTime    @default(now()) @map(name: "created_at")
+  updatedAt                 DateTime    @default(now()) @updatedAt @map(name: "updated_at")
+  name                      String      
+  email                     String      @unique
+  company                   String
+
+  @@map("wait_list")
 }
