@@ -1,7 +1,9 @@
 import { Menu } from "lucide-react";
-
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar } from "@/components/sidebar";
+import { ChatList } from "@/components/chat-list";
+import { usePathname } from "next/navigation";
+import { cn } from "@/src/lib/utils";
 
 export const MobileSidebar = ({
   isPro,
@@ -10,6 +12,7 @@ export const MobileSidebar = ({
   isPro: boolean;
   hasChat: boolean;
 }) => {
+  const pathname = usePathname();
   return (
     <Sheet>
       <SheetTrigger className="md:hidden pr-4" aria-controls="mobile-sidebar">
@@ -17,10 +20,22 @@ export const MobileSidebar = ({
       </SheetTrigger>
       <SheetContent
         side="left"
-        className="p-0 bg-secondary pt-10 w-32"
+        className={cn(
+          "p-0 bg-secondary pt-10 ",
+          pathname.startsWith("/chat") ? "w-56" : "w-32"
+        )}
         id="mobile-sidebar"
       >
-        <Sidebar isPro={isPro} hasChat={hasChat} />
+        <div className="flex h-full">
+          <div className="w-32">
+            <Sidebar isPro={isPro} hasChat={hasChat} />
+          </div>
+          {pathname.startsWith("/chat") && (
+            <div className="w-32 flex justify-center">
+              <ChatList className="bg-transparent/10" />
+            </div>
+          )}
+        </div>
       </SheetContent>
     </Sheet>
   );

@@ -5,8 +5,8 @@ import { AISecurityService } from "@/src/security/services/AISecurityService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-import { ChatList } from "./components/chat-list";
-import { ChatClient } from "./components/client";
+import { ChatList } from "@/components/chat-list";
+import { ChatClient } from "@/components/client";
 import { ResizePanel } from "@/components/resize-panel";
 
 interface ChatIdPageProps {
@@ -33,7 +33,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
   return (
     <div className="flex h-full">
       <ResizePanel>
-        <ChatList />
+        <ChatList className="hidden md:flex" />
       </ResizePanel>
       <ChatClient ai={ai} chat={chat} canEditAi={canEditAi} />
       <AIProfile ai={ai} />

@@ -7,7 +7,12 @@ import { cn } from "@/src/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export const ChatList = () => {
+type Props = {
+  className?: string;
+  isMobile?: boolean;
+};
+
+export const ChatList = ({ className, isMobile = false }: Props) => {
   const { chats, fetchChats } = useChats();
   const router = useRouter();
   const pathname = usePathname();
@@ -21,7 +26,12 @@ export const ChatList = () => {
   const unpinned = chats.filter((chat) => !chat.pinPosition);
 
   return (
-    <div className="hidden md:flex flex-col h-full py-4 px-2 bg-accent/30 overflow-y-auto w-full">
+    <div
+      className={cn(
+        "flex flex-col h-full py-4 px-2 bg-accent/30 overflow-y-auto w-full h-full @container",
+        className
+      )}
+    >
       <div className="flex flex-wrap">
         {pinned.map((chat: ChatSummaryDto) => (
           <div className="w-1/3 p-1" key={chat.id}>
@@ -46,7 +56,7 @@ export const ChatList = () => {
         <div
           onClick={() => router.push(`/chat/${chat.id}`)}
           className={cn(
-            "flex gap-x-2 items-center min-h-20 text-primary rounded-lg p-2 mb-2 transition",
+            "flex gap-x-2 items-center min-h-20 text-primary rounded-lg p-2 mb-2 transition justify-center",
             pathname.endsWith(chat.id) ? "bg-accent" : "cursor-pointer"
           )}
           key={chat.id}
@@ -54,7 +64,7 @@ export const ChatList = () => {
           <BotAvatar src={chat.ai.src} />
           <div
             className={cn(
-              "flex flex-col gap-y-1 w-full border-b border-muted-foreground pb-2",
+              "hidden @4xs:flex flex-col gap-y-1 w-full border-b border-muted-foreground pb-2",
               index === unpinned.length - 1 ||
                 pathname.endsWith(chat.id) ||
                 (unpinned[index + 1] &&
@@ -68,7 +78,7 @@ export const ChatList = () => {
             </div>
             <div
               className={cn(
-                "text-xs text-muted-foreground w-full text-ellipsis h-8 overflow-hidden"
+                "text-xs text-muted-foreground w-full text-ellipsis h-8 overflow-hidden "
               )}
             >
               {chat.ai.description}
