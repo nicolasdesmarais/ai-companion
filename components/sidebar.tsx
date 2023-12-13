@@ -14,6 +14,7 @@ import {
   LockKeyhole,
   MessageSquare,
   Plus,
+  PlusCircle,
   Settings,
   Store,
   UserPlus,
@@ -138,6 +139,19 @@ export const Sidebar = ({
       searchparams: { scope: "SHARED" },
       label: "Shared",
       pro: false,
+    },
+    {
+      icon: PlusCircle,
+      href: "/?scope=INSTANCE",
+      pathname: "/",
+      searchparams: { scope: "INSTANCE" },
+      label: "Superuser",
+      pro: false,
+      requiredPermission: {
+        resourceType: SecuredResourceType.AI,
+        action: SecuredAction.READ,
+        accessLevel: SecuredResourceAccessLevel.INSTANCE,
+      },
     },
     {
       icon: Settings,

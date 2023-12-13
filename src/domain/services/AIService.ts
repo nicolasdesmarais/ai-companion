@@ -295,7 +295,7 @@ export class AIService {
         SecuredResourceAccessLevel.INSTANCE
       );
       if (!hasInstanceAccess) {
-        throw new ForbiddenError("Forbidden");
+        return ListAIsRequestScope.ALL;
       }
     }
 
