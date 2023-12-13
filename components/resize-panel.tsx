@@ -40,7 +40,7 @@ export const ResizePanel = ({ children, className }: Props) => {
 
   return (
     <div
-      className={cn(className, "flex max-w-2xl min-w-[78px]")}
+      className={cn(className, "hidden md:flex max-w-2xl min-w-[78px]")}
       ref={sidebarRef}
       style={{ width: sidebarWidth }}
       onMouseDown={(e) => e.preventDefault()}
