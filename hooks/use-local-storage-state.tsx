@@ -1,4 +1,4 @@
-import { useState, Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 export const useLocalStorageState = <T,>(
   key: string,
@@ -15,7 +15,7 @@ export const useLocalStorageState = <T,>(
     }
   });
 
-  const setValue = (value: T) => {
+  const setValue: Dispatch<SetStateAction<T>> = (value) => {
     try {
       const valueToStore =
         value instanceof Function ? value(storedValue) : value;
