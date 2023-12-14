@@ -51,7 +51,7 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
         emails: values.teammates,
       };
 
-      const response = await axios.put(`/api/v1/ai/${ai.id}/share`, request);
+      const response = await axios.post(`/api/v1/ai/${ai.id}/share`, request);
       if (response.status === 200) {
         onSuccess();
       } else {
