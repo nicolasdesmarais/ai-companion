@@ -1,4 +1,4 @@
-import prismadb from "@/src/lib/prismadb";
+import chatService from "@/src/domain/services/ChatService";
 import { auth, redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
@@ -9,22 +9,13 @@ const ChatPage = async () => {
     return redirectToSignIn();
   }
 
-  const chats = await prismadb.chat.findMany({
-    where: {
-      userId,
-      isDeleted: false,
-    },
-    orderBy: {
-      updatedAt: "desc",
-    },
-    take: 1,
-  });
+  const chats = await chatService.getUserChats(userId);
 
-  if (!chats.length) {
+  if (!chats.data.length) {
     return redirect("/");
   }
 
-  return redirect(`/chat/${chats[0].id}`);
+  return redirect(`/chat/${chats.data[0].id}`);
 };
 
 export default ChatPage;

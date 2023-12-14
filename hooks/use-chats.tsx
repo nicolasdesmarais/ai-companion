@@ -11,7 +11,7 @@ interface useChatsStore {
 
 export const useChats = create<useChatsStore>((set) => ({
   chats: [],
-  setChats: (chats: any) => set({ chats }),
+  setChats: (chats: ChatSummaryDto[]) => set({ chats }),
   fetchChats: async () => {
     const response = await fetch("/api/v1/me/chats");
     if (response.status === 200) {

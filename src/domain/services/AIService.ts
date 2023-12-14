@@ -192,7 +192,7 @@ export class AIService {
   public async findAIForUser(
     authorizationContext: AuthorizationContext,
     aiId: string
-  ): Promise<AIDetailDto> {
+  ): Promise<AIDetailDto | null> {
     const { orgId, userId } = authorizationContext;
 
     // Use INSTANCE scope if possible, otherwise fallback to ALL
@@ -210,7 +210,7 @@ export class AIService {
       where: whereCondition,
     });
     if (!ai) {
-      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+      return null;
     }
 
     const canUpdateAI = AISecurityService.canUpdateAI(authorizationContext, ai);

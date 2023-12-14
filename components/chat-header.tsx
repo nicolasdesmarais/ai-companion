@@ -36,7 +36,7 @@ import { ShareModal } from "./share-modal";
 import { StarRating } from "./star-rating";
 
 interface ChatHeaderProps {
-  ai: AIDetailDto;
+  ai: AIDetailDto | null;
   chat: ChatDetailDto;
   canEditAi: boolean;
 }
@@ -49,6 +49,7 @@ export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
   const aiProfile = useAIProfile();
   const [showShareModal, setShowShareModal] = useState(false);
   const rateAI = useRateAI();
+
   const duplicate = async () => {
     const response = await axios.put(`/api/v1/chats/${chat.id}/duplicate`);
     if (response.status === 200) {
@@ -102,22 +103,25 @@ export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
     <div className="flex flex-col p-4 pb-3 bg-accent/30">
       <div className="flex w-full justify-between items-center">
         <div className="flex gap-x-2 items-center">
-          <BotAvatar src={ai.src} />
+          <BotAvatar src={chat.ai.src} />
           <div className="flex flex-col gap-y-1">
-            <p className="font-bold">{ai.name}</p>
+            <p className="font-bold">{chat.ai.name}</p>
             <div className="flex items-center gap-x-2">
               <p className="text-xs text-muted-foreground">
-                Created by {ai.userName}
+                Created by {chat.ai.userName}
               </p>
-              <div className="flex items-center text-xs text-muted-foreground">
-                <MessagesSquare className="w-3 h-3 mr-1" />
-                {ai.messageCount}
-              </div>
+              {ai && (
+                <div className="flex items-center text-xs text-muted-foreground">
+                  <MessagesSquare className="w-3 h-3 mr-1" />
+                  {ai.messageCount}
+                </div>
+              )}
             </div>
           </div>
         </div>
+
         <div className="flex">
-          {(user?.id === ai.userId || ai.visibility === "PUBLIC") && (
+          {ai && canEditAi && (
             <Button
               variant="ghost"
               size="icon"
@@ -141,28 +145,36 @@ export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
                   Unpin
                 </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem onClick={() => pin()}>
-                  <Pin className="w-4 h-4 mr-2" />
-                  Pin
+                ai && (
+                  <DropdownMenuItem onClick={() => pin()}>
+                    <Pin className="w-4 h-4 mr-2" />
+                    Pin
+                  </DropdownMenuItem>
+                )
+              )}
+              {ai && (
+                <DropdownMenuItem onClick={() => reset()}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Reset
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => reset()}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Reset
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => duplicate()}>
-                <CopyPlus className="w-4 h-4 mr-2" />
-                Duplicate
-              </DropdownMenuItem>
+              {ai && (
+                <DropdownMenuItem onClick={() => duplicate()}>
+                  <CopyPlus className="w-4 h-4 mr-2" />
+                  Duplicate
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={() => remove()}>
                 <Trash className="w-4 h-4 mr-2" />
                 Remove
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => rateAI.onOpen()}>
-                <Star className="w-4 h-4 mr-2" />
-                Rate
-              </DropdownMenuItem>
-              {canEditAi && (
+              {ai && (
+                <DropdownMenuItem onClick={() => rateAI.onOpen()}>
+                  <Star className="w-4 h-4 mr-2" />
+                  Rate
+                </DropdownMenuItem>
+              )}
+              {ai && canEditAi && (
                 <DropdownMenuItem
                   onClick={() => router.push(`/ai/${ai.id}/edit`)}
                 >
@@ -174,39 +186,44 @@ export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
           </DropdownMenu>
         </div>
       </div>
-      <div className="flex ml-14">
-        <StarRating
-          value={Math.round(ai.rating)}
-          count={ai.ratingCount}
-          hideCount={true}
-          onClick={() => router.push("#user-ratings")}
-        />
-        <div className="text-xs text-muted-foreground">
-          <Button
-            variant="link"
-            size="xs"
-            type="button"
+
+      {ai && (
+        <div className="flex ml-14">
+          <StarRating
+            value={Math.round(ai.rating)}
+            count={ai.ratingCount}
+            hideCount={true}
             onClick={() => router.push("#user-ratings")}
-          >
-            {ai.ratingCount} {ai.ratingCount === 1 ? "Rating" : "Ratings"}
-          </Button>
-          |
-          <Button
-            variant="link"
-            size="xs"
-            type="button"
-            onClick={() => aiProfile.onOpen()}
-          >
-            View Profile
-          </Button>
+          />
+          <div className="text-xs text-muted-foreground">
+            <Button
+              variant="link"
+              size="xs"
+              type="button"
+              onClick={() => router.push("#user-ratings")}
+            >
+              {ai.ratingCount} {ai.ratingCount === 1 ? "Rating" : "Ratings"}
+            </Button>
+            |
+            <Button
+              variant="link"
+              size="xs"
+              type="button"
+              onClick={() => aiProfile.onOpen()}
+            >
+              View Profile
+            </Button>
+          </div>
         </div>
-      </div>
-      <ShareModal
-        showModal={showShareModal}
-        setShowModal={setShowShareModal}
-        ai={ai}
-      />
-      <RateModal ai={ai} />
+      )}
+      {ai && (
+        <ShareModal
+          showModal={showShareModal}
+          setShowModal={setShowShareModal}
+          ai={ai}
+        />
+      )}
+      {ai && <RateModal ai={ai} />}
     </div>
   );
 };

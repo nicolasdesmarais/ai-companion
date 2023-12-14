@@ -1,13 +1,13 @@
 import { AIProfile } from "@/components/ai-profile";
+import { ChatList } from "@/components/chat-list";
+import { ChatClient } from "@/components/client";
+import { ResizePanel } from "@/components/resize-panel";
 import aiService from "@/src/domain/services/AIService";
 import chatService from "@/src/domain/services/ChatService";
 import { AISecurityService } from "@/src/security/services/AISecurityService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-import { ChatList } from "@/components/chat-list";
-import { ChatClient } from "@/components/client";
-import { ResizePanel } from "@/components/resize-panel";
 
 interface ChatIdPageProps {
   params: {
@@ -28,7 +28,8 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     return redirect("/");
   }
 
-  const canEditAi = AISecurityService.canUpdateAI(authorizationContext, ai);
+  const canEditAi =
+    ai !== null && AISecurityService.canUpdateAI(authorizationContext, ai);
 
   return (
     <div className="flex h-full">
@@ -42,7 +43,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
         <ChatList />
       </ResizePanel>
       <ChatClient ai={ai} chat={chat} canEditAi={canEditAi} />
-      <AIProfile ai={ai} />
+      {ai && <AIProfile ai={ai} />}
     </div>
   );
 };

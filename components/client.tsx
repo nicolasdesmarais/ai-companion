@@ -13,7 +13,7 @@ import { ChatDetailDto, ChatMessageDto } from "@/src/domain/ports/api/ChatsApi";
 import { Role } from "@prisma/client";
 
 interface ChatClientProps {
-  ai: AIDetailDto;
+  ai: AIDetailDto | null;
   chat: ChatDetailDto;
   canEditAi: boolean;
 }
@@ -87,7 +87,7 @@ export const ChatClient = ({ ai, chat, canEditAi }: ChatClientProps) => {
         stream={stream}
       />
       <ChatForm
-        isLoading={isLoading}
+        isLoading={!ai || isLoading}
         input={input}
         handleInputChange={handleInputChange}
         onSubmit={onSubmit}

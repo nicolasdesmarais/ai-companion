@@ -13,7 +13,11 @@ import { Prisma, Role } from "@prisma/client";
 import { JsonObject } from "@prisma/client/runtime/library";
 import axios from "axios";
 import { ChatSecurityService } from "../../security/services/ChatSecurityService";
-import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
+import {
+  BadRequestError,
+  EntityNotFoundError,
+  ForbiddenError,
+} from "../errors/Errors";
 import aiModelService from "./AIModelService";
 import aiService from "./AIService";
 
@@ -133,6 +137,9 @@ export class ChatService {
     aiId: string
   ) {
     const ai = await aiService.findAIForUser(authorizationContext, aiId);
+    if (!ai) {
+      throw new BadRequestError(`AI with id ${aiId} not found`);
+    }
 
     const { orgId, userId } = authorizationContext;
     const chat = await prismadb.chat.create({

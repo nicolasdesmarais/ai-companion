@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import { AIDetailDto, UpdateAIRequest } from "@/src/domain/ports/api/AIApi";
 import aiService from "@/src/domain/services/AIService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
@@ -22,10 +23,15 @@ async function getHandler(
     return new NextResponse("AI ID required", { status: 400 });
   }
 
-  const ai: AIDetailDto = await aiService.findAIForUser(
+  const ai: AIDetailDto | null = await aiService.findAIForUser(
     authorizationContext,
     params.aiId
   );
+
+  if (!ai) {
+    throw new EntityNotFoundError(`AI with ID ${params.aiId} not found`);
+  }
+
   return NextResponse.json(ai);
 }
 
