@@ -149,22 +149,28 @@ export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
                   Pin
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => reset()}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Reset
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => duplicate()}>
-                <CopyPlus className="w-4 h-4 mr-2" />
-                Duplicate
-              </DropdownMenuItem>
+              {ai && (
+                <DropdownMenuItem onClick={() => reset()}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Reset
+                </DropdownMenuItem>
+              )}
+              {ai && (
+                <DropdownMenuItem onClick={() => duplicate()}>
+                  <CopyPlus className="w-4 h-4 mr-2" />
+                  Duplicate
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={() => remove()}>
                 <Trash className="w-4 h-4 mr-2" />
                 Remove
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => rateAI.onOpen()}>
-                <Star className="w-4 h-4 mr-2" />
-                Rate
-              </DropdownMenuItem>
+              {ai && (
+                <DropdownMenuItem onClick={() => rateAI.onOpen()}>
+                  <Star className="w-4 h-4 mr-2" />
+                  Rate
+                </DropdownMenuItem>
+              )}
               {ai && canEditAi && (
                 <DropdownMenuItem
                   onClick={() => router.push(`/ai/${ai.id}/edit`)}
