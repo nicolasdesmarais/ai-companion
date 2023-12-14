@@ -13,7 +13,7 @@ import { ChatDetailDto, ChatMessageDto } from "@/src/domain/ports/api/ChatsApi";
 import { Role } from "@prisma/client";
 
 interface ChatClientProps {
-  ai: AIDetailDto;
+  ai: AIDetailDto | null;
   chat: ChatDetailDto;
   canEditAi: boolean;
 }

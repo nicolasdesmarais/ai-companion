@@ -36,7 +36,7 @@ import { ShareModal } from "./share-modal";
 import { StarRating } from "./star-rating";
 
 interface ChatHeaderProps {
-  ai: AIDetailDto;
+  ai: AIDetailDto | null;
   chat: ChatDetailDto;
   canEditAi: boolean;
 }
@@ -101,23 +101,25 @@ export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
   return (
     <div className="flex flex-col p-4 pb-3 bg-accent/30">
       <div className="flex w-full justify-between items-center">
-        <div className="flex gap-x-2 items-center">
-          <BotAvatar src={ai.src} />
-          <div className="flex flex-col gap-y-1">
-            <p className="font-bold">{ai.name}</p>
-            <div className="flex items-center gap-x-2">
-              <p className="text-xs text-muted-foreground">
-                Created by {ai.userName}
-              </p>
-              <div className="flex items-center text-xs text-muted-foreground">
-                <MessagesSquare className="w-3 h-3 mr-1" />
-                {ai.messageCount}
+        {ai && (
+          <div className="flex gap-x-2 items-center">
+            <BotAvatar src={ai.src} />
+            <div className="flex flex-col gap-y-1">
+              <p className="font-bold">{ai.name}</p>
+              <div className="flex items-center gap-x-2">
+                <p className="text-xs text-muted-foreground">
+                  Created by {ai.userName}
+                </p>
+                <div className="flex items-center text-xs text-muted-foreground">
+                  <MessagesSquare className="w-3 h-3 mr-1" />
+                  {ai.messageCount}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
         <div className="flex">
-          {(user?.id === ai.userId || ai.visibility === "PUBLIC") && (
+          {ai && (user?.id === ai.userId || ai.visibility === "PUBLIC") && (
             <Button
               variant="ghost"
               size="icon"
@@ -162,7 +164,7 @@ export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
                 <Star className="w-4 h-4 mr-2" />
                 Rate
               </DropdownMenuItem>
-              {canEditAi && (
+              {ai && canEditAi && (
                 <DropdownMenuItem
                   onClick={() => router.push(`/ai/${ai.id}/edit`)}
                 >
@@ -174,39 +176,44 @@ export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
           </DropdownMenu>
         </div>
       </div>
-      <div className="flex ml-14">
-        <StarRating
-          value={Math.round(ai.rating)}
-          count={ai.ratingCount}
-          hideCount={true}
-          onClick={() => router.push("#user-ratings")}
-        />
-        <div className="text-xs text-muted-foreground">
-          <Button
-            variant="link"
-            size="xs"
-            type="button"
+
+      {ai && (
+        <div className="flex ml-14">
+          <StarRating
+            value={Math.round(ai.rating)}
+            count={ai.ratingCount}
+            hideCount={true}
             onClick={() => router.push("#user-ratings")}
-          >
-            {ai.ratingCount} {ai.ratingCount === 1 ? "Rating" : "Ratings"}
-          </Button>
-          |
-          <Button
-            variant="link"
-            size="xs"
-            type="button"
-            onClick={() => aiProfile.onOpen()}
-          >
-            View Profile
-          </Button>
+          />
+          <div className="text-xs text-muted-foreground">
+            <Button
+              variant="link"
+              size="xs"
+              type="button"
+              onClick={() => router.push("#user-ratings")}
+            >
+              {ai.ratingCount} {ai.ratingCount === 1 ? "Rating" : "Ratings"}
+            </Button>
+            |
+            <Button
+              variant="link"
+              size="xs"
+              type="button"
+              onClick={() => aiProfile.onOpen()}
+            >
+              View Profile
+            </Button>
+          </div>
         </div>
-      </div>
-      <ShareModal
-        showModal={showShareModal}
-        setShowModal={setShowShareModal}
-        ai={ai}
-      />
-      <RateModal ai={ai} />
+      )}
+      {ai && (
+        <ShareModal
+          showModal={showShareModal}
+          setShowModal={setShowShareModal}
+          ai={ai}
+        />
+      )}
+      {ai && <RateModal ai={ai} />}
     </div>
   );
 };

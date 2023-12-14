@@ -10,6 +10,7 @@ import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { redirectToSignIn } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
 
 export const maxDuration = 300;
 
@@ -29,6 +30,10 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
     authorizationContext,
     params.aiId
   );
+
+  if (initialAi === null) {
+    return redirect("/");
+  }
 
   const models = await aiModelService.getAIModels();
 
