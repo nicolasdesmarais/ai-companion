@@ -10,9 +10,6 @@ import {
   use,
 } from "react";
 
-// why cant web mouse events *just work*?
-const INERTIA_MULTIPLIER = 1.9;
-
 type Props = {
   children: ReactNode;
   name: string;
@@ -20,6 +17,7 @@ type Props = {
   initial: number;
   max: number;
   min: number;
+  position?: "left" | "right";
 };
 
 export const ResizePanel = ({
@@ -29,6 +27,7 @@ export const ResizePanel = ({
   initial,
   max,
   min,
+  position = "left",
 }: Props) => {
   const sidebarRef = useRef(null);
   const [isResizing, setIsResizing] = useState(false);
@@ -48,12 +47,15 @@ export const ResizePanel = ({
   const resize = useCallback(
     (mouseMoveEvent: any) => {
       if (isResizing) {
+        const movement = mouseMoveEvent.movementX;
         setSidebarWidth((width) =>
           Math.min(
             max,
             Math.max(
               min,
-              Math.round(width + mouseMoveEvent.movementX * INERTIA_MULTIPLIER)
+              Math.round(
+                position === "right" ? width - movement : width + movement
+              )
             )
           )
         );
@@ -79,19 +81,20 @@ export const ResizePanel = ({
 
   return (
     <div
-      className={cn(className, "hidden md:flex max-w-2xl min-w-[78px]")}
+      className={cn(className, "shrink-0")}
       ref={sidebarRef}
       style={{ width: initial }}
       onMouseDown={(e) => e.preventDefault()}
     >
-      {children}
+      {position === "left" && children}
       <div
         className={cn(
-          "hover:bg-ring w-1 cursor-col-resize",
+          "hover:bg-ring w-1 cursor-col-resize shrink-0",
           isResizing && "bg-ring"
         )}
         onMouseDown={startResizing}
       ></div>
+      {position === "right" && children}
     </div>
   );
 };

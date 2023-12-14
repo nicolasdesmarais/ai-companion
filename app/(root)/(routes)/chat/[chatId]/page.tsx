@@ -35,10 +35,11 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
       <ResizePanel
         name="chat-list-resize-panel"
         initial={360}
-        min={60}
-        max={1200}
+        min={80}
+        max={600}
+        className="hidden md:flex"
       >
-        <ChatList className="hidden md:flex" />
+        <ChatList />
       </ResizePanel>
       <ChatClient ai={ai} chat={chat} canEditAi={canEditAi} />
       <AIProfile ai={ai} />
