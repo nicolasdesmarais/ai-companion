@@ -12,6 +12,7 @@ import {
   AI,
   AIVisibility,
   DataSourceType,
+  Group,
   GroupAvailability,
   Prisma,
 } from "@prisma/client";
@@ -338,7 +339,7 @@ export class AIService {
   }
 
   private mapToAIDto(
-    ai: AI,
+    ai: AI & { groups: Group[] },
     messageCountPerAi: any[],
     ratingPerAi: any[],
     forUpdate: boolean = false
@@ -369,11 +370,11 @@ export class AIService {
     }
 
     const { seed, ...aiWithoutSeed } = filteredAi;
-    if (forUpdate) {
-      filteredAi = filteredAi;
-    } else {
+    if (!forUpdate) {
       filteredAi = aiWithoutSeed;
     }
+
+    const groupIds: string[] = ai.groups.map((group) => group.id);
 
     return {
       ...filteredAi,
@@ -382,6 +383,7 @@ export class AIService {
       messageCount,
       rating,
       ratingCount,
+      groups: groupIds,
     };
   }
 
