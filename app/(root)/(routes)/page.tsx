@@ -11,7 +11,7 @@ import {
   ListAIsRequestParams,
   ListAIsRequestScope,
 } from "@/src/domain/ports/api/ListAIsRequestParams";
-import prismadb from "@/src/lib/prismadb";
+import categoryService from "@/src/domain/services/CategoryService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 
 interface RootPageProps {
@@ -54,7 +54,7 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
     requestParams
   );
 
-  const categories = await prismadb.category.findMany();
+  const categories = await categoryService.getCategories();
 
   return (
     <div className="h-full px-4 space-y-2 pt-2">
