@@ -309,6 +309,11 @@ export class GroupService {
     }
 
     await prismadb.$transaction([
+      prismadb.groupAI.deleteMany({
+        where: {
+          groupId: groupId,
+        },
+      }),
       prismadb.groupUser.deleteMany({
         where: {
           groupId: groupId,
