@@ -32,7 +32,12 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
 
   return (
     <div className="flex h-full">
-      <ResizePanel>
+      <ResizePanel
+        name="chat-list-resize-panel"
+        initial={360}
+        min={60}
+        max={1200}
+      >
         <ChatList className="hidden md:flex" />
       </ResizePanel>
       <ChatClient ai={ai} chat={chat} canEditAi={canEditAi} />

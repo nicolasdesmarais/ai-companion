@@ -1,16 +1,41 @@
 "use client";
+import useLocalStorageState from "@/hooks/use-local-storage-state";
 import { cn } from "@/src/lib/utils";
-import { ReactNode, useCallback, useRef, useState, useEffect } from "react";
+import {
+  ReactNode,
+  useCallback,
+  useRef,
+  useState,
+  useEffect,
+  use,
+} from "react";
+
+// why cant web mouse events *just work*?
+const INERTIA_MULTIPLIER = 1.9;
 
 type Props = {
   children: ReactNode;
+  name: string;
   className?: string;
+  initial: number;
+  max: number;
+  min: number;
 };
 
-export const ResizePanel = ({ children, className }: Props) => {
+export const ResizePanel = ({
+  children,
+  className,
+  name,
+  initial,
+  max,
+  min,
+}: Props) => {
   const sidebarRef = useRef(null);
   const [isResizing, setIsResizing] = useState(false);
-  const [sidebarWidth, setSidebarWidth] = useState(360);
+  const [sidebarWidth, setSidebarWidth] = useLocalStorageState<number>(
+    name,
+    initial
+  );
 
   const startResizing = useCallback((e: any) => {
     setIsResizing(true);
@@ -23,10 +48,18 @@ export const ResizePanel = ({ children, className }: Props) => {
   const resize = useCallback(
     (mouseMoveEvent: any) => {
       if (isResizing) {
-        setSidebarWidth((width) => width + mouseMoveEvent.movementX * 1.9);
+        setSidebarWidth((width) =>
+          Math.min(
+            max,
+            Math.max(
+              min,
+              Math.round(width + mouseMoveEvent.movementX * INERTIA_MULTIPLIER)
+            )
+          )
+        );
       }
     },
-    [isResizing]
+    [isResizing, setSidebarWidth, max]
   );
 
   useEffect(() => {
@@ -38,11 +71,17 @@ export const ResizePanel = ({ children, className }: Props) => {
     };
   }, [resize, stopResizing]);
 
+  useEffect(() => {
+    if (sidebarRef.current) {
+      (sidebarRef.current as any).style.width = sidebarWidth + "px";
+    }
+  }, [sidebarWidth]);
+
   return (
     <div
       className={cn(className, "hidden md:flex max-w-2xl min-w-[78px]")}
       ref={sidebarRef}
-      style={{ width: sidebarWidth }}
+      style={{ width: initial }}
       onMouseDown={(e) => e.preventDefault()}
     >
       {children}
