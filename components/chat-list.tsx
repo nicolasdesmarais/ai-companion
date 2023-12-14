@@ -4,6 +4,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useChats } from "@/hooks/use-chats";
 import { ChatSummaryDto } from "@/src/domain/ports/api/ChatsApi";
 import { cn } from "@/src/lib/utils";
+import { Loader } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -13,7 +14,7 @@ type Props = {
 };
 
 export const ChatList = ({ className, isMobile = false }: Props) => {
-  const { chats, fetchChats } = useChats();
+  const { chats, fetchChats, loading } = useChats();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -32,6 +33,11 @@ export const ChatList = ({ className, isMobile = false }: Props) => {
         className
       )}
     >
+      {loading && (
+        <div className="flex flex-col items-center justify-center h-full">
+          <Loader className="w-12 h-12 spinner" />
+        </div>
+      )}
       <div className="flex flex-wrap">
         {pinned.map((chat: ChatSummaryDto) => (
           <div

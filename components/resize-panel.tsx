@@ -89,7 +89,7 @@ export const ResizePanel = ({
       {position === "left" && children}
       <div
         className={cn(
-          "hover:bg-ring w-1 cursor-col-resize shrink-0",
+          "hover:bg-ring w-1 cursor-col-resize shrink-0 transition",
           isResizing && "bg-ring"
         )}
         onMouseDown={startResizing}
