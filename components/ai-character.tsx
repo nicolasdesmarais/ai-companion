@@ -27,7 +27,6 @@ import { useTalkModal } from "@/hooks/use-talk-modal";
 import { AIModel } from "@/src/domain/models/AIModel";
 import { GroupSummaryDto } from "@/src/domain/ports/api/GroupsApi";
 import { getDiversityString } from "@/src/lib/diversity";
-import { useOrganization } from "@clerk/nextjs";
 import { Category } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { Loader, Play, Plus, Settings, Wand2 } from "lucide-react";
@@ -56,6 +55,7 @@ interface AIFormProps {
   categories: Category[];
   form: any;
   groups: GroupSummaryDto[];
+  hasInstanceAccess: boolean;
 }
 
 export const AICharacter = ({
@@ -63,6 +63,7 @@ export const AICharacter = ({
   categories,
   form,
   groups,
+  hasInstanceAccess,
 }: AIFormProps) => {
   const { toast } = useToast();
   const groupModal = useGroupModal();
@@ -75,7 +76,6 @@ export const AICharacter = ({
   const [imagePrompt, setImagePrompt] = useState("");
   const [imageModel, setImageModel] = useState("latent-consistency");
   const [diversityString, setDiversityString] = useState("");
-  const { organization } = useOrganization();
 
   const isLoading = form.formState.isSubmitting;
 
@@ -614,6 +614,11 @@ export const AICharacter = ({
                 <SelectItem key="ORGANIZATION" value="ORGANIZATION">
                   Organization
                 </SelectItem>
+                {hasInstanceAccess && (
+                  <SelectItem key="PUBLIC" value="PUBLIC">
+                    Public
+                  </SelectItem>
+                )}
               </SelectContent>
             </Select>
             <FormDescription>Control who can see your AI</FormDescription>

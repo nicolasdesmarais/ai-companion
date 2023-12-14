@@ -199,10 +199,14 @@ export class AIService {
   ): Promise<AIDetailDto> {
     const { orgId, userId } = authorizationContext;
 
-    const whereCondition = { AND: [{}] };
-    whereCondition.AND.push(
-      this.getBaseWhereCondition(orgId, userId, ListAIsRequestScope.ALL)
+    // Use INSTANCE scope if possible, otherwise fallback to ALL
+    const scope = this.determineScope(
+      authorizationContext,
+      ListAIsRequestScope.INSTANCE
     );
+
+    const whereCondition = { AND: [{}] };
+    whereCondition.AND.push(this.getBaseWhereCondition(orgId, userId, scope));
     whereCondition.AND.push({ id: aiId });
 
     const ai = await prismadb.aI.findFirst({

@@ -97,6 +97,7 @@ interface AIFormProps {
   categories: Category[];
   initialAi: AIDetailDto | null;
   groups: GroupSummaryDto[];
+  hasInstanceAccess: boolean;
 }
 
 export const AIEditor = ({
@@ -104,6 +105,7 @@ export const AIEditor = ({
   categories,
   initialAi,
   groups,
+  hasInstanceAccess,
 }: AIFormProps) => {
   const { toast } = useToast();
   const router = useRouter();
@@ -300,6 +302,7 @@ export const AIEditor = ({
           categories={categories}
           form={form}
           groups={groups}
+          hasInstanceAccess={hasInstanceAccess}
         />
       ),
       buttons: (
