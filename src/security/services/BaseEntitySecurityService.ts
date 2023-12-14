@@ -11,6 +11,25 @@ type BaseEntity = {
 export class BaseEntitySecurityService {
   public static hasPermission(
     authorizationContext: AuthorizationContext,
+    resourceType: SecuredResourceType,
+    action: SecuredAction,
+    accessLevel: SecuredResourceAccessLevel
+  ) {
+    const { permissions } = authorizationContext;
+
+    const hasPermission = permissions.some((permission) => {
+      return (
+        permission.resourceType === resourceType &&
+        permission.action === action &&
+        permission.accessLevel === accessLevel
+      );
+    });
+
+    return hasPermission;
+  }
+
+  public static hasPermissionOnEntity(
+    authorizationContext: AuthorizationContext,
     entity: BaseEntity,
     resourceType: SecuredResourceType,
     action: SecuredAction

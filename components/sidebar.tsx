@@ -11,6 +11,7 @@ import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import {
   Atom,
+  Eye,
   LockKeyhole,
   MessageSquare,
   Plus,
@@ -138,6 +139,19 @@ export const Sidebar = ({
       searchparams: { scope: "SHARED" },
       label: "Shared",
       pro: false,
+    },
+    {
+      icon: Eye,
+      href: "/?scope=INSTANCE",
+      pathname: "/",
+      searchparams: { scope: "INSTANCE" },
+      label: "Superuser",
+      pro: false,
+      requiredPermission: {
+        resourceType: SecuredResourceType.AI,
+        action: SecuredAction.READ,
+        accessLevel: SecuredResourceAccessLevel.INSTANCE,
+      },
     },
     {
       icon: Settings,

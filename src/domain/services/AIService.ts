@@ -2,6 +2,10 @@ import { BadRequestError } from "@/src/domain/errors/Errors";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
+import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
 import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
 import {
@@ -232,11 +236,11 @@ export class AIService {
    * @returns
    */
   public async findAIsForUser(
-    orgId: string,
-    userId: string,
+    authorizationContext: AuthorizationContext,
     request: ListAIsRequestParams
   ): Promise<AIDetailDto[]> {
-    const scope = request.scope || ListAIsRequestScope.ALL;
+    const scope = this.determineScope(authorizationContext, request.scope);
+    const { orgId, userId } = authorizationContext;
 
     const whereCondition = { AND: [{}] };
     whereCondition.AND.push(this.getBaseWhereCondition(orgId, userId, scope));
@@ -273,6 +277,29 @@ export class AIService {
     });
 
     return result;
+  }
+
+  private determineScope(
+    authorizationContext: AuthorizationContext,
+    scope: ListAIsRequestScope | null | undefined
+  ) {
+    if (!scope) {
+      return ListAIsRequestScope.ALL;
+    }
+
+    if (scope === ListAIsRequestScope.INSTANCE) {
+      const hasInstanceAccess = BaseEntitySecurityService.hasPermission(
+        authorizationContext,
+        SecuredResourceType.AI,
+        SecuredAction.READ,
+        SecuredResourceAccessLevel.INSTANCE
+      );
+      if (!hasInstanceAccess) {
+        return ListAIsRequestScope.ALL;
+      }
+    }
+
+    return scope;
   }
 
   private async getMessageCountPerAi(aiIds: string[]) {
@@ -389,6 +416,9 @@ export class AIService {
         baseWhereCondition.OR.push(this.getSharedWithUserCriteria(userId));
         baseWhereCondition.OR.push(this.getOrganizationCriteria(orgId));
         baseWhereCondition.OR.push(this.getPublicCriteria());
+        break;
+      case ListAIsRequestScope.INSTANCE:
+        baseWhereCondition = { AND: [{}] };
         break;
     }
 
