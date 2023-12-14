@@ -102,23 +102,24 @@ export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
   return (
     <div className="flex flex-col p-4 pb-3 bg-accent/30">
       <div className="flex w-full justify-between items-center">
-        {ai && (
-          <div className="flex gap-x-2 items-center">
-            <BotAvatar src={ai.src} />
-            <div className="flex flex-col gap-y-1">
-              <p className="font-bold">{ai.name}</p>
-              <div className="flex items-center gap-x-2">
-                <p className="text-xs text-muted-foreground">
-                  Created by {ai.userName}
-                </p>
+        <div className="flex gap-x-2 items-center">
+          <BotAvatar src={chat.ai.src} />
+          <div className="flex flex-col gap-y-1">
+            <p className="font-bold">{chat.ai.name}</p>
+            <div className="flex items-center gap-x-2">
+              <p className="text-xs text-muted-foreground">
+                Created by {chat.ai.userName}
+              </p>
+              {ai && (
                 <div className="flex items-center text-xs text-muted-foreground">
                   <MessagesSquare className="w-3 h-3 mr-1" />
                   {ai.messageCount}
                 </div>
-              </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
+
         <div className="flex">
           {ai && canEditAi && (
             <Button
@@ -144,10 +145,12 @@ export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
                   Unpin
                 </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem onClick={() => pin()}>
-                  <Pin className="w-4 h-4 mr-2" />
-                  Pin
-                </DropdownMenuItem>
+                ai && (
+                  <DropdownMenuItem onClick={() => pin()}>
+                    <Pin className="w-4 h-4 mr-2" />
+                    Pin
+                  </DropdownMenuItem>
+                )
               )}
               {ai && (
                 <DropdownMenuItem onClick={() => reset()}>
