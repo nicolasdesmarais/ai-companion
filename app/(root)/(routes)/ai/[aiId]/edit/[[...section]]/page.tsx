@@ -4,6 +4,10 @@ import aiModelService from "@/src/domain/services/AIModelService";
 import aiService from "@/src/domain/services/AIService";
 import groupService from "@/src/domain/services/GroupService";
 import prismadb from "@/src/lib/prismadb";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
+import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { redirectToSignIn } from "@clerk/nextjs";
 
@@ -32,6 +36,13 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
 
   const groups = await groupService.findGroupsByUser(authorizationContext);
 
+  const hasInstanceAccess = BaseEntitySecurityService.hasPermission(
+    authorizationContext,
+    SecuredResourceType.AI,
+    SecuredAction.WRITE,
+    SecuredResourceAccessLevel.INSTANCE
+  );
+
   return (
     <>
       <AIEditor
@@ -39,6 +50,7 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
         aiModels={models}
         categories={categories}
         groups={groups}
+        hasInstanceAccess={hasInstanceAccess}
       />
       <GroupModal />
     </>
