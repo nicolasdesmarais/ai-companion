@@ -49,6 +49,7 @@ export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
   const aiProfile = useAIProfile();
   const [showShareModal, setShowShareModal] = useState(false);
   const rateAI = useRateAI();
+
   const duplicate = async () => {
     const response = await axios.put(`/api/v1/chats/${chat.id}/duplicate`);
     if (response.status === 200) {
@@ -119,7 +120,7 @@ export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
           </div>
         )}
         <div className="flex">
-          {ai && (user?.id === ai.userId || ai.visibility === "PUBLIC") && (
+          {ai && canEditAi && (
             <Button
               variant="ghost"
               size="icon"

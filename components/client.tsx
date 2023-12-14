@@ -87,7 +87,7 @@ export const ChatClient = ({ ai, chat, canEditAi }: ChatClientProps) => {
         stream={stream}
       />
       <ChatForm
-        isLoading={isLoading}
+        isLoading={!ai || isLoading}
         input={input}
         handleInputChange={handleInputChange}
         onSubmit={onSubmit}
