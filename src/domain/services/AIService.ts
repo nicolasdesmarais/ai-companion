@@ -12,7 +12,7 @@ import {
   AI,
   AIVisibility,
   DataSourceType,
-  Group,
+  GroupAI,
   GroupAvailability,
   Prisma,
 } from "@prisma/client";
@@ -63,12 +63,7 @@ const listAIResponseSelect: Prisma.AISelect = {
   seed: true,
   groups: {
     select: {
-      group: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
+      groupId: true,
     },
   },
 };
@@ -339,7 +334,7 @@ export class AIService {
   }
 
   private mapToAIDto(
-    ai: AI & { groups: Group[] },
+    ai: AI & { groups: GroupAI[] },
     messageCountPerAi: any[],
     ratingPerAi: any[],
     forUpdate: boolean = false
@@ -374,7 +369,7 @@ export class AIService {
       filteredAi = aiWithoutSeed;
     }
 
-    const groupIds: string[] = ai.groups.map((group) => group.id);
+    const groupIds: string[] = ai.groups.map((groupAi) => groupAi.groupId);
 
     return {
       ...filteredAi,
