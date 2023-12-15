@@ -585,6 +585,12 @@ export class AIService {
       throw new ForbiddenError("Forbidden");
     }
 
+    if (ai.orgId !== dataSource.orgId) {
+      throw new BadRequestError(
+        "DataSources must belong to the same org as the AI"
+      );
+    }
+
     return await prismadb.aIDataSource.create({
       data: {
         aiId,

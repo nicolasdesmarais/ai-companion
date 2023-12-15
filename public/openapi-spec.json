@@ -628,7 +628,7 @@
             "description": "Not Found, either of the specified AI or data source are not found."
           },
           "500": {
-            "description": "Internal Server Error, indicating a problem within the server."
+            "description": "Internal Server Error"
           }
         },
         "security": [
@@ -792,40 +792,6 @@
                 }
               }
             }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ]
-      }
-    },
-    "/api/v1/data-sources/{dataSourceId}": {
-      "delete": {
-        "summary": "Delete a Data Source",
-        "description": "Deletes a specific data source associated with the given AI identifier.",
-        "operationId": "deleteDataSource",
-        "parameters": [
-          {
-            "name": "dataSourceId",
-            "in": "path",
-            "required": true,
-            "description": "The unique identifier of the data source to be deleted.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Data source successfully deleted, no content to return."
-          },
-          "403": {
-            "description": "Forbidden, the user is not authorized to perform this action."
-          },
-          "404": {
-            "description": "Not Found, the specified data source ID does not exist."
           }
         },
         "security": [
@@ -1084,6 +1050,40 @@
           },
           "500": {
             "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/data-sources/{dataSourceId}": {
+      "delete": {
+        "summary": "Delete a Data Source",
+        "description": "Deletes a specific data source associated with the given AI identifier.",
+        "operationId": "deleteDataSource",
+        "parameters": [
+          {
+            "name": "dataSourceId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the data source to be deleted.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Data source successfully deleted, no content to return."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "404": {
+            "description": "Not Found, the specified data source ID does not exist."
           }
         },
         "security": [
