@@ -1,4 +1,3 @@
-import { ListDataSourcesResponse } from "@/src/adapter-in/api/DataSourcesApi";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
 import apiDataSourceAdapter from "@/src/adapter-out/knowledge/api/ApiDataSourceAdapter";
 import fileUploadDataSourceAdapter from "@/src/adapter-out/knowledge/file-upload/FileUploadDataSourceAdapter";
@@ -24,6 +23,7 @@ import {
 } from "@prisma/client";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import { DomainEvent } from "../events/domain-event";
+import { DataSourceDto } from "../models/DataSources";
 
 const dataSourceSummarySelect: Prisma.DataSourceSelect = {
   id: true,
@@ -56,18 +56,16 @@ export class DataSourceService {
 
   public async getDataSources(
     authorizationContext: AuthorizationContext
-  ): Promise<ListDataSourcesResponse> {
+  ): Promise<DataSourceDto[]> {
     const dataSources = await prismadb.dataSource.findMany({
       select: dataSourceSummarySelect,
       where: this.getDataSourcesWhereClause(authorizationContext),
     });
 
-    return {
-      data: dataSources.map((dataSource) => ({
-        ...dataSource,
-        indexPercentage: dataSource.indexPercentage.toString(),
-      })),
-    };
+    return dataSources.map((dataSource) => ({
+      ...dataSource,
+      indexPercentage: dataSource.indexPercentage.toString(),
+    }));
   }
 
   private getDataSourcesWhereClause(
@@ -106,7 +104,7 @@ export class DataSourceService {
   public async getAIDataSources(
     authorizationContext: AuthorizationContext,
     aiId: string
-  ): Promise<ListDataSourcesResponse> {
+  ): Promise<DataSourceDto[]> {
     const ai = await prismadb.aI.findUnique({
       where: { id: aiId },
     });
@@ -133,12 +131,10 @@ export class DataSourceService {
       },
     });
 
-    return {
-      data: dataSources.map((dataSource) => ({
-        ...dataSource,
-        indexPercentage: dataSource.indexPercentage.toString(),
-      })),
-    };
+    return dataSources.map((dataSource) => ({
+      ...dataSource,
+      indexPercentage: dataSource.indexPercentage.toString(),
+    }));
   }
 
   /**

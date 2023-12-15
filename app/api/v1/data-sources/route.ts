@@ -1,5 +1,6 @@
-import { GroupSummaryDto } from "@/src/domain/models/Groups";
-import groupService from "@/src/domain/services/GroupService";
+import { ListDataSourcesResponse } from "@/src/adapter-in/api/DataSourcesApi";
+import { DataSourceDto } from "@/src/domain/models/DataSources";
+import dataSourceService from "@/src/domain/services/DataSourceService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
@@ -11,13 +12,13 @@ import { NextResponse } from "next/server";
 async function getHandler(
   req: Request,
   context: { authorizationContext: AuthorizationContext }
-) {
+): Promise<NextResponse<ListDataSourcesResponse>> {
   const { authorizationContext } = context;
 
-  const groups: GroupSummaryDto[] = await groupService.findGroupsByUser(
+  const dataSources: DataSourceDto[] = await dataSourceService.getDataSources(
     authorizationContext
   );
-  return NextResponse.json(groups);
+  return NextResponse.json({ data: dataSources });
 }
 
 export const GET = withErrorHandler(
