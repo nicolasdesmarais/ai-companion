@@ -1,7 +1,5 @@
-import {
-  CreateGroupRequest,
-  GroupDetailDto,
-} from "@/src/adapter-in/api/GroupsApi";
+import { CreateGroupRequest } from "@/src/adapter-in/api/GroupsApi";
+import { GroupDetailDto } from "@/src/domain/models/Groups";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";

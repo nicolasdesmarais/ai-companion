@@ -1,4 +1,4 @@
-import { GroupSummaryDto } from "@/src/adapter-in/api/GroupsApi";
+import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { AuthorizationContext } from "../models/AuthorizationContext";
 
 export class GroupSecurityService {
