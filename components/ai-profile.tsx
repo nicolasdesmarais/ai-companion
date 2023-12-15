@@ -1,4 +1,5 @@
 "use client";
+import { ResizePanel } from "@/components/resize-panel";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useAIProfile } from "@/hooks/use-ai-profile";
 import { useRateAI } from "@/hooks/use-rate-ai";
@@ -13,7 +14,6 @@ import { useEffect, useState } from "react";
 import { StarRating } from "./star-rating";
 import { StarSvg } from "./svg/star-svg";
 import { Button } from "./ui/button";
-import { ResizePanel } from "@/components/resize-panel";
 
 const aiModelRepository = new StaticAIModelRepository();
 interface Props {
