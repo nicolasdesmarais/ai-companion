@@ -1,3 +1,4 @@
+import { ListDataSourcesResponse } from "@/src/adapter-in/api/DataSourcesApi";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
 import apiDataSourceAdapter from "@/src/adapter-out/knowledge/api/ApiDataSourceAdapter";
 import fileUploadDataSourceAdapter from "@/src/adapter-out/knowledge/file-upload/FileUploadDataSourceAdapter";
@@ -7,7 +8,6 @@ import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSource
 import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
 import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
-import { GetDataSourcesResponse } from "@/src/domain/models/DataSources";
 import prismadb from "@/src/lib/prismadb";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
@@ -56,7 +56,7 @@ export class DataSourceService {
 
   public async getDataSources(
     authorizationContext: AuthorizationContext
-  ): Promise<GetDataSourcesResponse> {
+  ): Promise<ListDataSourcesResponse> {
     const dataSources = await prismadb.dataSource.findMany({
       select: dataSourceSummarySelect,
       where: this.getDataSourcesWhereClause(authorizationContext),
@@ -106,7 +106,7 @@ export class DataSourceService {
   public async getAIDataSources(
     authorizationContext: AuthorizationContext,
     aiId: string
-  ): Promise<GetDataSourcesResponse> {
+  ): Promise<ListDataSourcesResponse> {
     const ai = await prismadb.aI.findUnique({
       where: { id: aiId },
     });
