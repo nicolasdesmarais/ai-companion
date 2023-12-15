@@ -19,8 +19,10 @@ export const ChatList = ({ className, isMobile = false }: Props) => {
   const pathname = usePathname();
 
   useEffect(() => {
-    fetchChats();
-  }, []);
+    if (!chats.length) {
+      fetchChats();
+    }
+  }, [fetchChats, chats.length]);
 
   const pinned = chats.filter((chat) => chat.pinPosition);
 

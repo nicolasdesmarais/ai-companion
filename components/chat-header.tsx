@@ -55,6 +55,7 @@ export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
     if (response.status === 200) {
       toast({ description: "Chat duplicated." });
       router.push(`/chat/${response.data.id}`);
+      fetchChats();
     }
   };
 
@@ -96,6 +97,7 @@ export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
     if (response.status === 204) {
       toast({ description: "Chat deleted." });
       router.push(`/chat/`);
+      fetchChats();
     }
   };
 
