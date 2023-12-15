@@ -1,4 +1,9 @@
+import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { GroupAvailability } from "@prisma/client";
+
+export interface ListGroupsResponse {
+  data: GroupSummaryDto[];
+}
 
 export interface CreateGroupRequest {
   name: string;
