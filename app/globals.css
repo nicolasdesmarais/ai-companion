@@ -37,6 +37,10 @@ body,
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
     --ring: 217 37% 48%;
+
+    --orange: 36 91% 43%;
+    --green: 118 74% 33%;
+    --yellow: 51 96% 48%;
  
     --radius: 0.5rem;
   }

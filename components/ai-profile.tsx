@@ -264,7 +264,7 @@ export const AIProfile = ({ ai }: Props) => {
                   >
                     <div
                       className={cn(
-                        "rounded-md bg-[#eecc50] h-full",
+                        "rounded-md bg-yellow h-full",
                         ratingDistributions[4 - i] < 100 && "rounded-r-none"
                       )}
                       style={{ width: `${ratingDistributions[4 - i] || 0}%` }}

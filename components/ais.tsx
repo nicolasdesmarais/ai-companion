@@ -4,6 +4,8 @@ import Link from "next/link";
 import { StarRating } from "@/components/star-rating";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { AIDetailDto } from "@/src/domain/models/AI";
+import { LockKeyhole } from "lucide-react";
+import { cn } from "@/src/lib/utils";
 
 interface AIsProps {
   data: AIDetailDto[];
@@ -20,7 +22,7 @@ export const AIs = ({ data }: AIsProps) => {
       </div>
     );
   }
-
+  console.log(data);
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-9 gap-3 pb-10">
       {data.map((item) => (
@@ -38,6 +40,9 @@ export const AIs = ({ data }: AIsProps) => {
                     className="rounded-xl object-cover"
                     alt="Character"
                   />
+                  {item.visibility === "PRIVATE" && (
+                    <LockKeyhole className="absolute top-2 right-2 w-6 h-6 bg-orange px-1 rounded-md text-white" />
+                  )}
                 </div>
                 <p className="font-bold">{item.name}</p>
                 <p className="text-xs">{item.description}</p>
@@ -49,8 +54,16 @@ export const AIs = ({ data }: AIsProps) => {
                   className="mt-2"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                  <div className="lowercase truncate w-11/12">
-                    {item.userName}
+                  <div className={cn("truncate w-11/12")}>
+                    <span
+                      className={cn(
+                        "lowercase",
+                        item.visibility === "PRIVATE" &&
+                          "bg-orange px-1 rounded-sm text-white"
+                      )}
+                    >
+                      {item.userName}
+                    </span>
                   </div>
                   <div className="flex items-center">{item.messageCount}</div>
                   <span>&nbsp;chats</span>
