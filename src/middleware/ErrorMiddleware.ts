@@ -1,4 +1,4 @@
-import { ApiError } from "@/src/domain/models/ApiError";
+import { ApiError } from "@/src/adapter-in/api/ApiError";
 import { NextResponse } from "next/server";
 import {
   BadRequestError,
