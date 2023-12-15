@@ -1,38 +1,6 @@
 import { AIVisibility } from "@prisma/client";
 import { AIModelOptions } from "./AIModel";
 
-export interface AIProfileFeature {
-  title: string;
-  description: string;
-}
-export interface AIProfile {
-  headline: string;
-  description: string;
-  features: AIProfileFeature[];
-  showCharacter: boolean;
-  showTraining: boolean;
-  showPersonality: boolean;
-  trainingDescription: string;
-}
-
-export interface AIRequest {
-  categoryId: string;
-  src: string;
-  name: string;
-  description: string;
-  instructions: string;
-  seed: string;
-  modelId: string;
-  visibility: AIVisibility;
-  options: AIModelOptions;
-  groups: string[];
-  profile: AIProfile;
-}
-
-export interface ListAIsResponse {
-  data: AIDetailDto[];
-}
-
 export interface AISummaryDto {
   id: string;
   createdAt: Date;
@@ -60,4 +28,18 @@ export interface AIDetailDto extends AISummaryDto {
   groups?: string[];
   options?: AIModelOptions;
   visibility?: AIVisibility;
+}
+
+export interface AIProfileFeature {
+  title: string;
+  description: string;
+}
+export interface AIProfile {
+  headline: string;
+  description: string;
+  features: AIProfileFeature[];
+  showCharacter: boolean;
+  showTraining: boolean;
+  showPersonality: boolean;
+  trainingDescription: string;
 }
