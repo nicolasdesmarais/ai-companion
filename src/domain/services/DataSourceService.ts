@@ -10,16 +10,33 @@ import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUr
 import { GetDataSourcesResponse } from "@/src/domain/ports/api/DataSourcesApi";
 import prismadb from "@/src/lib/prismadb";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { AISecurityService } from "@/src/security/services/AISecurityService";
 import {
   DataSourceIndexStatus,
   DataSourceType,
   Knowledge,
   KnowledgeIndexStatus,
+  Prisma,
   PrismaClient,
 } from "@prisma/client";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import { DomainEvent } from "../events/domain-event";
+
+const dataSourceSummarySelect: Prisma.DataSourceSelect = {
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastIndexedAt: true,
+  name: true,
+  type: true,
+  orgId: true,
+  ownerUserId: true,
+  indexStatus: true,
+  indexPercentage: true,
+};
 
 export class DataSourceService {
   private getDataSourceAdapter(type: DataSourceType): DataSourceAdapter {
@@ -35,6 +52,55 @@ export class DataSourceService {
       default:
         throw new Error(`DataSourceType ${type} not supported`);
     }
+  }
+
+  public async getDataSources(
+    authorizationContext: AuthorizationContext
+  ): Promise<GetDataSourcesResponse> {
+    const dataSources = await prismadb.dataSource.findMany({
+      select: dataSourceSummarySelect,
+      where: this.getDataSourcesWhereClause(authorizationContext),
+    });
+
+    return {
+      data: dataSources.map((dataSource) => ({
+        ...dataSource,
+        indexPercentage: dataSource.indexPercentage.toString(),
+      })),
+    };
+  }
+
+  private getDataSourcesWhereClause(
+    authorizationContext: AuthorizationContext
+  ): Prisma.DataSourceWhereInput {
+    const dataSourcePermissions = authorizationContext.permissions
+      .filter(
+        (permission) =>
+          permission.resourceType === SecuredResourceType.DATA_SOURCES &&
+          permission.action === SecuredAction.READ
+      )
+      .map((permission) => permission.accessLevel);
+
+    const { orgId, userId } = authorizationContext;
+
+    if (dataSourcePermissions.includes(SecuredResourceAccessLevel.INSTANCE)) {
+      return {};
+    }
+    if (
+      dataSourcePermissions.includes(SecuredResourceAccessLevel.ORGANIZATION)
+    ) {
+      return {
+        orgId,
+      };
+    }
+    if (dataSourcePermissions.includes(SecuredResourceAccessLevel.SELF)) {
+      return {
+        orgId,
+        ownerUserId: userId,
+      };
+    }
+
+    throw new ForbiddenError("Forbidden");
   }
 
   public async getAIDataSources(
@@ -57,16 +123,7 @@ export class DataSourceService {
     }
 
     const dataSources = await prismadb.dataSource.findMany({
-      select: {
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        lastIndexedAt: true,
-        name: true,
-        type: true,
-        indexStatus: true,
-        indexPercentage: true,
-      },
+      select: dataSourceSummarySelect,
       where: {
         ais: {
           some: {
