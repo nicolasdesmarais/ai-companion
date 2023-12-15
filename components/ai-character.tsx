@@ -25,7 +25,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useGroupModal } from "@/hooks/use-group-modal";
 import { useTalkModal } from "@/hooks/use-talk-modal";
 import { AIModel } from "@/src/domain/models/AIModel";
-import { GroupSummaryDto } from "@/src/domain/ports/api/GroupsApi";
+import { GroupSummaryDto } from "@/src/domain/models/GroupsApi";
 import { getDiversityString } from "@/src/lib/diversity";
 import { Category } from "@prisma/client";
 import axios, { AxiosError } from "axios";

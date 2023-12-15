@@ -1,7 +1,7 @@
 import {
   ListAIsRequestParams,
   ListAIsRequestScope,
-} from "@/src/domain/ports/api/ListAIsRequestParams";
+} from "@/src/domain/models/ListAIsRequestParams";
 import aiService from "@/src/domain/services/AIService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";

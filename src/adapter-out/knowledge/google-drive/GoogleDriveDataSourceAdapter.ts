@@ -6,7 +6,7 @@ import { DomainEvent } from "@/src/domain/events/domain-event";
 import {
   GoogleDriveSearchResponse,
   mapMimeTypeToEnum,
-} from "@/src/domain/ports/api/GoogleDriveApi";
+} from "@/src/domain/models/GoogleDriveApi";
 import orgClientCredentialsService from "@/src/domain/services/OrgClientCredentialsService";
 import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";

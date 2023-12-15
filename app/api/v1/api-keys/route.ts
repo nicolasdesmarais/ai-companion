@@ -1,4 +1,4 @@
-import { CreateApiKeyRequest } from "@/src/domain/ports/api/ApiKeysApi";
+import { CreateApiKeyRequest } from "@/src/domain/models/ApiKeysApi";
 import apiKeyService from "@/src/domain/services/ApiKeyService";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { auth } from "@clerk/nextjs";

@@ -10,7 +10,7 @@ import {
   GroupDetailDto,
   GroupSummaryDto,
   UpdateGroupRequest,
-} from "../ports/api/GroupsApi";
+} from "../models/GroupsApi";
 import { InvitationService } from "./InvitationService";
 
 const groupSummarySelect: Prisma.GroupSelect = {

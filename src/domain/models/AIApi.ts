@@ -1,5 +1,5 @@
 import { AIVisibility } from "@prisma/client";
-import { AIModelOptions } from "../../models/AIModel";
+import { AIModelOptions } from "./AIModel";
 
 export interface CreateAIRequest extends AIRequest {
   userName: string;

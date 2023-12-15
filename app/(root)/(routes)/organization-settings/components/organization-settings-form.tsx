@@ -24,7 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
-import { UpsertClientCredentialsRequest } from "@/src/domain/ports/api/OrgClientCredentialsApi";
+import { UpsertClientCredentialsRequest } from "@/src/domain/models/OrgClientCredentialsApi";
 import { OAuthTokenProvider } from "@prisma/client";
 import axios from "axios";
 import { Loader } from "lucide-react";

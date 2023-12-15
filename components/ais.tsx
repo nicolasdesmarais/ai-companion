@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { StarRating } from "@/components/star-rating";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
-import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
+import { AIDetailDto } from "@/src/domain/models/AIApi";
 
 interface AIsProps {
   data: AIDetailDto[];

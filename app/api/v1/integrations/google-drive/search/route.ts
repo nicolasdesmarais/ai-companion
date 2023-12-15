@@ -3,7 +3,7 @@ import {
   BadRequestError,
   EntityNotFoundError,
 } from "@/src/domain/errors/Errors";
-import { GoogleDriveSearchRequest } from "@/src/domain/ports/api/GoogleDriveApi";
+import { GoogleDriveSearchRequest } from "@/src/domain/models/GoogleDriveApi";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 

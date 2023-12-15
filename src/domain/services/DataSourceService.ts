@@ -7,7 +7,7 @@ import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSource
 import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
 import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
-import { GetDataSourcesResponse } from "@/src/domain/ports/api/DataSourcesApi";
+import { GetDataSourcesResponse } from "@/src/domain/models/DataSourcesApi";
 import prismadb from "@/src/lib/prismadb";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { SecuredAction } from "@/src/security/models/SecuredAction";

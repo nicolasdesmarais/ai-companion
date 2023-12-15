@@ -20,18 +20,18 @@ import { ChatOpenAI } from "langchain/chat_models/openai";
 import { SystemMessage } from "langchain/schema";
 import { AISecurityService } from "../../security/services/AISecurityService";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
-import { AIModelOptions } from "../models/AIModel";
 import {
   AIDetailDto,
   AIProfile,
   CreateAIRequest,
   UpdateAIRequest,
-} from "../ports/api/AIApi";
+} from "../models/AIApi";
+import { AIModelOptions } from "../models/AIModel";
 import {
   ListAIsRequestParams,
   ListAIsRequestScope,
-} from "../ports/api/ListAIsRequestParams";
-import { ShareAIRequest } from "../ports/api/ShareAIRequest";
+} from "../models/ListAIsRequestParams";
+import { ShareAIRequest } from "../models/ShareAIRequest";
 import aiModelService from "./AIModelService";
 import dataSourceService from "./DataSourceService";
 import groupService from "./GroupService";

@@ -5,7 +5,7 @@ import {
   ChatDetailDto,
   CreateChatRequest,
   ListChatsResponse,
-} from "@/src/domain/ports/api/ChatsApi";
+} from "@/src/domain/models/ChatsApi";
 import prismadb from "@/src/lib/prismadb";
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";

@@ -3,8 +3,8 @@
 import { ChatForm } from "@/components/chat-form";
 import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
-import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
-import { ChatMessageDto } from "@/src/domain/ports/api/ChatsApi";
+import { AIDetailDto } from "@/src/domain/models/AIApi";
+import { ChatMessageDto } from "@/src/domain/models/ChatsApi";
 import { useCompletion } from "ai/react";
 import {
   Dispatch,

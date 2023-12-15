@@ -1,5 +1,5 @@
 import { GoogleDriveDataSourceInput } from "@/src/adapter-out/knowledge/google-drive/types/GoogleDriveDataSourceInput";
-import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/ports/api/GoogleDriveApi";
+import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/models/GoogleDriveApi";
 import aiService from "@/src/domain/services/AIService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";

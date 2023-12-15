@@ -4,7 +4,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useAIProfile } from "@/hooks/use-ai-profile";
 import { useRateAI } from "@/hooks/use-rate-ai";
 import { StaticAIModelRepository } from "@/src/adapter-out/repositories/StaticAIModelRepository";
-import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
+import { AIDetailDto } from "@/src/domain/models/AIApi";
 import { cn } from "@/src/lib/utils";
 import axios from "axios";
 import { X } from "lucide-react";

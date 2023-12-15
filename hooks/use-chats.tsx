@@ -1,7 +1,7 @@
 import {
   ChatSummaryDto,
   ListChatsResponse,
-} from "@/src/domain/ports/api/ChatsApi";
+} from "@/src/domain/models/ChatsApi";
 import { create } from "zustand";
 
 interface useChatsStore {

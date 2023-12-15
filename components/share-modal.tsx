@@ -5,7 +5,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { ShareAIForm } from "@/components/share-ai-form";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
+import { AIDetailDto } from "@/src/domain/models/AIApi";
 
 interface InviteModalProps {
   showModal: boolean;

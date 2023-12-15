@@ -31,7 +31,7 @@ import { useGroupModal } from "@/hooks/use-group-modal";
 import {
   CreateGroupRequest,
   UpdateGroupRequest,
-} from "@/src/domain/ports/api/GroupsApi";
+} from "@/src/domain/models/GroupsApi";
 import { useUser } from "@clerk/nextjs";
 import { GroupAvailability } from "@prisma/client";
 import { Loader, X } from "lucide-react";

@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
+import { AIDetailDto } from "@/src/domain/models/AIApi";
 import { AIModel } from "@/src/domain/models/AIModel";
-import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
 
 interface SelectDataSourceProps {
   initialAi: AIDetailDto | null;

@@ -10,7 +10,7 @@ import aiService from "@/src/domain/services/AIService";
 import {
   ListAIsRequestParams,
   ListAIsRequestScope,
-} from "@/src/domain/ports/api/ListAIsRequestParams";
+} from "@/src/domain/models/ListAIsRequestParams";
 import categoryService from "@/src/domain/services/CategoryService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 
