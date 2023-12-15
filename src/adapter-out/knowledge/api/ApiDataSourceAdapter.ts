@@ -1,4 +1,4 @@
-import { CreateApiDataSourceRequest } from "@/src/domain/models/DataSourcesApi";
+import { CreateApiDataSourceRequest } from "@/src/domain/models/DataSources";
 import {
   DataSourceType,
   Knowledge,
