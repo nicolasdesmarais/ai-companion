@@ -15,7 +15,7 @@ async function getHandler(
 ): Promise<NextResponse<ListDataSourcesResponse>> {
   const { authorizationContext } = context;
 
-  const dataSources: DataSourceDto[] = await dataSourceService.getDataSources(
+  const dataSources: DataSourceDto[] = await dataSourceService.listDataSources(
     authorizationContext
   );
   return NextResponse.json({ data: dataSources });

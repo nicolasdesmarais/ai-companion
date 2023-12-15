@@ -60,7 +60,7 @@ export class DataSourceService {
     }
   }
 
-  public async getDataSources(
+  public async listDataSources(
     authorizationContext: AuthorizationContext
   ): Promise<DataSourceDto[]> {
     const highestAccessLevel = BaseEntitySecurityService.getHighestAccessLevel(
@@ -86,7 +86,7 @@ export class DataSourceService {
     }
   }
 
-  public async getAIDataSources(
+  public async listAIDataSources(
     authorizationContext: AuthorizationContext,
     aiId: string
   ): Promise<DataSourceDto[]> {
