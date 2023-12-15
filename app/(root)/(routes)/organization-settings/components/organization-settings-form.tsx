@@ -30,6 +30,7 @@ import axios from "axios";
 import { Loader } from "lucide-react";
 
 interface OrganizationSettingsFormProps {
+  redirectUri: string;
   data: any;
 }
 
@@ -45,15 +46,11 @@ interface GoogleIntegrationFormData {
 
 export const OrganizationSettingsForm: React.FC<
   OrganizationSettingsFormProps
-> = ({ data }) => {
+> = ({ redirectUri, data }) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [googleIntegrationData, setGoogleIntegrationData] =
     useState<GoogleIntegrationFormData>(data);
-
-  const host = window.location.host;
-  const protocol = window.location.protocol;
-  const redirectUri = `${protocol}://${host}/integrations/google-drive/callback`;
 
   const form = useForm<GoogleIntegrationFormData>({
     resolver: zodResolver(googleIntegrationFormSchema),
