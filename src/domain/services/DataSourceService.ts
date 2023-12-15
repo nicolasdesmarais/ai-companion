@@ -37,7 +37,7 @@ export class DataSourceService {
     }
   }
 
-  public async getDataSources(
+  public async getAIDataSources(
     authorizationContext: AuthorizationContext,
     aiId: string
   ): Promise<GetDataSourcesResponse> {

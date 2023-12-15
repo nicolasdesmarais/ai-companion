@@ -16,7 +16,7 @@ async function getHandler(
 ) {
   const { params, authorizationContext } = context;
 
-  const dataSources = await dataSourceService.getDataSources(
+  const dataSources = await dataSourceService.getAIDataSources(
     authorizationContext,
     params.aiId
   );
