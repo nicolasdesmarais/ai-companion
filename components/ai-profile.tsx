@@ -1,9 +1,10 @@
 "use client";
+import { ResizePanel } from "@/components/resize-panel";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useAIProfile } from "@/hooks/use-ai-profile";
 import { useRateAI } from "@/hooks/use-rate-ai";
 import { StaticAIModelRepository } from "@/src/adapter-out/repositories/StaticAIModelRepository";
-import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
+import { AIDetailDto } from "@/src/domain/models/AI";
 import { cn } from "@/src/lib/utils";
 import axios from "axios";
 import { X } from "lucide-react";
@@ -13,7 +14,6 @@ import { useEffect, useState } from "react";
 import { StarRating } from "./star-rating";
 import { StarSvg } from "./svg/star-svg";
 import { Button } from "./ui/button";
-import { ResizePanel } from "@/components/resize-panel";
 
 const aiModelRepository = new StaticAIModelRepository();
 interface Props {

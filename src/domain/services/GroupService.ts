@@ -3,14 +3,13 @@ import prismadb from "@/src/lib/prismadb";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { clerkClient } from "@clerk/nextjs";
 import { GroupAvailability, Prisma } from "@prisma/client";
-import { GroupSecurityService } from "../../security/services/GroupSecurityService";
-import { BadRequestError, EntityNotFoundError } from "../errors/Errors";
 import {
   CreateGroupRequest,
-  GroupDetailDto,
-  GroupSummaryDto,
   UpdateGroupRequest,
-} from "../ports/api/GroupsApi";
+} from "../../adapter-in/api/GroupsApi";
+import { GroupSecurityService } from "../../security/services/GroupSecurityService";
+import { BadRequestError, EntityNotFoundError } from "../errors/Errors";
+import { GroupDetailDto, GroupSummaryDto } from "../models/Groups";
 import { InvitationService } from "./InvitationService";
 
 const groupSummarySelect: Prisma.GroupSelect = {

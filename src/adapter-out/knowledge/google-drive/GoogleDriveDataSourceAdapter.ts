@@ -1,12 +1,12 @@
 import {
+  GoogleDriveSearchResponse,
+  mapMimeTypeToEnum,
+} from "@/src/adapter-in/api/GoogleDriveApi";
+import {
   EntityNotFoundError,
   ForbiddenError,
 } from "@/src/domain/errors/Errors";
 import { DomainEvent } from "@/src/domain/events/domain-event";
-import {
-  GoogleDriveSearchResponse,
-  mapMimeTypeToEnum,
-} from "@/src/domain/ports/api/GoogleDriveApi";
 import orgClientCredentialsService from "@/src/domain/services/OrgClientCredentialsService";
 import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";

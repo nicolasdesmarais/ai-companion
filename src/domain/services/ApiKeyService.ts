@@ -4,7 +4,7 @@ import {
   ListApiKeyResponse,
   UpdateApiKeyRequest,
   UpdateApiKeyResponse,
-} from "@/src/domain/ports/api/ApiKeysApi";
+} from "@/src/adapter-in/api/ApiKeysApi";
 import prismadb from "@/src/lib/prismadb";
 import { isValidScope } from "@/src/security/models/Permission";
 import { JsonValue } from "@prisma/client/runtime/library";

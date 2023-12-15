@@ -1,4 +1,4 @@
-import { AISummaryDto } from "@/src/domain/ports/api/AIApi";
+import { AISummaryDto } from "@/src/domain/models/AI";
 import { AI } from "@prisma/client";
 import { AuthorizationContext } from "../models/AuthorizationContext";
 import { SecuredAction } from "../models/SecuredAction";

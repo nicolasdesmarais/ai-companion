@@ -24,7 +24,7 @@ import {
   CreateApiKeyRequest,
   CreateApiKeyResponse,
   ListApiKeyResponse,
-} from "@/src/domain/ports/api/ApiKeysApi";
+} from "@/src/adapter-in/api/ApiKeysApi";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
 import { format } from "date-fns";

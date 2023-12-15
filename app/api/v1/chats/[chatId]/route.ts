@@ -1,7 +1,5 @@
-import {
-  ChatDetailDto,
-  CreateChatRequest,
-} from "@/src/domain/ports/api/ChatsApi";
+import { CreateChatRequest } from "@/src/adapter-in/api/ChatsApi";
+import { ChatDetailDto } from "@/src/domain/models/Chats";
 import chatService from "@/src/domain/services/ChatService";
 import { rateLimit } from "@/src/lib/rate-limit";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";

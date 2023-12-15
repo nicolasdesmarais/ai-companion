@@ -9,8 +9,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
-import { ShareAIRequest } from "@/src/domain/ports/api/ShareAIRequest";
+import { ShareAIRequest } from "@/src/adapter-in/api/AIApi";
+import { AIDetailDto } from "@/src/domain/models/AI";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AIVisibility } from "@prisma/client";
 import axios from "axios";

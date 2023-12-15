@@ -10,14 +10,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { EntityNotFoundError } from "@/src/domain/errors/Errors";
-import { UserOAuthTokenEntity } from "@/src/domain/models/OAuthTokenEntity";
 import {
   CreateGoogleDriveKnowledgeRequest,
   GoogleDriveFile,
   GoogleDriveSearchRequest,
   getLabelFromFileType,
-} from "@/src/domain/ports/api/GoogleDriveApi";
+} from "@/src/adapter-in/api/GoogleDriveApi";
+import { EntityNotFoundError } from "@/src/domain/errors/Errors";
+import { UserOAuthTokenEntity } from "@/src/domain/models/OAuthTokens";
 import axios from "axios";
 import { format } from "date-fns";
 import { Loader, Server } from "lucide-react";

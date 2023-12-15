@@ -1,7 +1,7 @@
 import {
   ApifySupportedEvents,
   ApifyWebhookEvent,
-} from "@/src/domain/ports/api/ApifyWebhookEvent";
+} from "@/src/domain/models/ApifyWebhookEvent";
 import dataSourceService from "@/src/domain/services/DataSourceService";
 import { DataSourceType } from "@prisma/client";
 import { headers } from "next/headers";

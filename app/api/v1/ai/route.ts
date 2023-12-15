@@ -1,4 +1,4 @@
-import { CreateAIRequest } from "@/src/domain/ports/api/AIApi";
+import { CreateAIRequest } from "@/src/adapter-in/api/AIApi";
 import aiService from "@/src/domain/services/AIService";
 import EmailUtils from "@/src/lib/emailUtils";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";

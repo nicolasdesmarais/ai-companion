@@ -1,3 +1,4 @@
+import { ListDataSourcesResponse } from "@/src/adapter-in/api/DataSourcesApi";
 import dataSourceService from "@/src/domain/services/DataSourceService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
@@ -13,7 +14,7 @@ async function getHandler(
     params: { aiId: string };
     authorizationContext: AuthorizationContext;
   }
-) {
+): Promise<NextResponse<ListDataSourcesResponse>> {
   const { params, authorizationContext } = context;
 
   const dataSources = await dataSourceService.getAIDataSources(
@@ -21,7 +22,7 @@ async function getHandler(
     params.aiId
   );
 
-  return NextResponse.json(dataSources);
+  return NextResponse.json({ data: dataSources });
 }
 
 export const GET = withErrorHandler(

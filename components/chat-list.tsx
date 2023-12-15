@@ -2,7 +2,7 @@
 import { BotAvatar } from "@/components/bot-avatar";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useChats } from "@/hooks/use-chats";
-import { ChatSummaryDto } from "@/src/domain/ports/api/ChatsApi";
+import { ChatSummaryDto } from "@/src/domain/models/Chats";
 import { cn } from "@/src/lib/utils";
 import { Loader } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";

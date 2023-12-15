@@ -1,4 +1,4 @@
-import { ShareAIRequest } from "@/src/domain/ports/api/ShareAIRequest";
+import { ShareAIRequest } from "@/src/adapter-in/api/AIApi";
 import aiService from "@/src/domain/services/AIService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";

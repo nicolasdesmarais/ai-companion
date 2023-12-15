@@ -1,7 +1,5 @@
-import {
-  GroupDetailDto,
-  UpdateGroupRequest,
-} from "@/src/domain/ports/api/GroupsApi";
+import { UpdateGroupRequest } from "@/src/adapter-in/api/GroupsApi";
+import { GroupDetailDto } from "@/src/domain/models/Groups";
 import groupService from "@/src/domain/services/GroupService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";

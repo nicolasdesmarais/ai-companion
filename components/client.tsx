@@ -8,8 +8,8 @@ import { ChatForm } from "@/components/chat-form";
 import { ChatHeader } from "@/components/chat-header";
 import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
-import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
-import { ChatDetailDto, ChatMessageDto } from "@/src/domain/ports/api/ChatsApi";
+import { AIDetailDto } from "@/src/domain/models/AI";
+import { ChatDetailDto, ChatMessageDto } from "@/src/domain/models/Chats";
 import { Role } from "@prisma/client";
 
 interface ChatClientProps {

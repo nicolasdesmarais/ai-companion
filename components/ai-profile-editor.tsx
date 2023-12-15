@@ -8,8 +8,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
-import { AIDetailDto } from "@/src/domain/ports/api/AIApi";
-import { ChatMessageDto } from "@/src/domain/ports/api/ChatsApi";
+import { AIDetailDto } from "@/src/domain/models/AI";
+import { ChatMessageDto } from "@/src/domain/models/Chats";
 import { Loader, Plus, Trash, Wand2 } from "lucide-react";
 import { useState } from "react";
 import { Drawer } from "./drawer";

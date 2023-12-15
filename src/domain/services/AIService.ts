@@ -1,3 +1,10 @@
+import {
+  CreateAIRequest,
+  ListAIsRequestParams,
+  ListAIsRequestScope,
+  ShareAIRequest,
+  UpdateAIRequest,
+} from "@/src/adapter-in/api/AIApi";
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
@@ -20,18 +27,8 @@ import { ChatOpenAI } from "langchain/chat_models/openai";
 import { SystemMessage } from "langchain/schema";
 import { AISecurityService } from "../../security/services/AISecurityService";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
+import { AIDetailDto, AIProfile } from "../models/AI";
 import { AIModelOptions } from "../models/AIModel";
-import {
-  AIDetailDto,
-  AIProfile,
-  CreateAIRequest,
-  UpdateAIRequest,
-} from "../ports/api/AIApi";
-import {
-  ListAIsRequestParams,
-  ListAIsRequestScope,
-} from "../ports/api/ListAIsRequestParams";
-import { ShareAIRequest } from "../ports/api/ShareAIRequest";
 import aiModelService from "./AIModelService";
 import dataSourceService from "./DataSourceService";
 import groupService from "./GroupService";
