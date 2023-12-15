@@ -1,3 +1,4 @@
+import { CreateAIRequest, UpdateAIRequest } from "@/src/adapter-in/api/AIApi";
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
@@ -20,12 +21,7 @@ import { ChatOpenAI } from "langchain/chat_models/openai";
 import { SystemMessage } from "langchain/schema";
 import { AISecurityService } from "../../security/services/AISecurityService";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
-import {
-  AIDetailDto,
-  AIProfile,
-  CreateAIRequest,
-  UpdateAIRequest,
-} from "../models/AI";
+import { AIDetailDto, AIProfile } from "../models/AI";
 import { AIModelOptions } from "../models/AIModel";
 import {
   ListAIsRequestParams,
