@@ -22,6 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
 import { UpsertClientCredentialsRequest } from "@/src/domain/ports/api/OrgClientCredentialsApi";
 import { OAuthTokenProvider } from "@prisma/client";
@@ -49,6 +50,10 @@ export const OrganizationSettingsForm: React.FC<
   const [loading, setLoading] = useState(false);
   const [googleIntegrationData, setGoogleIntegrationData] =
     useState<GoogleIntegrationFormData>(data);
+
+  const host = window.location.host;
+  const protocol = window.location.protocol;
+  const redirectUri = `${protocol}://${host}/integrations/google-drive/callback`;
 
   const form = useForm<GoogleIntegrationFormData>({
     resolver: zodResolver(googleIntegrationFormSchema),
@@ -99,6 +104,7 @@ export const OrganizationSettingsForm: React.FC<
   return (
     <div className="p-4 max-w-3xl mx-auto">
       <h1 className="text-lg font-medium">Data Source Integrations</h1>
+      <Separator />
 
       <div className="flex items-center justify-between my-4">
         <span>Google Drive</span>
@@ -152,11 +158,25 @@ export const OrganizationSettingsForm: React.FC<
 
                   <div>
                     <label className="block mb-2 text-sm font-medium">
-                      Scopes
+                      Redirect URI
+                    </label>
+                    <div>
+                      <Input value={redirectUri} disabled={true} />
+                    </div>
+                    <div>
+                      Copy and paste into Google API Console › APIs & Services ›
+                      Credentials where it asks for redirect_URI
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">
+                      Required Scopes
                     </label>
                     <ul>
                       <li>https://www.googleapis.com/auth/userinfo.email</li>
                       <li>https://www.googleapis.com/auth/userinfo.profile</li>
+                      <li>https://www.googleapis.com/auth/drive.readonly</li>
                     </ul>
                   </div>
                   <DialogFooter>
