@@ -7,7 +7,7 @@ import { GptAssistantModel } from "@/src/adapter-out/ai-model/chat-models/GptAss
 import { LLamaModel } from "@/src/adapter-out/ai-model/chat-models/LLamaModel";
 import { StaticAIModelRepository } from "@/src/adapter-out/repositories/StaticAIModelRepository";
 import { AIModel } from "../models/AIModel";
-import { AIModelRepository } from "../ports/AIModelRepository";
+import { AIModelRepository } from "../ports/outgoing/AIModelRepository";
 
 const CHAT_MODELS = [
   new Gpt4Model(),

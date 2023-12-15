@@ -1,4 +1,4 @@
-import { AIModelRepository } from "@/src/domain/ports/AIModelRepository";
+import { AIModelRepository } from "@/src/domain/ports/outgoing/AIModelRepository";
 import { AIModel } from "../../domain/models/AIModel";
 
 const SHOW_ALL_AI_MODELS = process.env.SHOW_ALL_AI_MODELS !== "false";

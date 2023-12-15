@@ -1,4 +1,4 @@
-import { AIModel } from "../models/AIModel";
+import { AIModel } from "../../models/AIModel";
 
 export interface AIModelRepository {
   findAll(): Promise<AIModel[]>;
