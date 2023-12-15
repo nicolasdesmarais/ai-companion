@@ -182,7 +182,7 @@ export const AICharacter = ({
     const description = form.getValues("description");
     if (name && description) {
       try {
-        const response = await axios.post("/api/generate", {
+        const response = await axios.post("/api/v1/generate", {
           prompt: `Generate an AI agent prompt for ${name}, ${description}.  Prompt should be at least 200 characters long.`,
         });
         form.setValue("instructions", response.data, { shouldDirty: true });
@@ -218,7 +218,7 @@ export const AICharacter = ({
         if (!seed) {
           history = `Human: Hi ${name}\n`;
         } else {
-          const question = await axios.post("/api/generate", {
+          const question = await axios.post("/api/v1/generate", {
             prompt: `
               Pretend you are a human talking to an AI agent ${name}, ${description}.  Continue the conversation below.\n\n
               ${seed}\nHuman:
@@ -226,7 +226,7 @@ export const AICharacter = ({
           });
           history = `${seed}Human: ${question.data}\n`;
         }
-        const response = await axios.post("/api/generate", {
+        const response = await axios.post("/api/v1/generate", {
           prompt: `
           ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${name}: prefix.
 
