@@ -1,7 +1,7 @@
 import {
   GroupDetailDto,
   UpdateGroupRequest,
-} from "@/src/domain/models/GroupsApi";
+} from "@/src/adapter-in/api/GroupsApi";
 import groupService from "@/src/domain/services/GroupService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
