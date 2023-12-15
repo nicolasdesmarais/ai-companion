@@ -1,5 +1,6 @@
 import { AIVisibility } from "@prisma/client";
 import { AIModelOptions } from "./AIModel";
+import { ChatSummaryDto } from "./Chats";
 
 export interface AISummaryDto {
   id: string;
@@ -23,6 +24,7 @@ export interface AIDetailDto extends AISummaryDto {
   messageCount: number;
   rating: number;
   ratingCount: number;
+  chats?: ChatSummaryDto[];
 
   // Only included based on access and profile settings
   groups?: string[];
