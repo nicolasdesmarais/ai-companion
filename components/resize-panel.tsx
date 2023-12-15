@@ -18,6 +18,7 @@ type Props = {
   max: number;
   min: number;
   position?: "left" | "right";
+  persist?: boolean;
 };
 
 export const ResizePanel = ({
@@ -28,6 +29,7 @@ export const ResizePanel = ({
   max,
   min,
   position = "left",
+  persist = true,
 }: Props) => {
   const sidebarRef = useRef(null);
   const [isResizing, setIsResizing] = useState(false);
@@ -35,6 +37,7 @@ export const ResizePanel = ({
     name,
     initial
   );
+  const [ephemeralWidth, setEphemeralWidth] = useState(initial);
 
   const startResizing = useCallback((e: any) => {
     setIsResizing(true);
@@ -48,7 +51,7 @@ export const ResizePanel = ({
     (mouseMoveEvent: any) => {
       if (isResizing) {
         const movement = mouseMoveEvent.movementX;
-        setSidebarWidth((width) =>
+        const setter = (width: number) =>
           Math.min(
             max,
             Math.max(
@@ -57,11 +60,15 @@ export const ResizePanel = ({
                 position === "right" ? width - movement : width + movement
               )
             )
-          )
-        );
+          );
+        if (persist) {
+          setSidebarWidth(setter);
+        } else {
+          setEphemeralWidth(setter);
+        }
       }
     },
-    [isResizing, setSidebarWidth, max]
+    [isResizing, setSidebarWidth, max, min, persist, position]
   );
 
   useEffect(() => {
@@ -75,9 +82,10 @@ export const ResizePanel = ({
 
   useEffect(() => {
     if (sidebarRef.current) {
-      (sidebarRef.current as any).style.width = sidebarWidth + "px";
+      const w = persist ? sidebarWidth : ephemeralWidth;
+      (sidebarRef.current as any).style.width = w + "px";
     }
-  }, [sidebarWidth]);
+  }, [sidebarWidth, ephemeralWidth, persist]);
 
   return (
     <div

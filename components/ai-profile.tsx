@@ -87,6 +87,7 @@ export const AIProfile = ({ ai }: Props) => {
       max={2000}
       position="right"
       className="flex"
+      persist={false}
     >
       <div className="bg-[#0f111e] px-6 space-y-4 w-full md:w-auto absolute left-0 md:left-[76px] right-0 top-[64px] md:top-0 bottom-0 lg:static overflow-auto ml-1 pb-16">
         <div className="absolute top-4 right-4">
