@@ -1,7 +1,7 @@
 "use client";
 
 import { useGroupModal } from "@/hooks/use-group-modal";
-import { GroupSummaryDto } from "@/src/domain/models/GroupsApi";
+import { GroupSummaryDto } from "@/src/adapter-in/api/GroupsApi";
 import { cn } from "@/src/lib/utils";
 import { useOrganization, useUser } from "@clerk/nextjs";
 import { GroupAvailability } from "@prisma/client";
