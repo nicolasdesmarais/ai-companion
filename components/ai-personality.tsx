@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
-import { AIDetailDto } from "@/src/domain/models/AIApi";
+import { AIDetailDto } from "@/src/domain/models/AI";
 import { AIModel } from "@/src/domain/models/AIModel";
 
 interface SelectDataSourceProps {

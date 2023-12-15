@@ -25,7 +25,7 @@ import {
   AIProfile,
   CreateAIRequest,
   UpdateAIRequest,
-} from "../models/AIApi";
+} from "../models/AI";
 import { AIModelOptions } from "../models/AIModel";
 import {
   ListAIsRequestParams,

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { EntityNotFoundError } from "@/src/domain/errors/Errors";
-import { AIDetailDto, UpdateAIRequest } from "@/src/domain/models/AIApi";
+import { AIDetailDto, UpdateAIRequest } from "@/src/domain/models/AI";
 import aiService from "@/src/domain/services/AIService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";

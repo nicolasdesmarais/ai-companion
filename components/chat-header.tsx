@@ -28,7 +28,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAIProfile } from "@/hooks/use-ai-profile";
 import { useChats } from "@/hooks/use-chats";
 import { useRateAI } from "@/hooks/use-rate-ai";
-import { AIDetailDto } from "@/src/domain/models/AIApi";
+import { AIDetailDto } from "@/src/domain/models/AI";
 import { ChatDetailDto } from "@/src/domain/models/ChatsApi";
 import { useState } from "react";
 import { RateModal } from "./rate-modal";

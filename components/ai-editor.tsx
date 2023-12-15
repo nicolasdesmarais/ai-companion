@@ -4,7 +4,7 @@ import LeavePageBlocker from "@/components/leave-page-blocker";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
-import { AIDetailDto } from "@/src/domain/models/AIApi";
+import { AIDetailDto } from "@/src/domain/models/AI";
 import { AIModel } from "@/src/domain/models/AIModel";
 import { GroupSummaryDto } from "@/src/domain/models/GroupsApi";
 import { cn } from "@/src/lib/utils";

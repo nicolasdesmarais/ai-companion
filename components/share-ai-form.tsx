@@ -9,7 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { AIDetailDto } from "@/src/domain/models/AIApi";
+import { AIDetailDto } from "@/src/domain/models/AI";
 import { ShareAIRequest } from "@/src/domain/models/ShareAIRequest";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AIVisibility } from "@prisma/client";

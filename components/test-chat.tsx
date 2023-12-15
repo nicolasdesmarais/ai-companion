@@ -3,7 +3,7 @@
 import { ChatForm } from "@/components/chat-form";
 import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
-import { AIDetailDto } from "@/src/domain/models/AIApi";
+import { AIDetailDto } from "@/src/domain/models/AI";
 import { ChatMessageDto } from "@/src/domain/models/ChatsApi";
 import { useCompletion } from "ai/react";
 import {

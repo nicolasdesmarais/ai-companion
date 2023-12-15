@@ -3,7 +3,7 @@
 import { ElementRef, useEffect, useRef, useState } from "react";
 
 import { ChatMessage } from "@/components/chat-message";
-import { AISummaryDto } from "@/src/domain/models/AIApi";
+import { AISummaryDto } from "@/src/domain/models/AI";
 import { ChatMessageDto } from "@/src/domain/models/ChatsApi";
 
 interface ChatMessagesProps {

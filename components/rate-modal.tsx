@@ -6,7 +6,7 @@ import { RateAIForm } from "@/components/rate-ai-form";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useRateAI } from "@/hooks/use-rate-ai";
-import { AIDetailDto } from "@/src/domain/models/AIApi";
+import { AIDetailDto } from "@/src/domain/models/AI";
 
 interface RateModalProps {
   ai: AIDetailDto;

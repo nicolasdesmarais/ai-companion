@@ -1,5 +1,5 @@
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { AIDetailDto } from "@/src/domain/models/AIApi";
+import { AIDetailDto } from "@/src/domain/models/AI";
 import { cn } from "@/src/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import { marked } from "marked";
