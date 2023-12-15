@@ -150,7 +150,7 @@ export const AICharacter = ({
     setGeneratingImage(true);
     if (imagePrompt) {
       try {
-        const response = await axios.post("/api/image", {
+        const response = await axios.post("/api/v1/image", {
           prompt: imagePrompt,
           model: imageModel,
         });
