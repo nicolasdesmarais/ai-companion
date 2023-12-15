@@ -1,4 +1,4 @@
-import { CreateApiDataSourceRequest } from "@/src/domain/models/DataSourcesApi";
+import { CreateApiDataSourceRequest } from "@/src/domain/models/DataSources";
 import aiService from "@/src/domain/services/AIService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
