@@ -22,7 +22,7 @@ async function postHandler(
 
   const body: CreateApiDataSourceRequest = await request.json();
 
-  const dataSource = await aiService.createAIDataSource(
+  const dataSource = await aiService.createDataSourceAndAddToAI(
     authorizationContext,
     params.aiId,
     body.name,

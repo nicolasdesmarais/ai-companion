@@ -48,7 +48,7 @@ async function postHandler(
     fileHash,
   };
 
-  const dataSource = await aiService.createAIDataSource(
+  const dataSource = await aiService.createDataSourceAndAddToAI(
     authorizationContext,
     params.aiId,
     filename,

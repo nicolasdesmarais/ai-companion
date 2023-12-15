@@ -46,3 +46,12 @@ export interface AIRequest {
 export interface ShareAIRequest {
   emails: string;
 }
+
+export interface CreateAIDataSourceRequest {
+  dataSourceId: string;
+}
+
+export interface CreateAIDataSourceResponse {
+  aiId: string;
+  dataSourceId: string;
+}

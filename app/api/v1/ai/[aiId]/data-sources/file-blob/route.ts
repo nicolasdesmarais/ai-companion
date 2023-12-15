@@ -42,7 +42,7 @@ async function postHandler(
         blobUrl: blob.url,
       };
 
-      await aiService.createAIDataSource(
+      await aiService.createDataSourceAndAddToAI(
         authorizationContext,
         params.aiId,
         blob.pathname,
