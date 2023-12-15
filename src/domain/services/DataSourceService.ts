@@ -7,12 +7,14 @@ import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSource
 import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
 import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
+import { DataSourceRepositoryImpl } from "@/src/adapter-out/repositories/DataSourceRepositoryImpl";
 import prismadb from "@/src/lib/prismadb";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { AISecurityService } from "@/src/security/services/AISecurityService";
+import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
 import { DataSourceSecurityService } from "@/src/security/services/DataSourceSecurityService";
 import {
   DataSourceIndexStatus,
@@ -25,6 +27,7 @@ import {
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import { DomainEvent } from "../events/domain-event";
 import { DataSourceDto } from "../models/DataSources";
+import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
 
 const dataSourceSummarySelect: Prisma.DataSourceSelect = {
   id: true,
@@ -40,6 +43,8 @@ const dataSourceSummarySelect: Prisma.DataSourceSelect = {
 };
 
 export class DataSourceService {
+  constructor(private dataSourceRepository: DataSourceRepository) {}
+
   private getDataSourceAdapter(type: DataSourceType): DataSourceAdapter {
     switch (type) {
       case DataSourceType.GOOGLE_DRIVE:
@@ -58,48 +63,27 @@ export class DataSourceService {
   public async getDataSources(
     authorizationContext: AuthorizationContext
   ): Promise<DataSourceDto[]> {
-    const dataSources = await prismadb.dataSource.findMany({
-      select: dataSourceSummarySelect,
-      where: this.getDataSourcesWhereClause(authorizationContext),
-    });
-
-    return dataSources.map((dataSource) => ({
-      ...dataSource,
-      indexPercentage: dataSource.indexPercentage.toString(),
-    }));
-  }
-
-  private getDataSourcesWhereClause(
-    authorizationContext: AuthorizationContext
-  ): Prisma.DataSourceWhereInput {
-    const dataSourcePermissions = authorizationContext.permissions
-      .filter(
-        (permission) =>
-          permission.resourceType === SecuredResourceType.DATA_SOURCES &&
-          permission.action === SecuredAction.READ
-      )
-      .map((permission) => permission.accessLevel);
+    const highestAccessLevel = BaseEntitySecurityService.getHighestAccessLevel(
+      authorizationContext,
+      SecuredResourceType.DATA_SOURCES,
+      SecuredAction.READ
+    );
+    if (!highestAccessLevel) {
+      throw new ForbiddenError("Forbidden");
+    }
 
     const { orgId, userId } = authorizationContext;
-
-    if (dataSourcePermissions.includes(SecuredResourceAccessLevel.INSTANCE)) {
-      return {};
+    switch (highestAccessLevel) {
+      case SecuredResourceAccessLevel.INSTANCE:
+        return await this.dataSourceRepository.findAll();
+      case SecuredResourceAccessLevel.ORGANIZATION:
+        return await this.dataSourceRepository.findByOrgId(orgId);
+      case SecuredResourceAccessLevel.SELF:
+        return await this.dataSourceRepository.findByOrgIdAndUserId(
+          orgId,
+          userId
+        );
     }
-    if (
-      dataSourcePermissions.includes(SecuredResourceAccessLevel.ORGANIZATION)
-    ) {
-      return {
-        orgId,
-      };
-    }
-    if (dataSourcePermissions.includes(SecuredResourceAccessLevel.SELF)) {
-      return {
-        orgId,
-        ownerUserId: userId,
-      };
-    }
-
-    throw new ForbiddenError("Forbidden");
   }
 
   public async getAIDataSources(
@@ -723,5 +707,6 @@ export class DataSourceService {
   }
 }
 
-const dataSourceService = new DataSourceService();
+const dataSourceRepository = new DataSourceRepositoryImpl();
+const dataSourceService = new DataSourceService(dataSourceRepository);
 export default dataSourceService;

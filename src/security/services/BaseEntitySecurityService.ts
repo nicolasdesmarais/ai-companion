@@ -1,6 +1,9 @@
 import { AuthorizationContext } from "../models/AuthorizationContext";
 import { SecuredAction } from "../models/SecuredAction";
-import { SecuredResourceAccessLevel } from "../models/SecuredResourceAccessLevel";
+import {
+  SecuredResourceAccessLevel,
+  rankedAccessLevels,
+} from "../models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "../models/SecuredResourceType";
 
 export type BaseEntity = {
@@ -57,5 +60,22 @@ export class BaseEntitySecurityService {
       }
     }
     return false;
+  }
+
+  public static getHighestAccessLevel(
+    authorizationContext: AuthorizationContext,
+    resourceType: SecuredResourceType,
+    action: SecuredAction
+  ): SecuredResourceAccessLevel | null {
+    return (
+      rankedAccessLevels.find((level) =>
+        authorizationContext.permissions.some(
+          (permission) =>
+            permission.resourceType === resourceType &&
+            permission.action === action &&
+            permission.accessLevel === level
+        )
+      ) || null
+    );
   }
 }
