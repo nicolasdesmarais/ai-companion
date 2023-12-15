@@ -1,4 +1,5 @@
-import { ChatSummaryDto, ListChatsResponse } from "@/src/domain/models/Chats";
+import { ListChatsResponse } from "@/src/adapter-in/api/ChatsApi";
+import { ChatSummaryDto } from "@/src/domain/models/Chats";
 import { create } from "zustand";
 
 interface useChatsStore {

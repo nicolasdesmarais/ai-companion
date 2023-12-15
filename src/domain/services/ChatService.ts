@@ -1,11 +1,11 @@
+import {
+  CreateChatRequest,
+  ListChatsResponse,
+} from "@/src/adapter-in/api/ChatsApi";
 import vectorDatabaseAdapter, {
   VectorKnowledgeResponse,
 } from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
-import {
-  ChatDetailDto,
-  CreateChatRequest,
-  ListChatsResponse,
-} from "@/src/domain/models/Chats";
+import { ChatDetailDto } from "@/src/domain/models/Chats";
 import prismadb from "@/src/lib/prismadb";
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
