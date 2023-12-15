@@ -1,5 +1,7 @@
 import {
   CreateAIRequest,
+  ListAIsRequestParams,
+  ListAIsRequestScope,
   ShareAIRequest,
   UpdateAIRequest,
 } from "@/src/adapter-in/api/AIApi";
@@ -27,10 +29,6 @@ import { AISecurityService } from "../../security/services/AISecurityService";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import { AIDetailDto, AIProfile } from "../models/AI";
 import { AIModelOptions } from "../models/AIModel";
-import {
-  ListAIsRequestParams,
-  ListAIsRequestScope,
-} from "../models/ListAIsRequestParams";
 import aiModelService from "./AIModelService";
 import dataSourceService from "./DataSourceService";
 import groupService from "./GroupService";
