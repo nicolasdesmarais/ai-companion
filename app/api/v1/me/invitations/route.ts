@@ -1,4 +1,4 @@
-import { CreateInvitationRequest } from "@/src/domain/models/InvitationsApi";
+import { CreateInvitationRequest } from "@/src/adapter-in/api/InvitationsApi";
 import { InvitationService } from "@/src/domain/services/InvitationService";
 import EmailUtils from "@/src/lib/emailUtils";
 import { auth } from "@clerk/nextjs";
