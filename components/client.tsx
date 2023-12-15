@@ -78,7 +78,7 @@ export const ChatClient = ({ ai, chat, canEditAi }: ChatClientProps) => {
     stream = completion;
   }
   return (
-    <div className="flex flex-col h-full w-full space-y-2 ml-1 shrink">
+    <div className="flex flex-col h-full w-full space-y-2 shrink">
       <ChatHeader ai={ai} chat={chat} canEditAi={canEditAi} />
       <ChatMessages
         ai={ai}

@@ -1,6 +1,7 @@
 "use client";
 import useLocalStorageState from "@/hooks/use-local-storage-state";
 import { cn } from "@/src/lib/utils";
+import { is } from "date-fns/locale";
 import {
   ReactNode,
   useCallback,
@@ -19,6 +20,7 @@ type Props = {
   min: number;
   position?: "left" | "right";
   persist?: boolean;
+  animationClassName?: string;
 };
 
 export const ResizePanel = ({
@@ -30,6 +32,7 @@ export const ResizePanel = ({
   min,
   position = "left",
   persist = true,
+  animationClassName,
 }: Props) => {
   const sidebarRef = useRef(null);
   const [isResizing, setIsResizing] = useState(false);
@@ -38,8 +41,10 @@ export const ResizePanel = ({
     initial
   );
   const [ephemeralWidth, setEphemeralWidth] = useState(initial);
+  const [allowAnimation, setAllowAnimation] = useState(true);
 
   const startResizing = useCallback((e: any) => {
+    setAllowAnimation(false);
     setIsResizing(true);
   }, []);
 
@@ -89,7 +94,11 @@ export const ResizePanel = ({
 
   return (
     <div
-      className={cn(className, "shrink-0")}
+      className={cn(
+        className,
+        "shrink-0",
+        allowAnimation && animationClassName
+      )}
       ref={sidebarRef}
       style={{ width: initial }}
       onMouseDown={(e) => e.preventDefault()}
