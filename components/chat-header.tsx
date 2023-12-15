@@ -29,7 +29,7 @@ import { useAIProfile } from "@/hooks/use-ai-profile";
 import { useChats } from "@/hooks/use-chats";
 import { useRateAI } from "@/hooks/use-rate-ai";
 import { AIDetailDto } from "@/src/domain/models/AI";
-import { ChatDetailDto } from "@/src/domain/models/ChatsApi";
+import { ChatDetailDto } from "@/src/domain/models/Chats";
 import { useState } from "react";
 import { RateModal } from "./rate-modal";
 import { ShareModal } from "./share-modal";

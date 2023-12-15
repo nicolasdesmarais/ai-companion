@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { AIDetailDto } from "@/src/domain/models/AI";
-import { ChatMessageDto } from "@/src/domain/models/ChatsApi";
+import { ChatMessageDto } from "@/src/domain/models/Chats";
 import { Loader, Plus, Trash, Wand2 } from "lucide-react";
 import { useState } from "react";
 import { Drawer } from "./drawer";

@@ -1,4 +1,4 @@
-import { ChatSummaryDto } from "@/src/domain/models/ChatsApi";
+import { ChatSummaryDto } from "@/src/domain/models/Chats";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";

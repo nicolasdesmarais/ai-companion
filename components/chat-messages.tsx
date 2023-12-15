@@ -4,7 +4,7 @@ import { ElementRef, useEffect, useRef, useState } from "react";
 
 import { ChatMessage } from "@/components/chat-message";
 import { AISummaryDto } from "@/src/domain/models/AI";
-import { ChatMessageDto } from "@/src/domain/models/ChatsApi";
+import { ChatMessageDto } from "@/src/domain/models/Chats";
 
 interface ChatMessagesProps {
   messages: ChatMessageDto[];
