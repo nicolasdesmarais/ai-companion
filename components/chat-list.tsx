@@ -33,11 +33,6 @@ export const ChatList = ({ className, isMobile = false }: Props) => {
         className
       )}
     >
-      {loading && (
-        <div className="flex flex-col items-center justify-center h-full">
-          <Loader className="w-12 h-12 spinner" />
-        </div>
-      )}
       <div className="flex flex-wrap">
         {pinned.map((chat: ChatSummaryDto) => (
           <div
@@ -105,6 +100,11 @@ export const ChatList = ({ className, isMobile = false }: Props) => {
           </div>
         </div>
       ))}
+      {loading && (
+        <div className="flex flex-col items-center justify-center h-full">
+          <Loader className="w-12 h-12 spinner" />
+        </div>
+      )}
     </div>
   );
 };
