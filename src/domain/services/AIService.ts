@@ -13,6 +13,7 @@ import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
+import { DataSourceSecurityService } from "@/src/security/services/DataSourceSecurityService";
 import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
 import {
@@ -507,7 +508,7 @@ export class AIService {
     };
   }
 
-  public async createAIDataSource(
+  public async createDataSourceAndAddToAI(
     authorizationContext: AuthorizationContext,
     aiId: string,
     name: string,
@@ -535,6 +536,60 @@ export class AIService {
       type,
       data
     );
+
+    return await prismadb.aIDataSource.create({
+      data: {
+        aiId,
+        dataSourceId,
+      },
+    });
+  }
+
+  public async addDatasourceToAI(
+    authorizationContext: AuthorizationContext,
+    aiId: string,
+    dataSourceId: string
+  ) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    const canUpdateAI = AISecurityService.canUpdateAI(authorizationContext, ai);
+    if (!canUpdateAI) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const dataSource = await prismadb.dataSource.findUnique({
+      where: {
+        id: dataSourceId,
+      },
+    });
+
+    if (!dataSource) {
+      throw new EntityNotFoundError(
+        `DataSource with id=${dataSourceId} not found`
+      );
+    }
+
+    const canReadDataSource = DataSourceSecurityService.canReadDataSource(
+      authorizationContext,
+      dataSource
+    );
+    if (!canReadDataSource) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    if (ai.orgId !== dataSource.orgId) {
+      throw new BadRequestError(
+        "DataSources must belong to the same org as the AI"
+      );
+    }
 
     return await prismadb.aIDataSource.create({
       data: {

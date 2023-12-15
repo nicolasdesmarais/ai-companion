@@ -28,7 +28,7 @@ async function postHandler(
     fileId: body.fileId,
   };
 
-  const dataSource = await aiService.createAIDataSource(
+  const dataSource = await aiService.createDataSourceAndAddToAI(
     authorizationContext,
     params.aiId,
     body.filename,

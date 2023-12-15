@@ -27,7 +27,7 @@ async function postHandler(
       url,
     };
 
-    const dataSource = await aiService.createAIDataSource(
+    const dataSource = await aiService.createDataSourceAndAddToAI(
       authorizationContext,
       params.aiId,
       url,

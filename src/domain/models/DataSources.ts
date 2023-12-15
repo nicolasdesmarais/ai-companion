@@ -5,6 +5,8 @@ export interface DataSourceDto {
   createdAt: Date;
   updatedAt: Date;
   lastIndexedAt: Date | null;
+  orgId: string;
+  ownerUserId: string;
   name: string;
   type: DataSourceType;
   indexStatus: DataSourceIndexStatus | null;

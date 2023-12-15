@@ -526,6 +526,118 @@
         ]
       }
     },
+    "/api/v1/ai/{aiId}/data-sources": {
+      "get": {
+        "summary": "List data sources for the AI",
+        "description": "Retrieves a list of data sources associated with the given AI identifier.",
+        "operationId": "listAIDataSources",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The identifier of the AI whose data sources are to be retrieved.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of data sources associated with the AI.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListDataSourcesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "AI not found with the given identifier."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Add an existing data source to the specified AI",
+        "description": "Associates an existing data source with the specified AI.",
+        "operationId": "addDataSourceToAI",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier for the AI to which the data source is to be added.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dataSourceId": {
+                    "type": "string",
+                    "description": "The unique identifier of the existing data source to be added."
+                  }
+                },
+                "required": ["dataSourceId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Data source successfully added to the AI.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "aiId": {
+                      "type": "string",
+                      "description": "The AI identifier to which the data source was added."
+                    },
+                    "dataSource": {
+                      "$ref": "#/components/schemas/DataSource"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, malformed request syntax or invalid request message framing."
+          },
+          "403": {
+            "description": "Forbidden, the user does not have the required permissions on the specified AI and/or data source."
+          },
+          "404": {
+            "description": "Not Found, either of the specified AI or data source are not found."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/ai/{aiId}/data-sources/api": {
       "post": {
         "summary": "Create a new API data source for the specified AI",
@@ -680,81 +792,6 @@
                 }
               }
             }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ]
-      }
-    },
-    "/api/v1/ai/{aiId}/data-sources": {
-      "get": {
-        "summary": "List data sources for the AI",
-        "description": "Retrieves a list of data sources associated with the given AI identifier.",
-        "operationId": "listAIDataSources",
-        "parameters": [
-          {
-            "name": "aiId",
-            "in": "path",
-            "required": true,
-            "description": "The identifier of the AI whose data sources are to be retrieved.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of data sources associated with the AI.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListDataSourcesResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "AI not found with the given identifier."
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ]
-      }
-    },
-    "/api/v1/data-sources/{dataSourceId}": {
-      "delete": {
-        "summary": "Delete a Data Source",
-        "description": "Deletes a specific data source associated with the given AI identifier.",
-        "operationId": "deleteDataSource",
-        "parameters": [
-          {
-            "name": "dataSourceId",
-            "in": "path",
-            "required": true,
-            "description": "The unique identifier of the data source to be deleted.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Data source successfully deleted, no content to return."
-          },
-          "403": {
-            "description": "Forbidden, the user is not authorized to perform this action."
-          },
-          "404": {
-            "description": "Not Found, the specified data source ID does not exist."
           }
         },
         "security": [
@@ -1013,6 +1050,40 @@
           },
           "500": {
             "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/data-sources/{dataSourceId}": {
+      "delete": {
+        "summary": "Delete a Data Source",
+        "description": "Deletes a specific data source associated with the given AI identifier.",
+        "operationId": "deleteDataSource",
+        "parameters": [
+          {
+            "name": "dataSourceId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the data source to be deleted.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Data source successfully deleted, no content to return."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "404": {
+            "description": "Not Found, the specified data source ID does not exist."
           }
         },
         "security": [
