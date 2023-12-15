@@ -10,13 +10,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import {
   CreateGoogleDriveKnowledgeRequest,
   GoogleDriveFile,
   GoogleDriveSearchRequest,
   getLabelFromFileType,
-} from "@/src/domain/models/GoogleDriveApi";
+} from "@/src/adapter-in/api/GoogleDriveApi";
+import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import { UserOAuthTokenEntity } from "@/src/domain/models/OAuthTokenEntity";
 import axios from "axios";
 import { format } from "date-fns";
