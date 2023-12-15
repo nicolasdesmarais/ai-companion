@@ -3,7 +3,7 @@ import { SecuredAction } from "../models/SecuredAction";
 import { SecuredResourceAccessLevel } from "../models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "../models/SecuredResourceType";
 
-type BaseEntity = {
+export type BaseEntity = {
   orgId: string;
   userId: string;
 };

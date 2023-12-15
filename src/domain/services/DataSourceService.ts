@@ -13,6 +13,7 @@ import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { AISecurityService } from "@/src/security/services/AISecurityService";
+import { DataSourceSecurityService } from "@/src/security/services/DataSourceSecurityService";
 import {
   DataSourceIndexStatus,
   DataSourceType,
@@ -666,8 +667,7 @@ export class DataSourceService {
   }
 
   public async deleteDataSource(
-    orgId: string,
-    userId: string,
+    authorizationContext: AuthorizationContext,
     dataSourceId: string
   ) {
     const dataSource = await prismadb.dataSource.findUnique({
@@ -682,7 +682,12 @@ export class DataSourceService {
       );
     }
 
-    if (dataSource.orgId !== orgId || dataSource.ownerUserId !== userId) {
+    const canUpdateDataSource = DataSourceSecurityService.canUpdateDataSource(
+      authorizationContext,
+      dataSource
+    );
+
+    if (!canUpdateDataSource) {
       throw new ForbiddenError("Forbidden");
     }
 

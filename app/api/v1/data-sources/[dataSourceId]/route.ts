@@ -1,6 +1,7 @@
 import dataSourceService from "@/src/domain/services/DataSourceService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
@@ -12,13 +13,15 @@ async function deleteHandler(
   request: Request,
   context: {
     params: { dataSourceId: string };
-    orgId: string;
-    userId: string;
+    authorizationContext: AuthorizationContext;
   }
 ) {
-  const { params, orgId, userId } = context;
+  const { params, authorizationContext } = context;
 
-  await dataSourceService.deleteDataSource(orgId, userId, params.dataSourceId);
+  await dataSourceService.deleteDataSource(
+    authorizationContext,
+    params.dataSourceId
+  );
   return new NextResponse(null, { status: 204 });
 }
 
