@@ -25,3 +25,6 @@ export interface AIRequest {
   groups: string[];
   profile: AIProfile;
 }
+export interface ShareAIRequest {
+  emails: string;
+}

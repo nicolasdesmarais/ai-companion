@@ -1,4 +1,8 @@
-import { CreateAIRequest, UpdateAIRequest } from "@/src/adapter-in/api/AIApi";
+import {
+  CreateAIRequest,
+  ShareAIRequest,
+  UpdateAIRequest,
+} from "@/src/adapter-in/api/AIApi";
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
@@ -27,7 +31,6 @@ import {
   ListAIsRequestParams,
   ListAIsRequestScope,
 } from "../models/ListAIsRequestParams";
-import { ShareAIRequest } from "../models/ShareAIRequest";
 import aiModelService from "./AIModelService";
 import dataSourceService from "./DataSourceService";
 import groupService from "./GroupService";
