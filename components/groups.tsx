@@ -24,8 +24,8 @@ export const Groups = () => {
 
   const fetchGroups = async () => {
     const response = await axios.get("/api/v1/me/groups");
-    if (response.status === 200 && Array.isArray(response.data)) {
-      setGroups(response.data);
+    if (response.status === 200 && Array.isArray(response.data.data)) {
+      setGroups(response.data.data);
     }
   };
 
