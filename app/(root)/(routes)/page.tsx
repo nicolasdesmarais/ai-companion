@@ -69,7 +69,7 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
       {!(scope === ListAIsRequestScope.PRIVATE || searchParams.groupId) && (
         <Categories data={categories} />
       )}
-      <AIs data={data} />
+      <AIs data={data} authorizationContext={authorizationContext} />
       <GroupModal />
       <ConfirmModal />
     </div>

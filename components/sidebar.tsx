@@ -145,7 +145,7 @@ export const Sidebar = ({
       href: "/?scope=INSTANCE",
       pathname: "/",
       searchparams: { scope: "INSTANCE" },
-      label: "Superuser",
+      label: "Super User",
       pro: false,
       requiredPermission: {
         resourceType: SecuredResourceType.AI,

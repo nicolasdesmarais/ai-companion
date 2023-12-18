@@ -6,12 +6,15 @@ import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { AIDetailDto } from "@/src/domain/models/AI";
 import { Building, LockKeyhole, MessageSquareText, Users } from "lucide-react";
 import { cn } from "@/src/lib/utils";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
+import { Tooltip } from "./ui/tooltip";
 
 interface AIsProps {
   data: AIDetailDto[];
+  authorizationContext: AuthorizationContext;
 }
 
-export const AIs = ({ data }: AIsProps) => {
+export const AIs = ({ data, authorizationContext }: AIsProps) => {
   if (data.length === 0) {
     return (
       <div className="pt-10 flex flex-col items-center justify-center space-y-3">
@@ -64,15 +67,18 @@ export const AIs = ({ data }: AIsProps) => {
                   className="mt-2"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                  <div className={cn("truncate w-11/12")}>
+                  <div className={cn("truncate w-11/12 rounded-sm mr-1")}>
                     <span
                       className={cn(
                         "lowercase",
                         item.visibility === "PRIVATE" &&
+                          item.userId === authorizationContext.userId &&
                           "bg-orange px-1 rounded-sm text-white"
                       )}
                     >
-                      {item.userName}
+                      <Tooltip content="My Creation" side="bottom">
+                        {item.userName}
+                      </Tooltip>
                     </span>
                   </div>
                   <div className="flex items-center">{item.messageCount}</div>
