@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -30,7 +30,6 @@ import axios from "axios";
 import { Loader } from "lucide-react";
 
 interface OrganizationSettingsFormProps {
-  redirectUri: string;
   data: any;
 }
 
@@ -46,11 +45,18 @@ interface GoogleIntegrationFormData {
 
 export const OrganizationSettingsForm: React.FC<
   OrganizationSettingsFormProps
-> = ({ redirectUri, data }) => {
+> = ({ data }) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [googleIntegrationData, setGoogleIntegrationData] =
     useState<GoogleIntegrationFormData>(data);
+  const [redirectUri, setRedirectUri] = useState("");
+
+  useEffect(() => {
+    const host = window.location.host;
+    const protocol = window.location.protocol;
+    setRedirectUri(`${protocol}//${host}/integrations/google-drive/callback`);
+  }, []);
 
   const form = useForm<GoogleIntegrationFormData>({
     resolver: zodResolver(googleIntegrationFormSchema),

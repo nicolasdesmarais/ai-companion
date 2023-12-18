@@ -32,16 +32,7 @@ const OrganizationSettingsPage = async () => {
       OAuthTokenProvider.GOOGLE
     );
 
-  const host = window.location.host;
-  const protocol = window.location.protocol;
-  const redirectUri = `${protocol}://${host}/integrations/google-drive/callback`;
-
-  return (
-    <OrganizationSettingsForm
-      redirectUri={redirectUri}
-      data={googleDriveCredentials}
-    />
-  );
+  return <OrganizationSettingsForm data={googleDriveCredentials} />;
 };
 
 export default OrganizationSettingsPage;
