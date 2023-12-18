@@ -367,7 +367,7 @@ export class AIService {
     if (forUpdate || profile?.showCharacter) {
       filteredAi = ai;
     } else {
-      filteredAi = aiWithoutCharacter;
+      filteredAi = { visibility, ...aiWithoutCharacter };
     }
 
     const { seed, ...aiWithoutSeed } = filteredAi;
