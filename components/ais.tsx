@@ -4,7 +4,7 @@ import Link from "next/link";
 import { StarRating } from "@/components/star-rating";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { AIDetailDto } from "@/src/domain/models/AI";
-import { LockKeyhole, MessageSquareText } from "lucide-react";
+import { Building, LockKeyhole, MessageSquareText } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 
 interface AIsProps {
@@ -46,6 +46,9 @@ export const AIs = ({ data }: AIsProps) => {
                   )}
                   {item.visibility === "PRIVATE" && (
                     <LockKeyhole className="absolute top-2 right-2 w-6 h-6 bg-orange px-1 rounded-md text-white" />
+                  )}
+                  {item.visibility === "ORGANIZATION" && (
+                    <Building className="absolute top-2 right-2 w-6 h-6 bg-green px-1 rounded-md text-white" />
                   )}
                 </div>
                 <p className="font-bold">{item.name}</p>
