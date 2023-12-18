@@ -374,6 +374,8 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
 
       if (!response.data.files) return;
 
+      console.log("listFilesRecursive file count", response.data.files.length);
+
       for (const file of response.data.files) {
         if (file.mimeType === FOLDER_MIME_TYPE) {
           await listFilesRecursive(file.id!);
