@@ -21,26 +21,12 @@ import {
   DataSourceType,
   Knowledge,
   KnowledgeIndexStatus,
-  Prisma,
   PrismaClient,
 } from "@prisma/client";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import { DomainEvent } from "../events/domain-event";
 import { DataSourceDto } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
-
-const dataSourceSummarySelect: Prisma.DataSourceSelect = {
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-  lastIndexedAt: true,
-  name: true,
-  type: true,
-  orgId: true,
-  ownerUserId: true,
-  indexStatus: true,
-  indexPercentage: true,
-};
 
 export class DataSourceService {
   constructor(private dataSourceRepository: DataSourceRepository) {}
@@ -60,7 +46,12 @@ export class DataSourceService {
     }
   }
 
-  public async getDataSources(
+  /**
+   * Returns a list of all data sources the user has access to.
+   * @param authorizationContext
+   * @returns
+   */
+  public async listDataSources(
     authorizationContext: AuthorizationContext
   ): Promise<DataSourceDto[]> {
     const highestAccessLevel = BaseEntitySecurityService.getHighestAccessLevel(
@@ -86,7 +77,13 @@ export class DataSourceService {
     }
   }
 
-  public async getAIDataSources(
+  /**
+   * Returns a list of all data sources for the specified AI.
+   * @param authorizationContext
+   * @param aiId
+   * @returns
+   */
+  public async listAIDataSources(
     authorizationContext: AuthorizationContext,
     aiId: string
   ): Promise<DataSourceDto[]> {
@@ -105,21 +102,7 @@ export class DataSourceService {
       );
     }
 
-    const dataSources = await prismadb.dataSource.findMany({
-      select: dataSourceSummarySelect,
-      where: {
-        ais: {
-          some: {
-            aiId,
-          },
-        },
-      },
-    });
-
-    return dataSources.map((dataSource) => ({
-      ...dataSource,
-      indexPercentage: dataSource.indexPercentage.toString(),
-    }));
+    return await dataSourceRepository.findByAiId(aiId);
   }
 
   /**

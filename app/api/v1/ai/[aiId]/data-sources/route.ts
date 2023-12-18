@@ -23,7 +23,7 @@ async function getHandler(
 ): Promise<NextResponse<ListDataSourcesResponse>> {
   const { params, authorizationContext } = context;
 
-  const dataSources = await dataSourceService.getAIDataSources(
+  const dataSources = await dataSourceService.listAIDataSources(
     authorizationContext,
     params.aiId
   );
