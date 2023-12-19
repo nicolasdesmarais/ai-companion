@@ -450,56 +450,6 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     return modifiedTime !== item.metadata.modifiedTime;
   }
 
-  private async listAllFiles(
-    googleDriveClient: drive_v3.Drive,
-    fileId: string
-  ): Promise<ListFilesResponse> {
-    const files: drive_v3.Schema$File[] = [];
-
-    const listFilesRecursive = async (folderId: string): Promise<void> => {
-      const query = `'${folderId}' in parents and (${this.getMimeTypeQuery(
-        true
-      )}) and trashed=false`;
-
-      const response = await this.listFiles(googleDriveClient, query);
-
-      if (!response.data.files) return;
-
-      for (const file of response.data.files) {
-        if (file.mimeType === FOLDER_MIME_TYPE) {
-          await listFilesRecursive(file.id!);
-        } else {
-          files.push(file);
-        }
-      }
-    };
-
-    const initialFile = await googleDriveClient.files.get({
-      fileId,
-      fields: "id, name, mimeType",
-      supportsAllDrives: true,
-    });
-    const rootName = initialFile.data.name ?? "";
-
-    if (!initialFile.data.mimeType || !initialFile.data.id) {
-      return {
-        rootName,
-        files,
-      };
-    }
-
-    if (initialFile.data.mimeType === FOLDER_MIME_TYPE) {
-      await listFilesRecursive(initialFile.data.id);
-    } else {
-      files.push(initialFile.data);
-    }
-
-    return {
-      rootName,
-      files,
-    };
-  }
-
   private async getFileContent(
     googleDriveClient: drive_v3.Drive,
     fileId: string,
