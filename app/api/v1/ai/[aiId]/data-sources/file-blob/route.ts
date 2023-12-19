@@ -17,13 +17,14 @@ async function postHandler(
     authorizationContext: AuthorizationContext;
   }
 ): Promise<NextResponse> {
-  const { params, authorizationContext } = context;
+  const { params } = context;
   const body = (await request.json()) as HandleUploadBody;
 
   const jsonResponse = await handleUpload({
     body,
     request,
     onBeforeGenerateToken: async (pathname: string) => {
+      const { authorizationContext } = context;
       return {
         tokenPayload: JSON.stringify({
           authorizationContext,
