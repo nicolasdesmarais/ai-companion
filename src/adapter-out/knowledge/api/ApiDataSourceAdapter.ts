@@ -17,6 +17,7 @@ export class ApiDataSourceAdapter implements DataSourceAdapter {
   public async getDataSourceItemList(
     orgId: string,
     userId: string,
+    dataSourceId: string,
     data: any
   ): Promise<DataSourceItemList> {
     const input = data as CreateApiDataSourceRequest;

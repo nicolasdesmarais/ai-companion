@@ -7,6 +7,7 @@ export interface DataSourceAdapter {
   getDataSourceItemList(
     orgId: string,
     userId: string,
+    dataSourceId: string,
     data: any
   ): Promise<DataSourceItemList>;
 
