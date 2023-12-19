@@ -17,7 +17,7 @@ export const dataSourceInitialized = inngest.createFunction(
       );
     });
 
-    initializeKnowledgeList(step, dataSourceId, knowledgeIdList);
+    await initializeKnowledgeList(step, dataSourceId, knowledgeIdList);
   }
 );
 
@@ -35,7 +35,7 @@ export const dataSourceItemListReceived = inngest.createFunction(
       );
     });
 
-    initializeKnowledgeList(step, dataSourceId, knowledgeIdList);
+    await initializeKnowledgeList(step, dataSourceId, knowledgeIdList);
   }
 );
 
@@ -60,9 +60,8 @@ const initializeKnowledgeList = async (
     }
   }
 
-  if (events.length >= 0) {
+  if (events.length > 0) {
     await step.sendEvent("fan-out-knowledge-initialized", events);
-    events = [];
   }
 };
 
