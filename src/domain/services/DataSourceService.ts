@@ -46,6 +46,21 @@ export class DataSourceService {
     }
   }
 
+  private async getDataSourceAndAdapter(dataSourceId: string) {
+    const dataSource = await prismadb.dataSource.findUnique({
+      where: { id: dataSourceId },
+    });
+
+    if (!dataSource) {
+      throw new EntityNotFoundError(
+        `DataSource with id=${dataSourceId} not found`
+      );
+    }
+
+    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
+    return { dataSource, dataSourceAdapter };
+  }
+
   /**
    * Returns a list of all data sources the user has access to.
    * @param authorizationContext
@@ -147,17 +162,9 @@ export class DataSourceService {
   public async createDataSourceKnowledgeList(
     dataSourceId: string
   ): Promise<string[]> {
-    const dataSource = await prismadb.dataSource.findUnique({
-      where: { id: dataSourceId },
-    });
+    const { dataSource, dataSourceAdapter } =
+      await this.getDataSourceAndAdapter(dataSourceId);
 
-    if (!dataSource) {
-      throw new EntityNotFoundError(
-        `DataSource with id=${dataSourceId} not found`
-      );
-    }
-
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
     const itemList = await dataSourceAdapter.getDataSourceItemList(
       dataSource.orgId,
       dataSource.ownerUserId,
@@ -182,17 +189,10 @@ export class DataSourceService {
     dataSourceId: string,
     dataSourceItemList: DataSourceItemList
   ): Promise<string[]> {
-    const dataSource = await prismadb.dataSource.findUnique({
-      where: { id: dataSourceId },
-    });
+    const { dataSourceAdapter } = await this.getDataSourceAndAdapter(
+      dataSourceId
+    );
 
-    if (!dataSource) {
-      throw new EntityNotFoundError(
-        `DataSource with id=${dataSourceId} not found`
-      );
-    }
-
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
     return await this.initializeKnowledgeList(
       dataSourceId,
       dataSourceAdapter,
