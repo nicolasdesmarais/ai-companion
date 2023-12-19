@@ -1,30 +1,22 @@
 import { FileUploadDataSourceInput } from "@/src/adapter-out/knowledge/file-upload/types/FileUploadDataSourceInput";
 import aiService from "@/src/domain/services/AIService";
-import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
-import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
-import { SecuredAction } from "@/src/security/models/SecuredAction";
-import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
-import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
+import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { DataSourceType } from "@prisma/client";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 
 async function postHandler(
   request: Request,
-  context: {
-    params: { aiId: string };
-    authorizationContext: AuthorizationContext;
-  }
+  { params: { aiId } }: { params: { aiId: string } }
 ): Promise<NextResponse> {
-  const { params } = context;
   const body = (await request.json()) as HandleUploadBody;
 
   const jsonResponse = await handleUpload({
     body,
     request,
     onBeforeGenerateToken: async (pathname: string) => {
-      const { authorizationContext } = context;
+      const authorizationContext = getUserAuthorizationContext();
       return {
         tokenPayload: JSON.stringify({
           authorizationContext,
@@ -45,7 +37,7 @@ async function postHandler(
 
       await aiService.createDataSourceAndAddToAI(
         authorizationContext,
-        params.aiId,
+        aiId,
         blob.pathname,
         DataSourceType.FILE_UPLOAD,
         input
@@ -56,11 +48,4 @@ async function postHandler(
   return NextResponse.json(jsonResponse);
 }
 
-export const POST = withErrorHandler(
-  withAuthorization(
-    SecuredResourceType.DATA_SOURCES,
-    SecuredAction.WRITE,
-    Object.values(SecuredResourceAccessLevel),
-    postHandler
-  )
-);
+export const POST = withErrorHandler(postHandler);
