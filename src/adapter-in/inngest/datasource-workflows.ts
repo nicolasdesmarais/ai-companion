@@ -28,12 +28,15 @@ export const dataSourceItemListReceived = inngest.createFunction(
     const payload = event.data as DataSourceItemListReceivedPayload;
     const { dataSourceId, dataSourceItemList } = payload;
 
-    const knowledgeIdList = await step.run("get-knowledge-list", async () => {
-      return await dataSourceService.onDataSourceItemListReceived(
-        dataSourceId,
-        dataSourceItemList
-      );
-    });
+    const knowledgeIdList = await step.run(
+      "on-datasource-item-list-received",
+      async () => {
+        return await dataSourceService.onDataSourceItemListReceived(
+          dataSourceId,
+          dataSourceItemList
+        );
+      }
+    );
 
     await initializeKnowledgeList(step, dataSourceId, knowledgeIdList);
   }
