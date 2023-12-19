@@ -69,11 +69,6 @@ const SUPPORTED_MIME_TYPES = [
 
 const FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
 
-interface ListFilesResponse {
-  rootName: string;
-  files: drive_v3.Schema$File[];
-}
-
 export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
   private getNamesQuery(names: string[]) {
     return names.map((name) => `name contains '${name}'`).join(" AND ");
