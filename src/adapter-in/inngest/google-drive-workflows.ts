@@ -10,7 +10,7 @@ import {
 } from "@/src/domain/events/domain-event";
 import { inngest } from "./client";
 
-export const folderScanInitiated = inngest.createFunction(
+export const googleDriveFolderScanInitiated = inngest.createFunction(
   { id: "google-drive-folder-scan-initiated" },
   { event: GoogleDriveEvent.GOOGLE_DRIVE_FOLDER_SCAN_INITIATED },
   async ({ event, step }) => {
