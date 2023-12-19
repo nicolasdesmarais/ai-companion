@@ -20,7 +20,7 @@ export const folderScanInitiated = inngest.createFunction(
     const dataSourceItemList: DataSourceItemList = await step.run(
       "scan-folder",
       async () => {
-        return await googleDriveDataSourceAdapter.scanFolder(
+        return await googleDriveDataSourceAdapter.getDataSourceItemListFromFolder(
           orgId,
           userId,
           oauthTokenId,

@@ -248,7 +248,19 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     };
   }
 
-  public async scanFolder(
+  /**
+   * Retrieves a list of files from a Google Drive folder.
+   * Each file in the folder is returned as a DataSourceItem, with all relevant metadata.
+   * For each child folder in the folder, a FOLDER_SCAN_INITIATED event is published
+   * to process the folder asynchronously.
+   * @param orgId
+   * @param userId
+   * @param oauthTokenId
+   * @param dataSourceId
+   * @param folderId
+   * @returns
+   */
+  public async getDataSourceItemListFromFolder(
     orgId: string,
     userId: string,
     oauthTokenId: string,
