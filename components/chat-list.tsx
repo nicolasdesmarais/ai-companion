@@ -89,7 +89,7 @@ export const ChatList = ({ className, isMobile = false }: Props) => {
               )}
             >
               <div className="flex items-center gap-x-2">
-                <p className="font-bold text-ellipsis">{chat.name}</p>
+                <p className="font-bold text-ellipsis">{chat.ai.name}</p>
               </div>
               <div
                 className={cn(
