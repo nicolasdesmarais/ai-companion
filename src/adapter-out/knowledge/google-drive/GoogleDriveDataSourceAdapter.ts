@@ -42,32 +42,17 @@ import {
 } from "./events/GoogleDriveEvent";
 import { GoogleDriveDataSourceInput } from "./types/GoogleDriveDataSourceInput";
 import { GoogleDriveFileMetadata } from "./types/GoogleDriveFileMetaData";
-import { mapGoogleDriveFileToDataSourceItem } from "./util/GoogleDriveUtils";
-
-const MIME_TYPE_TEXT = "text/plain";
-const MIME_TYPE_CSV = "text/csv";
-const MIME_TYPE_EPUB = "application/epub+zip";
-const MIME_TYPE_PDF = "application/pdf";
-const MIME_TYPE_MARKDOWN = "text/markdown";
-const MIME_TYPE_GOOGLE_DOC = "application/vnd.google-apps.document";
-const MIME_TYPE_GOOGLE_SHEETS = "application/vnd.google-apps.spreadsheet";
-const MIME_TYPE_GOOGLE_SLIDES = "application/vnd.google-apps.presentation";
-const MIME_TYPE_DOCX =
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-
-const SUPPORTED_MIME_TYPES = [
-  MIME_TYPE_TEXT,
+import {
+  FOLDER_MIME_TYPE,
   MIME_TYPE_CSV,
-  MIME_TYPE_EPUB,
-  MIME_TYPE_PDF,
-  MIME_TYPE_MARKDOWN,
+  MIME_TYPE_DOCX,
   MIME_TYPE_GOOGLE_DOC,
   MIME_TYPE_GOOGLE_SHEETS,
   MIME_TYPE_GOOGLE_SLIDES,
-  MIME_TYPE_DOCX,
-];
-
-const FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
+  MIME_TYPE_PDF,
+  SUPPORTED_MIME_TYPES,
+  mapGoogleDriveFileToDataSourceItem,
+} from "./util/GoogleDriveUtils";
 
 export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
   private getNamesQuery(names: string[]) {
