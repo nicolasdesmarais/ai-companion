@@ -1,7 +1,12 @@
 import { DataSourceDto } from "@/src/domain/models/DataSources";
 import { DataSourceRepository } from "@/src/domain/ports/outgoing/DataSourceRepository";
 import prismadb from "@/src/lib/prismadb";
-import { DataSource, Prisma } from "@prisma/client";
+import {
+  DataSource,
+  DataSourceIndexStatus,
+  DataSourceType,
+  Prisma,
+} from "@prisma/client";
 
 const dataSourceSummarySelect: Prisma.DataSourceSelect = {
   id: true,
@@ -69,5 +74,26 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
       ...dataSource,
       indexPercentage: dataSource.indexPercentage.toString(),
     };
+  }
+
+  public async initializeDataSource(
+    orgId: string,
+    ownerUserId: string,
+    name: string,
+    type: DataSourceType,
+    data: any
+  ): Promise<DataSourceDto> {
+    const dataSource = await prismadb.dataSource.create({
+      data: {
+        orgId,
+        ownerUserId,
+        name,
+        type,
+        indexStatus: DataSourceIndexStatus.INITIALIZED,
+        indexPercentage: 0,
+        data,
+      },
+    });
+    return this.mapDataSourceToDto(dataSource);
   }
 }

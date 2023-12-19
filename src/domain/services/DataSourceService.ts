@@ -107,7 +107,7 @@ export class DataSourceService {
 
   /**
    * Create and persist a data source entity.
-   * Publishes a DATASOURCE_PERSISTED event.
+   * Publishes a DATASOURCE_INITIALIZED event.
    * @param authorizationContext
    * @param name
    * @param type
@@ -121,7 +121,8 @@ export class DataSourceService {
     data: any
   ) {
     const { orgId, userId } = authorizationContext;
-    const dataSourceId = await this.initializeDataSource(
+
+    const dataSource = await dataSourceRepository.initializeDataSource(
       orgId,
       userId,
       name,
@@ -129,33 +130,13 @@ export class DataSourceService {
       data
     );
 
+    const dataSourceId = dataSource.id;
     await publishEvent(DomainEvent.DATASOURCE_INITIALIZED, {
       dataSourceId,
       dataSourceType: type,
     });
 
     return dataSourceId;
-  }
-
-  private async initializeDataSource(
-    orgId: string,
-    ownerUserId: string,
-    name: string,
-    type: DataSourceType,
-    data: any
-  ) {
-    const dataSource = await prismadb.dataSource.create({
-      data: {
-        orgId,
-        ownerUserId,
-        name,
-        type,
-        indexStatus: DataSourceIndexStatus.INITIALIZED,
-        indexPercentage: 0,
-        data,
-      },
-    });
-    return dataSource.id;
   }
 
   /**
