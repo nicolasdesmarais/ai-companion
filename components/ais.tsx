@@ -45,16 +45,32 @@ export const AIs = ({ data, authorizationContext }: AIsProps) => {
                   />
 
                   {item.chats?.length && (
-                    <MessageSquareText className="absolute top-2 left-2 w-6 h-6 bg-ring px-1 rounded-md text-white" />
+                    <div className="absolute top-2 left-2">
+                      <Tooltip content="Active Chat">
+                        <MessageSquareText className="w-6 h-6 bg-ring px-1 rounded-md text-white" />
+                      </Tooltip>
+                    </div>
                   )}
                   {item.visibility === "PRIVATE" && (
-                    <LockKeyhole className="absolute top-2 right-2 w-6 h-6 bg-orange px-1 rounded-md text-white" />
+                    <div className="absolute top-2 right-2">
+                      <Tooltip content="Private">
+                        <LockKeyhole className="w-6 h-6 bg-orange px-1 rounded-md text-white" />
+                      </Tooltip>
+                    </div>
                   )}
                   {item.visibility === "ORGANIZATION" && (
-                    <Building className="absolute top-2 right-2 w-6 h-6 bg-green px-1 rounded-md text-white" />
+                    <div className="absolute top-2 right-2">
+                      <Tooltip content="In My Organization">
+                        <Building className="w-6 h-6 bg-green px-1 rounded-md text-white" />
+                      </Tooltip>
+                    </div>
                   )}
                   {item.visibility === "GROUP" && (
-                    <Users className="absolute top-2 right-2 w-6 h-6 bg-green px-1 rounded-md text-white" />
+                    <div className="absolute top-2 right-2">
+                      <Tooltip content="Shared">
+                        <Users className="w-6 h-6 bg-green px-1 rounded-md text-white" />
+                      </Tooltip>
+                    </div>
                   )}
                 </div>
                 <p className="font-bold">{item.name}</p>
@@ -68,18 +84,16 @@ export const AIs = ({ data, authorizationContext }: AIsProps) => {
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-2">
                   <div className={cn("truncate w-11/12 rounded-sm mr-1")}>
-                    <span
-                      className={cn(
-                        "lowercase",
-                        item.visibility === "PRIVATE" &&
-                          item.userId === authorizationContext.userId &&
-                          "bg-orange px-1 rounded-sm text-white"
-                      )}
-                    >
-                      <Tooltip content="My Creation" side="bottom">
-                        {item.userName}
-                      </Tooltip>
-                    </span>
+                    {item.visibility === "PRIVATE" &&
+                    item.userId === authorizationContext.userId ? (
+                      <span className="bg-orange px-1 rounded-sm text-white">
+                        <Tooltip content="My Creation" side="bottom">
+                          {item.userName}
+                        </Tooltip>
+                      </span>
+                    ) : (
+                      <span className="lowercase">{item.userName}</span>
+                    )}
                   </div>
                   <div className="flex items-center">{item.messageCount}</div>
                   <span>&nbsp;chats</span>
