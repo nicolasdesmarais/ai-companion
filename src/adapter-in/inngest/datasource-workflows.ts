@@ -1,4 +1,7 @@
-import { DomainEvent } from "@/src/domain/events/domain-event";
+import {
+  DataSourceItemListReceivedPayload,
+  DomainEvent,
+} from "@/src/domain/events/domain-event";
 import dataSourceService from "@/src/domain/services/DataSourceService";
 import { inngest } from "./client";
 
@@ -14,28 +17,54 @@ export const dataSourceInitialized = inngest.createFunction(
       );
     });
 
-    let events = [];
-    for (const knowledgeId of knowledgeIdList) {
-      events.push({
-        name: DomainEvent.KNOWLEDGE_INITIALIZED,
-        data: {
-          dataSourceId,
-          knowledgeId,
-        },
-      });
+    initializeKnowledgeList(step, dataSourceId, knowledgeIdList);
+  }
+);
 
-      if (events.length >= INGEST_EVENT_MAX) {
-        await step.sendEvent("fan-out-knowledge-initialized", events);
-        events = [];
-      }
-    }
+export const dataSourceItemListReceived = inngest.createFunction(
+  { id: "datasource-item-list-received" },
+  { event: DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED },
+  async ({ event, step }) => {
+    const payload = event.data as DataSourceItemListReceivedPayload;
+    const { dataSourceId, dataSourceItemList } = payload;
 
-    if (events.length >= 0) {
+    const knowledgeIdList = await step.run("get-knowledge-list", async () => {
+      return await dataSourceService.onDataSourceItemListReceived(
+        dataSourceId,
+        dataSourceItemList
+      );
+    });
+
+    initializeKnowledgeList(step, dataSourceId, knowledgeIdList);
+  }
+);
+
+const initializeKnowledgeList = async (
+  step: any,
+  dataSourceId: string,
+  knowledgeIdList: string[]
+) => {
+  let events = [];
+  for (const knowledgeId of knowledgeIdList) {
+    events.push({
+      name: DomainEvent.KNOWLEDGE_INITIALIZED,
+      data: {
+        dataSourceId,
+        knowledgeId,
+      },
+    });
+
+    if (events.length >= INGEST_EVENT_MAX) {
       await step.sendEvent("fan-out-knowledge-initialized", events);
       events = [];
     }
   }
-);
+
+  if (events.length >= 0) {
+    await step.sendEvent("fan-out-knowledge-initialized", events);
+    events = [];
+  }
+};
 
 export const knowledgeInitialized = inngest.createFunction(
   { id: "knowledge-initialized" },

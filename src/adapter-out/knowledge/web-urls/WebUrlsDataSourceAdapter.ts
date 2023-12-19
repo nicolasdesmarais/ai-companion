@@ -26,6 +26,7 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
   public async getDataSourceItemList(
     orgId: string,
     userId: string,
+    dataSourceId: string,
     data: any
   ): Promise<DataSourceItemList> {
     const input = data as WebUrlDataSourceInput;

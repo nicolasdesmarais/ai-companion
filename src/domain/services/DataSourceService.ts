@@ -144,7 +144,9 @@ export class DataSourceService {
    * @param dataSourceId
    * @returns
    */
-  public async createDataSourceKnowledgeList(dataSourceId: string) {
+  public async createDataSourceKnowledgeList(
+    dataSourceId: string
+  ): Promise<string[]> {
     const dataSource = await prismadb.dataSource.findUnique({
       where: { id: dataSourceId },
     });
@@ -159,6 +161,7 @@ export class DataSourceService {
     const itemList = await dataSourceAdapter.getDataSourceItemList(
       dataSource.orgId,
       dataSource.ownerUserId,
+      dataSourceId,
       dataSource.data
     );
 
@@ -169,11 +172,42 @@ export class DataSourceService {
     );
   }
 
+  /**
+   * Handle asynchronous receipt of a data source item list through an event
+   * @param dataSourceId
+   * @param dataSourceItemList
+   * @returns
+   */
+  public async onDataSourceItemListReceived(
+    dataSourceId: string,
+    dataSourceItemList: DataSourceItemList
+  ): Promise<string[]> {
+    const dataSource = await prismadb.dataSource.findUnique({
+      where: { id: dataSourceId },
+    });
+
+    if (!dataSource) {
+      throw new EntityNotFoundError(
+        `DataSource with id=${dataSourceId} not found`
+      );
+    }
+
+    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
+    return await this.initializeKnowledgeList(
+      dataSourceId,
+      dataSourceAdapter,
+      dataSourceItemList
+    );
+  }
+
   private async initializeKnowledgeList(
     dataSourceId: string,
     dataSourceAdapter: DataSourceAdapter,
     itemList: DataSourceItemList
-  ) {
+  ): Promise<string[]> {
+    if (itemList.items.length === 0) {
+      return [];
+    }
     const knowledgeIdList = [];
     const dataSourceKnowledgeRelations = [];
 

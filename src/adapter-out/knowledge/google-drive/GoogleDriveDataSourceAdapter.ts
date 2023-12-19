@@ -36,8 +36,13 @@ import {
   KnowledgeIndexingResult,
   KnowledgeIndexingResultStatus,
 } from "../types/KnowlegeIndexingResult";
+import {
+  FolderScanInitiatedEventPayload,
+  GoogleDriveEvent,
+} from "./events/GoogleDriveEvent";
 import { GoogleDriveDataSourceInput } from "./types/GoogleDriveDataSourceInput";
 import { GoogleDriveFileMetadata } from "./types/GoogleDriveFileMetaData";
+import { mapGoogleDriveFileToDataSourceItem } from "./util/GoogleDriveUtils";
 
 const MIME_TYPE_TEXT = "text/plain";
 const MIME_TYPE_CSV = "text/csv";
@@ -204,50 +209,136 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     return response;
   }
 
-  public async getDataSourceItemList(orgId: string, userId: string, data: any) {
+  /**
+   * Retrieves a list of files from Google Drive
+   * If the fileId is a file:
+   *  - returns a list with a single item
+   * If the fileId is a folder:
+   *  - publishes a FOLDER_SCAN_INITIATED event to process the folder asynchronously
+   *  - returns an empty list of items
+   * @param orgId
+   * @param userId
+   * @param data
+   * @returns
+   */
+  public async getDataSourceItemList(
+    orgId: string,
+    userId: string,
+    dataSourceId: string,
+    data: any
+  ): Promise<DataSourceItemList> {
     const input = data as GoogleDriveDataSourceInput;
+    const oauthTokenId = input.oauthTokenId;
 
     const oauth2Client = await this.setOAuthCredentials(
       orgId,
       userId,
-      input.oauthTokenId
+      oauthTokenId
     );
     const driveClient = googleDriveClient(oauth2Client);
 
-    const listFilesResponse = await this.listAllFiles(
-      driveClient,
-      input.fileId
-    );
-    if (!listFilesResponse?.files || listFilesResponse.files.length === 0) {
+    const inputFile = await driveClient.files.get({
+      fileId: input.fileId,
+      fields: "id, name, mimeType",
+      supportsAllDrives: true,
+    });
+
+    const fileData = inputFile.data;
+    if (!fileData.id) {
       return {
         type: DataSourceType.GOOGLE_DRIVE,
         items: [],
       };
     }
 
-    const items: DataSourceItem[] = [];
-    const result: DataSourceItemList = {
+    const dataSourceItem = await this.extractDataSourceItemFromFile(
+      orgId,
+      userId,
+      oauthTokenId,
+      dataSourceId,
+      fileData
+    );
+    const dataSourceItemList: DataSourceItem[] = [];
+    if (dataSourceItem) {
+      dataSourceItemList.push(dataSourceItem);
+    }
+    return {
       type: DataSourceType.GOOGLE_DRIVE,
-      items,
+      items: dataSourceItemList,
     };
-    for (const file of listFilesResponse.files) {
-      const metadata: GoogleDriveFileMetadata = {
-        fileId: file.id ?? "",
-        fileName: file.name ?? "",
-        mimeType: file.mimeType ?? "",
-        modifiedTime: file.modifiedTime ?? "",
-      };
+  }
 
-      const uniqueId = `${metadata.fileId}`;
-      const item: DataSourceItem = {
-        name: file.name ?? "",
-        uniqueId,
-        metadata,
+  public async scanFolder(
+    orgId: string,
+    userId: string,
+    oauthTokenId: string,
+    dataSourceId: string,
+    folderId: string
+  ): Promise<DataSourceItemList> {
+    const oauth2Client = await this.setOAuthCredentials(
+      orgId,
+      userId,
+      oauthTokenId
+    );
+    const driveClient = googleDriveClient(oauth2Client);
+
+    const query = `'${folderId}' in parents and (${this.getMimeTypeQuery(
+      true
+    )}) and trashed=false`;
+
+    const response = await this.listFiles(driveClient, query);
+
+    if (!response.data.files) {
+      return {
+        type: DataSourceType.GOOGLE_DRIVE,
+        items: [],
       };
-      items.push(item);
     }
 
-    return result;
+    const files: DataSourceItem[] = [];
+    for (const file of response.data.files) {
+      const item = await this.extractDataSourceItemFromFile(
+        orgId,
+        userId,
+        oauthTokenId,
+        dataSourceId,
+        file
+      );
+      if (item) {
+        files.push(item);
+      }
+    }
+    return {
+      type: DataSourceType.GOOGLE_DRIVE,
+      items: files,
+    };
+  }
+
+  private async extractDataSourceItemFromFile(
+    orgId: string,
+    userId: string,
+    oauthTokenId: string,
+    dataSourceId: string,
+    file: drive_v3.Schema$File
+  ): Promise<DataSourceItem | null> {
+    if (!file.id) {
+      return null;
+    }
+    // For folders, publish event to process folder asynchronously
+    // Return an empty list of items
+    if (file.mimeType === FOLDER_MIME_TYPE) {
+      const eventPayload: FolderScanInitiatedEventPayload = {
+        orgId,
+        userId,
+        oauthTokenId,
+        dataSourceId,
+        folderId: file.id,
+      };
+      await publishEvent(GoogleDriveEvent.FOLDER_SCAN_INITIATED, eventPayload);
+      return null;
+    }
+
+    return mapGoogleDriveFileToDataSourceItem(file);
   }
 
   public async indexKnowledge(
