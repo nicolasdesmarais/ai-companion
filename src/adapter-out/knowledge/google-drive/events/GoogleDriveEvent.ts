@@ -1,8 +1,8 @@
 export enum GoogleDriveEvent {
-  FOLDER_SCAN_INITIATED = "folder.scan.initiated",
+  GOOGLE_DRIVE_FOLDER_SCAN_INITIATED = "google.drive.folder.scan.initiated",
 }
 
-export interface FolderScanInitiatedEventPayload {
+export interface GoogleDriveFolderScanInitiatedPayload {
   orgId: string;
   userId: string;
   oauthTokenId: string;

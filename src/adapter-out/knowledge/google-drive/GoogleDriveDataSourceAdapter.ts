@@ -37,8 +37,8 @@ import {
   KnowledgeIndexingResultStatus,
 } from "../types/KnowlegeIndexingResult";
 import {
-  FolderScanInitiatedEventPayload,
   GoogleDriveEvent,
+  GoogleDriveFolderScanInitiatedPayload,
 } from "./events/GoogleDriveEvent";
 import { GoogleDriveDataSourceInput } from "./types/GoogleDriveDataSourceInput";
 import { GoogleDriveFileMetadata } from "./types/GoogleDriveFileMetaData";
@@ -319,14 +319,17 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     // For folders, publish event to process folder asynchronously
     // Return an empty list of items
     if (file.mimeType === FOLDER_MIME_TYPE) {
-      const eventPayload: FolderScanInitiatedEventPayload = {
+      const eventPayload: GoogleDriveFolderScanInitiatedPayload = {
         orgId,
         userId,
         oauthTokenId,
         dataSourceId,
         folderId: file.id,
       };
-      await publishEvent(GoogleDriveEvent.FOLDER_SCAN_INITIATED, eventPayload);
+      await publishEvent(
+        GoogleDriveEvent.GOOGLE_DRIVE_FOLDER_SCAN_INITIATED,
+        eventPayload
+      );
       return null;
     }
 
