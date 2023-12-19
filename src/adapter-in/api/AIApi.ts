@@ -11,6 +11,7 @@ export interface ListAIsRequestParams {
   groupId?: string | null;
   categoryId?: string | null;
   search?: string | null;
+  sort?: string | null;
 }
 
 export enum ListAIsRequestScope {

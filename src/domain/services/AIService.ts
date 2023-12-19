@@ -282,6 +282,15 @@ export class AIService {
       return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi);
     });
 
+    console.log(request.sort);
+    if (request.sort === "newest") {
+      return result;
+    } else if (!request.sort || request.sort === "popularity") {
+      return result.sort((a, b) => b.messageCount - a.messageCount);
+    } else if (request.sort === "rating") {
+      return result.sort((a, b) => b.rating - a.rating);
+    }
+
     return result;
   }
 
