@@ -42,10 +42,10 @@ export const WebUrlsForm = ({ aiId }: WebUrlsProps) => {
   };
 
   return (
-    <div className="w-full p-6 bg-gray-900 text-white">
+    <div className="w-full p-6 bg-accent/30">
       <div className="mb-4">
         <h2 className="text-xl font-bold">Website URLs</h2>
-        <p className="text-gray-400">
+        <p className="text-gray-400 dark:text-white">
           Choose URLs you want AppDirect AI to read to train this AIs knowledge
         </p>
 
@@ -54,7 +54,7 @@ export const WebUrlsForm = ({ aiId }: WebUrlsProps) => {
             key={index}
             type="text"
             placeholder="https://google.com"
-            className="mt-2 w-full p-2 bg-gray-800 border rounded border-gray-700"
+            className="mt-2 w-full p-2 bg-accent/30 border rounded border-accent/80"
             value={url}
             onChange={(e) => handleUrlChange(index, e.target.value)}
           />

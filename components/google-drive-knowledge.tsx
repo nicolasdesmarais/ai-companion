@@ -183,7 +183,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   };
 
   return (
-    <div className="w-full p-6 bg-gray-900 text-white">
+    <div className="w-full p-6 bg-accent/30">
       <div className="mb-4">
         <h2 className="text-xl font-bold">Google Drive Integration</h2>
         <p className="text-gray-400 mb-4">

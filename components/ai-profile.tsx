@@ -88,7 +88,7 @@ export const AIProfile = ({ ai }: Props) => {
       animationClassName="animate-in slide-in-from-right duration-200"
       persist={false}
     >
-      <div className="bg-[#0f111e] px-6 space-y-4 w-full md:w-auto absolute left-0 md:left-[76px] right-0 top-[64px] md:top-0 bottom-0 lg:static overflow-auto pb-16">
+      <div className="bg-profile px-6 space-y-4 w-full md:w-auto absolute left-0 md:left-[76px] right-0 top-[64px] md:top-0 bottom-0 lg:static overflow-auto pb-16">
         <div className="absolute top-4 right-4">
           <Button
             onClick={() => {

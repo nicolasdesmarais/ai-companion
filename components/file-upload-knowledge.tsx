@@ -80,7 +80,7 @@ export const FileUploadKnowledge = ({
   };
 
   return (
-    <div className="w-full p-6 bg-gray-900 text-white">
+    <div className="w-full p-6 bg-accent/30">
       <FormItem>
         <FormLabel>Upload your file</FormLabel>
         <div>
