@@ -26,13 +26,16 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
     return redirectToSignIn();
   }
 
-  const initialAi = await aiService.findAIForUser(
-    authorizationContext,
-    params.aiId
-  );
+  let initialAi = null;
+  if (params.aiId !== "new") {
+    initialAi = await aiService.findAIForUser(
+      authorizationContext,
+      params.aiId
+    );
 
-  if (initialAi === null) {
-    return redirect("/");
+    if (initialAi === null) {
+      return redirect("/");
+    }
   }
 
   const models = await aiModelService.getAIModels();
