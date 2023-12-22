@@ -3,6 +3,7 @@ import { Categories } from "@/components/categories";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { GroupModal } from "@/components/group-modal";
 import { Groups } from "@/components/groups";
+import { Filters } from "@/components/filters";
 import { InviteButton } from "@/components/invite-button";
 import { SearchInput } from "@/components/search-input";
 import aiService from "@/src/domain/services/AIService";
@@ -64,13 +65,14 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
         <h1 className="text-4xl font-bold whitespace-nowrap pt-2 pr-2">
           Browse AIs
         </h1>
-        <Groups />
+        <Filters />
         <InviteButton />
       </div>
       <SearchInput />
-      {!(scope === ListAIsRequestScope.PRIVATE || searchParams.groupId) && (
+      {!(scope !== ListAIsRequestScope.PUBLIC || searchParams.groupId) && (
         <Categories data={categories} />
       )}
+      <Groups />
       <AIs data={data} authorizationContext={authorizationContext} />
       <GroupModal />
       <ConfirmModal />

@@ -420,7 +420,13 @@ export class AIService {
         baseWhereCondition = this.getSharedWithUserCriteria(userId);
         break;
       case ListAIsRequestScope.ORGANIZATION:
-        baseWhereCondition = this.getOrganizationCriteria(orgId);
+        baseWhereCondition = {
+          OR: [
+            this.getOrganizationCriteria(orgId),
+            this.getUserGroupCriteria(orgId, userId),
+          ],
+        };
+        console.log(baseWhereCondition);
         break;
       case ListAIsRequestScope.PUBLIC:
         baseWhereCondition = this.getPublicCriteria();
@@ -483,7 +489,9 @@ export class AIService {
   private getOrganizationCriteria(orgId: string) {
     return {
       orgId,
-      visibility: AIVisibility.ORGANIZATION,
+      visibility: {
+        in: [AIVisibility.ORGANIZATION, AIVisibility.GROUP],
+      },
     };
   }
 
