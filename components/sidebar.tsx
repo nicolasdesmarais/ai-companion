@@ -38,6 +38,7 @@ interface Route {
   href: string;
   pathname?: string;
   searchparams?: Record<string, string>;
+  searchparamsregex?: Record<string, RegExp>;
   label: string;
   pro: boolean;
   regex: RegExp;
@@ -56,6 +57,17 @@ const isActive = (
     pathActive = pathname === route.pathname;
   } else {
     pathname === route.href;
+  }
+
+  if (route.searchparamsregex) {
+    const params = Object.fromEntries(searchparams.entries());
+    const requiredParamsRegex = Object.entries(route.searchparamsregex);
+    if (requiredParamsRegex.length) {
+      const searchActive = requiredParamsRegex.every(([key, value]) =>
+        value.test(params[key])
+      );
+      return pathActive && searchActive;
+    }
   }
 
   if (route.searchparams) {
@@ -144,7 +156,7 @@ export const Sidebar = ({
       icon: Eye,
       href: "/?scope=INSTANCE",
       pathname: "/",
-      searchparams: { scope: "INSTANCE" },
+      searchparamsregex: { scope: /INSTANCE.*/ },
       label: "Super User",
       pro: false,
       requiredPermission: {
