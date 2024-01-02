@@ -4,7 +4,13 @@ import Link from "next/link";
 import { StarRating } from "@/components/star-rating";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { AIDetailDto } from "@/src/domain/models/AI";
-import { Building, LockKeyhole, MessageSquareText, Users } from "lucide-react";
+import {
+  Building,
+  EyeOff,
+  LockKeyhole,
+  MessageSquareText,
+  Users,
+} from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { Tooltip } from "./ui/tooltip";
@@ -51,6 +57,14 @@ export const AIs = ({ data, authorizationContext }: AIsProps) => {
                       </Tooltip>
                     </div>
                   )}
+                  {item.visibility === "PRIVATE" &&
+                    item.userId !== authorizationContext.userId && (
+                      <div className="absolute top-2 left-2">
+                        <Tooltip content="Not Visible to Me">
+                          <EyeOff className="w-6 h-6 bg-destructive px-1 rounded-md text-white" />
+                        </Tooltip>
+                      </div>
+                    )}
                   {item.visibility === "PRIVATE" && (
                     <div className="absolute top-2 right-2">
                       <Tooltip content="Private">
