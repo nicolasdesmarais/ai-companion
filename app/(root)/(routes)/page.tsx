@@ -7,6 +7,7 @@ import { Filters } from "@/components/filters";
 import { InviteButton } from "@/components/invite-button";
 import { SearchInput } from "@/components/search-input";
 import aiService from "@/src/domain/services/AIService";
+import { Banner } from "@/components/ui/banner";
 
 import {
   ListAIsRequestParams,
@@ -61,6 +62,12 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
 
   return (
     <div className="h-full px-4 space-y-2 pt-2">
+      {scope === ListAIsRequestScope.INSTANCE && (
+        <Banner className="my-2" variant="destructive">
+          Warning: As a superuser, you are able to see and edit AIs where the
+          creator did not give you permission to see. Use with caution.
+        </Banner>
+      )}
       <div className="flex ">
         <h1 className="text-4xl font-bold whitespace-nowrap pt-2 pr-2">
           Browse AIs

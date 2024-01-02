@@ -282,7 +282,6 @@ export class AIService {
       return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi);
     });
 
-    console.log(request.sort);
     if (request.sort === "newest") {
       return result;
     } else if (!request.sort || request.sort === "popularity") {
