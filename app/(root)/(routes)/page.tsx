@@ -16,6 +16,8 @@ import {
 } from "@/src/adapter-in/api/AIApi";
 import categoryService from "@/src/domain/services/CategoryService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
+import { GroupSummaryDto } from "@/src/domain/models/Groups";
+import groupService from "@/src/domain/services/GroupService";
 
 interface RootPageProps {
   searchParams: {
@@ -33,6 +35,9 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
     return;
   }
 
+  const groups: GroupSummaryDto[] = await groupService.findGroupsByUser(
+    authorizationContext
+  );
   const scopeParam = searchParams.scope;
   let scope: ListAIsRequestScope | undefined;
   if (
@@ -80,8 +85,12 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
       {!(scope !== ListAIsRequestScope.PUBLIC || searchParams.groupId) && (
         <Categories data={categories} />
       )}
-      <Groups />
-      <AIs data={data} authorizationContext={authorizationContext} />
+      <Groups groups={groups} />
+      <AIs
+        data={data}
+        authorizationContext={authorizationContext}
+        groups={groups}
+      />
       <GroupModal />
       <ConfirmModal />
     </div>

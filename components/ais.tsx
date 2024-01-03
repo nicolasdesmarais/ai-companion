@@ -14,13 +14,15 @@ import {
 import { cn } from "@/src/lib/utils";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { Tooltip } from "./ui/tooltip";
+import { GroupSummaryDto } from "@/src/domain/models/Groups";
 
 interface AIsProps {
   data: AIDetailDto[];
   authorizationContext: AuthorizationContext;
+  groups: GroupSummaryDto[];
 }
 
-export const AIs = ({ data, authorizationContext }: AIsProps) => {
+export const AIs = ({ data, authorizationContext, groups }: AIsProps) => {
   if (data.length === 0) {
     return (
       <div className="pt-10 flex flex-col items-center justify-center space-y-3">
@@ -31,7 +33,7 @@ export const AIs = ({ data, authorizationContext }: AIsProps) => {
       </div>
     );
   }
-
+  console.log(groups, data, authorizationContext.orgId);
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-9 gap-3 pb-10">
       {data.map((item) => (
@@ -57,14 +59,20 @@ export const AIs = ({ data, authorizationContext }: AIsProps) => {
                       </Tooltip>
                     </div>
                   )}
-                  {item.visibility === "PRIVATE" &&
-                    item.userId !== authorizationContext.userId && (
-                      <div className="absolute top-2 left-2">
-                        <Tooltip content="Not Visible to Me">
-                          <EyeOff className="w-6 h-6 bg-destructive px-1 rounded-md text-white" />
-                        </Tooltip>
-                      </div>
-                    )}
+                  {(item.visibility === "PRIVATE" &&
+                    item.userId !== authorizationContext.userId) ||
+                  (item.visibility === "ORGANIZATION" &&
+                    item.orgId !== authorizationContext.orgId) ||
+                  (item.visibility === "GROUP" &&
+                    !item.groups?.some((groupId) =>
+                      groups.some((group) => group.id === groupId)
+                    )) ? (
+                    <div className="absolute top-2 left-2">
+                      <Tooltip content="Not Visible to Me">
+                        <EyeOff className="w-6 h-6 bg-destructive px-1 rounded-md text-white" />
+                      </Tooltip>
+                    </div>
+                  ) : null}
                   {item.visibility === "PRIVATE" && (
                     <div className="absolute top-2 right-2">
                       <Tooltip content="Private">

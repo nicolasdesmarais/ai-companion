@@ -5,39 +5,23 @@ import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { cn } from "@/src/lib/utils";
 import { useOrganization, useUser } from "@clerk/nextjs";
 import { GroupAvailability } from "@prisma/client";
-import axios from "axios";
 import { MoreVertical, Plus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
-import { useEffect, useState } from "react";
 
-export const Groups = () => {
+interface Props {
+  groups: GroupSummaryDto[];
+}
+
+export const Groups = ({ groups }: Props) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const groupModal = useGroupModal();
   const { user } = useUser();
   const { organization } = useOrganization();
-  const [groups, setGroups] = useState<GroupSummaryDto[]>([]);
 
   const groupId = searchParams.get("groupId");
   const scope = searchParams.get("scope");
-
-  const fetchGroups = async () => {
-    const response = await axios.get("/api/v1/me/groups");
-    if (response.status === 200 && Array.isArray(response.data.data)) {
-      setGroups(response.data.data);
-    }
-  };
-
-  useEffect(() => {
-    if (groupModal.areGroupsUpdated) {
-      fetchGroups();
-    }
-  }, [groupModal.areGroupsUpdated]);
-
-  useEffect(() => {
-    fetchGroups();
-  }, [organization?.id]);
 
   const onClick = (id: string | undefined) => {
     let query;
