@@ -1,6 +1,9 @@
 "use client";
 
-import { SuperuserScopes } from "@/src/adapter-in/api/AIApi";
+import {
+  ListAIsRequestScope,
+  SuperuserScopes,
+} from "@/src/adapter-in/api/AIApi";
 import { cn } from "@/src/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
@@ -42,7 +45,7 @@ export const Filters = () => {
     transition
   `;
 
-  if (scope && SuperuserScopes.includes(scope)) {
+  if (scope && SuperuserScopes.includes(scope as ListAIsRequestScope)) {
     return (
       <div className="w-full overflow-x-auto space-x-2 flex p-1">
         <button
