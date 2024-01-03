@@ -480,6 +480,9 @@ export class AIService {
                   },
                 },
               },
+              {
+                ownerUserId: userId,
+              },
             ],
           },
         },
