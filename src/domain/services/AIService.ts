@@ -445,11 +445,10 @@ export class AIService {
         baseWhereCondition = this.getAllOrganizationCriteria();
         break;
       case ListAIsRequestScope.INSTANCE_NOT_VISIBLE:
-        baseWhereCondition = { AND: [{}] };
-        baseWhereCondition.AND.push({ visibility: AIVisibility.PRIVATE });
-        baseWhereCondition.AND.push({
-          NOT: this.getOwnedByUserCriteria(userId),
-        });
+        baseWhereCondition = { OR: [{}] };
+        baseWhereCondition.OR.push(this.geOthersPrivateCriteria(userId));
+        baseWhereCondition.OR.push(this.geOthersOrganizationCriteria(orgId));
+        baseWhereCondition.OR.push(this.geOthersGroupCriteria(orgId, userId));
         break;
       case ListAIsRequestScope.INSTANCE_PRIVATE:
         baseWhereCondition = { visibility: AIVisibility.PRIVATE };
@@ -495,6 +494,53 @@ export class AIService {
           userId: userId,
         },
       },
+    };
+  }
+
+  private geOthersGroupCriteria(orgId: string, userId: string) {
+    return {
+      visibility: AIVisibility.GROUP,
+      groups: {
+        some: {
+          group: {
+            OR: [
+              {
+                NOT: {
+                  orgId,
+                },
+              },
+              {
+                users: {
+                  some: {
+                    NOT: {
+                      userId: userId,
+                    },
+                  },
+                },
+                NOT: {
+                  ownerUserId: userId,
+                },
+              },
+            ],
+          },
+        },
+      },
+    };
+  }
+
+  private geOthersOrganizationCriteria(orgId: string) {
+    return {
+      visibility: AIVisibility.ORGANIZATION,
+      NOT: {
+        orgId,
+      },
+    };
+  }
+
+  private geOthersPrivateCriteria(userId: string) {
+    return {
+      visibility: AIVisibility.PRIVATE,
+      NOT: this.getOwnedByUserCriteria(userId),
     };
   }
 
