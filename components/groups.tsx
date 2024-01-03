@@ -26,9 +26,9 @@ export const Groups = ({ groups }: Props) => {
   const onClick = (id: string | undefined) => {
     let query;
     if (!id) {
-      query = { scope: "ORGANIZATION", groupId: undefined };
+      query = { scope, groupId: undefined };
     } else {
-      query = { scope: undefined, groupId: id };
+      query = { scope, groupId: id };
     }
 
     const url = qs.stringifyUrl(
@@ -46,7 +46,11 @@ export const Groups = ({ groups }: Props) => {
     groupModal.onOpen();
   };
 
-  if (scope !== "ORGANIZATION" && !groupId) {
+  if (
+    scope !== "ORGANIZATION" &&
+    scope !== "INSTANCE_ORGANIZATION" &&
+    !groupId
+  ) {
     return null;
   }
 
