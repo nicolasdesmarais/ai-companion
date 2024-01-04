@@ -277,13 +277,15 @@ export class AIService {
       return [];
     }
 
+    const aiShares = await this.getAISharesForUser(userId);
+
     const aiIds = ais.map((ai) => ai.id);
 
     const messageCountPerAi: any[] = await this.getMessageCountPerAi(aiIds);
     const ratingPerAi: any[] = await this.getRatingPerAi(aiIds);
 
     const result = ais.map((ai) => {
-      return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi);
+      return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi, aiShares);
     });
 
     if (request.sort === "newest") {
@@ -355,6 +357,7 @@ export class AIService {
     ai: AI & { groups: GroupAI[] },
     messageCountPerAi: any[],
     ratingPerAi: any[],
+    aiShares: any[],
     forUpdate: boolean = false
   ): AIDetailDto {
     const aiCountRow = messageCountPerAi.find((m) => m.aiId === ai.id);
@@ -363,6 +366,8 @@ export class AIService {
     const ratingRow = ratingPerAi.find((r) => r.aiId === ai.id);
     const rating = ratingRow ? Number(ratingRow.averageRating) : 0;
     const ratingCount = ratingRow ? Number(ratingRow.ratingCount) : 0;
+
+    const isShared = !!aiShares.find((a) => a.aiId === ai.id);
 
     const profile = ai.profile as unknown as AIProfile;
 
@@ -396,6 +401,7 @@ export class AIService {
       messageCount,
       rating,
       ratingCount,
+      isShared,
       groups: groupIds,
     };
   }
@@ -1092,6 +1098,16 @@ export class AIService {
     };
 
     return aiProfile;
+  }
+
+  public async getAISharesForUser(userId: string) {
+    const aiShares = await prismadb.aIPermissions.findMany({
+      where: {
+        userId,
+      },
+    });
+
+    return aiShares;
   }
 }
 
