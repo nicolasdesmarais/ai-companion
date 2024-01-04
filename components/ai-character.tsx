@@ -81,8 +81,8 @@ export const AICharacter = ({
 
   const fetchGroups = async () => {
     const response = await axios.get("/api/v1/me/groups");
-    if (response.status === 200 && Array.isArray(response.data)) {
-      setGroupList(response.data);
+    if (response.status === 200 && Array.isArray(response.data.data)) {
+      setGroupList(response.data.data);
     }
   };
 
