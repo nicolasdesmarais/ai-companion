@@ -4,17 +4,25 @@ import Link from "next/link";
 import { StarRating } from "@/components/star-rating";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { AIDetailDto } from "@/src/domain/models/AI";
-import { Building, LockKeyhole, MessageSquareText, Users } from "lucide-react";
+import {
+  Building,
+  EyeOff,
+  LockKeyhole,
+  MessageSquareText,
+  Users,
+} from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { Tooltip } from "./ui/tooltip";
+import { GroupSummaryDto } from "@/src/domain/models/Groups";
 
 interface AIsProps {
   data: AIDetailDto[];
   authorizationContext: AuthorizationContext;
+  groups: GroupSummaryDto[];
 }
 
-export const AIs = ({ data, authorizationContext }: AIsProps) => {
+export const AIs = ({ data, authorizationContext, groups }: AIsProps) => {
   if (data.length === 0) {
     return (
       <div className="pt-10 flex flex-col items-center justify-center space-y-3">
@@ -51,6 +59,22 @@ export const AIs = ({ data, authorizationContext }: AIsProps) => {
                       </Tooltip>
                     </div>
                   )}
+                  {(item.visibility === "PRIVATE" &&
+                    item.userId !== authorizationContext.userId) ||
+                  (item.visibility === "ORGANIZATION" &&
+                    item.orgId !== authorizationContext.orgId) ||
+                  (item.visibility === "GROUP" &&
+                    !item.groups?.some((groupId) =>
+                      groups.some(
+                        (group) => !group.notVisibleToMe && group.id === groupId
+                      )
+                    )) ? (
+                    <div className="absolute top-2 left-2">
+                      <Tooltip content="Not Visible to Me">
+                        <EyeOff className="w-6 h-6 bg-destructive px-1 rounded-md text-white" />
+                      </Tooltip>
+                    </div>
+                  ) : null}
                   {item.visibility === "PRIVATE" && (
                     <div className="absolute top-2 right-2">
                       <Tooltip content="Private">

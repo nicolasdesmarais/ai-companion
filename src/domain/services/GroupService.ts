@@ -88,6 +88,12 @@ export class GroupService {
     });
   }
 
+  public async getInstanceGroups() {
+    return await prismadb.group.findMany({
+      select: groupSummarySelect,
+    });
+  }
+
   /**
    * Creates a new group
    * @param authorizationContext

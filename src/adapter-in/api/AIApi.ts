@@ -22,8 +22,18 @@ export enum ListAIsRequestScope {
   ORGANIZATION = "ORGANIZATION", // Only return AIs that are shared within the user's organization
   PUBLIC = "PUBLIC", // Only return AIs that are public,
   ALL = "ALL", // Return all AIs that the user has access to
-  INSTANCE = "INSTANCE",
+  INSTANCE = "INSTANCE", // No filters
+  INSTANCE_ORGANIZATION = "INSTANCE_ORGANIZATION", // All AIs with org and group visibility
+  INSTANCE_PRIVATE = "INSTANCE_PRIVATE", // All private AIs
+  INSTANCE_NOT_VISIBLE = "INSTANCE_NOT_VISIBLE", // All AIs user would not see normally
 }
+
+export const SuperuserScopes = [
+  ListAIsRequestScope.INSTANCE,
+  ListAIsRequestScope.INSTANCE_ORGANIZATION,
+  ListAIsRequestScope.INSTANCE_PRIVATE,
+  ListAIsRequestScope.INSTANCE_NOT_VISIBLE,
+];
 
 export interface CreateAIRequest extends AIRequest {
   userName: string;

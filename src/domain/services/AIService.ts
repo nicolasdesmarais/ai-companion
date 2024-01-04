@@ -244,7 +244,11 @@ export class AIService {
     whereCondition.AND.push(this.getBaseWhereCondition(orgId, userId, scope));
 
     if (request.groupId) {
-      whereCondition.AND.push(this.getGroupCriteria(orgId, request.groupId));
+      if (scope === ListAIsRequestScope.INSTANCE_ORGANIZATION) {
+        whereCondition.AND.push(this.getInstanceGroupCriteria(request.groupId));
+      } else {
+        whereCondition.AND.push(this.getGroupCriteria(orgId, request.groupId));
+      }
     }
     if (request.categoryId) {
       whereCondition.AND.push(this.getCategoryCriteria(request.categoryId));
@@ -282,7 +286,6 @@ export class AIService {
       return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi);
     });
 
-    console.log(request.sort);
     if (request.sort === "newest") {
       return result;
     } else if (!request.sort || request.sort === "popularity") {
@@ -426,7 +429,6 @@ export class AIService {
             this.getUserGroupCriteria(orgId, userId),
           ],
         };
-        console.log(baseWhereCondition);
         break;
       case ListAIsRequestScope.PUBLIC:
         baseWhereCondition = this.getPublicCriteria();
@@ -441,6 +443,18 @@ export class AIService {
         break;
       case ListAIsRequestScope.INSTANCE:
         baseWhereCondition = { AND: [{}] };
+        break;
+      case ListAIsRequestScope.INSTANCE_ORGANIZATION:
+        baseWhereCondition = this.getAllOrganizationCriteria();
+        break;
+      case ListAIsRequestScope.INSTANCE_NOT_VISIBLE:
+        baseWhereCondition = { OR: [{}] };
+        baseWhereCondition.OR.push(this.geOthersPrivateCriteria(userId));
+        baseWhereCondition.OR.push(this.geOthersOrganizationCriteria(orgId));
+        baseWhereCondition.OR.push(this.geOthersGroupCriteria(orgId, userId));
+        break;
+      case ListAIsRequestScope.INSTANCE_PRIVATE:
+        baseWhereCondition = { visibility: AIVisibility.PRIVATE };
         break;
     }
 
@@ -469,6 +483,9 @@ export class AIService {
                   },
                 },
               },
+              {
+                ownerUserId: userId,
+              },
             ],
           },
         },
@@ -486,9 +503,64 @@ export class AIService {
     };
   }
 
+  private geOthersGroupCriteria(orgId: string, userId: string) {
+    return {
+      visibility: AIVisibility.GROUP,
+      groups: {
+        some: {
+          group: {
+            OR: [
+              {
+                NOT: {
+                  orgId,
+                },
+              },
+              {
+                users: {
+                  some: {
+                    NOT: {
+                      userId: userId,
+                    },
+                  },
+                },
+                NOT: {
+                  ownerUserId: userId,
+                },
+              },
+            ],
+          },
+        },
+      },
+    };
+  }
+
+  private geOthersOrganizationCriteria(orgId: string) {
+    return {
+      visibility: AIVisibility.ORGANIZATION,
+      NOT: {
+        orgId,
+      },
+    };
+  }
+
+  private geOthersPrivateCriteria(userId: string) {
+    return {
+      visibility: AIVisibility.PRIVATE,
+      NOT: this.getOwnedByUserCriteria(userId),
+    };
+  }
+
   private getOrganizationCriteria(orgId: string) {
     return {
       orgId,
+      visibility: {
+        in: [AIVisibility.ORGANIZATION, AIVisibility.GROUP],
+      },
+    };
+  }
+
+  private getAllOrganizationCriteria() {
+    return {
       visibility: {
         in: [AIVisibility.ORGANIZATION, AIVisibility.GROUP],
       },
@@ -506,6 +578,18 @@ export class AIService {
           group: {
             id: groupId,
             orgId: orgId,
+          },
+        },
+      },
+    };
+  }
+
+  private getInstanceGroupCriteria(groupId: string) {
+    return {
+      groups: {
+        some: {
+          group: {
+            id: groupId,
           },
         },
       },

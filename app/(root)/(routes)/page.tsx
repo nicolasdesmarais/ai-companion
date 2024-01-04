@@ -7,13 +7,22 @@ import { Filters } from "@/components/filters";
 import { InviteButton } from "@/components/invite-button";
 import { SearchInput } from "@/components/search-input";
 import aiService from "@/src/domain/services/AIService";
+import { Banner } from "@/components/ui/banner";
 
 import {
   ListAIsRequestParams,
   ListAIsRequestScope,
+  SuperuserScopes,
 } from "@/src/adapter-in/api/AIApi";
 import categoryService from "@/src/domain/services/CategoryService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
+import { GroupSummaryDto } from "@/src/domain/models/Groups";
+import groupService from "@/src/domain/services/GroupService";
+import { SecuredRole } from "@/src/security/models/SecuredRoles";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
 
 interface RootPageProps {
   searchParams: {
@@ -44,6 +53,29 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
     scope = ListAIsRequestScope[scopeParam as keyof typeof ListAIsRequestScope];
   }
 
+  const hasInstanceGroupsAccess = BaseEntitySecurityService.hasPermission(
+    authorizationContext,
+    SecuredResourceType.GROUPS,
+    SecuredAction.READ,
+    SecuredResourceAccessLevel.INSTANCE
+  );
+
+  let groups: GroupSummaryDto[] = await groupService.findGroupsByUser(
+    authorizationContext
+  );
+  if (
+    scope === ListAIsRequestScope.INSTANCE_ORGANIZATION &&
+    hasInstanceGroupsAccess
+  ) {
+    const allGroups: GroupSummaryDto[] = await groupService.getInstanceGroups();
+    allGroups.forEach((group) => {
+      if (!groups.find((g) => g.id === group.id)) {
+        group.notVisibleToMe = true;
+      }
+    });
+    groups = allGroups;
+  }
+
   const requestParams: ListAIsRequestParams = {
     scope: scope,
     groupId: searchParams.groupId,
@@ -61,6 +93,12 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
 
   return (
     <div className="h-full px-4 space-y-2 pt-2">
+      {scope && SuperuserScopes.includes(scope) && (
+        <Banner className="my-2" variant="destructive">
+          Warning: As a superuser, you are able to see and edit AIs where the
+          creator did not give you permission to see. Use with caution.
+        </Banner>
+      )}
       <div className="flex ">
         <h1 className="text-4xl font-bold whitespace-nowrap pt-2 pr-2">
           Browse AIs
@@ -72,8 +110,12 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
       {!(scope !== ListAIsRequestScope.PUBLIC || searchParams.groupId) && (
         <Categories data={categories} />
       )}
-      <Groups />
-      <AIs data={data} authorizationContext={authorizationContext} />
+      <Groups groups={groups} />
+      <AIs
+        data={data}
+        authorizationContext={authorizationContext}
+        groups={groups}
+      />
       <GroupModal />
       <ConfirmModal />
     </div>
