@@ -213,6 +213,7 @@ export class AIService {
 
     const canUpdateAI = AISecurityService.canUpdateAI(authorizationContext, ai);
 
+    const aiShare = await this.getAIShareForAIAndUser(ai.id, userId);
     const messageCountPerAi: any[] = await this.getMessageCountPerAi([ai.id]);
     const ratingPerAi: any[] = await this.getRatingPerAi([ai.id]);
 
@@ -220,6 +221,7 @@ export class AIService {
       ai,
       messageCountPerAi,
       ratingPerAi,
+      aiShare,
       canUpdateAI
     );
     return aiDto;
@@ -1108,6 +1110,17 @@ export class AIService {
     });
 
     return aiShares;
+  }
+
+  public async getAIShareForAIAndUser(aiId: string, userId: string) {
+    const aiShare = await prismadb.aIPermissions.findMany({
+      where: {
+        aiId,
+        userId,
+      },
+    });
+
+    return aiShare;
   }
 }
 
