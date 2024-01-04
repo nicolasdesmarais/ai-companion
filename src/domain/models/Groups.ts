@@ -8,6 +8,7 @@ export interface GroupSummaryDto {
   ownerUserId: string;
   name: string;
   availability: GroupAvailability;
+  notVisibleToMe?: boolean;
 }
 
 export interface GroupDetailDto extends GroupSummaryDto {

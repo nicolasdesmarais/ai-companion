@@ -18,6 +18,11 @@ import categoryService from "@/src/domain/services/CategoryService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import groupService from "@/src/domain/services/GroupService";
+import { SecuredRole } from "@/src/security/models/SecuredRoles";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
 
 interface RootPageProps {
   searchParams: {
@@ -35,9 +40,6 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
     return;
   }
 
-  const groups: GroupSummaryDto[] = await groupService.findGroupsByUser(
-    authorizationContext
-  );
   const scopeParam = searchParams.scope;
   let scope: ListAIsRequestScope | undefined;
   if (
@@ -49,6 +51,29 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
     scope = undefined;
   } else {
     scope = ListAIsRequestScope[scopeParam as keyof typeof ListAIsRequestScope];
+  }
+
+  const hasInstanceGroupsAccess = BaseEntitySecurityService.hasPermission(
+    authorizationContext,
+    SecuredResourceType.GROUPS,
+    SecuredAction.READ,
+    SecuredResourceAccessLevel.INSTANCE
+  );
+
+  let groups: GroupSummaryDto[] = await groupService.findGroupsByUser(
+    authorizationContext
+  );
+  if (
+    scope === ListAIsRequestScope.INSTANCE_ORGANIZATION &&
+    hasInstanceGroupsAccess
+  ) {
+    const allGroups: GroupSummaryDto[] = await groupService.getInstanceGroups();
+    allGroups.forEach((group) => {
+      if (!groups.find((g) => g.id === group.id)) {
+        group.notVisibleToMe = true;
+      }
+    });
+    groups = allGroups;
   }
 
   const requestParams: ListAIsRequestParams = {

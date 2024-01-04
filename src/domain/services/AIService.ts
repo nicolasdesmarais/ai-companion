@@ -244,7 +244,11 @@ export class AIService {
     whereCondition.AND.push(this.getBaseWhereCondition(orgId, userId, scope));
 
     if (request.groupId) {
-      whereCondition.AND.push(this.getGroupCriteria(orgId, request.groupId));
+      if (scope === ListAIsRequestScope.INSTANCE_ORGANIZATION) {
+        whereCondition.AND.push(this.getInstanceGroupCriteria(request.groupId));
+      } else {
+        whereCondition.AND.push(this.getGroupCriteria(orgId, request.groupId));
+      }
     }
     if (request.categoryId) {
       whereCondition.AND.push(this.getCategoryCriteria(request.categoryId));
@@ -425,7 +429,6 @@ export class AIService {
             this.getUserGroupCriteria(orgId, userId),
           ],
         };
-        console.log(baseWhereCondition);
         break;
       case ListAIsRequestScope.PUBLIC:
         baseWhereCondition = this.getPublicCriteria();
@@ -575,6 +578,18 @@ export class AIService {
           group: {
             id: groupId,
             orgId: orgId,
+          },
+        },
+      },
+    };
+  }
+
+  private getInstanceGroupCriteria(groupId: string) {
+    return {
+      groups: {
+        some: {
+          group: {
+            id: groupId,
           },
         },
       },
