@@ -24,6 +24,7 @@ export interface AIDetailDto extends AISummaryDto {
   messageCount: number;
   rating: number;
   ratingCount: number;
+  isShared: boolean;
   chats?: ChatSummaryDto[];
 
   // Only included based on access and profile settings

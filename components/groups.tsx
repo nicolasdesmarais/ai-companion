@@ -5,9 +5,11 @@ import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { cn } from "@/src/lib/utils";
 import { useOrganization, useUser } from "@clerk/nextjs";
 import { GroupAvailability } from "@prisma/client";
+import axios from "axios";
 import { MoreVertical, Plus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
+import { useEffect, useState } from "react";
 
 interface Props {
   groups: GroupSummaryDto[];
@@ -19,9 +21,23 @@ export const Groups = ({ groups }: Props) => {
   const groupModal = useGroupModal();
   const { user } = useUser();
   const { organization } = useOrganization();
+  const [groupList, setGroupList] = useState<GroupSummaryDto[]>(groups);
 
   const groupId = searchParams.get("groupId");
   const scope = searchParams.get("scope");
+
+  const fetchGroups = async () => {
+    const response = await axios.get("/api/v1/me/groups");
+    if (response.status === 200 && Array.isArray(response.data.data)) {
+      setGroupList(response.data.data);
+    }
+  };
+
+  useEffect(() => {
+    if (groupModal.areGroupsUpdated) {
+      fetchGroups();
+    }
+  }, [groupModal.areGroupsUpdated]);
 
   const onClick = (id: string | undefined) => {
     let query;
@@ -78,7 +94,7 @@ export const Groups = ({ groups }: Props) => {
       >
         All
       </button>
-      {groups.map((item) => (
+      {groupList.map((item) => (
         <button
           onClick={() => onClick(item.id)}
           className={cn(

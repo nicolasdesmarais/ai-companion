@@ -60,10 +60,12 @@ export const AIs = ({ data, authorizationContext, groups }: AIsProps) => {
                     </div>
                   )}
                   {(item.visibility === "PRIVATE" &&
+                    !item.isShared &&
                     item.userId !== authorizationContext.userId) ||
                   (item.visibility === "ORGANIZATION" &&
                     item.orgId !== authorizationContext.orgId) ||
                   (item.visibility === "GROUP" &&
+                    item.groups?.length &&
                     !item.groups?.some((groupId) =>
                       groups.some(
                         (group) => !group.notVisibleToMe && group.id === groupId
