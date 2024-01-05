@@ -54,6 +54,8 @@ import {
   mapGoogleDriveFileToDataSourceItem,
 } from "./util/GoogleDriveUtils";
 
+const GOOGLE_WEBHOOK_URL = process.env.GOOGLE_WEBHOOK_URL;
+
 export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
   private getNamesQuery(names: string[]) {
     return names.map((name) => `name contains '${name}'`).join(" AND ");
@@ -230,6 +232,16 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
         items: [],
       };
     }
+
+    const watchResponse = await driveClient.files.watch({
+      fileId: fileData.id,
+      requestBody: {
+        id: fileData.id,
+        type: "web_hook",
+        address: GOOGLE_WEBHOOK_URL,
+      },
+      supportsAllDrives: true,
+    });
 
     const dataSourceItem = await this.extractDataSourceItemFromFile(
       orgId,
