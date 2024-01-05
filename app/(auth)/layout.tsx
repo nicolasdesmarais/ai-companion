@@ -35,7 +35,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
             users.
           </div>
           <Image
-            src="/teaser-splash.png"
+            src="/login-avatars.png"
             alt="Splash Image of AppDirect AIs"
             width="517"
             height="705"
