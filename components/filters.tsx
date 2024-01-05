@@ -83,7 +83,7 @@ export const Filters = () => {
 
   return (
     <div className="w-full overflow-x-auto space-x-2 flex p-1">
-      {/* <button
+      <button
         onClick={() => onClick("PUBLIC")}
         className={cn(
           btnClassNames,
@@ -91,7 +91,7 @@ export const Filters = () => {
         )}
       >
         Public
-      </button> */}
+      </button>
       <button
         onClick={() => onClick("ORGANIZATION")}
         className={cn(

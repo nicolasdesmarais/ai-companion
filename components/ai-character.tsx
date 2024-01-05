@@ -602,9 +602,6 @@ export const AICharacter = ({
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {/* <SelectItem key="PUBLIC" value="PUBLIC">
-                  Public
-                </SelectItem> */}
                 <SelectItem key="PRIVATE" value="PRIVATE">
                   Private
                 </SelectItem>
