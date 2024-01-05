@@ -703,6 +703,32 @@ export class DataSourceService {
       await prismadb.dataSource.delete({ where: { id: dataSourceId } });
     });
   }
+
+  public async refreshDataSource(
+    authorizationContext: AuthorizationContext,
+    dataSourceId: string
+  ) {
+    const dataSource = await prismadb.dataSource.findUnique({
+      where: { id: dataSourceId },
+      include: {
+        knowledges: true,
+      },
+    });
+    if (!dataSource) {
+      throw new EntityNotFoundError(
+        `DataSource with id=${dataSourceId} not found`
+      );
+    }
+
+    const canUpdateDataSource = DataSourceSecurityService.canUpdateDataSource(
+      authorizationContext,
+      dataSource
+    );
+
+    if (!canUpdateDataSource) {
+      throw new ForbiddenError("Forbidden");
+    }
+  }
 }
 
 const dataSourceRepository = new DataSourceRepositoryImpl();
