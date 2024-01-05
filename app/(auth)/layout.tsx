@@ -8,7 +8,7 @@ export function Avatar() {
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="blue-bg flex flex-col md:h-full md:overflow-clip">
+    <div className="blue-bg flex flex-col h-screen md:h-full md:overflow-clip">
       <Link href="/">
         <div className="flex justify-center items-center flex-col">
           <Image

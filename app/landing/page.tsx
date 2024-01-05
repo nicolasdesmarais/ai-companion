@@ -4,12 +4,16 @@ import { WaitListForm } from "@/components/wait-list-form";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { ElementRef, useRef } from "react";
+import Link from "next/link";
 
 const LandingPage = () => {
   const waitlist = useRef<ElementRef<"div">>(null);
   return (
     <div className="bg-black flex flex-col">
-      <div className="blue-bg max-h-[885px] h-screen py-16 overflow-hidden flex flex-col">
+      <div className="blue-bg max-h-[785px] h-screen pb-16 overflow-hidden flex flex-col">
+        <div className="text-white/30 z-10 flex flex-row-reverse pt-4 pr-4 lg:mx-auto lg:w-[970px] lg:-mb-8">
+          <Link href="/sign-in">Beta Login</Link>
+        </div>
         <div className="flex justify-center items-center">
           <div>
             <div className="flex items-center justify-center border-b-2 border-white pb-4 mb-4">
