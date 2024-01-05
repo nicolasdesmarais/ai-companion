@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { AITeaser } from "@/components/ai-teaser";
+import Link from "next/link";
 
 export function Avatar() {
   return;
@@ -8,27 +9,30 @@ export function Avatar() {
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="blue-bg flex flex-col md:h-full md:overflow-clip">
-      <div className="flex justify-center items-center flex-col">
-        <Image
-          src="/AppDirect-Mark_White.png"
-          alt="AppDirect Logo"
-          width="64"
-          height="64"
-          className="mt-5"
-        />
-        <h1 className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
-          AppDirect AI
-        </h1>
-      </div>
+      <Link href="/">
+        <div className="flex justify-center items-center flex-col">
+          <Image
+            src="/AppDirect-Mark_White.png"
+            alt="AppDirect Logo"
+            width="64"
+            height="64"
+            className="mt-5"
+          />
+          <h1 className="mt-5 text-2xl leading-none tracking-tight md:text-5xl lg:text-4xl dark:text-white">
+            AppDirect AI
+          </h1>
+        </div>
+      </Link>
       <div className="flex justify-center h-full my-16">
         <div className="w-[500px] hidden md:block">
           <h2 className="me-4 mb-4 font-extrabold leading-none tracking-tight text-gray-900 text-4xl dark:text-white">
-            Let AI change the way you work.
+            Access for the Closed Beta
           </h2>
           <div>
-            AppDirect gives you the ability to access AIs that help you be more
-            successful in work and life. You can browse our catalog of community
-            made AIs or create your own!
+            AppDirect AI is currently in a Closed Beta. If you have not received
+            explicit instruction that you can access the product, please return
+            to the homepage and sign up to be notified when we open up for more
+            users.
           </div>
           <AITeaser />
         </div>
