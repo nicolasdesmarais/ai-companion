@@ -34,7 +34,13 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
             to the homepage and sign up to be notified when we open up for more
             users.
           </div>
-          <AITeaser />
+          <Image
+            src="/teaser-splash.png"
+            alt="Splash Image of AppDirect AIs"
+            width="517"
+            height="705"
+            className="mt-5"
+          />
         </div>
         <div className="w-[500px] flex flex-col items-center">{children}</div>
       </div>
