@@ -453,7 +453,7 @@ export class AIService {
         baseWhereCondition = { AND: [{}] };
         break;
       case ListAIsRequestScope.INSTANCE_ORGANIZATION:
-        baseWhereCondition = this.getAllOrganizationCriteria();
+        baseWhereCondition = this.getAllOrganizationCriteria(orgId);
         break;
       case ListAIsRequestScope.INSTANCE_NOT_VISIBLE:
         baseWhereCondition = { OR: [{}] };
@@ -562,13 +562,14 @@ export class AIService {
     return {
       orgId,
       visibility: {
-        in: [AIVisibility.ORGANIZATION, AIVisibility.GROUP],
+        in: [AIVisibility.ORGANIZATION],
       },
     };
   }
 
-  private getAllOrganizationCriteria() {
+  private getAllOrganizationCriteria(orgId: string) {
     return {
+      orgId,
       visibility: {
         in: [AIVisibility.ORGANIZATION, AIVisibility.GROUP],
       },
