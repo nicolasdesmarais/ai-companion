@@ -9,8 +9,8 @@ interface Props {
 
 export const AITeaser = ({ className = "" }: Props) => {
   return (
-    <div className={className}>
-      <div className={cn("flex flex-wrap w-[500px] overflow-hidden")}>
+    <div className={cn("h-[600px] overflow-clip", className)}>
+      <div className={cn("flex flex-wrap w-[500px]")}>
         <div>
           <div className="m-3 w-56">
             <Card className="bg-card rounded-xl cursor-pointer hover:opacity-75 transition border-0 p-1">
