@@ -3,6 +3,7 @@
 import {
   ListAIsRequestScope,
   SuperuserScopes,
+  AdminScopes,
 } from "@/src/adapter-in/api/AIApi";
 import { cn } from "@/src/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -57,7 +58,7 @@ export const Filters = () => {
               : "bg-primary/10"
           )}
         >
-          Organization
+          All Organizations
         </button>
         <button
           onClick={() => onClick("INSTANCE_NOT_VISIBLE")}
@@ -73,6 +74,42 @@ export const Filters = () => {
           className={cn(
             btnClassNames,
             scope === "INSTANCE_PRIVATE" ? "bg-accent" : "bg-primary/10"
+          )}
+        >
+          Private
+        </button>
+      </div>
+    );
+  }
+
+  if (scope && AdminScopes.includes(scope as ListAIsRequestScope)) {
+    return (
+      <div className="w-full overflow-x-auto space-x-2 flex p-1">
+        <button
+          onClick={() => onClick("ADMIN_ORGANIZATION")}
+          className={cn(
+            btnClassNames,
+            scope === "ADMIN_ORGANIZATION" || groupId
+              ? "bg-accent"
+              : "bg-primary/10"
+          )}
+        >
+          Organization
+        </button>
+        <button
+          onClick={() => onClick("ADMIN_NOT_VISIBLE")}
+          className={cn(
+            btnClassNames,
+            scope === "ADMIN_NOT_VISIBLE" ? "bg-accent" : "bg-primary/10"
+          )}
+        >
+          Not Visible to Me
+        </button>
+        <button
+          onClick={() => onClick("ADMIN_PRIVATE")}
+          className={cn(
+            btnClassNames,
+            scope === "ADMIN_PRIVATE" ? "bg-accent" : "bg-primary/10"
           )}
         >
           Private
