@@ -97,6 +97,7 @@ export class GroupService {
       SecuredAction.READ,
       SecuredResourceAccessLevel.INSTANCE
     );
+
     if (hasInstanceGroupsAccess) {
       const allGroups: GroupSummaryDto[] = await this.getInstanceGroups();
       allGroups.forEach((group) => {
@@ -106,11 +107,40 @@ export class GroupService {
       });
       groups = allGroups;
     }
+
+    const hasAdminGroupsAccess = BaseEntitySecurityService.hasPermission(
+      authorizationContext,
+      SecuredResourceType.GROUPS,
+      SecuredAction.READ,
+      SecuredResourceAccessLevel.ORGANIZATION
+    );
+
+    if (hasAdminGroupsAccess) {
+      const allGroups: GroupSummaryDto[] = await this.getOrganizationGroups(
+        orgId
+      );
+      allGroups.forEach((group) => {
+        if (!groups.find((g) => g.id === group.id)) {
+          group.notVisibleToMe = true;
+        }
+      });
+      groups = allGroups;
+    }
+
     return groups;
   }
 
   public async getInstanceGroups() {
     return await prismadb.group.findMany({
+      select: groupSummarySelect,
+    });
+  }
+
+  public async getOrganizationGroups(orgId: string) {
+    return await prismadb.group.findMany({
+      where: {
+        orgId,
+      },
       select: groupSummarySelect,
     });
   }

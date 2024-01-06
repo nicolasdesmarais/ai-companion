@@ -65,6 +65,7 @@ export const Groups = ({ groups }: Props) => {
   if (
     scope !== "ORGANIZATION" &&
     scope !== "INSTANCE_ORGANIZATION" &&
+    scope !== "ADMIN_ORGANIZATION" &&
     !groupId
   ) {
     return null;
@@ -96,6 +97,7 @@ export const Groups = ({ groups }: Props) => {
       </button>
       {groupList.map((item) =>
         (scope && scope === "INSTANCE_ORGANIZATION") ||
+        (scope && scope === "ADMIN_ORGANIZATION") ||
         (scope === "ORGANIZATION" && !item.notVisibleToMe) ? (
           <button
             onClick={() => onClick(item.id)}
