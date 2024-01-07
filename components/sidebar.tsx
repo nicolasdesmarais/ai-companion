@@ -18,6 +18,7 @@ import {
   Settings,
   Store,
   UserPlus,
+  Building2,
 } from "lucide-react";
 import {
   ReadonlyURLSearchParams,
@@ -163,6 +164,19 @@ export const Sidebar = ({
         resourceType: SecuredResourceType.AI,
         action: SecuredAction.READ,
         accessLevel: SecuredResourceAccessLevel.INSTANCE,
+      },
+    },
+    {
+      icon: Building2,
+      href: "/?scope=ADMIN",
+      pathname: "/",
+      searchparamsregex: { scope: /ADMIN.*/ },
+      label: "Admin",
+      pro: false,
+      requiredPermission: {
+        resourceType: SecuredResourceType.AI,
+        action: SecuredAction.READ,
+        accessLevel: SecuredResourceAccessLevel.ORGANIZATION,
       },
     },
     {

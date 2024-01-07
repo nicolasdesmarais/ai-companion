@@ -11,6 +11,10 @@ import { GroupSecurityService } from "../../security/services/GroupSecurityServi
 import { BadRequestError, EntityNotFoundError } from "../errors/Errors";
 import { GroupDetailDto, GroupSummaryDto } from "../models/Groups";
 import { InvitationService } from "./InvitationService";
+import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 
 const groupSummarySelect: Prisma.GroupSelect = {
   id: true,
@@ -82,14 +86,61 @@ export class GroupService {
   ): Promise<GroupSummaryDto[]> {
     const { orgId, userId } = authorizationContext;
 
-    return await prismadb.group.findMany({
+    let groups: GroupSummaryDto[] = await prismadb.group.findMany({
       select: groupSummarySelect,
       where: this.getGroupCriteria(orgId, userId),
     });
+
+    const hasInstanceGroupsAccess = BaseEntitySecurityService.hasPermission(
+      authorizationContext,
+      SecuredResourceType.GROUPS,
+      SecuredAction.READ,
+      SecuredResourceAccessLevel.INSTANCE
+    );
+
+    if (hasInstanceGroupsAccess) {
+      const allGroups: GroupSummaryDto[] = await this.getInstanceGroups();
+      allGroups.forEach((group) => {
+        if (!groups.find((g) => g.id === group.id)) {
+          group.notVisibleToMe = true;
+        }
+      });
+      groups = allGroups;
+    }
+
+    const hasAdminGroupsAccess = BaseEntitySecurityService.hasPermission(
+      authorizationContext,
+      SecuredResourceType.GROUPS,
+      SecuredAction.READ,
+      SecuredResourceAccessLevel.ORGANIZATION
+    );
+
+    if (hasAdminGroupsAccess) {
+      const allGroups: GroupSummaryDto[] = await this.getOrganizationGroups(
+        orgId
+      );
+      allGroups.forEach((group) => {
+        if (!groups.find((g) => g.id === group.id)) {
+          group.notVisibleToMe = true;
+        }
+      });
+      groups = allGroups;
+    }
+
+    return groups;
   }
 
   public async getInstanceGroups() {
     return await prismadb.group.findMany({
+      select: groupSummarySelect,
+    });
+  }
+
+  public async getOrganizationGroups(orgId: string) {
+    return await prismadb.group.findMany({
+      where: {
+        orgId,
+      },
       select: groupSummarySelect,
     });
   }

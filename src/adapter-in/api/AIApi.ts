@@ -26,6 +26,10 @@ export enum ListAIsRequestScope {
   INSTANCE_ORGANIZATION = "INSTANCE_ORGANIZATION", // All AIs with org and group visibility
   INSTANCE_PRIVATE = "INSTANCE_PRIVATE", // All private AIs
   INSTANCE_NOT_VISIBLE = "INSTANCE_NOT_VISIBLE", // All AIs user would not see normally
+  ADMIN = "ADMIN", // All AIs in the organization
+  ADMIN_ORGANIZATION = "ADMIN_ORGANIZATION", // All AIs in the organization
+  ADMIN_PRIVATE = "ADMIN_PRIVATE", // All AIs in the organization
+  ADMIN_NOT_VISIBLE = "ADMIN_NOT_VISIBLE", // All AIs in the organization
 }
 
 export const SuperuserScopes = [
@@ -33,6 +37,13 @@ export const SuperuserScopes = [
   ListAIsRequestScope.INSTANCE_ORGANIZATION,
   ListAIsRequestScope.INSTANCE_PRIVATE,
   ListAIsRequestScope.INSTANCE_NOT_VISIBLE,
+];
+
+export const AdminScopes = [
+  ListAIsRequestScope.ADMIN,
+  ListAIsRequestScope.ADMIN_ORGANIZATION,
+  ListAIsRequestScope.ADMIN_PRIVATE,
+  ListAIsRequestScope.ADMIN_NOT_VISIBLE,
 ];
 
 export interface CreateAIRequest extends AIRequest {

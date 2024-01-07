@@ -453,7 +453,7 @@ export class AIService {
         baseWhereCondition = { AND: [{}] };
         break;
       case ListAIsRequestScope.INSTANCE_ORGANIZATION:
-        baseWhereCondition = this.getAllOrganizationCriteria(orgId);
+        baseWhereCondition = this.getAllOrganizationCriteria();
         break;
       case ListAIsRequestScope.INSTANCE_NOT_VISIBLE:
         baseWhereCondition = { OR: [{}] };
@@ -463,6 +463,29 @@ export class AIService {
         break;
       case ListAIsRequestScope.INSTANCE_PRIVATE:
         baseWhereCondition = { visibility: AIVisibility.PRIVATE };
+        break;
+      case ListAIsRequestScope.ADMIN:
+        baseWhereCondition = this.getAllAdminCriteria(orgId);
+        break;
+      case ListAIsRequestScope.ADMIN_ORGANIZATION:
+        baseWhereCondition = this.getAllAdminOrganizationCriteria(orgId);
+        break;
+      case ListAIsRequestScope.ADMIN_PRIVATE:
+        baseWhereCondition = { orgId, visibility: AIVisibility.PRIVATE };
+        break;
+      case ListAIsRequestScope.ADMIN_NOT_VISIBLE:
+        baseWhereCondition = {
+          AND: [
+            {
+              orgId,
+              OR: [
+                this.geOthersPrivateCriteria(userId),
+                this.geOthersOrganizationCriteria(orgId),
+                this.geOthersGroupCriteria(orgId, userId),
+              ],
+            },
+          ],
+        };
         break;
     }
 
@@ -567,7 +590,21 @@ export class AIService {
     };
   }
 
-  private getAllOrganizationCriteria(orgId: string) {
+  private getAllOrganizationCriteria() {
+    return {
+      visibility: {
+        in: [AIVisibility.ORGANIZATION, AIVisibility.GROUP],
+      },
+    };
+  }
+
+  private getAllAdminCriteria(orgId: string) {
+    return {
+      orgId,
+    };
+  }
+
+  private getAllAdminOrganizationCriteria(orgId: string) {
     return {
       orgId,
       visibility: {

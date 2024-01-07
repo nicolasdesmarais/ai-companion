@@ -65,6 +65,7 @@ export const Groups = ({ groups }: Props) => {
   if (
     scope !== "ORGANIZATION" &&
     scope !== "INSTANCE_ORGANIZATION" &&
+    scope !== "ADMIN_ORGANIZATION" &&
     !groupId
   ) {
     return null;
@@ -94,29 +95,33 @@ export const Groups = ({ groups }: Props) => {
       >
         All
       </button>
-      {groupList.map((item) => (
-        <button
-          onClick={() => onClick(item.id)}
-          className={cn(
-            buttonCn,
-            item.id === groupId ? "bg-accent" : "bg-primary/10"
-          )}
-          key={item.id}
-        >
-          {item.name}
-          {item.id === groupId &&
-          (item.availability === GroupAvailability.RESTRICTED ||
-            (item.availability === GroupAvailability.EVERYONE &&
-              item.ownerUserId === user?.id)) ? (
-            <MoreVertical
-              onClick={() => groupModal.onOpen(item.id)}
-              className="w-6 h-6 ml-1 p-1 opacity-60 hover:opacity-100 hover:bg-primary/10 hover:rounded-full cursor-pointer"
-            />
-          ) : (
-            ""
-          )}
-        </button>
-      ))}
+      {groupList.map((item) =>
+        (scope && scope === "INSTANCE_ORGANIZATION") ||
+        (scope && scope === "ADMIN_ORGANIZATION") ||
+        (scope === "ORGANIZATION" && !item.notVisibleToMe) ? (
+          <button
+            onClick={() => onClick(item.id)}
+            className={cn(
+              buttonCn,
+              item.id === groupId ? "bg-accent" : "bg-primary/10"
+            )}
+            key={item.id}
+          >
+            {item.name}
+            {item.id === groupId &&
+            (item.availability === GroupAvailability.RESTRICTED ||
+              (item.availability === GroupAvailability.EVERYONE &&
+                item.ownerUserId === user?.id)) ? (
+              <MoreVertical
+                onClick={() => groupModal.onOpen(item.id)}
+                className="w-6 h-6 ml-1 p-1 opacity-60 hover:opacity-100 hover:bg-primary/10 hover:rounded-full cursor-pointer"
+              />
+            ) : (
+              ""
+            )}
+          </button>
+        ) : null
+      )}
       {organization?.id && (
         <button
           onClick={() => createGroup()}

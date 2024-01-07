@@ -10,6 +10,7 @@ import aiService from "@/src/domain/services/AIService";
 import { Banner } from "@/components/ui/banner";
 
 import {
+  AdminScopes,
   ListAIsRequestParams,
   ListAIsRequestScope,
   SuperuserScopes,
@@ -18,11 +19,6 @@ import categoryService from "@/src/domain/services/CategoryService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import groupService from "@/src/domain/services/GroupService";
-import { SecuredRole } from "@/src/security/models/SecuredRoles";
-import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
-import { SecuredAction } from "@/src/security/models/SecuredAction";
-import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
-import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
 
 interface RootPageProps {
   searchParams: {
@@ -53,28 +49,9 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
     scope = ListAIsRequestScope[scopeParam as keyof typeof ListAIsRequestScope];
   }
 
-  const hasInstanceGroupsAccess = BaseEntitySecurityService.hasPermission(
-    authorizationContext,
-    SecuredResourceType.GROUPS,
-    SecuredAction.READ,
-    SecuredResourceAccessLevel.INSTANCE
-  );
-
-  let groups: GroupSummaryDto[] = await groupService.findGroupsByUser(
+  const groups: GroupSummaryDto[] = await groupService.findGroupsByUser(
     authorizationContext
   );
-  if (
-    scope === ListAIsRequestScope.INSTANCE_ORGANIZATION &&
-    hasInstanceGroupsAccess
-  ) {
-    const allGroups: GroupSummaryDto[] = await groupService.getInstanceGroups();
-    allGroups.forEach((group) => {
-      if (!groups.find((g) => g.id === group.id)) {
-        group.notVisibleToMe = true;
-      }
-    });
-    groups = allGroups;
-  }
 
   const requestParams: ListAIsRequestParams = {
     scope: scope,
@@ -97,6 +74,12 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
         <Banner className="my-2" variant="destructive">
           Warning: As a superuser, you are able to see and edit AIs where the
           creator did not give you permission to see. Use with caution.
+        </Banner>
+      )}
+      {scope && AdminScopes.includes(scope) && (
+        <Banner className="my-2" variant="destructive">
+          Warning: As a company admin, you are able to see and edit AIs where
+          the creator did not give you permission to see. Use with caution.
         </Banner>
       )}
       <div className="flex ">
