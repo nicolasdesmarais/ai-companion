@@ -30,11 +30,13 @@ export const SUPPORTED_MIME_TYPES = [
 export const FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
 
 export function mapGoogleDriveFileToDataSourceItem(
-  file: drive_v3.Schema$File
+  file: drive_v3.Schema$File,
+  parentFolderId?: string
 ): DataSourceItem {
   const metadata: GoogleDriveFileMetadata = {
     fileId: file.id ?? "",
     fileName: file.name ?? "",
+    parentFolderId,
     mimeType: file.mimeType ?? "",
     modifiedTime: file.modifiedTime ?? "",
   };

@@ -294,7 +294,8 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
         userId,
         oauthTokenId,
         dataSourceId,
-        file
+        file,
+        folderId
       );
       if (item) {
         files.push(item);
@@ -311,7 +312,8 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     userId: string,
     oauthTokenId: string,
     dataSourceId: string,
-    file: drive_v3.Schema$File
+    file: drive_v3.Schema$File,
+    parentFolderId?: string
   ): Promise<DataSourceItem | null> {
     if (!file.id) {
       return null;
@@ -333,7 +335,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       return null;
     }
 
-    return mapGoogleDriveFileToDataSourceItem(file);
+    return mapGoogleDriveFileToDataSourceItem(file, parentFolderId);
   }
 
   public async indexKnowledge(
