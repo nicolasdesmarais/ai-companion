@@ -11,16 +11,9 @@ export const dataSourceInitialized = inngest.createFunction(
   async ({ event, step }) => {
     const dataSourceId = event.data.dataSourceId;
 
-    const knowledgeIdList = await step.run(
-      "create-knowledge-list",
-      async () => {
-        return await dataSourceService.createDataSourceKnowledgeList(
-          dataSourceId
-        );
-      }
-    );
-
-    await initializeKnowledgeList(step, dataSourceId, knowledgeIdList);
+    await step.run("create-knowledge-list", async () => {
+      await dataSourceService.createDataSourceKnowledgeList(dataSourceId);
+    });
   }
 );
 
@@ -30,16 +23,9 @@ export const dataSourceRefreshRequested = inngest.createFunction(
   async ({ event, step }) => {
     const dataSourceId = event.data.dataSourceId;
 
-    const knowledgeIdList = await step.run(
-      "update-knowledge-list",
-      async () => {
-        return await dataSourceService.updateDataSourceKnowledgeList(
-          dataSourceId
-        );
-      }
-    );
-
-    await initializeKnowledgeList(step, dataSourceId, knowledgeIdList);
+    await step.run("update-knowledge-list", async () => {
+      await dataSourceService.updateDataSourceKnowledgeList(dataSourceId);
+    });
   }
 );
 
@@ -50,49 +36,40 @@ export const dataSourceItemListReceived = inngest.createFunction(
     const payload = event.data as DataSourceItemListReceivedPayload;
     const { dataSourceId, dataSourceItemList } = payload;
 
-    const knowledgeIdList = await step.run(
-      "on-datasource-item-list-received",
-      async () => {
-        return await dataSourceService.onDataSourceItemListReceived(
-          dataSourceId,
-          dataSourceItemList
-        );
-      }
-    );
-
-    await initializeKnowledgeList(step, dataSourceId, knowledgeIdList);
+    await step.run("on-datasource-item-list-received", async () => {
+      await dataSourceService.onDataSourceItemListReceived(
+        dataSourceId,
+        dataSourceItemList
+      );
+    });
   }
 );
-
-const initializeKnowledgeList = async (
-  step: any,
-  dataSourceId: string,
-  knowledgeIdList: string[]
-) => {
-  let events = [];
-  for (const knowledgeId of knowledgeIdList) {
-    events.push({
-      name: DomainEvent.KNOWLEDGE_INITIALIZED,
-      data: {
-        dataSourceId,
-        knowledgeId,
-      },
-    });
-
-    if (events.length >= INGEST_EVENT_MAX) {
-      await step.sendEvent("fan-out-knowledge-initialized", events);
-      events = [];
-    }
-  }
-
-  if (events.length > 0) {
-    await step.sendEvent("fan-out-knowledge-initialized", events);
-  }
-};
 
 export const knowledgeInitialized = inngest.createFunction(
   { id: "knowledge-initialized" },
   { event: DomainEvent.KNOWLEDGE_INITIALIZED },
+  async ({ event, step }) => {
+    const dataSourceId = event.data.dataSourceId;
+    const knowledgeId = event.data.knowledgeId;
+
+    const result = await step.run("index-knowledge", async () => {
+      return await dataSourceService.indexDataSourceKnowledge(
+        dataSourceId,
+        knowledgeId
+      );
+    });
+    if (result?.events?.length && result?.events?.length > 0) {
+      while (result.events.length) {
+        const eventBatch = result.events.splice(0, INGEST_EVENT_MAX);
+        await step.sendEvent("fan-out-knowledge-chunks", eventBatch);
+      }
+    }
+  }
+);
+
+export const knowledgeRefreshRequested = inngest.createFunction(
+  { id: "knowledge-refresh-requested" },
+  { event: DomainEvent.KNOWLEDGE_REFRESH_REQUESTED },
   async ({ event, step }) => {
     const dataSourceId = event.data.dataSourceId;
     const knowledgeId = event.data.knowledgeId;

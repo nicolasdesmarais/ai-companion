@@ -159,9 +159,7 @@ export class DataSourceService {
    * @param dataSourceId
    * @returns
    */
-  public async createDataSourceKnowledgeList(
-    dataSourceId: string
-  ): Promise<string[]> {
+  public async createDataSourceKnowledgeList(dataSourceId: string) {
     const { dataSource, dataSourceAdapter } =
       await this.getDataSourceAndAdapter(dataSourceId);
 
@@ -172,16 +170,14 @@ export class DataSourceService {
       dataSource.data
     );
 
-    return await this.upsertKnowledgeListAndCreateAssociations(
+    await this.upsertKnowledgeListAndCreateAssociations(
       dataSourceId,
       dataSourceAdapter,
       itemList
     );
   }
 
-  public async updateDataSourceKnowledgeList(
-    dataSourceId: string
-  ): Promise<string[]> {
+  public async updateDataSourceKnowledgeList(dataSourceId: string) {
     const { dataSource, dataSourceAdapter } =
       await this.getDataSourceAndAdapter(dataSourceId);
 
@@ -192,7 +188,7 @@ export class DataSourceService {
       dataSource.data
     );
 
-    return await this.upsertKnowledgeListAndUpdateAssociations(
+    await this.upsertKnowledgeListAndUpdateAssociations(
       dataSourceId,
       dataSourceAdapter,
       itemList
@@ -208,7 +204,7 @@ export class DataSourceService {
   public async onDataSourceItemListReceived(
     dataSourceId: string,
     dataSourceItemList: DataSourceItemList
-  ): Promise<string[]> {
+  ) {
     const { dataSourceAdapter } = await this.getDataSourceAndAdapter(
       dataSourceId
     );
@@ -221,52 +217,52 @@ export class DataSourceService {
     }
 
     if (dataSource.indexStatus === DataSourceIndexStatus.REFRESHING) {
-      return await this.upsertKnowledgeListAndUpdateAssociations(
+      await this.upsertKnowledgeListAndUpdateAssociations(
+        dataSourceId,
+        dataSourceAdapter,
+        dataSourceItemList
+      );
+    } else {
+      await this.upsertKnowledgeListAndCreateAssociations(
         dataSourceId,
         dataSourceAdapter,
         dataSourceItemList
       );
     }
-
-    return await this.upsertKnowledgeListAndCreateAssociations(
-      dataSourceId,
-      dataSourceAdapter,
-      dataSourceItemList
-    );
   }
 
   private async upsertKnowledgeListAndCreateAssociations(
     dataSourceId: string,
     dataSourceAdapter: DataSourceAdapter,
     itemList: DataSourceItemList
-  ): Promise<string[]> {
-    const knowledgeIds = await this.upsertKnowledgeList(
-      dataSourceId,
+  ) {
+    const knowledgeList = await this.upsertKnowledgeList(
       dataSourceAdapter,
       itemList
     );
 
-    const dataSourceKnowledgeRelations = knowledgeIds.map((knowledgeId) => {
-      return { dataSourceId, knowledgeId };
+    const dataSourceKnowledgeRelations = knowledgeList.map((knowledge) => {
+      return { dataSourceId, knowledgeId: knowledge.id };
     });
 
     await prismadb.dataSourceKnowledge.createMany({
       data: dataSourceKnowledgeRelations,
     });
 
-    return knowledgeIds;
+    await this.publishKnowledgeEvents(dataSourceId, knowledgeList);
   }
 
   private async upsertKnowledgeListAndUpdateAssociations(
     dataSourceId: string,
     dataSourceAdapter: DataSourceAdapter,
     itemList: DataSourceItemList
-  ): Promise<string[]> {
-    const knowledgeIds = await this.upsertKnowledgeList(
-      dataSourceId,
+  ) {
+    const knowledgeList = await this.upsertKnowledgeList(
       dataSourceAdapter,
       itemList
     );
+
+    const knowledgeIds = knowledgeList.map((knowledge) => knowledge.id);
 
     // Find existing associations
     const existingAssociations = await prismadb.dataSourceKnowledge.findMany({
@@ -316,18 +312,23 @@ export class DataSourceService {
       });
     }
 
-    return knowledgeIds;
+    const knowledgeListToUpdate = knowledgeList.filter(
+      (knowledge) =>
+        knowledge.indexStatus === KnowledgeIndexStatus.INITIALIZED ||
+        knowledge.indexStatus === KnowledgeIndexStatus.REFRESHING
+    );
+
+    await this.publishKnowledgeEvents(dataSourceId, knowledgeListToUpdate);
   }
 
   private async upsertKnowledgeList(
-    dataSourceId: string,
     dataSourceAdapter: DataSourceAdapter,
     itemList: DataSourceItemList
-  ): Promise<string[]> {
+  ): Promise<Knowledge[]> {
     if (itemList.items.length === 0) {
       return [];
     }
-    const knowledgeIdList = [];
+    const knowledgeList = [];
     const existingKnowledgeMap = await this.getExistingKnowledgeMap(itemList);
 
     for (const item of itemList.items) {
@@ -341,7 +342,7 @@ export class DataSourceService {
           item
         );
         if (shouldReindexKnowledge) {
-          await prismadb.knowledge.update({
+          knowledge = await prismadb.knowledge.update({
             where: { id: existingKnowledge.id },
             data: {
               indexStatus: KnowledgeIndexStatus.REFRESHING,
@@ -360,10 +361,29 @@ export class DataSourceService {
           },
         });
       }
-      knowledgeIdList.push(knowledge.id);
+      knowledgeList.push(knowledge);
     }
 
-    return knowledgeIdList;
+    return knowledgeList;
+  }
+
+  private async publishKnowledgeEvents(
+    dataSourceId: string,
+    knowledgeList: Knowledge[]
+  ) {
+    for (const knowledge of knowledgeList) {
+      if (knowledge.indexStatus === KnowledgeIndexStatus.INITIALIZED) {
+        await publishEvent(DomainEvent.KNOWLEDGE_INITIALIZED, {
+          dataSourceId,
+          knowledgeId: knowledge.id,
+        });
+      } else if (knowledge.indexStatus === KnowledgeIndexStatus.REFRESHING) {
+        await publishEvent(DomainEvent.KNOWLEDGE_REFRESH_REQUESTED, {
+          dataSourceId,
+          knowledgeId: knowledge.id,
+        });
+      }
+    }
   }
 
   private async getExistingKnowledgeMap(itemList: DataSourceItemList) {
