@@ -22,6 +22,18 @@ const dataSourceSummarySelect: Prisma.DataSourceSelect = {
 };
 
 export class DataSourceRepositoryImpl implements DataSourceRepository {
+  public async findById(id: string): Promise<DataSourceDto | null> {
+    const dataSource = await prismadb.dataSource.findUnique({
+      where: { id },
+    });
+
+    if (!dataSource) {
+      return null;
+    }
+
+    return this.mapDataSourceToDto(dataSource);
+  }
+
   public async findAll(): Promise<DataSourceDto[]> {
     const dataSources = await prismadb.dataSource.findMany({
       select: dataSourceSummarySelect,
@@ -92,6 +104,20 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
         indexStatus: DataSourceIndexStatus.INITIALIZED,
         indexPercentage: 0,
         data,
+      },
+    });
+    return this.mapDataSourceToDto(dataSource);
+  }
+
+  public async updateDataSource(
+    dataSourceDto: DataSourceDto
+  ): Promise<DataSourceDto> {
+    const dataSource = await prismadb.dataSource.update({
+      where: {
+        id: dataSourceDto.id,
+      },
+      data: {
+        ...dataSourceDto,
       },
     });
     return this.mapDataSourceToDto(dataSource);
