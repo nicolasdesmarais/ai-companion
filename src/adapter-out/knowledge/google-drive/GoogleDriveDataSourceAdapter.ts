@@ -561,6 +561,39 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
   public async deleteKnowledge(knowledgeId: string): Promise<void> {
     await fileLoader.deleteKnowledge(knowledgeId);
   }
+
+  public async getRemovedKnowledgeIds(
+    dataSourceItemList: DataSourceItemList
+  ): Promise<string[]> {
+    const parentFolderIds = dataSourceItemList.items
+      .filter((item) => item.metadata?.parentFolderId)
+      .map((item) => item.metadata.parentFolderId);
+
+    const uniqueIds = dataSourceItemList.items
+      .map((item) => item.uniqueId)
+      .filter((uniqueId) => uniqueId !== undefined) as string[];
+
+    const removedKnowledgeIds = await prismadb.knowledge.findMany({
+      select: {
+        id: true,
+      },
+      where: {
+        uniqueId: {
+          not: {
+            in: uniqueIds,
+          },
+        },
+        metadata: {
+          path: "$.parentFolderId",
+          array_contains: {
+            in: parentFolderIds,
+          },
+        },
+      },
+    });
+
+    return removedKnowledgeIds.map((knowledge) => knowledge.id);
+  }
 }
 
 const googleDriveDataSourceAdapter = new GoogleDriveDataSourceAdapter();

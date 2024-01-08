@@ -182,6 +182,12 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
   public async deleteKnowledge(knowledgeId: string): Promise<void> {
     await fileLoader.deleteKnowledge(knowledgeId);
   }
+
+  public async getRemovedKnowledgeIds(
+    dataSourceItemList: DataSourceItemList
+  ): Promise<string[]> {
+    return [];
+  }
 }
 
 const fileUploadDataSourceAdapter = new FileUploadDataSourceAdapter();

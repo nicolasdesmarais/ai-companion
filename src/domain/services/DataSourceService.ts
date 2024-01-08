@@ -255,6 +255,19 @@ export class DataSourceService {
       data: dataSourceKnowledgeRelations,
     });
 
+    // Remove relationships to any knowledge IDs which have been removed from the data source
+    const removedKnowledgeIds = await dataSourceAdapter.getRemovedKnowledgeIds(
+      itemList
+    );
+    await prismadb.dataSourceKnowledge.deleteMany({
+      where: {
+        dataSourceId,
+        knowledgeId: {
+          in: removedKnowledgeIds,
+        },
+      },
+    });
+
     return knowledgeIdList;
   }
 
@@ -728,6 +741,11 @@ export class DataSourceService {
     if (!canUpdateDataSource) {
       throw new ForbiddenError("Forbidden");
     }
+
+    await publishEvent(DomainEvent.DATASOURCE_INITIALIZED, {
+      dataSourceId,
+      dataSourceType: dataSource.type,
+    });
   }
 }
 
