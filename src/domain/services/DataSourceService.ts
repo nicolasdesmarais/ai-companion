@@ -172,7 +172,27 @@ export class DataSourceService {
       dataSource.data
     );
 
-    return await this.initializeKnowledgeList(
+    return await this.upsertKnowledgeListAndCreateAssociations(
+      dataSourceId,
+      dataSourceAdapter,
+      itemList
+    );
+  }
+
+  public async updateDataSourceKnowledgeList(
+    dataSourceId: string
+  ): Promise<string[]> {
+    const { dataSource, dataSourceAdapter } =
+      await this.getDataSourceAndAdapter(dataSourceId);
+
+    const itemList = await dataSourceAdapter.getDataSourceItemList(
+      dataSource.orgId,
+      dataSource.ownerUserId,
+      dataSourceId,
+      dataSource.data
+    );
+
+    return await this.upsertKnowledgeListAndUpdateAssociations(
       dataSourceId,
       dataSourceAdapter,
       itemList
@@ -193,14 +213,111 @@ export class DataSourceService {
       dataSourceId
     );
 
-    return await this.initializeKnowledgeList(
+    const dataSource = await dataSourceRepository.findById(dataSourceId);
+    if (!dataSource) {
+      throw new EntityNotFoundError(
+        `DataSource with id=${dataSourceId} not found`
+      );
+    }
+
+    if (dataSource.indexStatus === DataSourceIndexStatus.REFRESHING) {
+      return await this.upsertKnowledgeListAndUpdateAssociations(
+        dataSourceId,
+        dataSourceAdapter,
+        dataSourceItemList
+      );
+    }
+
+    return await this.upsertKnowledgeListAndCreateAssociations(
       dataSourceId,
       dataSourceAdapter,
       dataSourceItemList
     );
   }
 
-  private async initializeKnowledgeList(
+  private async upsertKnowledgeListAndCreateAssociations(
+    dataSourceId: string,
+    dataSourceAdapter: DataSourceAdapter,
+    itemList: DataSourceItemList
+  ): Promise<string[]> {
+    const knowledgeIds = await this.upsertKnowledgeList(
+      dataSourceId,
+      dataSourceAdapter,
+      itemList
+    );
+
+    const dataSourceKnowledgeRelations = knowledgeIds.map((knowledgeId) => {
+      return { dataSourceId, knowledgeId };
+    });
+
+    await prismadb.dataSourceKnowledge.createMany({
+      data: dataSourceKnowledgeRelations,
+    });
+
+    return knowledgeIds;
+  }
+
+  private async upsertKnowledgeListAndUpdateAssociations(
+    dataSourceId: string,
+    dataSourceAdapter: DataSourceAdapter,
+    itemList: DataSourceItemList
+  ): Promise<string[]> {
+    const knowledgeIds = await this.upsertKnowledgeList(
+      dataSourceId,
+      dataSourceAdapter,
+      itemList
+    );
+
+    // Find existing associations
+    const existingAssociations = await prismadb.dataSourceKnowledge.findMany({
+      where: {
+        dataSourceId: dataSourceId,
+        knowledgeId: {
+          in: knowledgeIds,
+        },
+      },
+      select: {
+        knowledgeId: true,
+      },
+    });
+    const existingKnowledgeIds = existingAssociations.map(
+      (association) => association.knowledgeId
+    );
+
+    // Filter to include only new relationships
+    const newKnowledgeIds = knowledgeIds.filter(
+      (knowledgeId) => !existingKnowledgeIds.includes(knowledgeId)
+    );
+
+    if (newKnowledgeIds.length > 0) {
+      const newDataSourceKnowledgeRelations = newKnowledgeIds.map(
+        (knowledgeId) => {
+          return { dataSourceId, knowledgeId };
+        }
+      );
+
+      await prismadb.dataSourceKnowledge.createMany({
+        data: newDataSourceKnowledgeRelations,
+      });
+    }
+
+    // Remove relationships to any knowledge IDs which have been removed from the data source
+    const removedKnowledgeIds = await dataSourceAdapter.getRemovedKnowledgeIds(
+      itemList
+    );
+    await prismadb.dataSourceKnowledge.deleteMany({
+      where: {
+        dataSourceId,
+        knowledgeId: {
+          in: removedKnowledgeIds,
+        },
+      },
+    });
+
+    return knowledgeIds;
+  }
+
+  private async upsertKnowledgeList(
     dataSourceId: string,
     dataSourceAdapter: DataSourceAdapter,
     itemList: DataSourceItemList
@@ -209,8 +326,6 @@ export class DataSourceService {
       return [];
     }
     const knowledgeIdList = [];
-    const dataSourceKnowledgeRelations = [];
-
     const existingKnowledgeMap = await this.getExistingKnowledgeMap(itemList);
 
     for (const item of itemList.items) {
@@ -227,7 +342,7 @@ export class DataSourceService {
           await prismadb.knowledge.update({
             where: { id: existingKnowledge.id },
             data: {
-              indexStatus: KnowledgeIndexStatus.INITIALIZED,
+              indexStatus: KnowledgeIndexStatus.REFRESHING,
             },
           });
         }
@@ -244,29 +359,7 @@ export class DataSourceService {
         });
       }
       knowledgeIdList.push(knowledge.id);
-
-      dataSourceKnowledgeRelations.push({
-        dataSourceId,
-        knowledgeId: knowledge.id,
-      });
     }
-
-    await prismadb.dataSourceKnowledge.createMany({
-      data: dataSourceKnowledgeRelations,
-    });
-
-    // Remove relationships to any knowledge IDs which have been removed from the data source
-    const removedKnowledgeIds = await dataSourceAdapter.getRemovedKnowledgeIds(
-      itemList
-    );
-    await prismadb.dataSourceKnowledge.deleteMany({
-      where: {
-        dataSourceId,
-        knowledgeId: {
-          in: removedKnowledgeIds,
-        },
-      },
-    });
 
     return knowledgeIdList;
   }
@@ -366,6 +459,7 @@ export class DataSourceService {
     let partiallyCompletedKnowledges = 0,
       partiallyCompletedPercents = 0,
       indexingKnowledges = 0,
+      refreshingKnowledges = 0,
       completedKnowledges = 0,
       failedKnowledges = 0,
       totalDocumentCount = 0,
@@ -377,6 +471,9 @@ export class DataSourceService {
       switch (knowledge.indexStatus) {
         case KnowledgeIndexStatus.INDEXING:
           indexingKnowledges++;
+          break;
+        case KnowledgeIndexStatus.REFRESHING:
+          refreshingKnowledges++;
           break;
         case KnowledgeIndexStatus.COMPLETED:
           completedKnowledges++;
@@ -406,7 +503,9 @@ export class DataSourceService {
     }
 
     let indexingStatus;
-    if (indexingKnowledges > 0) {
+    if (refreshingKnowledges > 0) {
+      indexingStatus = DataSourceIndexStatus.REFRESHING;
+    } else if (indexingKnowledges > 0) {
       indexingStatus = DataSourceIndexStatus.INDEXING;
     } else if (failedKnowledges === knowledgeCount) {
       indexingStatus = DataSourceIndexStatus.FAILED;
@@ -742,7 +841,6 @@ export class DataSourceService {
 
     await publishEvent(DomainEvent.DATASOURCE_REFRESH_REQUESTED, {
       dataSourceId,
-      dataSourceType: dataSource.type,
     });
   }
 }

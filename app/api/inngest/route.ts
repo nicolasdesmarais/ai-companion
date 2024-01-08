@@ -1,6 +1,7 @@
 import {
   dataSourceInitialized,
   dataSourceItemListReceived,
+  dataSourceRefreshRequested,
   knowledgeEventReceived,
   knowledgeInitialized,
   loadKnowledgeChunk,
@@ -15,6 +16,7 @@ export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
     dataSourceInitialized,
+    dataSourceRefreshRequested,
     dataSourceItemListReceived,
     knowledgeInitialized,
     knowledgeEventReceived,

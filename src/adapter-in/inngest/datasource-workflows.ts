@@ -11,11 +11,33 @@ export const dataSourceInitialized = inngest.createFunction(
   async ({ event, step }) => {
     const dataSourceId = event.data.dataSourceId;
 
-    const knowledgeIdList = await step.run("get-knowledge-list", async () => {
-      return await dataSourceService.createDataSourceKnowledgeList(
-        dataSourceId
-      );
-    });
+    const knowledgeIdList = await step.run(
+      "create-knowledge-list",
+      async () => {
+        return await dataSourceService.createDataSourceKnowledgeList(
+          dataSourceId
+        );
+      }
+    );
+
+    await initializeKnowledgeList(step, dataSourceId, knowledgeIdList);
+  }
+);
+
+export const dataSourceRefreshRequested = inngest.createFunction(
+  { id: "datasource-refresh-requested" },
+  { event: DomainEvent.DATASOURCE_REFRESH_REQUESTED },
+  async ({ event, step }) => {
+    const dataSourceId = event.data.dataSourceId;
+
+    const knowledgeIdList = await step.run(
+      "update-knowledge-list",
+      async () => {
+        return await dataSourceService.updateDataSourceKnowledgeList(
+          dataSourceId
+        );
+      }
+    );
 
     await initializeKnowledgeList(step, dataSourceId, knowledgeIdList);
   }
