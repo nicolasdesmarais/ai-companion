@@ -721,12 +721,7 @@ export class DataSourceService {
     authorizationContext: AuthorizationContext,
     dataSourceId: string
   ) {
-    const dataSource = await prismadb.dataSource.findUnique({
-      where: { id: dataSourceId },
-      include: {
-        knowledges: true,
-      },
-    });
+    const dataSource = await dataSourceRepository.findById(dataSourceId);
     if (!dataSource) {
       throw new EntityNotFoundError(
         `DataSource with id=${dataSourceId} not found`
@@ -742,7 +737,10 @@ export class DataSourceService {
       throw new ForbiddenError("Forbidden");
     }
 
-    await publishEvent(DomainEvent.DATASOURCE_INITIALIZED, {
+    dataSource.indexStatus = DataSourceIndexStatus.REFRESHING;
+    dataSourceRepository.updateDataSource(dataSource);
+
+    await publishEvent(DomainEvent.DATASOURCE_REFRESH_REQUESTED, {
       dataSourceId,
       dataSourceType: dataSource.type,
     });
