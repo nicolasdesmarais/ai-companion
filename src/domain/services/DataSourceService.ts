@@ -305,14 +305,16 @@ export class DataSourceService {
     const removedKnowledgeIds = await dataSourceAdapter.getRemovedKnowledgeIds(
       itemList
     );
-    await prismadb.dataSourceKnowledge.deleteMany({
-      where: {
-        dataSourceId,
-        knowledgeId: {
-          in: removedKnowledgeIds,
+    if (removedKnowledgeIds.length > 0) {
+      await prismadb.dataSourceKnowledge.deleteMany({
+        where: {
+          dataSourceId,
+          knowledgeId: {
+            in: removedKnowledgeIds,
+          },
         },
-      },
-    });
+      });
+    }
 
     return knowledgeIds;
   }

@@ -565,34 +565,40 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
   public async getRemovedKnowledgeIds(
     dataSourceItemList: DataSourceItemList
   ): Promise<string[]> {
-    const parentFolderIds = dataSourceItemList.items
-      .filter((item) => item.metadata?.parentFolderId)
-      .map((item) => item.metadata.parentFolderId);
+    const parentFolderIds = new Set(
+      dataSourceItemList.items
+        .filter((item) => item.metadata?.parentFolderId)
+        .map((item) => item.metadata.parentFolderId)
+    );
 
     const uniqueIds = dataSourceItemList.items
       .map((item) => item.uniqueId)
       .filter((uniqueId) => uniqueId !== undefined) as string[];
 
-    const removedKnowledgeIds = await prismadb.knowledge.findMany({
-      select: {
-        id: true,
-      },
-      where: {
-        uniqueId: {
-          not: {
-            in: uniqueIds,
+    const removedKnowledgeIds: string[] = [];
+    for (const folderId of Array.from(parentFolderIds)) {
+      const folderRemovedKnowledgeIds = await prismadb.knowledge.findMany({
+        select: {
+          id: true,
+        },
+        where: {
+          uniqueId: {
+            not: {
+              in: uniqueIds,
+            },
+          },
+          metadata: {
+            path: "$.parentFolderId",
+            equals: folderId,
           },
         },
-        metadata: {
-          path: "$.parentFolderId",
-          array_contains: {
-            in: parentFolderIds,
-          },
-        },
-      },
-    });
+      });
+      folderRemovedKnowledgeIds.forEach((knowledge) =>
+        removedKnowledgeIds.push(knowledge.id)
+      );
+    }
 
-    return removedKnowledgeIds.map((knowledge) => knowledge.id);
+    return removedKnowledgeIds;
   }
 }
 
