@@ -1,3 +1,4 @@
+import vectorDatabaseAdapter from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 import {
   DataSourceItemListReceivedPayload,
   DomainEvent,
@@ -74,18 +75,36 @@ export const knowledgeRefreshRequested = inngest.createFunction(
     const dataSourceId = event.data.dataSourceId;
     const knowledgeId = event.data.knowledgeId;
 
-    const result = await step.run("index-knowledge", async () => {
+    const newKnowledge = await step.run("update-knowledge", async () => {
+      return await dataSourceService.copyKnowledgeAndAssociations(knowledgeId);
+    });
+
+    const indexKnowledgeResult = await step.run("index-knowledge", async () => {
       return await dataSourceService.indexDataSourceKnowledge(
         dataSourceId,
-        knowledgeId
+        newKnowledge.id
       );
     });
-    if (result?.events?.length && result?.events?.length > 0) {
-      while (result.events.length) {
-        const eventBatch = result.events.splice(0, INGEST_EVENT_MAX);
+    if (
+      indexKnowledgeResult?.events?.length &&
+      indexKnowledgeResult?.events?.length > 0
+    ) {
+      while (indexKnowledgeResult.events.length) {
+        const eventBatch = indexKnowledgeResult.events.splice(
+          0,
+          INGEST_EVENT_MAX
+        );
         await step.sendEvent("fan-out-knowledge-chunks", eventBatch);
       }
     }
+
+    await step.run("delete-knowledge", async () => {
+      await dataSourceService.deleteKnowledge(knowledgeId);
+    });
+
+    await step.run("delete-vectordb-knowledge", async () => {
+      await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
+    });
   }
 );
 
