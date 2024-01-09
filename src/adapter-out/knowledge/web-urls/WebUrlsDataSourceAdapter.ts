@@ -201,6 +201,12 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       chunkCount,
     };
   }
+
+  public async getRemovedKnowledgeIds(
+    dataSourceItemList: DataSourceItemList
+  ): Promise<string[]> {
+    return [];
+  }
 }
 
 const webUrlsDataSourceAdapter = new WebUrlsDataSourceAdapter();

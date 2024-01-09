@@ -159,9 +159,7 @@ export class DataSourceService {
    * @param dataSourceId
    * @returns
    */
-  public async createDataSourceKnowledgeList(
-    dataSourceId: string
-  ): Promise<string[]> {
+  public async createDataSourceKnowledgeList(dataSourceId: string) {
     const { dataSource, dataSourceAdapter } =
       await this.getDataSourceAndAdapter(dataSourceId);
 
@@ -172,7 +170,25 @@ export class DataSourceService {
       dataSource.data
     );
 
-    return await this.initializeKnowledgeList(
+    await this.upsertKnowledgeListAndCreateAssociations(
+      dataSourceId,
+      dataSourceAdapter,
+      itemList
+    );
+  }
+
+  public async updateDataSourceKnowledgeList(dataSourceId: string) {
+    const { dataSource, dataSourceAdapter } =
+      await this.getDataSourceAndAdapter(dataSourceId);
+
+    const itemList = await dataSourceAdapter.getDataSourceItemList(
+      dataSource.orgId,
+      dataSource.ownerUserId,
+      dataSourceId,
+      dataSource.data
+    );
+
+    await this.upsertKnowledgeListAndUpdateAssociations(
       dataSourceId,
       dataSourceAdapter,
       itemList
@@ -188,29 +204,131 @@ export class DataSourceService {
   public async onDataSourceItemListReceived(
     dataSourceId: string,
     dataSourceItemList: DataSourceItemList
-  ): Promise<string[]> {
+  ) {
     const { dataSourceAdapter } = await this.getDataSourceAndAdapter(
       dataSourceId
     );
 
-    return await this.initializeKnowledgeList(
-      dataSourceId,
-      dataSourceAdapter,
-      dataSourceItemList
-    );
+    const dataSource = await dataSourceRepository.findById(dataSourceId);
+    if (!dataSource) {
+      throw new EntityNotFoundError(
+        `DataSource with id=${dataSourceId} not found`
+      );
+    }
+
+    if (dataSource.indexStatus === DataSourceIndexStatus.REFRESHING) {
+      await this.upsertKnowledgeListAndUpdateAssociations(
+        dataSourceId,
+        dataSourceAdapter,
+        dataSourceItemList
+      );
+    } else {
+      await this.upsertKnowledgeListAndCreateAssociations(
+        dataSourceId,
+        dataSourceAdapter,
+        dataSourceItemList
+      );
+    }
   }
 
-  private async initializeKnowledgeList(
+  private async upsertKnowledgeListAndCreateAssociations(
     dataSourceId: string,
     dataSourceAdapter: DataSourceAdapter,
     itemList: DataSourceItemList
-  ): Promise<string[]> {
+  ) {
+    const knowledgeList = await this.upsertKnowledgeList(
+      dataSourceAdapter,
+      itemList
+    );
+
+    const dataSourceKnowledgeRelations = knowledgeList.map((knowledge) => {
+      return { dataSourceId, knowledgeId: knowledge.id };
+    });
+
+    await prismadb.dataSourceKnowledge.createMany({
+      data: dataSourceKnowledgeRelations,
+    });
+
+    await this.publishKnowledgeEvents(dataSourceId, knowledgeList);
+  }
+
+  private async upsertKnowledgeListAndUpdateAssociations(
+    dataSourceId: string,
+    dataSourceAdapter: DataSourceAdapter,
+    itemList: DataSourceItemList
+  ) {
+    const knowledgeList = await this.upsertKnowledgeList(
+      dataSourceAdapter,
+      itemList
+    );
+
+    const knowledgeIds = knowledgeList.map((knowledge) => knowledge.id);
+
+    // Find existing associations
+    const existingAssociations = await prismadb.dataSourceKnowledge.findMany({
+      where: {
+        dataSourceId: dataSourceId,
+        knowledgeId: {
+          in: knowledgeIds,
+        },
+      },
+      select: {
+        knowledgeId: true,
+      },
+    });
+    const existingKnowledgeIds = existingAssociations.map(
+      (association) => association.knowledgeId
+    );
+
+    // Filter to include only new relationships
+    const newKnowledgeIds = knowledgeIds.filter(
+      (knowledgeId) => !existingKnowledgeIds.includes(knowledgeId)
+    );
+
+    if (newKnowledgeIds.length > 0) {
+      const newDataSourceKnowledgeRelations = newKnowledgeIds.map(
+        (knowledgeId) => {
+          return { dataSourceId, knowledgeId };
+        }
+      );
+
+      await prismadb.dataSourceKnowledge.createMany({
+        data: newDataSourceKnowledgeRelations,
+      });
+    }
+
+    // Remove relationships to any knowledge IDs which have been removed from the data source
+    const removedKnowledgeIds = await dataSourceAdapter.getRemovedKnowledgeIds(
+      itemList
+    );
+    if (removedKnowledgeIds.length > 0) {
+      await prismadb.dataSourceKnowledge.deleteMany({
+        where: {
+          dataSourceId,
+          knowledgeId: {
+            in: removedKnowledgeIds,
+          },
+        },
+      });
+    }
+
+    const knowledgeListToUpdate = knowledgeList.filter(
+      (knowledge) =>
+        knowledge.indexStatus === KnowledgeIndexStatus.INITIALIZED ||
+        knowledge.indexStatus === KnowledgeIndexStatus.REFRESHING
+    );
+
+    await this.publishKnowledgeEvents(dataSourceId, knowledgeListToUpdate);
+  }
+
+  private async upsertKnowledgeList(
+    dataSourceAdapter: DataSourceAdapter,
+    itemList: DataSourceItemList
+  ): Promise<Knowledge[]> {
     if (itemList.items.length === 0) {
       return [];
     }
-    const knowledgeIdList = [];
-    const dataSourceKnowledgeRelations = [];
-
+    const knowledgeList = [];
     const existingKnowledgeMap = await this.getExistingKnowledgeMap(itemList);
 
     for (const item of itemList.items) {
@@ -224,10 +342,10 @@ export class DataSourceService {
           item
         );
         if (shouldReindexKnowledge) {
-          await prismadb.knowledge.update({
+          knowledge = await prismadb.knowledge.update({
             where: { id: existingKnowledge.id },
             data: {
-              indexStatus: KnowledgeIndexStatus.INITIALIZED,
+              indexStatus: KnowledgeIndexStatus.REFRESHING,
             },
           });
         }
@@ -243,19 +361,29 @@ export class DataSourceService {
           },
         });
       }
-      knowledgeIdList.push(knowledge.id);
-
-      dataSourceKnowledgeRelations.push({
-        dataSourceId,
-        knowledgeId: knowledge.id,
-      });
+      knowledgeList.push(knowledge);
     }
 
-    await prismadb.dataSourceKnowledge.createMany({
-      data: dataSourceKnowledgeRelations,
-    });
+    return knowledgeList;
+  }
 
-    return knowledgeIdList;
+  private async publishKnowledgeEvents(
+    dataSourceId: string,
+    knowledgeList: Knowledge[]
+  ) {
+    for (const knowledge of knowledgeList) {
+      if (knowledge.indexStatus === KnowledgeIndexStatus.INITIALIZED) {
+        await publishEvent(DomainEvent.KNOWLEDGE_INITIALIZED, {
+          dataSourceId,
+          knowledgeId: knowledge.id,
+        });
+      } else if (knowledge.indexStatus === KnowledgeIndexStatus.REFRESHING) {
+        await publishEvent(DomainEvent.KNOWLEDGE_REFRESH_REQUESTED, {
+          dataSourceId,
+          knowledgeId: knowledge.id,
+        });
+      }
+    }
   }
 
   private async getExistingKnowledgeMap(itemList: DataSourceItemList) {
@@ -269,6 +397,9 @@ export class DataSourceService {
         where: {
           type: itemList.type,
           uniqueId: { in: uniqueIds },
+          indexStatus: {
+            not: KnowledgeIndexStatus.DELETED,
+          },
         },
       });
 
@@ -353,6 +484,7 @@ export class DataSourceService {
     let partiallyCompletedKnowledges = 0,
       partiallyCompletedPercents = 0,
       indexingKnowledges = 0,
+      refreshingKnowledges = 0,
       completedKnowledges = 0,
       failedKnowledges = 0,
       totalDocumentCount = 0,
@@ -364,6 +496,9 @@ export class DataSourceService {
       switch (knowledge.indexStatus) {
         case KnowledgeIndexStatus.INDEXING:
           indexingKnowledges++;
+          break;
+        case KnowledgeIndexStatus.REFRESHING:
+          refreshingKnowledges++;
           break;
         case KnowledgeIndexStatus.COMPLETED:
           completedKnowledges++;
@@ -393,7 +528,9 @@ export class DataSourceService {
     }
 
     let indexingStatus;
-    if (indexingKnowledges > 0) {
+    if (refreshingKnowledges > 0) {
+      indexingStatus = DataSourceIndexStatus.REFRESHING;
+    } else if (indexingKnowledges > 0) {
       indexingStatus = DataSourceIndexStatus.INDEXING;
     } else if (failedKnowledges === knowledgeCount) {
       indexingStatus = DataSourceIndexStatus.FAILED;
@@ -648,6 +785,65 @@ export class DataSourceService {
     }
   }
 
+  /**
+   * Creates a copy of an existing knowledge and copies over
+   * all existing data source associations
+   * @param knowledge
+   * @returns
+   */
+  public async copyKnowledgeAndAssociations(knowledgeId: string) {
+    const knowledge = await prismadb.knowledge.findUnique({
+      where: { id: knowledgeId },
+      include: {
+        dataSources: true,
+      },
+    });
+    if (!knowledge) {
+      throw new EntityNotFoundError(
+        `Knowledge with id=${knowledgeId} not found`
+      );
+    }
+
+    const newKnowledge = await prismadb.knowledge.create({
+      data: {
+        name: knowledge.name,
+        type: knowledge.type,
+        uniqueId: knowledge.uniqueId,
+        indexStatus: KnowledgeIndexStatus.INITIALIZED,
+        blobUrl: knowledge.blobUrl,
+        metadata: knowledge.metadata as any,
+      },
+    });
+
+    const dataSourceKnowledgeRelations = knowledge.dataSources.map(
+      (existingAssociation) => {
+        return {
+          dataSourceId: existingAssociation.dataSourceId,
+          knowledgeId: newKnowledge.id,
+        };
+      }
+    );
+
+    await prismadb.dataSourceKnowledge.createMany({
+      data: dataSourceKnowledgeRelations,
+    });
+
+    return newKnowledge;
+  }
+
+  public async deleteKnowledge(knowledgeId: string) {
+    await prismadb.$transaction(async (tx) => {
+      await tx.dataSourceKnowledge.deleteMany({
+        where: { knowledgeId },
+      });
+
+      await tx.knowledge.update({
+        where: { id: knowledgeId },
+        data: { indexStatus: KnowledgeIndexStatus.DELETED },
+      });
+    });
+  }
+
   public async deleteDataSource(
     authorizationContext: AuthorizationContext,
     dataSourceId: string
@@ -701,6 +897,34 @@ export class DataSourceService {
       });
 
       await prismadb.dataSource.delete({ where: { id: dataSourceId } });
+    });
+  }
+
+  public async refreshDataSource(
+    authorizationContext: AuthorizationContext,
+    dataSourceId: string
+  ) {
+    const dataSource = await dataSourceRepository.findById(dataSourceId);
+    if (!dataSource) {
+      throw new EntityNotFoundError(
+        `DataSource with id=${dataSourceId} not found`
+      );
+    }
+
+    const canUpdateDataSource = DataSourceSecurityService.canUpdateDataSource(
+      authorizationContext,
+      dataSource
+    );
+
+    if (!canUpdateDataSource) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    dataSource.indexStatus = DataSourceIndexStatus.REFRESHING;
+    dataSourceRepository.updateDataSource(dataSource);
+
+    await publishEvent(DomainEvent.DATASOURCE_REFRESH_REQUESTED, {
+      dataSourceId,
     });
   }
 }

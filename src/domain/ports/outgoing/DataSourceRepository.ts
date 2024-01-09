@@ -2,6 +2,7 @@ import { DataSourceType } from "@prisma/client";
 import { DataSourceDto } from "../../models/DataSources";
 
 export interface DataSourceRepository {
+  findById(id: string): Promise<DataSourceDto | null>;
   findAll(): Promise<DataSourceDto[]>;
   findByOrgId(orgId: string): Promise<DataSourceDto[]>;
   findByOrgIdAndUserId(orgId: string, userId: string): Promise<DataSourceDto[]>;
@@ -14,4 +15,6 @@ export interface DataSourceRepository {
     type: DataSourceType,
     data: any
   ): Promise<DataSourceDto>;
+
+  updateDataSource(dataSourceDto: DataSourceDto): Promise<DataSourceDto>;
 }

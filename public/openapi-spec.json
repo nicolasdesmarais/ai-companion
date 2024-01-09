@@ -1093,6 +1093,43 @@
         ]
       }
     },
+    "/api/v1/data-sources/{dataSourceId}/refresh": {
+      "put": {
+        "summary": "Refresh a Data Source",
+        "description": "This endpoint refreshes the specified data source.",
+        "operationId": "refreshDataSource",
+        "parameters": [
+          {
+            "name": "dataSourceId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the data source to be refreshed.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Request has been accepted for processing."
+          },
+          "401": {
+            "description": "Missing authorization context. User must be authenticated."
+          },
+          "403": {
+            "description": "User does not have permission to perform this operation."
+          },
+          "404": {
+            "description": "Data source not found with the specified ID."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/groups": {
       "post": {
         "summary": "Create a new group",
