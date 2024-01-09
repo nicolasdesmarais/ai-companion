@@ -397,6 +397,9 @@ export class DataSourceService {
         where: {
           type: itemList.type,
           uniqueId: { in: uniqueIds },
+          indexStatus: {
+            not: KnowledgeIndexStatus.DELETED,
+          },
         },
       });
 

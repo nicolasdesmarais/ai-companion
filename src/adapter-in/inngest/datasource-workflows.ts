@@ -75,9 +75,14 @@ export const knowledgeRefreshRequested = inngest.createFunction(
     const dataSourceId = event.data.dataSourceId;
     const knowledgeId = event.data.knowledgeId;
 
-    const newKnowledge = await step.run("update-knowledge", async () => {
-      return await dataSourceService.copyKnowledgeAndAssociations(knowledgeId);
-    });
+    const newKnowledge = await step.run(
+      "copy-knowledge-and-associations",
+      async () => {
+        return await dataSourceService.copyKnowledgeAndAssociations(
+          knowledgeId
+        );
+      }
+    );
 
     const indexKnowledgeResult = await step.run("index-knowledge", async () => {
       return await dataSourceService.indexDataSourceKnowledge(
