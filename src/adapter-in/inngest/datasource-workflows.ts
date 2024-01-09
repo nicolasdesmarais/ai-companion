@@ -72,9 +72,13 @@ export const knowledgeInitialized = inngest.createFunction(
       );
     });
 
-    await step.run("delete-vectordb-knowledge", async () => {
-      await vectorDatabaseAdapter.deleteKnowledgeList(relatedKnowledgeIds);
-    });
+    await Promise.all(
+      relatedKnowledgeIds.map((knowledgeId) =>
+        step.run("delete-vectordb-knowledge", async () => {
+          await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
+        })
+      )
+    );
   }
 );
 

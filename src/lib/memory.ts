@@ -75,14 +75,6 @@ export class MemoryManager {
     await pineconeIndex.deleteMany({ knowledge: knowledgeId });
   }
 
-  public async vectorDeleteMany(knowledgeIds: string[]) {
-    const pineconeIndex = this.pinecone.Index(
-      process.env.PINECONE_INDEX! || ""
-    );
-
-    await pineconeIndex.deleteMany({ knowledge: { in: { knowledgeIds } } });
-  }
-
   public static getInstance(): MemoryManager {
     if (!MemoryManager.instance) {
       MemoryManager.instance = new MemoryManager();
