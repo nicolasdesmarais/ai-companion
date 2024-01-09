@@ -5,12 +5,15 @@ import prismadb from "@/src/lib/prismadb";
 import { OAuthTokenProvider } from "@prisma/client";
 import { UserOAuthTokenEntity } from "../models/OAuthTokens";
 import orgClientCredentialsService from "./OrgClientCredentialsService";
+import msftOAuthAdapter from "@/src/adapter-out/oauth/MsftOAuthAdapter";
 
 export class OAuthTokenService {
   private getOAuthAdapter(provider: OAuthTokenProvider): OAuthAdapter {
     switch (provider) {
       case OAuthTokenProvider.GOOGLE:
         return googleDriveOAuthAdapter;
+      case OAuthTokenProvider.MSFT:
+        return msftOAuthAdapter;
       default:
         throw new Error(`No OAuthAdapter found for ${provider}`);
     }

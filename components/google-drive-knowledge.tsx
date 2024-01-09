@@ -147,14 +147,6 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
     setSearching(false);
   };
 
-  const handleSelectFile = (file: GoogleDriveFile | null) => {
-    if (!file) {
-      return;
-    }
-
-    setSelectedFile(file);
-  };
-
   const handleContinue = async () => {
     if (!selectedFile || !selectedAccount) {
       return;

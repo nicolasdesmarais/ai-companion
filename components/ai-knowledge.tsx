@@ -21,6 +21,7 @@ import { FileUploadKnowledge } from "./file-upload-knowledge";
 import { GoogleDriveForm } from "./google-drive-knowledge";
 import { Banner } from "./ui/banner";
 import { WebUrlsForm } from "./web-urls-knowledge-form";
+import { OneDriveKnowledge } from "./onedrive-knowledge";
 
 interface SelectDataSourceProps {
   form: any;
@@ -213,10 +214,16 @@ export const AIKnowledge = ({
       )}
       {pathname.endsWith("web-url") && <WebUrlsForm aiId={aiId} />}
       {pathname.endsWith("cloud") && aiId && (
-        <GoogleDriveForm
-          aiId={aiId}
-          goBack={() => router.push(`/ai/${aiId}/edit/knowledge`)}
-        />
+        <>
+          <OneDriveKnowledge
+            aiId={aiId}
+            goBack={() => router.push(`/ai/${aiId}/edit/knowledge`)}
+          />
+          <GoogleDriveForm
+            aiId={aiId}
+            goBack={() => router.push(`/ai/${aiId}/edit/knowledge`)}
+          />
+        </>
       )}
     </div>
   );
