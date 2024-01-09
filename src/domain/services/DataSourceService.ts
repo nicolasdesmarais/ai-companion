@@ -371,6 +371,11 @@ export class DataSourceService {
     dataSourceId: string,
     knowledgeList: Knowledge[]
   ) {
+    if (knowledgeList.length === 0) {
+      this.updateDataSourceStatus(dataSourceId);
+      return;
+    }
+
     for (const knowledge of knowledgeList) {
       if (knowledge.indexStatus === KnowledgeIndexStatus.INITIALIZED) {
         await publishEvent(DomainEvent.KNOWLEDGE_INITIALIZED, {
