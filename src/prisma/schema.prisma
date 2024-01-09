@@ -167,6 +167,7 @@ enum KnowledgeIndexStatus {
   PARTIALLY_COMPLETED
   COMPLETED
   FAILED
+  DELETED
 }
 
 model AIPermissions {
