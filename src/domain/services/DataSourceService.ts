@@ -474,7 +474,6 @@ export class DataSourceService {
     let partiallyCompletedKnowledges = 0,
       partiallyCompletedPercents = 0,
       indexingKnowledges = 0,
-      refreshingKnowledges = 0,
       completedKnowledges = 0,
       failedKnowledges = 0,
       totalDocumentCount = 0,
@@ -486,9 +485,6 @@ export class DataSourceService {
       switch (knowledge.indexStatus) {
         case KnowledgeIndexStatus.INDEXING:
           indexingKnowledges++;
-          break;
-        case KnowledgeIndexStatus.REFRESHING:
-          refreshingKnowledges++;
           break;
         case KnowledgeIndexStatus.COMPLETED:
           completedKnowledges++;
@@ -518,10 +514,11 @@ export class DataSourceService {
     }
 
     let indexingStatus;
-    if (refreshingKnowledges > 0) {
-      indexingStatus = DataSourceIndexStatus.REFRESHING;
-    } else if (indexingKnowledges > 0) {
-      indexingStatus = DataSourceIndexStatus.INDEXING;
+    if (indexingKnowledges > 0) {
+      indexingStatus =
+        dataSource.indexStatus === DataSourceIndexStatus.REFRESHING
+          ? DataSourceIndexStatus.REFRESHING
+          : DataSourceIndexStatus.INDEXING;
     } else if (failedKnowledges === knowledgeCount) {
       indexingStatus = DataSourceIndexStatus.FAILED;
     } else if (completedKnowledges === knowledgeCount) {
