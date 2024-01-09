@@ -163,7 +163,6 @@ model Knowledge {
 enum KnowledgeIndexStatus {
   INITIALIZED
   INDEXING
-  REFRESHING
   PARTIALLY_COMPLETED
   COMPLETED
   FAILED
