@@ -312,13 +312,7 @@ export class DataSourceService {
       });
     }
 
-    const knowledgeListToUpdate = knowledgeList.filter(
-      (knowledge) =>
-        knowledge.indexStatus === KnowledgeIndexStatus.INITIALIZED ||
-        knowledge.indexStatus === KnowledgeIndexStatus.REFRESHING
-    );
-
-    await this.publishKnowledgeEvents(dataSourceId, knowledgeListToUpdate);
+    await this.publishKnowledgeEvents(dataSourceId, knowledgeList);
   }
 
   private async upsertKnowledgeList(
@@ -372,11 +366,20 @@ export class DataSourceService {
     knowledgeList: Knowledge[]
   ) {
     if (knowledgeList.length === 0) {
+      return;
+    }
+
+    const knowledgeListToUpdate = knowledgeList.filter(
+      (knowledge) =>
+        knowledge.indexStatus === KnowledgeIndexStatus.INITIALIZED ||
+        knowledge.indexStatus === KnowledgeIndexStatus.REFRESHING
+    );
+    if (knowledgeListToUpdate.length === 0) {
       this.updateDataSourceStatus(dataSourceId);
       return;
     }
 
-    for (const knowledge of knowledgeList) {
+    for (const knowledge of knowledgeListToUpdate) {
       if (knowledge.indexStatus === KnowledgeIndexStatus.INITIALIZED) {
         await publishEvent(DomainEvent.KNOWLEDGE_INITIALIZED, {
           dataSourceId,
