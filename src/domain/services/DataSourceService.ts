@@ -326,24 +326,16 @@ export class DataSourceService {
     const existingKnowledgeMap = await this.getExistingKnowledgeMap(itemList);
 
     for (const item of itemList.items) {
-      const existingKnowledge = existingKnowledgeMap.get(item.uniqueId!);
+      let knowledge = existingKnowledgeMap.get(item.uniqueId!);
 
-      let knowledge;
-      if (existingKnowledge) {
-        knowledge = existingKnowledge;
-        const shouldReindexKnowledge = dataSourceAdapter.shouldReindexKnowledge(
-          existingKnowledge,
-          item
-        );
-        if (shouldReindexKnowledge) {
-          knowledge = await prismadb.knowledge.update({
-            where: { id: existingKnowledge.id },
-            data: {
-              indexStatus: KnowledgeIndexStatus.REFRESHING,
-            },
-          });
-        }
-      } else {
+      if (
+        knowledge &&
+        dataSourceAdapter.shouldReindexKnowledge(knowledge, item)
+      ) {
+        knowledge = undefined;
+      }
+
+      if (!knowledge) {
         knowledge = await prismadb.knowledge.create({
           data: {
             name: item.name,
@@ -355,6 +347,7 @@ export class DataSourceService {
           },
         });
       }
+
       knowledgeList.push(knowledge);
     }
 
@@ -370,9 +363,7 @@ export class DataSourceService {
     }
 
     const knowledgeListToUpdate = knowledgeList.filter(
-      (knowledge) =>
-        knowledge.indexStatus === KnowledgeIndexStatus.INITIALIZED ||
-        knowledge.indexStatus === KnowledgeIndexStatus.REFRESHING
+      (knowledge) => knowledge.indexStatus === KnowledgeIndexStatus.INITIALIZED
     );
     if (knowledgeListToUpdate.length === 0) {
       this.updateDataSourceStatus(dataSourceId);
@@ -380,17 +371,10 @@ export class DataSourceService {
     }
 
     for (const knowledge of knowledgeListToUpdate) {
-      if (knowledge.indexStatus === KnowledgeIndexStatus.INITIALIZED) {
-        await publishEvent(DomainEvent.KNOWLEDGE_INITIALIZED, {
-          dataSourceId,
-          knowledgeId: knowledge.id,
-        });
-      } else if (knowledge.indexStatus === KnowledgeIndexStatus.REFRESHING) {
-        await publishEvent(DomainEvent.KNOWLEDGE_REFRESH_REQUESTED, {
-          dataSourceId,
-          knowledgeId: knowledge.id,
-        });
-      }
+      await publishEvent(DomainEvent.KNOWLEDGE_INITIALIZED, {
+        dataSourceId,
+        knowledgeId: knowledge.id,
+      });
     }
   }
 
@@ -405,9 +389,7 @@ export class DataSourceService {
         where: {
           type: itemList.type,
           uniqueId: { in: uniqueIds },
-          indexStatus: {
-            not: KnowledgeIndexStatus.DELETED,
-          },
+          indexStatus: KnowledgeIndexStatus.COMPLETED,
         },
       });
 
@@ -839,17 +821,62 @@ export class DataSourceService {
     return newKnowledge;
   }
 
-  public async deleteKnowledge(knowledgeId: string) {
+  public async deleteRelatedKnowledgeInstances(
+    knowledgeId: string
+  ): Promise<string[]> {
+    const knowledge = await prismadb.knowledge.findUnique({
+      where: { id: knowledgeId },
+    });
+
+    const relatedKnowledgeInstances = await prismadb.knowledge.findMany({
+      where: {
+        uniqueId: knowledge?.uniqueId,
+        id: { not: knowledgeId },
+      },
+    });
+    const relatedKnowledgeIds = relatedKnowledgeInstances.map(
+      (knowledge) => knowledge.id
+    );
+
+    if (relatedKnowledgeIds.length === 0) {
+      return [];
+    }
+
+    const relatedDataSources = await prismadb.dataSourceKnowledge.findMany({
+      select: { dataSourceId: true },
+      distinct: ["dataSourceId"],
+      where: {
+        knowledgeId: { in: relatedKnowledgeIds },
+      },
+    });
+
+    const newDataSourceRelationships = relatedDataSources.map((dataSource) => {
+      return {
+        dataSourceId: dataSource.dataSourceId,
+        knowledgeId,
+      };
+    });
+
     await prismadb.$transaction(async (tx) => {
       await tx.dataSourceKnowledge.deleteMany({
-        where: { knowledgeId },
+        where: {
+          knowledgeId: { in: [...relatedKnowledgeIds, knowledgeId] },
+        },
       });
 
-      await tx.knowledge.update({
-        where: { id: knowledgeId },
+      await tx.knowledge.updateMany({
+        where: {
+          id: { in: relatedKnowledgeIds },
+        },
         data: { indexStatus: KnowledgeIndexStatus.DELETED },
       });
+
+      await tx.dataSourceKnowledge.createMany({
+        data: newDataSourceRelationships,
+      });
     });
+
+    return relatedKnowledgeIds;
   }
 
   public async deleteDataSource(

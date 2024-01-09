@@ -65,50 +65,15 @@ export const knowledgeInitialized = inngest.createFunction(
         await step.sendEvent("fan-out-knowledge-chunks", eventBatch);
       }
     }
-  }
-);
 
-export const knowledgeRefreshRequested = inngest.createFunction(
-  { id: "knowledge-refresh-requested" },
-  { event: DomainEvent.KNOWLEDGE_REFRESH_REQUESTED },
-  async ({ event, step }) => {
-    const dataSourceId = event.data.dataSourceId;
-    const knowledgeId = event.data.knowledgeId;
-
-    const newKnowledge = await step.run(
-      "copy-knowledge-and-associations",
-      async () => {
-        return await dataSourceService.copyKnowledgeAndAssociations(
-          knowledgeId
-        );
-      }
-    );
-
-    const indexKnowledgeResult = await step.run("index-knowledge", async () => {
-      return await dataSourceService.indexDataSourceKnowledge(
-        dataSourceId,
-        newKnowledge.id
+    const relatedKnowledgeIds = await step.run("delete-knowledge", async () => {
+      return await dataSourceService.deleteRelatedKnowledgeInstances(
+        knowledgeId
       );
-    });
-    if (
-      indexKnowledgeResult?.events?.length &&
-      indexKnowledgeResult?.events?.length > 0
-    ) {
-      while (indexKnowledgeResult.events.length) {
-        const eventBatch = indexKnowledgeResult.events.splice(
-          0,
-          INGEST_EVENT_MAX
-        );
-        await step.sendEvent("fan-out-knowledge-chunks", eventBatch);
-      }
-    }
-
-    await step.run("delete-knowledge", async () => {
-      await dataSourceService.deleteKnowledge(knowledgeId);
     });
 
     await step.run("delete-vectordb-knowledge", async () => {
-      await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
+      await vectorDatabaseAdapter.deleteKnowledgeList(relatedKnowledgeIds);
     });
   }
 );

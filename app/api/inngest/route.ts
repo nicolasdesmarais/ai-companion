@@ -4,7 +4,6 @@ import {
   dataSourceRefreshRequested,
   knowledgeEventReceived,
   knowledgeInitialized,
-  knowledgeRefreshRequested,
   loadKnowledgeChunk,
 } from "@/src/adapter-in/inngest/datasource-workflows";
 import { googleDriveFolderScanInitiated } from "@/src/adapter-in/inngest/google-drive-workflows";
@@ -20,7 +19,6 @@ export const { GET, POST, PUT } = serve({
     dataSourceRefreshRequested,
     dataSourceItemListReceived,
     knowledgeInitialized,
-    knowledgeRefreshRequested,
     knowledgeEventReceived,
     loadKnowledgeChunk,
     googleDriveFolderScanInitiated,
