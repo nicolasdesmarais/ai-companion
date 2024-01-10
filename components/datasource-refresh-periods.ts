@@ -10,5 +10,7 @@ const dataRefreshPeriodLabels = {
 export function getDataSourceRefreshPeriodLabel(
   refreshPeriod: DataSourceRefreshPeriod | null
 ) {
-  return refreshPeriod ? dataRefreshPeriodLabels[refreshPeriod] : "";
+  return dataRefreshPeriodLabels[
+    refreshPeriod ? refreshPeriod : DataSourceRefreshPeriod.NEVER
+  ];
 }
