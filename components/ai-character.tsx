@@ -54,7 +54,6 @@ interface AIFormProps {
   aiModels: AIModel[];
   categories: Category[];
   form: any;
-  groups: GroupSummaryDto[];
   hasInstanceAccess: boolean;
 }
 
@@ -62,7 +61,6 @@ export const AICharacter = ({
   aiModels,
   categories,
   form,
-  groups,
   hasInstanceAccess,
 }: AIFormProps) => {
   const { toast } = useToast();
@@ -71,7 +69,7 @@ export const AICharacter = ({
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatingInstruction, setGeneratingInstruction] = useState(false);
   const [generatingConversation, setGeneratingConversation] = useState(false);
-  const [groupList, setGroupList] = useState<GroupSummaryDto[]>(groups || []);
+  const [groupList, setGroupList] = useState<GroupSummaryDto[]>([]);
   const [advancedImage, setAdvancedImage] = useState(false);
   const [imagePrompt, setImagePrompt] = useState("");
   const [imageModel, setImageModel] = useState("latent-consistency");
@@ -80,11 +78,16 @@ export const AICharacter = ({
   const isLoading = form.formState.isSubmitting;
 
   const fetchGroups = async () => {
+    console.log("fetching groups");
     const response = await axios.get("/api/v1/me/groups");
     if (response.status === 200 && Array.isArray(response.data.data)) {
       setGroupList(response.data.data);
     }
   };
+
+  useEffect(() => {
+    fetchGroups();
+  }, []);
 
   useEffect(() => {
     if (groupModal.areGroupsUpdated) {

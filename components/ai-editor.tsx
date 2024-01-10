@@ -96,7 +96,6 @@ interface AIFormProps {
   aiModels: AIModel[];
   categories: Category[];
   initialAi: AIDetailDto | null;
-  groups: GroupSummaryDto[];
   hasInstanceAccess: boolean;
 }
 
@@ -104,7 +103,6 @@ export const AIEditor = ({
   aiModels,
   categories,
   initialAi,
-  groups,
   hasInstanceAccess,
 }: AIFormProps) => {
   const { toast } = useToast();
@@ -301,7 +299,6 @@ export const AIEditor = ({
           aiModels={aiModels}
           categories={categories}
           form={form}
-          groups={groups}
           hasInstanceAccess={hasInstanceAccess}
         />
       ),

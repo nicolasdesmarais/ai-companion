@@ -44,8 +44,6 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
 
   const categories = await cache(prismadb.category.findMany)();
 
-  const groups = await groupService.findGroupsByUser(authorizationContext);
-
   const hasInstanceAccess = BaseEntitySecurityService.hasPermission(
     authorizationContext,
     SecuredResourceType.AI,
@@ -59,7 +57,6 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
         initialAi={initialAi}
         aiModels={models}
         categories={categories}
-        groups={groups}
         hasInstanceAccess={hasInstanceAccess}
       />
       <GroupModal />
