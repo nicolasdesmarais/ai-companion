@@ -1,7 +1,7 @@
 import { Table } from "@/components/table";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { KnowledgeIndexStatus } from "@prisma/client";
+import { DataSourceType, KnowledgeIndexStatus } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { format } from "date-fns";
 import {
@@ -11,11 +11,13 @@ import {
   Globe,
   Loader,
   MinusCircle,
+  RefreshCcw,
   Server,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import DataSourceCard from "./datasource-card";
+import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
 import { DataSourceTypes } from "./datasource-types";
 import { FileUploadKnowledge } from "./file-upload-knowledge";
 import { GoogleDriveForm } from "./google-drive-knowledge";
@@ -29,6 +31,11 @@ interface SelectDataSourceProps {
   knowledgeLoading: boolean;
 }
 
+const dataSourceTypesForRefresh = [
+  DataSourceType.GOOGLE_DRIVE,
+  DataSourceType.WEB_URL,
+];
+
 export const AIKnowledge = ({
   form,
   dataSources,
@@ -37,6 +44,7 @@ export const AIKnowledge = ({
 }: SelectDataSourceProps) => {
   const { toast } = useToast();
   const [removing, setRemoving] = useState("");
+  const [refreshing, setRefreshing] = useState("");
   const pathname = usePathname();
   const router = useRouter();
   const aiId = form.getValues("id");
@@ -58,6 +66,24 @@ export const AIKnowledge = ({
       });
     }
     setRemoving("");
+  };
+
+  const refreshDataSource = async (id: string) => {
+    setRefreshing(id);
+    try {
+      await axios.put(`/api/v1/data-sources/${id}/refresh`);
+
+      toast({ description: "Data source refresh request accepted." });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description:
+          String((error as AxiosError).response?.data) ||
+          "Something went wrong.",
+        duration: 6000,
+      });
+    }
+    setRefreshing("");
   };
 
   const inProgress = dataSources.some(
@@ -84,7 +110,14 @@ export const AIKnowledge = ({
           )}
           <div className="max-h-96 overflow-auto">
             <Table
-              headers={["NAME", "TYPE", "LAST MODIFIED", "Progress", "Remove"]}
+              headers={[
+                "NAME",
+                "TYPE",
+                "Refresh Period",
+                "LAST MODIFIED",
+                "Progress",
+                "Remove",
+              ]}
               className="w-full my-4 max-h-60"
             >
               {dataSources.map((dataSource: any) => (
@@ -98,6 +131,23 @@ export const AIKnowledge = ({
                         (format) => format.type === dataSource.type
                       )?.name
                     }
+                  </td>
+                  <td className="p-2">
+                    {getDataSourceRefreshPeriodLabel(dataSource.refreshPeriod)}
+                    {dataSourceTypesForRefresh.includes(dataSource.type) && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={!!removing}
+                        onClick={() => refreshDataSource(dataSource.id)}
+                      >
+                        {refreshing === dataSource.id ? (
+                          <Loader className="w-4 h-4 spinner" />
+                        ) : (
+                          <RefreshCcw className="w-4 h-4" />
+                        )}
+                      </Button>
+                    )}
                   </td>
                   <td className="p-2">
                     {dataSource.lastIndexedAt

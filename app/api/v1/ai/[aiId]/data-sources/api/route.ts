@@ -6,7 +6,7 @@ import { AuthorizationContext } from "@/src/security/models/AuthorizationContext
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
-import { DataSourceType } from "@prisma/client";
+import { DataSourceRefreshPeriod, DataSourceType } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 300;
@@ -27,6 +27,7 @@ async function postHandler(
     params.aiId,
     body.name,
     DataSourceType.API,
+    DataSourceRefreshPeriod.NEVER,
     body
   );
 

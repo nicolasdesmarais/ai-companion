@@ -157,6 +157,27 @@ export const loadKnowledgeChunk = inngest.createFunction(
   }
 );
 
+export const refreshDataSources = inngest.createFunction(
+  { id: "refresh-datasources" },
+  { cron: "0 0 * * *" },
+  async ({ step }) => {
+    const dataSourceIds = await step.run(
+      "find-datasources-to-refresh",
+      async () => {
+        return await dataSourceService.findDataSourcesToRefresh();
+      }
+    );
+
+    await Promise.all(
+      dataSourceIds.map((dataSourceId) =>
+        step.run("refresh-datasource", async () => {
+          await dataSourceService.refreshDataSourceAsSystem(dataSourceId);
+        })
+      )
+    );
+  }
+);
+
 export const pollIndexingDataSources = inngest.createFunction(
   { id: "poll-indexing-datasources" },
   { cron: "0 * * * *" },

@@ -18,7 +18,7 @@ async function putHandler(
 ) {
   const { params, authorizationContext } = context;
 
-  await dataSourceService.refreshDataSource(
+  await dataSourceService.refreshDataSourceAsUser(
     authorizationContext,
     params.dataSourceId
   );

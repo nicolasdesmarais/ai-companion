@@ -2,7 +2,7 @@ import { FileUploadDataSourceInput } from "@/src/adapter-out/knowledge/file-uplo
 import aiService from "@/src/domain/services/AIService";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
-import { DataSourceType } from "@prisma/client";
+import { DataSourceRefreshPeriod, DataSourceType } from "@prisma/client";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 
@@ -40,6 +40,7 @@ async function postHandler(
         aiId,
         blob.pathname,
         DataSourceType.FILE_UPLOAD,
+        DataSourceRefreshPeriod.NEVER,
         input
       );
     },
