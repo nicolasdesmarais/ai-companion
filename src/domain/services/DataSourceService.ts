@@ -956,7 +956,7 @@ export class DataSourceService {
     }
 
     dataSource.indexStatus = DataSourceIndexStatus.REFRESHING;
-    dataSourceRepository.updateDataSource(dataSource);
+    await dataSourceRepository.updateDataSource(dataSource);
 
     await publishEvent(DomainEvent.DATASOURCE_REFRESH_REQUESTED, {
       dataSourceId,
