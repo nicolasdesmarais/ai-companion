@@ -15,7 +15,7 @@
     "@clerk/themes": "^1.7.9",
     "@hookform/resolvers": "^3.3.2",
     "@pinecone-database/pinecone": "^1.1.2",
-    "@prisma/client": "^5.7.0",
+    "@prisma/client": "^5.8.0",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -89,7 +89,7 @@
   },
   "devDependencies": {
     "encoding": "^0.1.13",
-    "prisma": "^5.7.0"
+    "prisma": "^5.8.0"
   },
   "prisma": {
     "schema": "src/prisma/schema.prisma"
