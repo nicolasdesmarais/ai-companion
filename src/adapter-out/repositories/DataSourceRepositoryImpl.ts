@@ -18,6 +18,7 @@ const dataSourceSummarySelect: Prisma.DataSourceSelect = {
   type: true,
   orgId: true,
   ownerUserId: true,
+  refreshPeriod: true,
   indexStatus: true,
   indexPercentage: true,
 };

@@ -88,8 +88,8 @@ export const AIKnowledge = ({
               headers={[
                 "NAME",
                 "TYPE",
-                "LAST MODIFIED",
                 "Refresh Period",
+                "LAST MODIFIED",
                 "Progress",
                 "Remove",
               ]}

@@ -1,4 +1,8 @@
-import { DataSourceIndexStatus, DataSourceType } from "@prisma/client";
+import {
+  DataSourceIndexStatus,
+  DataSourceRefreshPeriod,
+  DataSourceType,
+} from "@prisma/client";
 
 export interface DataSourceDto {
   id: string;
@@ -9,6 +13,7 @@ export interface DataSourceDto {
   ownerUserId: string;
   name: string;
   type: DataSourceType;
+  refreshPeriod: DataSourceRefreshPeriod | null;
   indexStatus: DataSourceIndexStatus | null;
   indexPercentage: string;
 }
