@@ -1,7 +1,7 @@
 import { Table } from "@/components/table";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { KnowledgeIndexStatus } from "@prisma/client";
+import { DataSourceType, KnowledgeIndexStatus } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { format } from "date-fns";
 import {
@@ -30,6 +30,11 @@ interface SelectDataSourceProps {
   setDataSource: (dataSource: any) => void;
   knowledgeLoading: boolean;
 }
+
+const dataSourceTypesForRefresh = [
+  DataSourceType.GOOGLE_DRIVE,
+  DataSourceType.WEB_URL,
+];
 
 export const AIKnowledge = ({
   form,
@@ -129,18 +134,20 @@ export const AIKnowledge = ({
                   </td>
                   <td className="p-2">
                     {getDataSourceRefreshPeriodLabel(dataSource.refreshPeriod)}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={!!removing}
-                      onClick={() => refreshDataSource(dataSource.id)}
-                    >
-                      {refreshing === dataSource.id ? (
-                        <Loader className="w-4 h-4 spinner" />
-                      ) : (
-                        <RefreshCcw className="w-4 h-4" />
-                      )}
-                    </Button>
+                    {dataSourceTypesForRefresh.includes(dataSource.type) && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={!!removing}
+                        onClick={() => refreshDataSource(dataSource.id)}
+                      >
+                        {refreshing === dataSource.id ? (
+                          <Loader className="w-4 h-4 spinner" />
+                        ) : (
+                          <RefreshCcw className="w-4 h-4" />
+                        )}
+                      </Button>
+                    )}
                   </td>
                   <td className="p-2">
                     {dataSource.lastIndexedAt
