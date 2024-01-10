@@ -23,6 +23,7 @@ import axios from "axios";
 import { format } from "date-fns";
 import { Loader, Server } from "lucide-react";
 import { useEffect, useState } from "react";
+import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
 
 const ADD_ACCOUNT_OPTION = "add-account";
 
@@ -30,13 +31,6 @@ interface FilesProps {
   aiId: string;
   goBack: () => void;
 }
-
-const dataRefreshPeriodLabels = {
-  [DataSourceRefreshPeriod.NEVER]: "Never",
-  [DataSourceRefreshPeriod.DAILY]: "Daily",
-  [DataSourceRefreshPeriod.WEEKLY]: "Weekly",
-  [DataSourceRefreshPeriod.MONTHLY]: "Monthly",
-};
 
 export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -341,16 +335,14 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
             <FormControl>
               <SelectTrigger className="bg-background">
                 <SelectValue>
-                  {dataRefreshPeriod
-                    ? dataRefreshPeriodLabels[dataRefreshPeriod]
-                    : ""}
+                  {getDataSourceRefreshPeriodLabel(dataRefreshPeriod)}
                 </SelectValue>
               </SelectTrigger>
             </FormControl>
             <SelectContent>
               {Object.values(DataSourceRefreshPeriod).map((period) => (
                 <SelectItem key={period} value={period}>
-                  {dataRefreshPeriodLabels[period]}
+                  {getDataSourceRefreshPeriodLabel(period)}
                 </SelectItem>
               ))}
             </SelectContent>

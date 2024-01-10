@@ -16,6 +16,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import DataSourceCard from "./datasource-card";
+import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
 import { DataSourceTypes } from "./datasource-types";
 import { FileUploadKnowledge } from "./file-upload-knowledge";
 import { GoogleDriveForm } from "./google-drive-knowledge";
@@ -84,7 +85,14 @@ export const AIKnowledge = ({
           )}
           <div className="max-h-96 overflow-auto">
             <Table
-              headers={["NAME", "TYPE", "LAST MODIFIED", "Progress", "Remove"]}
+              headers={[
+                "NAME",
+                "TYPE",
+                "LAST MODIFIED",
+                "Refresh Period",
+                "Progress",
+                "Remove",
+              ]}
               className="w-full my-4 max-h-60"
             >
               {dataSources.map((dataSource: any) => (
@@ -98,6 +106,9 @@ export const AIKnowledge = ({
                         (format) => format.type === dataSource.type
                       )?.name
                     }
+                  </td>
+                  <td className="p-2">
+                    {getDataSourceRefreshPeriodLabel(dataSource.refreshPeriod)}
                   </td>
                   <td className="p-2">
                     {dataSource.lastIndexedAt
