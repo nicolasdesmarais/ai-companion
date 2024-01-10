@@ -229,21 +229,22 @@ model Chat {
 }
 
 model DataSource {
-  id              String                 @id @default(cuid())
-  createdAt       DateTime               @default(now()) @map(name: "created_at")
-  updatedAt       DateTime               @default(now()) @updatedAt @map(name: "updated_at")
-  lastIndexedAt   DateTime?              @map(name: "last_indexed_at")
-  name            String                 @db.VarChar(500)
-  orgId           String                 @map(name: "org_id")
-  ownerUserId     String                 @map(name: "owner_user_id")
+  id              String                   @id @default(cuid())
+  createdAt       DateTime                 @default(now()) @map(name: "created_at")
+  updatedAt       DateTime                 @default(now()) @updatedAt @map(name: "updated_at")
+  lastIndexedAt   DateTime?                @map(name: "last_indexed_at")
+  name            String                   @db.VarChar(500)
+  orgId           String                   @map(name: "org_id")
+  ownerUserId     String                   @map(name: "owner_user_id")
   type            DataSourceType
-  indexStatus     DataSourceIndexStatus? @map(name: "index_status")
-  indexPercentage Decimal                @map(name: "index_percentage")
-  documentCount   Int?                   @map(name: "document_count")
-  tokenCount      Int?                   @map(name: "token_count")
+  indexStatus     DataSourceIndexStatus?   @map(name: "index_status")
+  indexPercentage Decimal                  @map(name: "index_percentage")
+  documentCount   Int?                     @map(name: "document_count")
+  tokenCount      Int?                     @map(name: "token_count")
   knowledges      DataSourceKnowledge[]
   ais             AIDataSource[]
   data            Json?
+  refreshPeriod   DataSourceRefreshPeriod? @map(name: "refresh_period")
 
   @@map("data_sources")
 }
@@ -262,6 +263,13 @@ enum DataSourceIndexStatus {
   PARTIALLY_COMPLETED
   COMPLETED
   FAILED
+}
+
+enum DataSourceRefreshPeriod {
+  NEVER
+  DAILY
+  WEEKLY
+  MONTHLY
 }
 
 model DataSourceKnowledge {
