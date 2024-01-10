@@ -38,6 +38,30 @@ export class AISecurityService {
     return this.canUpdateAI(authorizationContext, ai);
   }
 
+  public static canApproveAIForOrg(
+    authorizationContext: AuthorizationContext,
+    ai: AI
+  ) {
+    const hasInstanceAccess = BaseEntitySecurityService.hasPermission(
+      authorizationContext,
+      SecuredResourceType.AI,
+      SecuredAction.WRITE,
+      SecuredResourceAccessLevel.INSTANCE
+    );
+
+    if (hasInstanceAccess) {
+      return true;
+    }
+
+    const hasOrgAccess = BaseEntitySecurityService.hasPermission(
+      authorizationContext,
+      SecuredResourceType.AI,
+      SecuredAction.WRITE,
+      SecuredResourceAccessLevel.ORGANIZATION
+    );
+    return hasOrgAccess && ai.orgId === authorizationContext.orgId;
+  }
+
   public static hasInstanceReadAccess(
     authorizationContext: AuthorizationContext
   ) {

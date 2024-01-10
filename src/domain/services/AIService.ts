@@ -5,6 +5,7 @@ import {
   ShareAIRequest,
   UpdateAIRequest,
 } from "@/src/adapter-in/api/AIApi";
+import { AIRepositoryImpl } from "@/src/adapter-out/repositories/AIRepositoryImpl";
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
@@ -31,6 +32,7 @@ import { AISecurityService } from "../../security/services/AISecurityService";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import { AIDetailDto, AIProfile } from "../models/AI";
 import { AIModelOptions } from "../models/AIModel";
+import { AIRepository } from "../ports/outgoing/AIRepository";
 import aiModelService from "./AIModelService";
 import dataSourceService from "./DataSourceService";
 import groupService from "./GroupService";
@@ -68,6 +70,8 @@ const listAIResponseSelect: Prisma.AISelect = {
 };
 
 export class AIService {
+  constructor(private aiRepository: AIRepository) {}
+
   public async findAIById(id: string) {
     return prismadb.aI.findUnique({
       where: {
@@ -1163,7 +1167,44 @@ export class AIService {
 
     return aiShare;
   }
+
+  public async approveAIForOrganization(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ) {
+    const ai = await aiRepository.getById(aiId);
+
+    const canApproveAI = AISecurityService.canApproveAIForOrg(
+      authorizationContext,
+      ai
+    );
+    if (!canApproveAI) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const { orgId } = authorizationContext;
+    await aiRepository.approveAIForOrg(aiId, orgId);
+  }
+
+  public async revokeAIForOrganization(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ) {
+    const ai = await aiRepository.getById(aiId);
+
+    const canApproveAI = AISecurityService.canApproveAIForOrg(
+      authorizationContext,
+      ai
+    );
+    if (!canApproveAI) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const { orgId } = authorizationContext;
+    await aiRepository.revokeAIForOrg(aiId, orgId);
+  }
 }
 
-const aiService = new AIService();
+const aiRepository = new AIRepositoryImpl();
+const aiService = new AIService(aiRepository);
 export default aiService;
