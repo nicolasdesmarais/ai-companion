@@ -35,6 +35,7 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       items: [
         {
           name: input.url,
+          uniqueId: input.url,
         },
       ],
     };
