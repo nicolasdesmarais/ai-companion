@@ -52,14 +52,12 @@ Elon: Always! But right now, I'm particularly excited about Neuralink. It has th
 
 interface AIFormProps {
   aiModels: AIModel[];
-  categories: Category[];
   form: any;
   hasInstanceAccess: boolean;
 }
 
 export const AICharacter = ({
   aiModels,
-  categories,
   form,
   hasInstanceAccess,
 }: AIFormProps) => {
@@ -74,19 +72,27 @@ export const AICharacter = ({
   const [imagePrompt, setImagePrompt] = useState("");
   const [imageModel, setImageModel] = useState("latent-consistency");
   const [diversityString, setDiversityString] = useState("");
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const isLoading = form.formState.isSubmitting;
 
   const fetchGroups = async () => {
-    console.log("fetching groups");
     const response = await axios.get("/api/v1/me/groups");
     if (response.status === 200 && Array.isArray(response.data.data)) {
       setGroupList(response.data.data);
     }
   };
 
+  const fetchCategories = async () => {
+    const response = await axios.get("/api/v1/categories");
+    if (response.status === 200 && Array.isArray(response.data)) {
+      setCategories(response.data);
+    }
+  };
+
   useEffect(() => {
     fetchGroups();
+    fetchCategories();
   }, []);
 
   useEffect(() => {

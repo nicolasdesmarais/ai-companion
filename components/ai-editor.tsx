@@ -94,14 +94,12 @@ const formSchema = z.object({
 
 interface AIFormProps {
   aiModels: AIModel[];
-  categories: Category[];
   initialAi: AIDetailDto | null;
   hasInstanceAccess: boolean;
 }
 
 export const AIEditor = ({
   aiModels,
-  categories,
   initialAi,
   hasInstanceAccess,
 }: AIFormProps) => {
@@ -297,7 +295,6 @@ export const AIEditor = ({
       content: (
         <AICharacter
           aiModels={aiModels}
-          categories={categories}
           form={form}
           hasInstanceAccess={hasInstanceAccess}
         />
