@@ -92,7 +92,6 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
         id: true,
       },
       where: {
-        indexStatus: DataSourceIndexStatus.COMPLETED,
         OR: [
           {
             AND: [
