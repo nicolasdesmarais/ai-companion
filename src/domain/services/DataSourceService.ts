@@ -144,6 +144,7 @@ export class DataSourceService {
       userId,
       name,
       type,
+      refreshPeriod,
       data
     );
 

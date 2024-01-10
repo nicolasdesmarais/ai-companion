@@ -4,6 +4,7 @@ import prismadb from "@/src/lib/prismadb";
 import {
   DataSource,
   DataSourceIndexStatus,
+  DataSourceRefreshPeriod,
   DataSourceType,
   Prisma,
 } from "@prisma/client";
@@ -93,6 +94,7 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
     ownerUserId: string,
     name: string,
     type: DataSourceType,
+    refreshPeriod: DataSourceRefreshPeriod,
     data: any
   ): Promise<DataSourceDto> {
     const dataSource = await prismadb.dataSource.create({
@@ -101,6 +103,7 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
         ownerUserId,
         name,
         type,
+        refreshPeriod,
         indexStatus: DataSourceIndexStatus.INITIALIZED,
         indexPercentage: 0,
         data,

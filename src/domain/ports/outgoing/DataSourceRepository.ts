@@ -1,4 +1,4 @@
-import { DataSourceType } from "@prisma/client";
+import { DataSourceRefreshPeriod, DataSourceType } from "@prisma/client";
 import { DataSourceDto } from "../../models/DataSources";
 
 export interface DataSourceRepository {
@@ -13,6 +13,7 @@ export interface DataSourceRepository {
     ownerUserId: string,
     name: string,
     type: DataSourceType,
+    refreshPeriod: DataSourceRefreshPeriod,
     data: any
   ): Promise<DataSourceDto>;
 
