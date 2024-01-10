@@ -1,7 +1,10 @@
+import { DataSourceRefreshPeriod } from "@prisma/client";
+
 export interface CreateGoogleDriveKnowledgeRequest {
   oauthTokenId: string;
   fileId: string;
   filename: string;
+  dataRefreshPeriod?: DataSourceRefreshPeriod;
 }
 
 export interface GoogleDriveSearchRequest {

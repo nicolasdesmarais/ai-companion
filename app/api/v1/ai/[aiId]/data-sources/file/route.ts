@@ -6,7 +6,7 @@ import { AuthorizationContext } from "@/src/security/models/AuthorizationContext
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
-import { DataSourceType } from "@prisma/client";
+import { DataSourceRefreshPeriod, DataSourceType } from "@prisma/client";
 import { put } from "@vercel/blob";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
@@ -53,6 +53,7 @@ async function postHandler(
     params.aiId,
     filename,
     DataSourceType.FILE_UPLOAD,
+    DataSourceRefreshPeriod.NEVER,
     input
   );
 

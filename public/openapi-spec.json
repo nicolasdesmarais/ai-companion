@@ -184,6 +184,9 @@
           "type": {
             "$ref": "#/components/schemas/DataSourceType"
           },
+          "refreshPeriod": {
+            "$ref": "#/components/schemas/DataSourceRefreshPeriod"
+          },
           "indexStatus": {
             "$ref": "#/components/schemas/DataSourceIndexStatus"
           },
@@ -197,6 +200,11 @@
         "type": "string",
         "description": "The type of the data source.",
         "enum": ["API", "FILE_UPLOAD", "GOOGLE_DRIVE", "WEB_URL"]
+      },
+      "DataSourceRefreshPeriod": {
+        "type": "string",
+        "description": "How frequently the data source should be refreshed.",
+        "enum": ["NEVER", "DAILY", "WEEKLY", "MONTHLY"]
       },
       "DataSourceIndexStatus": {
         "type": "string",

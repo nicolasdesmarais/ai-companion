@@ -74,6 +74,6 @@ export const POST = withErrorHandler(
     SecuredResourceType.DATA_SOURCES,
     SecuredAction.WRITE,
     Object.values(SecuredResourceAccessLevel),
-    getHandler
+    postHandler
   )
 );

@@ -4,6 +4,7 @@ import prismadb from "@/src/lib/prismadb";
 import {
   DataSource,
   DataSourceIndexStatus,
+  DataSourceRefreshPeriod,
   DataSourceType,
   Prisma,
 } from "@prisma/client";
@@ -17,6 +18,7 @@ const dataSourceSummarySelect: Prisma.DataSourceSelect = {
   type: true,
   orgId: true,
   ownerUserId: true,
+  refreshPeriod: true,
   indexStatus: true,
   indexPercentage: true,
 };
@@ -77,6 +79,46 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
     return this.mapDataSourcesToDto(dataSources);
   }
 
+  public async findDataSourceIdsToRefresh(now: Date): Promise<string[]> {
+    const oneDayAgo = new Date(now);
+    oneDayAgo.setDate(now.getDate() - 1);
+    const oneWeekAgo = new Date(now);
+    oneWeekAgo.setDate(now.getDate() - 7);
+    const oneMonthAgo = new Date(now);
+    oneMonthAgo.setMonth(now.getMonth() - 1);
+
+    const dataSources = await prismadb.dataSource.findMany({
+      select: {
+        id: true,
+      },
+      where: {
+        OR: [
+          {
+            AND: [
+              { refreshPeriod: DataSourceRefreshPeriod.DAILY },
+              { lastIndexedAt: { lt: oneDayAgo } },
+            ],
+          },
+          {
+            AND: [
+              { refreshPeriod: DataSourceRefreshPeriod.WEEKLY },
+              { lastIndexedAt: { lt: oneWeekAgo } },
+            ],
+          },
+          {
+            AND: [
+              { refreshPeriod: DataSourceRefreshPeriod.MONTHLY },
+              { lastIndexedAt: { lt: oneMonthAgo } },
+            ],
+          },
+        ],
+        NOT: { refreshPeriod: DataSourceRefreshPeriod.NEVER },
+      },
+    });
+
+    return dataSources.map((dataSource) => dataSource.id);
+  }
+
   private mapDataSourcesToDto(dataSources: DataSource[]): DataSourceDto[] {
     return dataSources.map((dataSource) => this.mapDataSourceToDto(dataSource));
   }
@@ -93,6 +135,7 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
     ownerUserId: string,
     name: string,
     type: DataSourceType,
+    refreshPeriod: DataSourceRefreshPeriod,
     data: any
   ): Promise<DataSourceDto> {
     const dataSource = await prismadb.dataSource.create({
@@ -101,6 +144,7 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
         ownerUserId,
         name,
         type,
+        refreshPeriod,
         indexStatus: DataSourceIndexStatus.INITIALIZED,
         indexPercentage: 0,
         data,
