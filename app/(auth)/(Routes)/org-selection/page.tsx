@@ -1,4 +1,3 @@
-"use client";
 import { OrganizationList } from "@clerk/nextjs";
 
 export default function Page() {
