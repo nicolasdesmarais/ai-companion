@@ -39,6 +39,7 @@ export const AIKnowledge = ({
 }: SelectDataSourceProps) => {
   const { toast } = useToast();
   const [removing, setRemoving] = useState("");
+  const [refreshing, setRefreshing] = useState("");
   const pathname = usePathname();
   const router = useRouter();
   const aiId = form.getValues("id");
@@ -63,7 +64,7 @@ export const AIKnowledge = ({
   };
 
   const refreshDataSource = async (id: string) => {
-    setRemoving(id);
+    setRefreshing(id);
     try {
       await axios.put(`/api/v1/data-sources/${id}/refresh`);
 
@@ -77,7 +78,7 @@ export const AIKnowledge = ({
         duration: 6000,
       });
     }
-    setRemoving("");
+    setRefreshing("");
   };
 
   const inProgress = dataSources.some(
@@ -134,7 +135,7 @@ export const AIKnowledge = ({
                       disabled={!!removing}
                       onClick={() => refreshDataSource(dataSource.id)}
                     >
-                      {removing === dataSource.id ? (
+                      {refreshing === dataSource.id ? (
                         <Loader className="w-4 h-4 spinner" />
                       ) : (
                         <RefreshCcw className="w-4 h-4" />
