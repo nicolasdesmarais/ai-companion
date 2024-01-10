@@ -19,6 +19,7 @@ import { AICharacter } from "./ai-character";
 import { AIKnowledge } from "./ai-knowledge";
 import { AIPersonality } from "./ai-personality";
 import { AIProfileEditor } from "./ai-profile-editor";
+import { useReportWebVitals } from "next/web-vitals";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -113,6 +114,18 @@ export const AIEditor = ({
   const [continueRequested, setContinueRequested] = useState("");
   const [dataSources, setDataSources] = useState<any[]>([]);
   const [dataSourcesLoading, setDataSourcesLoading] = useState(true);
+
+  useReportWebVitals((metric) => {
+    switch (metric.name) {
+      case "Next.js-hydration":
+      case "Next.js-route-change-to-render":
+      case "Next.js-render":
+        console.log(metric);
+        break;
+      default:
+        break;
+    }
+  });
 
   useEffect(() => {
     const fetchDataSources = async () => {
