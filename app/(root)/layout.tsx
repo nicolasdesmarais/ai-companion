@@ -5,6 +5,7 @@ import { checkSubscription } from "@/src/lib/subscription";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
+  const start = performance.now();
   const isPro = await checkSubscription();
   const authorizationContext = getUserAuthorizationContext();
   if (!authorizationContext) {
@@ -22,6 +23,8 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
       isDeleted: false,
     },
   });
+  const end = performance.now();
+  console.log(`RootLayout time: ${end - start} ms`);
 
   return (
     <div className="h-full">

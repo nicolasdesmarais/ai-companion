@@ -50,6 +50,7 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
   console.log(`getAIModels time: ${end - start} ms`);
 
   start = performance.now();
+  //TODO: optimize
   const categories = await prismadb.category.findMany();
   end = performance.now();
   console.log(`category time: ${end - start} ms`);
