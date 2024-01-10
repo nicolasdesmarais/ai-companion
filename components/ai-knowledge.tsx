@@ -11,6 +11,7 @@ import {
   Globe,
   Loader,
   MinusCircle,
+  RefreshCcw,
   Server,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
@@ -49,6 +50,24 @@ export const AIKnowledge = ({
 
       setDataSource((current: any) => current.filter((i: any) => i.id !== id));
       toast({ description: "Knowledge removed." });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description:
+          String((error as AxiosError).response?.data) ||
+          "Something went wrong.",
+        duration: 6000,
+      });
+    }
+    setRemoving("");
+  };
+
+  const refreshDataSource = async (id: string) => {
+    setRemoving(id);
+    try {
+      await axios.put(`/api/v1/data-sources/${id}/refresh`);
+
+      toast({ description: "Data source refresh request accepted." });
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -109,6 +128,18 @@ export const AIKnowledge = ({
                   </td>
                   <td className="p-2">
                     {getDataSourceRefreshPeriodLabel(dataSource.refreshPeriod)}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={!!removing}
+                      onClick={() => refreshDataSource(dataSource.id)}
+                    >
+                      {removing === dataSource.id ? (
+                        <Loader className="w-4 h-4 spinner" />
+                      ) : (
+                        <RefreshCcw className="w-4 h-4" />
+                      )}
+                    </Button>
                   </td>
                   <td className="p-2">
                     {dataSource.lastIndexedAt
