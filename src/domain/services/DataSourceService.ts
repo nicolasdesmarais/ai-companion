@@ -935,16 +935,15 @@ export class DataSourceService {
     });
   }
 
-  public async refreshDataSource(
+  public async findDataSourcesToRefresh() {
+    return await dataSourceRepository.findDataSourceIdsToRefresh(new Date());
+  }
+
+  public async refreshDataSourceAsUser(
     authorizationContext: AuthorizationContext,
     dataSourceId: string
   ) {
-    const dataSource = await dataSourceRepository.findById(dataSourceId);
-    if (!dataSource) {
-      throw new EntityNotFoundError(
-        `DataSource with id=${dataSourceId} not found`
-      );
-    }
+    const dataSource = await this.getDataSource(dataSourceId);
 
     const canUpdateDataSource = DataSourceSecurityService.canUpdateDataSource(
       authorizationContext,
@@ -955,11 +954,35 @@ export class DataSourceService {
       throw new ForbiddenError("Forbidden");
     }
 
+    await this.refreshDataSourceAndPublishEvent(dataSource);
+  }
+
+  public async refreshDataSourceAsSystem(dataSourceId: string) {
+    const dataSource = await dataSourceRepository.findById(dataSourceId);
+    if (!dataSource) {
+      throw new EntityNotFoundError(
+        `DataSource with id=${dataSourceId} not found`
+      );
+    }
+
+    await this.refreshDataSourceAndPublishEvent(dataSource);
+  }
+
+  private async getDataSource(dataSourceId: string) {
+    const dataSource = await dataSourceRepository.findById(dataSourceId);
+    if (!dataSource) {
+      throw new EntityNotFoundError(
+        `DataSource with id=${dataSourceId} not found`
+      );
+    }
+    return dataSource;
+  }
+
+  private async refreshDataSourceAndPublishEvent(dataSource: DataSourceDto) {
     dataSource.indexStatus = DataSourceIndexStatus.REFRESHING;
     await dataSourceRepository.updateDataSource(dataSource);
-
     await publishEvent(DomainEvent.DATASOURCE_REFRESH_REQUESTED, {
-      dataSourceId,
+      dataSourceId: dataSource.id,
     });
   }
 }

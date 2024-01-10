@@ -79,6 +79,47 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
     return this.mapDataSourcesToDto(dataSources);
   }
 
+  public async findDataSourceIdsToRefresh(now: Date): Promise<string[]> {
+    const oneDayAgo = new Date(now);
+    oneDayAgo.setDate(now.getDate() - 1);
+    const oneWeekAgo = new Date(now);
+    oneWeekAgo.setDate(now.getDate() - 7);
+    const oneMonthAgo = new Date(now);
+    oneMonthAgo.setMonth(now.getMonth() - 1);
+
+    const dataSources = await prismadb.dataSource.findMany({
+      select: {
+        id: true,
+      },
+      where: {
+        indexStatus: DataSourceIndexStatus.COMPLETED,
+        OR: [
+          {
+            AND: [
+              { refreshPeriod: DataSourceRefreshPeriod.DAILY },
+              { lastIndexedAt: { lt: oneDayAgo } },
+            ],
+          },
+          {
+            AND: [
+              { refreshPeriod: DataSourceRefreshPeriod.WEEKLY },
+              { lastIndexedAt: { lt: oneWeekAgo } },
+            ],
+          },
+          {
+            AND: [
+              { refreshPeriod: DataSourceRefreshPeriod.MONTHLY },
+              { lastIndexedAt: { lt: oneMonthAgo } },
+            ],
+          },
+        ],
+        NOT: { refreshPeriod: DataSourceRefreshPeriod.NEVER },
+      },
+    });
+
+    return dataSources.map((dataSource) => dataSource.id);
+  }
+
   private mapDataSourcesToDto(dataSources: DataSource[]): DataSourceDto[] {
     return dataSources.map((dataSource) => this.mapDataSourceToDto(dataSource));
   }

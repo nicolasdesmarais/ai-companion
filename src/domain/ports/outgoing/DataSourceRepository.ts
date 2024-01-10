@@ -7,6 +7,7 @@ export interface DataSourceRepository {
   findByOrgId(orgId: string): Promise<DataSourceDto[]>;
   findByOrgIdAndUserId(orgId: string, userId: string): Promise<DataSourceDto[]>;
   findByAiId(aiId: string): Promise<DataSourceDto[]>;
+  findDataSourceIdsToRefresh(now: Date): Promise<string[]>;
 
   initializeDataSource(
     orgId: string,
