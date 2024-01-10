@@ -19,6 +19,7 @@ import { User } from "@clerk/nextjs/server";
 import {
   AI,
   AIVisibility,
+  DataSourceRefreshPeriod,
   DataSourceType,
   GroupAI,
   GroupAvailability,
@@ -668,6 +669,7 @@ export class AIService {
     aiId: string,
     name: string,
     type: DataSourceType,
+    refreshPeriod: DataSourceRefreshPeriod,
     data: any
   ) {
     const ai = await prismadb.aI.findUnique({
@@ -689,6 +691,7 @@ export class AIService {
       authorizationContext,
       name,
       type,
+      refreshPeriod,
       data
     );
 

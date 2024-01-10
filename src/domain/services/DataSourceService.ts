@@ -18,6 +18,7 @@ import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySec
 import { DataSourceSecurityService } from "@/src/security/services/DataSourceSecurityService";
 import {
   DataSourceIndexStatus,
+  DataSourceRefreshPeriod,
   DataSourceType,
   Knowledge,
   KnowledgeIndexStatus,
@@ -133,6 +134,7 @@ export class DataSourceService {
     authorizationContext: AuthorizationContext,
     name: string,
     type: DataSourceType,
+    refreshPeriod: DataSourceRefreshPeriod,
     data: any
   ) {
     const { orgId, userId } = authorizationContext;
