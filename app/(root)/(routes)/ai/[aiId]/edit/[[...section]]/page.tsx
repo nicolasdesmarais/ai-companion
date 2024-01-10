@@ -11,8 +11,10 @@ import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySec
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 
 export const maxDuration = 300;
+export const revalidate = 3600;
 
 interface AIIdPageProps {
   params: {
@@ -40,7 +42,7 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
 
   const models = await aiModelService.getAIModels();
 
-  const categories = await prismadb.category.findMany();
+  const categories = await cache(prismadb.category.findMany)();
 
   const groups = await groupService.findGroupsByUser(authorizationContext);
 
