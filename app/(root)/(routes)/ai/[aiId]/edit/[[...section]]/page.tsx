@@ -40,7 +40,7 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
     }
   }
 
-  const models = await aiModelService.getAIModels();
+  const models = await cache(() => aiModelService.getAIModels())();
 
   const categories = await cache(prismadb.category.findMany)();
 
