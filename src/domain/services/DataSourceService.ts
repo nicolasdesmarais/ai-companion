@@ -366,7 +366,7 @@ export class DataSourceService {
       (knowledge) => knowledge.indexStatus === KnowledgeIndexStatus.INITIALIZED
     );
     if (knowledgeListToUpdate.length === 0) {
-      this.updateDataSourceStatus(dataSourceId);
+      await this.updateDataSourceStatus(dataSourceId);
       return;
     }
 
