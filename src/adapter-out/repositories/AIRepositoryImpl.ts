@@ -19,7 +19,7 @@ export class AIRepositoryImpl implements AIRepository {
   public async approveAIForOrg(aiId: string, orgId: string): Promise<void> {
     await prismadb.aIOrgApproval.upsert({
       where: {
-        orgId_aiId: {
+        aiId_orgId: {
           orgId,
           aiId,
         },
