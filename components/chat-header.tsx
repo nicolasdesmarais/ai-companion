@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import {
+  BadgeCheck,
   CopyPlus,
   Edit,
   ExternalLink,
@@ -198,13 +199,13 @@ export const ChatHeader = ({
               )}
               {ai && canApproveAi && !ai.isApprovedByOrg && (
                 <DropdownMenuItem onClick={() => approve()}>
-                  <Edit className="w-4 h-4 mr-2" />
+                  <BadgeCheck className="w-4 h-4 mr-2" />
                   Approve
                 </DropdownMenuItem>
               )}
               {ai && canApproveAi && ai.isApprovedByOrg && (
                 <DropdownMenuItem onClick={() => revoke()}>
-                  <Edit className="w-4 h-4 mr-2" />
+                  <BadgeCheck className="w-4 h-4 mr-2" />
                   Revoke
                 </DropdownMenuItem>
               )}
