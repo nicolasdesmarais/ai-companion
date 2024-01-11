@@ -31,6 +31,10 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
   const canEditAi =
     ai !== null && AISecurityService.canUpdateAI(authorizationContext, ai);
 
+  const canApproveAi =
+    ai !== null &&
+    AISecurityService.canApproveAIForOrg(authorizationContext, ai);
+
   return (
     <div className="flex h-full">
       <ResizePanel
@@ -42,7 +46,12 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
       >
         <ChatList />
       </ResizePanel>
-      <ChatClient ai={ai} chat={chat} canEditAi={canEditAi} />
+      <ChatClient
+        ai={ai}
+        chat={chat}
+        canEditAi={canEditAi}
+        canApproveAi={canApproveAi}
+      />
       {ai && <AIProfile ai={ai} />}
     </div>
   );

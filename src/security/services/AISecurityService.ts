@@ -40,7 +40,7 @@ export class AISecurityService {
 
   public static canApproveAIForOrg(
     authorizationContext: AuthorizationContext,
-    ai: AI
+    ai: AISummaryDto
   ) {
     if (
       BaseEntitySecurityService.hasPermission(
