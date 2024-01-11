@@ -17,7 +17,7 @@ export class AIRepositoryImpl implements AIRepository {
   }
 
   public async approveAIForOrg(aiId: string, orgId: string): Promise<void> {
-    await prismadb.organizationApprovedAI.upsert({
+    await prismadb.aIOrgApproval.upsert({
       where: {
         orgId_aiId: {
           orgId,
@@ -33,7 +33,7 @@ export class AIRepositoryImpl implements AIRepository {
   }
 
   public async revokeAIForOrg(aiId: string, orgId: string): Promise<void> {
-    await prismadb.organizationApprovedAI.delete({
+    await prismadb.aIOrgApproval.delete({
       where: {
         orgId_aiId: {
           orgId,
