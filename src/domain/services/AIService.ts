@@ -269,6 +269,10 @@ export class AIService {
       whereCondition.AND.push(this.getSearchCriteria(request.search));
     }
 
+    if (request.approvedByOrg !== null && request.approvedByOrg !== undefined) {
+      whereCondition.AND.push(this.getApprovedByOrgCriteria(orgId, true));
+    }
+
     const ais = await prismadb.aI.findMany({
       select: {
         ...listAIResponseSelect(orgId),
@@ -385,7 +389,7 @@ export class AIService {
 
     const profile = ai.profile as unknown as AIProfile;
 
-    const { options, ...aiWithoutOptionsAndApprovals } = ai;
+    const { options, ...aiWithoutOptions } = ai;
     let aiModelOptions: AIModelOptions;
     if (forUpdate || profile?.showPersonality) {
       aiModelOptions = options as unknown as AIModelOptions;
@@ -677,6 +681,26 @@ export class AIService {
         },
       ],
     };
+  }
+
+  private getApprovedByOrgCriteria(orgId: string, isApprovedByOrg: Boolean) {
+    if (isApprovedByOrg) {
+      return {
+        orgApprovals: {
+          some: {
+            orgId,
+          },
+        },
+      };
+    } else {
+      return {
+        orgApprovals: {
+          none: {
+            orgId,
+          },
+        },
+      };
+    }
   }
 
   public async createDataSourceAndAddToAI(
