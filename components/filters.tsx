@@ -94,15 +94,6 @@ export const Filters = () => {
           Private
         </button>
         <button
-          onClick={() => onClick("INSTANCE_PRIVATE")}
-          className={cn(
-            btnClassNames,
-            scope === "INSTANCE_PRIVATE" ? "bg-accent" : "bg-primary/10"
-          )}
-        >
-          Private
-        </button>
-        <button
           onClick={() => onClickCompanyApproved()}
           className={cn(
             btnClassNames,
