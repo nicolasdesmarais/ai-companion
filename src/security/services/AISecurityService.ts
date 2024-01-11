@@ -42,14 +42,14 @@ export class AISecurityService {
     authorizationContext: AuthorizationContext,
     ai: AI
   ) {
-    const hasInstanceAccess = BaseEntitySecurityService.hasPermission(
-      authorizationContext,
-      SecuredResourceType.AI,
-      SecuredAction.WRITE,
-      SecuredResourceAccessLevel.INSTANCE
-    );
-
-    if (hasInstanceAccess) {
+    if (
+      BaseEntitySecurityService.hasPermission(
+        authorizationContext,
+        SecuredResourceType.AI,
+        SecuredAction.WRITE,
+        SecuredResourceAccessLevel.INSTANCE
+      )
+    ) {
       return true;
     }
 
