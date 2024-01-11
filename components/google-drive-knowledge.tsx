@@ -1,7 +1,12 @@
 "use client";
 import { Table } from "@/components/table";
 import { Button } from "@/components/ui/button";
-import { FormControl, FormItem, FormLabel } from "@/components/ui/form";
+import {
+  FormControl,
+  FormDescription,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -337,32 +342,37 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
           </>
         )}
       </div>
-      <div>
-        {!setupRequired && (
-          <FormItem>
-            <FormLabel>Data Refresh Interval</FormLabel>
-            <Select
-              onValueChange={handleDataRefreshPeriodChange}
-              value={dataRefreshPeriod ?? ""}
-            >
-              <FormControl>
-                <SelectTrigger className="bg-background">
-                  <SelectValue>
-                    {getDataSourceRefreshPeriodLabel(dataRefreshPeriod)}
-                  </SelectValue>
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {Object.values(DataSourceRefreshPeriod).map((period) => (
-                  <SelectItem key={period} value={period}>
-                    {getDataSourceRefreshPeriodLabel(period)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormItem>
-        )}
-      </div>
+      {loading ||
+        (!setupRequired && (
+          <div className="mt-8">
+            <FormItem>
+              <FormLabel>Data Refresh Interval</FormLabel>
+              <Select
+                onValueChange={handleDataRefreshPeriodChange}
+                value={dataRefreshPeriod ?? ""}
+              >
+                <FormControl>
+                  <SelectTrigger className="bg-background">
+                    <SelectValue>
+                      {getDataSourceRefreshPeriodLabel(dataRefreshPeriod)}
+                    </SelectValue>
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {Object.values(DataSourceRefreshPeriod).map((period) => (
+                    <SelectItem key={period} value={period}>
+                      {getDataSourceRefreshPeriodLabel(period)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Determine how often your data source will be reindexed. Please
+                be aware that this may increase costs.
+              </FormDescription>
+            </FormItem>
+          </div>
+        ))}
     </div>
   );
 };

@@ -132,12 +132,13 @@ export const AIKnowledge = ({
                       )?.name
                     }
                   </td>
-                  <td className="p-2">
+                  <td className="p-3 flex justify-between items-center">
                     {getDataSourceRefreshPeriodLabel(dataSource.refreshPeriod)}
                     {dataSourceTypesForRefresh.includes(dataSource.type) && (
                       <Button
                         type="button"
                         variant="outline"
+                        size="sm"
                         disabled={!!removing}
                         onClick={() => refreshDataSource(dataSource.id)}
                       >
