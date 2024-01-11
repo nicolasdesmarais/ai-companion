@@ -26,12 +26,6 @@ export class OAuthTokenService {
         provider
       );
 
-    if (!orgClientCredentialData) {
-      throw new Error(
-        `Missing client credentials for ${provider}, for org ${orgId}`
-      );
-    }
-
     return orgClientCredentialData;
   }
 
@@ -98,11 +92,15 @@ export class OAuthTokenService {
     orgId: string,
     userId: string,
     provider: OAuthTokenProvider
-  ): Promise<UserOAuthTokenEntity[]> {
+  ): Promise<UserOAuthTokenEntity[] | null> {
     const orgClientCredentialData = await this.getOrgClientCredentialData(
       orgId,
       provider
     );
+
+    if (!orgClientCredentialData) {
+      return null;
+    }
 
     const oauthAdapter = await this.getOAuthAdapter(provider);
 

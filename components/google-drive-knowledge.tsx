@@ -24,6 +24,7 @@ import { format } from "date-fns";
 import { Loader, Server } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
+import { Banner } from "./ui/banner";
 
 const ADD_ACCOUNT_OPTION = "add-account";
 
@@ -44,6 +45,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [setupRequired, setSetupRequired] = useState(false);
   const [dataRefreshPeriod, setDataRefreshPeriod] =
     useState<DataSourceRefreshPeriod | null>(DataSourceRefreshPeriod.NEVER);
 
@@ -54,7 +56,10 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
         `/api/v1/integrations/google-drive/accounts`
       );
       setAccounts(response.data);
-      if (response.data.length > 0) {
+      if (response.data === null) {
+        setSearching(false);
+        setSetupRequired(true);
+      } else if (response.data.length > 0) {
         setSelectedAccount(response.data[0]?.id);
       } else {
         setSearching(false);
@@ -194,44 +199,51 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
 
           {!loading ? (
             <>
-              <FormItem>
-                <FormLabel>Account</FormLabel>
-                {accounts.length === 0 ? (
-                  <div>
-                    <Button
-                      onClick={handleConnectClick}
-                      type="button"
-                      variant="ring"
+              {setupRequired ? (
+                <Banner className="my-2" variant="destructive">
+                  Google Drive integration is not set up. Please go to Settings
+                  to add the API keys or ask your company admin to set it up.
+                </Banner>
+              ) : (
+                <FormItem>
+                  <FormLabel>Account</FormLabel>
+                  {accounts.length === 0 ? (
+                    <div>
+                      <Button
+                        onClick={handleConnectClick}
+                        type="button"
+                        variant="ring"
+                      >
+                        Connect Your Google Account
+                      </Button>
+                    </div>
+                  ) : null}
+                  {accounts.length > 0 ? (
+                    <Select
+                      disabled={loading}
+                      onValueChange={handleAccountChange}
+                      value={selectedAccount}
                     >
-                      Connect Your Google Account
-                    </Button>
-                  </div>
-                ) : null}
-                {accounts.length > 0 ? (
-                  <Select
-                    disabled={loading}
-                    onValueChange={handleAccountChange}
-                    value={selectedAccount}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="bg-background">
-                        <SelectValue placeholder="Select an account" />
-                      </SelectTrigger>
-                    </FormControl>
+                      <FormControl>
+                        <SelectTrigger className="bg-background">
+                          <SelectValue placeholder="Select an account" />
+                        </SelectTrigger>
+                      </FormControl>
 
-                    <SelectContent>
-                      {accounts.map((token: UserOAuthTokenEntity) => (
-                        <SelectItem key={token.id} value={token.id as string}>
-                          {token.email}
+                      <SelectContent>
+                        {accounts.map((token: UserOAuthTokenEntity) => (
+                          <SelectItem key={token.id} value={token.id as string}>
+                            {token.email}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value={ADD_ACCOUNT_OPTION}>
+                          + Add Account
                         </SelectItem>
-                      ))}
-                      <SelectItem value={ADD_ACCOUNT_OPTION}>
-                        + Add Account
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                ) : null}
-              </FormItem>
+                      </SelectContent>
+                    </Select>
+                  ) : null}
+                </FormItem>
+              )}
             </>
           ) : null}
         </div>
@@ -326,28 +338,30 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
         )}
       </div>
       <div>
-        <FormItem>
-          <FormLabel>Data Refresh Interval</FormLabel>
-          <Select
-            onValueChange={handleDataRefreshPeriodChange}
-            value={dataRefreshPeriod ?? ""}
-          >
-            <FormControl>
-              <SelectTrigger className="bg-background">
-                <SelectValue>
-                  {getDataSourceRefreshPeriodLabel(dataRefreshPeriod)}
-                </SelectValue>
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {Object.values(DataSourceRefreshPeriod).map((period) => (
-                <SelectItem key={period} value={period}>
-                  {getDataSourceRefreshPeriodLabel(period)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </FormItem>
+        {!setupRequired && (
+          <FormItem>
+            <FormLabel>Data Refresh Interval</FormLabel>
+            <Select
+              onValueChange={handleDataRefreshPeriodChange}
+              value={dataRefreshPeriod ?? ""}
+            >
+              <FormControl>
+                <SelectTrigger className="bg-background">
+                  <SelectValue>
+                    {getDataSourceRefreshPeriodLabel(dataRefreshPeriod)}
+                  </SelectValue>
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {Object.values(DataSourceRefreshPeriod).map((period) => (
+                  <SelectItem key={period} value={period}>
+                    {getDataSourceRefreshPeriodLabel(period)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormItem>
+        )}
       </div>
     </div>
   );
