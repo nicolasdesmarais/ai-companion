@@ -251,26 +251,29 @@ export class AIService {
   ): Promise<AIDetailDto[]> {
     const scope = this.determineScope(authorizationContext, request.scope);
     const { orgId, userId } = authorizationContext;
+    const { groupId, categoryId, approvedByOrg, search } = request;
 
     const whereCondition = { AND: [{}] };
     whereCondition.AND.push(this.getBaseWhereCondition(orgId, userId, scope));
 
-    if (request.groupId) {
+    if (groupId) {
       if (scope === ListAIsRequestScope.INSTANCE_ORGANIZATION) {
-        whereCondition.AND.push(this.getInstanceGroupCriteria(request.groupId));
+        whereCondition.AND.push(this.getInstanceGroupCriteria(groupId));
       } else {
-        whereCondition.AND.push(this.getGroupCriteria(orgId, request.groupId));
+        whereCondition.AND.push(this.getGroupCriteria(orgId, groupId));
       }
     }
-    if (request.categoryId) {
-      whereCondition.AND.push(this.getCategoryCriteria(request.categoryId));
+    if (categoryId) {
+      whereCondition.AND.push(this.getCategoryCriteria(categoryId));
     }
-    if (request.search) {
-      whereCondition.AND.push(this.getSearchCriteria(request.search));
+    if (search) {
+      whereCondition.AND.push(this.getSearchCriteria(search));
     }
 
-    if (request.approvedByOrg !== null && request.approvedByOrg !== undefined) {
-      whereCondition.AND.push(this.getApprovedByOrgCriteria(orgId, true));
+    if (approvedByOrg !== null && approvedByOrg !== undefined) {
+      whereCondition.AND.push(
+        this.getApprovedByOrgCriteria(orgId, approvedByOrg)
+      );
     }
 
     const ais = await prismadb.aI.findMany({
