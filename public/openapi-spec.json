@@ -437,6 +437,43 @@
         ]
       }
     },
+    "/api/v1/ai/{aiId}/approve": {
+      "put": {
+        "summary": "Approve an AI",
+        "description": "Marks an AI as approved by the organization.",
+        "operationId": "approveAI",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The identifier of the AI to be approved.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI successfully approved."
+          },
+          "401": {
+            "description": "Unauthorized, lacking authorization context."
+          },
+          "403": {
+            "description": "Forbidden, user does not have the right permissions."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/ai/{aiId}/chats": {
       "get": {
         "summary": "Get all chats for the AI",
@@ -800,6 +837,43 @@
                 }
               }
             }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ai/{aiId}/revoke": {
+      "put": {
+        "summary": "Revoke AI approval",
+        "description": "Revokes the organization approval for an AI.",
+        "operationId": "revokeAIApproval",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The identifier of the AI whose approval is to be revoked.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI approval successfully revoked."
+          },
+          "401": {
+            "description": "Unauthorized, lacking authorization context."
+          },
+          "403": {
+            "description": "Forbidden, user does not have the right permissions."
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "security": [
