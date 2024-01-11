@@ -2,8 +2,6 @@ import { AIEditor } from "@/components/ai-editor";
 import { GroupModal } from "@/components/group-modal";
 import aiModelService from "@/src/domain/services/AIModelService";
 import aiService from "@/src/domain/services/AIService";
-import groupService from "@/src/domain/services/GroupService";
-import prismadb from "@/src/lib/prismadb";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
