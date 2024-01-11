@@ -16,9 +16,15 @@ interface ChatClientProps {
   ai: AIDetailDto | null;
   chat: ChatDetailDto;
   canEditAi: boolean;
+  canApproveAi: boolean;
 }
 
-export const ChatClient = ({ ai, chat, canEditAi }: ChatClientProps) => {
+export const ChatClient = ({
+  ai,
+  chat,
+  canEditAi,
+  canApproveAi,
+}: ChatClientProps) => {
   const router = useRouter();
   const [messages, setMessages] = useState<ChatMessageDto[]>(chat.messages);
   const [streaming, setStreaming] = useState<boolean>(false);
@@ -79,7 +85,12 @@ export const ChatClient = ({ ai, chat, canEditAi }: ChatClientProps) => {
   }
   return (
     <div className="flex flex-col h-full w-full space-y-2 shrink">
-      <ChatHeader ai={ai} chat={chat} canEditAi={canEditAi} />
+      <ChatHeader
+        ai={ai}
+        chat={chat}
+        canEditAi={canEditAi}
+        canApproveAi={canApproveAi}
+      />
       <ChatMessages
         ai={ai}
         isLoading={isLoading && !stream}

@@ -1,6 +1,5 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import {
   CopyPlus,
@@ -39,11 +38,16 @@ interface ChatHeaderProps {
   ai: AIDetailDto | null;
   chat: ChatDetailDto;
   canEditAi: boolean;
+  canApproveAi: boolean;
 }
 
-export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
+export const ChatHeader = ({
+  ai,
+  chat,
+  canEditAi,
+  canApproveAi,
+}: ChatHeaderProps) => {
   const router = useRouter();
-  const { user } = useUser();
   const { toast } = useToast();
   const { chats, fetchChats } = useChats();
   const aiProfile = useAIProfile();
@@ -97,6 +101,22 @@ export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
     if (response.status === 204) {
       toast({ description: "Chat deleted." });
       router.push(`/chat/`);
+      fetchChats();
+    }
+  };
+
+  const approve = async () => {
+    const response = await axios.put(`/api/v1/ai/${ai?.id}/approve`);
+    if (response.status === 200) {
+      toast({ description: "AI Approved." });
+      fetchChats();
+    }
+  };
+
+  const revoke = async () => {
+    const response = await axios.put(`/api/v1/ai/${ai?.id}/revoke`);
+    if (response.status === 200) {
+      toast({ description: "AI Approval Revoked." });
       fetchChats();
     }
   };
@@ -174,6 +194,18 @@ export const ChatHeader = ({ ai, chat, canEditAi }: ChatHeaderProps) => {
                 <DropdownMenuItem onClick={() => rateAI.onOpen()}>
                   <Star className="w-4 h-4 mr-2" />
                   Rate
+                </DropdownMenuItem>
+              )}
+              {ai && canApproveAi && !ai.isApprovedByOrg && (
+                <DropdownMenuItem onClick={() => approve()}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Approve
+                </DropdownMenuItem>
+              )}
+              {ai && canApproveAi && ai.isApprovedByOrg && (
+                <DropdownMenuItem onClick={() => revoke()}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Revoke
                 </DropdownMenuItem>
               )}
               {ai && canEditAi && (
