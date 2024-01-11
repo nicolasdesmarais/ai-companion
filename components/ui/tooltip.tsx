@@ -18,7 +18,9 @@ export const Tooltip = ({
   return (
     <TooltipPrimitives.Provider>
       <TooltipPrimitives.Root>
-        <TooltipPrimitives.Trigger>{children}</TooltipPrimitives.Trigger>
+        <TooltipPrimitives.Trigger className={className}>
+          {children}
+        </TooltipPrimitives.Trigger>
         <TooltipPrimitives.Portal>
           <TooltipPrimitives.Content
             side={side}

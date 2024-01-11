@@ -275,10 +275,10 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
               </div>
             </div>
 
-            <div className="max-h-96 overflow-auto">
+            <div className="max-h-[32rem] overflow-auto border border-ring/30 rounded-sm">
               <Table
                 headers={["NAME", "TYPE", "OWNER", "LAST MODIFIED"]}
-                className="w-full my-4 max-h-60"
+                className="w-full max-h-60"
               >
                 {!searching &&
                   searchResults &&
@@ -315,16 +315,40 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
             </div>
           </div>
         ) : null}
+        {loading ||
+          (!setupRequired && (
+            <div className="my-4">
+              <FormItem>
+                <FormLabel>Data Refresh Interval</FormLabel>
+                <Select
+                  onValueChange={handleDataRefreshPeriodChange}
+                  value={dataRefreshPeriod ?? ""}
+                >
+                  <FormControl>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue>
+                        {getDataSourceRefreshPeriodLabel(dataRefreshPeriod)}
+                      </SelectValue>
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.values(DataSourceRefreshPeriod).map((period) => (
+                      <SelectItem key={period} value={period}>
+                        {getDataSourceRefreshPeriodLabel(period)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Determine how often your data source will be reindexed. Please
+                  be aware that this may increase costs.
+                </FormDescription>
+              </FormItem>
+            </div>
+          ))}
         {selectedFile && (
           <>
-            <div className="flex justify-between w-full mt-4">
-              <Button
-                onClick={() => setSelectedFile(null)}
-                type="button"
-                variant="link"
-              >
-                Unselect
-              </Button>
+            <div className="flex flex-row-reverse w-full mt-4">
               <Button
                 type="button"
                 onClick={handleContinue}
@@ -342,37 +366,6 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
           </>
         )}
       </div>
-      {loading ||
-        (!setupRequired && (
-          <div className="mt-8">
-            <FormItem>
-              <FormLabel>Data Refresh Interval</FormLabel>
-              <Select
-                onValueChange={handleDataRefreshPeriodChange}
-                value={dataRefreshPeriod ?? ""}
-              >
-                <FormControl>
-                  <SelectTrigger className="bg-background">
-                    <SelectValue>
-                      {getDataSourceRefreshPeriodLabel(dataRefreshPeriod)}
-                    </SelectValue>
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {Object.values(DataSourceRefreshPeriod).map((period) => (
-                    <SelectItem key={period} value={period}>
-                      {getDataSourceRefreshPeriodLabel(period)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Determine how often your data source will be reindexed. Please
-                be aware that this may increase costs.
-              </FormDescription>
-            </FormItem>
-          </div>
-        ))}
     </div>
   );
 };

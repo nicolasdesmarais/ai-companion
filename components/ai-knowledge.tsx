@@ -123,8 +123,21 @@ export const AIKnowledge = ({
             >
               {dataSources.map((dataSource: any) => (
                 <tr key={dataSource.id} className="items-center my-2 text-sm">
-                  <td className="p-2 ">
-                    <div className="max-w-sm truncate">{dataSource.name}</div>
+                  <td className="p-2">
+                    {dataSource.name.length > 30 ? (
+                      <Tooltip
+                        content={dataSource.name}
+                        className="cursor-default"
+                      >
+                        <div className="truncate max-w-[290px]">
+                          {dataSource.name}
+                        </div>
+                      </Tooltip>
+                    ) : (
+                      <div className="truncate max-w-[290px]">
+                        {dataSource.name}
+                      </div>
+                    )}
                   </td>
                   <td className="p-2">
                     {
@@ -143,6 +156,7 @@ export const AIKnowledge = ({
                           size="sm"
                           disabled={!!removing}
                           onClick={() => refreshDataSource(dataSource.id)}
+                          className="ml-2"
                         >
                           {refreshing === dataSource.id ? (
                             <Loader className="w-4 h-4 spinner" />
@@ -170,6 +184,7 @@ export const AIKnowledge = ({
                     <Button
                       type="button"
                       variant="outline"
+                      size="sm"
                       disabled={!!removing}
                       onClick={() => removeDataSource(dataSource.id)}
                     >
