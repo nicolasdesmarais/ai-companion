@@ -23,6 +23,7 @@ import { FileUploadKnowledge } from "./file-upload-knowledge";
 import { GoogleDriveForm } from "./google-drive-knowledge";
 import { Banner } from "./ui/banner";
 import { WebUrlsForm } from "./web-urls-knowledge-form";
+import { Tooltip } from "./ui/tooltip";
 
 interface SelectDataSourceProps {
   form: any;
@@ -135,19 +136,21 @@ export const AIKnowledge = ({
                   <td className="p-3 flex justify-between items-center">
                     {getDataSourceRefreshPeriodLabel(dataSource.refreshPeriod)}
                     {dataSourceTypesForRefresh.includes(dataSource.type) && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={!!removing}
-                        onClick={() => refreshDataSource(dataSource.id)}
-                      >
-                        {refreshing === dataSource.id ? (
-                          <Loader className="w-4 h-4 spinner" />
-                        ) : (
-                          <RefreshCcw className="w-4 h-4" />
-                        )}
-                      </Button>
+                      <Tooltip content="Refresh Now">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={!!removing}
+                          onClick={() => refreshDataSource(dataSource.id)}
+                        >
+                          {refreshing === dataSource.id ? (
+                            <Loader className="w-4 h-4 spinner" />
+                          ) : (
+                            <RefreshCcw className="w-4 h-4 text-green" />
+                          )}
+                        </Button>
+                      </Tooltip>
                     )}
                   </td>
                   <td className="p-2">
