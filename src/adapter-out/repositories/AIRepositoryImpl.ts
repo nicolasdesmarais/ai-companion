@@ -35,7 +35,7 @@ export class AIRepositoryImpl implements AIRepository {
   public async revokeAIForOrg(aiId: string, orgId: string): Promise<void> {
     await prismadb.aIOrgApproval.delete({
       where: {
-        orgId_aiId: {
+        aiId_orgId: {
           orgId,
           aiId,
         },
