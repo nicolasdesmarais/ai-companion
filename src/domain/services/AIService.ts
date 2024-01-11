@@ -385,7 +385,7 @@ export class AIService {
 
     const profile = ai.profile as unknown as AIProfile;
 
-    const { options, ...aiWithoutOptions } = ai;
+    const { options, ...aiWithoutOptionsAndApprovals } = ai;
     let aiModelOptions: AIModelOptions;
     if (forUpdate || profile?.showPersonality) {
       aiModelOptions = options as unknown as AIModelOptions;
@@ -405,6 +405,9 @@ export class AIService {
     if (!forUpdate) {
       filteredAi = aiWithoutSeed;
     }
+
+    const { orgApprovals, ...aiWithoutApprovals } = filteredAi;
+    filteredAi = aiWithoutApprovals;
 
     const groupIds: string[] = ai.groups.map((groupAi) => groupAi.groupId);
 
