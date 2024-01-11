@@ -686,8 +686,8 @@ export class AIService {
     };
   }
 
-  private getApprovedByOrgCriteria(orgId: string, isApprovedByOrg: Boolean) {
-    if (isApprovedByOrg) {
+  private getApprovedByOrgCriteria(orgId: string, isApprovedByOrg: boolean) {
+    if (isApprovedByOrg === true) {
       return {
         orgApprovals: {
           some: {

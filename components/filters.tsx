@@ -1,9 +1,9 @@
 "use client";
 
 import {
+  AdminScopes,
   ListAIsRequestScope,
   SuperuserScopes,
-  AdminScopes,
 } from "@/src/adapter-in/api/AIApi";
 import { cn } from "@/src/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -15,10 +15,25 @@ export const Filters = () => {
 
   const scope = searchParams.get("scope");
   const groupId = searchParams.get("groupId");
+  const approvedByOrg = searchParams.get("approvedByOrg");
 
   const onClick = (id: string | undefined) => {
-    let query = { scope: id, groupId: undefined };
+    let query = { scope: id, groupId: undefined, approvedByOrg };
 
+    const url = qs.stringifyUrl(
+      {
+        url: window.location.href,
+        query,
+      },
+      { skipNull: true }
+    );
+
+    router.push(url);
+  };
+
+  const onClickCompanyApproved = () => {
+    const updatedApprovedByOrg = approvedByOrg === "true" ? undefined : "true";
+    let query = { scope, groupId, approvedByOrg: updatedApprovedByOrg };
     const url = qs.stringifyUrl(
       {
         url: window.location.href,
@@ -78,6 +93,24 @@ export const Filters = () => {
         >
           Private
         </button>
+        <button
+          onClick={() => onClick("INSTANCE_PRIVATE")}
+          className={cn(
+            btnClassNames,
+            scope === "INSTANCE_PRIVATE" ? "bg-accent" : "bg-primary/10"
+          )}
+        >
+          Private
+        </button>
+        <button
+          onClick={() => onClickCompanyApproved()}
+          className={cn(
+            btnClassNames,
+            approvedByOrg ? "bg-accent" : "bg-primary/10"
+          )}
+        >
+          Company Approved
+        </button>
       </div>
     );
   }
@@ -114,6 +147,15 @@ export const Filters = () => {
         >
           Private
         </button>
+        <button
+          onClick={() => onClickCompanyApproved()}
+          className={cn(
+            btnClassNames,
+            approvedByOrg ? "bg-accent" : "bg-primary/10"
+          )}
+        >
+          Company Approved
+        </button>
       </div>
     );
   }
@@ -146,6 +188,15 @@ export const Filters = () => {
         )}
       >
         Private
+      </button>
+      <button
+        onClick={() => onClickCompanyApproved()}
+        className={cn(
+          btnClassNames,
+          approvedByOrg ? "bg-accent" : "bg-primary/10"
+        )}
+      >
+        Company Approved
       </button>
     </div>
   );
