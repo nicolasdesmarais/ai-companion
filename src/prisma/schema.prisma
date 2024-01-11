@@ -341,5 +341,5 @@ model OrganizationApprovedAI {
   aiId      String   @map(name: "ai_id")
 
   @@unique([orgId, aiId])
-  @@map("organization_approved_ais")
+  @@map("org_approved_ais")
 }
