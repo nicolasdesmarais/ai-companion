@@ -23,7 +23,6 @@ export default authMiddleware({
     if (!auth.userId && !auth.isPublicRoute && !auth.isApiRoute) {
       const landing = new URL("/landing", req.url);
       return NextResponse.redirect(landing);
-      // return redirectToSignIn({ returnBackUrl: req.url });
     }
     // redirect them to organization selection page
     if (
