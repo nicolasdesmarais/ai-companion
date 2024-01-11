@@ -427,7 +427,47 @@
             "description": "AI not found with the given identifier."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ai/{aiId}/approve": {
+      "put": {
+        "summary": "Approve an AI",
+        "description": "Marks an AI as approved by the organization.",
+        "operationId": "approveAI",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The identifier of the AI to be approved.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI successfully approved."
+          },
+          "401": {
+            "description": "Missing authorization context. User must be authenticated."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "404": {
+            "description": "AI not found with the given identifier."
+          },
+          "500": {
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -468,7 +508,7 @@
             "description": "AI not found with the given identifier."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -524,7 +564,7 @@
             "description": "Not found, when the specified AI ID does not exist or is not visible to the current user."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -565,7 +605,7 @@
             "description": "AI not found with the given identifier."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -630,13 +670,13 @@
             "description": "Bad request, malformed request syntax or invalid request message framing."
           },
           "403": {
-            "description": "Forbidden, the user does not have the required permissions on the specified AI and/or data source."
+            "description": "Forbidden, the user is not authorized to perform this action."
           },
           "404": {
             "description": "Not Found, either of the specified AI or data source are not found."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -723,7 +763,7 @@
             }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -809,6 +849,46 @@
         ]
       }
     },
+    "/api/v1/ai/{aiId}/revoke": {
+      "put": {
+        "summary": "Revoke AI approval",
+        "description": "Revokes the organization approval for an AI.",
+        "operationId": "revokeAIApproval",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The identifier of the AI whose approval is to be revoked.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI approval successfully revoked."
+          },
+          "401": {
+            "description": "Missing authorization context. User must be authenticated."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "404": {
+            "description": "AI not found with the given identifier."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/chats/{chatId}": {
       "get": {
         "summary": "Get a chat session",
@@ -843,7 +923,7 @@
             "description": "Not found, when the specified chat ID does not exist."
           },
           "500": {
-            "description": "Internal Server Error, any internal error."
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -910,7 +990,7 @@
             "description": "Not found, when the specified chat ID does not exist."
           },
           "500": {
-            "description": "Internal Server Error, any internal error."
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -945,7 +1025,7 @@
             "description": "Not Found, the specified chat ID does not exist."
           },
           "500": {
-            "description": "Internal Server Error, any internal error."
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -989,7 +1069,7 @@
             "description": "Not found, when the specified chat ID does not exist."
           },
           "500": {
-            "description": "Internal Server Error, any internal error."
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -1030,7 +1110,7 @@
             "description": "Not found, when the specified chat ID does not exist."
           },
           "500": {
-            "description": "Internal Server Error, any internal error."
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -1057,7 +1137,7 @@
             }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -1125,7 +1205,7 @@
             "description": "Missing authorization context. User must be authenticated."
           },
           "403": {
-            "description": "User does not have permission to perform this operation."
+            "description": "Forbidden, the user is not authorized to perform this action."
           },
           "404": {
             "description": "Data source not found with the specified ID."
@@ -1179,13 +1259,13 @@
             }
           },
           "401": {
-            "description": "User is not authenticated."
+            "description": "Missing authorization context. User must be authenticated."
           },
           "403": {
-            "description": "User does not have permission to create a group."
+            "description": "Forbidden, the user is not authorized to perform this action."
           },
           "500": {
-            "description": "Server error."
+            "description": "Internal Server Error."
           }
         }
       }
@@ -1251,13 +1331,13 @@
             "description": "Bad request, when the input data is invalid."
           },
           "403": {
-            "description": "Forbidden, the user does not have permission to update the group."
+            "description": "Forbidden, the user is not authorized to perform this action."
           },
           "404": {
             "description": "Not found, when the specified group ID does not exist."
           },
           "500": {
-            "description": "Server error."
+            "description": "Internal Server Error."
           }
         }
       },
@@ -1284,13 +1364,13 @@
             "description": "Bad request, when the request is malformed."
           },
           "403": {
-            "description": "Forbidden, the user does not have permission to delete the group."
+            "description": "Forbidden, the user is not authorized to perform this action."
           },
           "404": {
             "description": "Not found, when the specified group ID does not exist."
           },
           "500": {
-            "description": "Server error."
+            "description": "Internal Server Error."
           }
         }
       }
@@ -1319,13 +1399,13 @@
             "description": "Bad request, when the request is malformed."
           },
           "403": {
-            "description": "Forbidden, the user does not have permission to leave the group or is not a member of the group."
+            "description": "Forbidden, the user is not authorized to perform this action."
           },
           "404": {
             "description": "Not found, when the specified group ID does not exist."
           },
           "500": {
-            "description": "Server error."
+            "description": "Internal Server Error."
           }
         }
       }
@@ -1409,7 +1489,7 @@
             "description": "AI not found with the given identifier."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -1439,13 +1519,13 @@
             }
           },
           "401": {
-            "description": "User is not authenticated."
+            "description": "Missing authorization context. User must be authenticated."
           },
           "403": {
-            "description": "User does not have permission to view the groups."
+            "description": "Forbidden, the user is not authorized to perform this action."
           },
           "500": {
-            "description": "Server error."
+            "description": "Internal Server Error."
           }
         }
       }

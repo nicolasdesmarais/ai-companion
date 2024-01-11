@@ -51,6 +51,7 @@ export class BaseEntitySecurityService {
             if (entity.orgId === orgId) {
               return true;
             }
+            break;
           case SecuredResourceAccessLevel.SELF:
             if (entity.orgId === orgId && entity.userId === userId) {
               return true;
