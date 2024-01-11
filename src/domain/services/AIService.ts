@@ -45,7 +45,7 @@ const openai = new ChatOpenAI({
   azureOpenAIApiDeploymentName: "ai-prod-16k",
 });
 
-const listAIResponseSelect: Prisma.AISelect = {
+const listAIResponseSelect = (orgId: string): Prisma.AISelect => ({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -67,7 +67,12 @@ const listAIResponseSelect: Prisma.AISelect = {
       groupId: true,
     },
   },
-};
+  orgApprovals: {
+    select: {
+      id: true,
+    },
+  },
+});
 
 export class AIService {
   constructor(private aiRepository: AIRepository) {}
@@ -209,7 +214,7 @@ export class AIService {
     whereCondition.AND.push({ id: aiId });
 
     const ai = await prismadb.aI.findFirst({
-      select: listAIResponseSelect,
+      select: listAIResponseSelect(orgId),
       where: whereCondition,
     });
     if (!ai) {
@@ -266,7 +271,7 @@ export class AIService {
 
     const ais = await prismadb.aI.findMany({
       select: {
-        ...listAIResponseSelect,
+        ...listAIResponseSelect(orgId),
         chats: {
           where: {
             userId,
@@ -361,7 +366,7 @@ export class AIService {
   }
 
   private mapToAIDto(
-    ai: AI & { groups: GroupAI[] },
+    ai: AI & { groups: GroupAI[] } & { orgApprovals: { id: number }[] },
     messageCountPerAi: any[],
     ratingPerAi: any[],
     aiShares: any[],
@@ -375,6 +380,8 @@ export class AIService {
     const ratingCount = ratingRow ? Number(ratingRow.ratingCount) : 0;
 
     const isShared = !!aiShares.find((a) => a.aiId === ai.id);
+
+    const isApprovedByOrg = ai.orgApprovals.length > 0;
 
     const profile = ai.profile as unknown as AIProfile;
 
@@ -409,6 +416,7 @@ export class AIService {
       rating,
       ratingCount,
       isShared,
+      isApprovedByOrg,
       groups: groupIds,
     };
   }

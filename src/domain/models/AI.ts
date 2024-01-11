@@ -26,6 +26,7 @@ export interface AIDetailDto extends AISummaryDto {
   ratingCount: number;
   isShared: boolean;
   chats?: ChatSummaryDto[];
+  isApprovedByOrg: Boolean;
 
   // Only included based on access and profile settings
   groups?: string[];
