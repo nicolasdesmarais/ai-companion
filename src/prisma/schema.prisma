@@ -49,8 +49,8 @@ model AI {
 
   dataSources AIDataSource[]
 
-  ratings                AIRating[]
-  OrganizationApprovedAI OrganizationApprovedAI[]
+  ratings      AIRating[]
+  orgApprovals AIOrgApproval[]
 
   @@index([categoryId])
   @@index([visibility])
@@ -332,7 +332,7 @@ model WaitList {
   @@map("wait_list")
 }
 
-model OrganizationApprovedAI {
+model AIOrgApproval {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @default(now()) @updatedAt @map(name: "updated_at")
@@ -341,5 +341,5 @@ model OrganizationApprovedAI {
   aiId      String   @map(name: "ai_id")
 
   @@unique([orgId, aiId])
-  @@map("org_approved_ais")
+  @@map("ai_org_approvals")
 }
