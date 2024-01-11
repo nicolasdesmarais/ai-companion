@@ -1440,6 +1440,14 @@
           },
           {
             "in": "query",
+            "name": "approvedByOrg",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Filter results by whether the AI has been approved by the organization."
+          },
+          {
+            "in": "query",
             "name": "search",
             "schema": {
               "type": "string"
