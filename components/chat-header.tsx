@@ -180,7 +180,12 @@ export const ChatHeader = ({
         <div className="flex gap-x-2 items-center">
           <BotAvatar src={chat.ai.src} />
           <div className="flex flex-col gap-y-1">
-            <p className="font-bold">{chat.ai.name}</p>
+            <div className="flex">
+              <p className="font-bold">{chat.ai.name}</p>
+              {isApproved ? (
+                <BadgeCheck className="w-6 h-6 ml-1 text-ring" />
+              ) : null}
+            </div>
             <div className="flex items-center gap-x-2">
               <p className="text-xs text-muted-foreground">
                 Created by {chat.ai.userName}
