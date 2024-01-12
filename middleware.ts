@@ -13,9 +13,10 @@ export default authMiddleware({
     "/landing",
     "/api/v1/waitlist/export",
     "/api/v1/waitlist",
+    "/api/v1/warm",
   ],
   apiRoutes: [
-    "/api/((?!webhook|v1/integrations/clerkWebhooks|v1/integrations/apify/webhooks|inngest).*)",
+    "/api/((?!webhook|v1/warm|v1/integrations/clerkWebhooks|v1/integrations/apify/webhooks|inngest).*)",
   ],
 
   afterAuth(auth, req, evt) {
