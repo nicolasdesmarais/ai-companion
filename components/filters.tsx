@@ -6,6 +6,7 @@ import {
   SuperuserScopes,
 } from "@/src/adapter-in/api/AIApi";
 import { cn } from "@/src/lib/utils";
+import { BadgeCheck } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
 
@@ -55,7 +56,6 @@ export const Filters = () => {
     md:px-4
     py-2
     md:py-3
-    rounded-md
     bg-primary/10
     hover:opacity-75
     transition
@@ -64,42 +64,48 @@ export const Filters = () => {
   if (scope && SuperuserScopes.includes(scope as ListAIsRequestScope)) {
     return (
       <div className="w-full overflow-x-auto space-x-2 flex p-1">
-        <button
-          onClick={() => onClick("INSTANCE_ORGANIZATION")}
-          className={cn(
-            btnClassNames,
-            scope === "INSTANCE_ORGANIZATION" || groupId
-              ? "bg-accent"
-              : "bg-primary/10"
-          )}
-        >
-          All Organizations
-        </button>
-        <button
-          onClick={() => onClick("INSTANCE_NOT_VISIBLE")}
-          className={cn(
-            btnClassNames,
-            scope === "INSTANCE_NOT_VISIBLE" ? "bg-accent" : "bg-primary/10"
-          )}
-        >
-          Not Visible to Me
-        </button>
-        <button
-          onClick={() => onClick("INSTANCE_PRIVATE")}
-          className={cn(
-            btnClassNames,
-            scope === "INSTANCE_PRIVATE" ? "bg-accent" : "bg-primary/10"
-          )}
-        >
-          Private
-        </button>
+        <div className="flex space-x-0.5">
+          <button
+            onClick={() => onClick("INSTANCE_ORGANIZATION")}
+            className={cn(
+              btnClassNames,
+              scope === "INSTANCE_ORGANIZATION" || groupId
+                ? "bg-accent"
+                : "bg-primary/10",
+              "rounded-l-md"
+            )}
+          >
+            All Organizations
+          </button>
+          <button
+            onClick={() => onClick("INSTANCE_NOT_VISIBLE")}
+            className={cn(
+              btnClassNames,
+              scope === "INSTANCE_NOT_VISIBLE" ? "bg-accent" : "bg-primary/10"
+            )}
+          >
+            Not Visible to Me
+          </button>
+          <button
+            onClick={() => onClick("INSTANCE_PRIVATE")}
+            className={cn(
+              btnClassNames,
+              scope === "INSTANCE_PRIVATE" ? "bg-accent" : "bg-primary/10",
+              "rounded-r-md"
+            )}
+          >
+            Private
+          </button>
+        </div>
         <button
           onClick={() => onClickCompanyApproved()}
           className={cn(
             btnClassNames,
-            approvedByOrg ? "bg-accent" : "bg-primary/10"
+            approvedByOrg ? "bg-accent" : "bg-primary/10",
+            "rounded-md"
           )}
         >
+          <BadgeCheck className="w-6 h-6 mr-2 text-ring" />
           Company Approved
         </button>
       </div>
@@ -109,42 +115,48 @@ export const Filters = () => {
   if (scope && AdminScopes.includes(scope as ListAIsRequestScope)) {
     return (
       <div className="w-full overflow-x-auto space-x-2 flex p-1">
-        <button
-          onClick={() => onClick("ADMIN_ORGANIZATION")}
-          className={cn(
-            btnClassNames,
-            scope === "ADMIN_ORGANIZATION" || groupId
-              ? "bg-accent"
-              : "bg-primary/10"
-          )}
-        >
-          Organization
-        </button>
-        <button
-          onClick={() => onClick("ADMIN_NOT_VISIBLE")}
-          className={cn(
-            btnClassNames,
-            scope === "ADMIN_NOT_VISIBLE" ? "bg-accent" : "bg-primary/10"
-          )}
-        >
-          Not Visible to Me
-        </button>
-        <button
-          onClick={() => onClick("ADMIN_PRIVATE")}
-          className={cn(
-            btnClassNames,
-            scope === "ADMIN_PRIVATE" ? "bg-accent" : "bg-primary/10"
-          )}
-        >
-          Private
-        </button>
+        <div className="flex space-x-0.5">
+          <button
+            onClick={() => onClick("ADMIN_ORGANIZATION")}
+            className={cn(
+              btnClassNames,
+              scope === "ADMIN_ORGANIZATION" || groupId
+                ? "bg-accent"
+                : "bg-primary/10",
+              "rounded-l-md"
+            )}
+          >
+            Organization
+          </button>
+          <button
+            onClick={() => onClick("ADMIN_NOT_VISIBLE")}
+            className={cn(
+              btnClassNames,
+              scope === "ADMIN_NOT_VISIBLE" ? "bg-accent" : "bg-primary/10"
+            )}
+          >
+            Not Visible to Me
+          </button>
+          <button
+            onClick={() => onClick("ADMIN_PRIVATE")}
+            className={cn(
+              btnClassNames,
+              scope === "ADMIN_PRIVATE" ? "bg-accent" : "bg-primary/10",
+              "rounded-r-md"
+            )}
+          >
+            Private
+          </button>
+        </div>
         <button
           onClick={() => onClickCompanyApproved()}
           className={cn(
             btnClassNames,
-            approvedByOrg ? "bg-accent" : "bg-primary/10"
+            approvedByOrg ? "bg-accent" : "bg-primary/10",
+            "rounded-md"
           )}
         >
+          <BadgeCheck className="w-6 h-6 mr-2 text-ring" />
           Company Approved
         </button>
       </div>
@@ -153,40 +165,46 @@ export const Filters = () => {
 
   return (
     <div className="w-full overflow-x-auto space-x-2 flex p-1">
-      <button
-        onClick={() => onClick("PUBLIC")}
-        className={cn(
-          btnClassNames,
-          scope == "PUBLIC" ? "bg-accent" : "bg-primary/10"
-        )}
-      >
-        Public
-      </button>
-      <button
-        onClick={() => onClick("ORGANIZATION")}
-        className={cn(
-          btnClassNames,
-          scope === "ORGANIZATION" || groupId ? "bg-accent" : "bg-primary/10"
-        )}
-      >
-        Organization
-      </button>
-      <button
-        onClick={() => onClick("PRIVATE")}
-        className={cn(
-          btnClassNames,
-          scope === "PRIVATE" ? "bg-accent" : "bg-primary/10"
-        )}
-      >
-        Private
-      </button>
+      <div className="flex space-x-0.5">
+        <button
+          onClick={() => onClick("PUBLIC")}
+          className={cn(
+            btnClassNames,
+            scope == "PUBLIC" ? "bg-accent" : "bg-primary/10",
+            "rounded-l-md"
+          )}
+        >
+          Public
+        </button>
+        <button
+          onClick={() => onClick("ORGANIZATION")}
+          className={cn(
+            btnClassNames,
+            scope === "ORGANIZATION" || groupId ? "bg-accent" : "bg-primary/10"
+          )}
+        >
+          Organization
+        </button>
+        <button
+          onClick={() => onClick("PRIVATE")}
+          className={cn(
+            btnClassNames,
+            scope === "PRIVATE" ? "bg-accent" : "bg-primary/10",
+            "rounded-r-md"
+          )}
+        >
+          Private
+        </button>
+      </div>
       <button
         onClick={() => onClickCompanyApproved()}
         className={cn(
           btnClassNames,
-          approvedByOrg ? "bg-accent" : "bg-primary/10"
+          approvedByOrg ? "bg-accent" : "bg-primary/10",
+          "rounded-md"
         )}
       >
+        <BadgeCheck className="w-6 h-6 mr-2 text-ring" />
         Company Approved
       </button>
     </div>
