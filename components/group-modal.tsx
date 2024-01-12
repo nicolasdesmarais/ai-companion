@@ -45,16 +45,23 @@ const groupFormSchema = z.object({
   teammates: z.string(),
 });
 
-export const GroupModal = () => {
+interface GroupModalProps {
+  canAssignEveryoneAvailability: boolean;
+}
+
+export const GroupModal = ({
+  canAssignEveryoneAvailability,
+}: GroupModalProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedOption, setSelectedOption] =
-    useState<GroupAvailability | null>(GroupAvailability.EVERYONE);
+    useState<GroupAvailability | null>(GroupAvailability.RESTRICTED);
   const [currentTeammates, setCurrentTeammates] = useState<any[]>([]);
   const [removedTeammates, setRemovedTeammates] = useState<any[]>([]);
   const [isOwner, setIsOwner] = useState(true);
   const [search, setSearch] = useState("");
   const [filteredTeammates, setFilteredTeammates] = useState<any[]>([]);
+  const [hasOrgAccess, setHasOrgAccess] = useState(true);
   const { toast } = useToast();
   const { user } = useUser();
   const groupModal = useGroupModal();
@@ -100,7 +107,7 @@ export const GroupModal = () => {
   const updateGroup = async (values: z.infer<typeof groupFormSchema>) => {
     const request: UpdateGroupRequest = {
       name: values.name,
-      availability: selectedOption || GroupAvailability.EVERYONE,
+      availability: selectedOption || GroupAvailability.RESTRICTED,
       memberEmailsToAdd: values.teammates,
       memberEmailsToRemove: removedTeammates,
     };
@@ -125,7 +132,7 @@ export const GroupModal = () => {
   const createGroup = async (values: z.infer<typeof groupFormSchema>) => {
     const request: CreateGroupRequest = {
       name: values.name,
-      availability: selectedOption || GroupAvailability.EVERYONE,
+      availability: selectedOption || GroupAvailability.RESTRICTED,
       memberEmails: values.teammates,
     };
 
@@ -280,27 +287,29 @@ export const GroupModal = () => {
               <div className="space-y-4">
                 <FormLabel>Who can join?</FormLabel>
                 <FormItem>
-                  <FormControl>
-                    <div>
-                      <label>
-                        <input
-                          type="radio"
-                          disabled={!isOwner || loading}
-                          value={GroupAvailability.EVERYONE}
-                          checked={
-                            selectedOption === GroupAvailability.EVERYONE
-                          }
-                          onChange={(e) =>
-                            setSelectedOption(
-                              e.target.value as GroupAvailability
-                            )
-                          }
-                          className="mr-2"
-                        />
-                        Everyone in your company
-                      </label>
-                    </div>
-                  </FormControl>
+                  {canAssignEveryoneAvailability && (
+                    <FormControl>
+                      <div>
+                        <label>
+                          <input
+                            type="radio"
+                            disabled={!isOwner || loading}
+                            value={GroupAvailability.EVERYONE}
+                            checked={
+                              selectedOption === GroupAvailability.EVERYONE
+                            }
+                            onChange={(e) =>
+                              setSelectedOption(
+                                e.target.value as GroupAvailability
+                              )
+                            }
+                            className="mr-2"
+                          />
+                          Everyone in your company
+                        </label>
+                      </div>
+                    </FormControl>
+                  )}
                   <FormControl>
                     <div>
                       <label>
