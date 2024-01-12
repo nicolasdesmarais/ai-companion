@@ -6,5 +6,11 @@
     "app/api/v1/chats/*/route.ts": {
       "memory": 3008
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/v1/warm",
+      "schedule": "*/5 * * * *"
+    }
+  ]
 }

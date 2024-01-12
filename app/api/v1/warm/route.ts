@@ -8,6 +8,7 @@ const fetchPath = async (origin: string, path: string) => {
   });
   return {
     status: resp.status,
+    text: await resp.text(),
     path,
   };
 };
