@@ -197,6 +197,9 @@ export const ChatHeader = ({
                   Rate
                 </DropdownMenuItem>
               )}
+              <div className="text-xxs uppercase border-b text-white/30 m-1">
+                Admin
+              </div>
               {ai && canApproveAi && !ai.isApprovedByOrg && (
                 <DropdownMenuItem onClick={() => approve()}>
                   <BadgeCheck className="w-4 h-4 mr-2" />
