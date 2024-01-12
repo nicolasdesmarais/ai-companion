@@ -5,10 +5,12 @@ interface useConfirmModalStore {
   isOpen: boolean;
   title?: ReactElement | string;
   body?: ReactElement | string;
+  footer?: ReactElement | string;
   onOpen: (
     title: ReactElement | string,
     body: ReactElement | string,
-    onConfirm: () => void
+    onConfirm: () => void,
+    footer?: ReactElement | string
   ) => void;
   onClose: () => void;
   onConfirm: () => void;
@@ -19,7 +21,7 @@ export const useConfirmModal = create<useConfirmModalStore>((set) => ({
   title: "Are you sure?",
   body: "This action cannot be undone.",
   onConfirm: () => {},
-  onOpen: (title, body, onConfirm) =>
-    set({ isOpen: true, title, body, onConfirm }),
+  onOpen: (title, body, onConfirm, footer) =>
+    set({ isOpen: true, title, body, onConfirm, footer }),
   onClose: () => set({ isOpen: false }),
 }));

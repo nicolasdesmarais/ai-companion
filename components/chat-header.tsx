@@ -111,40 +111,66 @@ export const ChatHeader = ({
 
   const approve = async () => {
     confirmModal.onOpen(
-      "Mark as Company Approved",
+      <div className="flex items-center">
+        Mark as Company Approved
+        <BadgeCheck className="w-6 h-6 ml-2 text-ring" />
+      </div>,
       <div>
         By marking {ai?.name} as Company Approved it will receive a blue
         checkmark. This will make it clear to your employees that this AI has
         been identified by your company as high quality. You can revoke this
         status at any time.
       </div>,
-      async () => {
-        const response = await axios.put(`/api/v1/ai/${ai?.id}/approve`);
-        if (response.status === 200) {
-          toast({ description: "AI Approved." });
-          setIsApproved(true);
-          fetchChats();
-        }
-      }
+      () => {},
+      <div className="flex flex-row-reverse w-full">
+        <Button
+          variant="ring"
+          onClick={async () => {
+            confirmModal.onClose();
+            const response = await axios.put(`/api/v1/ai/${ai?.id}/approve`);
+            if (response.status === 200) {
+              toast({ description: "AI Approved." });
+              setIsApproved(true);
+              fetchChats();
+            }
+          }}
+          type="button"
+        >
+          Mark as Approved
+        </Button>
+      </div>
     );
   };
 
   const revoke = async () => {
     confirmModal.onOpen(
-      "Revoke Company Approved Status",
+      <div className="flex items-center">
+        Revoke Company Approved Status
+        <BadgeCheck className="w-6 h-6 ml-2 text-ring" />
+      </div>,
       <div>
         By revoking the Company Approved status for {ai?.name} it will no longer
         display a blue checkmark or show up in the Company Approved filter. You
         can add the Company Approved status back at any time.
       </div>,
-      async () => {
-        const response = await axios.put(`/api/v1/ai/${ai?.id}/revoke`);
-        if (response.status === 200) {
-          toast({ description: "AI Approval Revoked." });
-          setIsApproved(false);
-          fetchChats();
-        }
-      }
+      () => {},
+      <div className="flex flex-row-reverse w-full">
+        <Button
+          variant="ring"
+          onClick={async () => {
+            confirmModal.onClose();
+            const response = await axios.put(`/api/v1/ai/${ai?.id}/revoke`);
+            if (response.status === 200) {
+              toast({ description: "AI Approval Revoked." });
+              setIsApproved(false);
+              fetchChats();
+            }
+          }}
+          type="button"
+        >
+          Revoke Approved Status
+        </Button>
+      </div>
     );
   };
 

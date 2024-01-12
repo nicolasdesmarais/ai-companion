@@ -41,28 +41,32 @@ export const ConfirmModal = () => {
         </DialogHeader>
         <Separator />
         <DialogFooter>
-          <div className="flex justify-between w-full">
-            <Button
-              size="lg"
-              variant="destructive"
-              onClick={() => {
-                confirmModal.onClose();
-                confirmModal.onConfirm();
-              }}
-              className="bg-red-600 hover:bg-red-700"
-              disabled={loading}
-              type="button"
-            >
-              Confirm
-            </Button>
-            <Button
-              onClick={() => confirmModal.onClose()}
-              variant="link"
-              type="button"
-            >
-              Cancel
-            </Button>
-          </div>
+          {confirmModal.footer ? (
+            confirmModal.footer
+          ) : (
+            <div className="flex justify-between w-full">
+              <Button
+                size="lg"
+                variant="destructive"
+                onClick={() => {
+                  confirmModal.onClose();
+                  confirmModal.onConfirm();
+                }}
+                className="bg-red-600 hover:bg-red-700"
+                disabled={loading}
+                type="button"
+              >
+                Confirm
+              </Button>
+              <Button
+                onClick={() => confirmModal.onClose()}
+                variant="link"
+                type="button"
+              >
+                Cancel
+              </Button>
+            </div>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
