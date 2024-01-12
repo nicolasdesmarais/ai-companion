@@ -34,7 +34,7 @@ export const AIs = ({ data, authorizationContext, groups }: AIsProps) => {
       </div>
     );
   }
-  console.log(data);
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-9 gap-3 pb-10">
       {data.map((item) => (
