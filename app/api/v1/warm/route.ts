@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 300;
 
-const paths = ["/", "/ai/new/edit", "/chat/"];
+const paths = ["/", "/ai/new/edit", "/chat/", "/api/v1/me/chats"];
 
 const fetchPath = async (origin: string, path: string) => {
   const url = origin + path;
