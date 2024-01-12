@@ -146,9 +146,11 @@ export const AIKnowledge = ({
                       )?.name
                     }
                   </td>
-                  <td className="p-3 flex justify-between items-center">
-                    {getDataSourceRefreshPeriodLabel(dataSource.refreshPeriod)}
-                    {dataSourceTypesForRefresh.includes(dataSource.type) && (
+                  {dataSourceTypesForRefresh.includes(dataSource.type) ? (
+                    <td className="p-3 flex justify-between items-center">
+                      {getDataSourceRefreshPeriodLabel(
+                        dataSource.refreshPeriod
+                      )}
                       <Tooltip content="Refresh Now">
                         <Button
                           type="button"
@@ -165,8 +167,14 @@ export const AIKnowledge = ({
                           )}
                         </Button>
                       </Tooltip>
-                    )}
-                  </td>
+                    </td>
+                  ) : (
+                    <td className="p-2">
+                      {getDataSourceRefreshPeriodLabel(
+                        dataSource.refreshPeriod
+                      )}
+                    </td>
+                  )}
                   <td className="p-2">
                     {dataSource.lastIndexedAt
                       ? format(
