@@ -6,6 +6,7 @@ import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
+import { GroupSecurityService } from "@/src/security/services/GroupSecurityService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
@@ -47,6 +48,9 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
     SecuredResourceAccessLevel.INSTANCE
   );
 
+  const canAssignEveryoneAvailability =
+    GroupSecurityService.canAssignEveryoneAvailability(authorizationContext);
+
   return (
     <>
       <AIEditor
@@ -54,7 +58,9 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
         aiModels={models}
         hasInstanceAccess={hasInstanceAccess}
       />
-      <GroupModal />
+      <GroupModal
+        canAssignEveryoneAvailability={canAssignEveryoneAvailability}
+      />
     </>
   );
 };

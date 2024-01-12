@@ -18,6 +18,7 @@ import {
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import categoryService from "@/src/domain/services/CategoryService";
 import groupService from "@/src/domain/services/GroupService";
+import { GroupSecurityService } from "@/src/security/services/GroupSecurityService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 
 interface RootPageProps {
@@ -77,6 +78,9 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
 
   const categories = await categoryService.getCategories();
 
+  const canAssignEveryoneAvailability =
+    GroupSecurityService.canAssignEveryoneAvailability(authorizationContext);
+
   return (
     <div className="h-full px-4 space-y-2 pt-2">
       {scope && SuperuserScopes.includes(scope) && (
@@ -108,7 +112,9 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
         authorizationContext={authorizationContext}
         groups={groups}
       />
-      <GroupModal />
+      <GroupModal
+        canAssignEveryoneAvailability={canAssignEveryoneAvailability}
+      />
       <ConfirmModal />
     </div>
   );
