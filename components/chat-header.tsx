@@ -34,6 +34,7 @@ import { useState } from "react";
 import { RateModal } from "./rate-modal";
 import { ShareModal } from "./share-modal";
 import { StarRating } from "./star-rating";
+import { useConfirmModal } from "@/hooks/use-confirm-modal";
 
 interface ChatHeaderProps {
   ai: AIDetailDto | null;
@@ -54,6 +55,8 @@ export const ChatHeader = ({
   const aiProfile = useAIProfile();
   const [showShareModal, setShowShareModal] = useState(false);
   const rateAI = useRateAI();
+  const confirmModal = useConfirmModal();
+  const [isApproved, setIsApproved] = useState(ai?.isApprovedByOrg);
 
   const duplicate = async () => {
     const response = await axios.put(`/api/v1/chats/${chat.id}/duplicate`);
@@ -107,19 +110,42 @@ export const ChatHeader = ({
   };
 
   const approve = async () => {
-    const response = await axios.put(`/api/v1/ai/${ai?.id}/approve`);
-    if (response.status === 200) {
-      toast({ description: "AI Approved." });
-      fetchChats();
-    }
+    confirmModal.onOpen(
+      "Mark as Company Approved",
+      <div>
+        By marking {ai?.name} as Company Approved it will receive a blue
+        checkmark. This will make it clear to your employees that this AI has
+        been identified by your company as high quality. You can revoke this
+        status at any time.
+      </div>,
+      async () => {
+        const response = await axios.put(`/api/v1/ai/${ai?.id}/approve`);
+        if (response.status === 200) {
+          toast({ description: "AI Approved." });
+          setIsApproved(true);
+          fetchChats();
+        }
+      }
+    );
   };
 
   const revoke = async () => {
-    const response = await axios.put(`/api/v1/ai/${ai?.id}/revoke`);
-    if (response.status === 200) {
-      toast({ description: "AI Approval Revoked." });
-      fetchChats();
-    }
+    confirmModal.onOpen(
+      "Revoke Company Approved Status",
+      <div>
+        By revoking the Company Approved status for {ai?.name} it will no longer
+        display a blue checkmark or show up in the Company Approved filter. You
+        can add the Company Approved status back at any time.
+      </div>,
+      async () => {
+        const response = await axios.put(`/api/v1/ai/${ai?.id}/revoke`);
+        if (response.status === 200) {
+          toast({ description: "AI Approval Revoked." });
+          setIsApproved(false);
+          fetchChats();
+        }
+      }
+    );
   };
 
   return (
@@ -200,13 +226,13 @@ export const ChatHeader = ({
               <div className="text-xxs uppercase border-b text-white/30 m-1">
                 Admin
               </div>
-              {ai && canApproveAi && !ai.isApprovedByOrg && (
+              {ai && canApproveAi && !isApproved && (
                 <DropdownMenuItem onClick={() => approve()}>
                   <BadgeCheck className="w-4 h-4 mr-2" />
                   Approve
                 </DropdownMenuItem>
               )}
-              {ai && canApproveAi && ai.isApprovedByOrg && (
+              {ai && canApproveAi && isApproved && (
                 <DropdownMenuItem onClick={() => revoke()}>
                   <BadgeCheck className="w-4 h-4 mr-2" />
                   Revoke

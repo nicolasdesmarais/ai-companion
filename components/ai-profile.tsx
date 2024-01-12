@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { StarRating } from "./star-rating";
 import { StarSvg } from "./svg/star-svg";
 import { Button } from "./ui/button";
+import { Fragment } from "react";
 
 const aiModelRepository = new StaticAIModelRepository();
 interface Props {
@@ -254,7 +255,7 @@ export const AIProfile = ({ ai }: Props) => {
           <>
             <div className="grid gap-3 grid-cols-[50px_auto_50px]">
               {[...Array(5)].map((_, i) => (
-                <>
+                <Fragment key={`rating-${i}`}>
                   <div key={`rating-1-${i}`} className="text-ring">
                     {5 - i} star
                   </div>
@@ -273,7 +274,7 @@ export const AIProfile = ({ ai }: Props) => {
                   <div key={`rating-3-${i}`} className="text-ring">
                     {ratingDistributions[4 - i]} %
                   </div>
-                </>
+                </Fragment>
               ))}
             </div>
             <div className="text-xl font-bold">
