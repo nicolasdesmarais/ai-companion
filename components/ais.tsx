@@ -10,6 +10,7 @@ import {
   LockKeyhole,
   MessageSquareText,
   Users,
+  BadgeCheck,
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
@@ -33,7 +34,7 @@ export const AIs = ({ data, authorizationContext, groups }: AIsProps) => {
       </div>
     );
   }
-
+  console.log(data);
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-9 gap-3 pb-10">
       {data.map((item) => (
@@ -100,7 +101,12 @@ export const AIs = ({ data, authorizationContext, groups }: AIsProps) => {
                     </div>
                   )}
                 </div>
-                <p className="font-bold">{item.name}</p>
+                <div className="flex items-center">
+                  {item.isApprovedByOrg ? (
+                    <BadgeCheck className="w-4 h-4 mr-1 text-ring" />
+                  ) : null}
+                  <p className="font-bold">{item.name}</p>
+                </div>
                 <p className="text-xs">{item.description}</p>
               </CardHeader>
               <CardFooter className="flex flex-col">
