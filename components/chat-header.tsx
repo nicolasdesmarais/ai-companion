@@ -174,7 +174,7 @@ export const ChatHeader = ({
     );
   };
 
-  const thisChat = chats.find((c) => c.id === chat.id);
+  const thisChat = chats.length ? chats.find((c) => c.id === chat.id) : chat;
   return (
     <div className="flex flex-col p-4 pb-3 bg-accent/30">
       <div className="flex w-full justify-between items-center">
