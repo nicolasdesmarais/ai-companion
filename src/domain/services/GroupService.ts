@@ -1,6 +1,10 @@
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
+import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
 import { clerkClient } from "@clerk/nextjs";
 import { GroupAvailability, Prisma } from "@prisma/client";
 import {
@@ -11,10 +15,6 @@ import { GroupSecurityService } from "../../security/services/GroupSecurityServi
 import { BadRequestError, EntityNotFoundError } from "../errors/Errors";
 import { GroupDetailDto, GroupSummaryDto } from "../models/Groups";
 import { InvitationService } from "./InvitationService";
-import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
-import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
-import { SecuredAction } from "@/src/security/models/SecuredAction";
-import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 
 const groupSummarySelect: Prisma.GroupSelect = {
   id: true,
@@ -82,7 +82,8 @@ export class GroupService {
    * @returns
    */
   public async findGroupsByUser(
-    authorizationContext: AuthorizationContext
+    authorizationContext: AuthorizationContext,
+    includeElevatedAccessGroups: boolean = false
   ): Promise<GroupSummaryDto[]> {
     const { orgId, userId } = authorizationContext;
 
@@ -91,40 +92,39 @@ export class GroupService {
       where: this.getGroupCriteria(orgId, userId),
     });
 
-    const hasInstanceGroupsAccess = BaseEntitySecurityService.hasPermission(
-      authorizationContext,
-      SecuredResourceType.GROUPS,
-      SecuredAction.READ,
-      SecuredResourceAccessLevel.INSTANCE
-    );
-
-    if (hasInstanceGroupsAccess) {
-      const allGroups: GroupSummaryDto[] = await this.getInstanceGroups();
-      allGroups.forEach((group) => {
-        if (!groups.find((g) => g.id === group.id)) {
-          group.notVisibleToMe = true;
-        }
-      });
-      groups = allGroups;
-    }
-
-    const hasAdminGroupsAccess = BaseEntitySecurityService.hasPermission(
-      authorizationContext,
-      SecuredResourceType.GROUPS,
-      SecuredAction.READ,
-      SecuredResourceAccessLevel.ORGANIZATION
-    );
-
-    if (hasAdminGroupsAccess) {
-      const allGroups: GroupSummaryDto[] = await this.getOrganizationGroups(
-        orgId
+    if (includeElevatedAccessGroups) {
+      const hasInstanceGroupsAccess = BaseEntitySecurityService.hasPermission(
+        authorizationContext,
+        SecuredResourceType.GROUPS,
+        SecuredAction.READ,
+        SecuredResourceAccessLevel.INSTANCE
       );
-      allGroups.forEach((group) => {
-        if (!groups.find((g) => g.id === group.id)) {
-          group.notVisibleToMe = true;
-        }
-      });
-      groups = allGroups;
+      const hasAdminGroupsAccess = BaseEntitySecurityService.hasPermission(
+        authorizationContext,
+        SecuredResourceType.GROUPS,
+        SecuredAction.READ,
+        SecuredResourceAccessLevel.ORGANIZATION
+      );
+
+      if (hasInstanceGroupsAccess) {
+        const allGroups: GroupSummaryDto[] = await this.getInstanceGroups();
+        allGroups.forEach((group) => {
+          if (!groups.find((g) => g.id === group.id)) {
+            group.notVisibleToMe = true;
+          }
+        });
+        groups = allGroups;
+      } else if (hasAdminGroupsAccess) {
+        const allGroups: GroupSummaryDto[] = await this.getOrganizationGroups(
+          orgId
+        );
+        allGroups.forEach((group) => {
+          if (!groups.find((g) => g.id === group.id)) {
+            group.notVisibleToMe = true;
+          }
+        });
+        groups = allGroups;
+      }
     }
 
     return groups;

@@ -17,7 +17,6 @@ import {
 } from "@/src/adapter-in/api/AIApi";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import categoryService from "@/src/domain/services/CategoryService";
-import groupService from "@/src/domain/services/GroupService";
 import { GroupSecurityService } from "@/src/security/services/GroupSecurityService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 
@@ -51,9 +50,7 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
     scope = ListAIsRequestScope[scopeParam as keyof typeof ListAIsRequestScope];
   }
 
-  const groups: GroupSummaryDto[] = await groupService.findGroupsByUser(
-    authorizationContext
-  );
+  const groups: GroupSummaryDto[] = [];
 
   let approvedByOrg;
   if (searchParams.approvedByOrg === "true") {
