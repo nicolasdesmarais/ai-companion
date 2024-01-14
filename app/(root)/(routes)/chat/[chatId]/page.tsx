@@ -8,6 +8,7 @@ import { AISecurityService } from "@/src/security/services/AISecurityService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
+import { ConfirmModal } from "@/components/confirm-modal";
 
 interface ChatIdPageProps {
   params: {
@@ -53,6 +54,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
         canApproveAi={canApproveAi}
       />
       {ai && <AIProfile ai={ai} />}
+      <ConfirmModal />
     </div>
   );
 };

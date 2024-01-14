@@ -34,6 +34,7 @@ import { useState } from "react";
 import { RateModal } from "./rate-modal";
 import { ShareModal } from "./share-modal";
 import { StarRating } from "./star-rating";
+import { useConfirmModal } from "@/hooks/use-confirm-modal";
 
 interface ChatHeaderProps {
   ai: AIDetailDto | null;
@@ -54,6 +55,8 @@ export const ChatHeader = ({
   const aiProfile = useAIProfile();
   const [showShareModal, setShowShareModal] = useState(false);
   const rateAI = useRateAI();
+  const confirmModal = useConfirmModal();
+  const [isApproved, setIsApproved] = useState(ai?.isApprovedByOrg);
 
   const duplicate = async () => {
     const response = await axios.put(`/api/v1/chats/${chat.id}/duplicate`);
@@ -107,28 +110,83 @@ export const ChatHeader = ({
   };
 
   const approve = async () => {
-    const response = await axios.put(`/api/v1/ai/${ai?.id}/approve`);
-    if (response.status === 200) {
-      toast({ description: "AI Approved." });
-      fetchChats();
-    }
+    confirmModal.onOpen(
+      <div className="flex items-center">
+        Mark as Company Approved
+        <BadgeCheck className="w-6 h-6 ml-2 text-ring" />
+      </div>,
+      <div>
+        By marking {ai?.name} as Company Approved it will receive a blue
+        checkmark. This will make it clear to your employees that this AI has
+        been identified by your company as high quality. You can revoke this
+        status at any time.
+      </div>,
+      () => {},
+      <div className="flex flex-row-reverse w-full">
+        <Button
+          variant="ring"
+          onClick={async () => {
+            confirmModal.onClose();
+            const response = await axios.put(`/api/v1/ai/${ai?.id}/approve`);
+            if (response.status === 200) {
+              toast({ description: "AI Approved." });
+              setIsApproved(true);
+              fetchChats();
+            }
+          }}
+          type="button"
+        >
+          Mark as Approved
+        </Button>
+      </div>
+    );
   };
 
   const revoke = async () => {
-    const response = await axios.put(`/api/v1/ai/${ai?.id}/revoke`);
-    if (response.status === 200) {
-      toast({ description: "AI Approval Revoked." });
-      fetchChats();
-    }
+    confirmModal.onOpen(
+      <div className="flex items-center">
+        Revoke Company Approved Status
+        <BadgeCheck className="w-6 h-6 ml-2 text-ring" />
+      </div>,
+      <div>
+        By revoking the Company Approved status for {ai?.name} it will no longer
+        display a blue checkmark or show up in the Company Approved filter. You
+        can add the Company Approved status back at any time.
+      </div>,
+      () => {},
+      <div className="flex flex-row-reverse w-full">
+        <Button
+          variant="ring"
+          onClick={async () => {
+            confirmModal.onClose();
+            const response = await axios.put(`/api/v1/ai/${ai?.id}/revoke`);
+            if (response.status === 200) {
+              toast({ description: "AI Approval Revoked." });
+              setIsApproved(false);
+              fetchChats();
+            }
+          }}
+          type="button"
+        >
+          Revoke Approved Status
+        </Button>
+      </div>
+    );
   };
 
+  const thisChat = chats.length ? chats.find((c) => c.id === chat.id) : chat;
   return (
     <div className="flex flex-col p-4 pb-3 bg-accent/30">
       <div className="flex w-full justify-between items-center">
         <div className="flex gap-x-2 items-center">
           <BotAvatar src={chat.ai.src} />
           <div className="flex flex-col gap-y-1">
-            <p className="font-bold">{chat.ai.name}</p>
+            <div className="flex">
+              <p className="font-bold">{chat.ai.name}</p>
+              {isApproved ? (
+                <BadgeCheck className="w-6 h-6 ml-1 text-ring" />
+              ) : null}
+            </div>
             <div className="flex items-center gap-x-2">
               <p className="text-xs text-muted-foreground">
                 Created by {chat.ai.userName}
@@ -162,7 +220,7 @@ export const ChatHeader = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {chat.pinPosition ? (
+              {thisChat.pinPosition ? (
                 <DropdownMenuItem onClick={() => unpin()}>
                   <PinOff className="w-4 h-4 mr-2" />
                   Unpin
@@ -197,13 +255,16 @@ export const ChatHeader = ({
                   Rate
                 </DropdownMenuItem>
               )}
-              {ai && canApproveAi && !ai.isApprovedByOrg && (
+              <div className="text-xxs uppercase border-b text-white/30 m-1">
+                Admin
+              </div>
+              {ai && canApproveAi && !isApproved && (
                 <DropdownMenuItem onClick={() => approve()}>
                   <BadgeCheck className="w-4 h-4 mr-2" />
                   Approve
                 </DropdownMenuItem>
               )}
-              {ai && canApproveAi && ai.isApprovedByOrg && (
+              {ai && canApproveAi && isApproved && (
                 <DropdownMenuItem onClick={() => revoke()}>
                   <BadgeCheck className="w-4 h-4 mr-2" />
                   Revoke
