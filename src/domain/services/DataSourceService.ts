@@ -828,9 +828,19 @@ export class DataSourceService {
       where: { id: knowledgeId },
     });
 
+    if (!knowledge) {
+      throw new EntityNotFoundError(
+        `Knowledge with id=${knowledgeId} not found`
+      );
+    }
+
+    if (!knowledge.uniqueId) {
+      return [];
+    }
+
     const relatedKnowledgeInstances = await prismadb.knowledge.findMany({
       where: {
-        uniqueId: knowledge?.uniqueId,
+        uniqueId: knowledge.uniqueId,
         id: { not: knowledgeId },
       },
     });
