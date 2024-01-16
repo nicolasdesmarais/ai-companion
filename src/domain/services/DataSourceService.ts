@@ -857,7 +857,7 @@ export class DataSourceService {
       select: { dataSourceId: true },
       distinct: ["dataSourceId"],
       where: {
-        knowledgeId: { in: relatedKnowledgeIds },
+        knowledgeId: { in: [...relatedKnowledgeIds, knowledgeId] },
       },
     });
 
@@ -878,6 +878,7 @@ export class DataSourceService {
       await tx.knowledge.updateMany({
         where: {
           id: { in: relatedKnowledgeIds },
+          indexStatus: { not: KnowledgeIndexStatus.DELETED },
         },
         data: { indexStatus: KnowledgeIndexStatus.DELETED },
       });
