@@ -219,7 +219,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
 
     const inputFile = await driveClient.files.get({
       fileId: input.fileId,
-      fields: "id, name, mimeType",
+      fields: "id, name, mimeType, modifiedTime",
       supportsAllDrives: true,
     });
 
