@@ -196,6 +196,7 @@ model OAuthToken {
 
 enum OAuthTokenProvider {
   GOOGLE
+  MSFT
 }
 
 model OrgClientCredentials {
