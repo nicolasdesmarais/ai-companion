@@ -33,11 +33,17 @@ async function getHandler(
     scope = ListAIsRequestScope[scopeParam as keyof typeof ListAIsRequestScope];
   }
 
+  let approvedByOrg;
+  if (searchParams.has("approvedByOrg")) {
+    approvedByOrg = searchParams.get("approvedByOrg") === "true";
+  }
+
   const requestParams: ListAIsRequestParams = {
     scope,
     groupId: searchParams.get("groupId"),
     categoryId: searchParams.get("categoryId"),
     search: searchParams.get("search"),
+    approvedByOrg,
   };
 
   const ais = await aiService.findAIsForUser(

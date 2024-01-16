@@ -5,6 +5,7 @@ import {
   ShareAIRequest,
   UpdateAIRequest,
 } from "@/src/adapter-in/api/AIApi";
+import { AIRepositoryImpl } from "@/src/adapter-out/repositories/AIRepositoryImpl";
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
@@ -19,6 +20,7 @@ import { User } from "@clerk/nextjs/server";
 import {
   AI,
   AIVisibility,
+  DataSourceRefreshPeriod,
   DataSourceType,
   GroupAI,
   GroupAvailability,
@@ -30,6 +32,7 @@ import { AISecurityService } from "../../security/services/AISecurityService";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import { AIDetailDto, AIProfile } from "../models/AI";
 import { AIModelOptions } from "../models/AIModel";
+import { AIRepository } from "../ports/outgoing/AIRepository";
 import aiModelService from "./AIModelService";
 import dataSourceService from "./DataSourceService";
 import groupService from "./GroupService";
@@ -42,7 +45,7 @@ const openai = new ChatOpenAI({
   azureOpenAIApiDeploymentName: "ai-prod-16k",
 });
 
-const listAIResponseSelect: Prisma.AISelect = {
+const listAIResponseSelect = (orgId: string): Prisma.AISelect => ({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -64,9 +67,16 @@ const listAIResponseSelect: Prisma.AISelect = {
       groupId: true,
     },
   },
-};
+  orgApprovals: {
+    select: {
+      id: true,
+    },
+  },
+});
 
 export class AIService {
+  constructor(private aiRepository: AIRepository) {}
+
   public async findAIById(id: string) {
     return prismadb.aI.findUnique({
       where: {
@@ -204,7 +214,7 @@ export class AIService {
     whereCondition.AND.push({ id: aiId });
 
     const ai = await prismadb.aI.findFirst({
-      select: listAIResponseSelect,
+      select: listAIResponseSelect(orgId),
       where: whereCondition,
     });
     if (!ai) {
@@ -241,27 +251,34 @@ export class AIService {
   ): Promise<AIDetailDto[]> {
     const scope = this.determineScope(authorizationContext, request.scope);
     const { orgId, userId } = authorizationContext;
+    const { groupId, categoryId, approvedByOrg, search } = request;
 
     const whereCondition = { AND: [{}] };
     whereCondition.AND.push(this.getBaseWhereCondition(orgId, userId, scope));
 
-    if (request.groupId) {
+    if (groupId) {
       if (scope === ListAIsRequestScope.INSTANCE_ORGANIZATION) {
-        whereCondition.AND.push(this.getInstanceGroupCriteria(request.groupId));
+        whereCondition.AND.push(this.getInstanceGroupCriteria(groupId));
       } else {
-        whereCondition.AND.push(this.getGroupCriteria(orgId, request.groupId));
+        whereCondition.AND.push(this.getGroupCriteria(orgId, groupId));
       }
     }
-    if (request.categoryId) {
-      whereCondition.AND.push(this.getCategoryCriteria(request.categoryId));
+    if (categoryId) {
+      whereCondition.AND.push(this.getCategoryCriteria(categoryId));
     }
-    if (request.search) {
-      whereCondition.AND.push(this.getSearchCriteria(request.search));
+    if (search) {
+      whereCondition.AND.push(this.getSearchCriteria(search));
+    }
+
+    if (approvedByOrg !== null && approvedByOrg !== undefined) {
+      whereCondition.AND.push(
+        this.getApprovedByOrgCriteria(orgId, approvedByOrg)
+      );
     }
 
     const ais = await prismadb.aI.findMany({
       select: {
-        ...listAIResponseSelect,
+        ...listAIResponseSelect(orgId),
         chats: {
           where: {
             userId,
@@ -356,7 +373,7 @@ export class AIService {
   }
 
   private mapToAIDto(
-    ai: AI & { groups: GroupAI[] },
+    ai: AI & { groups: GroupAI[] } & { orgApprovals: { id: number }[] },
     messageCountPerAi: any[],
     ratingPerAi: any[],
     aiShares: any[],
@@ -370,6 +387,8 @@ export class AIService {
     const ratingCount = ratingRow ? Number(ratingRow.ratingCount) : 0;
 
     const isShared = !!aiShares.find((a) => a.aiId === ai.id);
+
+    const isApprovedByOrg = ai.orgApprovals.length > 0;
 
     const profile = ai.profile as unknown as AIProfile;
 
@@ -394,6 +413,9 @@ export class AIService {
       filteredAi = aiWithoutSeed;
     }
 
+    const { orgApprovals, ...aiWithoutApprovals } = filteredAi;
+    filteredAi = aiWithoutApprovals;
+
     const groupIds: string[] = ai.groups.map((groupAi) => groupAi.groupId);
 
     return {
@@ -404,6 +426,7 @@ export class AIService {
       rating,
       ratingCount,
       isShared,
+      isApprovedByOrg,
       groups: groupIds,
     };
   }
@@ -663,11 +686,32 @@ export class AIService {
     };
   }
 
+  private getApprovedByOrgCriteria(orgId: string, isApprovedByOrg: boolean) {
+    if (isApprovedByOrg === true) {
+      return {
+        orgApprovals: {
+          some: {
+            orgId,
+          },
+        },
+      };
+    } else {
+      return {
+        orgApprovals: {
+          none: {
+            orgId,
+          },
+        },
+      };
+    }
+  }
+
   public async createDataSourceAndAddToAI(
     authorizationContext: AuthorizationContext,
     aiId: string,
     name: string,
     type: DataSourceType,
+    refreshPeriod: DataSourceRefreshPeriod,
     data: any
   ) {
     const ai = await prismadb.aI.findUnique({
@@ -689,6 +733,7 @@ export class AIService {
       authorizationContext,
       name,
       type,
+      refreshPeriod,
       data
     );
 
@@ -1160,7 +1205,44 @@ export class AIService {
 
     return aiShare;
   }
+
+  public async approveAIForOrganization(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ) {
+    const ai = await aiRepository.getById(aiId);
+
+    const canApproveAI = AISecurityService.canApproveAIForOrg(
+      authorizationContext,
+      ai
+    );
+    if (!canApproveAI) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const { orgId } = authorizationContext;
+    await aiRepository.approveAIForOrg(aiId, orgId);
+  }
+
+  public async revokeAIForOrganization(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ) {
+    const ai = await aiRepository.getById(aiId);
+
+    const canApproveAI = AISecurityService.canApproveAIForOrg(
+      authorizationContext,
+      ai
+    );
+    if (!canApproveAI) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const { orgId } = authorizationContext;
+    await aiRepository.revokeAIForOrg(aiId, orgId);
+  }
 }
 
-const aiService = new AIService();
+const aiRepository = new AIRepositoryImpl();
+const aiService = new AIService(aiRepository);
 export default aiService;

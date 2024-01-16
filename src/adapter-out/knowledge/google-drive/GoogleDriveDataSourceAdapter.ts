@@ -294,7 +294,8 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
         userId,
         oauthTokenId,
         dataSourceId,
-        file
+        file,
+        folderId
       );
       if (item) {
         files.push(item);
@@ -311,7 +312,8 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     userId: string,
     oauthTokenId: string,
     dataSourceId: string,
-    file: drive_v3.Schema$File
+    file: drive_v3.Schema$File,
+    parentFolderId?: string
   ): Promise<DataSourceItem | null> {
     if (!file.id) {
       return null;
@@ -333,7 +335,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       return null;
     }
 
-    return mapGoogleDriveFileToDataSourceItem(file);
+    return mapGoogleDriveFileToDataSourceItem(file, parentFolderId);
   }
 
   public async indexKnowledge(
@@ -558,6 +560,45 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
 
   public async deleteKnowledge(knowledgeId: string): Promise<void> {
     await fileLoader.deleteKnowledge(knowledgeId);
+  }
+
+  public async getRemovedKnowledgeIds(
+    dataSourceItemList: DataSourceItemList
+  ): Promise<string[]> {
+    const parentFolderIds = new Set(
+      dataSourceItemList.items
+        .filter((item) => item.metadata?.parentFolderId)
+        .map((item) => item.metadata.parentFolderId)
+    );
+
+    const uniqueIds = dataSourceItemList.items
+      .map((item) => item.uniqueId)
+      .filter((uniqueId) => uniqueId !== undefined) as string[];
+
+    const removedKnowledgeIds: string[] = [];
+    for (const folderId of Array.from(parentFolderIds)) {
+      const folderRemovedKnowledgeIds = await prismadb.knowledge.findMany({
+        select: {
+          id: true,
+        },
+        where: {
+          uniqueId: {
+            not: {
+              in: uniqueIds,
+            },
+          },
+          metadata: {
+            path: "$.parentFolderId",
+            equals: folderId,
+          },
+        },
+      });
+      folderRemovedKnowledgeIds.forEach((knowledge) =>
+        removedKnowledgeIds.push(knowledge.id)
+      );
+    }
+
+    return removedKnowledgeIds;
   }
 }
 

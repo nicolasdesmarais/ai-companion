@@ -54,7 +54,7 @@ export const ChatList = ({ className, isMobile = false }: Props) => {
                 </Avatar>
               </div>
               <div className="mt-2 text-xs truncate text-center @4xs:text-left">
-                {chat.name}
+                {chat.ai.name}
               </div>
             </div>
           </div>

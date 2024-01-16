@@ -1,9 +1,11 @@
 import {
   dataSourceInitialized,
   dataSourceItemListReceived,
+  dataSourceRefreshRequested,
   knowledgeEventReceived,
   knowledgeInitialized,
   loadKnowledgeChunk,
+  refreshDataSources,
 } from "@/src/adapter-in/inngest/datasource-workflows";
 import { googleDriveFolderScanInitiated } from "@/src/adapter-in/inngest/google-drive-workflows";
 import { serve } from "inngest/next";
@@ -15,10 +17,12 @@ export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
     dataSourceInitialized,
+    dataSourceRefreshRequested,
     dataSourceItemListReceived,
+    googleDriveFolderScanInitiated,
     knowledgeInitialized,
     knowledgeEventReceived,
     loadKnowledgeChunk,
-    googleDriveFolderScanInitiated,
+    refreshDataSources,
   ],
 });

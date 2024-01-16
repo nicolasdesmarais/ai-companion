@@ -1,7 +1,7 @@
 import { Table } from "@/components/table";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { KnowledgeIndexStatus } from "@prisma/client";
+import { DataSourceType, KnowledgeIndexStatus } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { format } from "date-fns";
 import {
@@ -11,17 +11,20 @@ import {
   Globe,
   Loader,
   MinusCircle,
+  RefreshCcw,
   Server,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import DataSourceCard from "./datasource-card";
+import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
 import { DataSourceTypes } from "./datasource-types";
 import { FileUploadKnowledge } from "./file-upload-knowledge";
 import { GoogleDriveForm } from "./google-drive-knowledge";
 import { Banner } from "./ui/banner";
 import { WebUrlsForm } from "./web-urls-knowledge-form";
 import { OneDriveKnowledge } from "./onedrive-knowledge";
+import { Tooltip } from "./ui/tooltip";
 
 interface SelectDataSourceProps {
   form: any;
@@ -29,6 +32,11 @@ interface SelectDataSourceProps {
   setDataSource: (dataSource: any) => void;
   knowledgeLoading: boolean;
 }
+
+const dataSourceTypesForRefresh = [
+  DataSourceType.GOOGLE_DRIVE,
+  DataSourceType.WEB_URL,
+];
 
 export const AIKnowledge = ({
   form,
@@ -38,6 +46,7 @@ export const AIKnowledge = ({
 }: SelectDataSourceProps) => {
   const { toast } = useToast();
   const [removing, setRemoving] = useState("");
+  const [refreshing, setRefreshing] = useState("");
   const pathname = usePathname();
   const router = useRouter();
   const aiId = form.getValues("id");
@@ -59,6 +68,24 @@ export const AIKnowledge = ({
       });
     }
     setRemoving("");
+  };
+
+  const refreshDataSource = async (id: string) => {
+    setRefreshing(id);
+    try {
+      await axios.put(`/api/v1/data-sources/${id}/refresh`);
+
+      toast({ description: "Data source refresh request accepted." });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description:
+          String((error as AxiosError).response?.data) ||
+          "Something went wrong.",
+        duration: 6000,
+      });
+    }
+    setRefreshing("");
   };
 
   const inProgress = dataSources.some(
@@ -85,13 +112,33 @@ export const AIKnowledge = ({
           )}
           <div className="max-h-96 overflow-auto">
             <Table
-              headers={["NAME", "TYPE", "LAST MODIFIED", "Progress", "Remove"]}
+              headers={[
+                "NAME",
+                "TYPE",
+                "Refresh Period",
+                "LAST MODIFIED",
+                "Progress",
+                "Remove",
+              ]}
               className="w-full my-4 max-h-60"
             >
               {dataSources.map((dataSource: any) => (
                 <tr key={dataSource.id} className="items-center my-2 text-sm">
-                  <td className="p-2 ">
-                    <div className="max-w-sm truncate">{dataSource.name}</div>
+                  <td className="p-2">
+                    {dataSource.name.length > 30 ? (
+                      <Tooltip
+                        content={dataSource.name}
+                        className="cursor-default"
+                      >
+                        <div className="truncate max-w-[290px]">
+                          {dataSource.name}
+                        </div>
+                      </Tooltip>
+                    ) : (
+                      <div className="truncate max-w-[290px]">
+                        {dataSource.name}
+                      </div>
+                    )}
                   </td>
                   <td className="p-2">
                     {
@@ -100,6 +147,35 @@ export const AIKnowledge = ({
                       )?.name
                     }
                   </td>
+                  {dataSourceTypesForRefresh.includes(dataSource.type) ? (
+                    <td className="p-3 flex justify-between items-center">
+                      {getDataSourceRefreshPeriodLabel(
+                        dataSource.refreshPeriod
+                      )}
+                      <Tooltip content="Refresh Now">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={!!removing}
+                          onClick={() => refreshDataSource(dataSource.id)}
+                          className="ml-2"
+                        >
+                          {refreshing === dataSource.id ? (
+                            <Loader className="w-4 h-4 spinner" />
+                          ) : (
+                            <RefreshCcw className="w-4 h-4 text-green" />
+                          )}
+                        </Button>
+                      </Tooltip>
+                    </td>
+                  ) : (
+                    <td className="p-2">
+                      {getDataSourceRefreshPeriodLabel(
+                        dataSource.refreshPeriod
+                      )}
+                    </td>
+                  )}
                   <td className="p-2">
                     {dataSource.lastIndexedAt
                       ? format(
@@ -117,6 +193,7 @@ export const AIKnowledge = ({
                     <Button
                       type="button"
                       variant="outline"
+                      size="sm"
                       disabled={!!removing}
                       onClick={() => removeDataSource(dataSource.id)}
                     >

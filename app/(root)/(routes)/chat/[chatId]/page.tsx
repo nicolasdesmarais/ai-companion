@@ -8,6 +8,7 @@ import { AISecurityService } from "@/src/security/services/AISecurityService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
+import { ConfirmModal } from "@/components/confirm-modal";
 
 interface ChatIdPageProps {
   params: {
@@ -31,6 +32,10 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
   const canEditAi =
     ai !== null && AISecurityService.canUpdateAI(authorizationContext, ai);
 
+  const canApproveAi =
+    ai !== null &&
+    AISecurityService.canApproveAIForOrg(authorizationContext, ai);
+
   return (
     <div className="flex h-full">
       <ResizePanel
@@ -42,8 +47,14 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
       >
         <ChatList />
       </ResizePanel>
-      <ChatClient ai={ai} chat={chat} canEditAi={canEditAi} />
+      <ChatClient
+        ai={ai}
+        chat={chat}
+        canEditAi={canEditAi}
+        canApproveAi={canApproveAi}
+      />
       {ai && <AIProfile ai={ai} />}
+      <ConfirmModal />
     </div>
   );
 };

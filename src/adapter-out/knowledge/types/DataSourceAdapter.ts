@@ -38,4 +38,8 @@ export interface DataSourceAdapter {
   ): Promise<IndexKnowledgeResponse>;
 
   deleteKnowledge(knowledgeId: string): Promise<void>;
+
+  getRemovedKnowledgeIds(
+    dataSourceItemList: DataSourceItemList
+  ): Promise<string[]>;
 }

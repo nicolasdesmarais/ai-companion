@@ -1,3 +1,4 @@
+import vectorDatabaseAdapter from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 import {
   DataSourceItemListReceivedPayload,
   DomainEvent,
@@ -11,13 +12,21 @@ export const dataSourceInitialized = inngest.createFunction(
   async ({ event, step }) => {
     const dataSourceId = event.data.dataSourceId;
 
-    const knowledgeIdList = await step.run("get-knowledge-list", async () => {
-      return await dataSourceService.createDataSourceKnowledgeList(
-        dataSourceId
-      );
+    await step.run("create-knowledge-list", async () => {
+      await dataSourceService.createDataSourceKnowledgeList(dataSourceId);
     });
+  }
+);
 
-    await initializeKnowledgeList(step, dataSourceId, knowledgeIdList);
+export const dataSourceRefreshRequested = inngest.createFunction(
+  { id: "datasource-refresh-requested" },
+  { event: DomainEvent.DATASOURCE_REFRESH_REQUESTED },
+  async ({ event, step }) => {
+    const dataSourceId = event.data.dataSourceId;
+
+    await step.run("update-knowledge-list", async () => {
+      await dataSourceService.updateDataSourceKnowledgeList(dataSourceId);
+    });
   }
 );
 
@@ -28,45 +37,14 @@ export const dataSourceItemListReceived = inngest.createFunction(
     const payload = event.data as DataSourceItemListReceivedPayload;
     const { dataSourceId, dataSourceItemList } = payload;
 
-    const knowledgeIdList = await step.run(
-      "on-datasource-item-list-received",
-      async () => {
-        return await dataSourceService.onDataSourceItemListReceived(
-          dataSourceId,
-          dataSourceItemList
-        );
-      }
-    );
-
-    await initializeKnowledgeList(step, dataSourceId, knowledgeIdList);
+    await step.run("on-datasource-item-list-received", async () => {
+      await dataSourceService.onDataSourceItemListReceived(
+        dataSourceId,
+        dataSourceItemList
+      );
+    });
   }
 );
-
-const initializeKnowledgeList = async (
-  step: any,
-  dataSourceId: string,
-  knowledgeIdList: string[]
-) => {
-  let events = [];
-  for (const knowledgeId of knowledgeIdList) {
-    events.push({
-      name: DomainEvent.KNOWLEDGE_INITIALIZED,
-      data: {
-        dataSourceId,
-        knowledgeId,
-      },
-    });
-
-    if (events.length >= INGEST_EVENT_MAX) {
-      await step.sendEvent("fan-out-knowledge-initialized", events);
-      events = [];
-    }
-  }
-
-  if (events.length > 0) {
-    await step.sendEvent("fan-out-knowledge-initialized", events);
-  }
-};
 
 export const knowledgeInitialized = inngest.createFunction(
   { id: "knowledge-initialized" },
@@ -87,6 +65,20 @@ export const knowledgeInitialized = inngest.createFunction(
         await step.sendEvent("fan-out-knowledge-chunks", eventBatch);
       }
     }
+
+    const relatedKnowledgeIds = await step.run("delete-knowledge", async () => {
+      return await dataSourceService.deleteRelatedKnowledgeInstances(
+        knowledgeId
+      );
+    });
+
+    await Promise.all(
+      relatedKnowledgeIds.map((knowledgeId) =>
+        step.run("delete-vectordb-knowledge", async () => {
+          await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
+        })
+      )
+    );
   }
 );
 
@@ -162,6 +154,27 @@ export const loadKnowledgeChunk = inngest.createFunction(
       );
       throw (new Error("Error loading knowledge chunk"), e);
     }
+  }
+);
+
+export const refreshDataSources = inngest.createFunction(
+  { id: "refresh-datasources" },
+  { cron: "0 0 * * *" },
+  async ({ step }) => {
+    const dataSourceIds = await step.run(
+      "find-datasources-to-refresh",
+      async () => {
+        return await dataSourceService.findDataSourcesToRefresh();
+      }
+    );
+
+    await Promise.all(
+      dataSourceIds.map((dataSourceId) =>
+        step.run("refresh-datasource", async () => {
+          await dataSourceService.refreshDataSourceAsSystem(dataSourceId);
+        })
+      )
+    );
   }
 );
 

@@ -2,17 +2,18 @@ import { AIEditor } from "@/components/ai-editor";
 import { GroupModal } from "@/components/group-modal";
 import aiModelService from "@/src/domain/services/AIModelService";
 import aiService from "@/src/domain/services/AIService";
-import groupService from "@/src/domain/services/GroupService";
-import prismadb from "@/src/lib/prismadb";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
+import { GroupSecurityService } from "@/src/security/services/GroupSecurityService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 
 export const maxDuration = 300;
+export const revalidate = 3600;
 
 interface AIIdPageProps {
   params: {
@@ -38,11 +39,7 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
     }
   }
 
-  const models = await aiModelService.getAIModels();
-
-  const categories = await prismadb.category.findMany();
-
-  const groups = await groupService.findGroupsByUser(authorizationContext);
+  const models = await cache(() => aiModelService.getAIModels())();
 
   const hasInstanceAccess = BaseEntitySecurityService.hasPermission(
     authorizationContext,
@@ -51,16 +48,19 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
     SecuredResourceAccessLevel.INSTANCE
   );
 
+  const canAssignEveryoneAvailability =
+    GroupSecurityService.canAssignEveryoneAvailability(authorizationContext);
+
   return (
     <>
       <AIEditor
         initialAi={initialAi}
         aiModels={models}
-        categories={categories}
-        groups={groups}
         hasInstanceAccess={hasInstanceAccess}
       />
-      <GroupModal />
+      <GroupModal
+        canAssignEveryoneAvailability={canAssignEveryoneAvailability}
+      />
     </>
   );
 };

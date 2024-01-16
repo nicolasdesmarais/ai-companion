@@ -52,17 +52,13 @@ Elon: Always! But right now, I'm particularly excited about Neuralink. It has th
 
 interface AIFormProps {
   aiModels: AIModel[];
-  categories: Category[];
   form: any;
-  groups: GroupSummaryDto[];
   hasInstanceAccess: boolean;
 }
 
 export const AICharacter = ({
   aiModels,
-  categories,
   form,
-  groups,
   hasInstanceAccess,
 }: AIFormProps) => {
   const { toast } = useToast();
@@ -71,11 +67,12 @@ export const AICharacter = ({
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatingInstruction, setGeneratingInstruction] = useState(false);
   const [generatingConversation, setGeneratingConversation] = useState(false);
-  const [groupList, setGroupList] = useState<GroupSummaryDto[]>(groups || []);
+  const [groupList, setGroupList] = useState<GroupSummaryDto[]>([]);
   const [advancedImage, setAdvancedImage] = useState(false);
   const [imagePrompt, setImagePrompt] = useState("");
   const [imageModel, setImageModel] = useState("latent-consistency");
   const [diversityString, setDiversityString] = useState("");
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const isLoading = form.formState.isSubmitting;
 
@@ -85,6 +82,18 @@ export const AICharacter = ({
       setGroupList(response.data.data);
     }
   };
+
+  const fetchCategories = async () => {
+    const response = await axios.get("/api/v1/categories");
+    if (response.status === 200 && Array.isArray(response.data)) {
+      setCategories(response.data);
+    }
+  };
+
+  useEffect(() => {
+    fetchGroups();
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     if (groupModal.areGroupsUpdated) {

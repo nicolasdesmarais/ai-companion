@@ -82,6 +82,11 @@ export class VectorDatabaseAdapter {
     }
     return { knowledge, docMeta };
   }
+
+  public async deleteKnowledge(knowledgeId: string): Promise<void> {
+    const memoryManager = await MemoryManager.getInstance();
+    await memoryManager.vectorDelete(knowledgeId);
+  }
 }
 
 const vectorDatabaseAdapter = new VectorDatabaseAdapter();

@@ -35,6 +35,7 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       items: [
         {
           name: input.url,
+          uniqueId: input.url,
         },
       ],
     };
@@ -71,7 +72,13 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
     knowledge: Knowledge,
     item: DataSourceItem
   ): boolean {
-    return knowledge.uniqueId !== item.uniqueId;
+    if (knowledge.uniqueId !== item.uniqueId) {
+      return true;
+    }
+
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    return !knowledge.lastIndexedAt || knowledge.lastIndexedAt < oneWeekAgo;
   }
 
   public retrieveKnowledgeIdFromEvent(data: any): string {
@@ -200,6 +207,12 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       blobUrl,
       chunkCount,
     };
+  }
+
+  public async getRemovedKnowledgeIds(
+    dataSourceItemList: DataSourceItemList
+  ): Promise<string[]> {
+    return [];
   }
 }
 

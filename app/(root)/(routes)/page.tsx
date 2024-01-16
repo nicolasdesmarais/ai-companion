@@ -1,13 +1,13 @@
 import { AIs } from "@/components/ais";
 import { Categories } from "@/components/categories";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { Filters } from "@/components/filters";
 import { GroupModal } from "@/components/group-modal";
 import { Groups } from "@/components/groups";
-import { Filters } from "@/components/filters";
 import { InviteButton } from "@/components/invite-button";
 import { SearchInput } from "@/components/search-input";
-import aiService from "@/src/domain/services/AIService";
 import { Banner } from "@/components/ui/banner";
+import aiService from "@/src/domain/services/AIService";
 
 import {
   AdminScopes,
@@ -15,16 +15,18 @@ import {
   ListAIsRequestScope,
   SuperuserScopes,
 } from "@/src/adapter-in/api/AIApi";
-import categoryService from "@/src/domain/services/CategoryService";
-import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
+import categoryService from "@/src/domain/services/CategoryService";
 import groupService from "@/src/domain/services/GroupService";
+import { GroupSecurityService } from "@/src/security/services/GroupSecurityService";
+import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 
 interface RootPageProps {
   searchParams: {
     scope: string;
     groupId: string;
     categoryId: string;
+    approvedByOrg: string;
     search: string;
     sort: string;
   };
@@ -53,11 +55,19 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
     authorizationContext
   );
 
+  let approvedByOrg;
+  if (searchParams.approvedByOrg === "true") {
+    approvedByOrg = true;
+  } else if (searchParams.approvedByOrg === "false") {
+    approvedByOrg = false;
+  }
+
   const requestParams: ListAIsRequestParams = {
     scope: scope,
     groupId: searchParams.groupId,
     categoryId: searchParams.categoryId,
     search: searchParams.search,
+    approvedByOrg,
     sort: searchParams.sort,
   };
 
@@ -67,6 +77,9 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
   );
 
   const categories = await categoryService.getCategories();
+
+  const canAssignEveryoneAvailability =
+    GroupSecurityService.canAssignEveryoneAvailability(authorizationContext);
 
   return (
     <div className="h-full px-4 space-y-2 pt-2">
@@ -99,7 +112,9 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
         authorizationContext={authorizationContext}
         groups={groups}
       />
-      <GroupModal />
+      <GroupModal
+        canAssignEveryoneAvailability={canAssignEveryoneAvailability}
+      />
       <ConfirmModal />
     </div>
   );
