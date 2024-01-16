@@ -26,9 +26,37 @@ interface Props {
 
 export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
   const [loading, setLoading] = useState(false);
+  const [searching, setSearching] = useState(true);
   const [accounts, setAccounts] = useState<UserOAuthTokenEntity[]>([]);
   const [selectedAccount, setSelectedAccount] = useState("");
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
+  const { toast } = useToast();
+
+  const fetchAccount = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `/api/v1/integrations/onedrive/accounts`
+      );
+      setAccounts(response.data);
+      if (response.data.length > 0) {
+        setSelectedAccount(response.data[0]?.id);
+      } else {
+        setSearching(false);
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: "Something went wrong",
+      });
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchAccount();
+  }, []);
 
   const handleConnectClick = async () => {
     // Open a new popup window

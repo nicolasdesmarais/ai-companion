@@ -33,8 +33,10 @@ export class MsftOAuthAdapter implements OAuthAdapter {
     clientCredentialData: any,
     token: any
   ): Promise<OAuthTokenInfo> {
+    console.log("getOAuthTokenInfo", clientCredentialData, token);
+    // TODO: refresh if needed
     return {
-      isExistingTokenValid: false,
+      isExistingTokenValid: true,
     };
   }
 }
