@@ -1,7 +1,7 @@
 import { OAuthAdapter, TokensFromRedirect } from "./OAuthAdapter";
 import { OAuthTokenInfo } from "./OAuthTokenInfo";
 
-const scope = "offline_access%20user.read";
+const scope = "offline_access%20user.read%20files.read.all";
 const msftUrl = "https://login.microsoftonline.com/common/oauth2/v2.0";
 export class MsftOAuthAdapter implements OAuthAdapter {
   public getOAuthRedirectUrl(): string {

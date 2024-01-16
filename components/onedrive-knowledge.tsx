@@ -30,7 +30,20 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
   const [accounts, setAccounts] = useState<UserOAuthTokenEntity[]>([]);
   const [selectedAccount, setSelectedAccount] = useState("");
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [selectedFile, setSelectedFile] = useState<any | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetchAccount();
+  }, []);
+
+  useEffect(() => {
+    if (selectedAccount) {
+      handleSearch();
+    }
+  }, [selectedAccount]);
 
   const fetchAccount = async () => {
     setLoading(true);
@@ -54,10 +67,6 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchAccount();
-  }, []);
-
   const handleConnectClick = async () => {
     // Open a new popup window
     const width = 600;
@@ -79,6 +88,36 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
     if (value === ADD_ACCOUNT_OPTION) {
       handleConnectClick();
     }
+  };
+
+  const handleSearch = async () => {
+    setSearching(true);
+    setSelectedFile(null);
+    try {
+      const response = await axios.post(
+        `/api/v1/integrations/onedrive/search`,
+        {
+          oauthTokenId: selectedAccount ?? "",
+          searchTerms: [searchTerm],
+        }
+      );
+      console.log(response.data);
+
+      setSearchResults(response.data.files);
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        toast({
+          variant: "destructive",
+          description: "Folder not found.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          description: "Something went wrong",
+        });
+      }
+    }
+    setSearching(false);
   };
 
   return (
