@@ -841,6 +841,7 @@ export class DataSourceService {
     const relatedKnowledgeInstances = await prismadb.knowledge.findMany({
       where: {
         uniqueId: knowledge.uniqueId,
+        type: knowledge.type,
         id: { not: knowledgeId },
       },
     });
