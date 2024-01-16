@@ -853,14 +853,18 @@ export class DataSourceService {
       return [];
     }
 
+    const relatedAndNewKnowledgeIds = [...relatedKnowledgeIds, knowledgeId];
+
+    // Find all data sources which are associated with the related or the new knowledge instances
     const relatedDataSources = await prismadb.dataSourceKnowledge.findMany({
       select: { dataSourceId: true },
       distinct: ["dataSourceId"],
       where: {
-        knowledgeId: { in: [...relatedKnowledgeIds, knowledgeId] },
+        knowledgeId: { in: relatedAndNewKnowledgeIds },
       },
     });
 
+    // Create new data source knowledge relationships for the new knowledge instance
     const newDataSourceRelationships = relatedDataSources.map((dataSource) => {
       return {
         dataSourceId: dataSource.dataSourceId,
@@ -869,9 +873,10 @@ export class DataSourceService {
     });
 
     await prismadb.$transaction(async (tx) => {
+      // Delete all data source knowledge relationships for the related and new knowledge instances
       await tx.dataSourceKnowledge.deleteMany({
         where: {
-          knowledgeId: { in: [...relatedKnowledgeIds, knowledgeId] },
+          knowledgeId: { in: relatedAndNewKnowledgeIds },
         },
       });
 
