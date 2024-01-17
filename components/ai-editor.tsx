@@ -388,9 +388,27 @@ export const AIEditor = ({
       ),
     },
     {
-      name: "Cloud Storage",
+      name: "Google Drive Storage",
       secondary: true,
-      route: "edit/knowledge/cloud",
+      route: "edit/knowledge/google-drive",
+      content: aiKnowledge,
+      buttons: (
+        <>
+          <div>{backButton("edit/knowledge")}</div>
+          <div className="flex flex-col md:flex-row items-center">
+            {saveProgressButton}
+            {continueButton(
+              "/edit/personality",
+              dataSources.length ? "Continue" : "Skip & Continue"
+            )}
+          </div>
+        </>
+      ),
+    },
+    {
+      name: "OneDrive Storage",
+      secondary: true,
+      route: "edit/knowledge/one-drive",
       content: aiKnowledge,
       buttons: (
         <>

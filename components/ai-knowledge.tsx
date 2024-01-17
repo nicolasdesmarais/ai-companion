@@ -254,13 +254,17 @@ export const AIKnowledge = ({
               icon={GoogleDriveSvg}
               title="Google Drive"
               description="Import data from your Google cloud storage."
-              onClick={() => router.push(`/ai/${aiId}/edit/knowledge/cloud`)}
+              onClick={() =>
+                router.push(`/ai/${aiId}/edit/knowledge/google-drive`)
+              }
             />
             <DataSourceCard
               icon={OneDriveSvg}
               title="Microsoft OneDrive"
               description="Import data from your Microsoft cloud storage."
-              onClick={() => router.push(`/ai/${aiId}/edit/knowledge/cloud`)}
+              onClick={() =>
+                router.push(`/ai/${aiId}/edit/knowledge/one-drive`)
+              }
             />
           </div>
         </>
@@ -286,17 +290,17 @@ export const AIKnowledge = ({
         />
       )}
       {pathname.endsWith("web-url") && <WebUrlsForm aiId={aiId} />}
-      {pathname.endsWith("cloud") && aiId && (
-        <>
-          <OneDriveKnowledge
-            aiId={aiId}
-            goBack={() => router.push(`/ai/${aiId}/edit/knowledge`)}
-          />
-          <GoogleDriveForm
-            aiId={aiId}
-            goBack={() => router.push(`/ai/${aiId}/edit/knowledge`)}
-          />
-        </>
+      {pathname.endsWith("google-drive") && aiId && (
+        <GoogleDriveForm
+          aiId={aiId}
+          goBack={() => router.push(`/ai/${aiId}/edit/knowledge`)}
+        />
+      )}
+      {pathname.endsWith("one-drive") && aiId && (
+        <OneDriveKnowledge
+          aiId={aiId}
+          goBack={() => router.push(`/ai/${aiId}/edit/knowledge`)}
+        />
       )}
     </div>
   );

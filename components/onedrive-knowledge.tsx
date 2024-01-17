@@ -121,7 +121,7 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
   return (
     <div className="w-full p-6 bg-accent/30 mb-8">
       <div className="mb-4">
-        <h2 className="text-xl font-bold">OneDrive Integration</h2>
+        <h2 className="text-xl font-bold">Microsoft OneDrive Integration</h2>
         <p className="text-gray-400 mb-4">
           Choose a file or folder from your OneDrive to train your AI.
         </p>
