@@ -63,17 +63,45 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
   ) {
     const token = await this.getToken(userId, oauthTokenId);
     if (searchTerm === "") {
-      return this.fetch(token, "/me/drive/root/children");
+      return await this.fetch(token, "/me/drive/root/children");
     }
-    return this.fetch(token, `/me/drive/root/search(q='${searchTerm}')`);
+    return await this.fetch(token, `/me/drive/root/search(q='${searchTerm}')`);
   }
 
+  /**
+   * Retrieves a list of files from OneDrive
+   * If the fileId is a file:
+   *  - returns a list with a single item
+   * If the fileId is a folder:
+   *  - publishes a FOLDER_SCAN_INITIATED event to process the folder asynchronously
+   *  - returns an empty list of items
+   * @param orgId
+   * @param userId
+   * @param data
+   * @returns
+   */
   public async getDataSourceItemList(
     orgId: string,
     userId: string,
     dataSourceId: string,
     data: any
   ): Promise<DataSourceItemList> {
+    const token = await this.getToken(userId, data.oauthTokenId);
+    const item = await this.fetch(token, `/me/drive/items/${data.fileId}`);
+    if (item.file) {
+      const dataSourceItem: DataSourceItem = {
+        name: item.name,
+        uniqueId: item.id,
+        metadata: {
+          fileId: item.id,
+          fileName: item.name,
+          mimeType: item.file.mimeType,
+          modifiedTime: item.lastModifiedDateTime,
+        },
+      };
+      console.log(item, dataSourceItem);
+    }
+    throw new Error("Method not implemented.");
     return {
       type: DataSourceType.ONEDRIVE,
       items: [],

@@ -1,7 +1,12 @@
 "use client";
 import { Table } from "@/components/table";
 import { Button } from "@/components/ui/button";
-import { FormControl, FormItem, FormLabel } from "@/components/ui/form";
+import {
+  FormControl,
+  FormDescription,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -12,10 +17,12 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import { UserOAuthTokenEntity } from "@/src/domain/models/OAuthTokens";
+import { DataSourceRefreshPeriod } from "@prisma/client";
 import axios from "axios";
 import { format } from "date-fns";
 import { Loader, Server } from "lucide-react";
 import { useEffect, useState } from "react";
+import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
 
 const ADD_ACCOUNT_OPTION = "add-account";
 
@@ -33,6 +40,9 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [selectedFile, setSelectedFile] = useState<any | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [dataRefreshPeriod, setDataRefreshPeriod] =
+    useState<DataSourceRefreshPeriod | null>(DataSourceRefreshPeriod.NEVER);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -116,6 +126,29 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
       }
     }
     setSearching(false);
+  };
+
+  const handleLoad = async () => {
+    if (!selectedFile || !selectedAccount) {
+      return;
+    }
+    setUploading(true);
+
+    try {
+      await axios.post(`/api/v1/ai/${aiId}/data-sources/onedrive`, {
+        oauthTokenId: selectedAccount,
+        fileId: selectedFile.id,
+        filename: selectedFile.name,
+        dataRefreshPeriod: dataRefreshPeriod ?? DataSourceRefreshPeriod.NEVER,
+      });
+      goBack();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: "Something went wrong",
+      });
+    }
+    setUploading(false);
   };
 
   return (
@@ -234,6 +267,57 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
           </div>
         </div>
       ) : null}
+      {!loading && (
+        <div className="my-4">
+          <FormItem>
+            <FormLabel>Data Refresh Interval</FormLabel>
+            <Select
+              onValueChange={(value) =>
+                setDataRefreshPeriod(value as DataSourceRefreshPeriod)
+              }
+              value={dataRefreshPeriod ?? ""}
+            >
+              <FormControl>
+                <SelectTrigger className="bg-background">
+                  <SelectValue>
+                    {getDataSourceRefreshPeriodLabel(dataRefreshPeriod)}
+                  </SelectValue>
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {Object.values(DataSourceRefreshPeriod).map((period) => (
+                  <SelectItem key={period} value={period}>
+                    {getDataSourceRefreshPeriodLabel(period)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormDescription>
+              Determine how often your data source will be reindexed. Please be
+              aware that this may increase costs.
+            </FormDescription>
+          </FormItem>
+        </div>
+      )}
+      {selectedFile && (
+        <>
+          <div className="flex flex-row-reverse w-full mt-4">
+            <Button
+              type="button"
+              onClick={handleLoad}
+              disabled={!selectedFile || !selectedAccount}
+              variant="ring"
+            >
+              Load
+              {uploading ? (
+                <Loader className="w-4 h-4 ml-2 spinner" />
+              ) : (
+                <Server className="w-4 h-4 ml-2" />
+              )}
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

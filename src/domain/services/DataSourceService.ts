@@ -28,6 +28,7 @@ import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import { DomainEvent } from "../events/domain-event";
 import { DataSourceDto } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
+import msftDataSourceAdapter from "@/src/adapter-out/knowledge/msft/MsftDataSourceAdapter";
 
 export class DataSourceService {
   constructor(private dataSourceRepository: DataSourceRepository) {}
@@ -42,6 +43,8 @@ export class DataSourceService {
         return fileUploadDataSourceAdapter;
       case DataSourceType.API:
         return apiDataSourceAdapter;
+      case DataSourceType.ONEDRIVE:
+        return msftDataSourceAdapter;
       default:
         throw new Error(`DataSourceType ${type} not supported`);
     }
