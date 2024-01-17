@@ -75,7 +75,6 @@ export class MsftOAuthAdapter implements OAuthAdapter {
         clientCredentialData,
         token
       );
-      console.log("refreshedToken", refreshedToken);
       return {
         isExistingTokenValid: false,
         refreshedToken,

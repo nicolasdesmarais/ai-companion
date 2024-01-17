@@ -14,19 +14,19 @@ export async function POST(req: Request) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const { searchTerms, oauthTokenId } = await req.json();
+  const { searchTerm, oauthTokenId } = await req.json();
 
   try {
     const searchResponse = await msftDataSourceAdapter.search(
       orgId,
       userId,
       oauthTokenId,
-      searchTerms
+      searchTerm
     );
 
     return NextResponse.json(searchResponse);
   } catch (e) {
-    console.log(e);
+    console.error("MSFT Search:", e.response?.data);
     if (e instanceof EntityNotFoundError) {
       return NextResponse.json({ folders: [], knowledgeIds: [] });
     }

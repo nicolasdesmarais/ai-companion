@@ -98,7 +98,7 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
         `/api/v1/integrations/onedrive/search`,
         {
           oauthTokenId: selectedAccount ?? "",
-          searchTerms: [searchTerm],
+          searchTerm,
         }
       );
       setSearchResults(response.data.value);

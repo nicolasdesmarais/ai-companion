@@ -48,20 +48,24 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     return oauthTokenData.access_token;
   }
 
+  private async fetch(token: string, url: string) {
+    const resp = await axios.get(MsftDataSourceAdapter.GraphApiUrl + url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return resp.data;
+  }
+
   public async search(
     orgId: string,
     userId: string,
     oauthTokenId: string,
-    searchTerms: string[]
+    searchTerm: string
   ) {
     const token = await this.getToken(userId, oauthTokenId);
-    const resp = await axios.get(
-      `${MsftDataSourceAdapter.GraphApiUrl}/me/drive/root/children`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    return resp.data;
+    if (searchTerm === "") {
+      return this.fetch(token, "/me/drive/root/children");
+    }
+    return this.fetch(token, `/me/drive/root/search(q='${searchTerm}')`);
   }
 
   public async getDataSourceItemList(
