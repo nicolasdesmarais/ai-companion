@@ -101,9 +101,7 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
           searchTerms: [searchTerm],
         }
       );
-      console.log(response.data);
-
-      setSearchResults(response.data.files);
+      setSearchResults(response.data.value);
     } catch (error) {
       if (error instanceof EntityNotFoundError) {
         toast({
@@ -170,6 +168,72 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
           </>
         ) : null}
       </div>
+      {selectedAccount ? (
+        <>
+          <div className="mb-4">
+            <div className="flex items-center">
+              <input
+                className="border p-2 rounded w-full mr-2" // added mr-2 for spacing
+                type="text"
+                placeholder="Search term"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSearch();
+                  }
+                }}
+              />
+              <Button onClick={handleSearch} variant="ring" type="button">
+                Search
+              </Button>
+            </div>
+          </div>
+
+          <div className="max-h-[32rem] overflow-auto border border-ring/30 rounded-sm">
+            <Table
+              headers={["NAME", "TYPE", "OWNER", "LAST MODIFIED"]}
+              className="w-full max-h-60"
+            >
+              {!searching &&
+                searchResults &&
+                searchResults.map((file) => (
+                  <tr
+                    key={file.id}
+                    className={file.id === selectedFile?.id ? "bg-ring" : ""}
+                    onClick={() => setSelectedFile(file)}
+                  >
+                    <td className="p-2">{file.name}</td>
+                    <td className="p-2">{file.name}</td>
+                    <td className="p-2">{file.createdBy?.user?.displayName}</td>
+                    <td className="p-2">
+                      {format(
+                        new Date(file.lastModifiedDateTime),
+                        "h:mma M/d/yyyy "
+                      )}
+                    </td>
+                  </tr>
+                ))}
+            </Table>
+            {!searching && searchResults && searchResults.length === 0 ? (
+              <div className="flex items-center my-2 w-full">
+                <div className="mx-auto flex p-4 bg-background rounded-lg">
+                  <Server className="w-6 h-6 mr-2" />
+                  <p>No results found</p>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </>
+      ) : null}
+      {loading || searching ? (
+        <div className="flex items-center my-2 w-full">
+          <div className="mx-auto">
+            <Loader className="w-8 h-8 spinner" />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };

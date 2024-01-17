@@ -20,21 +20,28 @@ export class MsftOAuthAdapter implements OAuthAdapter {
       },
       body: `client_id=${clientCredentialData.clientId}&scope=${scope}&code=${code}&redirect_uri=${clientCredentialData.redirectUri}&grant_type=authorization_code&client_secret=${clientCredentialData.clientSecret}`,
     });
-    const { access_token, refresh_token, error, error_description } =
-      await resp.json();
+    const {
+      access_token,
+      refresh_token,
+      error,
+      error_description,
+      expires_in,
+    } = await resp.json();
+
+    const exp = new Date();
+    exp.setSeconds(exp.getSeconds() + expires_in);
 
     if (error) {
       throw new Error(`MSFT Error: ${error} - ${error_description}`);
     }
-    return { email: "", tokens: { access_token, refresh_token } };
+    return { email: "CHANGE ME", tokens: { access_token, refresh_token, exp } };
   }
 
   public async getOAuthTokenInfo(
     clientCredentialData: any,
     token: any
   ): Promise<OAuthTokenInfo> {
-    console.log("getOAuthTokenInfo", clientCredentialData, token);
-    // TODO: refresh if needed
+    // TODO: refresh when needed
     return {
       isExistingTokenValid: true,
     };
