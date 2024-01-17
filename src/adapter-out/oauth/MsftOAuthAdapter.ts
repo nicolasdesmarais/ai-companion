@@ -37,11 +37,50 @@ export class MsftOAuthAdapter implements OAuthAdapter {
     return { email: "CHANGE ME", tokens: { access_token, refresh_token, exp } };
   }
 
+  public async refreshToken(
+    clientCredentialData: any,
+    token: any
+  ): Promise<any> {
+    const resp = await fetch(msftUrl + "/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: `client_id=${clientCredentialData.clientId}&scope=${scope}&refresh_token=${token.refresh_token}&grant_type=refresh_token&client_secret=${clientCredentialData.clientSecret}`,
+    });
+    const {
+      access_token,
+      refresh_token,
+      error,
+      error_description,
+      expires_in,
+    } = await resp.json();
+    const exp = new Date();
+    exp.setSeconds(exp.getSeconds() + expires_in);
+
+    if (error) {
+      throw new Error(`MSFT Error: ${error} - ${error_description}`);
+    }
+    return { access_token, refresh_token, exp };
+  }
+
   public async getOAuthTokenInfo(
     clientCredentialData: any,
     token: any
   ): Promise<OAuthTokenInfo> {
-    // TODO: refresh when needed
+    const now = new Date();
+    const exp = new Date(token.exp);
+    if (now > exp) {
+      const refreshedToken = await this.refreshToken(
+        clientCredentialData,
+        token
+      );
+      console.log("refreshedToken", refreshedToken);
+      return {
+        isExistingTokenValid: false,
+        refreshedToken,
+      };
+    }
     return {
       isExistingTokenValid: true,
     };
