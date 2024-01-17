@@ -55,6 +55,20 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
     }
   }, [selectedAccount]);
 
+  useEffect(() => {
+    const popupInterval = setInterval(() => {
+      if (popupWindow?.closed) {
+        clearInterval(popupInterval);
+        fetchAccount();
+      }
+    }, 1000);
+
+    // Cleanup interval on unmount
+    return () => {
+      clearInterval(popupInterval);
+    };
+  }, [popupWindow]);
+
   const fetchAccount = async () => {
     setLoading(true);
     try {
