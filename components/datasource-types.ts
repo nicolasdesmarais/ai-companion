@@ -15,4 +15,8 @@ export const DataSourceTypes = [
     name: "API",
     type: "API",
   },
+  {
+    name: "OneDrive",
+    type: "ONEDRIVE",
+  },
 ];
