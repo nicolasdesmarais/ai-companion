@@ -106,7 +106,7 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
       {!(scope !== ListAIsRequestScope.PUBLIC || searchParams.groupId) && (
         <Categories data={categories} />
       )}
-      <Groups groups={groups} />
+      <Groups groups={groups} hasElevatedWriteAccess={hasElevatedWriteAccess} />
       <AIs
         data={data}
         authorizationContext={authorizationContext}
