@@ -23,7 +23,10 @@ import { format } from "date-fns";
 import { Loader, Server } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
-import { getLabelFromFileType } from "@/src/adapter-in/api/DataSourcesApi";
+import {
+  FileType,
+  getLabelFromFileType,
+} from "@/src/adapter-in/api/DataSourcesApi";
 import mime from "mime-types";
 
 const ADD_ACCOUNT_OPTION = "add-account";
@@ -257,7 +260,9 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
                     <td className="p-2">
                       {file.folder
                         ? "Folder"
-                        : getLabelFromFileType(mime.lookup(file.name))}
+                        : getLabelFromFileType(
+                            mime.lookup(file.name) as FileType
+                          )}
                     </td>
                     <td className="p-2">{file.createdBy?.user?.displayName}</td>
                     <td className="p-2">
