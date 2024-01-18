@@ -27,8 +27,12 @@ export class GroupSecurityService {
     authorizationContext: AuthorizationContext,
     group: GroupSummaryDto
   ) {
-    const { userId } = authorizationContext;
-    return group.ownerUserId === userId;
+    return BaseEntitySecurityService.hasPermissionOnEntity(
+      authorizationContext,
+      { userId: group.ownerUserId, orgId: group.orgId },
+      SecuredResourceType.GROUPS,
+      SecuredAction.WRITE
+    );
   }
 
   public static canInviteUsersToGroup(
@@ -44,17 +48,6 @@ export class GroupSecurityService {
     return true;
   }
 
-  public static canAssignEveryoneAvailability(
-    authorizationContext: AuthorizationContext
-  ) {
-    return BaseEntitySecurityService.hasPermission(
-      authorizationContext,
-      SecuredResourceType.GROUPS,
-      SecuredAction.WRITE,
-      SecuredResourceAccessLevel.ORGANIZATION
-    );
-  }
-
   public static hasInstanceGroupsReadAccess(
     authorizationContext: AuthorizationContext
   ) {
@@ -62,6 +55,17 @@ export class GroupSecurityService {
       authorizationContext,
       SecuredResourceType.GROUPS,
       SecuredAction.READ,
+      SecuredResourceAccessLevel.INSTANCE
+    );
+  }
+
+  public static hasInstanceGroupsWriteAccess(
+    authorizationContext: AuthorizationContext
+  ) {
+    return BaseEntitySecurityService.hasPermission(
+      authorizationContext,
+      SecuredResourceType.GROUPS,
+      SecuredAction.WRITE,
       SecuredResourceAccessLevel.INSTANCE
     );
   }
@@ -74,6 +78,26 @@ export class GroupSecurityService {
       SecuredResourceType.GROUPS,
       SecuredAction.READ,
       SecuredResourceAccessLevel.ORGANIZATION
+    );
+  }
+
+  public static hasAdminGroupsWriteAccess(
+    authorizationContext: AuthorizationContext
+  ) {
+    return BaseEntitySecurityService.hasPermission(
+      authorizationContext,
+      SecuredResourceType.GROUPS,
+      SecuredAction.WRITE,
+      SecuredResourceAccessLevel.ORGANIZATION
+    );
+  }
+
+  public static hasElevatedWriteAccess(
+    authorizationContext: AuthorizationContext
+  ) {
+    return (
+      this.hasInstanceGroupsWriteAccess(authorizationContext) ||
+      this.hasAdminGroupsWriteAccess(authorizationContext)
     );
   }
 }

@@ -46,22 +46,19 @@ const groupFormSchema = z.object({
 });
 
 interface GroupModalProps {
-  canAssignEveryoneAvailability: boolean;
+  hasElevatedWriteAccess: boolean;
 }
 
-export const GroupModal = ({
-  canAssignEveryoneAvailability,
-}: GroupModalProps) => {
+export const GroupModal = ({ hasElevatedWriteAccess }: GroupModalProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedOption, setSelectedOption] =
     useState<GroupAvailability | null>(GroupAvailability.RESTRICTED);
   const [currentTeammates, setCurrentTeammates] = useState<any[]>([]);
   const [removedTeammates, setRemovedTeammates] = useState<any[]>([]);
-  const [isOwner, setIsOwner] = useState(true);
+  const [canUpdateGroup, setCanUpdateGroup] = useState(true);
   const [search, setSearch] = useState("");
   const [filteredTeammates, setFilteredTeammates] = useState<any[]>([]);
-  const [hasOrgAccess, setHasOrgAccess] = useState(true);
   const { toast } = useToast();
   const { user } = useUser();
   const groupModal = useGroupModal();
@@ -81,13 +78,17 @@ export const GroupModal = ({
 
   const fetchGroup = async () => {
     setLoading(true);
+
     const response = await axios.get(`/api/v1/groups/${groupModal.groupId}`);
     if (response.status === 200) {
+      const canUpdateGroup = hasElevatedWriteAccess ||
+      response.data.ownerId === user?.id;
+
       form.setValue("name", response.data.name);
       setSelectedOption(response.data.availability);
       setCurrentTeammates(response.data.users);
       setFilteredTeammates(response.data.users);
-      setIsOwner(response.data.ownerUserId === user?.id);
+      setCanUpdateGroup(canUpdateGroup);
     } else {
       toast({
         description: "Something went wrong",
@@ -260,7 +261,7 @@ export const GroupModal = ({
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {groupModal.groupId &&
-                !isOwner &&
+                !canUpdateGroup &&
                 selectedOption === GroupAvailability.RESTRICTED && (
                   <Banner>
                     Only the group owner can rename or delete this group.
@@ -275,7 +276,7 @@ export const GroupModal = ({
                     <FormControl>
                       <Input
                         placeholder="Group Name"
-                        disabled={!isOwner || loading}
+                        disabled={!canUpdateGroup || loading}
                         {...field}
                       />
                     </FormControl>
@@ -287,13 +288,13 @@ export const GroupModal = ({
               <div className="space-y-4">
                 <FormLabel>Who can join?</FormLabel>
                 <FormItem>
-                  {canAssignEveryoneAvailability && (
+                  {hasElevatedWriteAccess && (
                     <FormControl>
                       <div>
                         <label>
                           <input
                             type="radio"
-                            disabled={!isOwner || loading}
+                            disabled={!canUpdateGroup || loading}
                             value={GroupAvailability.EVERYONE}
                             checked={
                               selectedOption === GroupAvailability.EVERYONE
@@ -315,7 +316,7 @@ export const GroupModal = ({
                       <label>
                         <input
                           type="radio"
-                          disabled={!isOwner || loading}
+                          disabled={!canUpdateGroup || loading}
                           value={GroupAvailability.RESTRICTED}
                           checked={
                             selectedOption === GroupAvailability.RESTRICTED
@@ -418,7 +419,7 @@ export const GroupModal = ({
                     ) : null}
                   </Button>
 
-                  {groupModal.groupId && isOwner && (
+                  {groupModal.groupId && canUpdateGroup && (
                     <Button
                       size="lg"
                       variant="destructive"
@@ -446,7 +447,7 @@ export const GroupModal = ({
                     </Button>
                   )}
                   {groupModal.groupId &&
-                    !isOwner &&
+                    !canUpdateGroup &&
                     selectedOption === GroupAvailability.RESTRICTED && (
                       <Button
                         size="lg"
