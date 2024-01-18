@@ -34,10 +34,6 @@ export const Groups = ({ groups }: Props) => {
   };
 
   useEffect(() => {
-    fetchGroups();
-  }, []);
-
-  useEffect(() => {
     if (groupModal.areGroupsUpdated) {
       fetchGroups();
     }
