@@ -54,4 +54,26 @@ export class GroupSecurityService {
       SecuredResourceAccessLevel.ORGANIZATION
     );
   }
+
+  public static hasInstanceGroupsReadAccess(
+    authorizationContext: AuthorizationContext
+  ) {
+    return BaseEntitySecurityService.hasPermission(
+      authorizationContext,
+      SecuredResourceType.GROUPS,
+      SecuredAction.READ,
+      SecuredResourceAccessLevel.INSTANCE
+    );
+  }
+
+  public static hasAdminGroupsReadAccess(
+    authorizationContext: AuthorizationContext
+  ) {
+    return BaseEntitySecurityService.hasPermission(
+      authorizationContext,
+      SecuredResourceType.GROUPS,
+      SecuredAction.READ,
+      SecuredResourceAccessLevel.ORGANIZATION
+    );
+  }
 }
