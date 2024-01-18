@@ -55,7 +55,7 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     return oauthTokenData.access_token;
   }
 
-  private async fetch(token: string, url: string) {
+  public async fetch(token: string, url: string) {
     const resp = await axios.get(MsftDataSourceAdapter.GraphApiUrl + url, {
       headers: { Authorization: `Bearer ${token}` },
     });

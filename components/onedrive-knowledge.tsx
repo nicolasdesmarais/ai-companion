@@ -281,7 +281,7 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
           </div>
         </div>
       ) : null}
-      {!loading && (
+      {!loading && selectedAccount && (
         <div className="my-4">
           <FormItem>
             <FormLabel>Data Refresh Interval</FormLabel>

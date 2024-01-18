@@ -1,5 +1,6 @@
 import { OAuthAdapter, TokensFromRedirect } from "./OAuthAdapter";
 import { OAuthTokenInfo } from "./OAuthTokenInfo";
+import msftDataSourceAdapter from "@/src/adapter-out/knowledge/msft/MsftDataSourceAdapter";
 
 const scope = "offline_access%20user.read%20files.read.all";
 const msftUrl = "https://login.microsoftonline.com/common/oauth2/v2.0";
@@ -34,7 +35,16 @@ export class MsftOAuthAdapter implements OAuthAdapter {
     if (error) {
       throw new Error(`MSFT Error: ${error} - ${error_description}`);
     }
-    return { email: "CHANGE ME", tokens: { access_token, refresh_token, exp } };
+
+    const user = await msftDataSourceAdapter.fetch(access_token, "/me");
+    if (!user) {
+      throw new Error("MSFT Error: No user found");
+    }
+
+    return {
+      email: user.userPrincipalName,
+      tokens: { access_token, refresh_token, exp },
+    };
   }
 
   public async refreshToken(
