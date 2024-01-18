@@ -48,8 +48,8 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
     SecuredResourceAccessLevel.INSTANCE
   );
 
-  const canAssignEveryoneAvailability =
-    GroupSecurityService.canAssignEveryoneAvailability(authorizationContext);
+  const hasElevatedWriteAccess =
+    GroupSecurityService.hasElevatedWriteAccess(authorizationContext);
 
   return (
     <>
@@ -58,9 +58,7 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
         aiModels={models}
         hasInstanceAccess={hasInstanceAccess}
       />
-      <GroupModal
-        canAssignEveryoneAvailability={canAssignEveryoneAvailability}
-      />
+      <GroupModal hasElevatedWriteAccess={hasElevatedWriteAccess} />
     </>
   );
 };
