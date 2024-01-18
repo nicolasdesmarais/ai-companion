@@ -828,9 +828,20 @@ export class DataSourceService {
       where: { id: knowledgeId },
     });
 
+    if (!knowledge) {
+      throw new EntityNotFoundError(
+        `Knowledge with id=${knowledgeId} not found`
+      );
+    }
+
+    if (!knowledge.uniqueId) {
+      return [];
+    }
+
     const relatedKnowledgeInstances = await prismadb.knowledge.findMany({
       where: {
-        uniqueId: knowledge?.uniqueId,
+        uniqueId: knowledge.uniqueId,
+        type: knowledge.type,
         id: { not: knowledgeId },
       },
     });
@@ -842,14 +853,18 @@ export class DataSourceService {
       return [];
     }
 
+    const relatedAndNewKnowledgeIds = [...relatedKnowledgeIds, knowledgeId];
+
+    // Find all data sources which are associated with the related or the new knowledge instances
     const relatedDataSources = await prismadb.dataSourceKnowledge.findMany({
       select: { dataSourceId: true },
       distinct: ["dataSourceId"],
       where: {
-        knowledgeId: { in: relatedKnowledgeIds },
+        knowledgeId: { in: relatedAndNewKnowledgeIds },
       },
     });
 
+    // Create new data source knowledge relationships for the new knowledge instance
     const newDataSourceRelationships = relatedDataSources.map((dataSource) => {
       return {
         dataSourceId: dataSource.dataSourceId,
@@ -858,15 +873,17 @@ export class DataSourceService {
     });
 
     await prismadb.$transaction(async (tx) => {
+      // Delete all data source knowledge relationships for the related and new knowledge instances
       await tx.dataSourceKnowledge.deleteMany({
         where: {
-          knowledgeId: { in: [...relatedKnowledgeIds, knowledgeId] },
+          knowledgeId: { in: relatedAndNewKnowledgeIds },
         },
       });
 
       await tx.knowledge.updateMany({
         where: {
           id: { in: relatedKnowledgeIds },
+          indexStatus: { not: KnowledgeIndexStatus.DELETED },
         },
         data: { indexStatus: KnowledgeIndexStatus.DELETED },
       });

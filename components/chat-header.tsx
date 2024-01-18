@@ -27,6 +27,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { useAIProfile } from "@/hooks/use-ai-profile";
 import { useChats } from "@/hooks/use-chats";
+import { useConfirmModal } from "@/hooks/use-confirm-modal";
 import { useRateAI } from "@/hooks/use-rate-ai";
 import { AIDetailDto } from "@/src/domain/models/AI";
 import { ChatDetailDto } from "@/src/domain/models/Chats";
@@ -34,7 +35,6 @@ import { useState } from "react";
 import { RateModal } from "./rate-modal";
 import { ShareModal } from "./share-modal";
 import { StarRating } from "./star-rating";
-import { useConfirmModal } from "@/hooks/use-confirm-modal";
 
 interface ChatHeaderProps {
   ai: AIDetailDto | null;
@@ -174,7 +174,8 @@ export const ChatHeader = ({
     );
   };
 
-  const thisChat = chats.length ? chats.find((c) => c.id === chat.id) : chat;
+  const foundChat = chats.find((c) => c.id === chat.id);
+  const thisChat = foundChat !== undefined ? foundChat : chat;
   return (
     <div className="flex flex-col p-4 pb-3 bg-accent/30">
       <div className="flex w-full justify-between items-center">
