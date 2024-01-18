@@ -1,13 +1,12 @@
 "use client";
 import { LucideIcon } from "lucide-react";
-import Link from "next/link";
-import React from "react";
+import React, { ReactNode } from "react";
 
 interface Props {
   title: string;
   description: string;
   onClick?: () => void;
-  icon: LucideIcon;
+  icon: React.ComponentType<any>;
   isDisabled?: boolean;
 }
 

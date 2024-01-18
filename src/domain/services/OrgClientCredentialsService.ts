@@ -7,6 +7,14 @@ export class OrgClientCredentialsService {
     orgId: string,
     provider: OAuthTokenProvider
   ) {
+    if (provider == OAuthTokenProvider.MSFT) {
+      return {
+        clientId: process.env.MSFT_CLIENT_ID,
+        clientSecret: process.env.MSFT_SECRET,
+        redirectUri: process.env.MSFT_REDIRECT,
+      };
+    }
+
     const orgClientCredentials = await prismadb.orgClientCredentials.findUnique(
       {
         where: { orgId_provider: { orgId, provider } },

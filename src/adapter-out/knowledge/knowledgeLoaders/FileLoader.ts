@@ -11,6 +11,9 @@ import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { DocxLoader } from "./DocxLoader";
+import { fileTypeFromBlob, fileTypeFromFile } from "file-type";
+import mime from "mime-types";
+
 export class FileLoader {
   private async getFilepath(file: Blob, filename: string) {
     if (!file) {
@@ -29,6 +32,9 @@ export class FileLoader {
     filePathOrBlob: string | Blob
   ) {
     let docs;
+    if (!mimeType) {
+      mimeType = await this.computeMimeType(filename, filePathOrBlob);
+    }
     console.log(`Loading file ${filename} with mime type ${mimeType}`);
 
     try {
@@ -208,6 +214,19 @@ export class FileLoader {
   public async deleteKnowledge(knowledgeId: string): Promise<void> {
     const memoryManager = await MemoryManager.getInstance();
     await memoryManager.vectorDelete(knowledgeId);
+  }
+
+  public async computeMimeType(filename: string, file: string | Blob) {
+    let result;
+    if (file instanceof Blob) {
+      result = await fileTypeFromBlob(file);
+    } else {
+      result = await fileTypeFromFile(file);
+    }
+    if (result) {
+      return result.mime;
+    }
+    return mime.lookup(filename);
   }
 }
 

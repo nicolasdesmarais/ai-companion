@@ -196,6 +196,7 @@ model OAuthToken {
 
 enum OAuthTokenProvider {
   GOOGLE
+  MSFT
 }
 
 model OrgClientCredentials {
@@ -253,6 +254,7 @@ model DataSource {
 enum DataSourceType {
   WEB_URL
   GOOGLE_DRIVE
+  ONEDRIVE
   FILE_UPLOAD
   API
 }
