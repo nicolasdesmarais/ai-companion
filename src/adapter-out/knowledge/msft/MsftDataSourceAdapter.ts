@@ -28,6 +28,35 @@ import { DomainEvent } from "@/src/domain/events/domain-event";
 
 export class MsftDataSourceAdapter implements DataSourceAdapter {
   private static readonly GraphApiUrl = "https://graph.microsoft.com/v1.0";
+  private static readonly ConvertibleExtensions = [
+    "doc",
+    "docx",
+    "eml",
+    "htm",
+    "html",
+    "msg",
+    "odp",
+    "ods",
+    "odt",
+    "pps",
+    "ppsx",
+    "ppt",
+    "pptx",
+    "rtf",
+    "tif",
+    "tiff",
+    "xls",
+    "xlsm",
+    "xlsx",
+  ];
+
+  private isConvertible(filename: string): boolean {
+    const ext = filename.split(".").pop();
+    if (!ext) {
+      return false;
+    }
+    return MsftDataSourceAdapter.ConvertibleExtensions.includes(ext);
+  }
 
   private async getToken(
     userId: string,
@@ -140,15 +169,24 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
 
     const token = await this.getToken(userId, data.oauthTokenId);
     const item = await this.fetch(token, `/me/drive/items/${data.fileId}`);
-
-    const downloadUrl = item["@microsoft.graph.downloadUrl"];
-    if (!downloadUrl) {
-      console.error("Missing downloadUrl");
-      return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
-      };
+    let response;
+    if (this.isConvertible(knowledge.name)) {
+      response = await fetch(
+        `${MsftDataSourceAdapter.GraphApiUrl}/me/drive/items/${data.fileId}/content?format=pdf`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+    } else {
+      const downloadUrl = item["@microsoft.graph.downloadUrl"];
+      if (!downloadUrl) {
+        console.error("Missing downloadUrl");
+        return {
+          indexStatus: KnowledgeIndexStatus.FAILED,
+        };
+      }
+      response = await fetch(downloadUrl);
     }
-    const response = await fetch(downloadUrl);
     if (!response.body || response.status !== 200) {
       console.error("msft indexKnowledge: download fail");
       return {
