@@ -5,12 +5,15 @@ import { ElementRef, useEffect, useRef, useState } from "react";
 import { ChatMessage } from "@/components/chat-message";
 import { AISummaryDto } from "@/src/domain/models/AI";
 import { ChatMessageDto } from "@/src/domain/models/Chats";
+import { InspectMessageModal } from "./inspect-message-modal";
+import { useInspectMessage } from "@/hooks/use-inspect-message";
 
 interface ChatMessagesProps {
   messages: ChatMessageDto[];
   isLoading: boolean;
   ai: AISummaryDto | null;
   stream: string;
+  canEditAi: boolean;
 }
 
 export const ChatMessages = ({
@@ -18,10 +21,12 @@ export const ChatMessages = ({
   isLoading,
   ai,
   stream,
+  canEditAi,
 }: ChatMessagesProps) => {
   const scrollRef = useRef<ElementRef<"div">>(null);
 
   const [fakeLoading, setFakeLoading] = useState(messages.length === 0);
+  const inspectMessageModal = useInspectMessage();
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -37,8 +42,15 @@ export const ChatMessages = ({
     scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
 
+  const onInspect = (message: any, index: number) => {
+    const query = messages[index - 1].content;
+    const history = messages.slice(0, index - 1);
+    inspectMessageModal.onOpen(ai, message, history, query);
+  };
+
   return (
     <div className="flex-1 overflow-y-auto px-4">
+      <InspectMessageModal />
       {ai && (
         <ChatMessage
           isLoading={fakeLoading}
@@ -53,6 +65,7 @@ export const ChatMessages = ({
           src={ai?.src}
           content={message.content}
           role={message.role}
+          onInspect={canEditAi ? () => onInspect(message, index) : undefined}
         />
       ))}
       {isLoading && <ChatMessage src={ai?.src} role="system" isLoading />}

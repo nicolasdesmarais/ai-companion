@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy } from "lucide-react";
+import { Copy, Eye } from "lucide-react";
 import { useTheme } from "next-themes";
 import { BeatLoader } from "react-spinners";
 
@@ -46,6 +46,7 @@ export interface ChatMessageProps {
   content?: string;
   isLoading?: boolean;
   src?: string;
+  onInspect?: () => void;
 }
 
 export const ChatMessage = ({
@@ -53,6 +54,7 @@ export const ChatMessage = ({
   content,
   isLoading,
   src,
+  onInspect,
 }: ChatMessageProps) => {
   const { toast } = useToast();
   const { theme } = useTheme();
@@ -98,6 +100,16 @@ export const ChatMessage = ({
           variant="ghost"
         >
           <Copy className="w-4 h-4" />
+        </Button>
+      )}
+      {onInspect && role !== "user" && !isLoading && (
+        <Button
+          onClick={onInspect}
+          className="opacity-0 group-hover:opacity-100 transition"
+          size="icon"
+          variant="ghost"
+        >
+          <Eye className="w-4 h-4" />
         </Button>
       )}
     </div>
