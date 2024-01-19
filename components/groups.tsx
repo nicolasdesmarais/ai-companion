@@ -13,9 +13,10 @@ import { useEffect, useState } from "react";
 
 interface Props {
   groups: GroupSummaryDto[];
+  hasElevatedWriteAccess: boolean;
 }
 
-export const Groups = ({ groups }: Props) => {
+export const Groups = ({ groups, hasElevatedWriteAccess }: Props) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const groupModal = useGroupModal();
@@ -109,7 +110,8 @@ export const Groups = ({ groups }: Props) => {
           >
             {item.name}
             {item.id === groupId &&
-            (item.availability === GroupAvailability.RESTRICTED ||
+            (hasElevatedWriteAccess ||
+              item.availability === GroupAvailability.RESTRICTED ||
               (item.availability === GroupAvailability.EVERYONE &&
                 item.ownerUserId === user?.id)) ? (
               <MoreVertical

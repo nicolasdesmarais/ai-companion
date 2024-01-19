@@ -78,8 +78,8 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
 
   const categories = await categoryService.getCategories();
 
-  const canAssignEveryoneAvailability =
-    GroupSecurityService.canAssignEveryoneAvailability(authorizationContext);
+  const hasElevatedWriteAccess =
+    GroupSecurityService.hasElevatedWriteAccess(authorizationContext);
 
   return (
     <div className="h-full px-4 space-y-2 pt-2">
@@ -106,15 +106,13 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
       {!(scope !== ListAIsRequestScope.PUBLIC || searchParams.groupId) && (
         <Categories data={categories} />
       )}
-      <Groups groups={groups} />
+      <Groups groups={groups} hasElevatedWriteAccess={hasElevatedWriteAccess} />
       <AIs
         data={data}
         authorizationContext={authorizationContext}
         groups={groups}
       />
-      <GroupModal
-        canAssignEveryoneAvailability={canAssignEveryoneAvailability}
-      />
+      <GroupModal hasElevatedWriteAccess={hasElevatedWriteAccess} />
       <ConfirmModal />
     </div>
   );

@@ -11,10 +11,6 @@ import { GroupSecurityService } from "../../security/services/GroupSecurityServi
 import { BadRequestError, EntityNotFoundError } from "../errors/Errors";
 import { GroupDetailDto, GroupSummaryDto } from "../models/Groups";
 import { InvitationService } from "./InvitationService";
-import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
-import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
-import { SecuredAction } from "@/src/security/models/SecuredAction";
-import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 
 const groupSummarySelect: Prisma.GroupSelect = {
   id: true,
@@ -38,22 +34,31 @@ const groupDetailSelect: Prisma.GroupSelect = {
   },
 };
 
-export class GroupService {
-  private getGroupCriteria(orgId: string, userId: string) {
-    return {
-      orgId,
-      OR: [
-        { availability: GroupAvailability.EVERYONE },
-        { ownerUserId: userId },
-        {
-          users: {
-            some: { userId },
-          },
-        },
-      ],
-    };
-  }
+const organizationGroupCriteria = (orgId: string): Prisma.GroupWhereInput => {
+  return {
+    orgId,
+  };
+};
 
+const groupCriteria = (
+  orgId: string,
+  userId: string
+): Prisma.GroupWhereInput => {
+  return {
+    ...organizationGroupCriteria(orgId),
+    OR: [
+      { availability: GroupAvailability.EVERYONE },
+      { ownerUserId: userId },
+      {
+        users: {
+          some: { userId },
+        },
+      },
+    ],
+  };
+};
+
+export class GroupService {
   /**
    * Finds a Group by ID.
    * Returns null if the group does not exist or is not visible to the user
@@ -67,12 +72,27 @@ export class GroupService {
   ): Promise<GroupDetailDto | null> {
     const { orgId, userId } = authorizationContext;
 
+    const hasInstanceGroupsAccess =
+      GroupSecurityService.hasInstanceGroupsReadAccess(authorizationContext);
+
+    let whereCondition: Prisma.GroupWhereUniqueInput = {
+      id: groupId,
+    };
+
+    if (!hasInstanceGroupsAccess) {
+      const hasAdminGroupsAccess =
+        GroupSecurityService.hasAdminGroupsReadAccess(authorizationContext);
+
+      const additionalCondition = hasAdminGroupsAccess
+        ? organizationGroupCriteria(orgId)
+        : groupCriteria(orgId, userId);
+
+      whereCondition.AND = additionalCondition;
+    }
+
     return await prismadb.group.findUnique({
       select: groupDetailSelect,
-      where: {
-        id: groupId,
-        ...this.getGroupCriteria(orgId, userId),
-      },
+      where: whereCondition,
     });
   }
 
@@ -88,15 +108,13 @@ export class GroupService {
 
     let groups: GroupSummaryDto[] = await prismadb.group.findMany({
       select: groupSummarySelect,
-      where: this.getGroupCriteria(orgId, userId),
+      where: groupCriteria(orgId, userId),
     });
 
-    const hasInstanceGroupsAccess = BaseEntitySecurityService.hasPermission(
-      authorizationContext,
-      SecuredResourceType.GROUPS,
-      SecuredAction.READ,
-      SecuredResourceAccessLevel.INSTANCE
-    );
+    const hasInstanceGroupsAccess =
+      GroupSecurityService.hasInstanceGroupsReadAccess(authorizationContext);
+    const hasAdminGroupsAccess =
+      GroupSecurityService.hasAdminGroupsReadAccess(authorizationContext);
 
     if (hasInstanceGroupsAccess) {
       const allGroups: GroupSummaryDto[] = await this.getInstanceGroups();
@@ -106,16 +124,7 @@ export class GroupService {
         }
       });
       groups = allGroups;
-    }
-
-    const hasAdminGroupsAccess = BaseEntitySecurityService.hasPermission(
-      authorizationContext,
-      SecuredResourceType.GROUPS,
-      SecuredAction.READ,
-      SecuredResourceAccessLevel.ORGANIZATION
-    );
-
-    if (hasAdminGroupsAccess) {
+    } else if (hasAdminGroupsAccess) {
       const allGroups: GroupSummaryDto[] = await this.getOrganizationGroups(
         orgId
       );
@@ -138,9 +147,7 @@ export class GroupService {
 
   public async getOrganizationGroups(orgId: string) {
     return await prismadb.group.findMany({
-      where: {
-        orgId,
-      },
+      where: organizationGroupCriteria(orgId),
       select: groupSummarySelect,
     });
   }

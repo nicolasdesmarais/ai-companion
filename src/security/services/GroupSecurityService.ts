@@ -27,8 +27,12 @@ export class GroupSecurityService {
     authorizationContext: AuthorizationContext,
     group: GroupSummaryDto
   ) {
-    const { userId } = authorizationContext;
-    return group.ownerUserId === userId;
+    return BaseEntitySecurityService.hasPermissionOnEntity(
+      authorizationContext,
+      { userId: group.ownerUserId, orgId: group.orgId },
+      SecuredResourceType.GROUPS,
+      SecuredAction.WRITE
+    );
   }
 
   public static canInviteUsersToGroup(
@@ -44,7 +48,40 @@ export class GroupSecurityService {
     return true;
   }
 
-  public static canAssignEveryoneAvailability(
+  public static hasInstanceGroupsReadAccess(
+    authorizationContext: AuthorizationContext
+  ) {
+    return BaseEntitySecurityService.hasPermission(
+      authorizationContext,
+      SecuredResourceType.GROUPS,
+      SecuredAction.READ,
+      SecuredResourceAccessLevel.INSTANCE
+    );
+  }
+
+  public static hasInstanceGroupsWriteAccess(
+    authorizationContext: AuthorizationContext
+  ) {
+    return BaseEntitySecurityService.hasPermission(
+      authorizationContext,
+      SecuredResourceType.GROUPS,
+      SecuredAction.WRITE,
+      SecuredResourceAccessLevel.INSTANCE
+    );
+  }
+
+  public static hasAdminGroupsReadAccess(
+    authorizationContext: AuthorizationContext
+  ) {
+    return BaseEntitySecurityService.hasPermission(
+      authorizationContext,
+      SecuredResourceType.GROUPS,
+      SecuredAction.READ,
+      SecuredResourceAccessLevel.ORGANIZATION
+    );
+  }
+
+  public static hasAdminGroupsWriteAccess(
     authorizationContext: AuthorizationContext
   ) {
     return BaseEntitySecurityService.hasPermission(
@@ -52,6 +89,15 @@ export class GroupSecurityService {
       SecuredResourceType.GROUPS,
       SecuredAction.WRITE,
       SecuredResourceAccessLevel.ORGANIZATION
+    );
+  }
+
+  public static hasElevatedWriteAccess(
+    authorizationContext: AuthorizationContext
+  ) {
+    return (
+      this.hasInstanceGroupsWriteAccess(authorizationContext) ||
+      this.hasAdminGroupsWriteAccess(authorizationContext)
     );
   }
 }
