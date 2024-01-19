@@ -40,7 +40,7 @@ export const InspectMessageModal = ({}: Props) => {
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
       <DialogContent className="max-w-screen-2xl">
         <div className="text-xs">
-          <div className="mt-8">Query: "{query}"</div>
+          <div className="mt-8">Query: &quot;{query}&quot;</div>
           {message ? (
             <div className="mt-4">
               <div>Tokens Used: {message.metadata.tokensUsed || "unknown"}</div>
@@ -55,7 +55,7 @@ export const InspectMessageModal = ({}: Props) => {
           ) : null}
           {knowledge ? (
             <div className="mt-4">
-              <div>Knowledge available to answer query:</div>
+              <div>Knowledge used to answer query:</div>
               <pre className="text-xxs w-full">{knowledge}</pre>
             </div>
           ) : null}
@@ -63,8 +63,8 @@ export const InspectMessageModal = ({}: Props) => {
             <div className="mt-4">
               <div>Data Sources Used:</div>
               <div className="mt-4">
-                {sources.map((source) => (
-                  <div className="mt-2 flex gap-8">
+                {sources.map((source, index) => (
+                  <div className="mt-2 flex gap-8" key={`source-${index}`}>
                     <div>{source.source}</div>
                     <div>{source.blobType}</div>
                     <div>{source.tokenCount} tokens</div>
