@@ -26,7 +26,7 @@ import {
 } from "@prisma/client";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import { DomainEvent } from "../events/domain-event";
-import { DataSourceDto } from "../models/DataSources";
+import { DataSourceDto, DataSourceFilter } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
 import msftDataSourceAdapter from "@/src/adapter-out/knowledge/msft/MsftDataSourceAdapter";
 
@@ -71,7 +71,8 @@ export class DataSourceService {
    * @returns
    */
   public async listDataSources(
-    authorizationContext: AuthorizationContext
+    authorizationContext: AuthorizationContext,
+    filter?: DataSourceFilter
   ): Promise<DataSourceDto[]> {
     const highestAccessLevel = BaseEntitySecurityService.getHighestAccessLevel(
       authorizationContext,
