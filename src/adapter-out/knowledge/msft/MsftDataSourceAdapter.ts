@@ -92,7 +92,6 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
   }
 
   public async search(
-    orgId: string,
     userId: string,
     oauthTokenId: string,
     searchTerm: string
@@ -102,6 +101,12 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
       return await this.fetch(token, "/me/drive/root/children");
     }
     return await this.fetch(token, `/me/drive/root/search(q='${searchTerm}')`);
+  }
+
+  public async children(userId: string, oauthTokenId: string, id: string) {
+    const token = await this.getToken(userId, oauthTokenId);
+    console.log("msft children", `/me/drive/items/${id}/children`);
+    return await this.fetch(token, `/me/drive/items/${id}/children`);
   }
 
   /**

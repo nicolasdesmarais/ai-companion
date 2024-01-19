@@ -18,7 +18,6 @@ export async function POST(req: Request) {
 
   try {
     const searchResponse = await msftDataSourceAdapter.search(
-      orgId,
       userId,
       oauthTokenId,
       searchTerm

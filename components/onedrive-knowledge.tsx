@@ -20,7 +20,7 @@ import { UserOAuthTokenEntity } from "@/src/domain/models/OAuthTokens";
 import { DataSourceRefreshPeriod } from "@prisma/client";
 import axios from "axios";
 import { format } from "date-fns";
-import { Loader, Server } from "lucide-react";
+import { ChevronDown, ChevronRight, Loader, Server } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
 import {
@@ -28,6 +28,7 @@ import {
   getLabelFromFileType,
 } from "@/src/adapter-in/api/DataSourcesApi";
 import mime from "mime-types";
+import { cn } from "@/src/lib/utils";
 
 const ADD_ACCOUNT_OPTION = "add-account";
 
@@ -170,6 +171,49 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
     setUploading(false);
   };
 
+  const toggle = async (file: any, e: React.MouseEvent<HTMLElement>) => {
+    if (!file.expanded) {
+      e.stopPropagation();
+      file.loading = true;
+      setSearchResults([...searchResults]);
+      try {
+        const response = await axios.post(
+          `/api/v1/integrations/onedrive/children`,
+          {
+            oauthTokenId: selectedAccount ?? "",
+            id: file.id,
+          }
+        );
+        const values = response.data.value;
+        const indent = (file.indent || 0) + 1;
+        console.log("current indent", file.indent, indent);
+        values.forEach((value: any) => {
+          value.indent = indent;
+        });
+        file.expanded = true;
+        file.loading = false;
+        setSearchResults((prevSearchResults) => {
+          const newSearchResults = [...prevSearchResults];
+          const index = newSearchResults.findIndex((f) => f.id === file.id);
+          newSearchResults.splice(index + 1, 0, ...values);
+          return newSearchResults;
+        });
+      } catch (error) {
+        if (error instanceof EntityNotFoundError) {
+          toast({
+            variant: "destructive",
+            description: "Folder not found.",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            description: "Something went wrong",
+          });
+        }
+      }
+    }
+  };
+
   return (
     <div className="w-full p-6 bg-accent/30 mb-8">
       <div className="mb-4">
@@ -256,7 +300,30 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
                     className={file.id === selectedFile?.id ? "bg-ring" : ""}
                     onClick={() => setSelectedFile(file)}
                   >
-                    <td className="p-2">{file.name}</td>
+                    <td className="p-2 flex truncate">
+                      {file.indent &&
+                        [...Array(file.indent)].map((_, i) => (
+                          <div className="w-2">&nbsp;</div>
+                        ))}
+                      {file.folder ? (
+                        <div
+                          onClick={(e) => toggle(file, e)}
+                          className="truncate cursor-pointer flex items-center"
+                        >
+                          {file.loading ? (
+                            <Loader className="w-4 h-4 mr-2 text-white spinner" />
+                          ) : file.expanded ? (
+                            <ChevronDown className="w-4 h-4 mr-2 text-white" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4 mr-2 text-white" />
+                          )}
+
+                          {file.name}
+                        </div>
+                      ) : (
+                        file.name
+                      )}
+                    </td>
                     <td className="p-2">
                       {file.folder
                         ? "Folder"
