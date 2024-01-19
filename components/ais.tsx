@@ -40,7 +40,7 @@ export const AIs = ({ data, authorizationContext, groups }: AIsProps) => {
       {data.map((item) => (
         <Card
           key={item.name}
-          className="bg-card rounded-xl cursor-pointer hover:opacity-75 transition border-0 p-1"
+          className="bg-card rounded-xl cursor-pointer border-0 p-1 group"
         >
           <Link href={`/ai/${item.id}`}>
             <div className="h-full flex flex-col justify-between">
@@ -49,7 +49,7 @@ export const AIs = ({ data, authorizationContext, groups }: AIsProps) => {
                   <Image
                     src={item.src}
                     fill
-                    className="rounded-xl object-cover"
+                    className="rounded-xl object-cover group-hover:opacity-75 transition"
                     alt="Character"
                   />
 
