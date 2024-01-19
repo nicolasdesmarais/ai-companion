@@ -15,20 +15,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  FileType,
+  getLabelFromFileType,
+} from "@/src/adapter-in/api/DataSourcesApi";
 import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import { UserOAuthTokenEntity } from "@/src/domain/models/OAuthTokens";
 import { DataSourceRefreshPeriod } from "@prisma/client";
 import axios from "axios";
 import { format } from "date-fns";
 import { ChevronDown, ChevronRight, Loader, Server } from "lucide-react";
+import mime from "mime-types";
 import { useEffect, useState } from "react";
 import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
-import {
-  FileType,
-  getLabelFromFileType,
-} from "@/src/adapter-in/api/DataSourcesApi";
-import mime from "mime-types";
-import { cn } from "@/src/lib/utils";
 
 const ADD_ACCOUNT_OPTION = "add-account";
 
@@ -303,7 +302,9 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
                     <td className="p-2 flex truncate">
                       {file.indent &&
                         [...Array(file.indent)].map((_, i) => (
-                          <div className="w-2">&nbsp;</div>
+                          <div key={i} className="w-2">
+                            &nbsp;
+                          </div>
                         ))}
                       {file.folder ? (
                         <div
