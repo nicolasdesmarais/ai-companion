@@ -96,6 +96,7 @@ export const ChatClient = ({
         isLoading={isLoading && !stream}
         messages={messages}
         stream={stream}
+        canEditAi={canEditAi}
       />
       <ChatForm
         isLoading={!ai || isLoading}
