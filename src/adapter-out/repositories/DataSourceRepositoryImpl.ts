@@ -46,6 +46,16 @@ const dataSourceFilterWhereClause = (
   return whereClause;
 };
 
+const dataSourceFilterOrderBy = (
+  filter?: DataSourceFilter
+): Prisma.DataSourceOrderByWithRelationAndSearchRelevanceInput | undefined => {
+  return filter?.orderBy
+    ? {
+        [filter.orderBy.field]: filter.orderBy.direction,
+      }
+    : undefined;
+};
+
 export class DataSourceRepositoryImpl implements DataSourceRepository {
   public async findById(id: string): Promise<DataSourceDto | null> {
     const dataSource = await prismadb.dataSource.findUnique({
@@ -63,6 +73,7 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
     const dataSources = await prismadb.dataSource.findMany({
       select: dataSourceSummarySelect,
       where: dataSourceFilterWhereClause(filter),
+      orderBy: dataSourceFilterOrderBy(filter),
     });
     return this.mapDataSourcesToDto(dataSources);
   }
@@ -76,6 +87,7 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
         orgId,
         AND: dataSourceFilterWhereClause(filter),
       },
+      orderBy: dataSourceFilterOrderBy(filter),
     });
     return this.mapDataSourcesToDto(dataSources);
   }
@@ -91,6 +103,7 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
         ownerUserId: userId,
         AND: dataSourceFilterWhereClause(filter),
       },
+      orderBy: dataSourceFilterOrderBy(filter),
     });
     return this.mapDataSourcesToDto(dataSources);
   }
