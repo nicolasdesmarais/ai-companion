@@ -65,7 +65,11 @@ export const ChatMessages = ({
           src={ai?.src}
           content={message.content}
           role={message.role}
-          onInspect={canEditAi ? () => onInspect(message, index) : undefined}
+          onInspect={
+            canEditAi && message.metadata
+              ? () => onInspect(message, index)
+              : undefined
+          }
         />
       ))}
       {isLoading && <ChatMessage src={ai?.src} role="system" isLoading />}
