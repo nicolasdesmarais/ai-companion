@@ -1,4 +1,7 @@
-import { DataSourceDto } from "@/src/domain/models/DataSources";
+import {
+  DataSourceDto,
+  DataSourceFilter,
+} from "@/src/domain/models/DataSources";
 import { DataSourceRepository } from "@/src/domain/ports/outgoing/DataSourceRepository";
 import prismadb from "@/src/lib/prismadb";
 import {
@@ -23,6 +26,26 @@ const dataSourceSummarySelect: Prisma.DataSourceSelect = {
   indexPercentage: true,
 };
 
+const dataSourceFilterWhereClause = (
+  filter?: DataSourceFilter
+): Prisma.DataSourceWhereInput => {
+  let whereClause: Prisma.DataSourceWhereInput = {};
+
+  if (filter) {
+    if (filter.name) {
+      whereClause.name = {
+        search: filter.name,
+      };
+    }
+
+    if (filter.type) {
+      whereClause.type = filter.type;
+    }
+  }
+
+  return whereClause;
+};
+
 export class DataSourceRepositoryImpl implements DataSourceRepository {
   public async findById(id: string): Promise<DataSourceDto | null> {
     const dataSource = await prismadb.dataSource.findUnique({
@@ -36,30 +59,37 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
     return this.mapDataSourceToDto(dataSource);
   }
 
-  public async findAll(): Promise<DataSourceDto[]> {
+  public async findAll(filter?: DataSourceFilter): Promise<DataSourceDto[]> {
     const dataSources = await prismadb.dataSource.findMany({
       select: dataSourceSummarySelect,
+      where: dataSourceFilterWhereClause(filter),
     });
     return this.mapDataSourcesToDto(dataSources);
   }
-  public async findByOrgId(orgId: string): Promise<DataSourceDto[]> {
+  public async findByOrgId(
+    orgId: string,
+    filter?: DataSourceFilter
+  ): Promise<DataSourceDto[]> {
     const dataSources = await prismadb.dataSource.findMany({
       select: dataSourceSummarySelect,
       where: {
         orgId,
+        AND: dataSourceFilterWhereClause(filter),
       },
     });
     return this.mapDataSourcesToDto(dataSources);
   }
   public async findByOrgIdAndUserId(
     orgId: string,
-    userId: string
+    userId: string,
+    filter?: DataSourceFilter
   ): Promise<DataSourceDto[]> {
     const dataSources = await prismadb.dataSource.findMany({
       select: dataSourceSummarySelect,
       where: {
         orgId,
         ownerUserId: userId,
+        AND: dataSourceFilterWhereClause(filter),
       },
     });
     return this.mapDataSourcesToDto(dataSources);

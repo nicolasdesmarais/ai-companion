@@ -41,7 +41,6 @@ async function getHandler(
     orderBy,
   };
 
-  // Pass the query parameters to the listDataSources function
   const dataSources: DataSourceDto[] = await dataSourceService.listDataSources(
     authorizationContext,
     filter

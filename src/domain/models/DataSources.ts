@@ -36,6 +36,6 @@ export enum DataSourceOrderByField {
 }
 
 export enum DataSourceOrderByDirection {
-  ASC,
-  DESC,
+  ASC = "ASC",
+  DESC = "DESC",
 }

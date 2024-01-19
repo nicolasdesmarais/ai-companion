@@ -248,6 +248,10 @@ model DataSource {
   data            Json?
   refreshPeriod   DataSourceRefreshPeriod? @map(name: "refresh_period")
 
+  @@index(type)
+  @@index(createdAt)
+  @@index(lastIndexedAt)
+  @@fulltext(name)
   @@map("data_sources")
 }
 
