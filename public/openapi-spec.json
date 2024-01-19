@@ -1125,6 +1125,43 @@
         "summary": "List all data sources",
         "description": "Retrieves a list of data sources associated which the user has access to.",
         "operationId": "listDataSources",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "description": "The name of the data source.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "The type of the data source. One of: WEB_URL, GOOGLE_DRIVE, ONEDRIVE, FILE_UPLOAD, API.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "WEB_URL",
+                "GOOGLE_DRIVE",
+                "ONEDRIVE",
+                "FILE_UPLOAD",
+                "API"
+              ]
+            }
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "required": false,
+            "description": "Order by field and direction. Prefix field name with '+' for ascending or '-' for descending order. Allowed fields: createdAt, lastIndexedAt, usageCount.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[+-](createdAt|lastIndexedAt|usageCount)$"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "A list of all data sources which the user has access to.",
@@ -1147,6 +1184,7 @@
         ]
       }
     },
+
     "/api/v1/data-sources/{dataSourceId}": {
       "delete": {
         "summary": "Delete a Data Source",
