@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useInspectMessage } from "@/hooks/use-inspect-message";
 import axios from "axios";
+import { Loader } from "lucide-react";
 
 interface Props {}
 
@@ -11,6 +12,7 @@ export const InspectMessageModal = ({}: Props) => {
   const [knowledge, setKnowledge] = useState<any>(null);
   const [sources, setSources] = useState<any[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { isOpen, onClose, query, message, ai, messages } = useInspectMessage();
 
   useEffect(() => {
@@ -19,6 +21,7 @@ export const InspectMessageModal = ({}: Props) => {
 
   useEffect(() => {
     const fetchKnowledge = async () => {
+      setIsLoading(true);
       const response = await axios.post(`/api/v1/ai/${ai.id}/knowledge`, {
         prompt: query,
         tokensUsed: message.metadata.tokensUsed,
@@ -26,19 +29,28 @@ export const InspectMessageModal = ({}: Props) => {
       });
       setKnowledge(response.data.knowledge);
       setSources(response.data.docMeta);
+      setIsLoading(false);
     };
     if (query) {
       fetchKnowledge();
     }
-  }, [query]);
+  }, [query, message, ai, messages]);
 
   if (!isMounted) {
     return null;
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-screen-2xl">
+    <Dialog
+      open={isOpen}
+      onOpenChange={() => {
+        setKnowledge(null);
+        setSources([]);
+        setIsLoading(true);
+        onClose();
+      }}
+    >
+      <DialogContent className="max-w-screen-2xl overflow-auto">
         <div className="text-xs">
           <div className="mt-8">Query: &quot;{query}&quot;</div>
           {message ? (
@@ -73,6 +85,7 @@ export const InspectMessageModal = ({}: Props) => {
               </div>
             </div>
           ) : null}
+          {isLoading ? <Loader className="mt-4 spinner" /> : null}
         </div>
       </DialogContent>
     </Dialog>
