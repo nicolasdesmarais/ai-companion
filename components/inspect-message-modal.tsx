@@ -68,7 +68,9 @@ export const InspectMessageModal = ({}: Props) => {
           {knowledge ? (
             <div className="mt-4">
               <div>Knowledge used to answer query:</div>
-              <pre className="text-xxs w-full">{knowledge}</pre>
+              <div className="text-xxs w-full overflow-auto whitespace-pre">
+                {knowledge}
+              </div>
             </div>
           ) : null}
           {sources.length ? (
