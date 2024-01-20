@@ -16,7 +16,7 @@ export default authMiddleware({
     "/api/v1/warm",
   ],
   apiRoutes: [
-    "/api/((?!webhook|v1/warm|v1/integrations/clerkWebhooks|v1/integrations/apify/webhooks|inngest).*)",
+    "/api/((?!webhook|v1/integrations/onedrive|v1/warm|v1/integrations/clerkWebhooks|v1/integrations/apify/webhooks|inngest).*)",
   ],
 
   afterAuth(auth, req, evt) {

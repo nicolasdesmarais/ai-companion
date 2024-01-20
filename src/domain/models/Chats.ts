@@ -21,6 +21,7 @@ export interface ChatMessageDto {
   updatedAt: Date;
   role: Role;
   content: string;
+  metadata?: any;
 }
 
 export interface ChatAiDto {

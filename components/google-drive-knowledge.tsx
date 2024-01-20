@@ -19,8 +19,8 @@ import {
   CreateGoogleDriveKnowledgeRequest,
   GoogleDriveFile,
   GoogleDriveSearchRequest,
-  getLabelFromFileType,
 } from "@/src/adapter-in/api/GoogleDriveApi";
+import { getLabelFromFileType } from "@/src/adapter-in/api/DataSourcesApi";
 import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import { UserOAuthTokenEntity } from "@/src/domain/models/OAuthTokens";
 import { DataSourceRefreshPeriod } from "@prisma/client";

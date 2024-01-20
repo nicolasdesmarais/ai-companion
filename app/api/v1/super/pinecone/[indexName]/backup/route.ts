@@ -15,7 +15,7 @@ export async function GET(
     }
     const name = `${indexName}-${new Date().toISOString()}`
       .toLowerCase()
-      .replace(/:/g, "-");
+      .replace(/:|\./g, "-");
     await pinecone.createCollection({
       name,
       source: indexName,
