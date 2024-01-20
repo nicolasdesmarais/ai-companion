@@ -8,7 +8,7 @@ datadogRum.init({
   site: "datadoghq.com",
   service: "appdirect.ai",
   env: process.env.NEXT_PUBLIC_VERCEL_ENV || "local",
-  version: process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL || "local",
+  version: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA || "local",
   sessionSampleRate: 100,
   sessionReplaySampleRate: 20,
   trackUserInteractions: true,
