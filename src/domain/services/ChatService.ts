@@ -93,10 +93,14 @@ export class ChatService {
    * @param userId
    * @returns
    */
-  public async getUserChats(userId: string): Promise<ListChatsResponse> {
+  public async getUserChats(
+    userId: string,
+    orgId: string
+  ): Promise<ListChatsResponse> {
     const chats = await prismadb.chat.findMany({
       select: listChatsResponseSelect,
       where: {
+        orgId,
         userId,
         isDeleted: false,
       },

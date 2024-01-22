@@ -12,9 +12,9 @@ async function getHandler(
   request: NextRequest,
   context: { orgId: string; userId: string }
 ) {
-  const { userId } = context;
+  const { userId, orgId } = context;
 
-  const chatsResponse = await chatService.getUserChats(userId);
+  const chatsResponse = await chatService.getUserChats(userId, orgId);
   return NextResponse.json(chatsResponse);
 }
 
