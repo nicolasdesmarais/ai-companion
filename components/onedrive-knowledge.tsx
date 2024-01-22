@@ -303,7 +303,9 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
                     <td className="p-2 flex truncate">
                       {file.indent &&
                         [...Array(file.indent)].map((_, i) => (
-                          <div className="w-2">&nbsp;</div>
+                          <div className="w-2" key={`indent-${i}`}>
+                            &nbsp;
+                          </div>
                         ))}
                       {file.folder ? (
                         <div

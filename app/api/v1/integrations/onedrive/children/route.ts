@@ -9,10 +9,9 @@ import { AuthorizationContext } from "@/src/security/models/AuthorizationContext
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
-import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
-export async function postHandler(
+async function postHandler(
   req: Request,
   context: {
     authorizationContext: AuthorizationContext;

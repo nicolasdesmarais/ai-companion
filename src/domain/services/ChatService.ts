@@ -52,6 +52,7 @@ const getChatResponseSelect: Prisma.ChatSelect = {
       updatedAt: true,
       role: true,
       content: true,
+      metadata: true,
     },
     orderBy: {
       createdAt: "asc",
@@ -277,6 +278,7 @@ export class ChatService {
     const start = performance.now();
     let endSetup = start,
       endKnowledge = start,
+      recordedTokensUsed = 0,
       knowledgeMeta: any,
       chat: any;
 
@@ -327,6 +329,7 @@ export class ChatService {
             llmTime,
             totalTime,
             knowledgeMeta,
+            tokensUsed: recordedTokensUsed,
           }
         );
       }
@@ -396,6 +399,7 @@ export class ChatService {
       }
 
       endKnowledge = performance.now();
+      recordedTokensUsed = tokensUsed;
       return knowledgeResponse;
     };
 
@@ -415,6 +419,46 @@ export class ChatService {
       getKnowledgeCallback,
       endCallback,
     });
+  }
+
+  public async getKnowledge(
+    request: CreateChatRequest,
+    userId: string,
+    tokensUsed: number
+  ) {
+    const { prompt, messages, aiId } = request;
+
+    if (!aiId) {
+      throw new Error("AI id not found");
+    }
+    const chat = await this.getTestChat(aiId, userId, messages || [], prompt);
+    if (!chat || !chat.ai) {
+      throw new EntityNotFoundError(`AI with id ${aiId} not found`);
+    }
+    const model = await aiModelService.findAIModelById(chat.ai.modelId);
+    if (!model) {
+      throw new EntityNotFoundError(
+        `AI model with id ${chat.ai.modelId} not found`
+      );
+    }
+    const questionTokens = getTokenLength(prompt);
+    const answerTokens = ((chat.ai.options as JsonObject)?.maxTokens ||
+      model.options.maxTokens.default) as number;
+
+    const remainingTokens =
+      model.contextSize -
+      answerTokens -
+      questionTokens -
+      tokensUsed -
+      BUFFER_TOKENS;
+
+    const vectorKnowledge = await vectorDatabaseAdapter.getKnowledge(
+      prompt,
+      chat.messages,
+      chat.ai.dataSources,
+      remainingTokens
+    );
+    return vectorKnowledge;
   }
 }
 
