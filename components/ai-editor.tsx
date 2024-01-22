@@ -117,7 +117,9 @@ export const AIEditor = ({
       setDataSources(response.data.data);
       setDataSourcesLoading(false);
     };
-    fetchDataSources();
+    if (aiId) {
+      fetchDataSources();
+    }
   }, []);
 
   if (initialAi) {
