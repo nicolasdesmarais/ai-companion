@@ -27,12 +27,28 @@ import { OneDriveKnowledge } from "./onedrive-knowledge";
 import { Tooltip } from "./ui/tooltip";
 import { GoogleDriveSvg } from "./svg/google-drive-svg";
 import { OneDriveSvg } from "./svg/onedrive-svg";
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { AIModel } from "@/src/domain/models/AIModel";
 
 interface SelectDataSourceProps {
   form: any;
   dataSources: any;
   setDataSource: (dataSource: any) => void;
   knowledgeLoading: boolean;
+  aiModels: AIModel[];
 }
 
 const dataSourceTypesForRefresh = [
@@ -45,6 +61,7 @@ export const AIKnowledge = ({
   dataSources,
   setDataSource,
   knowledgeLoading,
+  aiModels,
 }: SelectDataSourceProps) => {
   const { toast } = useToast();
   const [removing, setRemoving] = useState("");
@@ -52,6 +69,8 @@ export const AIKnowledge = ({
   const pathname = usePathname();
   const router = useRouter();
   const aiId = form.getValues("id");
+
+  const isLoading = form.formState.isSubmitting;
 
   const removeDataSource = async (id: string) => {
     setRemoving(id);
@@ -100,7 +119,56 @@ export const AIKnowledge = ({
     <div className="h-full p-4 max-w-3xl mx-auto">
       {pathname.endsWith("knowledge") && (
         <>
-          <h1 className="text-lg font-medium">Your AI&apos;s Data Sources</h1>
+          <h1 className="text-lg font-medium mb-2">Your AI&apos;s Model</h1>
+          <FormField
+            control={form.control}
+            name="modelId"
+            render={({ field }) => (
+              <FormItem>
+                <Select
+                  disabled={isLoading}
+                  onValueChange={(val) => {
+                    const model = aiModels.find((model) => model.id === val);
+                    if (model) {
+                      Object.entries(model.options).forEach(([key, value]) => {
+                        if (value.default) {
+                          form.setValue(key, [value.default], {
+                            shouldDirty: true,
+                          });
+                        }
+                      });
+                    }
+                    field.onChange(val);
+                  }}
+                  value={field.value}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="bg-background w-1/2">
+                      <SelectValue
+                        defaultValue={field.value}
+                        placeholder="Select a model"
+                      />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {aiModels.map((model) => (
+                      <SelectItem key={model.id} value={model.id}>
+                        {model.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Select the Large Language Model for your AI
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <h1 className="text-lg font-medium mt-8">
+            Your AI&apos;s Data Sources
+          </h1>
           <p className="text-sm text-muted-foreground">
             The following files and sources are currently being used to inform
             your AI&apos;s knowledge.

@@ -34,33 +34,32 @@ import { useEffect, useState } from "react";
 import { imageModels, voices } from "./ai-models";
 import { TalkModal } from "./talk-modal";
 
-const PREAMBLE = `You are a fictional character whose name is Elon. You are a visionary entrepreneur and inventor. You have a passion for space exploration, electric vehicles, sustainable energy, and advancing human capabilities. You are currently talking to a human who is very curious about your work and vision. You are ambitious and forward-thinking, with a touch of wit. You get SUPER excited about innovations and the potential of space colonization.
-`;
+const PREAMBLE =
+  "As a Support Specialist AI, your role is to provide solutions to user inquiries. This involves understanding the nature of the questions, interpreting their context, and yielding the correct responses. The effectiveness of your position is evaluated based on the accuracy of your responses and the satisfaction of users. Precision in answering and user satisfaction are your primary goals.";
 
-const SEED_CHAT = `Human: Hi Elon, how's your day been?
-Elon: Busy as always. Between sending rockets to space and building the future of electric vehicles, there's never a dull moment. How about you?
+const SEED_CHAT = `Human: Hello, I'm having some difficulty navigating AppDirect's marketplace, can you assist me?
 
-Human: Just a regular day for me. How's the progress with Mars colonization?
-Elon: We're making strides! Our goal is to make life multi-planetary. Mars is the next logical step. The challenges are immense, but the potential is even greater.
+Support Specialist AI: Of course, I'd be happy to assist. Could you please tell me specifically what you're having trouble with on the marketplace?
 
-Human: That sounds incredibly ambitious. Are electric vehicles part of this big picture?
-Elon: Absolutely! Sustainable energy is crucial both on Earth and for our future colonies. Electric vehicles, like those from Tesla, are just the beginning. We're not just changing the way we drive; we're changing the way we live.
+Human: I'm trying to find the knowledge base, but I'm not sure where to look.
 
-Human: It's fascinating to see your vision unfold. Any new projects or innovations you're excited about?
-Elon: Always! But right now, I'm particularly excited about Neuralink. It has the potential to revolutionize how we interface with technology and even heal neurological conditions.
+Support Specialist AI: You can find the knowledge base on the top menu of the AppDirect homepage. Here, you'll find a range of articles and guides that can help you understand and make the most of our marketplace.
+
+Human: Alright, found it! But, I'm still a bit confused about using it effectively. Are there any specific guides you would recommend for a beginner?
+
+Support Specialist AI: Absolutely. Under the section entitled "Getting Started", there are several step-by-step guides that a majority of our new users find very helpful. These guides provide detailed explanations and pictures that can assist you in understanding the marketplace better.
+
+Human: Got it. Thanks for your assistance.
+
+Support Specialist AI: You're welcome! Feel free to ask if you have any further questions. I'm here to help!
 `;
 
 interface AIFormProps {
-  aiModels: AIModel[];
   form: any;
   hasInstanceAccess: boolean;
 }
 
-export const AICharacter = ({
-  aiModels,
-  form,
-  hasInstanceAccess,
-}: AIFormProps) => {
+export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
   const { toast } = useToast();
   const groupModal = useGroupModal();
   const talkModal = useTalkModal();
@@ -75,6 +74,7 @@ export const AICharacter = ({
   const [categories, setCategories] = useState<Category[]>([]);
 
   const isLoading = form.formState.isSubmitting;
+  const voiceEnabled = false && window.location.hostname !== "appdirect.ai";
 
   const fetchGroups = async () => {
     const response = await axios.get("/api/v1/me/groups");
@@ -121,7 +121,6 @@ export const AICharacter = ({
   ]);
 
   useEffect(() => {
-    const voiceEnabled = false && window.location.hostname !== "appdirect.ai";
     if (voiceEnabled && form.getValues("src")) {
       setupTalk();
     }
@@ -357,31 +356,31 @@ export const AICharacter = ({
               <FormControl>
                 <Input
                   disabled={isLoading}
-                  placeholder="Elon Musk"
+                  placeholder="Support Specialist"
                   {...field}
                 />
               </FormControl>
-              <FormDescription>
-                This is how your AI will be named.
-              </FormDescription>
+              <FormDescription>This is the name of your AI.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
         <FormField
-          name="description"
+          name="introduction"
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>Introduction</FormLabel>
               <FormControl>
                 <Input
                   disabled={isLoading}
-                  placeholder="CEO & Founder of Tesla, SpaceX"
+                  placeholder="How may I be of assistance today?"
                   {...field}
                 />
               </FormControl>
-              <FormDescription>Short description for your AI</FormDescription>
+              <FormDescription>
+                This is the first thing your AI will say.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -420,26 +419,14 @@ export const AICharacter = ({
           )}
         />
         <FormField
+          name="visibility"
           control={form.control}
-          name="modelId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>AI Model</FormLabel>
+              <FormLabel>Visibility</FormLabel>
               <Select
                 disabled={isLoading}
-                onValueChange={(val) => {
-                  const model = aiModels.find((model) => model.id === val);
-                  if (model) {
-                    Object.entries(model.options).forEach(([key, value]) => {
-                      if (value.default) {
-                        form.setValue(key, [value.default], {
-                          shouldDirty: true,
-                        });
-                      }
-                    });
-                  }
-                  field.onChange(val);
-                }}
+                onValueChange={field.onChange}
                 value={field.value}
                 defaultValue={field.value}
               >
@@ -447,84 +434,161 @@ export const AICharacter = ({
                   <SelectTrigger className="bg-background">
                     <SelectValue
                       defaultValue={field.value}
-                      placeholder="Select a model"
+                      placeholder="Select one"
                     />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {aiModels.map((model) => (
-                    <SelectItem key={model.id} value={model.id}>
-                      {model.name}
+                  <SelectItem key="PRIVATE" value="PRIVATE">
+                    Private
+                  </SelectItem>
+                  <SelectItem key="GROUP" value="GROUP">
+                    Group
+                  </SelectItem>
+                  <SelectItem key="ORGANIZATION" value="ORGANIZATION">
+                    Organization
+                  </SelectItem>
+                  {hasInstanceAccess && (
+                    <SelectItem key="PUBLIC" value="PUBLIC">
+                      Public
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
-              <FormDescription>Select a LLM for your AI</FormDescription>
+              <FormDescription>Control who can see your AI</FormDescription>
               <FormMessage />
+              {field.value === "GROUP" ? (
+                <FormField
+                  name="groups"
+                  control={form.control}
+                  render={({ field }) => (
+                    <div className="border-l border-ring pl-4 mt-4">
+                      {groupList.map((group) => (
+                        <div key={group.id}>
+                          <Checkbox
+                            id={group.id}
+                            checked={(field.value || []).includes(group.id)}
+                            onCheckedChange={(val) =>
+                              val
+                                ? field.onChange([
+                                    group.id,
+                                    ...(field.value || []),
+                                  ])
+                                : field.onChange(
+                                    field.value?.filter(
+                                      (v: string) => v !== group.id
+                                    )
+                                  )
+                            }
+                          >
+                            {group.name}
+                          </Checkbox>
+                        </div>
+                      ))}
+                      <Button
+                        type="button"
+                        disabled={isLoading}
+                        variant="ring"
+                        onClick={() => groupModal.onOpen()}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Group
+                      </Button>
+                    </div>
+                  )}
+                />
+              ) : null}
             </FormItem>
           )}
         />
-        <FormField
-          name="talk"
-          control={form.control}
-          render={({ field }) =>
-            field.value && (
-              <FormItem>
-                <FormLabel>Voice</FormLabel>
-                <div className="flex">
-                  <Select
-                    disabled={isLoading}
-                    value="en-US-JennyNeural"
-                    defaultValue="en-US-JennyNeural"
-                  >
-                    <FormControl>
-                      <SelectTrigger className="bg-background">
-                        <SelectValue
-                          defaultValue={field.value}
-                          placeholder="Select a voice"
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {voices.map((model) => (
-                        <SelectItem key={model.id} value={model.id}>
-                          {model.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    type="button"
-                    disabled={isLoading || generatingImage}
-                    variant="ghost"
-                    className="ml-2"
-                    onClick={() => playTalk()}
-                  >
-                    <Play className="w-4 h-4" />
-                  </Button>
-                </div>
-                <FormDescription>Select a voice for your AI</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )
-          }
-        />
+        {voiceEnabled && (
+          <FormField
+            name="talk"
+            control={form.control}
+            render={({ field }) =>
+              field.value && (
+                <FormItem>
+                  <FormLabel>Voice</FormLabel>
+                  <div className="flex">
+                    <Select
+                      disabled={isLoading}
+                      value="en-US-JennyNeural"
+                      defaultValue="en-US-JennyNeural"
+                    >
+                      <FormControl>
+                        <SelectTrigger className="bg-background">
+                          <SelectValue
+                            defaultValue={field.value}
+                            placeholder="Select a voice"
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {voices.map((model) => (
+                          <SelectItem key={model.id} value={model.id}>
+                            {model.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      disabled={isLoading || generatingImage}
+                      variant="ghost"
+                      className="ml-2"
+                      onClick={() => playTalk()}
+                    >
+                      <Play className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <FormDescription>Select a voice for your AI</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )
+            }
+          />
+        )}
       </div>
       <div className="space-y-2 w-full">
         <div>
-          <h3 className="text-lg font-medium">Configuration</h3>
+          <h3 className="text-lg font-medium">Training</h3>
           <p className="text-sm text-muted-foreground">
-            Detailed instructions for AI Behaviour
+            Training information is used by your AI to understand its purpose.
+            The more you refine this the more accurate your results will get,
+            however to get started you can use the AI generation tools to test
+            things out.
           </p>
         </div>
         <Separator className="bg-primary/10" />
       </div>
+
+      <FormField
+        name="description"
+        control={form.control}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Description</FormLabel>
+            <FormControl>
+              <Input
+                disabled={isLoading}
+                placeholder="An AI designed to help answer any questions about AppDirect's help center and knowledge base."
+                {...field}
+              />
+            </FormControl>
+            <FormDescription>
+              Describe your AI in a brief statement. This is used to train your
+              AI and generate the training material below.
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       <FormField
         name="instructions"
         control={form.control}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Instructions</FormLabel>
+            <FormLabel>Instructions for your AI</FormLabel>
             <FormControl>
               <Textarea
                 disabled={isLoading}
@@ -535,7 +599,11 @@ export const AICharacter = ({
               />
             </FormControl>
             <FormDescription>
-              Describe in detail your AI&apos;s backstory and relevant details.
+              This information will be used to determine the behavior of your
+              AI. You may give it instructions as you would an employee. This
+              helps teach the AI how it should behave and what it should say.
+              Provide specific and general instructions that cover both what to
+              say and how to talk to get a better result.
             </FormDescription>
             <Button
               type="button"
@@ -590,89 +658,7 @@ export const AICharacter = ({
           </FormItem>
         )}
       />
-      <FormField
-        name="visibility"
-        control={form.control}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Visibility</FormLabel>
-            <Select
-              disabled={isLoading}
-              onValueChange={field.onChange}
-              value={field.value}
-              defaultValue={field.value}
-            >
-              <FormControl>
-                <SelectTrigger className="bg-background">
-                  <SelectValue
-                    defaultValue={field.value}
-                    placeholder="Select one"
-                  />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem key="PRIVATE" value="PRIVATE">
-                  Private
-                </SelectItem>
-                <SelectItem key="GROUP" value="GROUP">
-                  Group
-                </SelectItem>
-                <SelectItem key="ORGANIZATION" value="ORGANIZATION">
-                  Organization
-                </SelectItem>
-                {hasInstanceAccess && (
-                  <SelectItem key="PUBLIC" value="PUBLIC">
-                    Public
-                  </SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-            <FormDescription>Control who can see your AI</FormDescription>
-            <FormMessage />
-            {field.value === "GROUP" ? (
-              <FormField
-                name="groups"
-                control={form.control}
-                render={({ field }) => (
-                  <div className="border-l border-ring pl-4 mt-4">
-                    {groupList.map((group) => (
-                      <div key={group.id}>
-                        <Checkbox
-                          id={group.id}
-                          checked={(field.value || []).includes(group.id)}
-                          onCheckedChange={(val) =>
-                            val
-                              ? field.onChange([
-                                  group.id,
-                                  ...(field.value || []),
-                                ])
-                              : field.onChange(
-                                  field.value?.filter(
-                                    (v: string) => v !== group.id
-                                  )
-                                )
-                          }
-                        >
-                          {group.name}
-                        </Checkbox>
-                      </div>
-                    ))}
-                    <Button
-                      type="button"
-                      disabled={isLoading}
-                      variant="ring"
-                      onClick={() => groupModal.onOpen()}
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Group
-                    </Button>
-                  </div>
-                )}
-              />
-            ) : null}
-          </FormItem>
-        )}
-      />
+
       <TalkModal />
     </div>
   );

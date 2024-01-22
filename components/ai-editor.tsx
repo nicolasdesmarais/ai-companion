@@ -286,6 +286,7 @@ export const AIEditor = ({
       dataSources={dataSources}
       setDataSource={setDataSources}
       knowledgeLoading={dataSourcesLoading}
+      aiModels={aiModels}
     />
   );
 
@@ -295,11 +296,7 @@ export const AIEditor = ({
       index: 1,
       route: "edit",
       content: (
-        <AICharacter
-          aiModels={aiModels}
-          form={form}
-          hasInstanceAccess={hasInstanceAccess}
-        />
+        <AICharacter form={form} hasInstanceAccess={hasInstanceAccess} />
       ),
       buttons: (
         <>
