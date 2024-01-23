@@ -25,6 +25,7 @@ const formSchema = z.object({
   name: z.string().min(1, {
     message: "Name is required.",
   }),
+  introduction: z.string().optional(),
   description: z.string().min(1, {
     message: "Description is required.",
   }),
@@ -142,9 +143,10 @@ export const AIEditor = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialAi
-      ? ({ talk: "", ...initialAi } as any)
+      ? ({ talk: "", introduction: "", ...initialAi } as any)
       : {
           name: "",
+          introduction: "",
           description: "",
           instructions: "",
           seed: "",
