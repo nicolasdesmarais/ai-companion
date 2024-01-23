@@ -5,6 +5,7 @@ import {
 import { DataSourceRepository } from "@/src/domain/ports/outgoing/DataSourceRepository";
 import prismadb from "@/src/lib/prismadb";
 import {
+  DataSource,
   DataSourceIndexStatus,
   DataSourceRefreshPeriod,
   DataSourceType,
@@ -29,6 +30,9 @@ const dataSourceFilterWhereClause = (
   filter?: DataSourceFilter
 ): Prisma.DataSourceWhereInput => {
   let whereClause: Prisma.DataSourceWhereInput = {};
+  whereClause.indexStatus = {
+    not: DataSourceIndexStatus.DELETED,
+  };
 
   if (filter) {
     if (filter.name) {
@@ -116,9 +120,9 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
             aiId,
           },
         },
-        // indexStatus: {
-        //   not: DataSourceIndexStatus.DELETED,
-        // },
+        indexStatus: {
+          not: DataSourceIndexStatus.DELETED,
+        },
       },
     });
     return this.mapDataSourcesToDto(dataSources);
@@ -137,6 +141,9 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
         id: true,
       },
       where: {
+        indexStatus: {
+          not: DataSourceIndexStatus.DELETED,
+        },
         OR: [
           {
             AND: [
