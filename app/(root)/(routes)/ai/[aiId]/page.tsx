@@ -24,7 +24,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
       authorizationContext,
       params.aiId
     );
-    return redirect(`/chat/${chat.id}`);
+    return redirect(`/chat/${chat.id}?new=true`);
   } else {
     return redirect(`/chat/${aiChats.data[0].id}`);
   }
