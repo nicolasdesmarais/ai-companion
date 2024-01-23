@@ -211,7 +211,7 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
       toast({
         variant: "destructive",
         description:
-          "Name and description are required to generate the instruction.",
+          "Fill out the name and description to generate training materials.",
         duration: 3000,
       });
     }
@@ -243,11 +243,16 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
       toast({
         variant: "destructive",
         description:
-          "Name, description and instructions are required to generate the conversation.",
+          "Fill out the name, description and instructions to generate training materials.",
         duration: 6000,
       });
     }
     setGeneratingConversation(false);
+  };
+
+  const generateAll = async () => {
+    await generateInstruction();
+    await generateConversation();
   };
 
   return (
@@ -547,7 +552,6 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
         </div>
         <Separator className="bg-primary/10" />
       </div>
-
       <FormField
         name="description"
         control={form.control}
@@ -566,6 +570,21 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
               AI and generate the training material below.
             </FormDescription>
             <FormMessage />
+            <Button
+              type="button"
+              disabled={
+                isLoading || generatingConversation || generatingInstruction
+              }
+              variant="outline"
+              onClick={() => generateAll()}
+            >
+              Generate Training Information
+              {generatingConversation || generatingInstruction ? (
+                <Loader className="w-4 h-4 ml-2 spinner" />
+              ) : (
+                <Wand2 className="w-4 h-4 ml-2" />
+              )}
+            </Button>
           </FormItem>
         )}
       />
