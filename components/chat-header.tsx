@@ -35,6 +35,7 @@ import { useState } from "react";
 import { RateModal } from "./rate-modal";
 import { ShareModal } from "./share-modal";
 import { StarRating } from "./star-rating";
+import { AIVisibility } from "@prisma/client";
 
 interface ChatHeaderProps {
   ai: AIDetailDto | null;
@@ -203,7 +204,7 @@ export const ChatHeader = ({
         </div>
 
         <div className="flex">
-          {ai && canEditAi && (
+          {ai && (canEditAi || ai.visibility === AIVisibility.PUBLIC) && (
             <Button
               variant="ghost"
               size="icon"
@@ -256,9 +257,11 @@ export const ChatHeader = ({
                   Rate
                 </DropdownMenuItem>
               )}
-              <div className="text-xxs uppercase border-b text-white/30 m-1">
-                Admin
-              </div>
+              {ai && (canApproveAi || canEditAi) && (
+                <div className="text-xxs uppercase border-b text-white/30 m-1">
+                  Admin
+                </div>
+              )}
               {ai && canApproveAi && !isApproved && (
                 <DropdownMenuItem onClick={() => approve()}>
                   <BadgeCheck className="w-4 h-4 mr-2" />
