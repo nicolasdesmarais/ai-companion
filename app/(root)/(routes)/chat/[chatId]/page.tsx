@@ -22,41 +22,40 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     return redirectToSignIn();
   }
 
-  const chat = await chatService.getChat(authorizationContext, params.chatId);
-  const ai = await aiService.findAIForUser(authorizationContext, chat.ai.id);
+  try {
+    const chat = await chatService.getChat(authorizationContext, params.chatId);
+    const ai = await aiService.findAIForUser(authorizationContext, chat.ai.id);
+    const canEditAi =
+      ai !== null && AISecurityService.canUpdateAI(authorizationContext, ai);
 
-  if (!chat) {
+    const canApproveAi =
+      ai !== null &&
+      AISecurityService.canApproveAIForOrg(authorizationContext, ai);
+
+    return (
+      <div className="flex h-full">
+        <ResizePanel
+          name="chat-list-resize-panel"
+          initial={360}
+          min={80}
+          max={600}
+          className="hidden md:flex"
+        >
+          <ChatList />
+        </ResizePanel>
+        <ChatClient
+          ai={ai}
+          chat={chat}
+          canEditAi={canEditAi}
+          canApproveAi={canApproveAi}
+        />
+        {ai && <AIProfile ai={ai} />}
+        <ConfirmModal />
+      </div>
+    );
+  } catch (e) {
     return redirect("/");
   }
-
-  const canEditAi =
-    ai !== null && AISecurityService.canUpdateAI(authorizationContext, ai);
-
-  const canApproveAi =
-    ai !== null &&
-    AISecurityService.canApproveAIForOrg(authorizationContext, ai);
-
-  return (
-    <div className="flex h-full">
-      <ResizePanel
-        name="chat-list-resize-panel"
-        initial={360}
-        min={80}
-        max={600}
-        className="hidden md:flex"
-      >
-        <ChatList />
-      </ResizePanel>
-      <ChatClient
-        ai={ai}
-        chat={chat}
-        canEditAi={canEditAi}
-        canApproveAi={canApproveAi}
-      />
-      {ai && <AIProfile ai={ai} />}
-      <ConfirmModal />
-    </div>
-  );
 };
 
 export default ChatIdPage;
