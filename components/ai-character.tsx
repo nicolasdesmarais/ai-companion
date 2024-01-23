@@ -54,6 +54,10 @@ Human: Got it. Thanks for your assistance.
 Support Specialist AI: You're welcome! Feel free to ask if you have any further questions. I'm here to help!
 `;
 
+const INSTRUCTION_PROMPT = `Create a single short paragraph description of an AI you are training to answer questions from users. 
+Write it as if you are explaining to them their job, role and responsibilities. Write it simply and direct without excessive adjectives or niceties. 
+Do not mention continuous learning. Write the paragraph based on the following information about them: `;
+
 interface AIFormProps {
   form: any;
   hasInstanceAccess: boolean;
@@ -191,7 +195,7 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
     if (name && description) {
       try {
         const response = await axios.post("/api/v1/generate", {
-          prompt: `Generate an AI agent prompt for ${name}, ${description}.  Prompt should be at least 200 characters long.`,
+          prompt: `${INSTRUCTION_PROMPT} ${name}, ${description}.`,
         });
         form.setValue("instructions", response.data, { shouldDirty: true });
       } catch (error: any) {
@@ -219,33 +223,13 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
     const name = form.getValues("name");
     const description = form.getValues("description");
     const instructions = form.getValues("instructions");
-    const seed = form.getValues("seed");
     if (name && description) {
       try {
-        let history;
-        if (!seed) {
-          history = `Human: Hi ${name}\n`;
-        } else {
-          const question = await axios.post("/api/v1/generate", {
-            prompt: `
-              Pretend you are a human talking to an AI agent ${name}, ${description}.  Continue the conversation below.\n\n
-              ${seed}\nHuman:
-            `,
-          });
-          history = `${seed}Human: ${question.data}\n`;
-        }
         const response = await axios.post("/api/v1/generate", {
-          prompt: `
-          ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${name}: prefix.
-
-          ${instructions}
-
-          Below are relevant details about ${name}'s past and the conversation you are in.
-          ${history}\n${name}:`,
+          prompt: `Create an example conversation between a Human and ${name} where the Human is asking questions of the AI named ${name}. 
+          Create the conversation based on what a user would ask an AI who is trained on the following information: ${instructions}`,
         });
-        form.setValue("seed", `${history}\n${name}: ${response.data}\n\n`, {
-          shouldDirty: true,
-        });
+        form.setValue("seed", response.data, { shouldDirty: true });
       } catch (error: any) {
         toast({
           variant: "destructive",
@@ -413,7 +397,9 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
                   ))}
                 </SelectContent>
               </Select>
-              <FormDescription>Select a category for your AI</FormDescription>
+              <FormDescription>
+                Select the public category for your AI
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -638,8 +624,10 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
               />
             </FormControl>
             <FormDescription>
-              Write couple of examples of a human chatting with your AI, write
-              expected answers.
+              Create an example conversation between a user and your AI. This
+              will teach the AI more about the type of response it should
+              provide to questions and better help it understand your
+              expectations.
             </FormDescription>
             <Button
               type="button"
@@ -647,7 +635,7 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
               variant="outline"
               onClick={() => generateConversation()}
             >
-              Add Generated Conversation
+              Generate Conversation
               {generatingConversation ? (
                 <Loader className="w-4 h-4 ml-2 spinner" />
               ) : (
