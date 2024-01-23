@@ -18,7 +18,7 @@ async function deleteHandler(
 ) {
   const { params, authorizationContext } = context;
 
-  await dataSourceService.deleteDataSource(
+  await dataSourceService.requestDeleteDataSource(
     authorizationContext,
     params.dataSourceId
   );

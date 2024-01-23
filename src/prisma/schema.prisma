@@ -248,6 +248,11 @@ model DataSource {
   data            Json?
   refreshPeriod   DataSourceRefreshPeriod? @map(name: "refresh_period")
 
+  @@index(indexStatus)
+  @@index(type)
+  @@index(createdAt)
+  @@index(lastIndexedAt)
+  @@fulltext(name)
   @@map("data_sources")
 }
 
@@ -266,6 +271,7 @@ enum DataSourceIndexStatus {
   PARTIALLY_COMPLETED
   COMPLETED
   FAILED
+  DELETED
 }
 
 enum DataSourceRefreshPeriod {

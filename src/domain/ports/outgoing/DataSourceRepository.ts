@@ -1,11 +1,18 @@
 import { DataSourceRefreshPeriod, DataSourceType } from "@prisma/client";
-import { DataSourceDto } from "../../models/DataSources";
+import { DataSourceDto, DataSourceFilter } from "../../models/DataSources";
 
 export interface DataSourceRepository {
   findById(id: string): Promise<DataSourceDto | null>;
-  findAll(): Promise<DataSourceDto[]>;
-  findByOrgId(orgId: string): Promise<DataSourceDto[]>;
-  findByOrgIdAndUserId(orgId: string, userId: string): Promise<DataSourceDto[]>;
+  findAll(filter?: DataSourceFilter): Promise<DataSourceDto[]>;
+  findByOrgId(
+    orgId: string,
+    filter?: DataSourceFilter
+  ): Promise<DataSourceDto[]>;
+  findByOrgIdAndUserId(
+    orgId: string,
+    userId: string,
+    filter?: DataSourceFilter
+  ): Promise<DataSourceDto[]>;
   findByAiId(aiId: string): Promise<DataSourceDto[]>;
   findDataSourceIdsToRefresh(now: Date): Promise<string[]>;
 

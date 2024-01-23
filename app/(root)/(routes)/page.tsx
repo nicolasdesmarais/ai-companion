@@ -95,11 +95,13 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
           the creator did not give you permission to see. Use with caution.
         </Banner>
       )}
-      <div className="flex ">
-        <h1 className="text-4xl font-bold whitespace-nowrap pt-2 pr-2">
-          Browse AIs
-        </h1>
-        <Filters />
+      <div className="flex justify-between">
+        <div className="flex flex-col md:flex-row">
+          <h1 className="text-4xl font-bold whitespace-nowrap pt-2 pr-2">
+            Browse AIs
+          </h1>
+          <Filters />
+        </div>
         <InviteButton />
       </div>
       <SearchInput />

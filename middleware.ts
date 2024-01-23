@@ -23,7 +23,7 @@ export default authMiddleware({
     // handle users who aren't authenticated
     if (!auth.userId && !auth.isPublicRoute && !auth.isApiRoute) {
       const landing = new URL("/landing", req.url);
-      return NextResponse.redirect(landing);
+      return NextResponse.redirect(landing, { status: 308 });
     }
     // redirect them to organization selection page
     if (
@@ -34,7 +34,7 @@ export default authMiddleware({
       req.nextUrl.pathname !== "/org-selection"
     ) {
       const orgSelection = new URL("/org-selection", req.url);
-      return NextResponse.redirect(orgSelection);
+      return NextResponse.redirect(orgSelection, { status: 308 });
     }
   },
 });

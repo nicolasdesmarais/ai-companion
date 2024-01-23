@@ -3,13 +3,13 @@ import { auth, redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
 const ChatPage = async () => {
-  const { userId } = auth();
+  const { userId, orgId } = auth();
 
-  if (!userId) {
+  if (!userId || !orgId) {
     return redirectToSignIn();
   }
 
-  const chats = await chatService.getUserChats(userId);
+  const chats = await chatService.getUserChats(userId, orgId);
 
   if (!chats.data.length) {
     return redirect("/");

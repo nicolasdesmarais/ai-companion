@@ -17,6 +17,13 @@ datadogRum.init({
   defaultPrivacyLevel: "mask-user-input",
 });
 
-export default function DatadogInit() {
+interface Props {
+  userId: string;
+}
+
+export default function DatadogInit({ userId }: Props) {
+  if (userId) {
+    datadogRum.setUser({ id: userId });
+  }
   return null;
 }

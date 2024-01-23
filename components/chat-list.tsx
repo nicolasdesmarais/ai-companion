@@ -5,24 +5,25 @@ import { useChats } from "@/hooks/use-chats";
 import { ChatSummaryDto } from "@/src/domain/models/Chats";
 import { cn } from "@/src/lib/utils";
 import { Loader } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 type Props = {
   className?: string;
-  isMobile?: boolean;
 };
 
-export const ChatList = ({ className, isMobile = false }: Props) => {
+export const ChatList = ({ className }: Props) => {
   const { chats, fetchChats, loading } = useChats();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const isNew = searchParams.get("new");
 
   useEffect(() => {
-    if (!chats.length) {
+    if (!chats.length || isNew) {
       fetchChats();
     }
-  }, [fetchChats, chats.length]);
+  }, [fetchChats, chats.length, isNew]);
 
   const pinned = chats.filter((chat) => chat.pinPosition);
 

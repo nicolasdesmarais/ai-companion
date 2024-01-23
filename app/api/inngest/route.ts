@@ -1,4 +1,5 @@
 import {
+  dataSourceDeleteRequested,
   dataSourceInitialized,
   dataSourceItemListReceived,
   dataSourceRefreshRequested,
@@ -19,6 +20,7 @@ export const { GET, POST, PUT } = serve({
     dataSourceInitialized,
     dataSourceRefreshRequested,
     dataSourceItemListReceived,
+    dataSourceDeleteRequested,
     googleDriveFolderScanInitiated,
     knowledgeInitialized,
     knowledgeEventReceived,
