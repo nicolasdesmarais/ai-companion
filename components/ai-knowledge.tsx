@@ -64,6 +64,7 @@ export const AIKnowledge = ({
   aiModels,
 }: SelectDataSourceProps) => {
   const { toast } = useToast();
+  const [modelId, setModelId] = useState(form.getValues("modelId"));
   const [removing, setRemoving] = useState("");
   const [refreshing, setRefreshing] = useState("");
   const pathname = usePathname();
@@ -71,6 +72,25 @@ export const AIKnowledge = ({
   const aiId = form.getValues("id");
 
   const isLoading = form.formState.isSubmitting;
+
+  const saveModel = async (id: string) => {
+    try {
+      const values = form.getValues();
+      values.modelId = id;
+      setModelId(id);
+      await axios.patch(`/api/v1/ai/${aiId}`, values);
+      toast({
+        description: "AI Saved.",
+        duration: 2000,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: "Something went wrong.",
+        duration: 3000,
+      });
+    }
+  };
 
   const removeDataSource = async (id: string) => {
     setRemoving(id);
@@ -120,52 +140,30 @@ export const AIKnowledge = ({
       {pathname.endsWith("knowledge") && (
         <>
           <h1 className="text-lg font-medium mb-2">Your AI&apos;s Model</h1>
-          <FormField
-            control={form.control}
-            name="modelId"
-            render={({ field }) => (
-              <FormItem>
-                <Select
-                  disabled={isLoading}
-                  onValueChange={(val) => {
-                    const model = aiModels.find((model) => model.id === val);
-                    if (model) {
-                      Object.entries(model.options).forEach(([key, value]) => {
-                        if (value.default) {
-                          form.setValue(key, [value.default], {
-                            shouldDirty: true,
-                          });
-                        }
-                      });
-                    }
-                    field.onChange(val);
-                  }}
-                  value={field.value}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="bg-background w-1/2">
-                      <SelectValue
-                        defaultValue={field.value}
-                        placeholder="Select a model"
-                      />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {aiModels.map((model) => (
-                      <SelectItem key={model.id} value={model.id}>
-                        {model.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  Select the Large Language Model for your AI
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <FormItem>
+            <Select
+              disabled={isLoading}
+              onValueChange={(val) => saveModel(val)}
+              value={modelId}
+            >
+              <FormControl>
+                <SelectTrigger className="bg-background w-1/2">
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {aiModels.map((model) => (
+                  <SelectItem key={model.id} value={model.id}>
+                    {model.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormDescription>
+              Select the Large Language Model for your AI
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
           <h1 className="text-lg font-medium mt-8">
             Your AI&apos;s Data Sources
           </h1>
