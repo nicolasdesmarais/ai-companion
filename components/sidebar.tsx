@@ -1,6 +1,7 @@
 "use client";
 
 import { ModeToggle } from "@/components/mode-toggle";
+import { useChats } from "@/hooks/use-chats";
 import { useProModal } from "@/hooks/use-pro-modal";
 import { cn } from "@/src/lib/utils";
 import { Permission } from "@/src/security/models/Permission";
@@ -26,10 +27,10 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
+import { useEffect } from "react";
 
 interface SidebarProps {
   isPro: boolean;
-  hasChat: boolean;
   className?: string;
   userPermissions: Permission[];
 }
@@ -87,14 +88,18 @@ const isActive = (
 
 export const Sidebar = ({
   isPro,
-  hasChat,
   className,
   userPermissions,
 }: SidebarProps) => {
+  const { chats, fetchChats } = useChats();
   const proModal = useProModal();
   const router = useRouter();
   const pathname = usePathname();
   const searchparams = useSearchParams();
+
+  useEffect(() => {
+    fetchChats();
+  }, [fetchChats]);
 
   const shouldHideRoute = (route: Route) => {
     const requiredRoutePermission = route.requiredPermission;
@@ -219,7 +224,7 @@ export const Sidebar = ({
             "text-muted-foreground text-xs group py-3 px-8 flex w-full justify-center font-medium rounded-lg transition",
             pathname.startsWith("/chat/")
               ? "bg-accent text-primary cursor-pointer hover:text-primary hover:bg-primary/10"
-              : hasChat
+              : chats.length > 0
               ? "cursor-pointer hover:text-primary hover:bg-primary/10"
               : "opacity-25"
           )}
