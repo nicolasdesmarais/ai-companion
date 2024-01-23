@@ -57,6 +57,7 @@ export interface AIRequest {
   categoryId: string;
   src: string;
   name: string;
+  introduction: string;
   description: string;
   instructions: string;
   seed: string;
