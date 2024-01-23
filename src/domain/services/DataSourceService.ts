@@ -2,6 +2,7 @@ import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
 import apiDataSourceAdapter from "@/src/adapter-out/knowledge/api/ApiDataSourceAdapter";
 import fileUploadDataSourceAdapter from "@/src/adapter-out/knowledge/file-upload/FileUploadDataSourceAdapter";
 import googleDriveDataSourceAdapter from "@/src/adapter-out/knowledge/google-drive/GoogleDriveDataSourceAdapter";
+import msftDataSourceAdapter from "@/src/adapter-out/knowledge/msft/MsftDataSourceAdapter";
 import { DataSourceAdapter } from "@/src/adapter-out/knowledge/types/DataSourceAdapter";
 import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
@@ -26,9 +27,8 @@ import {
 } from "@prisma/client";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import { DomainEvent } from "../events/domain-event";
-import { DataSourceDto } from "../models/DataSources";
+import { DataSourceDto, DataSourceFilter } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
-import msftDataSourceAdapter from "@/src/adapter-out/knowledge/msft/MsftDataSourceAdapter";
 
 export class DataSourceService {
   constructor(private dataSourceRepository: DataSourceRepository) {}
@@ -71,7 +71,8 @@ export class DataSourceService {
    * @returns
    */
   public async listDataSources(
-    authorizationContext: AuthorizationContext
+    authorizationContext: AuthorizationContext,
+    filter?: DataSourceFilter
   ): Promise<DataSourceDto[]> {
     const highestAccessLevel = BaseEntitySecurityService.getHighestAccessLevel(
       authorizationContext,
@@ -85,13 +86,14 @@ export class DataSourceService {
     const { orgId, userId } = authorizationContext;
     switch (highestAccessLevel) {
       case SecuredResourceAccessLevel.INSTANCE:
-        return await this.dataSourceRepository.findAll();
+        return await this.dataSourceRepository.findAll(filter);
       case SecuredResourceAccessLevel.ORGANIZATION:
-        return await this.dataSourceRepository.findByOrgId(orgId);
+        return await this.dataSourceRepository.findByOrgId(orgId, filter);
       case SecuredResourceAccessLevel.SELF:
         return await this.dataSourceRepository.findByOrgIdAndUserId(
           orgId,
-          userId
+          userId,
+          filter
         );
     }
   }
