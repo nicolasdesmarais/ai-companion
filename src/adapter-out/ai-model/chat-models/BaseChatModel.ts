@@ -1,16 +1,11 @@
 import { getTokenLength } from "@/src/lib/tokenCount";
+import { BaseChatModel as BaseLangChainChatModel } from "@langchain/core/language_models/chat_models";
 import { LangChainStream } from "ai";
-import {
-  ChatOpenAI,
-  ChatOpenAICallOptions,
-} from "langchain/chat_models/openai";
 import { HumanMessage, SystemMessage } from "langchain/schema";
 import { PostToChatInput, PostToChatResponse } from "./ChatModel";
 
 export abstract class BaseChatModel {
-  protected abstract getChatModelInstance(
-    options: any
-  ): ChatOpenAI<ChatOpenAICallOptions>;
+  protected abstract getChatModelInstance(options: any): BaseLangChainChatModel;
 
   public async postToChat(input: PostToChatInput): Promise<PostToChatResponse> {
     const { ai, messages, date, getKnowledgeCallback, endCallback } = input;
