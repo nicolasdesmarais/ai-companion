@@ -16,7 +16,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-      <DatadogInit />
+      <DatadogInit userId={userId} />
       <div className="h-full">
         <Navbar isPro={false} hasChat={true} userPermissions={permissions} />
         <div className="hidden md:flex h-full w-20 flex-col fixed inset-y-0 z-40">
