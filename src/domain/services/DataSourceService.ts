@@ -901,15 +901,20 @@ export class DataSourceService {
     return relatedKnowledgeIds;
   }
 
-  public async deleteDataSource(
+  /**
+   * Handles a request to delete a data source
+   * Validates that the data source exists and that the user has permission to delete it
+   * If validation is successful, publishes a DATASOURCE_DELETE_REQUESTED event
+   * Data source deletion is handled asynchronously by the data source workflows
+   * @param authorizationContext
+   * @param dataSourceId
+   */
+  public async requestDeleteDataSource(
     authorizationContext: AuthorizationContext,
     dataSourceId: string
   ) {
     const dataSource = await prismadb.dataSource.findUnique({
       where: { id: dataSourceId },
-      include: {
-        knowledges: true,
-      },
     });
     if (!dataSource) {
       throw new EntityNotFoundError(
@@ -926,35 +931,69 @@ export class DataSourceService {
       throw new ForbiddenError("Forbidden");
     }
 
-    const knowledgeIds: string[] = dataSource.knowledges.map(
-      (dataSourceKnowledge) => dataSourceKnowledge.knowledgeId
-    );
+    await publishEvent(DomainEvent.DATASOURCE_DELETE_REQUESTED, {
+      dataSourceId: dataSource.id,
+    });
+  }
 
-    await prismadb.$transaction(async (tx) => {
-      await prismadb.aIDataSource.deleteMany({
-        where: { dataSourceId },
-      });
-
-      await prismadb.dataSourceKnowledge.deleteMany({
-        where: { dataSourceId },
-      });
-
-      await prismadb.knowledge.deleteMany({
+  /**
+   * Marks a data source as deleted and removes
+   * all related associations.
+   * Returns a list of knowledge ids which were deleted
+   * @param dataSourceId
+   * @returns
+   */
+  public async deleteDataSource(dataSourceId: string) {
+    const dataSourceKnowledgeToDelete =
+      await prismadb.dataSourceKnowledge.findMany({
+        select: { knowledgeId: true },
         where: {
-          id: { in: knowledgeIds },
-          NOT: {
-            indexStatus: {
-              in: [
-                KnowledgeIndexStatus.COMPLETED,
-                KnowledgeIndexStatus.PARTIALLY_COMPLETED,
-              ],
+          dataSourceId,
+          knowledge: {
+            NOT: {
+              indexStatus: {
+                in: [
+                  KnowledgeIndexStatus.COMPLETED,
+                  KnowledgeIndexStatus.PARTIALLY_COMPLETED,
+                  KnowledgeIndexStatus.DELETED,
+                ],
+              },
             },
           },
         },
       });
 
-      await prismadb.dataSource.delete({ where: { id: dataSourceId } });
+    const knowledgeIdsToDelete: string[] = dataSourceKnowledgeToDelete.map(
+      (dataSourceKnowledge) => dataSourceKnowledge.knowledgeId
+    );
+
+    await prismadb.$transaction(async (tx) => {
+      await tx.dataSource.update({
+        where: { id: dataSourceId },
+        data: {
+          indexStatus: DataSourceIndexStatus.DELETED,
+        },
+      });
+
+      await tx.aIDataSource.deleteMany({
+        where: { dataSourceId },
+      });
+
+      await tx.dataSourceKnowledge.deleteMany({
+        where: { dataSourceId },
+      });
+
+      await tx.knowledge.updateMany({
+        data: {
+          indexStatus: KnowledgeIndexStatus.DELETED,
+        },
+        where: {
+          id: { in: knowledgeIdsToDelete },
+        },
+      });
     });
+
+    return knowledgeIdsToDelete;
   }
 
   public async findDataSourcesToRefresh() {
