@@ -54,6 +54,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
       </div>
     );
   } catch (e) {
+    console.error("[CHAT page]", e);
     return redirect("/");
   }
 };
