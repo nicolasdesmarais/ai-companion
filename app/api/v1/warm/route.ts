@@ -3,7 +3,19 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 300;
 
-const paths = ["/", "/ai/new/edit", "/chat/", "/api/v1/me/chats"];
+const testAiId = process.env.AUTOMATION_AI_ID;
+
+const paths = [
+  "/",
+  "/ai/new/edit",
+  "/chat/",
+  "/api/v1/me/chats",
+  "/api/v1/me/groups",
+  "/api/v1/categories",
+  `/ai/${testAiId}`,
+  `/api/v1/ai/${testAiId}/rating/all`,
+  `/api/v1/ai/${testAiId}/data-sources`,
+];
 
 const fetchPath = async (origin: string, path: string) => {
   const url = origin + path;

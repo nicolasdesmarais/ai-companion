@@ -80,7 +80,7 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <h3 className="text-lg font-medium">Share AI - {ai.name}</h3>
-          {ai.visibility === AIVisibility.PUBLIC && (
+          {ai.visibility === AIVisibility.PUBLIC ? (
             <div className="flex items-center">
               <p className="text-xs px-3 py-3 mr-2 bg-ring/10 rounded-lg w-full">
                 {aiLink}
@@ -94,28 +94,31 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
                 <Copy className="w-4 h-4" />
               </Button>
             </div>
+          ) : (
+            <>
+              <FormField
+                name="teammates"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Add teammates</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Ex: jennifer.wallace@acme.com, joe.hamm@acme.com"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="w-full flex flex-row-reverse">
+                <Button size="lg" variant="ring">
+                  Share
+                </Button>
+              </div>
+            </>
           )}
-          <FormField
-            name="teammates"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Add teammates</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Ex: jennifer.wallace@acme.com, joe.hamm@acme.com"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="w-full flex flex-row-reverse">
-            <Button size="lg" variant="ring">
-              Share
-            </Button>
-          </div>
         </form>
       </Form>
     </div>
