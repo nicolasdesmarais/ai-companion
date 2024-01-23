@@ -5,7 +5,6 @@ import {
 import { DataSourceRepository } from "@/src/domain/ports/outgoing/DataSourceRepository";
 import prismadb from "@/src/lib/prismadb";
 import {
-  DataSource,
   DataSourceIndexStatus,
   DataSourceRefreshPeriod,
   DataSourceType,
@@ -117,6 +116,9 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
             aiId,
           },
         },
+        // indexStatus: {
+        //   not: DataSourceIndexStatus.DELETED,
+        // },
       },
     });
     return this.mapDataSourcesToDto(dataSources);

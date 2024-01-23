@@ -204,18 +204,16 @@ export const pollIndexingDataSources = inngest.createFunction(
   }
 );
 
-export const dataSourceDeleted = inngest.createFunction(
-  { id: "datasource-deleted" },
-  { event: DomainEvent.DATASOURCE_DELETED },
+export const dataSourceDeleteRequested = inngest.createFunction(
+  { id: "datasource-delete-requested" },
+  { event: DomainEvent.DATASOURCE_DELETE_REQUESTED },
   async ({ event, step }) => {
     const dataSourceId = event.data.dataSourceId;
 
     const deletedKnowledgeIds = await step.run(
-      "create-knowledge-list",
+      "delete-data-source",
       async () => {
-        return await dataSourceService.deleteDataSourceAssociations(
-          dataSourceId
-        );
+        return await dataSourceService.deleteDataSource(dataSourceId);
       }
     );
 

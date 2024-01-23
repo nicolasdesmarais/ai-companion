@@ -901,7 +901,7 @@ export class DataSourceService {
     return relatedKnowledgeIds;
   }
 
-  public async deleteDataSource(
+  public async requestDeleteDataSource(
     authorizationContext: AuthorizationContext,
     dataSourceId: string
   ) {
@@ -923,21 +923,14 @@ export class DataSourceService {
       throw new ForbiddenError("Forbidden");
     }
 
-    await prismadb.dataSource.update({
-      where: { id: dataSourceId },
-      data: {
-        indexStatus: DataSourceIndexStatus.DELETED,
-      },
-    });
-
-    await publishEvent(DomainEvent.DATASOURCE_DELETED, {
+    await publishEvent(DomainEvent.DATASOURCE_DELETE_REQUESTED, {
       dataSourceId: dataSource.id,
     });
   }
 
-  public async deleteDataSourceAssociations(dataSourceId: string) {
-    const dataSourceKnowledgeList = await prismadb.dataSourceKnowledge.findMany(
-      {
+  public async deleteDataSource(dataSourceId: string) {
+    const dataSourceKnowledgeToDelete =
+      await prismadb.dataSourceKnowledge.findMany({
         select: { knowledgeId: true },
         where: {
           dataSourceId,
@@ -953,33 +946,39 @@ export class DataSourceService {
             },
           },
         },
-      }
-    );
+      });
 
-    const knowledgeIds: string[] = dataSourceKnowledgeList.map(
+    const knowledgeIdsToDelete: string[] = dataSourceKnowledgeToDelete.map(
       (dataSourceKnowledge) => dataSourceKnowledge.knowledgeId
     );
 
     await prismadb.$transaction(async (tx) => {
-      await prismadb.aIDataSource.deleteMany({
+      await tx.dataSource.update({
+        where: { id: dataSourceId },
+        data: {
+          indexStatus: DataSourceIndexStatus.DELETED,
+        },
+      });
+
+      await tx.aIDataSource.deleteMany({
         where: { dataSourceId },
       });
 
-      await prismadb.dataSourceKnowledge.deleteMany({
+      await tx.dataSourceKnowledge.deleteMany({
         where: { dataSourceId },
       });
 
-      await prismadb.knowledge.updateMany({
+      await tx.knowledge.updateMany({
         data: {
           indexStatus: KnowledgeIndexStatus.DELETED,
         },
         where: {
-          id: { in: knowledgeIds },
+          id: { in: knowledgeIdsToDelete },
         },
       });
     });
 
-    return knowledgeIds;
+    return knowledgeIdsToDelete;
   }
 
   public async findDataSourcesToRefresh() {
