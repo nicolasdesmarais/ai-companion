@@ -270,6 +270,7 @@ enum DataSourceIndexStatus {
   PARTIALLY_COMPLETED
   COMPLETED
   FAILED
+  DELETED
 }
 
 enum DataSourceRefreshPeriod {

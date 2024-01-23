@@ -4,6 +4,7 @@ export enum DomainEvent {
   DATASOURCE_INITIALIZED = "datasource.initialized",
   DATASOURCE_REFRESH_REQUESTED = "datasource.refresh.requested",
   DATASOURCE_ITEM_LIST_RECEIVED = "datasource.item.list.received",
+  DATASOURCE_DELETED = "datasource.deleted",
   KNOWLEDGE_INITIALIZED = "knowledge.initialized",
   KNOWLEDGE_EVENT_RECEIVED = "knowledge.event.received",
   KNOWLEDGE_CHUNK_RECEIVED = "knowledge.chunk.received",

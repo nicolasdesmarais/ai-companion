@@ -203,3 +203,28 @@ export const pollIndexingDataSources = inngest.createFunction(
     }
   }
 );
+
+export const dataSourceDeleted = inngest.createFunction(
+  { id: "datasource-deleted" },
+  { event: DomainEvent.DATASOURCE_DELETED },
+  async ({ event, step }) => {
+    const dataSourceId = event.data.dataSourceId;
+
+    const deletedKnowledgeIds = await step.run(
+      "create-knowledge-list",
+      async () => {
+        return await dataSourceService.deleteDataSourceAssociations(
+          dataSourceId
+        );
+      }
+    );
+
+    await Promise.all(
+      deletedKnowledgeIds.map((knowledgeId) =>
+        step.run("delete-vectordb-knowledge", async () => {
+          await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
+        })
+      )
+    );
+  }
+);

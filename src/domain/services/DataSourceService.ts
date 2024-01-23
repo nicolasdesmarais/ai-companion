@@ -907,9 +907,6 @@ export class DataSourceService {
   ) {
     const dataSource = await prismadb.dataSource.findUnique({
       where: { id: dataSourceId },
-      include: {
-        knowledges: true,
-      },
     });
     if (!dataSource) {
       throw new EntityNotFoundError(
@@ -926,7 +923,40 @@ export class DataSourceService {
       throw new ForbiddenError("Forbidden");
     }
 
-    const knowledgeIds: string[] = dataSource.knowledges.map(
+    await prismadb.dataSource.update({
+      where: { id: dataSourceId },
+      data: {
+        indexStatus: DataSourceIndexStatus.DELETED,
+      },
+    });
+
+    await publishEvent(DomainEvent.DATASOURCE_DELETED, {
+      dataSourceId: dataSource.id,
+    });
+  }
+
+  public async deleteDataSourceAssociations(dataSourceId: string) {
+    const dataSourceKnowledgeList = await prismadb.dataSourceKnowledge.findMany(
+      {
+        select: { knowledgeId: true },
+        where: {
+          dataSourceId,
+          knowledge: {
+            NOT: {
+              indexStatus: {
+                in: [
+                  KnowledgeIndexStatus.COMPLETED,
+                  KnowledgeIndexStatus.PARTIALLY_COMPLETED,
+                  KnowledgeIndexStatus.DELETED,
+                ],
+              },
+            },
+          },
+        },
+      }
+    );
+
+    const knowledgeIds: string[] = dataSourceKnowledgeList.map(
       (dataSourceKnowledge) => dataSourceKnowledge.knowledgeId
     );
 
@@ -939,22 +969,17 @@ export class DataSourceService {
         where: { dataSourceId },
       });
 
-      await prismadb.knowledge.deleteMany({
+      await prismadb.knowledge.updateMany({
+        data: {
+          indexStatus: KnowledgeIndexStatus.DELETED,
+        },
         where: {
           id: { in: knowledgeIds },
-          NOT: {
-            indexStatus: {
-              in: [
-                KnowledgeIndexStatus.COMPLETED,
-                KnowledgeIndexStatus.PARTIALLY_COMPLETED,
-              ],
-            },
-          },
         },
       });
-
-      await prismadb.dataSource.delete({ where: { id: dataSourceId } });
     });
+
+    return knowledgeIds;
   }
 
   public async findDataSourcesToRefresh() {
