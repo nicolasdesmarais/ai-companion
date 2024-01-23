@@ -54,3 +54,32 @@ FROM
    INNER JOIN knowledge k ON k.id = dsk.knowledge_id) AS ak
 GROUP BY ak.ai_id
 ORDER BY ai_token_count DESC;
+
+-- # of tokens in messages per organization
+SELECT c.org_id,
+       sum(json_extract(metadata, "$.tokensUsed")) AS token_count
+FROM messages m
+INNER JOIN chats c ON c.id = m.chat_id
+GROUP BY c.org_id
+ORDER BY token_count DESC;
+
+-- # of tokens in messages per organization and user
+SELECT c.org_id,
+       c.user_id,
+       sum(json_extract(metadata, "$.tokensUsed")) AS token_count
+FROM messages m
+INNER JOIN chats c ON c.id = m.chat_id
+GROUP BY c.org_id,
+         c.user_id
+ORDER BY token_count DESC;
+
+
+-- # of tokens in messages per AI
+SELECT ais.id,
+       ais.name,
+       sum(json_extract(metadata, "$.tokensUsed")) AS token_count
+FROM messages m
+INNER JOIN chats c ON c.id = m.chat_id
+INNER JOIN ais ON ais.id = c.ai_id
+GROUP BY ais.id
+ORDER BY token_count DESC;
