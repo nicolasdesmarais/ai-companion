@@ -901,6 +901,14 @@ export class DataSourceService {
     return relatedKnowledgeIds;
   }
 
+  /**
+   * Handles a request to delete a data source
+   * Validates that the data source exists and that the user has permission to delete it
+   * If validation is successful, publishes a DATASOURCE_DELETE_REQUESTED event
+   * Data source deletion is handled asynchronously by the data source workflows
+   * @param authorizationContext
+   * @param dataSourceId
+   */
   public async requestDeleteDataSource(
     authorizationContext: AuthorizationContext,
     dataSourceId: string
@@ -928,6 +936,13 @@ export class DataSourceService {
     });
   }
 
+  /**
+   * Marks a data source as deleted and removes
+   * all related associations.
+   * Returns a list of knowledge ids which were deleted
+   * @param dataSourceId
+   * @returns
+   */
   public async deleteDataSource(dataSourceId: string) {
     const dataSourceKnowledgeToDelete =
       await prismadb.dataSourceKnowledge.findMany({
