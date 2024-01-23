@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from "next/server";
 export const maxDuration = 300;
 
 const testAiId = process.env.AUTOMATION_AI_ID;
-console.log("testAiId", testAiId);
 
 const paths = [
   "/",
