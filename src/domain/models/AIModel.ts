@@ -29,4 +29,5 @@ export enum AIModelProvider {
   OPENAI = "openai",
   ANTHROPIC = "anthropic",
   REPLICATE = "replicate",
+  COHERE = "cohere",
 }
