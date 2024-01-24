@@ -1,7 +1,5 @@
-import {
-  ChatOpenAI,
-  ChatOpenAICallOptions,
-} from "langchain/chat_models/openai";
+import { BaseChatModel } from "@langchain/core/language_models/chat_models";
+import { ChatOpenAI } from "langchain/chat_models/openai";
 import { AbstractBaseChatModel } from "./AbstractBaseChatModel";
 import { ChatModel } from "./ChatModel";
 
@@ -17,9 +15,7 @@ export class Gpt35Model extends AbstractBaseChatModel implements ChatModel {
     return modelId === MODEL_ID;
   }
 
-  protected getChatModelInstance(
-    options: any
-  ): ChatOpenAI<ChatOpenAICallOptions> {
+  protected getChatModelInstance(options: any): BaseChatModel {
     return new ChatOpenAI({
       azureOpenAIApiKey: process.env.AZURE_GPT35_KEY,
       azureOpenAIApiVersion: AZURE_OPENAI_API_VERSION,
