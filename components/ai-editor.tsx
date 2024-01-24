@@ -486,7 +486,7 @@ export const AIEditor = ({
                   <div className="bg-secondary rounded-lg px-2 text-ring hidden md:block">
                     {tab.index}
                   </div>
-                  <div className="ml-2">{tab.name}</div>
+                  <div className="ml-0 md:ml-2">{tab.name}</div>
                 </div>
               )
             )}

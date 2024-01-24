@@ -358,7 +358,7 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
           name="introduction"
           control={form.control}
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="col-span-2 md:col-span-1">
               <FormLabel>Introduction</FormLabel>
               <FormControl>
                 <Input
@@ -378,7 +378,7 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
           control={form.control}
           name="categoryId"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="col-span-2 md:col-span-1">
               <FormLabel>Category</FormLabel>
               <Select
                 disabled={isLoading}
