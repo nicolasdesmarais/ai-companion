@@ -74,6 +74,18 @@ export const OrganizationSettingsForm: React.FC<
 
     setShowModal(true);
   };
+
+  const openGoogleDriveModal = () => {
+    const width = 600;
+    const height = 600;
+    const left = window.innerWidth / 2 - width / 2;
+    const top = window.innerHeight / 2 - height / 2;
+    const authPopup = window.open(
+      "/api/v1/integrations/onedrive/auth",
+      "authPopup",
+      `width=${width},height=${height},top=${top},left=${left}`
+    );
+  };
   const onSaveGoogleDrive = async (values: GoogleIntegrationFormData) => {
     try {
       setLoading(true);
@@ -113,6 +125,17 @@ export const OrganizationSettingsForm: React.FC<
         <span>Google Drive</span>
         <Button type="button" variant="outline" onClick={() => openModal()}>
           Edit
+        </Button>
+      </div>
+
+      <div className="flex items-center justify-between my-4">
+        <span>Microsoft OneDrive</span>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => openGoogleDriveModal()}
+        >
+          Connect
         </Button>
       </div>
 
