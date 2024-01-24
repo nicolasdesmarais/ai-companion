@@ -2,7 +2,7 @@ import {
   ChatOpenAI,
   ChatOpenAICallOptions,
 } from "langchain/chat_models/openai";
-import { BaseChatModel } from "./BaseChatModel";
+import { AbstractBaseChatModel } from "./AbstractBaseChatModel";
 import { ChatModel } from "./ChatModel";
 
 const MODEL_ID = "gpt-4";
@@ -12,7 +12,7 @@ const AZURE_OPENAI_API_VERSION = "2023-05-15";
 const AZURE_OPENAI_API_INSTANCE_NAME = "prod-appdirectai-east2";
 const AZURE_OPENAI_API_DEPLOYMENT_NAME = "gpt4-32k";
 
-export class Gpt4Model extends BaseChatModel implements ChatModel {
+export class Gpt4Model extends AbstractBaseChatModel implements ChatModel {
   public supports(modelId: string): boolean {
     return modelId === MODEL_ID;
   }
