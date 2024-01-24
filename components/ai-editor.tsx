@@ -25,6 +25,7 @@ const formSchema = z.object({
   name: z.string().min(1, {
     message: "Name is required.",
   }),
+  introduction: z.string().optional(),
   description: z.string().min(1, {
     message: "Description is required.",
   }),
@@ -145,6 +146,7 @@ export const AIEditor = ({
       ? ({ talk: "", ...initialAi } as any)
       : {
           name: "",
+          introduction: "",
           description: "",
           instructions: "",
           seed: "",
@@ -286,6 +288,7 @@ export const AIEditor = ({
       dataSources={dataSources}
       setDataSource={setDataSources}
       knowledgeLoading={dataSourcesLoading}
+      aiModels={aiModels}
     />
   );
 
@@ -295,11 +298,7 @@ export const AIEditor = ({
       index: 1,
       route: "edit",
       content: (
-        <AICharacter
-          aiModels={aiModels}
-          form={form}
-          hasInstanceAccess={hasInstanceAccess}
-        />
+        <AICharacter form={form} hasInstanceAccess={hasInstanceAccess} />
       ),
       buttons: (
         <>

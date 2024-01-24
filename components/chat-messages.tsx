@@ -56,7 +56,9 @@ export const ChatMessages = ({
           isLoading={fakeLoading}
           src={ai.src}
           role="system"
-          content={`Hello, I am ${ai.name}, ${ai.description}`}
+          content={
+            ai.introduction || `Hello, I am ${ai.name}, ${ai.description}`
+          }
         />
       )}
       {messages.map((message, index) => (

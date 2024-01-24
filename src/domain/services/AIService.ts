@@ -50,6 +50,7 @@ const listAIResponseSelect = (orgId: string): Prisma.AISelect => ({
   createdAt: true,
   updatedAt: true,
   name: true,
+  introduction: true,
   description: true,
   src: true,
   profile: true,
@@ -932,6 +933,7 @@ export class AIService {
     const {
       src,
       name,
+      introduction,
       description,
       instructions,
       seed,
@@ -963,6 +965,7 @@ export class AIService {
         categoryId,
         src,
         name,
+        introduction,
         description,
         instructions,
         seed,
