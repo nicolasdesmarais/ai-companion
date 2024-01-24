@@ -7,7 +7,7 @@ export interface AISummaryDto {
   createdAt: Date;
   updatedAt: Date;
   name: string;
-  introduction: string;
+  introduction: string | null;
   description: string;
   src: string;
   orgId: string;

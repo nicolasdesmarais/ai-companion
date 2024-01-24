@@ -143,7 +143,7 @@ export const AIEditor = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialAi
-      ? ({ talk: "", introduction: "", ...initialAi } as any)
+      ? ({ talk: "", ...initialAi } as any)
       : {
           name: "",
           introduction: "",
