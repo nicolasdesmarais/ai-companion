@@ -1,5 +1,5 @@
 import { ChatCohere } from "@langchain/cohere";
-import { BaseChatModel as BaseLangChainChatModel } from "@langchain/core/language_models/chat_models";
+import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { AbstractBaseChatModel } from "./AbstractBaseChatModel";
 import { ChatModel } from "./ChatModel";
 
@@ -10,7 +10,7 @@ export class CohereModel extends AbstractBaseChatModel implements ChatModel {
     return modelId === MODEL_ID;
   }
 
-  protected getChatModelInstance(options: any): BaseLangChainChatModel {
+  protected getChatModelInstance(options: any): BaseChatModel {
     return new ChatCohere({
       apiKey: process.env.COHERE_API_KEY,
       model: "command",
