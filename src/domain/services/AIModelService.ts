@@ -1,3 +1,4 @@
+import { AnthropicModel } from "@/src/adapter-out/ai-model/chat-models/AnthropicModel";
 import { AssistantChatModel } from "@/src/adapter-out/ai-model/chat-models/AssistantChatModel";
 import { ChatModel } from "@/src/adapter-out/ai-model/chat-models/ChatModel";
 import { DavinciModel } from "@/src/adapter-out/ai-model/chat-models/DavinciModel";
@@ -15,6 +16,7 @@ const CHAT_MODELS = [
   new GptAssistantModel(),
   new DavinciModel(),
   new LLamaModel(),
+  new AnthropicModel(),
 ];
 
 const ASSISTANT_MODELS = [new GptAssistantModel()];
