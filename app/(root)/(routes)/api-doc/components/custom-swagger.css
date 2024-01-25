@@ -1,3 +1,4 @@
+.dark .swagger-ui, 
 .dark .swagger-ui p, 
 .dark .swagger-ui .markdown p, 
 .dark .swagger-ui .markdown pre, 
@@ -8,7 +9,11 @@
 .dark .swagger-ui .opblock .opblock-section-header h4,
 .dark .swagger-ui table thead tr td, 
 .dark .swagger-ui table thead tr th,
-.dark .swagger-ui .parameter__name {
+.dark .swagger-ui .parameter__name,
+.dark .swagger-ui .parameter__type,
+.dark .swagger-ui .response-col_status,
+.dark .swagger-ui .response-col_links,
+.dark .swagger-ui .model-title {
   color: hsl(var(--muted-foreground)) !important;
 }
 

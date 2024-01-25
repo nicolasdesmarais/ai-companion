@@ -22,7 +22,11 @@ class Layout extends React.Component<Props> {
     const Col = getComponent("Col");
     const loadingStatus = specSelectors.loadingStatus();
     if (loadingStatus === "loading") {
-      return <Loader className="w-16 h-16 spinner" />;
+      return (
+        <div className="flex justify-center items-center h-32">
+          <Loader className="w-16 h-16 spinner" />
+        </div>
+      );
     }
     return (
       <div>
