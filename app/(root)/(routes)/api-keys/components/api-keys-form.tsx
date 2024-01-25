@@ -35,6 +35,7 @@ import * as z from "zod";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { isValidScope } from "@/src/security/models/Permission";
+import Link from "next/link";
 
 interface APIKeysFormProps {
   userScopes: string[];
@@ -170,7 +171,22 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({
 
   return (
     <div className="h-full p-4 max-w-3xl mx-auto">
-      <h1 className="text-lg font-medium">API Keys</h1>
+      <h1 className="text-lg font-medium">API Docs</h1>
+      <p className="text-sm text-muted-foreground">
+        There are several APIs available for your use. You can try them out on{" "}
+        <Link href="/api-doc" className="cursor-pointer text-ring">
+          the interactive API listing page
+        </Link>
+        . Authenticate by passing your generated secret key in the header of the
+        request:
+      </p>
+      <p className="text-xs my-2 whitespace-pre font-mono p-4 bg-primary/10 rounded-md">
+        curl https://appdirect.ai/api/v1/me/ai -H 'X-Authorization: Bearer{" "}
+        {`<your-secret-key>`}'
+      </p>
+
+      <Separator className="bg-primary/10 my-4" />
+      <h1 className="text-lg font-medium">Your API Keys</h1>
       <p className="text-sm text-muted-foreground">
         Your secret API keys are shown here. Remember, the secret keys are not
         displayed again once generated.
@@ -192,6 +208,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({
               <Button
                 type="button"
                 variant="outline"
+                className="m-2"
                 onClick={() => openEditModal(key)}
               >
                 Edit
