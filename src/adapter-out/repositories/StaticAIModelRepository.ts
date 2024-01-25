@@ -161,6 +161,45 @@ export class StaticAIModelRepository implements AIModelRepository {
         },
       },
     },
+    {
+      id: "cohere",
+      name: "Cohere",
+      externalModelId: "cohere",
+      contextSize: 16384,
+      isVisible: true,
+      options: {
+        temperature: {
+          default: 1,
+          max: 2,
+          min: 0,
+          step: 0.1,
+        },
+        topP: {
+          default: 1,
+          max: 1,
+          min: 0,
+          step: 0.01,
+        },
+        maxTokens: {
+          default: 4000,
+          max: 6000,
+          min: 100,
+          step: 1,
+        },
+        frequencyPenalty: {
+          default: 0,
+          max: 1,
+          min: -1,
+          step: 0.1,
+        },
+        presencePenalty: {
+          default: 0,
+          max: 1,
+          min: -1,
+          step: 0.1,
+        },
+      },
+    },
     // {
     //   id: "llama2-13b",
     //   name: "LLAMA2 13B Chat (4K Context)",

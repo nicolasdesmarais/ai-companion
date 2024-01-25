@@ -1,6 +1,7 @@
 import { AnthropicModel } from "@/src/adapter-out/ai-model/chat-models/AnthropicModel";
 import { AssistantChatModel } from "@/src/adapter-out/ai-model/chat-models/AssistantChatModel";
 import { ChatModel } from "@/src/adapter-out/ai-model/chat-models/ChatModel";
+import { CohereModel } from "@/src/adapter-out/ai-model/chat-models/CohereModel";
 import { DavinciModel } from "@/src/adapter-out/ai-model/chat-models/DavinciModel";
 import { Gpt35Model } from "@/src/adapter-out/ai-model/chat-models/Gpt35Model";
 import { Gpt4Model } from "@/src/adapter-out/ai-model/chat-models/Gpt4Model";
@@ -17,6 +18,7 @@ const CHAT_MODELS = [
   new DavinciModel(),
   new LLamaModel(),
   new AnthropicModel(),
+  new CohereModel(),
 ];
 
 const ASSISTANT_MODELS = [new GptAssistantModel()];
