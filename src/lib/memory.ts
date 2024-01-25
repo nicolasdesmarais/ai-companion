@@ -1,5 +1,6 @@
 import { OpenAIEmbeddings } from "@langchain/openai";
-import { PineconeStore } from "@langchain/pinecone";
+import { PineconeStore } from "langchain/vectorstores/pinecone";
+
 import { Pinecone } from "@pinecone-database/pinecone";
 import { Redis } from "@upstash/redis";
 import { Document } from "langchain/document";
