@@ -1,0 +1,4 @@
+#operations-tag-default, 
+.swagger-ui section.models.is-open h4 {
+  display: none;
+}

@@ -24,7 +24,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useGroupModal } from "@/hooks/use-group-modal";
 import { useTalkModal } from "@/hooks/use-talk-modal";
-import { AIModel } from "@/src/domain/models/AIModel";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { getDiversityString } from "@/src/lib/diversity";
 import { Category } from "@prisma/client";
