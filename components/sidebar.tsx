@@ -91,7 +91,7 @@ export const Sidebar = ({
   className,
   userPermissions,
 }: SidebarProps) => {
-  const { chats, fetchChats } = useChats();
+  const { chats, fetchChats, loading } = useChats();
   const proModal = useProModal();
   const router = useRouter();
   const pathname = usePathname();
@@ -224,7 +224,7 @@ export const Sidebar = ({
             "text-muted-foreground text-xs group py-3 px-8 flex w-full justify-center font-medium rounded-lg transition",
             pathname.startsWith("/chat/")
               ? "bg-accent text-primary cursor-pointer hover:text-primary hover:bg-primary/10"
-              : chats.length > 0
+              : loading || chats.length > 0
               ? "cursor-pointer hover:text-primary hover:bg-primary/10"
               : "opacity-25"
           )}
