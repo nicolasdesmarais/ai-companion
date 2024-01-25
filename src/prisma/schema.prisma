@@ -216,6 +216,7 @@ model Chat {
   id          String   @id @default(cuid())
   createdAt   DateTime @default(now()) @map(name: "created_at")
   updatedAt   DateTime @default(now()) @updatedAt @map(name: "updated_at")
+  seenAt      DateTime @default(now()) @updatedAt @map(name: "seen_at")
   name        String
   pinPosition Int?     @map(name: "pin_position")
   isDeleted   Boolean  @default(false) @map("is_deleted")
