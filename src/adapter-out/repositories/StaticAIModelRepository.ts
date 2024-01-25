@@ -127,7 +127,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       name: "Anthropic Claude",
       externalModelId: "anthropic",
       contextSize: 16384,
-      isVisible: true,
+      isVisible: false,
       options: {
         temperature: {
           default: 1,
