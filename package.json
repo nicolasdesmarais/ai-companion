@@ -45,7 +45,6 @@
     "class-variance-authority": "^0.7.0",
     "cloudinary": "^1.41.2",
     "clsx": "^2.1.0",
-    "cohere-ai": "^7.7.3",
     "date-fns": "^2.30.0",
     "dotenv": "^16.3.1",
     "epub2": "^3.0.2",
