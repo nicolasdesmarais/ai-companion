@@ -19,7 +19,7 @@ async function postHandler(
   const { params, authorizationContext } = context;
 
   const body = await req.json();
-  const { urls } = body;
+  const { urls, dataRefreshPeriod } = body;
 
   const dataSources = [];
   for (const url of urls) {
@@ -32,7 +32,7 @@ async function postHandler(
       params.aiId,
       url,
       DataSourceType.WEB_URL,
-      DataSourceRefreshPeriod.NEVER,
+      dataRefreshPeriod,
       input
     );
 

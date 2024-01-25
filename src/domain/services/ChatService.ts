@@ -104,6 +104,9 @@ export class ChatService {
         userId,
         isDeleted: false,
       },
+      orderBy: {
+        updatedAt: "desc",
+      },
     });
 
     return {

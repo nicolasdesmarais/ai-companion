@@ -364,6 +364,7 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
                   disabled={isLoading}
                   placeholder="How may I be of assistance today?"
                   {...field}
+                  value={field.value || ""}
                 />
               </FormControl>
               <FormDescription>

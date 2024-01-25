@@ -258,7 +258,7 @@ export const ChatHeader = ({
                 </DropdownMenuItem>
               )}
               {ai && (canApproveAi || canEditAi) && (
-                <div className="text-xxs uppercase border-b text-white/30 m-1">
+                <div className="text-xxs uppercase border-b dar:text-white/30 m-1">
                   Admin
                 </div>
               )}

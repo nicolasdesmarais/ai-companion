@@ -1,12 +1,7 @@
 "use client";
 import { Table } from "@/components/table";
 import { Button } from "@/components/ui/button";
-import {
-  FormControl,
-  FormDescription,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
+import { FormControl, FormItem, FormLabel } from "@/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -28,8 +23,8 @@ import axios from "axios";
 import { format } from "date-fns";
 import { Loader, Server } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
 import { Banner } from "./ui/banner";
+import { DataRefreshPeriod } from "./data-refresh-period";
 
 const ADD_ACCOUNT_OPTION = "add-account";
 
@@ -159,10 +154,6 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
       }
     }
     setSearching(false);
-  };
-
-  const handleDataRefreshPeriodChange = (value: DataSourceRefreshPeriod) => {
-    setDataRefreshPeriod(value);
   };
 
   const handleContinue = async () => {
@@ -317,34 +308,10 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
         ) : null}
         {loading ||
           (!setupRequired && (
-            <div className="my-4">
-              <FormItem>
-                <FormLabel>Data Refresh Interval</FormLabel>
-                <Select
-                  onValueChange={handleDataRefreshPeriodChange}
-                  value={dataRefreshPeriod ?? ""}
-                >
-                  <FormControl>
-                    <SelectTrigger className="bg-background">
-                      <SelectValue>
-                        {getDataSourceRefreshPeriodLabel(dataRefreshPeriod)}
-                      </SelectValue>
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {Object.values(DataSourceRefreshPeriod).map((period) => (
-                      <SelectItem key={period} value={period}>
-                        {getDataSourceRefreshPeriodLabel(period)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  Determine how often your data source will be reindexed. Please
-                  be aware that this may increase costs.
-                </FormDescription>
-              </FormItem>
-            </div>
+            <DataRefreshPeriod
+              setDataRefreshPeriod={setDataRefreshPeriod}
+              dataRefreshPeriod={dataRefreshPeriod}
+            />
           ))}
         {selectedFile && (
           <>
