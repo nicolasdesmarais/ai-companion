@@ -25,7 +25,7 @@ const formSchema = z.object({
   name: z.string().min(1, {
     message: "Name is required.",
   }),
-  introduction: z.string().optional(),
+  introduction: z.string().optional().nullable(),
   description: z.string().min(1, {
     message: "Description is required.",
   }),
@@ -166,6 +166,7 @@ export const AIEditor = ({
 
   useEffect(() => {
     if (Object.keys(form.formState.errors).length) {
+      console.log(form.formState.errors);
       toast({
         variant: "destructive",
         description: "Form is not valid. Please check the errors.",
