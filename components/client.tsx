@@ -2,7 +2,7 @@
 
 import { useCompletion } from "ai/react";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 import { ChatForm } from "@/components/chat-form";
 import { ChatHeader } from "@/components/chat-header";
@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { AIDetailDto } from "@/src/domain/models/AI";
 import { ChatDetailDto, ChatMessageDto } from "@/src/domain/models/Chats";
 import { Role } from "@prisma/client";
+import axios from "axios";
 
 interface ChatClientProps {
   ai: AIDetailDto | null;
@@ -29,6 +30,13 @@ export const ChatClient = ({
   const [messages, setMessages] = useState<ChatMessageDto[]>(chat.messages);
   const [streaming, setStreaming] = useState<boolean>(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const touch = async () => {
+      await axios.put(`/api/v1/chats/${chat.id}/touch`);
+    };
+    touch();
+  }, [chat.id]);
 
   const {
     completion,
