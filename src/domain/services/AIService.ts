@@ -17,6 +17,7 @@ import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySec
 import { DataSourceSecurityService } from "@/src/security/services/DataSourceSecurityService";
 import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
+import { ChatOpenAI } from "@langchain/openai";
 import {
   AI,
   AIVisibility,
@@ -26,7 +27,6 @@ import {
   GroupAvailability,
   Prisma,
 } from "@prisma/client";
-import { ChatOpenAI } from "langchain/chat_models/openai";
 import { SystemMessage } from "langchain/schema";
 import { AISecurityService } from "../../security/services/AISecurityService";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";

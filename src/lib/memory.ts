@@ -1,8 +1,8 @@
+import { OpenAIEmbeddings } from "@langchain/openai";
+import { PineconeStore } from "@langchain/pinecone";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { Redis } from "@upstash/redis";
 import { Document } from "langchain/document";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { PineconeStore } from "langchain/vectorstores/pinecone";
 
 const embeddingsConfig = {
   azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
