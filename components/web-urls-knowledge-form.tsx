@@ -5,6 +5,8 @@ import axios from "axios";
 import { Globe, Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { DataRefreshPeriod } from "./data-refresh-period";
+import { DataSourceRefreshPeriod } from "@prisma/client";
 
 interface WebUrlsProps {
   aiId: string;
@@ -14,12 +16,17 @@ export const WebUrlsForm = ({ aiId }: WebUrlsProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const [urls, setUrls] = useState([""]);
+  const [dataRefreshPeriod, setDataRefreshPeriod] =
+    useState<DataSourceRefreshPeriod | null>(DataSourceRefreshPeriod.NEVER);
   const router = useRouter();
 
   const handleContinue = async () => {
     setLoading(true);
     try {
-      await axios.post(`/api/v1/ai/${aiId}/data-sources/web-urls`, { urls });
+      await axios.post(`/api/v1/ai/${aiId}/data-sources/web-urls`, {
+        urls,
+        dataRefreshPeriod,
+      });
       setLoading(false);
       toast({
         variant: "default",
@@ -69,7 +76,10 @@ export const WebUrlsForm = ({ aiId }: WebUrlsProps) => {
           </a>
         </div>
       </div>
-
+      <DataRefreshPeriod
+        setDataRefreshPeriod={setDataRefreshPeriod}
+        dataRefreshPeriod={dataRefreshPeriod}
+      />
       <div className="flex justify-between w-full">
         <Button
           onClick={handleContinue}

@@ -179,7 +179,7 @@ export const AIKnowledge = ({
               <div>Return later to check on progress.</div>
             </Banner>
           )}
-          <div className="max-h-96 overflow-auto">
+          <div className="max-h-96 overflow-y-auto overflow-x-hidden">
             <Table
               headers={[
                 "NAME",
@@ -199,12 +199,12 @@ export const AIKnowledge = ({
                         content={dataSource.name}
                         className="cursor-default"
                       >
-                        <div className="truncate max-w-[290px]">
+                        <div className="truncate max-w-[280px]">
                           {dataSource.name}
                         </div>
                       </Tooltip>
                     ) : (
-                      <div className="truncate max-w-[290px]">
+                      <div className="truncate max-w-[280px]">
                         {dataSource.name}
                       </div>
                     )}
