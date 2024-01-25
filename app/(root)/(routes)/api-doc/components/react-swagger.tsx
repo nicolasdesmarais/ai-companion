@@ -26,7 +26,7 @@ class Layout extends React.Component<Props> {
     }
     return (
       <div>
-        <div className="swagger-ui pb-8">
+        <div className="pb-8">
           <div className="space-y-2 w-full mb-8 ml-4 pr-8">
             <div className="pt-8">
               <h3 className="text-lg font-medium">API Endpoints</h3>
@@ -39,11 +39,13 @@ class Layout extends React.Component<Props> {
             </div>
             <Separator className="bg-primary/10" />
           </div>
-          <Row>
-            <Col mobile={12} desktop={12}>
-              <Operations />
-            </Col>
-          </Row>
+          <div className="swagger-ui">
+            <Row>
+              <Col mobile={12} desktop={12}>
+                <Operations className="text-sm" />
+              </Col>
+            </Row>
+          </div>
           <div className="space-y-2 w-full mb-8 ml-4 pr-8">
             <div className="pt-8">
               <h3 className="text-lg font-medium">Schema Definitions</h3>
@@ -53,11 +55,13 @@ class Layout extends React.Component<Props> {
             </div>
             <Separator className="bg-primary/10" />
           </div>
-          <Row>
-            <Col mobile={12} desktop={12}>
-              <Models />
-            </Col>
-          </Row>
+          <div className="swagger-ui">
+            <Row>
+              <Col mobile={12} desktop={12}>
+                <Models />
+              </Col>
+            </Row>
+          </div>
         </div>
       </div>
     );

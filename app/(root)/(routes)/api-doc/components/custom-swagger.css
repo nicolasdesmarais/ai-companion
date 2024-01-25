@@ -1,3 +1,29 @@
+.dark .swagger-ui p, 
+.dark .swagger-ui .markdown p, 
+.dark .swagger-ui .markdown pre, 
+.dark .swagger-ui .renderedMarkdown p, 
+.dark .swagger-ui .renderedMarkdown pre,
+.dark .swagger-ui .opblock-summary-path,
+.dark .swagger-ui .opblock-summary-description,
+.dark .swagger-ui .opblock .opblock-section-header h4,
+.dark .swagger-ui table thead tr td, 
+.dark .swagger-ui table thead tr th,
+.dark .swagger-ui .parameter__name {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.dark .swagger-ui svg {
+  fill: hsl(var(--muted-foreground)) !important;
+}
+
+.dark .swagger-ui .opblock,
+.dark .swagger-ui .opblock-section-header {
+  background: transparent !important;
+}
+.swagger-ui .opblock-description-wrapper {
+  padding: 0 15px;
+}
+
 #operations-tag-default, 
 .swagger-ui section.models.is-open h4 {
   display: none;
