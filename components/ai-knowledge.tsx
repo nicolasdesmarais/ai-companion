@@ -54,6 +54,7 @@ interface SelectDataSourceProps {
 const dataSourceTypesForRefresh = [
   DataSourceType.GOOGLE_DRIVE,
   DataSourceType.WEB_URL,
+  DataSourceType.ONEDRIVE,
 ];
 
 export const AIKnowledge = ({
