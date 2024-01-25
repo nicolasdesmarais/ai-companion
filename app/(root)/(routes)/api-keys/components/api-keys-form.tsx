@@ -181,8 +181,9 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({
         request:
       </p>
       <p className="text-xs my-2 whitespace-pre font-mono p-4 bg-primary/10 rounded-md">
-        curl https://appdirect.ai/api/v1/me/ai -H 'X-Authorization: Bearer{" "}
-        {`<your-secret-key>`}'
+        {
+          "curl https://appdirect.ai/api/v1/me/ai -H 'X-Authorization: Bearer <your-secret-key>'"
+        }
       </p>
 
       <Separator className="bg-primary/10 my-4" />
