@@ -1,3 +1,4 @@
+import { AIModel } from "@/src/domain/models/AIModel";
 import aiModelService from "@/src/domain/services/AIModelService";
 import { AI } from "@prisma/client";
 import { OpenAIAssistantRunnable } from "langchain/experimental/openai_assistant";
@@ -17,8 +18,8 @@ const OPEN_AI = new OpenAI({
 });
 
 export class GptAssistantModel implements ChatModel, AssistantChatModel {
-  public supports(modelId: string): boolean {
-    return modelId === MODEL_ID;
+  public supports(model: AIModel): boolean {
+    return model.id === MODEL_ID;
   }
 
   private getInstructions(ai: AI) {

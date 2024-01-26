@@ -1,3 +1,4 @@
+import { AIModel } from "@/src/domain/models/AIModel";
 import { CallbackManager } from "langchain/callbacks";
 import { Replicate } from "langchain/llms/replicate";
 import { BaseCompletionModel } from "./BaseCompletionModel";
@@ -8,8 +9,8 @@ const REPLICATE_MODEL =
   "meta/llama-2-13b-chat:f4e2de70d66816a838a89eeeb621910adffb0dd0baba3976c96980970978018d";
 
 export class LLamaModel extends BaseCompletionModel implements ChatModel {
-  public supports(modelId: string): boolean {
-    return modelId === MODEL_ID;
+  public supports(model: AIModel): boolean {
+    return model.id === MODEL_ID;
   }
 
   protected getChatModelInstance(options: any, customHandlers: any) {

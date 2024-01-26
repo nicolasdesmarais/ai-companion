@@ -32,17 +32,19 @@ export class AIModelService {
     return this.aiModelRepository.findById(id);
   }
 
-  public getChatModelInstance(modelId: string): ChatModel | null {
-    return (
-      CHAT_MODELS.find((assistantModel) => assistantModel.supports(modelId)) ??
-      null
-    );
+  public getChatModelInstance(model: AIModel): ChatModel | null {
+    return CHAT_MODELS.find((chatModel) => chatModel.supports(model)) ?? null;
   }
 
   public getAssistantModelInstance(modelId: string): AssistantChatModel | null {
+    const model = this.aiModelRepository.findById(modelId);
+    if (!model) {
+      return null;
+    }
+
     return (
       ASSISTANT_MODELS.find((assistantModel) =>
-        assistantModel.supports(modelId)
+        assistantModel.supports(model)
       ) ?? null
     );
   }
