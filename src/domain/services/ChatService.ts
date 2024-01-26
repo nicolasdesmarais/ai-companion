@@ -20,6 +20,12 @@ import {
 } from "../errors/Errors";
 import aiModelService from "./AIModelService";
 import aiService from "./AIService";
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { SystemMessage } from "langchain/schema";
+import {
+  Gpt4Model,
+  gpt4ChatModel,
+} from "@/src/adapter-out/ai-model/chat-models/Gpt4Model";
 
 const BUFFER_TOKENS = 200;
 
@@ -28,6 +34,7 @@ const listChatsResponseSelect: Prisma.ChatSelect = {
   createdAt: true,
   updatedAt: true,
   name: true,
+  summary: true,
   orgId: true,
   userId: true,
   pinPosition: true,
@@ -472,6 +479,62 @@ export class ChatService {
       remainingTokens
     );
     return vectorKnowledge;
+  }
+
+  public async generate(prompt: string) {}
+
+  public async summarizeChat(
+    authorizationContext: AuthorizationContext,
+    chatId: string
+  ) {
+    const chat = await prismadb.chat.findUnique({
+      select: getChatResponseSelect,
+      where: {
+        id: chatId,
+        isDeleted: false,
+      },
+    });
+
+    if (!chat) {
+      throw new EntityNotFoundError(`Chat with id ${chatId} not found`);
+    }
+
+    if (chat.messages.length === 0) {
+      return;
+    }
+
+    const hasPermission = ChatSecurityService.canReadChat(
+      authorizationContext,
+      chat
+    );
+    if (!hasPermission) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const messages = chat.messages
+      .map((message) => {
+        if (message.role === Role.system) {
+          return `${chat.ai.name}: ${message.content}\n`;
+        } else {
+          return `You: ${message.content}\n`;
+        }
+      })
+      .join(" ");
+    const resp = await gpt4ChatModel.invoke([
+      new SystemMessage(
+        `Describe the following conversation in eight words. This will be displayed to the user, so refer to the user as "you". \n${messages}`
+      ),
+    ]);
+    await prismadb.chat.update({
+      where: {
+        id: chatId,
+      },
+      data: {
+        summary: resp.content,
+      },
+    });
+
+    return resp.content;
   }
 }
 
