@@ -3,7 +3,7 @@ import { AI, Chat, Message } from "@prisma/client";
 import { VectorKnowledgeResponse } from "../../knowledge/vector-database/VectorDatabaseAdapter";
 
 export interface ChatModel {
-  supports(modelId: string): boolean;
+  supports(model: AIModel): boolean;
 
   postToChat(input: PostToChatInput): Promise<PostToChatResponse>;
 }

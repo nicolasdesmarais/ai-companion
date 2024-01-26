@@ -1,3 +1,4 @@
+import { AIModel } from "@/src/domain/models/AIModel";
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { Message } from "@prisma/client";
 import { LangChainStream } from "ai";
@@ -5,13 +6,21 @@ import { PostToChatInput, PostToChatResponse } from "./ChatModel";
 
 export abstract class BaseCompletionModel {
   protected abstract getChatModelInstance(
+    model: AIModel,
     options: any,
     customHandlers: any
   ): any;
 
   public async postToChat(input: PostToChatInput): Promise<PostToChatResponse> {
-    const { ai, messages, date, options, getKnowledgeCallback, endCallback } =
-      input;
+    const {
+      ai,
+      aiModel,
+      messages,
+      date,
+      options,
+      getKnowledgeCallback,
+      endCallback,
+    } = input;
 
     const { handlers } = LangChainStream();
     const customHandleLLMEnd = async (_output: any, runId: string) => {
@@ -24,7 +33,11 @@ export abstract class BaseCompletionModel {
       handleLLMEnd: customHandleLLMEnd,
     };
 
-    const completionModel = this.getChatModelInstance(options, customHandlers);
+    const completionModel = this.getChatModelInstance(
+      aiModel,
+      options,
+      customHandlers
+    );
 
     const chatHistory = messages.reduce((acc: string, message: Message) => {
       if (message.role === "user") {

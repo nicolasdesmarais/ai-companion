@@ -342,7 +342,7 @@ export class ChatService {
       }
     };
 
-    const chatModel = aiModelService.getChatModelInstance(model.id);
+    const chatModel = aiModelService.getChatModelInstance(model);
     if (!chatModel) {
       throw new Error(`Chat model with id ${model.id} not found`);
     }
