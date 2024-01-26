@@ -75,20 +75,30 @@ export class StaticAIModelRepository implements AIModelRepository {
     {
       id: "llama-2-13b-chat",
       name: "LLAMA2 13B Chat (4K Context)",
-      externalModelId: "meta/llama-2-13b-chat",
+      externalModelId: "llama-2-13b-chat",
       contextSize: 4096,
       options: commonOptions,
       provider: AIModelProvider.REPLICATE,
       isVisible: false,
+      additionalData: {
+        owner: "meta",
+        version:
+          "f4e2de70d66816a838a89eeeb621910adffb0dd0baba3976c96980970978018d",
+      },
     },
     {
       id: "llama-2-70b-chat",
       name: "LLAMA2 70B Chat (4K Context)",
-      externalModelId: "meta/llama-2-70b-chat",
+      externalModelId: "llama-2-70b-chat",
       contextSize: 4096,
       options: commonOptions,
       provider: AIModelProvider.REPLICATE,
       isVisible: false,
+      additionalData: {
+        owner: "meta",
+        version:
+          "02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+      },
     },
   ];
 

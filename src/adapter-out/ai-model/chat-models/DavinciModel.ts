@@ -9,7 +9,11 @@ export class DavinciModel extends BaseCompletionModel implements ChatModel {
   supports(model: AIModel): boolean {
     return model.id === MODEL_ID;
   }
-  protected getChatModelInstance(options: any, customHandlers: any): any {
+  protected getChatModelInstance(
+    model: AIModel,
+    options: any,
+    customHandlers: any
+  ): any {
     return new OpenAI({
       openAIApiKey: process.env.OPENAI_API_KEY,
       modelName: MODEL_ID,

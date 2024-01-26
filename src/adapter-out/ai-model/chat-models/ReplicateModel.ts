@@ -1,21 +1,21 @@
-import { AIModel } from "@/src/domain/models/AIModel";
+import { AIModel, AIModelProvider } from "@/src/domain/models/AIModel";
 import { CallbackManager } from "langchain/callbacks";
 import { Replicate } from "langchain/llms/replicate";
 import { BaseCompletionModel } from "./BaseCompletionModel";
 import { ChatModel } from "./ChatModel";
 
-const MODEL_ID = "llama2-13b";
-const REPLICATE_MODEL =
-  "meta/llama-2-13b-chat:f4e2de70d66816a838a89eeeb621910adffb0dd0baba3976c96980970978018d";
-
-export class LLamaModel extends BaseCompletionModel implements ChatModel {
+export class ReplicateModel extends BaseCompletionModel implements ChatModel {
   public supports(model: AIModel): boolean {
-    return model.id === MODEL_ID;
+    return model.provider === AIModelProvider.REPLICATE;
   }
 
-  protected getChatModelInstance(options: any, customHandlers: any) {
+  protected getChatModelInstance(
+    model: AIModel,
+    options: any,
+    customHandlers: any
+  ) {
     return new Replicate({
-      model: REPLICATE_MODEL,
+      model: `${model.additionalData.owner}/${model.externalModelId}:${model.additionalData.version}`,
       input: {
         ...options,
         top_p: options.topP,

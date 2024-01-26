@@ -6,6 +6,7 @@ export interface AIModel {
   options: AIModelOptions;
   isVisible: boolean;
   provider: AIModelProvider;
+  additionalData?: any;
 }
 
 export interface AIModelOptions {

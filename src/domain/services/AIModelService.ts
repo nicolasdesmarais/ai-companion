@@ -5,7 +5,7 @@ import { DavinciModel } from "@/src/adapter-out/ai-model/chat-models/DavinciMode
 import { Gpt35Model } from "@/src/adapter-out/ai-model/chat-models/Gpt35Model";
 import { Gpt4Model } from "@/src/adapter-out/ai-model/chat-models/Gpt4Model";
 import { GptAssistantModel } from "@/src/adapter-out/ai-model/chat-models/GptAssistantModel";
-import { LLamaModel } from "@/src/adapter-out/ai-model/chat-models/LLamaModel";
+import { ReplicateModel } from "@/src/adapter-out/ai-model/chat-models/ReplicateModel";
 import { StaticAIModelRepository } from "@/src/adapter-out/repositories/StaticAIModelRepository";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
@@ -20,7 +20,7 @@ const CHAT_MODELS = [
   new Gpt35Model(),
   new GptAssistantModel(),
   new DavinciModel(),
-  new LLamaModel(),
+  new ReplicateModel(),
   new AnthropicModel(),
 ];
 
