@@ -5,6 +5,7 @@ export interface ChatSummaryDto {
   createdAt: Date;
   updatedAt: Date;
   name: string;
+  summary: string;
   orgId: string;
   userId: string;
   pinPosition: number | null;

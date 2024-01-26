@@ -107,7 +107,7 @@ export const ChatList = ({ className }: Props) => {
                   "text-xs text-muted-foreground w-full text-ellipsis h-8 overflow-hidden "
                 )}
               >
-                {chat.ai.description}
+                {chat.summary || chat.ai.description}
               </div>
             </div>
           </div>

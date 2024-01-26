@@ -27,3 +27,10 @@ export class Gpt4Model extends AbstractBaseChatModel implements ChatModel {
     });
   }
 }
+
+export const gpt4ChatModel = new ChatOpenAI({
+  azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
+  azureOpenAIApiVersion: AZURE_OPENAI_API_VERSION,
+  azureOpenAIApiInstanceName: AZURE_OPENAI_API_INSTANCE_NAME,
+  azureOpenAIApiDeploymentName: AZURE_OPENAI_API_DEPLOYMENT_NAME,
+});

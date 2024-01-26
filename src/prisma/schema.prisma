@@ -223,6 +223,7 @@ model Chat {
   orgId       String    @map(name: "org_id")
   userId      String    @map("user_id")
   externalId  String?   @map("external_id")
+  summary     String?   @db.Text
 
   messages Message[]
 

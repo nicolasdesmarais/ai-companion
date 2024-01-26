@@ -38,6 +38,15 @@ export const ChatClient = ({
     touch();
   }, [chat.id]);
 
+  const updateChatSummary = async () => {
+    const summarize = async () => {
+      await axios.put(`/api/v1/chats/${chat.id}/summarize`);
+    };
+    if (!chat.summary) {
+      summarize();
+    }
+  };
+
   const {
     completion,
     input,
@@ -70,6 +79,7 @@ export const ChatClient = ({
       setInput("");
 
       router.refresh();
+      updateChatSummary();
     },
   });
 
