@@ -20,8 +20,11 @@ export const ChatList = ({ className }: Props) => {
   const itemsRef = useRef<Array<HTMLDivElement | null>>([]);
   const isNew = searchParams.get("new");
 
+  const pinned = chats.filter((chat) => chat.pinPosition);
+  const unpinned = chats.filter((chat) => !chat.pinPosition);
+
   useEffect(() => {
-    const index = chats.findIndex((chat) => pathname.endsWith(chat.id));
+    const index = unpinned.findIndex((chat) => pathname.endsWith(chat.id));
     if (index !== -1) {
       itemsRef.current[index]?.scrollIntoView({
         block: "center",
@@ -34,10 +37,6 @@ export const ChatList = ({ className }: Props) => {
       fetchChats();
     }
   }, [fetchChats, chats.length, isNew]);
-
-  const pinned = chats.filter((chat) => chat.pinPosition);
-
-  const unpinned = chats.filter((chat) => !chat.pinPosition);
 
   return (
     <div
