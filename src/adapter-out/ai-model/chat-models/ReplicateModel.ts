@@ -1,6 +1,6 @@
 import { AIModel, AIModelProvider } from "@/src/domain/models/AIModel";
+import { Replicate } from "@langchain/community/llms/replicate";
 import { CallbackManager } from "langchain/callbacks";
-import { Replicate } from "langchain/llms/replicate";
 import { BaseCompletionModel } from "./BaseCompletionModel";
 import { ChatModel } from "./ChatModel";
 
