@@ -7,6 +7,11 @@ import { Gpt4Model } from "@/src/adapter-out/ai-model/chat-models/Gpt4Model";
 import { GptAssistantModel } from "@/src/adapter-out/ai-model/chat-models/GptAssistantModel";
 import { LLamaModel } from "@/src/adapter-out/ai-model/chat-models/LLamaModel";
 import { StaticAIModelRepository } from "@/src/adapter-out/repositories/StaticAIModelRepository";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
+import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
 import { AIModel } from "../models/AIModel";
 import { AIModelRepository } from "../ports/outgoing/AIModelRepository";
 
@@ -24,8 +29,21 @@ const ASSISTANT_MODELS = [new GptAssistantModel()];
 export class AIModelService {
   constructor(private aiModelRepository: AIModelRepository) {}
 
-  public async getAIModels(): Promise<AIModel[]> {
-    return this.aiModelRepository.findAll();
+  public async getAIModels(
+    authorizationContext: AuthorizationContext
+  ): Promise<AIModel[]> {
+    const hasInstanceAccess = BaseEntitySecurityService.hasPermission(
+      authorizationContext,
+      SecuredResourceType.AI,
+      SecuredAction.READ,
+      SecuredResourceAccessLevel.INSTANCE
+    );
+
+    if (hasInstanceAccess) {
+      return this.aiModelRepository.findAll();
+    }
+
+    return this.aiModelRepository.findVisible();
   }
 
   public findAIModelById(id: string): AIModel | null {

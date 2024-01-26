@@ -1,7 +1,5 @@
 import { AIModelRepository } from "@/src/domain/ports/outgoing/AIModelRepository";
-import { AIModel } from "../../domain/models/AIModel";
-
-const SHOW_ALL_AI_MODELS = process.env.SHOW_ALL_AI_MODELS !== "false";
+import { AIModel, AIModelProvider } from "../../domain/models/AIModel";
 
 const commonOptions = {
   temperature: {
@@ -44,6 +42,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       externalModelId: "gpt-4",
       contextSize: 32768,
       options: commonOptions,
+      provider: AIModelProvider.OPENAI,
       isVisible: true,
     },
     {
@@ -52,6 +51,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       externalModelId: "gpt35-16k",
       contextSize: 16384,
       options: commonOptions,
+      provider: AIModelProvider.OPENAI,
       isVisible: true,
     },
     {
@@ -60,6 +60,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       externalModelId: "gpt-4-1106-preview",
       contextSize: 8192,
       options: commonOptions,
+      provider: AIModelProvider.OPENAI,
       isVisible: false,
     },
     {
@@ -68,23 +69,34 @@ export class StaticAIModelRepository implements AIModelRepository {
       externalModelId: "anthropic",
       contextSize: 16384,
       options: commonOptions,
+      provider: AIModelProvider.ANTHROPIC,
       isVisible: true,
     },
     {
-      id: "llama2-13b",
+      id: "llama-2-13b-chat",
       name: "LLAMA2 13B Chat (4K Context)",
-      externalModelId: "llama2-13b",
+      externalModelId: "meta/llama-2-13b-chat",
       contextSize: 4096,
       options: commonOptions,
-      isVisible: true,
+      provider: AIModelProvider.REPLICATE,
+      isVisible: false,
+    },
+    {
+      id: "llama-2-70b-chat",
+      name: "LLAMA2 70B Chat (4K Context)",
+      externalModelId: "meta/llama-2-70b-chat",
+      contextSize: 4096,
+      options: commonOptions,
+      provider: AIModelProvider.REPLICATE,
+      isVisible: false,
     },
   ];
 
   public async findAll(): Promise<AIModel[]> {
-    if (SHOW_ALL_AI_MODELS) {
-      return this.models;
-    }
+    return this.models;
+  }
 
+  public async findVisible(): Promise<AIModel[]> {
     return this.models.filter((model) => model.isVisible);
   }
 
