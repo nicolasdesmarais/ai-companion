@@ -61,7 +61,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       contextSize: 8192,
       options: commonOptions,
       provider: AIModelProvider.OPENAI,
-      isVisible: false,
+      isVisible: true,
     },
     {
       id: "anthropic",
@@ -70,7 +70,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       contextSize: 16384,
       options: commonOptions,
       provider: AIModelProvider.ANTHROPIC,
-      isVisible: true,
+      isVisible: false,
     },
     {
       id: "llama-2-13b-chat",
