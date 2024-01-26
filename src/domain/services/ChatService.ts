@@ -104,9 +104,14 @@ export class ChatService {
         userId,
         isDeleted: false,
       },
-      orderBy: {
-        updatedAt: "desc",
-      },
+      orderBy: [
+        {
+          messagedAt: "desc",
+        },
+        {
+          updatedAt: "desc",
+        },
+      ],
     });
 
     return {
@@ -201,6 +206,7 @@ export class ChatService {
       },
       data: {
         externalId: externalChatId,
+        messagedAt: new Date(),
         messages: {
           create: {
             content: content,

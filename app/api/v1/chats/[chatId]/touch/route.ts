@@ -18,7 +18,7 @@ async function putHandler(
       id: chatId,
     },
     data: {
-      seenAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 

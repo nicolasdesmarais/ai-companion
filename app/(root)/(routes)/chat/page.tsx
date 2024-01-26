@@ -15,6 +15,8 @@ const ChatPage = async () => {
     return redirect("/");
   }
 
+  chats.data.sort((a, b) => (b.updatedAt as any) - (a.updatedAt as any));
+
   return redirect(`/chat/${chats.data[0].id}`);
 };
 
