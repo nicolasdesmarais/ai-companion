@@ -6,7 +6,7 @@ import { ChatSummaryDto } from "@/src/domain/models/Chats";
 import { cn } from "@/src/lib/utils";
 import { Loader } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 type Props = {
   className?: string;
@@ -17,7 +17,17 @@ export const ChatList = ({ className }: Props) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const itemsRef = useRef<Array<HTMLDivElement | null>>([]);
   const isNew = searchParams.get("new");
+
+  useEffect(() => {
+    const index = chats.findIndex((chat) => pathname.endsWith(chat.id));
+    if (index !== -1) {
+      itemsRef.current[index]?.scrollIntoView({
+        block: "center",
+      });
+    }
+  }, [pathname, chats]);
 
   useEffect(() => {
     if (!chats.length || isNew) {
@@ -64,6 +74,7 @@ export const ChatList = ({ className }: Props) => {
       {unpinned.map((chat: ChatSummaryDto, index) => (
         <div key={chat.id} className="w-full">
           <div
+            ref={(el) => (itemsRef.current[index] = el)}
             onClick={() => router.push(`/chat/${chat.id}`)}
             className={cn(
               "flex @4xs:gap-x-2 items-center @4xs:min-h-20 text-primary rounded-lg p-2 mb-2 transition justify-center w-full",
