@@ -39,7 +39,9 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
     }
   }
 
-  const models = await cache(() => aiModelService.getAIModels())();
+  const models = await cache(() =>
+    aiModelService.getAIModels(authorizationContext)
+  )();
 
   const hasInstanceAccess = BaseEntitySecurityService.hasPermission(
     authorizationContext,

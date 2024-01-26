@@ -1,5 +1,5 @@
+import { Document } from "@langchain/core/documents";
 import { BufferLoader } from "langchain/document_loaders/fs/buffer";
-import { Document } from "langchain/document";
 import { extractRawText } from "mammoth";
 
 /**

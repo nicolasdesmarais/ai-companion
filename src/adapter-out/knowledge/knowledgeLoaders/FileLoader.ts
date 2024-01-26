@@ -1,18 +1,17 @@
-import { Document } from "langchain/document";
-
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import { MemoryManager } from "@/src/lib/memory";
 import { getTokenLength } from "@/src/lib/tokenCount";
+import { Document } from "@langchain/core/documents";
 import { Knowledge } from "@prisma/client";
+import { fileTypeFromBlob } from "file-type";
 import { writeFile } from "fs/promises";
 import { CSVLoader } from "langchain/document_loaders/fs/csv";
 import { EPubLoader } from "langchain/document_loaders/fs/epub";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { DocxLoader } from "./DocxLoader";
-import { fileTypeFromBlob } from "file-type";
 import mime from "mime-types";
+import { DocxLoader } from "./DocxLoader";
 
 export class FileLoader {
   private async getFilepath(file: Blob, filename: string) {

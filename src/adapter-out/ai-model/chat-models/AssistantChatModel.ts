@@ -1,7 +1,8 @@
+import { AIModel } from "@/src/domain/models/AIModel";
 import { AI } from "@prisma/client";
 
 export interface AssistantChatModel {
-  supports(modelId: string): boolean;
+  supports(model: AIModel): boolean;
 
   createAssistant(input: CreateAssistantInput): Promise<string>;
 

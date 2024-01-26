@@ -1,3 +1,4 @@
+import { AIModel } from "@/src/domain/models/AIModel";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { AbstractBaseChatModel } from "./AbstractBaseChatModel";
@@ -11,8 +12,8 @@ const AZURE_OPENAI_API_INSTANCE_NAME = "appdirect-prod-ai-useast";
 const AZURE_OPENAI_API_DEPLOYMENT_NAME = "ai-prod-16k";
 
 export class Gpt35Model extends AbstractBaseChatModel implements ChatModel {
-  public supports(modelId: string): boolean {
-    return modelId === MODEL_ID;
+  public supports(model: AIModel): boolean {
+    return model.id === MODEL_ID;
   }
 
   protected getChatModelInstance(options: any): BaseChatModel {

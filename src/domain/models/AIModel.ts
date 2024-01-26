@@ -5,6 +5,8 @@ export interface AIModel {
   contextSize: number;
   options: AIModelOptions;
   isVisible: boolean;
+  provider: AIModelProvider;
+  additionalData?: any;
 }
 
 export interface AIModelOptions {
@@ -21,4 +23,10 @@ export interface RangeOption {
   max: number;
   min: number;
   step: number;
+}
+
+export enum AIModelProvider {
+  OPENAI = "openai",
+  ANTHROPIC = "anthropic",
+  REPLICATE = "replicate",
 }
