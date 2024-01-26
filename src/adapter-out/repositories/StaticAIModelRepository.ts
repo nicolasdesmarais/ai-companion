@@ -100,146 +100,30 @@ export class StaticAIModelRepository implements AIModelRepository {
           "02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
       },
     },
-      options: {
-        temperature: {
-          default: 1,
-          max: 2,
-          min: 0,
-          step: 0.1,
-        },
-        topP: {
-          default: 1,
-          max: 1,
-          min: 0,
-          step: 0.01,
-        },
-        maxTokens: {
-          default: 4000,
-          max: 6000,
-          min: 100,
-          step: 1,
-        },
-        frequencyPenalty: {
-          default: 0,
-          max: 1,
-          min: -1,
-          step: 0.1,
-        },
-        presencePenalty: {
-          default: 0,
-          max: 1,
-          min: -1,
-          step: 0.1,
-        },
-      },
-    },
     {
       id: "cohere",
       name: "Cohere",
       externalModelId: "cohere",
       contextSize: 16384,
+      options: commonOptions,
+      provider: AIModelProvider.COHERE,
       isVisible: true,
-      options: {
-        temperature: {
-          default: 1,
-          max: 2,
-          min: 0,
-          step: 0.1,
-        },
-        topP: {
-          default: 1,
-          max: 1,
-          min: 0,
-          step: 0.01,
-        },
-        maxTokens: {
-          default: 4000,
-          max: 6000,
-          min: 100,
-          step: 1,
-        },
-        frequencyPenalty: {
-          default: 0,
-          max: 1,
-          min: -1,
-          step: 0.1,
-        },
-        presencePenalty: {
-          default: 0,
-          max: 1,
-          min: -1,
-          step: 0.1,
-        },
+    },
+    ,
+    {
+      id: "llava-13b",
+      name: "Llava 13b",
+      externalModelId: "llava-13b",
+      contextSize: 4096,
+      options: commonOptions,
+      provider: AIModelProvider.REPLICATE,
+      isVisible: false,
+      additionalData: {
+        owner: "yorickvp",
+        version:
+          "e272157381e2a3bf12df3a8edd1f38d1dbd736bbb7437277c8b34175f8fce358",
       },
     },
-    // {
-    //   id: "llama2-13b",
-    //   name: "LLAMA2 13B Chat (4K Context)",
-    //   contextSize: 4096,
-    //   options: {
-    //     temperature: {
-    //       default: 0.75,
-    //       max: 2,
-    //       min: 0,
-    //       step: 0.1,
-    //     },
-    //     topP: {
-    //       default: 0.9,
-    //       max: 1,
-    //       min: 0,
-    //       step: 0.01,
-    //     },
-    //     topK: {
-    //       default: 50,
-    //       max: 100,
-    //       min: 0,
-    //       step: 1,
-    //     },
-    //     maxTokens: {
-    //       default: 1275,
-    //       max: 2000,
-    //       min: 1275,
-    //       step: 1,
-    //     },
-    //   },
-    // },
-    // {
-    //   id: "text-davinci-003",
-    //   name: "DaVinci-003 (4K Context)",
-    //   contextSize: 4096,
-    //   options: {
-    //     temperature: {
-    //       default: 1,
-    //       max: 2,
-    //       min: 0,
-    //       step: 0.1,
-    //     },
-    //     topP: {
-    //       default: 1,
-    //       max: 1,
-    //       min: 0,
-    //       step: 0.01,
-    //     },
-    //     maxTokens: {
-    //       default: 600,
-    //       max: 2000,
-    //       min: 500,
-    //       step: 1,
-    //     },
-    //     frequencyPenalty: {
-    //       default: 0,
-    //       max: 2,
-    //       min: -2,
-    //       step: 0.1,
-    //     },
-    //     presencePenalty: {
-    //       default: 0,
-    //       max: 2,
-    //       min: -2,
-    //       step: 0.1,
-    //     },
-    //   },
-    // },
   ];
 
   public async findAll(): Promise<AIModel[]> {
