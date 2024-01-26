@@ -63,7 +63,7 @@ export const ChatHeader = ({
     const response = await axios.put(`/api/v1/chats/${chat.id}/duplicate`);
     if (response.status === 200) {
       toast({ description: "Chat duplicated." });
-      router.push(`/chat/${response.data.id}`);
+      router.push(`/chat/${response.data.id}?new=true`);
       fetchChats();
     }
   };
@@ -72,7 +72,7 @@ export const ChatHeader = ({
     const response = await axios.put(`/api/v1/chats/${chat.id}/reset`);
     if (response.status === 200) {
       toast({ description: "Chat reset." });
-      router.push(`/chat/${response.data.id}`);
+      router.push(`/chat/${response.data.id}?new=true`);
     }
   };
 
