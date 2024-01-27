@@ -42,7 +42,7 @@ export const ChatClient = ({
     const summarize = async () => {
       await axios.put(`/api/v1/chats/${chat.id}/summarize`);
     };
-    if (!chat.summary) {
+    if (!chat.summary || messages.length < 10 || messages.length % 10 === 0) {
       summarize();
     }
   };
