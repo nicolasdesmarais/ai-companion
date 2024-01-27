@@ -509,7 +509,7 @@ export class ChatService {
       .join(" ");
     const resp = await gpt4ChatModel.invoke([
       new SystemMessage(
-        `Describe the following conversation in eight words. This will be displayed to the user, so refer to the user in second person singular. \n${messages}`
+        `Describe the following conversation in under ten words. This will be displayed to the user, so refer to the user in second person singular. \n${messages}`
       ),
     ]);
     await prismadb.chat.update({
