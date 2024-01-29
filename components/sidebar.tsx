@@ -20,6 +20,8 @@ import {
   Store,
   UserPlus,
   Building2,
+  Building,
+  FileText,
 } from "lucide-react";
 import {
   ReadonlyURLSearchParams,
@@ -28,6 +30,12 @@ import {
   useSearchParams,
 } from "next/navigation";
 import { useEffect } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface SidebarProps {
   isPro: boolean;
@@ -45,6 +53,7 @@ interface Route {
   pro: boolean;
   regex: RegExp;
   requiredPermission?: Permission;
+  children?: Route[];
 }
 
 const isActive = (
@@ -159,6 +168,17 @@ export const Sidebar = ({
       pro: false,
     },
     {
+      icon: FileText,
+      href: "/data-sources",
+      label: "Data",
+      pro: false,
+      requiredPermission: {
+        resourceType: SecuredResourceType.AI,
+        action: SecuredAction.READ,
+        accessLevel: SecuredResourceAccessLevel.INSTANCE,
+      },
+    },
+    {
       icon: Eye,
       href: "/?scope=INSTANCE",
       pathname: "/",
@@ -186,22 +206,30 @@ export const Sidebar = ({
     },
     {
       icon: Settings,
-      href: "/organization-settings",
       label: "Settings",
-      requiredPermission: {
-        resourceType: SecuredResourceType.ORG_SETTINGS,
-        action: SecuredAction.WRITE,
-        accessLevel: SecuredResourceAccessLevel.INSTANCE,
-      },
-      pro: false,
-    },
-    {
-      icon: LockKeyhole,
-      href: "/api-keys",
-      label: "API Keys",
-      pro: false,
+      children: [
+        {
+          icon: Building,
+          href: "/organization-settings",
+          label: "Company Settings",
+          requiredPermission: {
+            resourceType: SecuredResourceType.ORG_SETTINGS,
+            action: SecuredAction.WRITE,
+            accessLevel: SecuredResourceAccessLevel.INSTANCE,
+          },
+          pro: false,
+        },
+        {
+          icon: LockKeyhole,
+          href: "/api-keys",
+          label: "API Keys",
+          pro: false,
+        },
+      ],
     },
   ] as Route[];
+  const itemClass =
+    "text-muted-foreground text-xs group py-3 px-8 flex w-full justify-center font-medium cursor-pointer hover:text-primary hover:bg-primary/10 rounded-lg transition";
   return (
     <div
       className={cn(
@@ -234,23 +262,68 @@ export const Sidebar = ({
             Chat
           </div>
         </div>
-        {routes.map((route) => (
-          <div
-            onClick={() => onNavigate(route.href, route.pro)}
-            key={route.href}
-            className={cn(
-              "text-muted-foreground text-xs group py-3 px-8 flex w-full justify-center font-medium cursor-pointer hover:text-primary hover:bg-primary/10 rounded-lg transition",
-              isActive(route, pathname, searchparams) &&
-                "bg-accent text-primary",
-              shouldHideRoute(route) && "hidden"
-            )}
-          >
-            <div className="flex flex-col items-center flex-1">
-              <route.icon className="h-5 w-5 mb-1" />
-              <span className="w-12 text-center">{route.label}</span>
+        {routes.map((route) =>
+          route.children ? (
+            <div className={itemClass} key={route.label}>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className="flex flex-col items-center flex-1">
+                    <route.icon className="h-5 w-5 mb-1" />
+                    <span className="w-12 text-center">{route.label}</span>
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  side="right"
+                  className="min-w-[6rem] "
+                  sideOffset={20}
+                  alignOffset={-20}
+                >
+                  {route.children.map((child) => (
+                    <DropdownMenuItem
+                      key={child.href}
+                      onClick={() => onNavigate(child.href, child.pro)}
+                      className="focus:bg-transparent focus:text-primary focus:outline-none"
+                    >
+                      <div
+                        className={cn(
+                          itemClass,
+                          "px-0",
+                          isActive(child, pathname, searchparams) &&
+                            "bg-accent text-primary",
+                          shouldHideRoute(child) && "hidden"
+                        )}
+                      >
+                        <div className="flex flex-col items-center flex-1">
+                          <child.icon className="h-5 w-5 mb-1" />
+                          <span className="w-12 text-center">
+                            {child.label}
+                          </span>
+                        </div>
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-          </div>
-        ))}
+          ) : (
+            <div
+              onClick={() => onNavigate(route.href, route.pro)}
+              key={route.href}
+              className={cn(
+                itemClass,
+                isActive(route, pathname, searchparams) &&
+                  "bg-accent text-primary",
+                shouldHideRoute(route) && "hidden"
+              )}
+            >
+              <div className="flex flex-col items-center flex-1">
+                <route.icon className="h-5 w-5 mb-1" />
+                <span className="w-12 text-center">{route.label}</span>
+              </div>
+            </div>
+          )
+        )}
       </div>
       <div className="space-y-2 flex flex-col items-center py-3 px-8">
         <ModeToggle />

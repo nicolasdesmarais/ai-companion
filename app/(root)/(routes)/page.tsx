@@ -82,7 +82,7 @@ const RootPage = async ({ searchParams }: RootPageProps) => {
     GroupSecurityService.hasElevatedWriteAccess(authorizationContext);
 
   return (
-    <div className="h-full px-4 space-y-2 pt-2">
+    <div className="h-full pr-4 pl-2 space-y-2 pt-2">
       {scope && SuperuserScopes.includes(scope) && (
         <Banner className="my-2" variant="destructive">
           Warning: As a superuser, you are able to see and edit AIs where the
