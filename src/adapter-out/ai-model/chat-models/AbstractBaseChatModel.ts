@@ -1,7 +1,7 @@
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { LangChainStream } from "ai";
-import { HumanMessage, SystemMessage } from "langchain/schema";
+import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { PostToChatInput, PostToChatResponse } from "./ChatModel";
 
 export abstract class AbstractBaseChatModel {
