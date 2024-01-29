@@ -40,11 +40,11 @@ class Layout extends React.Component<Props> {
                 and clicking Execute. Remember to include your API Bearer key in
                 the X-Authorization header when making the calls from your app.
               </p>
-              <p className="text-xs my-2 whitespace-pre font-mono p-4 bg-primary/10 rounded-md">
+              <div className="text-xs my-2 whitespace-pre font-mono p-4 bg-primary/10 rounded-md overflow-auto">
                 {
                   "curl https://appdirect.ai/api/v1/me/ai -H 'X-Authorization: Bearer <your-secret-key>'"
                 }
-              </p>
+              </div>
             </div>
             <Separator className="bg-primary/10" />
           </div>
