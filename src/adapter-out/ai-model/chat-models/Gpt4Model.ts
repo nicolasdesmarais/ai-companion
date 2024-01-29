@@ -1,6 +1,6 @@
 import { AIModel } from "@/src/domain/models/AIModel";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
-import { ChatOpenAI } from "langchain/chat_models/openai";
+import { ChatOpenAI } from "@langchain/openai";
 import { AbstractBaseChatModel } from "./AbstractBaseChatModel";
 import { ChatModel } from "./ChatModel";
 
