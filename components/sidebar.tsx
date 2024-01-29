@@ -170,6 +170,7 @@ export const Sidebar = ({
     {
       icon: FileText,
       href: "/data-sources",
+      pathname: "/data-sources",
       label: "Data",
       pro: false,
       requiredPermission: {
