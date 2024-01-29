@@ -38,7 +38,12 @@ class Layout extends React.Component<Props> {
                 The following API endpoints are available for your use. You can
                 try them out on this page by filling out the required parameters
                 and clicking Execute. Remember to include your API Bearer key in
-                the Authorization header when making the calls from your app.
+                the X-Authorization header when making the calls from your app.
+              </p>
+              <p className="text-xs my-2 whitespace-pre font-mono p-4 bg-primary/10 rounded-md">
+                {
+                  "curl https://appdirect.ai/api/v1/me/ai -H 'X-Authorization: Bearer <your-secret-key>'"
+                }
               </p>
             </div>
             <Separator className="bg-primary/10" />
