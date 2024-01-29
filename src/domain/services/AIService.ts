@@ -27,7 +27,7 @@ import {
   GroupAvailability,
   Prisma,
 } from "@prisma/client";
-import { SystemMessage } from "langchain/schema";
+import { SystemMessage } from "@langchain/core/messages";
 import { AISecurityService } from "../../security/services/AISecurityService";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import { AIDetailDto, AIProfile } from "../models/AI";

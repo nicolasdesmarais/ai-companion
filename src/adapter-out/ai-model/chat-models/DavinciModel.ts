@@ -1,5 +1,5 @@
 import { AIModel } from "@/src/domain/models/AIModel";
-import { OpenAI } from "langchain/llms/openai";
+import { OpenAI } from "@langchain/openai";
 import { BaseCompletionModel } from "./BaseCompletionModel";
 import { ChatModel } from "./ChatModel";
 
