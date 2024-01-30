@@ -16,6 +16,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Button } from "./ui/button";
+import { X } from "lucide-react";
 
 interface Props {
   dataSources: any[];
@@ -58,12 +60,19 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
       setLoading(false);
     }
   };
-
-  if (!focus || !dataSources || dataSources.length === 0) return null;
   const dataSource = dataSources.find((ds) => ds.id === focus);
+
+  if (!focus || !dataSource || !dataSources || dataSources.length === 0)
+    return null;
+
   return (
-    <div className="mt-2 w-1/3 p-4">
-      <div>{dataSource.name}</div>
+    <div className="bg-profile ml-2 mt-2 mw-1/3 p-4">
+      <div className="absolute top-[110px] right-4">
+        <Button onClick={() => {}} variant="ghost" size="icon" type="button">
+          <X className="h-6 w-6" />
+        </Button>
+      </div>
+      <div className="text-xl font-bold">{dataSource.name}</div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -75,16 +84,34 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
             dataRefreshPeriod={dataRefreshPeriod}
           />
           <FormItem>
-            <FormLabel>Original Name</FormLabel>
-          </FormItem>
-          <FormItem>
             <FormLabel>Type</FormLabel>
+            <div>{dataSource.type}</div>
           </FormItem>
           <FormItem>
             <FormLabel>Original Upload</FormLabel>
+            <div>{dataSource.createdAt}</div>
           </FormItem>
           <FormItem>
             <FormLabel>Last Modified</FormLabel>
+            <div>{dataSource.updatedAt}</div>
+          </FormItem>
+          <FormItem>
+            <FormLabel>Content</FormLabel>
+            {dataSource.knowledges.map(({ knowledge }: any) =>
+              knowledge.blobUrl ? (
+                <div key={knowledge.id}>
+                  <a
+                    href={knowledge.blobUrl}
+                    target="_blank"
+                    className="text-ring"
+                  >
+                    {knowledge.name}
+                  </a>
+                </div>
+              ) : (
+                <div key={knowledge.id}>{knowledge.name}</div>
+              )
+            )}
           </FormItem>
         </form>
       </Form>
