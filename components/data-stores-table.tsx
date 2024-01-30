@@ -10,11 +10,19 @@ import { useState } from "react";
 import { DataSourceTypes } from "./datasource-types";
 import { KnowledgeIndexStatus } from "@prisma/client";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import qs from "query-string";
+import { cn } from "@/src/lib/utils";
 
 export const DataStoresTable = () => {
   const [dataSources, setDataSources] = useState<any[]>([]);
   const [removing, setRemoving] = useState("");
-  const [expanded, setExpanded] = useState<string[]>([]);
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const focus = searchParams.get("focus");
+
   const { toast } = useToast();
 
   const removeDataSource = async (id: string) => {};
@@ -38,6 +46,22 @@ export const DataStoresTable = () => {
     fetchDataSources();
   }, []);
 
+  const select = (id: string) => {
+    const query = {
+      focus: id,
+    };
+
+    const url = qs.stringifyUrl(
+      {
+        url: window.location.href,
+        query,
+      },
+      { skipNull: true, skipEmptyString: true }
+    );
+
+    router.push(url);
+  };
+
   return (
     <div className="mt-2">
       <Table
@@ -56,18 +80,14 @@ export const DataStoresTable = () => {
           <>
             <tr
               key={dataSource.id}
-              className="items-center my-2 text-sm hover:bg-ring/10"
+              className={cn(
+                "items-center my-2 text-sm hover:bg-ring/10",
+                focus === dataSource.id && "bg-ring/10"
+              )}
+              onClick={() => select(dataSource.id)}
             >
               <td className="p-2 ">
-                <div
-                  onClick={() => toggle(dataSource.id)}
-                  className=" truncate text-ring cursor-pointer flex items-center"
-                >
-                  {expanded.includes(dataSource.id) ? (
-                    <ChevronDown className="w-4 h-4 mr-2 text-white" />
-                  ) : (
-                    <ChevronRight className="w-4 h-4 mr-2 text-white" />
-                  )}
+                <div className=" truncate text-ring cursor-pointer flex items-center">
                   {dataSource.name}
                 </div>
               </td>
@@ -121,73 +141,6 @@ export const DataStoresTable = () => {
                 </Button>
               </td>
             </tr>
-            {expanded.includes(dataSource.id) &&
-              dataSource.knowledges.map(({ knowledge }: any) => (
-                <tr
-                  key={knowledge.id}
-                  className="items-center my-2 text-sm hover:bg-ring/10"
-                >
-                  <td className="p-2 pl-10">
-                    <div className="max-w-sm truncate">
-                      {knowledge.metadata?.indexingRunId ? (
-                        <Link
-                          target="_blank"
-                          href={`https://console.apify.com/organization/Xn4BErd8aMtmstvY2/actors/moJRLRc85AitArpNN/runs/${knowledge.metadata.indexingRunId}`}
-                          className="text-ring"
-                        >
-                          {knowledge.name}
-                        </Link>
-                      ) : (
-                        knowledge.name
-                      )}
-                    </div>
-                  </td>
-                  <td className="p-2">
-                    {dataSource.ais.map((ai: any) => {
-                      return (
-                        <Link
-                          key={ai.ai.id}
-                          target="_blank"
-                          href={`/ai/${ai.ai.id}`}
-                          className="text-ring"
-                        >
-                          {ai.ai.name}
-                        </Link>
-                      );
-                    })}
-                  </td>
-                  <td className="p-2">{knowledge.type}</td>
-                  <td className="p-2">
-                    {knowledge.lastIndexedAt
-                      ? format(
-                          new Date(knowledge.lastIndexedAt),
-                          "h:mma M/d/yyyy "
-                        )
-                      : null}
-                  </td>
-                  <td
-                    onClick={() => onCopy(dataSource.id)}
-                    className="text-ring cursor-pointer"
-                  >
-                    {knowledge.id}
-                  </td>
-
-                  <td className="p-2 text-center">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={!!removing}
-                      onClick={() => removeDataSource(knowledge.id)}
-                    >
-                      {removing === knowledge.id ? (
-                        <Loader className="w-4 h-4 spinner" />
-                      ) : (
-                        <MinusCircle className="w-4 h-4 text-destructive" />
-                      )}
-                    </Button>
-                  </td>
-                </tr>
-              ))}
           </>
         ))}
       </Table>
