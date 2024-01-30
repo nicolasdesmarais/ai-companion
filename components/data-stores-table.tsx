@@ -29,8 +29,8 @@ export const DataStoresTable = () => {
 
   const fetchDataSources = async () => {
     try {
-      const response = await axios.get(`/api/v1/super/data-sources/`);
-      setDataSources(response.data);
+      const response = await axios.get(`/api/v1/data-sources`);
+      setDataSources(response.data.data);
     } catch (error: any) {
       toast({
         variant: "destructive",

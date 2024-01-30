@@ -24,6 +24,16 @@ const dataSourceSummarySelect: Prisma.DataSourceSelect = {
   refreshPeriod: true,
   indexStatus: true,
   indexPercentage: true,
+  knowledges: {
+    select: {
+      knowledge: true,
+    },
+  },
+  ais: {
+    select: {
+      ai: true,
+    },
+  },
 };
 
 const dataSourceFilterWhereClause = (
