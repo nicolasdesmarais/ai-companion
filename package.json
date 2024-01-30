@@ -19,6 +19,7 @@
     "@datadog/browser-rum": "^5.8.0",
     "@hookform/resolvers": "^3.3.4",
     "@langchain/anthropic": "^0.0.9",
+    "@langchain/community": "^0.0.22",
     "@langchain/openai": "^0.0.13",
     "@langchain/pinecone": "^0.0.1",
     "@prisma/client": "^5.8.1",
