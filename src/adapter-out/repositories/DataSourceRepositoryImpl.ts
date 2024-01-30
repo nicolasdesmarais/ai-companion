@@ -69,6 +69,10 @@ const dataSourceFilterOrderBy = (
     : undefined;
 };
 
+interface TokenCountResult {
+  total_token_count: number;
+}
+
 export class DataSourceRepositoryImpl implements DataSourceRepository {
   public async findById(id: string): Promise<DataSourceDto | null> {
     const dataSource = await prismadb.dataSource.findUnique({
@@ -227,5 +231,20 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
       },
     });
     return this.mapDataSourceToDto(dataSource);
+  }
+
+  public async getNumberOfTokensStoredForOrg(orgId: string): Promise<number> {
+    const result = await prismadb.$queryRaw<TokenCountResult[]>`
+    SELECT SUM(dk.token_count) as total_token_count
+    FROM (
+        SELECT DISTINCT k.id, k.token_count
+        FROM data_sources d
+        INNER JOIN data_source_knowledges dsk ON dsk.data_source_id = d.id
+        INNER JOIN knowledge k ON k.id = dsk.knowledge_id
+        WHERE d.org_id = ${orgId}
+    ) as dk;
+`;
+
+    return result[0]?.total_token_count ?? 0;
   }
 }

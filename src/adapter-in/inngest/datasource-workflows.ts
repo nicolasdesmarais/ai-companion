@@ -135,6 +135,7 @@ export const loadKnowledgeChunk = inngest.createFunction(
   async ({ event }) => {
     try {
       const indexingResult = await dataSourceService.loadKnowledgeResult(
+        event.data.orgId,
         event.data.dataSourceType,
         event.data.knowledgeIndexingResult.knowledgeId,
         event.data.knowledgeIndexingResult.result,

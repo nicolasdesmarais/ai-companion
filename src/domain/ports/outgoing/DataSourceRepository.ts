@@ -26,4 +26,6 @@ export interface DataSourceRepository {
   ): Promise<DataSourceDto>;
 
   updateDataSource(dataSourceDto: DataSourceDto): Promise<DataSourceDto>;
+
+  getNumberOfTokensStoredForOrg(orgId: string): Promise<number>;
 }

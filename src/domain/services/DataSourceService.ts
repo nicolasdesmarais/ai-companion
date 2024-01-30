@@ -598,6 +598,7 @@ export class DataSourceService {
   }
 
   public async loadKnowledgeResult(
+    orgId: string,
     dataSourceType: DataSourceType,
     knowledgeId: string,
     result: KnowledgeIndexingResult,
@@ -612,6 +613,9 @@ export class DataSourceService {
         `Knowledge with id=${knowledgeId} not found`
       );
     }
+
+    const orgTokenCount =
+      await dataSourceRepository.getNumberOfTokensStoredForOrg(orgId);
 
     return await dataSourceAdapter.loadKnowledgeResult(
       knowledge,
