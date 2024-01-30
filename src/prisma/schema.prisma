@@ -255,6 +255,7 @@ model DataSource {
   @@index(type)
   @@index(createdAt)
   @@index(lastIndexedAt)
+  @@index(orgId)
   @@fulltext(name)
   @@map("data_sources")
 }
