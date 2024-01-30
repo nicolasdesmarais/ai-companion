@@ -5,6 +5,7 @@ import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
 import { AIDetailDto } from "@/src/domain/models/AI";
 import { ChatMessageDto } from "@/src/domain/models/Chats";
+import { getCurrentDateStr } from "@/src/lib/utils";
 import { useCompletion } from "ai/react";
 import {
   Dispatch,
@@ -42,7 +43,7 @@ export const TestChat = ({
   } = useCompletion({
     api: `/api/v1/chats/test-chat`,
     body: {
-      date: new Date().toLocaleString(),
+      date: getCurrentDateStr(),
       aiId: ai.id,
       messages,
     },
