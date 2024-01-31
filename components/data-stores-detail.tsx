@@ -1,30 +1,17 @@
 "use client";
-import { useSearchParams } from "next/navigation";
-import { DataRefreshPeriod } from "./data-refresh-period";
-import { useState } from "react";
-import { DataSourceRefreshPeriod } from "@prisma/client";
-import { Controller, useForm } from "react-hook-form";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormItem, FormLabel } from "@/components/ui/form";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { useToast } from "@/components/ui/use-toast";
-import axios, { AxiosError } from "axios";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Button } from "./ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { DataSourceRefreshPeriod } from "@prisma/client";
+import axios from "axios";
 import { X } from "lucide-react";
-import {
-  MultiSelect,
-  MultiSelectContent,
-  MultiSelectItem,
-  MultiSelectTrigger,
-  MultiSelectValue,
-} from "@/components/ui/multi-select";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { DataRefreshPeriod } from "./data-refresh-period";
+import { Button } from "./ui/button";
 
 interface Props {
   dataSources: any[];
