@@ -4,15 +4,18 @@ import { MultiSelect } from "@/components/ui/multi-select";
 import { useToast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DataSourceRefreshPeriod } from "@prisma/client";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { DataRefreshPeriod } from "./data-refresh-period";
 import { Button } from "./ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
+const badgeStyle = (color: string) => ({});
 interface Props {
   dataSources: any[];
 }
@@ -26,10 +29,32 @@ const dataSourceFormSchema = z.object({
 });
 
 export const DataStoresDetails = ({ dataSources }: Props) => {
+  const [ais, setAis] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const [selectedValues, setSelectedValues] = useState<any[]>([]);
+
   const [dataRefreshPeriod, setDataRefreshPeriod] =
     useState<DataSourceRefreshPeriod | null>(DataSourceRefreshPeriod.NEVER);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchAis = async () => {
+      try {
+        const response = await axios.get(`/api/v1/me/ai?scope=OWNED`);
+        setAis(response.data);
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          description:
+            String((error as AxiosError).response?.data) ||
+            "Something went wrong.",
+          duration: 6000,
+        });
+      }
+    };
+    fetchAis();
+  }, [toast]);
 
   const form = useForm<DataSourceFormData>({
     resolver: zodResolver(dataSourceFormSchema),
@@ -72,7 +97,30 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormItem>
             <FormLabel>Selected AIs</FormLabel>
-            <MultiSelect />
+            {ais && (
+              <>
+                <MultiSelect
+                  itemLabel="AI"
+                  items={ais}
+                  values={selectedValues}
+                  setValues={setSelectedValues}
+                />
+                <div className="relative mt-3 overflow-y-auto">
+                  {selectedValues.map(({ name, id, src }) => (
+                    <Badge
+                      key={`badge-${id}`}
+                      variant="outline"
+                      className="mr-2 mb-2 bg-ring"
+                    >
+                      <Avatar className="h-4 w-4 mr-2">
+                        <AvatarImage src={src} crop="w_48,h_48" />
+                      </Avatar>
+                      {name}
+                    </Badge>
+                  ))}
+                </div>
+              </>
+            )}
           </FormItem>
           <DataRefreshPeriod
             setDataRefreshPeriod={setDataRefreshPeriod}

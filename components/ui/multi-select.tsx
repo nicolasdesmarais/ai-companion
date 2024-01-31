@@ -4,7 +4,6 @@ import * as React from "react";
 import { Check, ChevronsUpDown, Edit2 } from "lucide-react";
 
 import { cn } from "@/src/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -17,65 +16,24 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
-// FIXME: https://twitter.com/lemcii/status/1659649371162419202?s=46&t=gqNnMIjMWXiG2Rbrr5gT6g
-// Removing states would help maybe?
+type Props = {
+  itemLabel: string;
+  items: any[];
+  values: any[];
+  setValues: React.Dispatch<React.SetStateAction<any[]>>;
+};
 
-type Framework = Record<"value" | "label" | "color", string>;
-
-const FRAMEWORKS = [
-  {
-    value: "next.js",
-    label: "Next.js",
-    color: "#ef4444",
-  },
-  {
-    value: "sveltekit",
-    label: "SvelteKit",
-    color: "#eab308",
-  },
-  {
-    value: "nuxt.js",
-    label: "Nuxt.js",
-    color: "#22c55e",
-  },
-  {
-    value: "remix",
-    label: "Remix",
-    color: "#06b6d4",
-  },
-  {
-    value: "astro",
-    label: "Astro",
-    color: "#3b82f6",
-  },
-  {
-    value: "wordpress",
-    label: "WordPress",
-    color: "#8b5cf6",
-  },
-] satisfies Framework[];
-
-const badgeStyle = (color: string) => ({
-  borderColor: `${color}20`,
-  backgroundColor: `${color}30`,
-  color,
-});
-
-export function MultiSelect() {
+export function MultiSelect({ itemLabel, items, values, setValues }: Props) {
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const [frameworks, setFrameworks] = React.useState<Framework[]>(FRAMEWORKS);
   const [openCombobox, setOpenCombobox] = React.useState(false);
   const [inputValue, setInputValue] = React.useState<string>("");
-  const [selectedValues, setSelectedValues] = React.useState<Framework[]>([
-    FRAMEWORKS[0],
-  ]);
-
-  const toggleFramework = (framework: Framework) => {
-    setSelectedValues((currentFrameworks) =>
-      !currentFrameworks.includes(framework)
-        ? [...currentFrameworks, framework]
-        : currentFrameworks.filter((l) => l.value !== framework.value)
+  const toggleItem = (item: any) => {
+    setValues((currentItems) =>
+      !currentItems.includes(item)
+        ? [...currentItems, item]
+        : currentItems.filter((l) => l.id !== item.id)
     );
     inputRef?.current?.focus();
   };
@@ -96,12 +54,10 @@ export function MultiSelect() {
             className="w-[200px] justify-between text-foreground"
           >
             <span className="truncate">
-              {selectedValues.length === 0 && "Select labels"}
-              {selectedValues.length === 1 && selectedValues[0].label}
-              {selectedValues.length === 2 &&
-                selectedValues.map(({ label }) => label).join(", ")}
-              {selectedValues.length > 2 &&
-                `${selectedValues.length} labels selected`}
+              {values.length === 0 && `Select ${itemLabel}`}
+              {values.length === 1 && values[0].name}
+              {values.length === 2 && values.map(({ name }) => name).join(", ")}
+              {values.length > 2 && `${values.length} ${itemLabel}s selected`}
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -110,18 +66,18 @@ export function MultiSelect() {
           <Command loop>
             <CommandInput
               ref={inputRef}
-              placeholder="Search framework..."
+              placeholder={`Search ${itemLabel}s...`}
               value={inputValue}
               onValueChange={setInputValue}
             />
             <CommandGroup className="max-h-[145px] overflow-auto">
-              {frameworks.map((framework) => {
-                const isActive = selectedValues.includes(framework);
+              {items.map((item) => {
+                const isActive = values.includes(item);
                 return (
                   <CommandItem
-                    key={framework.value}
-                    value={framework.value}
-                    onSelect={() => toggleFramework(framework)}
+                    key={item.id}
+                    value={item.id}
+                    onSelect={() => toggleItem(item)}
                   >
                     <Check
                       className={cn(
@@ -129,11 +85,12 @@ export function MultiSelect() {
                         isActive ? "opacity-100" : "opacity-0"
                       )}
                     />
-                    <div className="flex-1">{framework.label}</div>
-                    <div
-                      className="h-4 w-4 rounded-full"
-                      style={{ backgroundColor: framework.color }}
-                    />
+                    <div className="flex-1">{item.name}</div>
+                    {item.src && (
+                      <Avatar className="h-4 w-4">
+                        <AvatarImage src={item.src} crop="w_48,h_48" />
+                      </Avatar>
+                    )}
                   </CommandItem>
                 );
               })}
@@ -141,18 +98,6 @@ export function MultiSelect() {
           </Command>
         </PopoverContent>
       </Popover>
-      <div className="relative mt-3 overflow-y-auto">
-        {selectedValues.map(({ label, value, color }) => (
-          <Badge
-            key={value}
-            variant="outline"
-            style={badgeStyle(color)}
-            className="mr-2 mb-2"
-          >
-            {label}
-          </Badge>
-        ))}
-      </div>
     </div>
   );
 }
