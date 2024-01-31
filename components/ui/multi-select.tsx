@@ -31,7 +31,7 @@ export function MultiSelect({ itemLabel, items, values, setValues }: Props) {
   const [inputValue, setInputValue] = React.useState<string>("");
   const toggleItem = (item: any) => {
     setValues((currentItems) =>
-      !currentItems.includes(item)
+      !values.find((l) => l.id === item.id)
         ? [...currentItems, item]
         : currentItems.filter((l) => l.id !== item.id)
     );
@@ -72,7 +72,7 @@ export function MultiSelect({ itemLabel, items, values, setValues }: Props) {
             />
             <CommandGroup className="max-h-[145px] overflow-auto">
               {items.map((item) => {
-                const isActive = values.includes(item);
+                const isActive = values.find((l) => l.id === item.id);
                 return (
                   <CommandItem
                     key={item.id}

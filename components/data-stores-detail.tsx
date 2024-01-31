@@ -128,7 +128,7 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
             )}
           </FormItem>
           <DataRefreshPeriod
-            className="max-w-[200px]"
+            selectClassName="max-w-[200px]"
             setDataRefreshPeriod={setDataRefreshPeriod}
             dataRefreshPeriod={dataRefreshPeriod}
           />
