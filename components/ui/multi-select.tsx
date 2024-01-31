@@ -10,6 +10,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandEmpty,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -76,7 +77,7 @@ export function MultiSelect({ itemLabel, items, values, setValues }: Props) {
                 return (
                   <CommandItem
                     key={item.id}
-                    value={item.id}
+                    value={item.name}
                     onSelect={() => toggleItem(item)}
                   >
                     <Check
@@ -95,6 +96,7 @@ export function MultiSelect({ itemLabel, items, values, setValues }: Props) {
                 );
               })}
             </CommandGroup>
+            <CommandEmpty>{`No ${itemLabel} found`}</CommandEmpty>
           </Command>
         </PopoverContent>
       </Popover>
