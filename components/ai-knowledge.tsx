@@ -182,10 +182,10 @@ export const AIKnowledge = ({
           <div className="max-h-96 overflow-y-auto overflow-x-hidden">
             <Table
               headers={[
-                "NAME",
-                "TYPE",
+                "Name",
+                "Type",
                 "Refresh Period",
-                "LAST MODIFIED",
+                "Last Modified",
                 "Progress",
                 "Remove",
               ]}
