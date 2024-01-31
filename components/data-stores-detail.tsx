@@ -96,7 +96,7 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
           <X className="h-6 w-6" />
         </Button>
       </div>
-      <div className="text-xl font-bold pr-8">{dataSource.name}</div>
+      <div className="text-xl font-bold pr-8 truncate">{dataSource.name}</div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
@@ -144,24 +144,26 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
             <FormLabel>Last Modified</FormLabel>
             <div>{dataSource.updatedAt}</div>
           </FormItem>
-          <FormItem>
-            <FormLabel>Content</FormLabel>
-            {dataSource.knowledges.map(({ knowledge }: any) =>
-              knowledge.blobUrl ? (
-                <div key={knowledge.id}>
-                  <a
-                    href={knowledge.blobUrl}
-                    target="_blank"
-                    className="text-ring"
-                  >
-                    {knowledge.name}
-                  </a>
-                </div>
-              ) : (
-                <div key={knowledge.id}>{knowledge.name}</div>
-              )
-            )}
-          </FormItem>
+          {dataSource.knowledges.length > 0 && (
+            <FormItem>
+              <FormLabel>Content</FormLabel>
+              {dataSource.knowledges.map(({ knowledge }: any) =>
+                knowledge.blobUrl ? (
+                  <div key={knowledge.id}>
+                    <a
+                      href={knowledge.blobUrl}
+                      target="_blank"
+                      className="text-ring"
+                    >
+                      {knowledge.name}
+                    </a>
+                  </div>
+                ) : (
+                  <div key={knowledge.id}>{knowledge.name}</div>
+                )
+              )}
+            </FormItem>
+          )}
         </form>
       </Form>
     </div>
