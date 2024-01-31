@@ -83,8 +83,34 @@ export class DataSourceService {
       throw new ForbiddenError("Forbidden");
     }
 
+    return await this.listDataSourcesByLevel(
+      authorizationContext,
+      highestAccessLevel,
+      filter
+    );
+  }
+
+  /**
+   * Returns a list of all data sources for the specified access level.
+   * @param authorizationContext
+   * @returns
+   */
+  public async listDataSourcesByLevel(
+    authorizationContext: AuthorizationContext,
+    level: SecuredResourceAccessLevel,
+    filter?: DataSourceFilter
+  ): Promise<DataSourceDto[]> {
+    const hasPermission = BaseEntitySecurityService.hasPermission(
+      authorizationContext,
+      SecuredResourceType.DATA_SOURCES,
+      SecuredAction.READ,
+      level
+    );
+    if (!hasPermission) {
+      throw new ForbiddenError("Forbidden");
+    }
     const { orgId, userId } = authorizationContext;
-    switch (highestAccessLevel) {
+    switch (level) {
       case SecuredResourceAccessLevel.INSTANCE:
         return await this.dataSourceRepository.findAll(filter);
       case SecuredResourceAccessLevel.ORGANIZATION:

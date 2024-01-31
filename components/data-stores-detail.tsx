@@ -96,7 +96,7 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
           <X className="h-6 w-6" />
         </Button>
       </div>
-      <div className="text-xl font-bold">{dataSource.name}</div>
+      <div className="text-xl font-bold pr-8">{dataSource.name}</div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">

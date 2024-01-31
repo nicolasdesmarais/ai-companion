@@ -41,10 +41,12 @@ async function getHandler(
     orderBy,
   };
 
-  const dataSources: DataSourceDto[] = await dataSourceService.listDataSources(
-    authorizationContext,
-    filter
-  );
+  const dataSources: DataSourceDto[] =
+    await dataSourceService.listDataSourcesByLevel(
+      authorizationContext,
+      SecuredResourceAccessLevel.SELF,
+      filter
+    );
 
   return NextResponse.json({ data: dataSources });
 }
