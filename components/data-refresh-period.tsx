@@ -20,12 +20,14 @@ interface Props {
   dataRefreshPeriod: DataSourceRefreshPeriod | null;
   setDataRefreshPeriod: (period: DataSourceRefreshPeriod) => void;
   className?: string;
+  selectClassName?: string;
 }
 
 export const DataRefreshPeriod = ({
   dataRefreshPeriod,
   setDataRefreshPeriod,
   className,
+  selectClassName,
 }: Props) => {
   return (
     <div className={cn("my-4", className)}>
@@ -38,7 +40,7 @@ export const DataRefreshPeriod = ({
           value={dataRefreshPeriod ?? ""}
         >
           <FormControl>
-            <SelectTrigger className="bg-background">
+            <SelectTrigger className={cn("my-4", selectClassName)}>
               <SelectValue>
                 {getDataSourceRefreshPeriodLabel(dataRefreshPeriod)}
               </SelectValue>
