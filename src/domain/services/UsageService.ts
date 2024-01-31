@@ -24,7 +24,7 @@ export class UsageService {
       return true;
     }
 
-    return orgTokenCount + tokensToAdd <= dataUsageTokenLimit;
+    return Number(orgTokenCount) + Number(tokensToAdd) <= dataUsageTokenLimit;
   }
 }
 

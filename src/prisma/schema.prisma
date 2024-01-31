@@ -366,7 +366,7 @@ model OrgSubscription {
   apiUsageTokenLimit  Int?                   @map(name: "api_usage_token_limit")
 
   @@unique([orgId])
-  @@map("OrgSubscriptions")
+  @@map("org_subscriptions")
 }
 
 enum OrgSubscriptionEdition {
