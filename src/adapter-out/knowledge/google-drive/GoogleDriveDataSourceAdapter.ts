@@ -410,6 +410,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
             const eventResult = await publishEvent(
               DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
               {
+                orgId,
                 knowledgeIndexingResult: {
                   knowledgeId: knowledge.id,
                   result: {
