@@ -90,7 +90,7 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
     return null;
 
   return (
-    <div className="bg-profile ml-2 mt-2 mw-1/3 p-4">
+    <div className="bg-profile ml-2 mt-2 w-1/3 p-4">
       <div className="absolute top-[110px] right-4">
         <Button onClick={() => {}} variant="ghost" size="icon" type="button">
           <X className="h-6 w-6" />
@@ -128,6 +128,7 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
             )}
           </FormItem>
           <DataRefreshPeriod
+            className="max-w-[200px]"
             setDataRefreshPeriod={setDataRefreshPeriod}
             dataRefreshPeriod={dataRefreshPeriod}
           />
