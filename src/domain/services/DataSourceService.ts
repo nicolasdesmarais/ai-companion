@@ -123,7 +123,7 @@ export class DataSourceService {
       );
     }
 
-    return await dataSourceRepository.findByAiId(aiId);
+    return await this.dataSourceRepository.findByAiId(aiId);
   }
 
   /**
@@ -144,7 +144,7 @@ export class DataSourceService {
   ) {
     const { orgId, userId } = authorizationContext;
 
-    const dataSource = await dataSourceRepository.initializeDataSource(
+    const dataSource = await this.dataSourceRepository.initializeDataSource(
       orgId,
       userId,
       name,
@@ -217,7 +217,7 @@ export class DataSourceService {
       dataSourceId
     );
 
-    const dataSource = await dataSourceRepository.findById(dataSourceId);
+    const dataSource = await this.dataSourceRepository.findById(dataSourceId);
     if (!dataSource) {
       throw new EntityNotFoundError(
         `DataSource with id=${dataSourceId} not found`
@@ -615,7 +615,7 @@ export class DataSourceService {
     }
 
     const orgTokenCount =
-      await dataSourceRepository.getNumberOfTokensStoredForOrg(orgId);
+      await this.dataSourceRepository.getNumberOfTokensStoredForOrg(orgId);
 
     return await dataSourceAdapter.loadKnowledgeResult(
       knowledge,
@@ -1001,7 +1001,9 @@ export class DataSourceService {
   }
 
   public async findDataSourcesToRefresh() {
-    return await dataSourceRepository.findDataSourceIdsToRefresh(new Date());
+    return await this.dataSourceRepository.findDataSourceIdsToRefresh(
+      new Date()
+    );
   }
 
   public async refreshDataSourceAsUser(
@@ -1023,7 +1025,7 @@ export class DataSourceService {
   }
 
   public async refreshDataSourceAsSystem(dataSourceId: string) {
-    const dataSource = await dataSourceRepository.findById(dataSourceId);
+    const dataSource = await this.dataSourceRepository.findById(dataSourceId);
     if (!dataSource) {
       throw new EntityNotFoundError(
         `DataSource with id=${dataSourceId} not found`
@@ -1034,7 +1036,7 @@ export class DataSourceService {
   }
 
   private async getDataSource(dataSourceId: string) {
-    const dataSource = await dataSourceRepository.findById(dataSourceId);
+    const dataSource = await this.dataSourceRepository.findById(dataSourceId);
     if (!dataSource) {
       throw new EntityNotFoundError(
         `DataSource with id=${dataSourceId} not found`
@@ -1045,7 +1047,7 @@ export class DataSourceService {
 
   private async refreshDataSourceAndPublishEvent(dataSource: DataSourceDto) {
     dataSource.indexStatus = DataSourceIndexStatus.REFRESHING;
-    await dataSourceRepository.updateDataSource(dataSource);
+    await this.dataSourceRepository.updateDataSource(dataSource);
     await publishEvent(DomainEvent.DATASOURCE_REFRESH_REQUESTED, {
       dataSourceId: dataSource.id,
     });
