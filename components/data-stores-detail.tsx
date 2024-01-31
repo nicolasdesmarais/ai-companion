@@ -18,6 +18,13 @@ import {
 } from "@/components/ui/form";
 import { Button } from "./ui/button";
 import { X } from "lucide-react";
+import {
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectItem,
+  MultiSelectTrigger,
+  MultiSelectValue,
+} from "@/components/ui/multi-select";
 
 interface Props {
   dataSources: any[];
@@ -78,6 +85,7 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormItem>
             <FormLabel>Selected AIs</FormLabel>
+            <MultiSelect />
           </FormItem>
           <DataRefreshPeriod
             setDataRefreshPeriod={setDataRefreshPeriod}
