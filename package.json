@@ -22,7 +22,7 @@
     "@langchain/community": "^0.0.22",
     "@langchain/openai": "^0.0.13",
     "@langchain/pinecone": "^0.0.1",
-    "@prisma/client": "^5.8.1",
+    "@prisma/client": "^5.9.0",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -101,7 +101,7 @@
   "devDependencies": {
     "@types/mime-types": "^2.1.4",
     "encoding": "^0.1.13",
-    "prisma": "^5.8.1"
+    "prisma": "^5.9.0"
   },
   "prisma": {
     "schema": "src/prisma/schema.prisma"
