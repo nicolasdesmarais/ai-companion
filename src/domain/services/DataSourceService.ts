@@ -25,10 +25,15 @@ import {
   KnowledgeIndexStatus,
   PrismaClient,
 } from "@prisma/client";
-import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
+import {
+  EntityNotFoundError,
+  ForbiddenError,
+  RateLimitError,
+} from "../errors/Errors";
 import { DomainEvent } from "../events/domain-event";
 import { DataSourceDto, DataSourceFilter } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
+import usageService from "./UsageService";
 
 export class DataSourceService {
   constructor(private dataSourceRepository: DataSourceRepository) {}
@@ -613,9 +618,15 @@ export class DataSourceService {
         `Knowledge with id=${knowledgeId} not found`
       );
     }
+    const knowledgeTokenCount = knowledge.tokenCount || 0;
 
-    const orgTokenCount =
-      await this.dataSourceRepository.getNumberOfTokensStoredForOrg(orgId);
+    const hasSufficientDataStorage =
+      await usageService.hasSufficientDataStorage(orgId, knowledgeTokenCount);
+    if (!hasSufficientDataStorage) {
+      throw new RateLimitError(
+        "Insufficient data storage to load knowledge result"
+      );
+    }
 
     return await dataSourceAdapter.loadKnowledgeResult(
       knowledge,
