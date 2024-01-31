@@ -7,7 +7,7 @@ import { DataSourceRefreshPeriod } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { DataRefreshPeriod } from "./data-refresh-period";
@@ -31,12 +31,14 @@ const dataSourceFormSchema = z.object({
 export const DataStoresDetails = ({ dataSources }: Props) => {
   const [ais, setAis] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-
   const [selectedValues, setSelectedValues] = useState<any[]>([]);
-
   const [dataRefreshPeriod, setDataRefreshPeriod] =
     useState<DataSourceRefreshPeriod | null>(DataSourceRefreshPeriod.NEVER);
   const { toast } = useToast();
+
+  const searchParams = useSearchParams();
+  const focus = searchParams.get("focus");
+  const dataSource = dataSources.find((ds) => ds.id === focus);
 
   useEffect(() => {
     const fetchAis = async () => {
@@ -56,6 +58,12 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
     fetchAis();
   }, [toast]);
 
+  useEffect(() => {
+    if (dataSource?.ais) {
+      setSelectedValues(dataSource.ais.map((ai: any) => ai.ai));
+    }
+  }, [dataSource]);
+
   const form = useForm<DataSourceFormData>({
     resolver: zodResolver(dataSourceFormSchema),
     defaultValues: {
@@ -63,8 +71,6 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
       scopes: [],
     },
   });
-  const searchParams = useSearchParams();
-  const focus = searchParams.get("focus");
 
   const onSubmit = async (values: DataSourceFormData) => {
     try {
@@ -79,7 +85,6 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
       setLoading(false);
     }
   };
-  const dataSource = dataSources.find((ds) => ds.id === focus);
 
   if (!focus || !dataSource || !dataSources || dataSources.length === 0)
     return null;
@@ -94,17 +99,11 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
       <div className="text-xl font-bold">{dataSource.name}</div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
           <FormItem>
             <FormLabel>Selected AIs</FormLabel>
             {ais && (
               <>
-                <MultiSelect
-                  itemLabel="AI"
-                  items={ais}
-                  values={selectedValues}
-                  setValues={setSelectedValues}
-                />
                 <div className="relative mt-3 overflow-y-auto">
                   {selectedValues.map(({ name, id, src }) => (
                     <Badge
@@ -112,13 +111,19 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
                       variant="outline"
                       className="mr-2 mb-2 bg-ring"
                     >
-                      <Avatar className="h-4 w-4 mr-2">
+                      <Avatar className="h-6 w-6 mr-2">
                         <AvatarImage src={src} crop="w_48,h_48" />
                       </Avatar>
                       {name}
                     </Badge>
                   ))}
                 </div>
+                <MultiSelect
+                  itemLabel="AI"
+                  items={ais}
+                  values={selectedValues}
+                  setValues={setSelectedValues}
+                />
               </>
             )}
           </FormItem>
