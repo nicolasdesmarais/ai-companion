@@ -355,3 +355,20 @@ model AIOrgApproval {
   @@unique([aiId, orgId])
   @@map("ai_org_approvals")
 }
+
+model OrgSubscription {
+  id                  Int                    @id @default(autoincrement())
+  createdAt           DateTime               @default(now()) @map(name: "created_at")
+  updatedAt           DateTime               @default(now()) @updatedAt @map(name: "updated_at")
+  orgId               String                 @map(name: "org_id")
+  edition             OrgSubscriptionEdition
+  dataUsageTokenLimit Int?                   @map(name: "data_usage_token_limit")
+  apiUsageTokenLimit  Int?                   @map(name: "api_usage_token_limit")
+
+  @@unique([orgId])
+  @@map("org_subscriptions")
+}
+
+enum OrgSubscriptionEdition {
+  FREE
+}

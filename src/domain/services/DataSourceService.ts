@@ -25,10 +25,15 @@ import {
   KnowledgeIndexStatus,
   PrismaClient,
 } from "@prisma/client";
-import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
+import {
+  EntityNotFoundError,
+  ForbiddenError,
+  RateLimitError,
+} from "../errors/Errors";
 import { DomainEvent } from "../events/domain-event";
 import { DataSourceDto, DataSourceFilter } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
+import usageService from "./UsageService";
 
 export class DataSourceService {
   constructor(private dataSourceRepository: DataSourceRepository) {}
@@ -149,7 +154,7 @@ export class DataSourceService {
       );
     }
 
-    return await dataSourceRepository.findByAiId(aiId);
+    return await this.dataSourceRepository.findByAiId(aiId);
   }
 
   /**
@@ -170,7 +175,7 @@ export class DataSourceService {
   ) {
     const { orgId, userId } = authorizationContext;
 
-    const dataSource = await dataSourceRepository.initializeDataSource(
+    const dataSource = await this.dataSourceRepository.initializeDataSource(
       orgId,
       userId,
       name,
@@ -243,7 +248,7 @@ export class DataSourceService {
       dataSourceId
     );
 
-    const dataSource = await dataSourceRepository.findById(dataSourceId);
+    const dataSource = await this.dataSourceRepository.findById(dataSourceId);
     if (!dataSource) {
       throw new EntityNotFoundError(
         `DataSource with id=${dataSourceId} not found`
@@ -624,6 +629,7 @@ export class DataSourceService {
   }
 
   public async loadKnowledgeResult(
+    orgId: string,
     dataSourceType: DataSourceType,
     knowledgeId: string,
     result: KnowledgeIndexingResult,
@@ -636,6 +642,15 @@ export class DataSourceService {
     if (!knowledge) {
       throw new EntityNotFoundError(
         `Knowledge with id=${knowledgeId} not found`
+      );
+    }
+    const knowledgeTokenCount = knowledge.tokenCount || 0;
+
+    const hasSufficientDataStorage =
+      await usageService.hasSufficientDataStorage(orgId, knowledgeTokenCount);
+    if (!hasSufficientDataStorage) {
+      throw new RateLimitError(
+        "Insufficient data storage to load knowledge result"
       );
     }
 
@@ -1023,7 +1038,9 @@ export class DataSourceService {
   }
 
   public async findDataSourcesToRefresh() {
-    return await dataSourceRepository.findDataSourceIdsToRefresh(new Date());
+    return await this.dataSourceRepository.findDataSourceIdsToRefresh(
+      new Date()
+    );
   }
 
   public async refreshDataSourceAsUser(
@@ -1045,7 +1062,7 @@ export class DataSourceService {
   }
 
   public async refreshDataSourceAsSystem(dataSourceId: string) {
-    const dataSource = await dataSourceRepository.findById(dataSourceId);
+    const dataSource = await this.dataSourceRepository.findById(dataSourceId);
     if (!dataSource) {
       throw new EntityNotFoundError(
         `DataSource with id=${dataSourceId} not found`
@@ -1056,7 +1073,7 @@ export class DataSourceService {
   }
 
   private async getDataSource(dataSourceId: string) {
-    const dataSource = await dataSourceRepository.findById(dataSourceId);
+    const dataSource = await this.dataSourceRepository.findById(dataSourceId);
     if (!dataSource) {
       throw new EntityNotFoundError(
         `DataSource with id=${dataSourceId} not found`
@@ -1067,7 +1084,7 @@ export class DataSourceService {
 
   private async refreshDataSourceAndPublishEvent(dataSource: DataSourceDto) {
     dataSource.indexStatus = DataSourceIndexStatus.REFRESHING;
-    await dataSourceRepository.updateDataSource(dataSource);
+    await this.dataSourceRepository.updateDataSource(dataSource);
     await publishEvent(DomainEvent.DATASOURCE_REFRESH_REQUESTED, {
       dataSourceId: dataSource.id,
     });

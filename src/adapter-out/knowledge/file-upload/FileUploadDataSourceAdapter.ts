@@ -77,6 +77,7 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
         id: `kn-chunk-${knowledge.id}-${i}`,
         name: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
         data: {
+          orgId,
           knowledgeIndexingResult: {
             knowledgeId: knowledge.id,
             result: {
