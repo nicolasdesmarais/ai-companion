@@ -1,11 +1,9 @@
 "use client";
 import { useEffect } from "react";
 import { Table } from "@/components/table";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import axios, { AxiosError } from "axios";
 import { format } from "date-fns";
-import { Loader, MinusCircle } from "lucide-react";
 import { useState } from "react";
 import { DataSourceTypes } from "./datasource-types";
 import { KnowledgeIndexStatus } from "@prisma/client";
@@ -66,14 +64,7 @@ export const DataStoresTable = () => {
     <div className="mt-2">
       <div className="flex w-full">
         <Table
-          headers={[
-            "Name",
-            "AIs",
-            "Type",
-            "Last Modified",
-            "Progress",
-            "Status",
-          ]}
+          headers={["Name", "Type", "Last Modified", "Progress", "Status"]}
           className="grow my-4 max-h-60"
         >
           {dataSources.map((dataSource: any) => (
@@ -101,22 +92,6 @@ export const DataStoresTable = () => {
                       {dataSource.name}
                     </div>
                   )}
-                </td>
-                <td className="p-2 max-w-sm">
-                  <div className="truncate max-w-[100px]">
-                    {dataSource.ais.map((ai: any) => {
-                      return (
-                        <Link
-                          key={ai.ai.id}
-                          target="_blank"
-                          href={`/ai/${ai.ai.id}`}
-                          className="text-ring"
-                        >
-                          {ai.ai.name}
-                        </Link>
-                      );
-                    })}
-                  </div>
                 </td>
                 <td className="p-2">
                   {
