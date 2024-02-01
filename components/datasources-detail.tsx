@@ -15,20 +15,11 @@ import { Button } from "./ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
-const badgeStyle = (color: string) => ({});
 interface Props {
   dataSources: any[];
 }
-interface DataSourceFormData {
-  name: string;
-  scopes: string[];
-}
 
-const dataSourceFormSchema = z.object({
-  name: z.string().min(1, { message: "Name is required." }),
-});
-
-export const DataStoresDetails = ({ dataSources }: Props) => {
+export const DataSourcesDetails = ({ dataSources }: Props) => {
   const [ais, setAis] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedValues, setSelectedValues] = useState<any[]>([]);
@@ -67,12 +58,9 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
     }
   }, [dataSource]);
 
-  const form = useForm<DataSourceFormData>({
-    resolver: zodResolver(dataSourceFormSchema),
-    defaultValues: {
-      name: "",
-      scopes: [],
-    },
+  const form = useForm<any>({
+    resolver: zodResolver(z.object({})),
+    defaultValues: {},
   });
 
   const onSubmit = async (values: any) => {
@@ -105,7 +93,7 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
       <div className="text-xl font-bold pr-8 truncate">{dataSource.name}</div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+        <form className="space-y-4 mt-4">
           <FormItem>
             <FormLabel>Selected AIs</FormLabel>
             {ais && (
@@ -139,8 +127,10 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
           <DataRefreshPeriod
             selectClassName="max-w-[200px]"
             setDataRefreshPeriod={(value) => {
-              setDataRefreshPeriod(value);
-              onSubmit({ refreshPeriod: value });
+              if (value) {
+                setDataRefreshPeriod(value);
+                onSubmit({ refreshPeriod: value });
+              }
             }}
             dataRefreshPeriod={dataRefreshPeriod}
           />

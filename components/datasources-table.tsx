@@ -12,11 +12,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
 import { cn } from "@/src/lib/utils";
 import { Tooltip } from "./ui/tooltip";
-import { DataStoresDetails } from "./data-stores-detail";
+import { DataSourcesDetails } from "./datasources-detail";
 
-export const DataStoresTable = () => {
+export const DataSourcesTable = () => {
   const [dataSources, setDataSources] = useState<any[]>([]);
-  const [removing, setRemoving] = useState("");
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -118,7 +117,7 @@ export const DataStoresTable = () => {
             </>
           ))}
         </Table>
-        <DataStoresDetails dataSources={dataSources} />
+        <DataSourcesDetails dataSources={dataSources} />
       </div>
     </div>
   );
