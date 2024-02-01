@@ -28,4 +28,6 @@ export interface DataSourceRepository {
   updateDataSource(dataSourceDto: DataSourceDto): Promise<DataSourceDto>;
 
   getNumberOfTokensStoredForOrg(orgId: string): Promise<number>;
+
+  updateDataSourceAis(dataSourceId: string, aiIds: string[]): Promise<void>;
 }

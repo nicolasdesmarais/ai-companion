@@ -1,4 +1,6 @@
 "use client";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Form, FormItem, FormLabel } from "@/components/ui/form";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { useToast } from "@/components/ui/use-toast";
@@ -7,13 +9,11 @@ import { DataSourceRefreshPeriod } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { DataRefreshPeriod } from "./data-refresh-period";
 import { Button } from "./ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 interface Props {
   dataSources: any[];
@@ -118,7 +118,7 @@ export const DataSourcesDetails = ({ dataSources }: Props) => {
                   values={selectedValues}
                   onChange={(values) => {
                     setSelectedValues(values);
-                    console.log("changed", values, selectedValues);
+                    onSubmit({ ais: values.map((ai) => ai.id) });
                   }}
                 />
               </>

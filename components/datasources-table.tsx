@@ -1,19 +1,17 @@
 "use client";
-import { useEffect } from "react";
 import { Table } from "@/components/table";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
+import { cn } from "@/src/lib/utils";
+import { KnowledgeIndexStatus } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { format } from "date-fns";
-import { useState } from "react";
-import { DataSourceTypes } from "./datasource-types";
-import { KnowledgeIndexStatus } from "@prisma/client";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
-import { cn } from "@/src/lib/utils";
-import { Tooltip } from "./ui/tooltip";
+import { useEffect, useState } from "react";
+import { DataSourceTypes } from "./datasource-types";
 import { DataSourcesDetails } from "./datasources-detail";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip } from "./ui/tooltip";
 
 export const DataSourcesTable = () => {
   const [dataSources, setDataSources] = useState<any[]>([]);
@@ -100,11 +98,15 @@ export const DataSourcesTable = () => {
                     </div>
                   )}
                 </td>
-                <td className="p-2">
+                <td className="p-2 flex">
                   {dataSource.ais.map((ai: any) => (
-                    <Avatar className="h-6 w-6 mr-2" key={`ai-${ai.id}`}>
-                      <AvatarImage src={ai.ai.src} crop="w_48,h_48" />
-                    </Avatar>
+                    <div key={`ai-${ai.id}`}>
+                      <Tooltip content={ai.ai.name} className="cursor-default">
+                        <Avatar className="h-6 w-6 mr-2">
+                          <AvatarImage src={ai.ai.src} crop="w_48,h_48" />
+                        </Avatar>
+                      </Tooltip>
+                    </div>
                   ))}
                 </td>
                 <td className="p-2">
