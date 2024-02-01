@@ -13,4 +13,10 @@ export enum DomainEvent {
 export interface DataSourceItemListReceivedPayload {
   dataSourceId: string;
   dataSourceItemList: DataSourceItemList;
+  forRefresh: boolean;
+}
+
+export interface KnowledgeInitializedEventPayload {
+  dataSourceId: string;
+  knowledgeId: string;
 }

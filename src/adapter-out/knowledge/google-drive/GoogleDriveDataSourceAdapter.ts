@@ -205,7 +205,8 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     orgId: string,
     userId: string,
     dataSourceId: string,
-    data: any
+    data: any,
+    forRefresh: boolean
   ): Promise<DataSourceItemList> {
     const input = data as GoogleDriveDataSourceInput;
     const oauthTokenId = input.oauthTokenId;
@@ -235,7 +236,8 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       userId,
       oauthTokenId,
       dataSourceId,
-      fileData
+      fileData,
+      forRefresh
     );
     const dataSourceItemList: DataSourceItem[] = [];
     if (dataSourceItem) {
@@ -263,7 +265,8 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     userId: string,
     oauthTokenId: string,
     dataSourceId: string,
-    folderId: string
+    folderId: string,
+    forRefresh: boolean
   ): Promise<DataSourceItemList> {
     const oauth2Client = await this.setOAuthCredentials(
       orgId,
@@ -292,6 +295,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
         oauthTokenId,
         dataSourceId,
         file,
+        forRefresh,
         folderId
       );
       if (item) {
@@ -309,6 +313,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     oauthTokenId: string,
     dataSourceId: string,
     file: drive_v3.Schema$File,
+    forRefresh: boolean,
     parentFolderId?: string
   ): Promise<DataSourceItem | null> {
     if (!file.id) {
@@ -323,6 +328,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
         oauthTokenId,
         dataSourceId,
         folderId: file.id,
+        forRefresh,
       };
       await publishEvent(
         GoogleDriveEvent.GOOGLE_DRIVE_FOLDER_SCAN_INITIATED,

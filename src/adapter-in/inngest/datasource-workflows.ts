@@ -1,9 +1,13 @@
+import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceItemList";
 import vectorDatabaseAdapter from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 import {
   DataSourceItemListReceivedPayload,
   DomainEvent,
+  KnowledgeInitializedEventPayload,
 } from "@/src/domain/events/domain-event";
+import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
+import { KnowledgeIndexStatus } from "@prisma/client";
 import { inngest } from "./client";
 
 export const dataSourceInitialized = inngest.createFunction(
@@ -11,12 +15,23 @@ export const dataSourceInitialized = inngest.createFunction(
   { event: DomainEvent.DATASOURCE_INITIALIZED },
   async ({ event, step }) => {
     const dataSourceId = event.data.dataSourceId;
+    const forRefresh = false;
 
-    await step.run("create-knowledge-list", async () => {
-      await dataSourceManagementService.createDataSourceKnowledgeList(
-        dataSourceId
-      );
-    });
+    const dataSourceItemList = await step.run(
+      "get-datasource-item-list",
+      async () => {
+        return await dataSourceManagementService.getDataSourceItemList(
+          dataSourceId,
+          forRefresh
+        );
+      }
+    );
+    await publishDataSourceItemList(
+      dataSourceId,
+      dataSourceItemList,
+      step,
+      forRefresh
+    );
   }
 );
 
@@ -25,28 +40,103 @@ export const dataSourceRefreshRequested = inngest.createFunction(
   { event: DomainEvent.DATASOURCE_REFRESH_REQUESTED },
   async ({ event, step }) => {
     const dataSourceId = event.data.dataSourceId;
+    const forRefresh = true;
 
-    await step.run("update-knowledge-list", async () => {
-      await dataSourceManagementService.refreshDataSourceKnowledgeList(
-        dataSourceId
-      );
-    });
+    const dataSourceItemList = await step.run(
+      "get-datasource-item-list",
+      async () => {
+        return await dataSourceManagementService.getDataSourceItemList(
+          dataSourceId,
+          forRefresh
+        );
+      }
+    );
+
+    await publishDataSourceItemList(
+      dataSourceId,
+      dataSourceItemList,
+      step,
+      forRefresh
+    );
   }
 );
+
+const publishDataSourceItemList = async (
+  dataSourceId: string,
+  dataSourceItemList: DataSourceItemList | null,
+  step: any,
+  forRefresh: boolean
+) => {
+  if (!dataSourceItemList) {
+    return;
+  }
+
+  const eventPayload: DataSourceItemListReceivedPayload = {
+    dataSourceId,
+    dataSourceItemList,
+    forRefresh,
+  };
+  await step.sendEvent("datasource-item-list-received", {
+    name: DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED,
+    data: eventPayload,
+  });
+};
 
 export const dataSourceItemListReceived = inngest.createFunction(
   { id: "datasource-item-list-received" },
   { event: DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED },
   async ({ event, step }) => {
     const payload = event.data as DataSourceItemListReceivedPayload;
-    const { dataSourceId, dataSourceItemList } = payload;
+    const { dataSourceId, dataSourceItemList, forRefresh } = payload;
 
-    await step.run("on-datasource-item-list-received", async () => {
-      await dataSourceManagementService.onDataSourceItemListReceived(
+    const knowledgeList: KnowledgeDto[] = await step.run(
+      "upsert-knowledge-list",
+      async () => {
+        return await dataSourceManagementService.upsertKnowledgeList(
+          dataSourceId,
+          dataSourceItemList
+        );
+      }
+    );
+    const knowledgeIds = knowledgeList.map((k) => k.id);
+
+    if (forRefresh) {
+      await step.run("update-datasource-knowledge-associations", async () => {
+        await dataSourceManagementService.updateDataSourceKnowledgeAssociations(
+          dataSourceId,
+          dataSourceItemList,
+          knowledgeList
+        );
+      });
+    } else {
+      await step.run("create-datasource-knowledge-associations", async () => {
+        await dataSourceManagementService.createDataSourceKnowledgeAssociations(
+          dataSourceId,
+          knowledgeIds
+        );
+      });
+    }
+
+    const knowledgeListToUpdate = knowledgeList.filter(
+      (knowledge) => knowledge.indexStatus === KnowledgeIndexStatus.INITIALIZED
+    );
+
+    if (knowledgeListToUpdate.length === 0) {
+      await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
+      return;
+    }
+
+    for (const knowledge of knowledgeListToUpdate) {
+      const eventPayload: KnowledgeInitializedEventPayload = {
         dataSourceId,
-        dataSourceItemList
-      );
-    });
+        knowledgeId: knowledge.id,
+      };
+
+      await step.sendEvent("knowledge-initialized", {
+        name: DomainEvent.KNOWLEDGE_INITIALIZED,
+        data: eventPayload,
+      });
+    }
   }
 );
 

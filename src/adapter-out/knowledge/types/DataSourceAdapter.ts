@@ -8,7 +8,8 @@ export interface DataSourceAdapter {
     orgId: string,
     userId: string,
     dataSourceId: string,
-    data: any
+    data: any,
+    forRefresh?: boolean
   ): Promise<DataSourceItemList>;
 
   indexKnowledge(
