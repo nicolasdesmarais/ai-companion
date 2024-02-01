@@ -27,7 +27,7 @@ export const dataSourceRefreshRequested = inngest.createFunction(
     const dataSourceId = event.data.dataSourceId;
 
     await step.run("update-knowledge-list", async () => {
-      await dataSourceManagementService.updateDataSourceKnowledgeList(
+      await dataSourceManagementService.refreshDataSourceKnowledgeList(
         dataSourceId
       );
     });

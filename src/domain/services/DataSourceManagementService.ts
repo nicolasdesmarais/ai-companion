@@ -89,7 +89,13 @@ export class DataSourceManagementService {
     );
   }
 
-  public async updateDataSourceKnowledgeList(dataSourceId: string) {
+  /**
+   * Refreshes an existing data source.
+   * Retrieves the data source knowledge list and updates the knowledge list
+   * and associations, as needed.
+   * @param dataSourceId
+   */
+  public async refreshDataSourceKnowledgeList(dataSourceId: string) {
     const { dataSource, dataSourceAdapter } =
       await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
 
