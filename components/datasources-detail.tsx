@@ -198,7 +198,7 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
                 Restart Chat
               </Button>
               <Link
-                href={`/ai/${chatAi.id}/edit`}
+                href={`/ai/${chatAi?.id}/edit`}
                 rel="noopener noreferrer"
                 target="_blank"
               >
