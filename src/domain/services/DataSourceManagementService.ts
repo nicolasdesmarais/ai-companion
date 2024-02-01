@@ -1,22 +1,12 @@
 import { UpdateDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
-import apiDataSourceAdapter from "@/src/adapter-out/knowledge/api/ApiDataSourceAdapter";
-import fileUploadDataSourceAdapter from "@/src/adapter-out/knowledge/file-upload/FileUploadDataSourceAdapter";
-import googleDriveDataSourceAdapter from "@/src/adapter-out/knowledge/google-drive/GoogleDriveDataSourceAdapter";
-import msftDataSourceAdapter from "@/src/adapter-out/knowledge/msft/MsftDataSourceAdapter";
 import { DataSourceAdapter } from "@/src/adapter-out/knowledge/types/DataSourceAdapter";
 import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
-import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
 import { DataSourceRepositoryImpl } from "@/src/adapter-out/repositories/DataSourceRepositoryImpl";
 import prismadb from "@/src/lib/prismadb";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
-import { SecuredAction } from "@/src/security/models/SecuredAction";
-import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
-import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
-import { AISecurityService } from "@/src/security/services/AISecurityService";
-import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
 import { DataSourceSecurityService } from "@/src/security/services/DataSourceSecurityService";
 import {
   DataSource,
@@ -33,133 +23,13 @@ import {
   RateLimitError,
 } from "../errors/Errors";
 import { DomainEvent } from "../events/domain-event";
-import { DataSourceDto, DataSourceFilter } from "../models/DataSources";
+import { DataSourceDto } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
+import dataSourceAdapterService from "./DataSourceAdapterService";
 import usageService from "./UsageService";
 
-export class DataSourceService {
+export class DataSourceManagementService {
   constructor(private dataSourceRepository: DataSourceRepository) {}
-
-  private getDataSourceAdapter(type: DataSourceType): DataSourceAdapter {
-    switch (type) {
-      case DataSourceType.GOOGLE_DRIVE:
-        return googleDriveDataSourceAdapter;
-      case DataSourceType.WEB_URL:
-        return webUrlsDataSourceAdapter;
-      case DataSourceType.FILE_UPLOAD:
-        return fileUploadDataSourceAdapter;
-      case DataSourceType.API:
-        return apiDataSourceAdapter;
-      case DataSourceType.ONEDRIVE:
-        return msftDataSourceAdapter;
-      default:
-        throw new Error(`DataSourceType ${type} not supported`);
-    }
-  }
-
-  private async getDataSourceAndAdapter(dataSourceId: string): Promise<{
-    dataSource: DataSource;
-    dataSourceAdapter: DataSourceAdapter;
-  }> {
-    const dataSource = await prismadb.dataSource.findUnique({
-      where: { id: dataSourceId },
-    });
-    if (!dataSource) {
-      throw new EntityNotFoundError(
-        `DataSource with id=${dataSourceId} not found`
-      );
-    }
-
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
-    return { dataSource, dataSourceAdapter };
-  }
-
-  /**
-   * Returns a list of all data sources the user has access to.
-   * @param authorizationContext
-   * @returns
-   */
-  public async listDataSources(
-    authorizationContext: AuthorizationContext,
-    filter?: DataSourceFilter
-  ): Promise<DataSourceDto[]> {
-    const highestAccessLevel = BaseEntitySecurityService.getHighestAccessLevel(
-      authorizationContext,
-      SecuredResourceType.DATA_SOURCES,
-      SecuredAction.READ
-    );
-    if (!highestAccessLevel) {
-      throw new ForbiddenError("Forbidden");
-    }
-
-    return await this.listDataSourcesByLevel(
-      authorizationContext,
-      highestAccessLevel,
-      filter
-    );
-  }
-
-  /**
-   * Returns a list of all data sources for the specified access level.
-   * @param authorizationContext
-   * @returns
-   */
-  public async listDataSourcesByLevel(
-    authorizationContext: AuthorizationContext,
-    level: SecuredResourceAccessLevel,
-    filter?: DataSourceFilter
-  ): Promise<DataSourceDto[]> {
-    const hasPermission = BaseEntitySecurityService.hasPermission(
-      authorizationContext,
-      SecuredResourceType.DATA_SOURCES,
-      SecuredAction.READ,
-      level
-    );
-    if (!hasPermission) {
-      throw new ForbiddenError("Forbidden");
-    }
-    const { orgId, userId } = authorizationContext;
-    switch (level) {
-      case SecuredResourceAccessLevel.INSTANCE:
-        return await this.dataSourceRepository.findAll(filter);
-      case SecuredResourceAccessLevel.ORGANIZATION:
-        return await this.dataSourceRepository.findByOrgId(orgId, filter);
-      case SecuredResourceAccessLevel.SELF:
-        return await this.dataSourceRepository.findByOrgIdAndUserId(
-          orgId,
-          userId,
-          filter
-        );
-    }
-  }
-
-  /**
-   * Returns a list of all data sources for the specified AI.
-   * @param authorizationContext
-   * @param aiId
-   * @returns
-   */
-  public async listAIDataSources(
-    authorizationContext: AuthorizationContext,
-    aiId: string
-  ): Promise<DataSourceDto[]> {
-    const ai = await prismadb.aI.findUnique({
-      where: { id: aiId },
-    });
-
-    if (!ai) {
-      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
-    }
-
-    const canReadAi = AISecurityService.canReadAI(authorizationContext, ai);
-    if (!canReadAi) {
-      throw new ForbiddenError(
-        "User is not authorized to read AI with id=${aiId}"
-      );
-    }
-
-    return await this.dataSourceRepository.findByAiId(aiId);
-  }
 
   /**
    * Create and persist a data source entity.
@@ -203,7 +73,7 @@ export class DataSourceService {
    */
   public async createDataSourceKnowledgeList(dataSourceId: string) {
     const { dataSource, dataSourceAdapter } =
-      await this.getDataSourceAndAdapter(dataSourceId);
+      await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
 
     const itemList = await dataSourceAdapter.getDataSourceItemList(
       dataSource.orgId,
@@ -221,7 +91,7 @@ export class DataSourceService {
 
   public async updateDataSourceKnowledgeList(dataSourceId: string) {
     const { dataSource, dataSourceAdapter } =
-      await this.getDataSourceAndAdapter(dataSourceId);
+      await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
 
     const itemList = await dataSourceAdapter.getDataSourceItemList(
       dataSource.orgId,
@@ -248,7 +118,7 @@ export class DataSourceService {
     dataSourceItemList: DataSourceItemList
   ) {
     const { dataSource, dataSourceAdapter } =
-      await this.getDataSourceAndAdapter(dataSourceId);
+      await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
 
     if (dataSource.indexStatus === DataSourceIndexStatus.REFRESHING) {
       await this.upsertKnowledgeListAndUpdateAssociations(
@@ -474,7 +344,9 @@ export class DataSourceService {
 
     let indexKnowledgeResponse;
     if (knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED) {
-      const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
+      const dataSourceAdapter = dataSourceAdapterService.getDataSourceAdapter(
+        dataSource.type
+      );
       try {
         indexKnowledgeResponse = await dataSourceAdapter.indexKnowledge(
           dataSource.orgId,
@@ -612,7 +484,8 @@ export class DataSourceService {
     dataSourceType: DataSourceType,
     data: any
   ) {
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSourceType);
+    const dataSourceAdapter =
+      dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
     const knowledgeId = dataSourceAdapter.retrieveKnowledgeIdFromEvent(data);
     const knowledge = await prismadb.knowledge.findUnique({
       where: { id: knowledgeId },
@@ -640,7 +513,8 @@ export class DataSourceService {
     result: KnowledgeIndexingResult,
     index: number
   ) {
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSourceType);
+    const dataSourceAdapter =
+      dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
     const knowledge = await prismadb.knowledge.findUnique({
       where: { id: knowledgeId },
     });
@@ -750,7 +624,8 @@ export class DataSourceService {
       },
     });
 
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSourceType);
+    const dataSourceAdapter =
+      dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
     for (const knowledge of knowledgeList) {
       const indexKnowledgeResponse =
         await dataSourceAdapter.pollKnowledgeIndexingStatus(knowledge);
@@ -1121,5 +996,7 @@ export class DataSourceService {
 }
 
 const dataSourceRepository = new DataSourceRepositoryImpl();
-const dataSourceService = new DataSourceService(dataSourceRepository);
-export default dataSourceService;
+const dataSourceManagementService = new DataSourceManagementService(
+  dataSourceRepository
+);
+export default dataSourceManagementService;
