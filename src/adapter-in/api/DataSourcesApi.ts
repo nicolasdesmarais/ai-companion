@@ -49,4 +49,5 @@ export enum FileType {
 
 export interface UpdateDataSourceRequest {
   refreshPeriod: DataSourceRefreshPeriod | null;
+  ais: string[];
 }

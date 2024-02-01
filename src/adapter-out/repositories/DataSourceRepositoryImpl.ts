@@ -247,4 +247,19 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
 
     return result[0]?.total_token_count ?? 0;
   }
+
+  public async updateDataSourceAis(dataSourceId: string, aiIds: string[]) {
+    await prismadb.$transaction(async (tx) => {
+      await tx.aIDataSource.deleteMany({
+        where: { dataSourceId },
+      });
+      await tx.aIDataSource.createMany({
+        data: aiIds.map((aiId) => ({
+          aiId,
+          dataSourceId,
+        })),
+        skipDuplicates: true,
+      });
+    });
+  }
 }

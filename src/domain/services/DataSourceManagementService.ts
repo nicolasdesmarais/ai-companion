@@ -992,12 +992,24 @@ export class DataSourceManagementService {
       throw new ForbiddenError("Forbidden");
     }
 
-    const updatedDataSource: DataSourceDto = {
-      ...dataSource,
-      ...updateRequest,
-    };
+    if (updateRequest.refreshPeriod) {
+      const updatedDataSource: DataSourceDto = {
+        ...dataSource,
+        refreshPeriod: updateRequest.refreshPeriod,
+      };
 
-    return await this.dataSourceRepository.updateDataSource(updatedDataSource);
+      return await this.dataSourceRepository.updateDataSource(
+        updatedDataSource
+      );
+    }
+
+    if (updateRequest.ais) {
+      await this.dataSourceRepository.updateDataSourceAis(
+        dataSourceId,
+        updateRequest.ais
+      );
+    }
+    return dataSource;
   }
 }
 
