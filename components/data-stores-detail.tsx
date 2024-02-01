@@ -61,6 +61,9 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
   useEffect(() => {
     if (dataSource?.ais) {
       setSelectedValues(dataSource.ais.map((ai: any) => ai.ai));
+      setDataRefreshPeriod(
+        dataSource.refreshPeriod || DataSourceRefreshPeriod.NEVER
+      );
     }
   }, [dataSource]);
 
