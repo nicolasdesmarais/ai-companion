@@ -6,7 +6,7 @@ import {
   DataSourceOrderByDirection,
   DataSourceOrderByField,
 } from "@/src/domain/models/DataSources";
-import dataSourceService from "@/src/domain/services/DataSourceService";
+import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
@@ -42,7 +42,7 @@ async function getHandler(
   };
 
   const dataSources: DataSourceDto[] =
-    await dataSourceService.listDataSourcesByLevel(
+    await dataSourceManagementService.listDataSourcesByLevel(
       authorizationContext,
       SecuredResourceAccessLevel.SELF,
       filter

@@ -33,7 +33,7 @@ import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
 import dataSourceAdapterService from "./DataSourceAdapterService";
 import usageService from "./UsageService";
 
-export class DataSourceService {
+export class DataSourceManagementService {
   constructor(private dataSourceRepository: DataSourceRepository) {}
 
   /**
@@ -1088,5 +1088,7 @@ export class DataSourceService {
 }
 
 const dataSourceRepository = new DataSourceRepositoryImpl();
-const dataSourceService = new DataSourceService(dataSourceRepository);
-export default dataSourceService;
+const dataSourceManagementService = new DataSourceManagementService(
+  dataSourceRepository
+);
+export default dataSourceManagementService;
