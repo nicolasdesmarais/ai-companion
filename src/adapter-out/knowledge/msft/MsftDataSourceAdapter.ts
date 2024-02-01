@@ -140,7 +140,6 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
         },
       };
       return {
-        type: DataSourceType.ONEDRIVE,
         items: [dataSourceItem],
       };
     }

@@ -28,7 +28,6 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     const input = data as FileUploadDataSourceInput;
 
     const result: DataSourceItemList = {
-      type: DataSourceType.FILE_UPLOAD,
       items: [
         {
           name: input.filename,

@@ -1,11 +1,7 @@
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import { ApifyWebhookEvent } from "@/src/domain/models/ApifyWebhookEvent";
 import { logWithTimestamp } from "@/src/lib/logging";
-import {
-  DataSourceType,
-  Knowledge,
-  KnowledgeIndexStatus,
-} from "@prisma/client";
+import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import { put } from "@vercel/blob";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
@@ -31,7 +27,6 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
   ): Promise<DataSourceItemList> {
     const input = data as WebUrlDataSourceInput;
     const result: DataSourceItemList = {
-      type: DataSourceType.WEB_URL,
       items: [
         {
           name: input.url,
