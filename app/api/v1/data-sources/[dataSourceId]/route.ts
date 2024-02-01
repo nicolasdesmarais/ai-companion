@@ -1,4 +1,5 @@
-import dataSourceService from "@/src/domain/services/DataSourceService";
+import { UpdateDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
+import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
@@ -6,7 +7,6 @@ import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { NextResponse } from "next/server";
-import { UpdateDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
 
 export const maxDuration = 300;
 
@@ -19,7 +19,7 @@ async function deleteHandler(
 ) {
   const { params, authorizationContext } = context;
 
-  await dataSourceService.requestDeleteDataSource(
+  await dataSourceManagementService.requestDeleteDataSource(
     authorizationContext,
     params.dataSourceId
   );
@@ -40,7 +40,7 @@ async function patchHandler(
   }
 
   const body: UpdateDataSourceRequest = await request.json();
-  const dataSource = await dataSourceService.updateDataSource(
+  const dataSource = await dataSourceManagementService.updateDataSource(
     authorizationContext,
     params.dataSourceId,
     body
