@@ -1,19 +1,22 @@
 "use client";
+import { DataRefreshPeriod } from "@/components/data-refresh-period";
+import { Drawer } from "@/components/drawer";
+import { TestChat } from "@/components/test-chat";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Form, FormItem, FormLabel } from "@/components/ui/form";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { useToast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DataSourceRefreshPeriod } from "@prisma/client";
 import axios, { AxiosError } from "axios";
-import { X } from "lucide-react";
+import { ArrowUpRightSquare, X } from "lucide-react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { DataRefreshPeriod } from "./data-refresh-period";
-import { Button } from "./ui/button";
 
 interface Props {
   dataSources: any[];
@@ -26,6 +29,9 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
   const [selectedValues, setSelectedValues] = useState<any[]>([]);
   const [dataRefreshPeriod, setDataRefreshPeriod] =
     useState<DataSourceRefreshPeriod | null>(DataSourceRefreshPeriod.NEVER);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [chatAi, setChatAi] = useState<any>();
   const { toast } = useToast();
 
   const searchParams = useSearchParams();
@@ -102,16 +108,21 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
             {ais && (
               <>
                 <div className="relative mt-3 overflow-y-auto">
-                  {selectedValues.map(({ name, id, src }) => (
+                  {selectedValues.map((ai) => (
                     <Badge
-                      key={`badge-${id}`}
+                      key={`badge-${ai.id}`}
                       variant="outline"
-                      className="mr-2 mb-2 bg-ring"
+                      className="mr-2 mb-2 bg-ring cursor-pointer hover:bg-ring/80"
+                      onClick={() => {
+                        setMessages([]);
+                        setChatAi(ai);
+                        setChatOpen(true);
+                      }}
                     >
                       <Avatar className="h-6 w-6 mr-2">
-                        <AvatarImage src={src} crop="w_48,h_48" />
+                        <AvatarImage src={ai.src} crop="w_48,h_48" />
                       </Avatar>
-                      {name}
+                      {ai.name}
                     </Badge>
                   ))}
                 </div>
@@ -171,6 +182,35 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
           )}
         </form>
       </Form>
+      <Drawer open={chatOpen} setOpen={setChatOpen}>
+        <TestChat
+          ai={chatAi}
+          messages={messages}
+          setMessages={setMessages}
+          actions={
+            <div className="flex justify-between">
+              <Button
+                onClick={() => {
+                  setMessages([]);
+                }}
+                type="button"
+              >
+                Restart Chat
+              </Button>
+              <Link
+                href={`/ai/${chatAi.id}/edit`}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <Button variant="ring" type="button">
+                  Open AI Editor
+                  <ArrowUpRightSquare className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
+          }
+        />
+      </Drawer>
     </div>
   );
 };

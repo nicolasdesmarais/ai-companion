@@ -2,7 +2,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ReactNode } from "react";
 
 type Props = {
-  trigger: ReactNode;
+  trigger?: ReactNode;
   children: ReactNode;
   className?: string;
   open?: boolean;
