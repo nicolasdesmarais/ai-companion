@@ -1,14 +1,9 @@
 import { UpdateDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
-import apiDataSourceAdapter from "@/src/adapter-out/knowledge/api/ApiDataSourceAdapter";
-import fileUploadDataSourceAdapter from "@/src/adapter-out/knowledge/file-upload/FileUploadDataSourceAdapter";
-import googleDriveDataSourceAdapter from "@/src/adapter-out/knowledge/google-drive/GoogleDriveDataSourceAdapter";
-import msftDataSourceAdapter from "@/src/adapter-out/knowledge/msft/MsftDataSourceAdapter";
 import { DataSourceAdapter } from "@/src/adapter-out/knowledge/types/DataSourceAdapter";
 import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
-import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
 import { DataSourceRepositoryImpl } from "@/src/adapter-out/repositories/DataSourceRepositoryImpl";
 import prismadb from "@/src/lib/prismadb";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
@@ -35,44 +30,11 @@ import {
 import { DomainEvent } from "../events/domain-event";
 import { DataSourceDto, DataSourceFilter } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
+import dataSourceAdapterService from "./DataSourceAdapterService";
 import usageService from "./UsageService";
 
 export class DataSourceService {
   constructor(private dataSourceRepository: DataSourceRepository) {}
-
-  private getDataSourceAdapter(type: DataSourceType): DataSourceAdapter {
-    switch (type) {
-      case DataSourceType.GOOGLE_DRIVE:
-        return googleDriveDataSourceAdapter;
-      case DataSourceType.WEB_URL:
-        return webUrlsDataSourceAdapter;
-      case DataSourceType.FILE_UPLOAD:
-        return fileUploadDataSourceAdapter;
-      case DataSourceType.API:
-        return apiDataSourceAdapter;
-      case DataSourceType.ONEDRIVE:
-        return msftDataSourceAdapter;
-      default:
-        throw new Error(`DataSourceType ${type} not supported`);
-    }
-  }
-
-  private async getDataSourceAndAdapter(dataSourceId: string): Promise<{
-    dataSource: DataSource;
-    dataSourceAdapter: DataSourceAdapter;
-  }> {
-    const dataSource = await prismadb.dataSource.findUnique({
-      where: { id: dataSourceId },
-    });
-    if (!dataSource) {
-      throw new EntityNotFoundError(
-        `DataSource with id=${dataSourceId} not found`
-      );
-    }
-
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
-    return { dataSource, dataSourceAdapter };
-  }
 
   /**
    * Returns a list of all data sources the user has access to.
@@ -203,7 +165,7 @@ export class DataSourceService {
    */
   public async createDataSourceKnowledgeList(dataSourceId: string) {
     const { dataSource, dataSourceAdapter } =
-      await this.getDataSourceAndAdapter(dataSourceId);
+      await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
 
     const itemList = await dataSourceAdapter.getDataSourceItemList(
       dataSource.orgId,
@@ -221,7 +183,7 @@ export class DataSourceService {
 
   public async updateDataSourceKnowledgeList(dataSourceId: string) {
     const { dataSource, dataSourceAdapter } =
-      await this.getDataSourceAndAdapter(dataSourceId);
+      await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
 
     const itemList = await dataSourceAdapter.getDataSourceItemList(
       dataSource.orgId,
@@ -248,7 +210,7 @@ export class DataSourceService {
     dataSourceItemList: DataSourceItemList
   ) {
     const { dataSource, dataSourceAdapter } =
-      await this.getDataSourceAndAdapter(dataSourceId);
+      await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
 
     if (dataSource.indexStatus === DataSourceIndexStatus.REFRESHING) {
       await this.upsertKnowledgeListAndUpdateAssociations(
@@ -474,7 +436,9 @@ export class DataSourceService {
 
     let indexKnowledgeResponse;
     if (knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED) {
-      const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
+      const dataSourceAdapter = dataSourceAdapterService.getDataSourceAdapter(
+        dataSource.type
+      );
       try {
         indexKnowledgeResponse = await dataSourceAdapter.indexKnowledge(
           dataSource.orgId,
@@ -612,7 +576,8 @@ export class DataSourceService {
     dataSourceType: DataSourceType,
     data: any
   ) {
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSourceType);
+    const dataSourceAdapter =
+      dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
     const knowledgeId = dataSourceAdapter.retrieveKnowledgeIdFromEvent(data);
     const knowledge = await prismadb.knowledge.findUnique({
       where: { id: knowledgeId },
@@ -640,7 +605,8 @@ export class DataSourceService {
     result: KnowledgeIndexingResult,
     index: number
   ) {
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSourceType);
+    const dataSourceAdapter =
+      dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
     const knowledge = await prismadb.knowledge.findUnique({
       where: { id: knowledgeId },
     });
@@ -750,7 +716,8 @@ export class DataSourceService {
       },
     });
 
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSourceType);
+    const dataSourceAdapter =
+      dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
     for (const knowledge of knowledgeList) {
       const indexKnowledgeResponse =
         await dataSourceAdapter.pollKnowledgeIndexingStatus(knowledge);
