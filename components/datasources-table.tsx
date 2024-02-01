@@ -134,7 +134,10 @@ export const DataSourcesTable = () => {
             </>
           ))}
         </Table>
-        <DataSourcesDetails dataSources={dataSources} />
+        <DataSourcesDetails
+          dataSources={dataSources}
+          onChange={fetchDataSources}
+        />
       </div>
     </div>
   );
