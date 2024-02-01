@@ -20,7 +20,7 @@ const filterOptions = [
   { id: "progress", name: "Progress" },
 ];
 
-export const DataStoresSearch = () => {
+export const DataSourcesSearch = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 

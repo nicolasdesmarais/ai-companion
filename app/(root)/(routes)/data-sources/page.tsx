@@ -1,4 +1,4 @@
-import { DataStores } from "@/components/data-stores";
+import { DataSources } from "@/components/datasources";
 
 export default async function DataSourcesPage() {
   return (
@@ -6,7 +6,7 @@ export default async function DataSourcesPage() {
       <h1 className="text-3xl font-bold whitespace-nowrap pt-2 pr-2">
         Data Sources
       </h1>
-      <DataStores />
+      <DataSources />
     </div>
   );
 }
