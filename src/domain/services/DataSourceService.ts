@@ -361,7 +361,10 @@ export class DataSourceService {
       return [];
     }
     const knowledgeList = [];
-    const existingKnowledgeMap = await this.getExistingKnowledgeMap(itemList);
+    const existingKnowledgeMap = await this.getExistingKnowledgeMap(
+      datasource,
+      itemList
+    );
 
     for (const item of itemList.items) {
       let knowledge = existingKnowledgeMap.get(item.uniqueId!);
@@ -416,7 +419,10 @@ export class DataSourceService {
     }
   }
 
-  private async getExistingKnowledgeMap(itemList: DataSourceItemList) {
+  private async getExistingKnowledgeMap(
+    dataSource: DataSource,
+    itemList: DataSourceItemList
+  ) {
     const existingKnowledgeMap = new Map<string, Knowledge>();
     const uniqueIds = itemList.items
       .map((item) => item.uniqueId)
@@ -425,7 +431,7 @@ export class DataSourceService {
     if (uniqueIds.length > 0) {
       const existingKnowledge = await prismadb.knowledge.findMany({
         where: {
-          type: itemList.type,
+          type: dataSource.type,
           uniqueId: { in: uniqueIds },
           indexStatus: KnowledgeIndexStatus.COMPLETED,
         },
