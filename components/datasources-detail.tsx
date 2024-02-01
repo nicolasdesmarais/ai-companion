@@ -13,7 +13,8 @@ import { DataSourceRefreshPeriod } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { ArrowUpRightSquare, X } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import qs from "query-string";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -33,7 +34,7 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [chatAi, setChatAi] = useState<any>();
   const { toast } = useToast();
-
+  const router = useRouter();
   const searchParams = useSearchParams();
   const focus = searchParams.get("focus");
   const dataSource = dataSources.find((ds) => ds.id === focus);
@@ -93,9 +94,26 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
     return null;
 
   return (
-    <div className="bg-profile ml-2 mt-2 w-1/3 p-4">
+    <div className="bg-profile ml-2 mt-2 w-1/3 p-4 min-w-[500px]">
       <div className="absolute top-[110px] right-4">
-        <Button onClick={() => {}} variant="ghost" size="icon" type="button">
+        <Button
+          onClick={() => {
+            const url = qs.stringifyUrl(
+              {
+                url: window.location.href,
+                query: {
+                  focus: null,
+                },
+              },
+              { skipNull: true, skipEmptyString: true }
+            );
+
+            router.push(url);
+          }}
+          variant="ghost"
+          size="icon"
+          type="button"
+        >
           <X className="h-6 w-6" />
         </Button>
       </div>
