@@ -1,5 +1,6 @@
 "use client";
 import { DataRefreshPeriod } from "@/components/data-refresh-period";
+import { DataSourceTypes } from "@/components/datasource-types";
 import { Drawer } from "@/components/drawer";
 import { TestChat } from "@/components/test-chat";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -11,6 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DataSourceRefreshPeriod } from "@prisma/client";
 import axios, { AxiosError } from "axios";
+import { format } from "date-fns";
 import { ArrowUpRightSquare, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -168,15 +170,25 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
           />
           <FormItem>
             <FormLabel>Type</FormLabel>
-            <div>{dataSource.type}</div>
+            <div>
+              {
+                DataSourceTypes.find(
+                  (format) => format.type === dataSource.type
+                )?.name
+              }
+            </div>
           </FormItem>
           <FormItem>
             <FormLabel>Original Upload</FormLabel>
-            <div>{dataSource.createdAt}</div>
+            <div>
+              {format(new Date(dataSource.createdAt), "h:mma M/d/yyyy ")}
+            </div>
           </FormItem>
           <FormItem>
-            <FormLabel>Last Modified</FormLabel>
-            <div>{dataSource.updatedAt}</div>
+            <FormLabel>Last Indexed</FormLabel>
+            <div>
+              {format(new Date(dataSource.lastIndexedAt), "h:mma M/d/yyyy ")}
+            </div>
           </FormItem>
           {dataSource.knowledges.length > 0 && (
             <FormItem>
