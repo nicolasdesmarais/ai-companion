@@ -1,5 +1,4 @@
 export interface DataSourceItemList {
-  type: string;
   items: DataSourceItem[];
 }
 
