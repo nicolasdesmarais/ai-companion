@@ -17,9 +17,10 @@ import { Button } from "./ui/button";
 
 interface Props {
   dataSources: any[];
+  onChange: () => void;
 }
 
-export const DataSourcesDetails = ({ dataSources }: Props) => {
+export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
   const [ais, setAis] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedValues, setSelectedValues] = useState<any[]>([]);
@@ -70,7 +71,9 @@ export const DataSourcesDetails = ({ dataSources }: Props) => {
       toast({
         description: "Data source updated",
       });
+      onChange();
     } catch (error) {
+      console.error(error);
       toast({
         description: "Something went wrong",
         variant: "destructive",
