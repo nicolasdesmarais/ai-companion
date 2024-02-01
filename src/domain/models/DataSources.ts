@@ -2,6 +2,7 @@ import {
   DataSourceIndexStatus,
   DataSourceRefreshPeriod,
   DataSourceType,
+  KnowledgeIndexStatus,
 } from "@prisma/client";
 
 export interface DataSourceDto {
@@ -38,4 +39,14 @@ export enum DataSourceOrderByField {
 export enum DataSourceOrderByDirection {
   ASC = "asc",
   DESC = "desc",
+}
+
+export interface KnowledgeDto {
+  id: string;
+  name: string;
+  type: string;
+  uniqueId: string | null;
+  indexStatus: KnowledgeIndexStatus | null;
+  documentCount: number | null;
+  tokenCount: number | null;
 }

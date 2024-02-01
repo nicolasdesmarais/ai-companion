@@ -8,4 +8,5 @@ export interface GoogleDriveFolderScanInitiatedPayload {
   oauthTokenId: string;
   dataSourceId: string;
   folderId: string;
+  forRefresh: boolean;
 }

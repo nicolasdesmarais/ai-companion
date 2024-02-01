@@ -1,6 +1,5 @@
 import { UpdateDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
-import { DataSourceAdapter } from "@/src/adapter-out/knowledge/types/DataSourceAdapter";
 import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
@@ -23,7 +22,7 @@ import {
   RateLimitError,
 } from "../errors/Errors";
 import { DomainEvent } from "../events/domain-event";
-import { DataSourceDto } from "../models/DataSources";
+import { DataSourceDto, KnowledgeDto } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
 import dataSourceAdapterService from "./DataSourceAdapterService";
 import usageService from "./UsageService";
@@ -71,110 +70,161 @@ export class DataSourceManagementService {
    * @param dataSourceId
    * @returns
    */
-  public async createDataSourceKnowledgeList(dataSourceId: string) {
+  public async getDataSourceItemList(
+    dataSourceId: string,
+    forRefresh: boolean
+  ) {
     const { dataSource, dataSourceAdapter } =
       await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
 
-    const itemList = await dataSourceAdapter.getDataSourceItemList(
+    return await dataSourceAdapter.getDataSourceItemList(
       dataSource.orgId,
       dataSource.ownerUserId,
       dataSourceId,
-      dataSource.data
-    );
-
-    await this.upsertKnowledgeListAndCreateAssociations(
-      dataSource,
-      dataSourceAdapter,
-      itemList
+      dataSource.data,
+      forRefresh
     );
   }
 
   /**
-   * Refreshes an existing data source.
-   * Retrieves the data source knowledge list and updates the knowledge list
-   * and associations, as needed.
+   * Upserts a knowledge list for the specified data source to match the
+   * provided list of items. For each item in the list, the upsert logic works as follows:
+   * - A new knowledge is created in INITIALIZED status if:
+   *   - A knowledge with the same uniqueId does not exist
+   *   - A knowledge with the same uniqueId exists but should be reindexed (based on the adapter's shouldReindexKnowledge method)
+   * - A new knowledge is not created if a knowledge with the same uniqueId exists and should not be reindexed
+   *
+   * The method returns a list of all knowledges, including both new and existing knowledges.
    * @param dataSourceId
-   */
-  public async refreshDataSourceKnowledgeList(dataSourceId: string) {
-    const { dataSource, dataSourceAdapter } =
-      await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
-
-    const itemList = await dataSourceAdapter.getDataSourceItemList(
-      dataSource.orgId,
-      dataSource.ownerUserId,
-      dataSourceId,
-      dataSource.data
-    );
-
-    await this.upsertKnowledgeListAndUpdateAssociations(
-      dataSource,
-      dataSourceAdapter,
-      itemList
-    );
-  }
-
-  /**
-   * Handle asynchronous receipt of a data source item list through an event
-   * @param dataSourceId
-   * @param dataSourceItemList
+   * @param itemList
    * @returns
    */
-  public async onDataSourceItemListReceived(
+  public async upsertKnowledgeList(
     dataSourceId: string,
-    dataSourceItemList: DataSourceItemList
-  ) {
+    itemList: DataSourceItemList
+  ): Promise<KnowledgeDto[]> {
+    if (itemList.items.length === 0) {
+      return [];
+    }
     const { dataSource, dataSourceAdapter } =
       await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
 
-    if (dataSource.indexStatus === DataSourceIndexStatus.REFRESHING) {
-      await this.upsertKnowledgeListAndUpdateAssociations(
-        dataSource,
-        dataSourceAdapter,
-        dataSourceItemList
-      );
-    } else {
-      await this.upsertKnowledgeListAndCreateAssociations(
-        dataSource,
-        dataSourceAdapter,
-        dataSourceItemList
-      );
-    }
-  }
-
-  private async upsertKnowledgeListAndCreateAssociations(
-    dataSource: DataSource,
-    dataSourceAdapter: DataSourceAdapter,
-    itemList: DataSourceItemList
-  ) {
-    const knowledgeList = await this.upsertKnowledgeList(
+    const knowledgeList = [];
+    const existingKnowledgeMap = await this.getExistingKnowledgeMap(
       dataSource,
-      dataSourceAdapter,
       itemList
     );
 
-    const dataSourceKnowledgeRelations = knowledgeList.map((knowledge) => {
-      return { dataSourceId: dataSource.id, knowledgeId: knowledge.id };
+    for (const item of itemList.items) {
+      let knowledge = existingKnowledgeMap.get(item.uniqueId!);
+
+      if (
+        knowledge &&
+        dataSourceAdapter.shouldReindexKnowledge(knowledge, item)
+      ) {
+        knowledge = undefined;
+      }
+
+      if (!knowledge) {
+        knowledge = await prismadb.knowledge.create({
+          data: {
+            name: item.name,
+            type: dataSource.type,
+            uniqueId: item.uniqueId,
+            indexStatus: KnowledgeIndexStatus.INITIALIZED,
+            blobUrl: item.blobUrl,
+            metadata: item.metadata,
+          },
+        });
+      }
+
+      knowledgeList.push(knowledge);
+    }
+
+    return knowledgeList.map((knowledge) => this.mapKnowledgeToDto(knowledge));
+  }
+
+  private mapKnowledgeToDto(knowledge: Knowledge): KnowledgeDto {
+    const {
+      id,
+      name,
+      type,
+      uniqueId,
+      indexStatus,
+      documentCount,
+      tokenCount,
+      ...rest
+    } = knowledge;
+
+    return {
+      id,
+      name,
+      type,
+      uniqueId,
+      indexStatus,
+      documentCount,
+      tokenCount,
+    };
+  }
+
+  private async getExistingKnowledgeMap(
+    dataSource: DataSource,
+    itemList: DataSourceItemList
+  ) {
+    const existingKnowledgeMap = new Map<string, Knowledge>();
+    const uniqueIds = itemList.items
+      .map((item) => item.uniqueId)
+      .filter((uniqueId): uniqueId is string => uniqueId !== undefined);
+
+    if (uniqueIds.length > 0) {
+      const existingKnowledge = await prismadb.knowledge.findMany({
+        where: {
+          type: dataSource.type,
+          uniqueId: { in: uniqueIds },
+          indexStatus: KnowledgeIndexStatus.COMPLETED,
+        },
+      });
+
+      existingKnowledge.forEach((knowledge) => {
+        existingKnowledgeMap.set(knowledge.uniqueId!, knowledge);
+      });
+    }
+
+    return existingKnowledgeMap;
+  }
+
+  /**
+   * Creates associations between the specified data source and the specified knowledge list
+   * @param dataSourceId
+   * @param knowledgeIds
+   */
+  public async createDataSourceKnowledgeAssociations(
+    dataSourceId: string,
+    knowledgeIds: string[]
+  ) {
+    const dataSourceKnowledgeRelations = knowledgeIds.map((knowledgeId) => {
+      return { dataSourceId, knowledgeId };
     });
 
     await prismadb.dataSourceKnowledge.createMany({
       data: dataSourceKnowledgeRelations,
     });
-
-    await this.publishKnowledgeEvents(dataSource.id, knowledgeList);
   }
 
-  private async upsertKnowledgeListAndUpdateAssociations(
-    dataSource: DataSource,
-    dataSourceAdapter: DataSourceAdapter,
-    itemList: DataSourceItemList
+  /**
+   *
+   * @param dataSource
+   * @param dataSourceAdapter
+   * @param itemList
+   * @param knowledgeList
+   */
+  public async updateDataSourceKnowledgeAssociations(
+    dataSourceId: string,
+    itemList: DataSourceItemList,
+    knowledgeList: KnowledgeDto[]
   ) {
-    const knowledgeList = await this.upsertKnowledgeList(
-      dataSource,
-      dataSourceAdapter,
-      itemList
-    );
-
-    const dataSourceId = dataSource.id;
+    const { dataSourceAdapter } =
+      await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
     const knowledgeIds = knowledgeList.map((knowledge) => knowledge.id);
 
     // Find existing associations
@@ -224,101 +274,6 @@ export class DataSourceManagementService {
         },
       });
     }
-
-    await this.publishKnowledgeEvents(dataSourceId, knowledgeList);
-  }
-
-  private async upsertKnowledgeList(
-    datasource: DataSource,
-    dataSourceAdapter: DataSourceAdapter,
-    itemList: DataSourceItemList
-  ): Promise<Knowledge[]> {
-    if (itemList.items.length === 0) {
-      return [];
-    }
-    const knowledgeList = [];
-    const existingKnowledgeMap = await this.getExistingKnowledgeMap(
-      datasource,
-      itemList
-    );
-
-    for (const item of itemList.items) {
-      let knowledge = existingKnowledgeMap.get(item.uniqueId!);
-
-      if (
-        knowledge &&
-        dataSourceAdapter.shouldReindexKnowledge(knowledge, item)
-      ) {
-        knowledge = undefined;
-      }
-
-      if (!knowledge) {
-        knowledge = await prismadb.knowledge.create({
-          data: {
-            name: item.name,
-            type: datasource.type,
-            uniqueId: item.uniqueId,
-            indexStatus: KnowledgeIndexStatus.INITIALIZED,
-            blobUrl: item.blobUrl,
-            metadata: item.metadata,
-          },
-        });
-      }
-
-      knowledgeList.push(knowledge);
-    }
-
-    return knowledgeList;
-  }
-
-  private async publishKnowledgeEvents(
-    dataSourceId: string,
-    knowledgeList: Knowledge[]
-  ) {
-    if (knowledgeList.length === 0) {
-      return;
-    }
-
-    const knowledgeListToUpdate = knowledgeList.filter(
-      (knowledge) => knowledge.indexStatus === KnowledgeIndexStatus.INITIALIZED
-    );
-    if (knowledgeListToUpdate.length === 0) {
-      await this.updateDataSourceStatus(dataSourceId);
-      return;
-    }
-
-    for (const knowledge of knowledgeListToUpdate) {
-      await publishEvent(DomainEvent.KNOWLEDGE_INITIALIZED, {
-        dataSourceId,
-        knowledgeId: knowledge.id,
-      });
-    }
-  }
-
-  private async getExistingKnowledgeMap(
-    dataSource: DataSource,
-    itemList: DataSourceItemList
-  ) {
-    const existingKnowledgeMap = new Map<string, Knowledge>();
-    const uniqueIds = itemList.items
-      .map((item) => item.uniqueId)
-      .filter((uniqueId): uniqueId is string => uniqueId !== undefined);
-
-    if (uniqueIds.length > 0) {
-      const existingKnowledge = await prismadb.knowledge.findMany({
-        where: {
-          type: dataSource.type,
-          uniqueId: { in: uniqueIds },
-          indexStatus: KnowledgeIndexStatus.COMPLETED,
-        },
-      });
-
-      existingKnowledge.forEach((knowledge) => {
-        existingKnowledgeMap.set(knowledge.uniqueId!, knowledge);
-      });
-    }
-
-    return existingKnowledgeMap;
   }
 
   /**
@@ -373,7 +328,7 @@ export class DataSourceManagementService {
     return indexKnowledgeResponse;
   }
 
-  private async updateDataSourceStatus(
+  public async updateDataSourceStatus(
     dataSourceId: string,
     tx: PrismaClient = prismadb
   ) {
