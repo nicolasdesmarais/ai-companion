@@ -1,9 +1,5 @@
 import { CreateApiDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
-import {
-  DataSourceType,
-  Knowledge,
-  KnowledgeIndexStatus,
-} from "@prisma/client";
+import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import {
@@ -23,7 +19,6 @@ export class ApiDataSourceAdapter implements DataSourceAdapter {
     const input = data as CreateApiDataSourceRequest;
 
     const result: DataSourceItemList = {
-      type: DataSourceType.API,
       items: [
         {
           name: data.name,

@@ -1,3 +1,4 @@
+import { UpdateDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
 import apiDataSourceAdapter from "@/src/adapter-out/knowledge/api/ApiDataSourceAdapter";
 import fileUploadDataSourceAdapter from "@/src/adapter-out/knowledge/file-upload/FileUploadDataSourceAdapter";
@@ -18,6 +19,7 @@ import { AISecurityService } from "@/src/security/services/AISecurityService";
 import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
 import { DataSourceSecurityService } from "@/src/security/services/DataSourceSecurityService";
 import {
+  DataSource,
   DataSourceIndexStatus,
   DataSourceRefreshPeriod,
   DataSourceType,
@@ -34,7 +36,6 @@ import { DomainEvent } from "../events/domain-event";
 import { DataSourceDto, DataSourceFilter } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
 import usageService from "./UsageService";
-import { UpdateDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
 
 export class DataSourceService {
   constructor(private dataSourceRepository: DataSourceRepository) {}
@@ -56,11 +57,13 @@ export class DataSourceService {
     }
   }
 
-  private async getDataSourceAndAdapter(dataSourceId: string) {
+  private async getDataSourceAndAdapter(dataSourceId: string): Promise<{
+    dataSource: DataSource;
+    dataSourceAdapter: DataSourceAdapter;
+  }> {
     const dataSource = await prismadb.dataSource.findUnique({
       where: { id: dataSourceId },
     });
-
     if (!dataSource) {
       throw new EntityNotFoundError(
         `DataSource with id=${dataSourceId} not found`
@@ -188,7 +191,6 @@ export class DataSourceService {
     const dataSourceId = dataSource.id;
     await publishEvent(DomainEvent.DATASOURCE_INITIALIZED, {
       dataSourceId,
-      dataSourceType: type,
     });
 
     return dataSourceId;
@@ -211,7 +213,7 @@ export class DataSourceService {
     );
 
     await this.upsertKnowledgeListAndCreateAssociations(
-      dataSourceId,
+      dataSource,
       dataSourceAdapter,
       itemList
     );
@@ -229,7 +231,7 @@ export class DataSourceService {
     );
 
     await this.upsertKnowledgeListAndUpdateAssociations(
-      dataSourceId,
+      dataSource,
       dataSourceAdapter,
       itemList
     );
@@ -245,26 +247,18 @@ export class DataSourceService {
     dataSourceId: string,
     dataSourceItemList: DataSourceItemList
   ) {
-    const { dataSourceAdapter } = await this.getDataSourceAndAdapter(
-      dataSourceId
-    );
-
-    const dataSource = await this.dataSourceRepository.findById(dataSourceId);
-    if (!dataSource) {
-      throw new EntityNotFoundError(
-        `DataSource with id=${dataSourceId} not found`
-      );
-    }
+    const { dataSource, dataSourceAdapter } =
+      await this.getDataSourceAndAdapter(dataSourceId);
 
     if (dataSource.indexStatus === DataSourceIndexStatus.REFRESHING) {
       await this.upsertKnowledgeListAndUpdateAssociations(
-        dataSourceId,
+        dataSource,
         dataSourceAdapter,
         dataSourceItemList
       );
     } else {
       await this.upsertKnowledgeListAndCreateAssociations(
-        dataSourceId,
+        dataSource,
         dataSourceAdapter,
         dataSourceItemList
       );
@@ -272,42 +266,45 @@ export class DataSourceService {
   }
 
   private async upsertKnowledgeListAndCreateAssociations(
-    dataSourceId: string,
+    dataSource: DataSource,
     dataSourceAdapter: DataSourceAdapter,
     itemList: DataSourceItemList
   ) {
     const knowledgeList = await this.upsertKnowledgeList(
+      dataSource,
       dataSourceAdapter,
       itemList
     );
 
     const dataSourceKnowledgeRelations = knowledgeList.map((knowledge) => {
-      return { dataSourceId, knowledgeId: knowledge.id };
+      return { dataSourceId: dataSource.id, knowledgeId: knowledge.id };
     });
 
     await prismadb.dataSourceKnowledge.createMany({
       data: dataSourceKnowledgeRelations,
     });
 
-    await this.publishKnowledgeEvents(dataSourceId, knowledgeList);
+    await this.publishKnowledgeEvents(dataSource.id, knowledgeList);
   }
 
   private async upsertKnowledgeListAndUpdateAssociations(
-    dataSourceId: string,
+    dataSource: DataSource,
     dataSourceAdapter: DataSourceAdapter,
     itemList: DataSourceItemList
   ) {
     const knowledgeList = await this.upsertKnowledgeList(
+      dataSource,
       dataSourceAdapter,
       itemList
     );
 
+    const dataSourceId = dataSource.id;
     const knowledgeIds = knowledgeList.map((knowledge) => knowledge.id);
 
     // Find existing associations
     const existingAssociations = await prismadb.dataSourceKnowledge.findMany({
       where: {
-        dataSourceId: dataSourceId,
+        dataSourceId,
         knowledgeId: {
           in: knowledgeIds,
         },
@@ -356,6 +353,7 @@ export class DataSourceService {
   }
 
   private async upsertKnowledgeList(
+    datasource: DataSource,
     dataSourceAdapter: DataSourceAdapter,
     itemList: DataSourceItemList
   ): Promise<Knowledge[]> {
@@ -379,7 +377,7 @@ export class DataSourceService {
         knowledge = await prismadb.knowledge.create({
           data: {
             name: item.name,
-            type: itemList.type,
+            type: datasource.type,
             uniqueId: item.uniqueId,
             indexStatus: KnowledgeIndexStatus.INITIALIZED,
             blobUrl: item.blobUrl,
