@@ -13,6 +13,7 @@ import qs from "query-string";
 import { cn } from "@/src/lib/utils";
 import { Tooltip } from "./ui/tooltip";
 import { DataSourcesDetails } from "./datasources-detail";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 export const DataSourcesTable = () => {
   const [dataSources, setDataSources] = useState<any[]>([]);
@@ -63,7 +64,14 @@ export const DataSourcesTable = () => {
     <div className="mt-2">
       <div className="flex w-full">
         <Table
-          headers={["Name", "Type", "Last Modified", "Progress", "Status"]}
+          headers={[
+            "Name",
+            "AI",
+            "Type",
+            "Last Modified",
+            "Progress",
+            "Status",
+          ]}
           className="grow my-4 max-h-60"
         >
           {dataSources.map((dataSource: any) => (
@@ -91,6 +99,13 @@ export const DataSourcesTable = () => {
                       {dataSource.name}
                     </div>
                   )}
+                </td>
+                <td className="p-2">
+                  {dataSource.ais.map((ai: any) => (
+                    <Avatar className="h-6 w-6 mr-2" key={`ai-${ai.id}`}>
+                      <AvatarImage src={ai.ai.src} crop="w_48,h_48" />
+                    </Avatar>
+                  ))}
                 </td>
                 <td className="p-2">
                   {
