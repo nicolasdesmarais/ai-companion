@@ -34,6 +34,7 @@ import { DomainEvent } from "../events/domain-event";
 import { DataSourceDto, DataSourceFilter } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
 import usageService from "./UsageService";
+import { UpdateDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
 
 export class DataSourceService {
   constructor(private dataSourceRepository: DataSourceRepository) {}
@@ -1088,6 +1089,30 @@ export class DataSourceService {
     await publishEvent(DomainEvent.DATASOURCE_REFRESH_REQUESTED, {
       dataSourceId: dataSource.id,
     });
+  }
+
+  public async updateDataSource(
+    authorizationContext: AuthorizationContext,
+    dataSourceId: string,
+    updateRequest: UpdateDataSourceRequest
+  ) {
+    const dataSource = await this.getDataSource(dataSourceId);
+
+    const canUpdateDataSource = DataSourceSecurityService.canUpdateDataSource(
+      authorizationContext,
+      dataSource
+    );
+
+    if (!canUpdateDataSource) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const updatedDataSource: DataSourceDto = {
+      ...dataSource,
+      ...updateRequest,
+    };
+
+    return await this.dataSourceRepository.updateDataSource(updatedDataSource);
   }
 }
 

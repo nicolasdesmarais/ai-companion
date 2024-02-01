@@ -72,10 +72,13 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
     },
   });
 
-  const onSubmit = async (values: DataSourceFormData) => {
+  const onSubmit = async (values: any) => {
     try {
       setLoading(true);
-      await axios.post("/api/v1/data-store", {});
+      await axios.patch(`/api/v1/data-sources/${dataSource.id}`, values);
+      toast({
+        description: "Data source updated",
+      });
     } catch (error) {
       toast({
         description: "Something went wrong",
@@ -122,14 +125,20 @@ export const DataStoresDetails = ({ dataSources }: Props) => {
                   itemLabel="AI"
                   items={ais}
                   values={selectedValues}
-                  setValues={setSelectedValues}
+                  onChange={(values) => {
+                    setSelectedValues(values);
+                    console.log("changed", values, selectedValues);
+                  }}
                 />
               </>
             )}
           </FormItem>
           <DataRefreshPeriod
             selectClassName="max-w-[200px]"
-            setDataRefreshPeriod={setDataRefreshPeriod}
+            setDataRefreshPeriod={(value) => {
+              setDataRefreshPeriod(value);
+              onSubmit({ refreshPeriod: value });
+            }}
             dataRefreshPeriod={dataRefreshPeriod}
           />
           <FormItem>

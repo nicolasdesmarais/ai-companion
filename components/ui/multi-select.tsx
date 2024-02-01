@@ -1,8 +1,5 @@
 "use client";
-
-import * as React from "react";
 import { Check, ChevronsUpDown, Edit2 } from "lucide-react";
-
 import { cn } from "@/src/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,24 +15,25 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { useRef, useState } from "react";
 
 type Props = {
   itemLabel: string;
   items: any[];
   values: any[];
-  setValues: React.Dispatch<React.SetStateAction<any[]>>;
+  onChange: (val: any[]) => void;
 };
 
-export function MultiSelect({ itemLabel, items, values, setValues }: Props) {
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const [openCombobox, setOpenCombobox] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState<string>("");
+export function MultiSelect({ itemLabel, items, values, onChange }: Props) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [openCombobox, setOpenCombobox] = useState(false);
+  const [inputValue, setInputValue] = useState<string>("");
+
   const toggleItem = (item: any) => {
-    setValues((currentItems) =>
-      !values.find((l) => l.id === item.id)
-        ? [...currentItems, item]
-        : currentItems.filter((l) => l.id !== item.id)
-    );
+    const newValues = !values.find((l) => l.id === item.id)
+      ? [...values, item]
+      : values.filter((l) => l.id !== item.id);
+    onChange(newValues);
     inputRef?.current?.focus();
   };
 

@@ -6,6 +6,7 @@ import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { NextResponse } from "next/server";
+import { UpdateDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
 
 export const maxDuration = 300;
 
@@ -24,6 +25,38 @@ async function deleteHandler(
   );
   return new NextResponse(null, { status: 204 });
 }
+
+async function patchHandler(
+  request: Request,
+  context: {
+    params: { dataSourceId: string };
+    authorizationContext: AuthorizationContext;
+  }
+) {
+  const { params, authorizationContext } = context;
+
+  if (!params.dataSourceId) {
+    return new NextResponse("Data Source ID required", { status: 400 });
+  }
+
+  const body: UpdateDataSourceRequest = await request.json();
+  const dataSource = await dataSourceService.updateDataSource(
+    authorizationContext,
+    params.dataSourceId,
+    body
+  );
+
+  return NextResponse.json(dataSource);
+}
+
+export const PATCH = withErrorHandler(
+  withAuthorization(
+    SecuredResourceType.DATA_SOURCES,
+    SecuredAction.WRITE,
+    Object.values(SecuredResourceAccessLevel),
+    patchHandler
+  )
+);
 
 export const DELETE = withErrorHandler(
   withAuthorization(
