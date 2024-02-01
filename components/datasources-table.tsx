@@ -98,7 +98,7 @@ export const DataSourcesTable = () => {
                     </div>
                   )}
                 </td>
-                <td className="p-2 flex">
+                <td className="p-2 flex flex-wrap max-w-[145px]">
                   {dataSource.ais.map((ai: any) => (
                     <div key={`ai-${ai.id}`}>
                       <Tooltip content={ai.ai.name} className="cursor-default">
