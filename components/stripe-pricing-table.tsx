@@ -3,7 +3,7 @@ import { useUser } from "@clerk/nextjs";
 import React from "react";
 
 interface Props {
-  orgId: string;
+  orgId?: string;
 }
 
 const StripePricingTable = ({ orgId }: Props) => {
