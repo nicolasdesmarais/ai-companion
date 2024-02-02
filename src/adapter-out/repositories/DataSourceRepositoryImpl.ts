@@ -2,6 +2,7 @@ import {
   DataSourceDto,
   DataSourceFilter,
 } from "@/src/domain/models/DataSources";
+import { AIDataUsage } from "@/src/domain/models/OrgUsage";
 import { DataSourceRepository } from "@/src/domain/ports/outgoing/DataSourceRepository";
 import prismadb from "@/src/lib/prismadb";
 import {
@@ -70,6 +71,11 @@ const dataSourceFilterOrderBy = (
 };
 
 interface TokenCountResult {
+  total_token_count: number;
+}
+
+interface AIDataUsageResult {
+  ai_id: string;
   total_token_count: number;
 }
 
@@ -250,6 +256,36 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
     }
 
     return 0;
+  }
+
+  public async getNumberOfTokensStoredForOrgPerAi(
+    orgId: string
+  ): Promise<AIDataUsage[]> {
+    const result = await prismadb.$queryRaw<AIDataUsageResult[]>`
+    SELECT ai_id, IFNULL(SUM(dk.token_count), 0) AS total_token_count
+    FROM (
+    SELECT DISTINCT ai.id as ai_id,
+                    k.id as k_id,
+                    k.token_count
+    FROM ais ai
+    LEFT OUTER JOIN ai_data_sources ads ON ads.ai_id = ai.id
+    LEFT OUTER JOIN data_source_knowledges dsk ON dsk.data_source_id = ads.data_source_id
+    LEFT OUTER JOIN knowledge k ON k.id = dsk.knowledge_id
+    WHERE ai.org_id = ${orgId} ) AS dk
+    GROUP BY ai_id
+    ORDER BY total_token_count desc;
+`;
+
+    if (result.length === 0) {
+      return [];
+    }
+
+    const aiUsages: AIDataUsage[] = result.map((row) => ({
+      aiId: row.ai_id,
+      aiDataTokensUsed: row.total_token_count,
+    }));
+
+    return aiUsages;
   }
 
   public async updateDataSourceAis(dataSourceId: string, aiIds: string[]) {

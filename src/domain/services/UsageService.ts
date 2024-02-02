@@ -1,7 +1,9 @@
 import { DataSourceRepositoryImpl } from "@/src/adapter-out/repositories/DataSourceRepositoryImpl";
 import { OrgSubscriptionRepositoryImpl } from "@/src/adapter-out/repositories/OrgSubscriptionRepositoryImpl";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
-import { OrgUsage } from "../models/OrgUsage";
+import { UsageSecurityService } from "@/src/security/services/UsageSecurityService";
+import { ForbiddenError } from "../errors/Errors";
+import { OrgUsage, OrgUsageByAI } from "../models/OrgUsage";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
 import { OrgSubscriptionRepository } from "../ports/outgoing/OrgSubscriptionRepository";
 
@@ -14,7 +16,14 @@ export class UsageService {
   public async getOrgUsage(
     authorizationContext: AuthorizationContext
   ): Promise<OrgUsage> {
-    const orgId = authorizationContext.orgId;
+    const { orgId } = authorizationContext;
+    const canViewOrgUsage = UsageSecurityService.canViewOrgUsage(
+      authorizationContext,
+      orgId
+    );
+    if (!canViewOrgUsage) {
+      throw new ForbiddenError();
+    }
 
     const dataTokensUsed =
       await this.dataSourceRepository.getNumberOfTokensStoredForOrg(orgId);
@@ -36,6 +45,28 @@ export class UsageService {
       dataUsageTokenLimit,
       apiTokensUsed,
       apiUsageTokenLimit,
+    };
+  }
+
+  public async getAIUsage(
+    authorizationContext: AuthorizationContext
+  ): Promise<OrgUsageByAI> {
+    const orgUsage = await this.getOrgUsage(authorizationContext);
+    const aiDataUsages =
+      await this.dataSourceRepository.getNumberOfTokensStoredForOrgPerAi(
+        authorizationContext.orgId
+      );
+    const aiUsages = aiDataUsages.map((aiDataUsage) => {
+      return {
+        aiId: aiDataUsage.aiId,
+        aiDataTokensUsed: aiDataUsage.aiDataTokensUsed,
+        aiApiTokensUsed: 0, // TODO: Implement API usage tracking
+      };
+    });
+
+    return {
+      orgUsage,
+      aiUsages,
     };
   }
 
