@@ -216,23 +216,32 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
           {dataSource.knowledges.length > 0 && (
             <FormItem>
               <FormLabel className="uppercase">Content</FormLabel>
-              {dataSource.knowledges.map(({ knowledge }: any) =>
-                knowledge.blobUrl ? (
-                  <div key={knowledge.id}>
-                    <a
-                      href={knowledge.blobUrl}
-                      target="_blank"
-                      className="text-ring"
-                    >
+              {dataSource.knowledges.map(({ knowledge }: any) => (
+                <div className="flex justify-between">
+                  {knowledge.blobUrl ? (
+                    <div key={knowledge.id}>
+                      <a
+                        href={knowledge.blobUrl}
+                        target="_blank"
+                        className="text-ring"
+                      >
+                        {knowledge.name}
+                      </a>
+                    </div>
+                  ) : (
+                    <FormDescription key={knowledge.id}>
                       {knowledge.name}
-                    </a>
+                    </FormDescription>
+                  )}
+                  <div>
+                    {knowledge.metadata?.percentComplete
+                      ? `(${knowledge.metadata?.percentComplete.toFixed(
+                          1
+                        )}% indexed)`
+                      : ""}
                   </div>
-                ) : (
-                  <FormDescription key={knowledge.id}>
-                    {knowledge.name}
-                  </FormDescription>
-                )
-              )}
+                </div>
+              ))}
             </FormItem>
           )}
         </form>
