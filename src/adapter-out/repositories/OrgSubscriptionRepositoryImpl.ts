@@ -16,16 +16,26 @@ const mapOrgSubscriptionToDto = (
 export class OrgSubscriptionRepositoryImpl
   implements OrgSubscriptionRepository
 {
-  public async findOrCreateByOrgId(
-    orgId: string
-  ): Promise<OrgSubscriptionDto | null> {
-    let orgSubscription = await prismadb.orgSubscription.findUnique({
+  public async findByOrgId(orgId: string): Promise<OrgSubscriptionDto | null> {
+    const orgSubscription = await prismadb.orgSubscription.findUnique({
       where: { orgId },
     });
     if (!orgSubscription) {
-      orgSubscription = await this.createDefaultOrgSubscription(orgId);
+      return null;
     }
     return mapOrgSubscriptionToDto(orgSubscription);
+  }
+
+  public async findOrCreateByOrgId(
+    orgId: string
+  ): Promise<OrgSubscriptionDto | null> {
+    const existingOrgSubscription = this.findByOrgId(orgId);
+    if (existingOrgSubscription) {
+      return existingOrgSubscription;
+    }
+
+    const newOrgSubscription = await this.createDefaultOrgSubscription(orgId);
+    return mapOrgSubscriptionToDto(newOrgSubscription);
   }
 
   private async createDefaultOrgSubscription(
