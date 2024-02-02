@@ -54,8 +54,8 @@ export const knowledgeInitialized = inngest.createFunction(
   { id: "knowledge-initialized" },
   { event: DomainEvent.KNOWLEDGE_INITIALIZED },
   async ({ event, step }) => {
-    const dataSourceId = event.data.dataSourceId;
-    const knowledgeId = event.data.knowledgeId;
+    const payload = event.data as KnowledgeInitializedEventPayload;
+    const { dataSourceId, knowledgeId } = payload;
 
     const result = await step.run("index-knowledge", async () => {
       return await dataSourceManagementService.indexDataSourceKnowledge(
