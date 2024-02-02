@@ -20,7 +20,7 @@ export interface DataSourceDto {
 }
 
 export interface DataSourceFilter {
-  name?: string;
+  search?: string;
   type?: DataSourceType;
   orderBy?: DataSourceOrderBy;
 }
