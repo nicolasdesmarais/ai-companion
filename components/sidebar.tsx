@@ -185,11 +185,6 @@ export const Sidebar = ({
       pathname: "/data-sources",
       label: "Data",
       pro: false,
-      requiredPermission: {
-        resourceType: SecuredResourceType.AI,
-        action: SecuredAction.READ,
-        accessLevel: SecuredResourceAccessLevel.INSTANCE,
-      },
     },
     {
       icon: Eye,
