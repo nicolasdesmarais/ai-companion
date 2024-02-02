@@ -6,7 +6,12 @@ import { TestChat } from "@/components/test-chat";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Form, FormItem, FormLabel } from "@/components/ui/form";
+import {
+  Form,
+  FormDescription,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { useToast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -124,7 +129,7 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
       <Form {...form}>
         <form className="space-y-4 mt-4">
           <FormItem>
-            <FormLabel>Selected AIs</FormLabel>
+            <FormLabel className="uppercase">Selected AIs</FormLabel>
             {ais && (
               <>
                 <div className="relative mt-3 overflow-y-auto">
@@ -155,11 +160,15 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
                     onSubmit({ ais: values.map((ai) => ai.id) });
                   }}
                 />
+                <FormDescription>
+                  Select the AIs you would like to have access to this data.
+                </FormDescription>
               </>
             )}
           </FormItem>
           <DataRefreshPeriod
             selectClassName="max-w-[200px]"
+            labelClassName="uppercase"
             setDataRefreshPeriod={(value) => {
               if (value) {
                 setDataRefreshPeriod(value);
@@ -169,30 +178,30 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
             dataRefreshPeriod={dataRefreshPeriod}
           />
           <FormItem>
-            <FormLabel>Type</FormLabel>
-            <div>
+            <FormLabel className="uppercase">Type</FormLabel>
+            <FormDescription>
               {
                 DataSourceTypes.find(
                   (format) => format.type === dataSource.type
                 )?.name
               }
-            </div>
+            </FormDescription>
           </FormItem>
           <FormItem>
-            <FormLabel>Original Upload</FormLabel>
-            <div>
+            <FormLabel className="uppercase">Original Upload</FormLabel>
+            <FormDescription>
               {format(new Date(dataSource.createdAt), "h:mma M/d/yyyy ")}
-            </div>
+            </FormDescription>
           </FormItem>
           <FormItem>
-            <FormLabel>Last Indexed</FormLabel>
-            <div>
+            <FormLabel className="uppercase">Last Indexed</FormLabel>
+            <FormDescription>
               {format(new Date(dataSource.lastIndexedAt), "h:mma M/d/yyyy ")}
-            </div>
+            </FormDescription>
           </FormItem>
           {dataSource.knowledges.length > 0 && (
             <FormItem>
-              <FormLabel>Content</FormLabel>
+              <FormLabel className="uppercase">Content</FormLabel>
               {dataSource.knowledges.map(({ knowledge }: any) =>
                 knowledge.blobUrl ? (
                   <div key={knowledge.id}>
@@ -205,7 +214,9 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
                     </a>
                   </div>
                 ) : (
-                  <div key={knowledge.id}>{knowledge.name}</div>
+                  <FormDescription key={knowledge.id}>
+                    {knowledge.name}
+                  </FormDescription>
                 )
               )}
             </FormItem>
