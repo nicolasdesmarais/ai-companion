@@ -13,7 +13,7 @@ import { useProModal } from "@/hooks/use-pro-modal";
 import StripePricingTable from "./stripe-pricing-table";
 
 type Props = {
-  orgId: string;
+  orgId?: string;
 };
 
 export const ProModal = ({ orgId }: Props) => {

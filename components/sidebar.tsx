@@ -44,7 +44,7 @@ interface SidebarProps {
   isPro: boolean;
   className?: string;
   userPermissions: Permission[];
-  orgId: string;
+  orgId?: string;
 }
 
 interface Route {
