@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs";
+import { ChatOpenAI } from "@langchain/openai";
+import { SystemMessage } from "@langchain/core/messages";
 import { NextResponse } from "next/server";
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { SystemMessage } from "langchain/schema";
 
 export const maxDuration = 300;
 

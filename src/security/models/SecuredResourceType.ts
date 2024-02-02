@@ -5,12 +5,14 @@ export enum SecuredResourceType {
   GROUPS = "groups",
   ORG_CLIENT_CREDENTIALS = "org-client-credentials",
   ORG_SETTINGS = "org-settings",
+  ORG_USAGE = "org-usage",
 }
 
 export const availableApiResourceTypes = [
   SecuredResourceType.AI,
   SecuredResourceType.CHATS,
   SecuredResourceType.DATA_SOURCES,
+  SecuredResourceType.ORG_USAGE,
 ];
 
 export const orgOnlyResourceTypes = [

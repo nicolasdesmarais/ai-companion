@@ -96,10 +96,6 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({
     setIsEditModalOpen(false);
   };
 
-  const renderScopes = (scopes: string[]) => {
-    return scopes.filter(isValidScope).join(", ");
-  };
-
   const onCreateKey = async (values: NewAPIKeyFormData) => {
     try {
       setLoading(true);
@@ -180,7 +176,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({
         . Authenticate by passing your generated secret key in the header of the
         request:
       </p>
-      <p className="text-xs my-2 whitespace-pre font-mono p-4 bg-primary/10 rounded-md">
+      <p className="text-xs my-2 whitespace-pre font-mono p-4 bg-primary/10 rounded-md overflow-auto">
         {
           "curl https://appdirect.ai/api/v1/me/ai -H 'X-Authorization: Bearer <your-secret-key>'"
         }
@@ -194,7 +190,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({
       </p>
       <Table
         headers={["Name", "Created At", "Scopes", "Action"]}
-        className="w-full my-4"
+        className="w-full my-4 mr-4"
       >
         {apiKeys.map((key) => (
           <tr key={key.id} className="text-sm">
@@ -204,7 +200,11 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({
                 ? format(new Date(key.createdAt), "h:mma M/d/yyyy ")
                 : null}
             </td>
-            <td className="p-2">{renderScopes(key.scopes)}</td>
+            <td className="p-2">
+              {key.scopes.map((scope) => (
+                <div key={`${key.name}-${scope}`}>{scope}</div>
+              ))}
+            </td>
             <td className="p-2">
               <Button
                 type="button"

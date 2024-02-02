@@ -11,3 +11,11 @@ export function absoluteUrl(path: string) {
 
 export const delay = (ms: number | undefined) =>
   new Promise((res) => setTimeout(res, ms));
+
+export function getCurrentDateStr() {
+  const now = new Date();
+  const dayOfWeek = now.toLocaleString(window.navigator.language, {
+    weekday: "long",
+  });
+  return `${dayOfWeek}, ${now.toLocaleString()}`;
+}

@@ -24,7 +24,7 @@ export const Tooltip = ({
         <TooltipPrimitives.Portal>
           <TooltipPrimitives.Content
             side={side}
-            className={cn("text-xs bg-card p-2 rounded-sm")}
+            className={cn("text-xs bg-card p-2 rounded-sm z-50")}
           >
             {content}
             <TooltipPrimitives.Arrow />

@@ -1,4 +1,4 @@
-import dataSourceService from "@/src/domain/services/DataSourceService";
+import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
@@ -18,7 +18,7 @@ async function putHandler(
 ) {
   const { params, authorizationContext } = context;
 
-  await dataSourceService.refreshDataSourceAsUser(
+  await dataSourceManagementService.refreshDataSourceAsUser(
     authorizationContext,
     params.dataSourceId
   );

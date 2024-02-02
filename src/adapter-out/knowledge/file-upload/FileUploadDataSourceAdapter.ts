@@ -28,7 +28,6 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     const input = data as FileUploadDataSourceInput;
 
     const result: DataSourceItemList = {
-      type: DataSourceType.FILE_UPLOAD,
       items: [
         {
           name: input.filename,
@@ -77,6 +76,7 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
         id: `kn-chunk-${knowledge.id}-${i}`,
         name: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
         data: {
+          orgId,
           knowledgeIndexingResult: {
             knowledgeId: knowledge.id,
             result: {

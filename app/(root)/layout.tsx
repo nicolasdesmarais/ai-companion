@@ -9,7 +9,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
     return;
   }
 
-  const { userId, permissions } = authorizationContext;
+  const { userId, permissions, orgId } = authorizationContext;
   if (!userId) {
     return;
   }
@@ -20,7 +20,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
       <div className="h-full">
         <Navbar isPro={false} userPermissions={permissions} />
         <div className="hidden md:flex h-full w-20 flex-col fixed inset-y-0 z-40">
-          <Sidebar isPro={false} userPermissions={permissions} />
+          <Sidebar isPro={false} userPermissions={permissions} orgId={orgId} />
         </div>
         <main className="md:pl-20 pt-20 md:pt-0 h-full">{children}</main>
       </div>

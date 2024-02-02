@@ -2,7 +2,7 @@ import {
   ApifySupportedEvents,
   ApifyWebhookEvent,
 } from "@/src/domain/models/ApifyWebhookEvent";
-import dataSourceService from "@/src/domain/services/DataSourceService";
+import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
 import { DataSourceType } from "@prisma/client";
 import { headers } from "next/headers";
 
@@ -34,7 +34,10 @@ export async function POST(req: Request) {
     return new Response("", { status: 200 });
   }
 
-  await dataSourceService.knowledgeEventReceived(DataSourceType.WEB_URL, event);
+  await dataSourceManagementService.knowledgeEventReceived(
+    DataSourceType.WEB_URL,
+    event
+  );
 
   return new Response("", { status: 200 });
 }

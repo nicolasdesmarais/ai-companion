@@ -21,7 +21,7 @@ import {
 import aiModelService from "./AIModelService";
 import aiService from "./AIService";
 import { ChatOpenAI } from "langchain/chat_models/openai";
-import { SystemMessage } from "langchain/schema";
+import { SystemMessage } from "@langchain/core/messages";
 import {
   Gpt4Model,
   gpt4ChatModel,

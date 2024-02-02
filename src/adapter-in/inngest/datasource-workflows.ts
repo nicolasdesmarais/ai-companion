@@ -3,7 +3,7 @@ import {
   DataSourceItemListReceivedPayload,
   DomainEvent,
 } from "@/src/domain/events/domain-event";
-import dataSourceService from "@/src/domain/services/DataSourceService";
+import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
 import { inngest } from "./client";
 
 export const dataSourceInitialized = inngest.createFunction(
@@ -13,7 +13,9 @@ export const dataSourceInitialized = inngest.createFunction(
     const dataSourceId = event.data.dataSourceId;
 
     await step.run("create-knowledge-list", async () => {
-      await dataSourceService.createDataSourceKnowledgeList(dataSourceId);
+      await dataSourceManagementService.createDataSourceKnowledgeList(
+        dataSourceId
+      );
     });
   }
 );
@@ -25,7 +27,9 @@ export const dataSourceRefreshRequested = inngest.createFunction(
     const dataSourceId = event.data.dataSourceId;
 
     await step.run("update-knowledge-list", async () => {
-      await dataSourceService.updateDataSourceKnowledgeList(dataSourceId);
+      await dataSourceManagementService.refreshDataSourceKnowledgeList(
+        dataSourceId
+      );
     });
   }
 );
@@ -38,7 +42,7 @@ export const dataSourceItemListReceived = inngest.createFunction(
     const { dataSourceId, dataSourceItemList } = payload;
 
     await step.run("on-datasource-item-list-received", async () => {
-      await dataSourceService.onDataSourceItemListReceived(
+      await dataSourceManagementService.onDataSourceItemListReceived(
         dataSourceId,
         dataSourceItemList
       );
@@ -54,7 +58,7 @@ export const knowledgeInitialized = inngest.createFunction(
     const knowledgeId = event.data.knowledgeId;
 
     const result = await step.run("index-knowledge", async () => {
-      return await dataSourceService.indexDataSourceKnowledge(
+      return await dataSourceManagementService.indexDataSourceKnowledge(
         dataSourceId,
         knowledgeId
       );
@@ -67,7 +71,7 @@ export const knowledgeInitialized = inngest.createFunction(
     }
 
     const relatedKnowledgeIds = await step.run("delete-knowledge", async () => {
-      return await dataSourceService.deleteRelatedKnowledgeInstances(
+      return await dataSourceManagementService.deleteRelatedKnowledgeInstances(
         knowledgeId
       );
     });
@@ -93,7 +97,7 @@ export const knowledgeEventReceived = inngest.createFunction(
     const knowledgeIndexingResult = await step.run(
       "handle-knowledge-event-received",
       async () => {
-        return await dataSourceService.getKnowledgeResultFromEvent(
+        return await dataSourceManagementService.getKnowledgeResultFromEvent(
           dataSourceType,
           data
         );
@@ -134,13 +138,15 @@ export const loadKnowledgeChunk = inngest.createFunction(
   { event: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED },
   async ({ event }) => {
     try {
-      const indexingResult = await dataSourceService.loadKnowledgeResult(
-        event.data.dataSourceType,
-        event.data.knowledgeIndexingResult.knowledgeId,
-        event.data.knowledgeIndexingResult.result,
-        event.data.index
-      );
-      await dataSourceService.persistIndexingResult(
+      const indexingResult =
+        await dataSourceManagementService.loadKnowledgeResult(
+          event.data.orgId,
+          event.data.dataSourceType,
+          event.data.knowledgeIndexingResult.knowledgeId,
+          event.data.knowledgeIndexingResult.result,
+          event.data.index
+        );
+      await dataSourceManagementService.persistIndexingResult(
         event.data.knowledgeIndexingResult.knowledgeId,
         indexingResult,
         event.data.knowledgeIndexingResult.result.chunkCount
@@ -164,14 +170,16 @@ export const refreshDataSources = inngest.createFunction(
     const dataSourceIds = await step.run(
       "find-datasources-to-refresh",
       async () => {
-        return await dataSourceService.findDataSourcesToRefresh();
+        return await dataSourceManagementService.findDataSourcesToRefresh();
       }
     );
 
     await Promise.all(
       dataSourceIds.map((dataSourceId) =>
         step.run("refresh-datasource", async () => {
-          await dataSourceService.refreshDataSourceAsSystem(dataSourceId);
+          await dataSourceManagementService.refreshDataSourceAsSystem(
+            dataSourceId
+          );
         })
       )
     );
@@ -183,14 +191,14 @@ export const pollIndexingDataSources = inngest.createFunction(
   { cron: "0 * * * *" },
   async ({ step }) => {
     const dataSources = await step.run("get-indexing-datasources", async () => {
-      return await dataSourceService.getIndexingDataSources();
+      return await dataSourceManagementService.getIndexingDataSources();
     });
 
     const steps = [];
     for (const dataSource of dataSources) {
       steps.push(
         step.run("poll-datasource", async () => {
-          await dataSourceService.pollDataSource(
+          await dataSourceManagementService.pollDataSource(
             dataSource.id,
             dataSource.type
           );
@@ -213,7 +221,7 @@ export const dataSourceDeleteRequested = inngest.createFunction(
     const deletedKnowledgeIds = await step.run(
       "delete-data-source",
       async () => {
-        return await dataSourceService.deleteDataSource(dataSourceId);
+        return await dataSourceManagementService.deleteDataSource(dataSourceId);
       }
     );
 

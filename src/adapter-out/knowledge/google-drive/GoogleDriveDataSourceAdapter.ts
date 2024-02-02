@@ -226,7 +226,6 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     const fileData = inputFile.data;
     if (!fileData.id) {
       return {
-        type: DataSourceType.GOOGLE_DRIVE,
         items: [],
       };
     }
@@ -243,7 +242,6 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       dataSourceItemList.push(dataSourceItem);
     }
     return {
-      type: DataSourceType.GOOGLE_DRIVE,
       items: dataSourceItemList,
     };
   }
@@ -282,7 +280,6 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
 
     if (!response.data.files) {
       return {
-        type: DataSourceType.GOOGLE_DRIVE,
         items: [],
       };
     }
@@ -302,7 +299,6 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       }
     }
     return {
-      type: DataSourceType.GOOGLE_DRIVE,
       items: files,
     };
   }
@@ -410,6 +406,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
             const eventResult = await publishEvent(
               DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
               {
+                orgId,
                 knowledgeIndexingResult: {
                   knowledgeId: knowledge.id,
                   result: {

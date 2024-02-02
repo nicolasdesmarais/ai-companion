@@ -6,7 +6,7 @@ import {
   DataSourceOrderByDirection,
   DataSourceOrderByField,
 } from "@/src/domain/models/DataSources";
-import dataSourceService from "@/src/domain/services/DataSourceService";
+import dataSourceViewingService from "@/src/domain/services/DataSourceViewingService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
@@ -22,7 +22,7 @@ async function getHandler(
   const { authorizationContext } = context;
 
   const { searchParams } = new URL(req.url);
-  const name = searchParams.get("name");
+  const search = searchParams.get("search") || undefined;
   const type = searchParams.get("type");
   const orderByParam = searchParams.get("orderBy");
 
@@ -36,15 +36,17 @@ async function getHandler(
   }
 
   const filter: DataSourceFilter = {
-    name: name ?? undefined,
+    search,
     type: type ? (type as DataSourceType) : undefined,
     orderBy,
   };
 
-  const dataSources: DataSourceDto[] = await dataSourceService.listDataSources(
-    authorizationContext,
-    filter
-  );
+  const dataSources: DataSourceDto[] =
+    await dataSourceViewingService.listDataSourcesByLevel(
+      authorizationContext,
+      SecuredResourceAccessLevel.SELF,
+      filter
+    );
 
   return NextResponse.json({ data: dataSources });
 }

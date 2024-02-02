@@ -388,6 +388,33 @@
             "type": "string"
           }
         }
+      },
+      "OrgUsage": {
+        "type": "object",
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "description": "Unique identifier for the organization."
+          },
+          "dataTokensUsed": {
+            "type": "number",
+            "description": "Number of data tokens used by the organization."
+          },
+          "dataUsageTokenLimit": {
+            "type": "number",
+            "nullable": true,
+            "description": "The data token usage limit for the organization, if any."
+          },
+          "apiTokensUsed": {
+            "type": "number",
+            "description": "Number of API tokens used by the organization."
+          },
+          "apiUsageTokenLimit": {
+            "type": "number",
+            "nullable": true,
+            "description": "The API token usage limit for the organization, if any."
+          }
+        }
       }
     }
   },
@@ -1572,6 +1599,34 @@
           },
           "500": {
             "description": "Internal Server Error."
+          }
+        }
+      }
+    },
+    "/api/v1/org/usage": {
+      "get": {
+        "summary": "Get organization usage metrics",
+        "description": "Returns usage metrics for the organization.",
+        "operationId": "getOrgUsage",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgUsage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authorization context. User must be authenticated."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }

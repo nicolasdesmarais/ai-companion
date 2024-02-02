@@ -1,4 +1,5 @@
 import { DataSourceDto } from "@/src/domain/models/DataSources";
+import { DataSourceRefreshPeriod } from "@prisma/client";
 
 export interface ListDataSourcesResponse {
   data: DataSourceDto[];
@@ -44,4 +45,9 @@ export enum FileType {
   GOOGLE_SLIDES = "application/vnd.google-apps.presentation",
   FOLDER = "application/vnd.google-apps.folder",
   UNKNOWN = "unknown",
+}
+
+export interface UpdateDataSourceRequest {
+  refreshPeriod: DataSourceRefreshPeriod | null;
+  ais: string[];
 }

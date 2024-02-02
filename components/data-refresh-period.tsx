@@ -14,18 +14,23 @@ import {
 } from "@/components/ui/select";
 import { DataSourceRefreshPeriod } from "@prisma/client";
 import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
+import { cn } from "@/src/lib/utils";
 
 interface Props {
   dataRefreshPeriod: DataSourceRefreshPeriod | null;
   setDataRefreshPeriod: (period: DataSourceRefreshPeriod) => void;
+  className?: string;
+  selectClassName?: string;
 }
 
 export const DataRefreshPeriod = ({
   dataRefreshPeriod,
   setDataRefreshPeriod,
+  className,
+  selectClassName,
 }: Props) => {
   return (
-    <div className="my-4">
+    <div className={cn("my-4", className)}>
       <FormItem>
         <FormLabel>Data Refresh Interval</FormLabel>
         <Select
@@ -35,7 +40,7 @@ export const DataRefreshPeriod = ({
           value={dataRefreshPeriod ?? ""}
         >
           <FormControl>
-            <SelectTrigger className="bg-background">
+            <SelectTrigger className={cn("my-4", selectClassName)}>
               <SelectValue>
                 {getDataSourceRefreshPeriodLabel(dataRefreshPeriod)}
               </SelectValue>

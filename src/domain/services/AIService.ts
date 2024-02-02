@@ -17,6 +17,8 @@ import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySec
 import { DataSourceSecurityService } from "@/src/security/services/DataSourceSecurityService";
 import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
+import { SystemMessage } from "@langchain/core/messages";
+import { ChatOpenAI } from "@langchain/openai";
 import {
   AI,
   AIVisibility,
@@ -26,15 +28,13 @@ import {
   GroupAvailability,
   Prisma,
 } from "@prisma/client";
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { SystemMessage } from "langchain/schema";
 import { AISecurityService } from "../../security/services/AISecurityService";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import { AIDetailDto, AIProfile } from "../models/AI";
 import { AIModelOptions } from "../models/AIModel";
 import { AIRepository } from "../ports/outgoing/AIRepository";
 import aiModelService from "./AIModelService";
-import dataSourceService from "./DataSourceService";
+import dataSourceManagementService from "./DataSourceManagementService";
 import groupService from "./GroupService";
 import invitationService from "./InvitationService";
 
@@ -730,7 +730,7 @@ export class AIService {
       throw new ForbiddenError("Forbidden");
     }
 
-    const dataSourceId = await dataSourceService.createDataSource(
+    const dataSourceId = await dataSourceManagementService.createDataSource(
       authorizationContext,
       name,
       type,

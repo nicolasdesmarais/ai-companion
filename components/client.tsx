@@ -12,6 +12,7 @@ import { AIDetailDto } from "@/src/domain/models/AI";
 import { ChatDetailDto, ChatMessageDto } from "@/src/domain/models/Chats";
 import { Role } from "@prisma/client";
 import axios from "axios";
+import { getCurrentDateStr } from "@/src/lib/utils";
 
 interface ChatClientProps {
   ai: AIDetailDto | null;
@@ -57,7 +58,7 @@ export const ChatClient = ({
   } = useCompletion({
     api: `/api/v1/chats/${chat.id}`,
     body: {
-      date: new Date().toLocaleString(),
+      date: getCurrentDateStr(),
     },
     onError: (err) => {
       toast({

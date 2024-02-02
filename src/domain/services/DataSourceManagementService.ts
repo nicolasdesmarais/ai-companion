@@ -1,23 +1,15 @@
+import { UpdateDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
-import apiDataSourceAdapter from "@/src/adapter-out/knowledge/api/ApiDataSourceAdapter";
-import fileUploadDataSourceAdapter from "@/src/adapter-out/knowledge/file-upload/FileUploadDataSourceAdapter";
-import googleDriveDataSourceAdapter from "@/src/adapter-out/knowledge/google-drive/GoogleDriveDataSourceAdapter";
-import msftDataSourceAdapter from "@/src/adapter-out/knowledge/msft/MsftDataSourceAdapter";
 import { DataSourceAdapter } from "@/src/adapter-out/knowledge/types/DataSourceAdapter";
 import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
-import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
 import { DataSourceRepositoryImpl } from "@/src/adapter-out/repositories/DataSourceRepositoryImpl";
 import prismadb from "@/src/lib/prismadb";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
-import { SecuredAction } from "@/src/security/models/SecuredAction";
-import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
-import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
-import { AISecurityService } from "@/src/security/services/AISecurityService";
-import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
 import { DataSourceSecurityService } from "@/src/security/services/DataSourceSecurityService";
 import {
+  DataSource,
   DataSourceIndexStatus,
   DataSourceRefreshPeriod,
   DataSourceType,
@@ -25,106 +17,19 @@ import {
   KnowledgeIndexStatus,
   PrismaClient,
 } from "@prisma/client";
-import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
+import {
+  EntityNotFoundError,
+  ForbiddenError,
+  RateLimitError,
+} from "../errors/Errors";
 import { DomainEvent } from "../events/domain-event";
-import { DataSourceDto, DataSourceFilter } from "../models/DataSources";
+import { DataSourceDto } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
+import dataSourceAdapterService from "./DataSourceAdapterService";
+import usageService from "./UsageService";
 
-export class DataSourceService {
+export class DataSourceManagementService {
   constructor(private dataSourceRepository: DataSourceRepository) {}
-
-  private getDataSourceAdapter(type: DataSourceType): DataSourceAdapter {
-    switch (type) {
-      case DataSourceType.GOOGLE_DRIVE:
-        return googleDriveDataSourceAdapter;
-      case DataSourceType.WEB_URL:
-        return webUrlsDataSourceAdapter;
-      case DataSourceType.FILE_UPLOAD:
-        return fileUploadDataSourceAdapter;
-      case DataSourceType.API:
-        return apiDataSourceAdapter;
-      case DataSourceType.ONEDRIVE:
-        return msftDataSourceAdapter;
-      default:
-        throw new Error(`DataSourceType ${type} not supported`);
-    }
-  }
-
-  private async getDataSourceAndAdapter(dataSourceId: string) {
-    const dataSource = await prismadb.dataSource.findUnique({
-      where: { id: dataSourceId },
-    });
-
-    if (!dataSource) {
-      throw new EntityNotFoundError(
-        `DataSource with id=${dataSourceId} not found`
-      );
-    }
-
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
-    return { dataSource, dataSourceAdapter };
-  }
-
-  /**
-   * Returns a list of all data sources the user has access to.
-   * @param authorizationContext
-   * @returns
-   */
-  public async listDataSources(
-    authorizationContext: AuthorizationContext,
-    filter?: DataSourceFilter
-  ): Promise<DataSourceDto[]> {
-    const highestAccessLevel = BaseEntitySecurityService.getHighestAccessLevel(
-      authorizationContext,
-      SecuredResourceType.DATA_SOURCES,
-      SecuredAction.READ
-    );
-    if (!highestAccessLevel) {
-      throw new ForbiddenError("Forbidden");
-    }
-
-    const { orgId, userId } = authorizationContext;
-    switch (highestAccessLevel) {
-      case SecuredResourceAccessLevel.INSTANCE:
-        return await this.dataSourceRepository.findAll(filter);
-      case SecuredResourceAccessLevel.ORGANIZATION:
-        return await this.dataSourceRepository.findByOrgId(orgId, filter);
-      case SecuredResourceAccessLevel.SELF:
-        return await this.dataSourceRepository.findByOrgIdAndUserId(
-          orgId,
-          userId,
-          filter
-        );
-    }
-  }
-
-  /**
-   * Returns a list of all data sources for the specified AI.
-   * @param authorizationContext
-   * @param aiId
-   * @returns
-   */
-  public async listAIDataSources(
-    authorizationContext: AuthorizationContext,
-    aiId: string
-  ): Promise<DataSourceDto[]> {
-    const ai = await prismadb.aI.findUnique({
-      where: { id: aiId },
-    });
-
-    if (!ai) {
-      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
-    }
-
-    const canReadAi = AISecurityService.canReadAI(authorizationContext, ai);
-    if (!canReadAi) {
-      throw new ForbiddenError(
-        "User is not authorized to read AI with id=${aiId}"
-      );
-    }
-
-    return await dataSourceRepository.findByAiId(aiId);
-  }
 
   /**
    * Create and persist a data source entity.
@@ -144,7 +49,7 @@ export class DataSourceService {
   ) {
     const { orgId, userId } = authorizationContext;
 
-    const dataSource = await dataSourceRepository.initializeDataSource(
+    const dataSource = await this.dataSourceRepository.initializeDataSource(
       orgId,
       userId,
       name,
@@ -156,7 +61,6 @@ export class DataSourceService {
     const dataSourceId = dataSource.id;
     await publishEvent(DomainEvent.DATASOURCE_INITIALIZED, {
       dataSourceId,
-      dataSourceType: type,
     });
 
     return dataSourceId;
@@ -169,7 +73,7 @@ export class DataSourceService {
    */
   public async createDataSourceKnowledgeList(dataSourceId: string) {
     const { dataSource, dataSourceAdapter } =
-      await this.getDataSourceAndAdapter(dataSourceId);
+      await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
 
     const itemList = await dataSourceAdapter.getDataSourceItemList(
       dataSource.orgId,
@@ -179,15 +83,21 @@ export class DataSourceService {
     );
 
     await this.upsertKnowledgeListAndCreateAssociations(
-      dataSourceId,
+      dataSource,
       dataSourceAdapter,
       itemList
     );
   }
 
-  public async updateDataSourceKnowledgeList(dataSourceId: string) {
+  /**
+   * Refreshes an existing data source.
+   * Retrieves the data source knowledge list and updates the knowledge list
+   * and associations, as needed.
+   * @param dataSourceId
+   */
+  public async refreshDataSourceKnowledgeList(dataSourceId: string) {
     const { dataSource, dataSourceAdapter } =
-      await this.getDataSourceAndAdapter(dataSourceId);
+      await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
 
     const itemList = await dataSourceAdapter.getDataSourceItemList(
       dataSource.orgId,
@@ -197,7 +107,7 @@ export class DataSourceService {
     );
 
     await this.upsertKnowledgeListAndUpdateAssociations(
-      dataSourceId,
+      dataSource,
       dataSourceAdapter,
       itemList
     );
@@ -213,26 +123,18 @@ export class DataSourceService {
     dataSourceId: string,
     dataSourceItemList: DataSourceItemList
   ) {
-    const { dataSourceAdapter } = await this.getDataSourceAndAdapter(
-      dataSourceId
-    );
-
-    const dataSource = await dataSourceRepository.findById(dataSourceId);
-    if (!dataSource) {
-      throw new EntityNotFoundError(
-        `DataSource with id=${dataSourceId} not found`
-      );
-    }
+    const { dataSource, dataSourceAdapter } =
+      await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
 
     if (dataSource.indexStatus === DataSourceIndexStatus.REFRESHING) {
       await this.upsertKnowledgeListAndUpdateAssociations(
-        dataSourceId,
+        dataSource,
         dataSourceAdapter,
         dataSourceItemList
       );
     } else {
       await this.upsertKnowledgeListAndCreateAssociations(
-        dataSourceId,
+        dataSource,
         dataSourceAdapter,
         dataSourceItemList
       );
@@ -240,42 +142,45 @@ export class DataSourceService {
   }
 
   private async upsertKnowledgeListAndCreateAssociations(
-    dataSourceId: string,
+    dataSource: DataSource,
     dataSourceAdapter: DataSourceAdapter,
     itemList: DataSourceItemList
   ) {
     const knowledgeList = await this.upsertKnowledgeList(
+      dataSource,
       dataSourceAdapter,
       itemList
     );
 
     const dataSourceKnowledgeRelations = knowledgeList.map((knowledge) => {
-      return { dataSourceId, knowledgeId: knowledge.id };
+      return { dataSourceId: dataSource.id, knowledgeId: knowledge.id };
     });
 
     await prismadb.dataSourceKnowledge.createMany({
       data: dataSourceKnowledgeRelations,
     });
 
-    await this.publishKnowledgeEvents(dataSourceId, knowledgeList);
+    await this.publishKnowledgeEvents(dataSource.id, knowledgeList);
   }
 
   private async upsertKnowledgeListAndUpdateAssociations(
-    dataSourceId: string,
+    dataSource: DataSource,
     dataSourceAdapter: DataSourceAdapter,
     itemList: DataSourceItemList
   ) {
     const knowledgeList = await this.upsertKnowledgeList(
+      dataSource,
       dataSourceAdapter,
       itemList
     );
 
+    const dataSourceId = dataSource.id;
     const knowledgeIds = knowledgeList.map((knowledge) => knowledge.id);
 
     // Find existing associations
     const existingAssociations = await prismadb.dataSourceKnowledge.findMany({
       where: {
-        dataSourceId: dataSourceId,
+        dataSourceId,
         knowledgeId: {
           in: knowledgeIds,
         },
@@ -324,6 +229,7 @@ export class DataSourceService {
   }
 
   private async upsertKnowledgeList(
+    datasource: DataSource,
     dataSourceAdapter: DataSourceAdapter,
     itemList: DataSourceItemList
   ): Promise<Knowledge[]> {
@@ -331,7 +237,10 @@ export class DataSourceService {
       return [];
     }
     const knowledgeList = [];
-    const existingKnowledgeMap = await this.getExistingKnowledgeMap(itemList);
+    const existingKnowledgeMap = await this.getExistingKnowledgeMap(
+      datasource,
+      itemList
+    );
 
     for (const item of itemList.items) {
       let knowledge = existingKnowledgeMap.get(item.uniqueId!);
@@ -347,7 +256,7 @@ export class DataSourceService {
         knowledge = await prismadb.knowledge.create({
           data: {
             name: item.name,
-            type: itemList.type,
+            type: datasource.type,
             uniqueId: item.uniqueId,
             indexStatus: KnowledgeIndexStatus.INITIALIZED,
             blobUrl: item.blobUrl,
@@ -386,7 +295,10 @@ export class DataSourceService {
     }
   }
 
-  private async getExistingKnowledgeMap(itemList: DataSourceItemList) {
+  private async getExistingKnowledgeMap(
+    dataSource: DataSource,
+    itemList: DataSourceItemList
+  ) {
     const existingKnowledgeMap = new Map<string, Knowledge>();
     const uniqueIds = itemList.items
       .map((item) => item.uniqueId)
@@ -395,7 +307,7 @@ export class DataSourceService {
     if (uniqueIds.length > 0) {
       const existingKnowledge = await prismadb.knowledge.findMany({
         where: {
-          type: itemList.type,
+          type: dataSource.type,
           uniqueId: { in: uniqueIds },
           indexStatus: KnowledgeIndexStatus.COMPLETED,
         },
@@ -438,7 +350,9 @@ export class DataSourceService {
 
     let indexKnowledgeResponse;
     if (knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED) {
-      const dataSourceAdapter = this.getDataSourceAdapter(dataSource.type);
+      const dataSourceAdapter = dataSourceAdapterService.getDataSourceAdapter(
+        dataSource.type
+      );
       try {
         indexKnowledgeResponse = await dataSourceAdapter.indexKnowledge(
           dataSource.orgId,
@@ -576,7 +490,8 @@ export class DataSourceService {
     dataSourceType: DataSourceType,
     data: any
   ) {
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSourceType);
+    const dataSourceAdapter =
+      dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
     const knowledgeId = dataSourceAdapter.retrieveKnowledgeIdFromEvent(data);
     const knowledge = await prismadb.knowledge.findUnique({
       where: { id: knowledgeId },
@@ -598,18 +513,29 @@ export class DataSourceService {
   }
 
   public async loadKnowledgeResult(
+    orgId: string,
     dataSourceType: DataSourceType,
     knowledgeId: string,
     result: KnowledgeIndexingResult,
     index: number
   ) {
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSourceType);
+    const dataSourceAdapter =
+      dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
     const knowledge = await prismadb.knowledge.findUnique({
       where: { id: knowledgeId },
     });
     if (!knowledge) {
       throw new EntityNotFoundError(
         `Knowledge with id=${knowledgeId} not found`
+      );
+    }
+    const knowledgeTokenCount = knowledge.tokenCount || 0;
+
+    const hasSufficientDataStorage =
+      await usageService.hasSufficientDataStorage(orgId, knowledgeTokenCount);
+    if (!hasSufficientDataStorage) {
+      throw new RateLimitError(
+        "Insufficient data storage to load knowledge result"
       );
     }
 
@@ -704,7 +630,8 @@ export class DataSourceService {
       },
     });
 
-    const dataSourceAdapter = this.getDataSourceAdapter(dataSourceType);
+    const dataSourceAdapter =
+      dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
     for (const knowledge of knowledgeList) {
       const indexKnowledgeResponse =
         await dataSourceAdapter.pollKnowledgeIndexingStatus(knowledge);
@@ -997,7 +924,9 @@ export class DataSourceService {
   }
 
   public async findDataSourcesToRefresh() {
-    return await dataSourceRepository.findDataSourceIdsToRefresh(new Date());
+    return await this.dataSourceRepository.findDataSourceIdsToRefresh(
+      new Date()
+    );
   }
 
   public async refreshDataSourceAsUser(
@@ -1019,7 +948,7 @@ export class DataSourceService {
   }
 
   public async refreshDataSourceAsSystem(dataSourceId: string) {
-    const dataSource = await dataSourceRepository.findById(dataSourceId);
+    const dataSource = await this.dataSourceRepository.findById(dataSourceId);
     if (!dataSource) {
       throw new EntityNotFoundError(
         `DataSource with id=${dataSourceId} not found`
@@ -1030,7 +959,7 @@ export class DataSourceService {
   }
 
   private async getDataSource(dataSourceId: string) {
-    const dataSource = await dataSourceRepository.findById(dataSourceId);
+    const dataSource = await this.dataSourceRepository.findById(dataSourceId);
     if (!dataSource) {
       throw new EntityNotFoundError(
         `DataSource with id=${dataSourceId} not found`
@@ -1041,13 +970,51 @@ export class DataSourceService {
 
   private async refreshDataSourceAndPublishEvent(dataSource: DataSourceDto) {
     dataSource.indexStatus = DataSourceIndexStatus.REFRESHING;
-    await dataSourceRepository.updateDataSource(dataSource);
+    await this.dataSourceRepository.updateDataSource(dataSource);
     await publishEvent(DomainEvent.DATASOURCE_REFRESH_REQUESTED, {
       dataSourceId: dataSource.id,
     });
   }
+
+  public async updateDataSource(
+    authorizationContext: AuthorizationContext,
+    dataSourceId: string,
+    updateRequest: UpdateDataSourceRequest
+  ) {
+    const dataSource = await this.getDataSource(dataSourceId);
+
+    const canUpdateDataSource = DataSourceSecurityService.canUpdateDataSource(
+      authorizationContext,
+      dataSource
+    );
+
+    if (!canUpdateDataSource) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    if (updateRequest.refreshPeriod) {
+      const updatedDataSource: DataSourceDto = {
+        ...dataSource,
+        refreshPeriod: updateRequest.refreshPeriod,
+      };
+
+      return await this.dataSourceRepository.updateDataSource(
+        updatedDataSource
+      );
+    }
+
+    if (updateRequest.ais) {
+      await this.dataSourceRepository.updateDataSourceAis(
+        dataSourceId,
+        updateRequest.ais
+      );
+    }
+    return dataSource;
+  }
 }
 
 const dataSourceRepository = new DataSourceRepositoryImpl();
-const dataSourceService = new DataSourceService(dataSourceRepository);
-export default dataSourceService;
+const dataSourceManagementService = new DataSourceManagementService(
+  dataSourceRepository
+);
+export default dataSourceManagementService;

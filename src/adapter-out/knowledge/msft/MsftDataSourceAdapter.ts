@@ -1,8 +1,18 @@
+import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
+import {
+  EntityNotFoundError,
+  ForbiddenError,
+} from "@/src/domain/errors/Errors";
+import { DomainEvent } from "@/src/domain/events/domain-event";
+import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
+import prismadb from "@/src/lib/prismadb";
 import {
   DataSourceType,
   Knowledge,
   KnowledgeIndexStatus,
 } from "@prisma/client";
+import { put } from "@vercel/blob";
+import axios from "axios";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import {
@@ -14,17 +24,6 @@ import {
   KnowledgeIndexingResult,
   KnowledgeIndexingResultStatus,
 } from "../types/KnowlegeIndexingResult";
-import axios from "axios";
-import prismadb from "@/src/lib/prismadb";
-import {
-  EntityNotFoundError,
-  ForbiddenError,
-} from "@/src/domain/errors/Errors";
-import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
-import { Readable } from "stream";
-import { put } from "@vercel/blob";
-import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
-import { DomainEvent } from "@/src/domain/events/domain-event";
 
 export class MsftDataSourceAdapter implements DataSourceAdapter {
   private static readonly GraphApiUrl = "https://graph.microsoft.com/v1.0";
@@ -141,7 +140,6 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
         },
       };
       return {
-        type: DataSourceType.ONEDRIVE,
         items: [dataSourceItem],
       };
     }
@@ -221,6 +219,7 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
       const eventResult = await publishEvent(
         DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
         {
+          orgId,
           knowledgeIndexingResult: {
             knowledgeId: knowledge.id,
             result: {

@@ -5,7 +5,7 @@ import {
 import { ListDataSourcesResponse } from "@/src/adapter-in/api/DataSourcesApi";
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import aiService from "@/src/domain/services/AIService";
-import dataSourceService from "@/src/domain/services/DataSourceService";
+import dataSourceViewingService from "@/src/domain/services/DataSourceViewingService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
@@ -23,7 +23,7 @@ async function getHandler(
 ): Promise<NextResponse<ListDataSourcesResponse>> {
   const { params, authorizationContext } = context;
 
-  const dataSources = await dataSourceService.listAIDataSources(
+  const dataSources = await dataSourceViewingService.listAIDataSources(
     authorizationContext,
     params.aiId
   );

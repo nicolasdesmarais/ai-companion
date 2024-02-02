@@ -24,6 +24,16 @@ const dataSourceSummarySelect: Prisma.DataSourceSelect = {
   refreshPeriod: true,
   indexStatus: true,
   indexPercentage: true,
+  knowledges: {
+    select: {
+      knowledge: true,
+    },
+  },
+  ais: {
+    select: {
+      ai: true,
+    },
+  },
 };
 
 const dataSourceFilterWhereClause = (
@@ -35,9 +45,9 @@ const dataSourceFilterWhereClause = (
   };
 
   if (filter) {
-    if (filter.name) {
+    if (filter.search) {
       whereClause.name = {
-        search: filter.name,
+        search: filter.search,
       };
     }
 
@@ -56,8 +66,12 @@ const dataSourceFilterOrderBy = (
     ? {
         [filter.orderBy.field]: filter.orderBy.direction,
       }
-    : undefined;
+    : { name: "asc" };
 };
+
+interface TokenCountResult {
+  total_token_count: number;
+}
 
 export class DataSourceRepositoryImpl implements DataSourceRepository {
   public async findById(id: string): Promise<DataSourceDto | null> {
@@ -217,5 +231,39 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
       },
     });
     return this.mapDataSourceToDto(dataSource);
+  }
+
+  public async getNumberOfTokensStoredForOrg(orgId: string): Promise<number> {
+    const result = await prismadb.$queryRaw<TokenCountResult[]>`
+    SELECT SUM(dk.token_count) as total_token_count
+    FROM (
+        SELECT DISTINCT k.id, k.token_count
+        FROM data_sources d
+        INNER JOIN data_source_knowledges dsk ON dsk.data_source_id = d.id
+        INNER JOIN knowledge k ON k.id = dsk.knowledge_id
+        WHERE d.org_id = ${orgId}
+    ) as dk;
+`;
+
+    if (result.length > 0 && result[0].total_token_count) {
+      return Number(result[0].total_token_count);
+    }
+
+    return 0;
+  }
+
+  public async updateDataSourceAis(dataSourceId: string, aiIds: string[]) {
+    await prismadb.$transaction(async (tx) => {
+      await tx.aIDataSource.deleteMany({
+        where: { dataSourceId },
+      });
+      await tx.aIDataSource.createMany({
+        data: aiIds.map((aiId) => ({
+          aiId,
+          dataSourceId,
+        })),
+        skipDuplicates: true,
+      });
+    });
   }
 }
