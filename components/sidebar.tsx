@@ -1,6 +1,12 @@
 "use client";
 
 import { ModeToggle } from "@/components/mode-toggle";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useChats } from "@/hooks/use-chats";
 import { useProModal } from "@/hooks/use-pro-modal";
 import { cn } from "@/src/lib/utils";
@@ -12,16 +18,17 @@ import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import {
   Atom,
+  Building,
+  Building2,
   Eye,
+  FileText,
   LockKeyhole,
   MessageSquare,
   Plus,
   Settings,
+  Sparkles,
   Store,
   UserPlus,
-  Building2,
-  Building,
-  FileText,
 } from "lucide-react";
 import {
   ReadonlyURLSearchParams,
@@ -30,12 +37,8 @@ import {
   useSearchParams,
 } from "next/navigation";
 import { useEffect } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { ProModal } from "./pro-modal";
+import { Button } from "./ui/button";
 
 interface SidebarProps {
   isPro: boolean;
@@ -106,6 +109,13 @@ export const Sidebar = ({
   const pathname = usePathname();
   const searchparams = useSearchParams();
 
+  const showUpgrade = userPermissions.some((permission) => {
+    return (
+      permission.resourceType === SecuredResourceType.AI &&
+      permission.action === SecuredAction.READ &&
+      permission.accessLevel === SecuredResourceAccessLevel.ORGANIZATION
+    );
+  });
   useEffect(() => {
     fetchChats();
   }, [fetchChats]);
@@ -327,6 +337,11 @@ export const Sidebar = ({
         )}
       </div>
       <div className="space-y-2 flex flex-col items-center py-3 px-8">
+        {showUpgrade && (
+          <Button onClick={proModal.onOpen} size="sm" variant="premium">
+            <Sparkles className="h-4 w-4 fill-white text-white" />
+          </Button>
+        )}
         <ModeToggle />
         <UserButton
           afterSignOutUrl="/"
@@ -335,6 +350,7 @@ export const Sidebar = ({
           }}
         />
       </div>
+      <ProModal />
     </div>
   );
 };
