@@ -20,7 +20,7 @@ export const DataSourcesTable = () => {
   const searchParams = useSearchParams();
 
   const search = searchParams.get("search");
-  const sort = searchParams.get("sort");
+  const orderBy = searchParams.get("orderBy");
   const focus = searchParams.get("focus");
 
   const { toast } = useToast();
@@ -32,7 +32,7 @@ export const DataSourcesTable = () => {
           url: "/api/v1/data-sources",
           query: {
             search: search ? `*${search}*` : null,
-            sort,
+            orderBy: orderBy ? `+${orderBy}` : null,
           },
         },
         { skipNull: true, skipEmptyString: true }
@@ -52,7 +52,7 @@ export const DataSourcesTable = () => {
 
   useEffect(() => {
     fetchDataSources();
-  }, [search]);
+  }, [search, orderBy]);
 
   const select = (id: string) => {
     const query = {

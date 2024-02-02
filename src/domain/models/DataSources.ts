@@ -33,7 +33,9 @@ export interface DataSourceOrderBy {
 export enum DataSourceOrderByField {
   CREATED_AT = "createdAt",
   LAST_INDEXED_AT = "lastIndexedAt",
-  USAGE_COUNT = "usageCount",
+  NAME = "name",
+  TYPE = "type",
+  PROGRESS = "indexPercentage",
 }
 
 export enum DataSourceOrderByDirection {
