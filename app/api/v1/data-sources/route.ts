@@ -22,7 +22,7 @@ async function getHandler(
   const { authorizationContext } = context;
 
   const { searchParams } = new URL(req.url);
-  const name = searchParams.get("name");
+  const search = searchParams.get("search") || undefined;
   const type = searchParams.get("type");
   const orderByParam = searchParams.get("orderBy");
 
@@ -36,7 +36,7 @@ async function getHandler(
   }
 
   const filter: DataSourceFilter = {
-    name: name ?? undefined,
+    search,
     type: type ? (type as DataSourceType) : undefined,
     orderBy,
   };

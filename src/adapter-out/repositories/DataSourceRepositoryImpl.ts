@@ -45,9 +45,9 @@ const dataSourceFilterWhereClause = (
   };
 
   if (filter) {
-    if (filter.name) {
+    if (filter.search) {
       whereClause.name = {
-        search: filter.name,
+        search: filter.search,
       };
     }
 
