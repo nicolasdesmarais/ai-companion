@@ -19,13 +19,25 @@ export const DataSourcesTable = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const search = searchParams.get("search");
+  const sort = searchParams.get("sort");
   const focus = searchParams.get("focus");
 
   const { toast } = useToast();
 
   const fetchDataSources = async () => {
     try {
-      const response = await axios.get(`/api/v1/data-sources`);
+      const url = qs.stringifyUrl(
+        {
+          url: "/api/v1/data-sources",
+          query: {
+            search: search ? `*${search}*` : null,
+            sort,
+          },
+        },
+        { skipNull: true, skipEmptyString: true }
+      );
+      const response = await axios.get(url);
       setDataSources(response.data.data);
     } catch (error: any) {
       toast({
@@ -40,7 +52,7 @@ export const DataSourcesTable = () => {
 
   useEffect(() => {
     fetchDataSources();
-  }, []);
+  }, [search]);
 
   const select = (id: string) => {
     const query = {
