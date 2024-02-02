@@ -44,6 +44,7 @@ interface SidebarProps {
   isPro: boolean;
   className?: string;
   userPermissions: Permission[];
+  orgId: string;
 }
 
 interface Route {
@@ -102,6 +103,7 @@ export const Sidebar = ({
   isPro,
   className,
   userPermissions,
+  orgId,
 }: SidebarProps) => {
   const { chats, fetchChats, loading } = useChats();
   const proModal = useProModal();
@@ -350,7 +352,7 @@ export const Sidebar = ({
           }}
         />
       </div>
-      <ProModal />
+      <ProModal orgId={orgId} />
     </div>
   );
 };

@@ -9,15 +9,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/components/ui/use-toast";
 import { useProModal } from "@/hooks/use-pro-modal";
 import StripePricingTable from "./stripe-pricing-table";
 
-export const ProModal = () => {
+type Props = {
+  orgId: string;
+};
+
+export const ProModal = ({ orgId }: Props) => {
   const proModal = useProModal();
   const [isMounted, setIsMounted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     setIsMounted(true);
@@ -37,7 +38,7 @@ export const ProModal = () => {
         </DialogHeader>
         <Separator />
         <div className="overflow-auto h-screen">
-          <StripePricingTable />
+          <StripePricingTable orgId={orgId} />
         </div>
       </DialogContent>
     </Dialog>
