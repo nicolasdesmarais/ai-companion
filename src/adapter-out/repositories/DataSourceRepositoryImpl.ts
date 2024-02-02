@@ -66,7 +66,7 @@ const dataSourceFilterOrderBy = (
     ? {
         [filter.orderBy.field]: filter.orderBy.direction,
       }
-    : undefined;
+    : { name: "asc" };
 };
 
 interface TokenCountResult {

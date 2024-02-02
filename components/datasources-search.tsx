@@ -1,9 +1,5 @@
 "use client";
 
-import { Search } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import qs from "query-string";
-import { ChangeEventHandler, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -13,11 +9,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDebounce } from "@/hooks/use-debounce";
+import { Search } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import qs from "query-string";
+import { ChangeEventHandler, useEffect, useState } from "react";
 
 const filterOptions = [
   { id: "name", name: "Name" },
-  { id: "newest", name: "Newest" },
-  { id: "progress", name: "Progress" },
+  { id: "indexPercentage", name: "Progress" },
+  { id: "type", name: "Type" },
+  { id: "lastIndexedAt", name: "Index Date" },
+  { id: "createdAt", name: "Age" },
 ];
 
 export const DataSourcesSearch = () => {
@@ -25,11 +27,11 @@ export const DataSourcesSearch = () => {
   const searchParams = useSearchParams();
 
   const search = searchParams.get("search");
-  const sortParam = searchParams.get("sort");
+  const orderBy = searchParams.get("orderBy");
 
   const [value, setValue] = useState(search || "");
   const debouncedValue = useDebounce<string>(value, 500);
-  const [sort, setSort] = useState<string | undefined>(sortParam || "");
+  const [sort, setSort] = useState<string | undefined>(orderBy || "");
 
   const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setValue(e.target.value);
@@ -38,7 +40,7 @@ export const DataSourcesSearch = () => {
   useEffect(() => {
     const query = {
       search: debouncedValue,
-      sort,
+      orderBy: sort,
     };
 
     const url = qs.stringifyUrl(
