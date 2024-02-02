@@ -245,7 +245,11 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
     ) as dk;
 `;
 
-    return result[0]?.total_token_count ?? 0;
+    if (result.length > 0 && result[0].total_token_count) {
+      return Number(result[0].total_token_count);
+    }
+
+    return 0;
   }
 
   public async updateDataSourceAis(dataSourceId: string, aiIds: string[]) {
