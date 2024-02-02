@@ -12,7 +12,7 @@ async function getHandler(
   context: { authorizationContext: AuthorizationContext }
 ) {
   const { authorizationContext } = context;
-  const orgUsage = usageService.getOrgUsage(authorizationContext);
+  const orgUsage = await usageService.getOrgUsage(authorizationContext);
   return NextResponse.json(orgUsage);
 }
 
