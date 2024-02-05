@@ -8,12 +8,28 @@ export const imageModels = [
     name: "DALLE 2",
   },
   {
+    id: "dalle-3",
+    name: "DALLE 3",
+  },
+  {
     id: "stable-diffusion-xl",
     name: "Stable Diffusion XL",
   },
   {
     id: "latent-consistency",
     name: "Latent Consistency",
+  },
+  {
+    id: "playground-2",
+    name: "Playground v2",
+  },
+  {
+    id: "proteus",
+    name: "Proteus v0.2",
+  },
+  {
+    id: "realvisxl",
+    name: "Realvisxl v3 turbo",
   },
 ];
 
