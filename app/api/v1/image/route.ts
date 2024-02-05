@@ -19,6 +19,13 @@ const cloudinaryUpload = async (imageUrl: string) => {
     imageUrl,
     "bawmwjeq"
   );
+  if (data.bytes === 4723) {
+    // blank image means NSFW
+    return new NextResponse(
+      "Generated image is not allowed by our safety system.",
+      { status: 422 }
+    );
+  }
   return NextResponse.json(data);
 };
 
@@ -221,6 +228,6 @@ export async function POST(req: Request) {
       });
     }
     console.log("[IMAGE_ERROR]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    return new NextResponse(error.message, { status: 500 });
   }
 }

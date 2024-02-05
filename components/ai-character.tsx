@@ -167,6 +167,7 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
         });
         form.setValue("src", response.data.secure_url, { shouldDirty: true });
       } catch (error) {
+        console.log(error);
         toast({
           variant: "destructive",
           description:
