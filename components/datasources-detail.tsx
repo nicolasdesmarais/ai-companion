@@ -203,9 +203,9 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
             <FormItem>
               <FormLabel className="uppercase">Content</FormLabel>
               {dataSource.knowledges.map(({ knowledge }: any) => (
-                <div className="flex justify-between">
+                <div className="flex justify-between" key={knowledge.id}>
                   {knowledge.blobUrl ? (
-                    <div key={knowledge.id}>
+                    <div>
                       <a
                         href={knowledge.blobUrl}
                         target="_blank"
@@ -215,9 +215,7 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
                       </a>
                     </div>
                   ) : (
-                    <FormDescription key={knowledge.id}>
-                      {knowledge.name}
-                    </FormDescription>
+                    <FormDescription>{knowledge.name}</FormDescription>
                   )}
                   <div>
                     {knowledge.metadata?.percentComplete
