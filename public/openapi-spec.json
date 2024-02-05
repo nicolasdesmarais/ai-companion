@@ -415,6 +415,39 @@
             "description": "The API token usage limit for the organization, if any."
           }
         }
+      },
+      "OrgUsageByAI": {
+        "type": "object",
+        "properties": {
+          "orgUsage": {
+            "$ref": "#/components/schemas/OrgUsage"
+          },
+          "aiUsages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AIUsage"
+            }
+          }
+        }
+      },
+      "AIUsage": {
+        "type": "object",
+        "properties": {
+          "aiId": {
+            "type": "string",
+            "description": "Unique identifier for the AI instance."
+          },
+          "aiDataTokensUsed": {
+            "type": "number",
+            "nullable": true,
+            "description": "Number of data tokens used by this AI instance."
+          },
+          "aiApiTokensUsed": {
+            "type": "number",
+            "nullable": true,
+            "description": "Number of API tokens used by this AI instance."
+          }
+        }
       }
     }
   },
@@ -1603,7 +1636,32 @@
         }
       }
     },
-    "/api/v1/org/usage": {
+    "/api/v1/usage/ai": {
+      "get": {
+        "summary": "Get organization usage metrics by AI",
+        "description": "Returns the usage metrics of the organization broken down by AI.",
+        "operationId": "getOrgUsageByAI",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgUsageByAI"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/usage/org": {
       "get": {
         "summary": "Get organization usage metrics",
         "description": "Returns usage metrics for the organization.",
