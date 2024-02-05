@@ -1,4 +1,5 @@
 "use client";
+import { ConfirmModal } from "@/components/confirm-modal";
 import { DataRefreshPeriod } from "@/components/data-refresh-period";
 import { DataSourceTypes } from "@/components/datasource-types";
 import { Drawer } from "@/components/drawer";
@@ -14,6 +15,7 @@ import {
 } from "@/components/ui/form";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { useToast } from "@/components/ui/use-toast";
+import { useConfirmModal } from "@/hooks/use-confirm-modal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DataSourceRefreshPeriod } from "@prisma/client";
 import axios, { AxiosError } from "axios";
@@ -45,6 +47,7 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
   const searchParams = useSearchParams();
   const focus = searchParams.get("focus");
   const dataSource = dataSources.find((ds) => ds.id === focus);
+  const confirmModal = useConfirmModal();
 
   useEffect(() => {
     const fetchAis = async () => {
@@ -94,6 +97,38 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      const response = await axios.delete(
+        `/api/v1/data-sources/${dataSource.id}`
+      );
+      if (response.status === 204) {
+        toast({
+          description: "Data Source deleted successfully",
+        });
+      } else {
+        throw new Error(response.data.message);
+      }
+      onChange();
+      const url = qs.stringifyUrl(
+        {
+          url: window.location.href,
+          query: {
+            focus: null,
+          },
+        },
+        { skipNull: true, skipEmptyString: true }
+      );
+
+      router.push(url);
+    } catch (error) {
+      toast({
+        description: "Something went wrong",
+        variant: "destructive",
+      });
     }
   };
 
@@ -230,6 +265,23 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
           )}
         </form>
       </Form>
+      <Button
+        onClick={() =>
+          confirmModal.onOpen(
+            "Delete Data Source?",
+            <div>
+              <div>Are you sure you want to delete {dataSource.name}</div>
+              <div>This action cannot be undone.</div>
+            </div>,
+            handleDelete
+          )
+        }
+        type="button"
+        variant="destructive"
+        className="mt-8"
+      >
+        Delete Data
+      </Button>
       <Drawer open={chatOpen} setOpen={setChatOpen}>
         <TestChat
           ai={chatAi}
@@ -259,6 +311,7 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
           }
         />
       </Drawer>
+      <ConfirmModal />
     </div>
   );
 };
