@@ -130,7 +130,6 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
         <form className="space-y-4 mt-4">
           <FormItem>
             <FormLabel className="uppercase">Selected AIs</FormLabel>
-            <FormLabel className="uppercase">Selected AIs</FormLabel>
             {ais && (
               <>
                 <div className="relative mt-3 overflow-y-auto">
@@ -164,15 +163,11 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
                 <FormDescription>
                   Select the AIs you would like to have access to this data.
                 </FormDescription>
-                <FormDescription>
-                  Select the AIs you would like to have access to this data.
-                </FormDescription>
               </>
             )}
           </FormItem>
           <DataRefreshPeriod
             selectClassName="max-w-[200px]"
-            labelClassName="uppercase"
             labelClassName="uppercase"
             setDataRefreshPeriod={(value) => {
               if (value) {
@@ -185,32 +180,23 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
           <FormItem>
             <FormLabel className="uppercase">Type</FormLabel>
             <FormDescription>
-              <FormLabel className="uppercase">Type</FormLabel>
-              <FormDescription>
-                {
-                  DataSourceTypes.find(
-                    (format) => format.type === dataSource.type
-                  )?.name
-                }
-              </FormDescription>
+              {
+                DataSourceTypes.find(
+                  (format) => format.type === dataSource.type
+                )?.name
+              }
             </FormDescription>
           </FormItem>
           <FormItem>
             <FormLabel className="uppercase">Original Upload</FormLabel>
             <FormDescription>
-              <FormLabel className="uppercase">Original Upload</FormLabel>
-              <FormDescription>
-                {format(new Date(dataSource.createdAt), "h:mma M/d/yyyy ")}
-              </FormDescription>
+              {format(new Date(dataSource.createdAt), "h:mma M/d/yyyy ")}
             </FormDescription>
           </FormItem>
           <FormItem>
             <FormLabel className="uppercase">Last Indexed</FormLabel>
             <FormDescription>
-              <FormLabel className="uppercase">Last Indexed</FormLabel>
-              <FormDescription>
-                {format(new Date(dataSource.lastIndexedAt), "h:mma M/d/yyyy ")}
-              </FormDescription>
+              {format(new Date(dataSource.lastIndexedAt), "h:mma M/d/yyyy ")}
             </FormDescription>
           </FormItem>
           {dataSource.knowledges.length > 0 && (
