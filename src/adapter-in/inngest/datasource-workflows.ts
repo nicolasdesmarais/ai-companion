@@ -67,7 +67,7 @@ const publishDataSourceItemList = async (
   step: any,
   forRefresh: boolean
 ) => {
-  if (!dataSourceItemList) {
+  if (!dataSourceItemList || dataSourceItemList.items.length === 0) {
     return;
   }
 

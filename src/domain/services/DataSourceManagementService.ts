@@ -202,6 +202,10 @@ export class DataSourceManagementService {
     dataSourceId: string,
     knowledgeIds: string[]
   ) {
+    if (knowledgeIds.length === 0) {
+      return;
+    }
+
     const dataSourceKnowledgeRelations = knowledgeIds.map((knowledgeId) => {
       return { dataSourceId, knowledgeId };
     });
