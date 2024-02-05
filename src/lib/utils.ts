@@ -1,4 +1,4 @@
-import { type ClassValue, clsx } from "clsx";
+import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -14,7 +14,7 @@ export const delay = (ms: number | undefined) =>
 
 export function getCurrentDateStr() {
   const now = new Date();
-  const dayOfWeek = now.toLocaleString(window.navigator.language, {
+  const dayOfWeek = now.toLocaleString(undefined, {
     weekday: "long",
   });
   return `${dayOfWeek}, ${now.toLocaleString()}`;
