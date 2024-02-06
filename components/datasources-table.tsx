@@ -1,5 +1,4 @@
 "use client";
-import { Table } from "@/components/table";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/src/lib/utils";
@@ -73,79 +72,86 @@ export const DataSourcesTable = () => {
   return (
     <div className="mt-2">
       <div className="flex w-full">
-        <Table
-          headers={[
-            "Name",
-            "AI",
-            "Type",
-            "Last Modified",
-            "Progress",
-            "Status",
-          ]}
-          className="grow my-4 max-h-60"
-        >
-          {dataSources.map((dataSource: any) => (
-            <>
-              <tr
-                key={dataSource.id}
-                className={cn(
-                  "items-center my-2 text-sm hover:bg-ring/10",
-                  focus === dataSource.id && "bg-ring/10"
-                )}
-                onClick={() => select(dataSource.id)}
-              >
-                <td className="p-2">
-                  {dataSource.name.length > 30 ? (
-                    <Tooltip
-                      content={dataSource.name}
-                      className="cursor-default"
-                    >
-                      <div className="max-w-[280px] truncate">
+        <table className="table-auto text-left grow my-4 max-h-60">
+          <thead className="border-y-2 p-2 border-ring">
+            <tr>
+              <th className="p-2 text-sm">Name</th>
+              <th className="p-2 text-sm">AI</th>
+              <th className="p-2 text-sm hidden md:block">Type</th>
+              <th className="p-2 text-sm">Last Modified</th>
+              <th className="p-2 text-sm">Progress</th>
+              <th className="p-2 text-sm hidden md:block">Status</th>
+            </tr>
+          </thead>
+          <tbody className="text-sm">
+            {dataSources.map((dataSource: any) => (
+              <>
+                <tr
+                  key={dataSource.id}
+                  className={cn(
+                    "items-center my-2 text-sm hover:bg-ring/10",
+                    focus === dataSource.id && "bg-ring/10"
+                  )}
+                  onClick={() => select(dataSource.id)}
+                >
+                  <td className="p-2">
+                    {dataSource.name.length > 30 ? (
+                      <Tooltip
+                        content={dataSource.name}
+                        className="cursor-default"
+                      >
+                        <div className="max-w-[100px] md:max-w-[280px] truncate">
+                          {dataSource.name}
+                        </div>
+                      </Tooltip>
+                    ) : (
+                      <div className="truncate max-w-[100px] md:max-w-[280px]">
                         {dataSource.name}
                       </div>
-                    </Tooltip>
-                  ) : (
-                    <div className="truncate max-w-[280px]">
-                      {dataSource.name}
-                    </div>
-                  )}
-                </td>
-                <td className="p-2 flex flex-wrap max-w-[145px] min-w-[115px]">
-                  {dataSource.ais.map((ai: any) => (
-                    <div key={`ai-${ai.id}`}>
-                      <Tooltip content={ai.ai.name} className="cursor-default">
-                        <Avatar className="h-6 w-6 mr-2">
-                          <AvatarImage src={ai.ai.src} crop="w_48,h_48" />
-                        </Avatar>
-                      </Tooltip>
-                    </div>
-                  ))}
-                </td>
-                <td className="p-2">
-                  {
-                    DataSourceTypes.find(
-                      (format) => format.type === dataSource.type
-                    )?.name
-                  }
-                </td>
-                <td className="p-2">
-                  {dataSource.lastIndexedAt
-                    ? format(
-                        new Date(dataSource.lastIndexedAt),
-                        "h:mma M/d/yyyy "
-                      )
-                    : null}
-                </td>
-                <td className="p-2">
-                  {dataSource.indexStatus === KnowledgeIndexStatus.FAILED
-                    ? "Failed"
-                    : Math.round(dataSource.indexPercentage) + "%"}
-                </td>
-                <td className="p-2">{dataSource.indexStatus}</td>
-              </tr>
-            </>
-          ))}
-        </Table>
+                    )}
+                  </td>
+                  <td className="p-2 flex flex-wrap max-w-[145px] min-w-[115px]">
+                    {dataSource.ais.map((ai: any) => (
+                      <div key={`ai-${ai.id}`}>
+                        <Tooltip
+                          content={ai.ai.name}
+                          className="cursor-default"
+                        >
+                          <Avatar className="h-6 w-6 mr-2">
+                            <AvatarImage src={ai.ai.src} crop="w_48,h_48" />
+                          </Avatar>
+                        </Tooltip>
+                      </div>
+                    ))}
+                  </td>
+                  <td className="p-2 hidden md:table-cell">
+                    {
+                      DataSourceTypes.find(
+                        (format) => format.type === dataSource.type
+                      )?.name
+                    }
+                  </td>
+                  <td className="p-2">
+                    {dataSource.lastIndexedAt
+                      ? format(
+                          new Date(dataSource.lastIndexedAt),
+                          "h:mma M/d/yyyy "
+                        )
+                      : null}
+                  </td>
+                  <td className="p-2">
+                    {dataSource.indexStatus === KnowledgeIndexStatus.FAILED
+                      ? "Failed"
+                      : Math.round(dataSource.indexPercentage) + "%"}
+                  </td>
+                  <td className="p-2 hidden md:table-cell">
+                    {dataSource.indexStatus}
+                  </td>
+                </tr>
+              </>
+            ))}
+          </tbody>
+        </table>
         <DataSourcesDetails
           dataSources={dataSources}
           onChange={fetchDataSources}

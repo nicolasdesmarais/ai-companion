@@ -135,8 +135,8 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
     return null;
 
   return (
-    <div className="bg-profile ml-2 mt-2 w-1/3 p-4 min-w-[500px]">
-      <div className="absolute top-[110px] right-4">
+    <div className="bg-profile md:ml-2 md:mt-2 p-4 md:min-w-[500px] w-full md:w-1/3 absolute md:sticky top-[64px] bottom-0">
+      <div className="absolute top-2 right-4">
         <Button
           onClick={() => {
             const url = qs.stringifyUrl(
@@ -148,7 +148,6 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
               },
               { skipNull: true, skipEmptyString: true }
             );
-
             router.push(url);
           }}
           variant="ghost"
