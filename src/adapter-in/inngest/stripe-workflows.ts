@@ -54,6 +54,7 @@ const handleCheckoutSessionCompletedEvent = async (
   );
 
   const dataUsageLimitMetadata = stripeSubscription.metadata.allowance_gb;
+
   const dataUsageLimitInGb = dataUsageLimitMetadata
     ? parseInt(dataUsageLimitMetadata)
     : undefined;

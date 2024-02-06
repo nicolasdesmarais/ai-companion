@@ -2,6 +2,7 @@ export interface OrgSubscriptionDto {
   orgId: string;
   createdAt: Date;
   updatedAt: Date;
+  dataUsageLimitInTokens: number | null;
   dataUsageLimitInGb: number | null;
   apiUsageTokenLimit: number | null;
 }
