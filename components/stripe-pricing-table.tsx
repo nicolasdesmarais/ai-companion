@@ -20,7 +20,6 @@ const StripePricingTable = ({
     "publishable-key": stripePublishableKey,
     "client-reference-id": orgId,
     "customer-email": user?.primaryEmailAddress?.emailAddress,
-    metadata: "AppDirect.ai",
   });
   return (
     <>
