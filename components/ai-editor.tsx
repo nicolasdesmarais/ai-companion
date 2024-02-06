@@ -354,6 +354,24 @@ export const AIEditor = ({
       ),
     },
     {
+      name: "Link Existing Knowledge",
+      secondary: true,
+      route: "edit/knowledge/connect",
+      content: aiKnowledge,
+      buttons: (
+        <>
+          <div>{backButton("edit/knowledge")}</div>
+          <div className="flex flex-col md:flex-row items-center">
+            {saveProgressButton}
+            {continueButton(
+              "/edit/personality",
+              dataSources.length ? "Continue" : "Skip & Continue"
+            )}
+          </div>
+        </>
+      ),
+    },
+    {
       name: "File Upload",
       secondary: true,
       route: "edit/knowledge/file",
@@ -371,7 +389,6 @@ export const AIEditor = ({
         </>
       ),
     },
-
     {
       name: "Website URL",
       secondary: true,

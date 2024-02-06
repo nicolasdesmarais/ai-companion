@@ -29,10 +29,12 @@ import {
   Globe,
   Loader,
   MinusCircle,
+  PlusCircle,
   RefreshCcw,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ConnectKnowledge } from "./connect-knowledge";
 import DataSourceCard from "./datasource-card";
 import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
 import { DataSourceTypes } from "./datasource-types";
@@ -327,12 +329,12 @@ export const AIKnowledge = ({
           </p>
           <h3 className="text-md font-medium mt-6 mb-2">Data Sources</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* <DataSourceCard
+            <DataSourceCard
               icon={PlusCircle}
               title="Your Data Stores"
               description="Select a data store you created for a different AI."
-              isDisabled={true}
-            /> */}
+              onClick={() => router.push(`/ai/${aiId}/edit/knowledge/connect`)}
+            />
             <DataSourceCard
               icon={FileUp}
               title="Upload Files"
@@ -377,6 +379,12 @@ export const AIKnowledge = ({
             Create Data Source
           </h1>
         </div>
+      )}
+      {pathname.endsWith("connect") && (
+        <ConnectKnowledge
+          goBack={() => router.push(`/ai/${aiId}/edit/knowledge`)}
+          form={form}
+        />
       )}
       {pathname.endsWith("file") && (
         <FileUploadKnowledge

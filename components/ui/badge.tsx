@@ -1,5 +1,5 @@
-import * as React from "react";
 import { VariantProps, cva } from "class-variance-authority";
+import * as React from "react";
 
 import { cn } from "@/src/lib/utils";
 
@@ -14,7 +14,7 @@ const badgeVariants = cva(
           "bg-secondary hover:bg-secondary/80 border-transparent text-secondary-foreground",
         destructive:
           "bg-destructive hover:bg-destructive/80 border-transparent text-destructive-foreground",
-        outline: "text-foreground",
+        outline: "text-white dark:text-foreground",
       },
     },
     defaultVariants: {
