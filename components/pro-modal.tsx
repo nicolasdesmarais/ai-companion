@@ -13,10 +13,14 @@ import { useProModal } from "@/hooks/use-pro-modal";
 import StripePricingTable from "./stripe-pricing-table";
 
 type Props = {
-  orgId?: string;
+  orgId: string;
 };
 
 export const ProModal = ({ orgId }: Props) => {
+  const stripePublishableKey =
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "";
+  const pricingTableId = process.env.NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID ?? "";
+
   const proModal = useProModal();
   const [isMounted, setIsMounted] = useState(false);
 
@@ -38,7 +42,11 @@ export const ProModal = ({ orgId }: Props) => {
         </DialogHeader>
         <Separator />
         <div className="overflow-auto h-screen">
-          <StripePricingTable orgId={orgId} />
+          <StripePricingTable
+            orgId={orgId}
+            stripePublishableKey={stripePublishableKey}
+            pricingTableId={pricingTableId}
+          />
         </div>
       </DialogContent>
     </Dialog>
