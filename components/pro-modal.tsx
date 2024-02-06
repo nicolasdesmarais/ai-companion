@@ -24,8 +24,8 @@ export const ProModal = ({ orgId }: Props) => {
 
   useEffect(() => {
     setIsMounted(true);
-    setStripePublishableKey(process.env.STRIPE_PUBLISHABLE_KEY || "");
-    setPricingTableId(process.env.STRIPE_PRICING_TABLE_ID || "");
+    setStripePublishableKey(process.env.STRIPE_PUBLISHABLE_KEY ?? "");
+    setPricingTableId(process.env.STRIPE_PRICING_TABLE_ID ?? "");
   }, []);
 
   if (!isMounted) {
