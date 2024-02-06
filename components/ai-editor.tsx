@@ -6,10 +6,9 @@ import { Form } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
 import { AIDetailDto } from "@/src/domain/models/AI";
 import { AIModel } from "@/src/domain/models/AIModel";
-import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { cn } from "@/src/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Category, Knowledge } from "@prisma/client";
+import { Knowledge } from "@prisma/client";
 import axios from "axios";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -111,13 +110,14 @@ export const AIEditor = ({
   const [dataSources, setDataSources] = useState<any[]>([]);
   const [dataSourcesLoading, setDataSourcesLoading] = useState(true);
 
+  const fetchDataSources = async () => {
+    setDataSourcesLoading(true);
+    const response = await axios.get(`/api/v1/ai/${aiId}/data-sources`);
+    setDataSources(response.data.data);
+    setDataSourcesLoading(false);
+  };
+
   useEffect(() => {
-    const fetchDataSources = async () => {
-      setDataSourcesLoading(true);
-      const response = await axios.get(`/api/v1/ai/${aiId}/data-sources`);
-      setDataSources(response.data.data);
-      setDataSourcesLoading(false);
-    };
     if (aiId) {
       fetchDataSources();
     }
@@ -290,6 +290,7 @@ export const AIEditor = ({
       setDataSource={setDataSources}
       knowledgeLoading={dataSourcesLoading}
       aiModels={aiModels}
+      fetchDataSources={fetchDataSources}
     />
   );
 

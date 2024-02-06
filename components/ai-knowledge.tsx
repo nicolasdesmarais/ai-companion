@@ -1,36 +1,8 @@
 import { Table } from "@/components/table";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { DataSourceType, KnowledgeIndexStatus } from "@prisma/client";
-import axios, { AxiosError } from "axios";
-import { format } from "date-fns";
-import {
-  ChevronLeft,
-  Coffee,
-  FileUp,
-  Globe,
-  Loader,
-  MinusCircle,
-  RefreshCcw,
-  Server,
-} from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import DataSourceCard from "./datasource-card";
-import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
-import { DataSourceTypes } from "./datasource-types";
-import { FileUploadKnowledge } from "./file-upload-knowledge";
-import { GoogleDriveForm } from "./google-drive-knowledge";
-import { Banner } from "./ui/banner";
-import { WebUrlsForm } from "./web-urls-knowledge-form";
-import { OneDriveKnowledge } from "./onedrive-knowledge";
-import { Tooltip } from "./ui/tooltip";
-import { GoogleDriveSvg } from "./svg/google-drive-svg";
-import { OneDriveSvg } from "./svg/onedrive-svg";
 import {
   FormControl,
   FormDescription,
-  FormField,
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
@@ -41,7 +13,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
 import { AIModel } from "@/src/domain/models/AIModel";
+import {
+  DataSourceIndexStatus,
+  DataSourceType,
+  KnowledgeIndexStatus,
+} from "@prisma/client";
+import axios, { AxiosError } from "axios";
+import { format } from "date-fns";
+import {
+  ChevronLeft,
+  Coffee,
+  FileUp,
+  Globe,
+  Loader,
+  MinusCircle,
+  RefreshCcw,
+} from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import DataSourceCard from "./datasource-card";
+import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
+import { DataSourceTypes } from "./datasource-types";
+import { FileUploadKnowledge } from "./file-upload-knowledge";
+import { GoogleDriveForm } from "./google-drive-knowledge";
+import { OneDriveKnowledge } from "./onedrive-knowledge";
+import { GoogleDriveSvg } from "./svg/google-drive-svg";
+import { OneDriveSvg } from "./svg/onedrive-svg";
+import { Banner } from "./ui/banner";
+import { Tooltip } from "./ui/tooltip";
+import { WebUrlsForm } from "./web-urls-knowledge-form";
+
+const needsRefresh = (status: DataSourceIndexStatus) =>
+  status !== DataSourceIndexStatus.COMPLETED &&
+  status !== DataSourceIndexStatus.FAILED &&
+  status !== DataSourceIndexStatus.DELETED &&
+  status !== DataSourceIndexStatus.REFRESHING;
 
 interface SelectDataSourceProps {
   form: any;
@@ -49,6 +57,7 @@ interface SelectDataSourceProps {
   setDataSource: (dataSource: any) => void;
   knowledgeLoading: boolean;
   aiModels: AIModel[];
+  fetchDataSources: () => void;
 }
 
 const dataSourceTypesForRefresh = [
@@ -63,6 +72,7 @@ export const AIKnowledge = ({
   setDataSource,
   knowledgeLoading,
   aiModels,
+  fetchDataSources,
 }: SelectDataSourceProps) => {
   const { toast } = useToast();
   const [modelId, setModelId] = useState(form.getValues("modelId"));
@@ -72,6 +82,9 @@ export const AIKnowledge = ({
   const router = useRouter();
   const aiId = form.getValues("id");
 
+  const autoRefresh = dataSources.some((dataSource: any) =>
+    needsRefresh(dataSource.indexStatus)
+  );
   const isLoading = form.formState.isSubmitting;
 
   const saveModel = async (id: string) => {
@@ -129,6 +142,16 @@ export const AIKnowledge = ({
     }
     setRefreshing("");
   };
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (autoRefresh) {
+        fetchDataSources();
+      }
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [autoRefresh, refreshDataSource]);
 
   const inProgress = dataSources.some(
     (dataSource: any) =>
@@ -254,9 +277,14 @@ export const AIKnowledge = ({
                       : null}
                   </td>
                   <td className="p-2">
-                    {dataSource.indexStatus === KnowledgeIndexStatus.FAILED
-                      ? "Failed"
-                      : Math.round(dataSource.indexPercentage) + "%"}
+                    <div className="flex items-center">
+                      {dataSource.indexStatus === KnowledgeIndexStatus.FAILED
+                        ? "Failed"
+                        : Math.round(dataSource.indexPercentage) + "%"}
+                      {needsRefresh(dataSource.indexStatus) && (
+                        <Loader className="w-4 h-4 spinner ml-1" />
+                      )}
+                    </div>
                   </td>
                   <td className="p-2 text-center">
                     <Button
@@ -284,7 +312,7 @@ export const AIKnowledge = ({
                 </div>
               </div>
             ) : null}
-            {knowledgeLoading ? (
+            {knowledgeLoading && dataSources.length === 0 ? (
               <div className="flex items-center my-2 w-full">
                 <div className="mx-auto">
                   <Loader className="w-8 h-8 spinner" />
