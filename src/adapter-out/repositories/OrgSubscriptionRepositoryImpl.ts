@@ -49,4 +49,31 @@ export class OrgSubscriptionRepositoryImpl
       },
     });
   }
+
+  public async upsertOrgSubscription(
+    orgId: string,
+    edition?: OrgSubscriptionEdition,
+    apiUsageTokenLimit?: number,
+    dataUsageTokenLimit?: number,
+    externalId?: string
+  ): Promise<OrgSubscriptionDto> {
+    const updatedOrgSubscription = await prismadb.orgSubscription.upsert({
+      where: { orgId },
+      update: {
+        edition,
+        externalId,
+        apiUsageTokenLimit,
+        dataUsageTokenLimit,
+      },
+      create: {
+        orgId,
+        edition: edition || DEFAULT_EDITION,
+        externalId,
+        apiUsageTokenLimit,
+        dataUsageTokenLimit,
+      },
+    });
+
+    return mapOrgSubscriptionToDto(updatedOrgSubscription);
+  }
 }

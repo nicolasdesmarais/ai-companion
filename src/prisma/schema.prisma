@@ -362,6 +362,7 @@ model OrgSubscription {
   createdAt           DateTime               @default(now()) @map(name: "created_at")
   updatedAt           DateTime               @default(now()) @updatedAt @map(name: "updated_at")
   orgId               String                 @map(name: "org_id")
+  externalId          String?                @map(name: "external_id")
   edition             OrgSubscriptionEdition
   dataUsageTokenLimit Int?                   @map(name: "data_usage_token_limit")
   apiUsageTokenLimit  Int?                   @map(name: "api_usage_token_limit")
