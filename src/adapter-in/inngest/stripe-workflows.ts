@@ -44,7 +44,7 @@ const handleCheckoutSessionCompletedEvent = async (
     return;
   }
 
-  const stripeSubscription = await step.run(
+  const stripeSubscription: Stripe.Subscription = await step.run(
     "fetch-stripe-subscription",
     async () => {
       return await stripe.subscriptions.retrieve(
@@ -53,11 +53,16 @@ const handleCheckoutSessionCompletedEvent = async (
     }
   );
 
+  const dataUsageLimitMetadata = stripeSubscription.metadata.allowance_gb;
+  const dataUsageLimitInGb = dataUsageLimitMetadata
+    ? parseInt(dataUsageLimitMetadata)
+    : undefined;
+
   await step.run("update-org-subscription", async () => {
     return await orgSubscriptionService.updateOrgSubscription({
       orgId,
-      edition: "",
       externalId: stripeSubscription.id,
+      dataUsageLimitInGb,
     });
   });
 };

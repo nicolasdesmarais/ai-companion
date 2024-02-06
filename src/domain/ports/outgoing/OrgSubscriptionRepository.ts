@@ -1,4 +1,3 @@
-import { OrgSubscriptionEdition } from "@prisma/client";
 import { OrgSubscriptionDto } from "../../models/OrgSubscriptions";
 
 export interface OrgSubscriptionRepository {
@@ -6,9 +5,8 @@ export interface OrgSubscriptionRepository {
   findOrCreateByOrgId(orgId: string): Promise<OrgSubscriptionDto | null>;
   upsertOrgSubscription(
     orgId: string,
-    edition?: OrgSubscriptionEdition,
+    dataUsageLimitInGb?: number,
     apiUsageTokenLimit?: number,
-    dataUsageTokenLimit?: number,
     externalId?: string
   ): Promise<OrgSubscriptionDto>;
 }

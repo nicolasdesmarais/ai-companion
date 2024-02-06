@@ -358,19 +358,14 @@ model AIOrgApproval {
 }
 
 model OrgSubscription {
-  id                  Int                    @id @default(autoincrement())
-  createdAt           DateTime               @default(now()) @map(name: "created_at")
-  updatedAt           DateTime               @default(now()) @updatedAt @map(name: "updated_at")
-  orgId               String                 @map(name: "org_id")
-  externalId          String?                @map(name: "external_id")
-  edition             OrgSubscriptionEdition
-  dataUsageTokenLimit Int?                   @map(name: "data_usage_token_limit")
-  apiUsageTokenLimit  Int?                   @map(name: "api_usage_token_limit")
+  id                 Int      @id @default(autoincrement())
+  createdAt          DateTime @default(now()) @map(name: "created_at")
+  updatedAt          DateTime @default(now()) @updatedAt @map(name: "updated_at")
+  orgId              String   @map(name: "org_id")
+  externalId         String?  @map(name: "external_id")
+  dataUsageLimitInGb Int?     @map(name: "data_usage_limit_gb")
+  apiUsageTokenLimit Int?     @map(name: "api_usage_token_limit")
 
   @@unique([orgId])
   @@map("org_subscriptions")
-}
-
-enum OrgSubscriptionEdition {
-  FREE
 }

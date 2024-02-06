@@ -6,16 +6,12 @@ export class OrgSubscriptionService {
   constructor(private orgSubscriptionRepository: OrgSubscriptionRepository) {}
 
   public async updateOrgSubscription(input: UpdateOrgSubscriptionInput) {
-    // const edition = OrgSubscriptionEdition.FREE; // TODO - get edition from external service
-    // const dataUsageTokenLimit = 2500000; // TODO - get dataUsageTokenLimit from external service
-    // const apiUsageTokenLimit = 2500000; // TODO - get apiUsageTokenLimit from external service
-
+    const { orgId, dataUsageLimitInGb, apiUsageTokenLimit, externalId } = input;
     await this.orgSubscriptionRepository.upsertOrgSubscription(
-      input.orgId,
-      undefined,
-      undefined,
-      undefined,
-      input.externalId
+      orgId,
+      dataUsageLimitInGb,
+      apiUsageTokenLimit,
+      externalId
     );
   }
 }

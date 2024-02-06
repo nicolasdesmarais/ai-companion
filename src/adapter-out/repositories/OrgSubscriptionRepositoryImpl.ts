@@ -1,9 +1,8 @@
 import { OrgSubscriptionDto } from "@/src/domain/models/OrgSubscriptions";
 import { OrgSubscriptionRepository } from "@/src/domain/ports/outgoing/OrgSubscriptionRepository";
 import prismadb from "@/src/lib/prismadb";
-import { OrgSubscription, OrgSubscriptionEdition } from "@prisma/client";
+import { OrgSubscription } from "@prisma/client";
 
-const DEFAULT_EDITION = OrgSubscriptionEdition.FREE;
 const DEFAULT_DATA_USAGE_TOKEN_LIMIT = 2500000;
 
 const mapOrgSubscriptionToDto = (
@@ -29,7 +28,7 @@ export class OrgSubscriptionRepositoryImpl
   public async findOrCreateByOrgId(
     orgId: string
   ): Promise<OrgSubscriptionDto | null> {
-    const existingOrgSubscription = this.findByOrgId(orgId);
+    const existingOrgSubscription = await this.findByOrgId(orgId);
     if (existingOrgSubscription) {
       return existingOrgSubscription;
     }
@@ -44,33 +43,29 @@ export class OrgSubscriptionRepositoryImpl
     return await prismadb.orgSubscription.create({
       data: {
         orgId,
-        edition: DEFAULT_EDITION,
-        dataUsageTokenLimit: DEFAULT_DATA_USAGE_TOKEN_LIMIT,
+        dataUsageLimitInGb: DEFAULT_DATA_USAGE_TOKEN_LIMIT,
       },
     });
   }
 
   public async upsertOrgSubscription(
     orgId: string,
-    edition?: OrgSubscriptionEdition,
+    dataUsageLimitInGb?: number,
     apiUsageTokenLimit?: number,
-    dataUsageTokenLimit?: number,
     externalId?: string
   ): Promise<OrgSubscriptionDto> {
     const updatedOrgSubscription = await prismadb.orgSubscription.upsert({
       where: { orgId },
       update: {
-        edition,
         externalId,
+        dataUsageLimitInGb,
         apiUsageTokenLimit,
-        dataUsageTokenLimit,
       },
       create: {
         orgId,
-        edition: edition || DEFAULT_EDITION,
         externalId,
+        dataUsageLimitInGb,
         apiUsageTokenLimit,
-        dataUsageTokenLimit,
       },
     });
 
