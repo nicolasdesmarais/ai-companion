@@ -17,15 +17,15 @@ type Props = {
 };
 
 export const ProModal = ({ orgId }: Props) => {
+  const stripePublishableKey =
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "";
+  const pricingTableId = process.env.NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID ?? "";
+
   const proModal = useProModal();
   const [isMounted, setIsMounted] = useState(false);
-  const [stripePublishableKey, setStripePublishableKey] = useState("");
-  const [pricingTableId, setPricingTableId] = useState("");
 
   useEffect(() => {
     setIsMounted(true);
-    setStripePublishableKey(process.env.STRIPE_PUBLISHABLE_KEY ?? "");
-    setPricingTableId(process.env.STRIPE_PRICING_TABLE_ID ?? "");
   }, []);
 
   if (!isMounted) {
