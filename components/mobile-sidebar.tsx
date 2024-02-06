@@ -10,9 +10,11 @@ import { usePathname } from "next/navigation";
 export const MobileSidebar = ({
   isPro,
   userPermissions,
+  orgId
 }: {
   isPro: boolean;
   userPermissions: Permission[];
+  orgId: string;
 }) => {
   const pathname = usePathname();
   return (
@@ -30,7 +32,11 @@ export const MobileSidebar = ({
       >
         <div className="flex h-full">
           <div className="w-32">
-            <Sidebar isPro={isPro} userPermissions={userPermissions} />
+            <Sidebar
+              isPro={isPro}
+              userPermissions={userPermissions}
+              orgId={orgId}
+            />
           </div>
           {pathname.startsWith("/chat") && (
             <div className="w-32 flex justify-center">
