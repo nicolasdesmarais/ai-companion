@@ -25,10 +25,10 @@ export const stripeWebhookReceived = inngest.createFunction(
 
     switch (stripeEvent.type) {
       case StripeWebhookEventType.CHECKOUT_SESSION_COMPLETED:
-        handleCheckoutSessionCompletedEvent(step, stripeEvent);
+        await handleCheckoutSessionCompletedEvent(step, stripeEvent);
         break;
       case StripeWebhookEventType.INVOICE_PAYMENT_SUCCEEDED:
-        handleInvoicePaymentSucceeded(step, stripeEvent);
+        await handleInvoicePaymentSucceeded(step, stripeEvent);
         break;
     }
   }
