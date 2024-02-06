@@ -817,6 +817,13 @@ export class DataSourceManagementService {
       throw new ForbiddenError("Forbidden");
     }
 
+    await prismadb.dataSource.update({
+      where: { id: dataSourceId },
+      data: {
+        indexStatus: DataSourceIndexStatus.DELETION_REQUESTED,
+      },
+    });
+
     await publishEvent(DomainEvent.DATASOURCE_DELETE_REQUESTED, {
       dataSourceId: dataSource.id,
     });

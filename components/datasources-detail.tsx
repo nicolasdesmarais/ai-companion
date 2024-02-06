@@ -112,7 +112,6 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
       } else {
         throw new Error(response.data.message);
       }
-      onChange();
       const url = qs.stringifyUrl(
         {
           url: window.location.href,
@@ -122,8 +121,8 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
         },
         { skipNull: true, skipEmptyString: true }
       );
-
       router.push(url);
+      onChange();
     } catch (error) {
       toast({
         description: "Something went wrong",
