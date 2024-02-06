@@ -2,7 +2,7 @@
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/src/lib/utils";
-import { KnowledgeIndexStatus } from "@prisma/client";
+import { DataSourceIndexStatus, KnowledgeIndexStatus } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { format } from "date-fns";
 import { Loader } from "lucide-react";
@@ -14,9 +14,16 @@ import { DataSourceTypes } from "./datasource-types";
 import { DataSourcesDetails } from "./datasources-detail";
 import { Tooltip } from "./ui/tooltip";
 
+const needsRefresh = (status: DataSourceIndexStatus) =>
+  status !== DataSourceIndexStatus.COMPLETED &&
+  status !== DataSourceIndexStatus.FAILED &&
+  status !== DataSourceIndexStatus.DELETED &&
+  status !== DataSourceIndexStatus.REFRESHING;
+
 export const DataSourcesTable = () => {
   const [dataSources, setDataSources] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -43,6 +50,10 @@ export const DataSourcesTable = () => {
       const response = await axios.get(url);
       setDataSources(response.data.data);
       setLoading(false);
+      const needsAutoRefresh = response.data.data.some((dataSource: any) =>
+        needsRefresh(dataSource.indexStatus)
+      );
+      setAutoRefresh(needsAutoRefresh);
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -57,6 +68,16 @@ export const DataSourcesTable = () => {
   useEffect(() => {
     fetchDataSources();
   }, [search, orderBy]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (autoRefresh) {
+        fetchDataSources();
+      }
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [autoRefresh, fetchDataSources]);
 
   const select = (id: string) => {
     const query = {
@@ -91,70 +112,73 @@ export const DataSourcesTable = () => {
             </thead>
             <tbody className="text-sm">
               {dataSources.map((dataSource: any) => (
-                <>
-                  <tr
-                    key={dataSource.id}
-                    className={cn(
-                      "items-center my-2 text-sm hover:bg-ring/10",
-                      focus === dataSource.id && "bg-ring/10"
-                    )}
-                    onClick={() => select(dataSource.id)}
-                  >
-                    <td className="p-2">
-                      {dataSource.name.length > 30 ? (
-                        <Tooltip
-                          content={dataSource.name}
-                          className="cursor-default"
-                        >
-                          <div className="max-w-[100px] md:max-w-[280px] truncate">
-                            {dataSource.name}
-                          </div>
-                        </Tooltip>
-                      ) : (
-                        <div className="truncate max-w-[100px] md:max-w-[280px]">
+                <tr
+                  key={dataSource.id}
+                  className={cn(
+                    "items-center my-2 text-sm hover:bg-ring/10",
+                    focus === dataSource.id && "bg-ring/10"
+                  )}
+                  onClick={() => select(dataSource.id)}
+                >
+                  <td className="p-2">
+                    {dataSource.name.length > 30 ? (
+                      <Tooltip
+                        content={dataSource.name}
+                        className="cursor-default"
+                      >
+                        <div className="max-w-[100px] md:max-w-[280px] truncate">
                           {dataSource.name}
                         </div>
-                      )}
-                    </td>
-                    <td className="p-2 flex flex-wrap max-w-[145px] min-w-[115px]">
-                      {dataSource.ais.map((ai: any) => (
-                        <div key={`ai-${ai.id}`}>
-                          <Tooltip
-                            content={ai.ai.name}
-                            className="cursor-default"
-                          >
-                            <Avatar className="h-6 w-6 mr-2">
-                              <AvatarImage src={ai.ai.src} crop="w_48,h_48" />
-                            </Avatar>
-                          </Tooltip>
-                        </div>
-                      ))}
-                    </td>
-                    <td className="p-2 hidden md:table-cell">
-                      {
-                        DataSourceTypes.find(
-                          (format) => format.type === dataSource.type
-                        )?.name
-                      }
-                    </td>
-                    <td className="p-2">
-                      {dataSource.lastIndexedAt
-                        ? format(
-                            new Date(dataSource.lastIndexedAt),
-                            "h:mma M/d/yyyy "
-                          )
-                        : null}
-                    </td>
-                    <td className="p-2">
+                      </Tooltip>
+                    ) : (
+                      <div className="truncate max-w-[100px] md:max-w-[280px]">
+                        {dataSource.name}
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-2 flex flex-wrap max-w-[145px] min-w-[115px]">
+                    {dataSource.ais.map((ai: any, index: string) => (
+                      <div key={`ai-${index}-${dataSource.id}`}>
+                        <Tooltip
+                          content={ai.ai.name}
+                          className="cursor-default"
+                        >
+                          <Avatar className="h-6 w-6 mr-2">
+                            <AvatarImage src={ai.ai.src} crop="w_48,h_48" />
+                          </Avatar>
+                        </Tooltip>
+                      </div>
+                    ))}
+                  </td>
+                  <td className="p-2 hidden md:table-cell">
+                    {
+                      DataSourceTypes.find(
+                        (format) => format.type === dataSource.type
+                      )?.name
+                    }
+                  </td>
+                  <td className="p-2">
+                    {dataSource.lastIndexedAt
+                      ? format(
+                          new Date(dataSource.lastIndexedAt),
+                          "h:mma M/d/yyyy "
+                        )
+                      : null}
+                  </td>
+                  <td className="p-2">
+                    <div className="flex items-center">
                       {dataSource.indexStatus === KnowledgeIndexStatus.FAILED
                         ? "Failed"
                         : Math.round(dataSource.indexPercentage) + "%"}
-                    </td>
-                    <td className="p-2 hidden md:table-cell">
-                      {dataSource.indexStatus}
-                    </td>
-                  </tr>
-                </>
+                      {needsRefresh(dataSource.indexStatus) && (
+                        <Loader className="w-4 h-4 spinner ml-1" />
+                      )}
+                    </div>
+                  </td>
+                  <td className="p-2 hidden md:table-cell">
+                    {dataSource.indexStatus}
+                  </td>
+                </tr>
               ))}
             </tbody>
           </table>
