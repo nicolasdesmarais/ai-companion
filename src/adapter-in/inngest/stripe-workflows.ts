@@ -1,6 +1,6 @@
 import stripeAdapter from "@/src/adapter-out/stripe/StripeAdapter";
 import { ExternalOrgSubscription } from "@/src/domain/models/OrgSubscriptions";
-import orgSubscriptionService from "@/src/domain/services/OrgSubsriptionService";
+import orgSubscriptionService from "@/src/domain/services/OrgSubscriptionService";
 import { OrgSubscriptionType } from "@prisma/client";
 import Stripe from "stripe";
 import { inngest } from "./client";
