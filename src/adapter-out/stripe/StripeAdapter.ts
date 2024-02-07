@@ -7,6 +7,10 @@ export interface StripeMetadata {
   productMetadata: any;
 }
 
+export interface OrgSubscriptionMetadata {
+  orgId: string;
+}
+
 export class StripeAdapter {
   public async fetchExternalSubscription(
     subscriptionId: string
@@ -38,6 +42,15 @@ export class StripeAdapter {
       apiUsageTokenLimit,
       metadata,
     };
+  }
+
+  public async updateSubscriptionMetadata(
+    subscriptionId: string,
+    metadata: OrgSubscriptionMetadata
+  ) {
+    await stripe.subscriptions.update(subscriptionId, {
+      metadata: { ...metadata },
+    });
   }
 }
 

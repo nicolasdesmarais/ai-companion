@@ -39,7 +39,9 @@ export class OrgSubscriptionService {
     );
   }
 
-  public async updateOrgSubscription(input: UpdateOrgSubscriptionInput) {
+  public async updateOrgSubscription(
+    input: UpdateOrgSubscriptionInput
+  ): Promise<OrgSubscriptionDto> {
     const {
       orgId,
       type,
@@ -49,7 +51,7 @@ export class OrgSubscriptionService {
       metadata,
     } = input;
 
-    await this.orgSubscriptionRepository.upsertOrgSubscription(
+    return await this.orgSubscriptionRepository.upsertOrgSubscription(
       orgId,
       type,
       dataUsageLimitInGb,

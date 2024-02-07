@@ -1,4 +1,6 @@
-import stripeAdapter from "@/src/adapter-out/stripe/StripeAdapter";
+import stripeAdapter, {
+  OrgSubscriptionMetadata,
+} from "@/src/adapter-out/stripe/StripeAdapter";
 import { ExternalOrgSubscription } from "@/src/domain/models/OrgSubscriptions";
 import orgSubscriptionService from "@/src/domain/services/OrgSubscriptionService";
 import { OrgSubscriptionType } from "@prisma/client";
@@ -48,21 +50,34 @@ const handleCheckoutSessionCompletedEvent = async (
 
   const subscriptionId = session.subscription as string;
   const externalOrgSubscription: ExternalOrgSubscription = await step.run(
-    "fetch-usage-limits",
+    "fetch-external-subscription",
     async () => {
       return await stripeAdapter.fetchExternalSubscription(subscriptionId);
     }
   );
 
   const { externalId, dataUsageLimitInGb, metadata } = externalOrgSubscription;
-  await step.run("update-org-subscription", async () => {
-    return await orgSubscriptionService.updateOrgSubscription({
-      orgId,
-      type: OrgSubscriptionType.PAID,
-      externalId,
-      dataUsageLimitInGb,
-      metadata,
-    });
+  const orgSubscription = await step.run(
+    "update-org-subscription",
+    async () => {
+      return await orgSubscriptionService.updateOrgSubscription({
+        orgId,
+        type: OrgSubscriptionType.PAID,
+        externalId,
+        dataUsageLimitInGb,
+        metadata,
+      });
+    }
+  );
+
+  const orgSubscriptionMetadata: OrgSubscriptionMetadata = {
+    orgId,
+  };
+  await step.run("update-subscription-metadata", async () => {
+    return await stripeAdapter.updateSubscriptionMetadata(
+      subscriptionId,
+      orgSubscriptionMetadata
+    );
   });
 };
 
