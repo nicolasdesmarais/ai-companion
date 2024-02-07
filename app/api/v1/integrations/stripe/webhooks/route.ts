@@ -9,11 +9,6 @@ import {
 } from "@/src/adapter-in/inngest/stripe-workflows";
 import { stripe } from "@/src/lib/stripe";
 
-enum StripeWebhookEventType {
-  CHECKOUT_SESSION_COMPLETED = "checkout.session.completed",
-  INVOICE_PAYMENT_SUCCEEDED = "invoice.payment_succeeded",
-}
-
 export async function POST(req: Request) {
   const body = await req.text();
   const signature = headers().get("Stripe-Signature") as string;
