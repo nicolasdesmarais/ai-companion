@@ -164,9 +164,13 @@ body,
   border: 1px solid hsl(var(--muted-foreground));
   padding: 8px;
 }
-.markdown-chat-message li {
+.markdown-chat-message ol {
+  padding: 5px;
+}
+  .markdown-chat-message li {
   list-style: auto;
   margin: 10px 15px;
+  padding: 0 5px;
 }
 .markdown-chat-message ul li {
   list-style: disc;
