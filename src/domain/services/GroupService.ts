@@ -344,7 +344,7 @@ export class GroupService {
   }
 
   public async populateGroupUserId(userId: string, email: string) {
-    await prismadb.groupUser.updateMany({
+    return await prismadb.groupUser.updateMany({
       where: {
         email,
       },
