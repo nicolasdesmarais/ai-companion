@@ -48,6 +48,24 @@ export class OrgSubscriptionRepositoryImpl
     return mapOrgSubscriptionToDto(newOrgSubscription);
   }
 
+  public async createOrgSubscription(
+    orgId: string,
+    type: OrgSubscriptionType,
+    dataUsageLimitInGb: number,
+    apiUsageTokenLimit: number | null
+  ): Promise<OrgSubscriptionDto> {
+    const orgSubscription = await prismadb.orgSubscription.create({
+      data: {
+        orgId,
+        type,
+        dataUsageLimitInGb,
+        apiUsageTokenLimit,
+      },
+    });
+
+    return mapOrgSubscriptionToDto(orgSubscription);
+  }
+
   private async createDefaultOrgSubscription(
     orgId: string
   ): Promise<OrgSubscription> {

@@ -1,6 +1,12 @@
 import aiService from "@/src/domain/services/AIService";
 import groupService from "@/src/domain/services/GroupService";
-import { UserJSON, UserWebhookEvent, WebhookEvent } from "@clerk/nextjs/server";
+import orgSubscriptionService from "@/src/domain/services/OrgSubsriptionService";
+import {
+  OrganizationWebhookEvent,
+  UserJSON,
+  UserWebhookEvent,
+  WebhookEvent,
+} from "@clerk/nextjs/server";
 import { inngest } from "./client";
 
 export enum ClerkEvent {
@@ -70,4 +76,14 @@ const getPrimaryEmailFromUserJson = (data: UserJSON): string | null => {
   return primaryEmail ? primaryEmail.email_address : null;
 };
 
-const handleOrgCreatedEvent = async (step: any, clerkEvent: WebhookEvent) => {};
+const handleOrgCreatedEvent = async (step: any, clerkEvent: WebhookEvent) => {
+  const orgEvent = clerkEvent as OrganizationWebhookEvent;
+  const orgId = orgEvent.data.id;
+  if (!orgId) {
+    return;
+  }
+
+  await step.run("create-initial-org-subscription", async () => {
+    return await orgSubscriptionService.createInitialOrgSubscription(orgId);
+  });
+};
