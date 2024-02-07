@@ -364,7 +364,7 @@ model OrgSubscription {
   orgId              String              @map(name: "org_id")
   type               OrgSubscriptionType @default(FREE)
   externalId         String?             @map(name: "external_id")
-  dataUsageLimitInGb Int?                @map(name: "data_usage_limit_gb")
+  dataUsageLimitInGb Float?              @map(name: "data_usage_limit_gb")
   apiUsageTokenLimit Int?                @map(name: "api_usage_token_limit")
   metadata           Json?
 
