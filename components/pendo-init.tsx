@@ -11,6 +11,7 @@ export default function PendoInit({ userId, orgId }: Props) {
   if (userId) {
     return (
       <Script
+        id="pendo-init"
         strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: `(function(apiKey){
