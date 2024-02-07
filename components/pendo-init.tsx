@@ -2,13 +2,15 @@
 
 import Script from "next/script";
 
+const isProd = process.env.NEXT_PUBLIC_VERCEL_ENV === "production";
+
 interface Props {
   userId: string;
   orgId: string;
 }
 
 export default function PendoInit({ userId, orgId }: Props) {
-  if (userId) {
+  if (userId && isProd) {
     return (
       <Script
         id="pendo-init"
