@@ -5,6 +5,7 @@ export enum SecuredResourceType {
   GROUPS = "groups",
   ORG_CLIENT_CREDENTIALS = "org-client-credentials",
   ORG_SETTINGS = "org-settings",
+  ORG_SUBSCRIPTIONS = "org-subscriptions",
   ORG_USAGE = "org-usage",
 }
 

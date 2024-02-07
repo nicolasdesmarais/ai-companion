@@ -16,8 +16,9 @@ export interface OrgSubscriptionRepository {
   upsertOrgSubscription(
     orgId: string,
     type: OrgSubscriptionType,
-    dataUsageLimitInGb?: number,
-    apiUsageTokenLimit?: number,
-    externalId?: string
+    dataUsageLimitInGb?: number | null,
+    apiUsageTokenLimit?: number | null,
+    externalId?: string | null,
+    metadata?: any
   ): Promise<OrgSubscriptionDto>;
 }

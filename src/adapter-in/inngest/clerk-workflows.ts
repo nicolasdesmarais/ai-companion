@@ -1,6 +1,6 @@
 import aiService from "@/src/domain/services/AIService";
 import groupService from "@/src/domain/services/GroupService";
-import orgSubscriptionService from "@/src/domain/services/OrgSubsriptionService";
+import orgSubscriptionService from "@/src/domain/services/OrgSubscriptionService";
 import {
   OrganizationWebhookEvent,
   UserJSON,
