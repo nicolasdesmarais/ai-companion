@@ -142,7 +142,7 @@ export const ConnectKnowledge = ({ goBack, form }: Props) => {
         <div className="flex items-center my-2 w-full">
           <div className="mx-auto flex p-4 bg-background rounded-lg">
             <Coffee className="w-6 h-6 mr-2" />
-            <p>You don't have any existing data sources.</p>
+            <p>You don&apos;t have any existing data sources.</p>
           </div>
         </div>
       ) : null}
