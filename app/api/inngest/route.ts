@@ -9,6 +9,7 @@ import {
   refreshDataSources,
 } from "@/src/adapter-in/inngest/datasource-workflows";
 import { googleDriveFolderScanInitiated } from "@/src/adapter-in/inngest/google-drive-workflows";
+import { stripeWebhookReceived } from "@/src/adapter-in/inngest/stripe-workflows";
 import { serve } from "inngest/next";
 import { inngest } from "../../../src/adapter-in/inngest/client";
 
@@ -26,5 +27,6 @@ export const { GET, POST, PUT } = serve({
     knowledgeEventReceived,
     loadKnowledgeChunk,
     refreshDataSources,
+    stripeWebhookReceived,
   ],
 });

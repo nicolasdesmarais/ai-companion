@@ -31,7 +31,7 @@ export class UsageService {
       orgId
     );
     const dataUsageTokenLimit = orgSubscription
-      ? orgSubscription.dataUsageTokenLimit
+      ? orgSubscription.dataUsageLimitInTokens
       : null;
     const apiUsageTokenLimit = orgSubscription
       ? orgSubscription.apiUsageTokenLimit
@@ -76,7 +76,7 @@ export class UsageService {
   ): Promise<boolean> {
     const orgSubscription =
       await this.orgSubscriptionRepository.findOrCreateByOrgId(orgId);
-    const dataUsageTokenLimit = orgSubscription?.dataUsageTokenLimit;
+    const dataUsageTokenLimit = orgSubscription?.dataUsageLimitInTokens;
     const orgTokenCount =
       await this.dataSourceRepository.getNumberOfTokensStoredForOrg(orgId);
 

@@ -1,10 +1,20 @@
-import { OrgSubscriptionEdition } from "@prisma/client";
-
 export interface OrgSubscriptionDto {
-  orgId: String;
+  orgId: string;
   createdAt: Date;
   updatedAt: Date;
-  edition: OrgSubscriptionEdition;
-  dataUsageTokenLimit: number | null;
+  dataUsageLimitInTokens: number | null;
+  dataUsageLimitInGb: number | null;
+  apiUsageTokenLimit: number | null;
+}
+
+export interface UpdateOrgSubscriptionInput {
+  orgId: string;
+  externalId?: string;
+  dataUsageLimitInGb?: number;
+  apiUsageTokenLimit?: number;
+}
+
+export interface OrgSubscriptionUsageLimits {
+  dataUsageLimitInGb: number | null;
   apiUsageTokenLimit: number | null;
 }

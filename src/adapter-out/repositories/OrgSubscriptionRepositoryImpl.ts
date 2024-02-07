@@ -1,16 +1,26 @@
 import { OrgSubscriptionDto } from "@/src/domain/models/OrgSubscriptions";
 import { OrgSubscriptionRepository } from "@/src/domain/ports/outgoing/OrgSubscriptionRepository";
 import prismadb from "@/src/lib/prismadb";
-import { OrgSubscription, OrgSubscriptionEdition } from "@prisma/client";
+import { OrgSubscription } from "@prisma/client";
 
-const DEFAULT_EDITION = OrgSubscriptionEdition.FREE;
 const DEFAULT_DATA_USAGE_TOKEN_LIMIT = 2500000;
+
+const gigabytesToBytes = (gigabytes: number) => {
+  return gigabytes * Math.pow(2, 30);
+};
 
 const mapOrgSubscriptionToDto = (
   orgSubscription: OrgSubscription
 ): OrgSubscriptionDto => {
   const { id, ...orgSubscriptionWithoutId } = orgSubscription;
-  return orgSubscriptionWithoutId;
+
+  let dataUsageLimitInTokens = null;
+  if (orgSubscription.dataUsageLimitInGb) {
+    dataUsageLimitInTokens =
+      gigabytesToBytes(orgSubscription.dataUsageLimitInGb) / 4;
+  }
+
+  return { ...orgSubscriptionWithoutId, dataUsageLimitInTokens };
 };
 
 export class OrgSubscriptionRepositoryImpl
@@ -29,7 +39,7 @@ export class OrgSubscriptionRepositoryImpl
   public async findOrCreateByOrgId(
     orgId: string
   ): Promise<OrgSubscriptionDto | null> {
-    const existingOrgSubscription = this.findByOrgId(orgId);
+    const existingOrgSubscription = await this.findByOrgId(orgId);
     if (existingOrgSubscription) {
       return existingOrgSubscription;
     }
@@ -44,9 +54,32 @@ export class OrgSubscriptionRepositoryImpl
     return await prismadb.orgSubscription.create({
       data: {
         orgId,
-        edition: DEFAULT_EDITION,
-        dataUsageTokenLimit: DEFAULT_DATA_USAGE_TOKEN_LIMIT,
+        dataUsageLimitInGb: DEFAULT_DATA_USAGE_TOKEN_LIMIT,
       },
     });
+  }
+
+  public async upsertOrgSubscription(
+    orgId: string,
+    dataUsageLimitInGb?: number,
+    apiUsageTokenLimit?: number,
+    externalId?: string
+  ): Promise<OrgSubscriptionDto> {
+    const updatedOrgSubscription = await prismadb.orgSubscription.upsert({
+      where: { orgId },
+      update: {
+        externalId,
+        dataUsageLimitInGb,
+        apiUsageTokenLimit,
+      },
+      create: {
+        orgId,
+        externalId,
+        dataUsageLimitInGb,
+        apiUsageTokenLimit,
+      },
+    });
+
+    return mapOrgSubscriptionToDto(updatedOrgSubscription);
   }
 }
