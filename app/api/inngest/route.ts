@@ -1,3 +1,4 @@
+import { clerkWebhookReceived } from "@/src/adapter-in/inngest/clerk-workflows";
 import {
   dataSourceDeleteRequested,
   dataSourceInitialized,
@@ -28,5 +29,6 @@ export const { GET, POST, PUT } = serve({
     loadKnowledgeChunk,
     refreshDataSources,
     stripeWebhookReceived,
+    clerkWebhookReceived,
   ],
 });

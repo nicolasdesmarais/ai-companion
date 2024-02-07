@@ -834,7 +834,7 @@ export class AIService {
   }
 
   public async populateAiPermissionsUserId(userId: string, email: string) {
-    await prismadb.aIPermissions.updateMany({
+    return await prismadb.aIPermissions.updateMany({
       where: {
         email,
       },
