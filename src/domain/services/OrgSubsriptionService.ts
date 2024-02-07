@@ -6,9 +6,11 @@ export class OrgSubscriptionService {
   constructor(private orgSubscriptionRepository: OrgSubscriptionRepository) {}
 
   public async updateOrgSubscription(input: UpdateOrgSubscriptionInput) {
-    const { orgId, dataUsageLimitInGb, apiUsageTokenLimit, externalId } = input;
+    const { orgId, type, dataUsageLimitInGb, apiUsageTokenLimit, externalId } =
+      input;
     await this.orgSubscriptionRepository.upsertOrgSubscription(
       orgId,
+      type,
       dataUsageLimitInGb,
       apiUsageTokenLimit,
       externalId

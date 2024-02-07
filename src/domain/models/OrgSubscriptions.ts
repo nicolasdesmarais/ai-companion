@@ -1,3 +1,5 @@
+import { OrgSubscriptionType } from "@prisma/client";
+
 export interface OrgSubscriptionDto {
   orgId: string;
   createdAt: Date;
@@ -9,6 +11,7 @@ export interface OrgSubscriptionDto {
 
 export interface UpdateOrgSubscriptionInput {
   orgId: string;
+  type: OrgSubscriptionType;
   externalId?: string;
   dataUsageLimitInGb?: number;
   apiUsageTokenLimit?: number;
