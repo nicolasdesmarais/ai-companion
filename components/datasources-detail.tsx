@@ -268,7 +268,7 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
           confirmModal.onOpen(
             "Delete Data Source?",
             <div>
-              <div>Are you sure you want to delete {dataSource.name}</div>
+              <div>Are you sure you want to delete {dataSource.name}?</div>
               <div>This action cannot be undone.</div>
             </div>,
             handleDelete

@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { useConfirmModal } from "@/hooks/use-confirm-modal";
 import { AIModel } from "@/src/domain/models/AIModel";
 import {
   DataSourceIndexStatus,
@@ -34,6 +35,7 @@ import {
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ConfirmModal } from "./confirm-modal";
 import { ConnectKnowledge } from "./connect-knowledge";
 import DataSourceCard from "./datasource-card";
 import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
@@ -83,6 +85,7 @@ export const AIKnowledge = ({
   const pathname = usePathname();
   const router = useRouter();
   const aiId = form.getValues("id");
+  const confirmModal = useConfirmModal();
 
   const autoRefresh = dataSources.some((dataSource: any) =>
     needsRefresh(dataSource.indexStatus)
@@ -127,6 +130,31 @@ export const AIKnowledge = ({
     setRemoving("");
   };
 
+  const disconnectDataSource = async (ds: any) => {
+    setRemoving(ds.id);
+    try {
+      const ais = ds.ais
+        .map((ai: any) => ai.ai.id)
+        .filter((id: any) => id !== aiId);
+      await axios.patch(`/api/v1/data-sources/${ds.id}`, {
+        ais,
+      });
+      setDataSource((current: any) =>
+        current.filter((i: any) => i.id !== ds.id)
+      );
+      toast({ description: "Knowledge removed." });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description:
+          String((error as AxiosError).response?.data) ||
+          "Something went wrong.",
+        duration: 6000,
+      });
+    }
+    setRemoving("");
+  };
+
   const refreshDataSource = async (id: string) => {
     setRefreshing(id);
     try {
@@ -143,6 +171,28 @@ export const AIKnowledge = ({
       });
     }
     setRefreshing("");
+  };
+
+  const onRemove = async (ds: any) => {
+    if (ds.ais.length > 1) {
+      confirmModal.onOpen(
+        "Remove Data Source?",
+        <div>
+          <div>Are you sure you want to remove {ds.name} from this AI?</div>
+          <div>Other AIs will continue using this data source.</div>
+        </div>,
+        () => disconnectDataSource(ds)
+      );
+    } else {
+      confirmModal.onOpen(
+        "Delete Data Source?",
+        <div>
+          <div>Are you sure you want to delete {ds.name}?</div>
+          <div>This action cannot be undone.</div>
+        </div>,
+        () => removeDataSource(ds.id)
+      );
+    }
   };
 
   useEffect(() => {
@@ -294,7 +344,7 @@ export const AIKnowledge = ({
                       variant="outline"
                       size="sm"
                       disabled={!!removing}
-                      onClick={() => removeDataSource(dataSource.id)}
+                      onClick={() => onRemove(dataSource)}
                     >
                       {removing === dataSource.id ? (
                         <Loader className="w-4 h-4 spinner" />
@@ -405,6 +455,7 @@ export const AIKnowledge = ({
           goBack={() => router.push(`/ai/${aiId}/edit/knowledge`)}
         />
       )}
+      <ConfirmModal />
     </div>
   );
 };
