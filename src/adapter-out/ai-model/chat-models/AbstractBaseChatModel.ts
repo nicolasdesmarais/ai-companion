@@ -1,7 +1,7 @@
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
-import { LangChainStream } from "ai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { LangChainStream } from "ai";
 import { PostToChatInput, PostToChatResponse } from "./ChatModel";
 
 export abstract class AbstractBaseChatModel {
@@ -52,6 +52,7 @@ export abstract class AbstractBaseChatModel {
     const engineeredPrompt = `
         Pretend you are ${ai.name}, ${ai.description}.
         The user date and time is ${date}. Output format is markdown, including tables.
+        DO NOT use ${ai.name}: prefix.
         Here are more details about your character:\n
         ${ai.instructions}
         Answer questions using this knowledge:\n

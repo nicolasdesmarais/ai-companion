@@ -26,6 +26,7 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
     return `
         Pretend you are ${ai.name}, ${ai.description}.
         Output format is markdown, including tables.
+        DO NOT use ${ai.name}: prefix.
         Here are more details about your character:\n
         ${ai.instructions}
 
