@@ -13,8 +13,9 @@ export interface UpdateOrgSubscriptionInput {
   orgId: string;
   type: OrgSubscriptionType;
   externalId: string | null;
-  dataUsageLimitInGb?: number;
-  apiUsageTokenLimit?: number;
+  dataUsageLimitInGb?: number | null;
+  apiUsageTokenLimit?: number | null;
+  metadata: any;
 }
 
 export interface ExternalOrgSubscription {

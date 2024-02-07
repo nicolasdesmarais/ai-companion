@@ -47,25 +47,21 @@ const handleCheckoutSessionCompletedEvent = async (
   }
 
   const subscriptionId = session.subscription as string;
-  const usageLimits: ExternalOrgSubscription = await step.run(
+  const externalOrgSubscription: ExternalOrgSubscription = await step.run(
     "fetch-usage-limits",
     async () => {
-      return await stripeAdapter.fetchUsageLimitsFromSubscription(
-        subscriptionId
-      );
+      return await stripeAdapter.fetchExternalSubscription(subscriptionId);
     }
   );
 
-  const dataUsageLimitInGb = usageLimits.dataUsageLimitInGb
-    ? usageLimits.dataUsageLimitInGb
-    : undefined;
-
+  const { externalId, dataUsageLimitInGb, metadata } = externalOrgSubscription;
   await step.run("update-org-subscription", async () => {
     return await orgSubscriptionService.updateOrgSubscription({
       orgId,
       type: OrgSubscriptionType.PAID,
-      externalId: subscriptionId,
+      externalId,
       dataUsageLimitInGb,
+      metadata,
     });
   });
 };

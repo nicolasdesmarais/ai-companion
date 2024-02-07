@@ -40,14 +40,22 @@ export class OrgSubscriptionService {
   }
 
   public async updateOrgSubscription(input: UpdateOrgSubscriptionInput) {
-    const { orgId, type, dataUsageLimitInGb, apiUsageTokenLimit, externalId } =
-      input;
+    const {
+      orgId,
+      type,
+      externalId,
+      dataUsageLimitInGb,
+      apiUsageTokenLimit,
+      metadata,
+    } = input;
+
     await this.orgSubscriptionRepository.upsertOrgSubscription(
       orgId,
       type,
       dataUsageLimitInGb,
       apiUsageTokenLimit,
-      externalId
+      externalId,
+      metadata
     );
   }
 }

@@ -8,7 +8,7 @@ export interface StripeMetadata {
 }
 
 export class StripeAdapter {
-  public async fetchUsageLimitsFromSubscription(
+  public async fetchExternalSubscription(
     subscriptionId: string
   ): Promise<ExternalOrgSubscription> {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
