@@ -1,5 +1,6 @@
+import stripeAdapter from "@/src/adapter-out/stripe/StripeAdapter";
+import { OrgSubscriptionUsageLimits } from "@/src/domain/models/OrgSubscriptions";
 import orgSubscriptionService from "@/src/domain/services/OrgSubsriptionService";
-import { stripe } from "@/src/lib/stripe";
 import Stripe from "stripe";
 import { inngest } from "./client";
 
@@ -44,25 +45,24 @@ const handleCheckoutSessionCompletedEvent = async (
     return;
   }
 
-  const stripeSubscription: Stripe.Subscription = await step.run(
-    "fetch-stripe-subscription",
+  const subscriptionId = session.subscription as string;
+  const usageLimits: OrgSubscriptionUsageLimits = await step.run(
+    "fetch-usage-limits",
     async () => {
-      return await stripe.subscriptions.retrieve(
-        session.subscription as string
+      return await stripeAdapter.fetchUsageLimitsFromSubscription(
+        subscriptionId
       );
     }
   );
 
-  const dataUsageLimitMetadata = stripeSubscription.metadata.allowance_gb;
-
-  const dataUsageLimitInGb = dataUsageLimitMetadata
-    ? parseInt(dataUsageLimitMetadata)
+  const dataUsageLimitInGb = usageLimits.dataUsageLimitInGb
+    ? usageLimits.dataUsageLimitInGb
     : undefined;
 
   await step.run("update-org-subscription", async () => {
     return await orgSubscriptionService.updateOrgSubscription({
       orgId,
-      externalId: stripeSubscription.id,
+      externalId: subscriptionId,
       dataUsageLimitInGb,
     });
   });

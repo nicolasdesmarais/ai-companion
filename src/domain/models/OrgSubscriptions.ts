@@ -13,3 +13,8 @@ export interface UpdateOrgSubscriptionInput {
   dataUsageLimitInGb?: number;
   apiUsageTokenLimit?: number;
 }
+
+export interface OrgSubscriptionUsageLimits {
+  dataUsageLimitInGb: number | null;
+  apiUsageTokenLimit: number | null;
+}
