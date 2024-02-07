@@ -1,5 +1,5 @@
 import stripeAdapter from "@/src/adapter-out/stripe/StripeAdapter";
-import { OrgSubscriptionUsageLimits } from "@/src/domain/models/OrgSubscriptions";
+import { ExternalOrgSubscription } from "@/src/domain/models/OrgSubscriptions";
 import orgSubscriptionService from "@/src/domain/services/OrgSubsriptionService";
 import { OrgSubscriptionType } from "@prisma/client";
 import Stripe from "stripe";
@@ -47,7 +47,7 @@ const handleCheckoutSessionCompletedEvent = async (
   }
 
   const subscriptionId = session.subscription as string;
-  const usageLimits: OrgSubscriptionUsageLimits = await step.run(
+  const usageLimits: ExternalOrgSubscription = await step.run(
     "fetch-usage-limits",
     async () => {
       return await stripeAdapter.fetchUsageLimitsFromSubscription(

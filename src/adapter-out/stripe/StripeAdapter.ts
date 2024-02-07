@@ -1,10 +1,16 @@
-import { OrgSubscriptionUsageLimits } from "@/src/domain/models/OrgSubscriptions";
+import { ExternalOrgSubscription } from "@/src/domain/models/OrgSubscriptions";
 import { stripe } from "@/src/lib/stripe";
+
+export interface StripeMetadata {
+  productId: string;
+  productName: string;
+  productMetadata: any;
+}
 
 export class StripeAdapter {
   public async fetchUsageLimitsFromSubscription(
     subscriptionId: string
-  ): Promise<OrgSubscriptionUsageLimits> {
+  ): Promise<ExternalOrgSubscription> {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
     if (subscription.items.data.length === 0) {
@@ -20,9 +26,17 @@ export class StripeAdapter {
       : null;
     const apiUsageTokenLimit = null; // TODO: fetch from stripe
 
+    const metadata: StripeMetadata = {
+      productId: product.id,
+      productName: product.name,
+      productMetadata: product.metadata,
+    };
+
     return {
+      externalId: subscriptionId,
       dataUsageLimitInGb,
       apiUsageTokenLimit,
+      metadata,
     };
   }
 }

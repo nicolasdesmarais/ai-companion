@@ -85,20 +85,19 @@ export class OrgSubscriptionRepositoryImpl
     apiUsageTokenLimit?: number,
     externalId?: string
   ): Promise<OrgSubscriptionDto> {
+    const orgSubscriptionData = {
+      type,
+      externalId,
+      dataUsageLimitInGb,
+      apiUsageTokenLimit,
+    };
+
     const updatedOrgSubscription = await prismadb.orgSubscription.upsert({
       where: { orgId },
-      update: {
-        type,
-        externalId,
-        dataUsageLimitInGb,
-        apiUsageTokenLimit,
-      },
+      update: orgSubscriptionData,
       create: {
         orgId,
-        type,
-        externalId,
-        dataUsageLimitInGb,
-        apiUsageTokenLimit,
+        ...orgSubscriptionData,
       },
     });
 

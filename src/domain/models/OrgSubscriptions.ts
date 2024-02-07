@@ -12,12 +12,14 @@ export interface OrgSubscriptionDto {
 export interface UpdateOrgSubscriptionInput {
   orgId: string;
   type: OrgSubscriptionType;
-  externalId?: string;
+  externalId: string | null;
   dataUsageLimitInGb?: number;
   apiUsageTokenLimit?: number;
 }
 
-export interface OrgSubscriptionUsageLimits {
+export interface ExternalOrgSubscription {
+  externalId: string;
   dataUsageLimitInGb: number | null;
   apiUsageTokenLimit: number | null;
+  metadata?: any;
 }
