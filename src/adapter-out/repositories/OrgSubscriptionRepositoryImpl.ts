@@ -1,9 +1,9 @@
 import { OrgSubscriptionDto } from "@/src/domain/models/OrgSubscriptions";
 import { OrgSubscriptionRepository } from "@/src/domain/ports/outgoing/OrgSubscriptionRepository";
 import prismadb from "@/src/lib/prismadb";
-import { OrgSubscription } from "@prisma/client";
+import { OrgSubscription, OrgSubscriptionType } from "@prisma/client";
 
-const DEFAULT_DATA_USAGE_TOKEN_LIMIT = 2500000;
+const DEFAULT_DATA_USAGE_GB_LIMIT = 0.5;
 
 const gigabytesToBytes = (gigabytes: number) => {
   return gigabytes * Math.pow(2, 30);
@@ -54,13 +54,15 @@ export class OrgSubscriptionRepositoryImpl
     return await prismadb.orgSubscription.create({
       data: {
         orgId,
-        dataUsageLimitInGb: DEFAULT_DATA_USAGE_TOKEN_LIMIT,
+        type: OrgSubscriptionType.FREE,
+        dataUsageLimitInGb: DEFAULT_DATA_USAGE_GB_LIMIT,
       },
     });
   }
 
   public async upsertOrgSubscription(
     orgId: string,
+    type: OrgSubscriptionType,
     dataUsageLimitInGb?: number,
     apiUsageTokenLimit?: number,
     externalId?: string
@@ -68,12 +70,14 @@ export class OrgSubscriptionRepositoryImpl
     const updatedOrgSubscription = await prismadb.orgSubscription.upsert({
       where: { orgId },
       update: {
+        type,
         externalId,
         dataUsageLimitInGb,
         apiUsageTokenLimit,
       },
       create: {
         orgId,
+        type,
         externalId,
         dataUsageLimitInGb,
         apiUsageTokenLimit,
