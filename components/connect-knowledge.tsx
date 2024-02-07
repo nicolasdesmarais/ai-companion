@@ -26,7 +26,7 @@ export const ConnectKnowledge = ({ goBack, form }: Props) => {
   const [connecting, setConnecting] = useState(false);
   const [dataSources, setDataSources] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<any | null>(null);
   const { toast } = useToast();
 
   const aiId = form.getValues("id");
@@ -56,6 +56,27 @@ export const ConnectKnowledge = ({ goBack, form }: Props) => {
     fetchDataSources();
   }, []);
 
+  const connect = async () => {
+    if (!selected) {
+      return;
+    }
+    setConnecting(true);
+
+    try {
+      const currentAis = selected.ais.map((ai: any) => ai.ai.id);
+      await axios.patch(`/api/v1/data-sources/${selected.id}`, {
+        ais: [...currentAis, aiId],
+      });
+      goBack();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: "Something went wrong",
+      });
+    }
+    setConnecting(false);
+  };
+
   return (
     <div className="w-full p-6 bg-accent/30">
       <FormItem>
@@ -74,9 +95,9 @@ export const ConnectKnowledge = ({ goBack, form }: Props) => {
             key={dataSource.id}
             className={cn(
               "items-center my-2 text-sm hover:bg-ring/10",
-              selected === dataSource.id && "bg-ring/10"
+              selected && selected.id === dataSource.id && "bg-ring/10"
             )}
-            onClick={() => setSelected(dataSource.id)}
+            onClick={() => setSelected(dataSource)}
           >
             <td className="p-2">
               {dataSource.name.length > 30 ? (
@@ -136,7 +157,7 @@ export const ConnectKnowledge = ({ goBack, form }: Props) => {
         <Button
           type="button"
           disabled={connecting}
-          onClick={() => {}}
+          onClick={() => connect()}
           variant="ring"
         >
           Connect
