@@ -150,8 +150,8 @@ export const Sidebar = ({
   const routes = [
     {
       icon: Store,
-      href: "/",
-      pathname: "/",
+      href: "/index",
+      pathname: "/index",
       searchparams: { scope: null },
       label: "Browse",
       pro: false,
@@ -165,16 +165,16 @@ export const Sidebar = ({
     },
     {
       icon: Atom,
-      href: "/?scope=OWNED",
-      pathname: "/",
+      href: "/index?scope=OWNED",
+      pathname: "/index",
       searchparams: { scope: "OWNED" },
       label: "Your AIs",
       pro: false,
     },
     {
       icon: UserPlus,
-      href: "/?scope=SHARED",
-      pathname: "/",
+      href: "/index?scope=SHARED",
+      pathname: "/index",
       searchparams: { scope: "SHARED" },
       label: "Shared",
       pro: false,
@@ -188,8 +188,8 @@ export const Sidebar = ({
     },
     {
       icon: Eye,
-      href: "/?scope=INSTANCE",
-      pathname: "/",
+      href: "/index?scope=INSTANCE",
+      pathname: "/index",
       searchparamsregex: { scope: /INSTANCE.*/ },
       label: "Super User",
       pro: false,
@@ -201,8 +201,8 @@ export const Sidebar = ({
     },
     {
       icon: Building2,
-      href: "/?scope=ADMIN",
-      pathname: "/",
+      href: "/index?scope=ADMIN",
+      pathname: "/index",
       searchparamsregex: { scope: /ADMIN.*/ },
       label: "Admin",
       pro: false,
