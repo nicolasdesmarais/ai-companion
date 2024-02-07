@@ -11,9 +11,10 @@ export class StripeAdapter {
       throw new Error("Subscription has no items");
     }
 
-    const item = subscription.items.data[0];
+    const productId = subscription.items.data[0].plan.product as string;
+    const product = await stripe.products.retrieve(productId);
 
-    const dataUsageLimitMetadata = item.metadata.allowance_gb;
+    const dataUsageLimitMetadata = product.metadata.allowance_gb;
     const dataUsageLimitInGb = dataUsageLimitMetadata
       ? parseInt(dataUsageLimitMetadata)
       : null;
