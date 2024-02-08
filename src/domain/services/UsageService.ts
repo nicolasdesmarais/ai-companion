@@ -1,5 +1,6 @@
 import { DataSourceRepositoryImpl } from "@/src/adapter-out/repositories/DataSourceRepositoryImpl";
 import { OrgSubscriptionRepositoryImpl } from "@/src/adapter-out/repositories/OrgSubscriptionRepositoryImpl";
+import { convertGigabytesToTokens } from "@/src/lib/tokenCount";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { UsageSecurityService } from "@/src/security/services/UsageSecurityService";
 import { ForbiddenError } from "../errors/Errors";
@@ -76,7 +77,11 @@ export class UsageService {
   ): Promise<boolean> {
     const orgSubscription =
       await this.orgSubscriptionRepository.findOrCreateByOrgId(orgId);
-    const dataUsageTokenLimit = orgSubscription?.dataUsageLimitInTokens;
+
+    const dataUsageTokenLimit = orgSubscription?.dataUsageLimitInGb
+      ? convertGigabytesToTokens(orgSubscription.dataUsageLimitInGb)
+      : undefined;
+
     const orgTokenCount =
       await this.dataSourceRepository.getNumberOfTokensStoredForOrg(orgId);
 
