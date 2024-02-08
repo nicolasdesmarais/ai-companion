@@ -18,6 +18,7 @@ import {
   OrgSubscriptionDto,
 } from "@/src/domain/models/OrgSubscriptions";
 import axios from "axios";
+import { Loader } from "lucide-react";
 
 type Props = {
   orgId: string;
@@ -30,21 +31,23 @@ export const ProModal = ({ orgId }: Props) => {
 
   const proModal = useProModal();
   const [isMounted, setIsMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<OrgSubscriptionDto>();
 
   const fetchSubscription = async () => {
-    const response = await axios.get(`/api/v1/org-subscription`);
-    setSubscription(response.data);
+    setLoading(true);
+    try {
+      const response = await axios.get(`/api/v1/org-subscription`);
+      setSubscription(response.data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchSubscription();
     setIsMounted(true);
+    fetchSubscription();
   }, []);
-
-  if (!isMounted) {
-    return null;
-  }
 
   const handleUpgrade = async () => {
     try {
@@ -63,6 +66,10 @@ export const ProModal = ({ orgId }: Props) => {
     }
   };
 
+  if (!isMounted) {
+    return null;
+  }
+
   return (
     <Dialog open={proModal.isOpen} onOpenChange={proModal.onClose}>
       <DialogContent>
@@ -72,28 +79,34 @@ export const ProModal = ({ orgId }: Props) => {
           </DialogTitle>
         </DialogHeader>
         <Separator />
-        <div className="overflow-auto h-screen">
-          {subscription && subscription.externalId ? (
-            <>
-              <p>
-                You are subscribed to the {subscription.metadata.productName}{" "}
-                plan.
-              </p>
-              <button
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                onClick={handleUpgrade}
-              >
-                Upgrade
-              </button>
-            </>
-          ) : (
-            <StripePricingTable
-              orgId={orgId}
-              stripePublishableKey={stripePublishableKey}
-              pricingTableId={pricingTableId}
-            />
-          )}
-        </div>
+        {loading ? (
+          <div className="flex justify-center items-center h-32">
+            <Loader className="w-16 h-16 spinner" />
+          </div>
+        ) : (
+          <div className="overflow-auto h-screen">
+            {subscription?.externalId ? (
+              <>
+                <p>
+                  You are subscribed to the {subscription.metadata.productName}{" "}
+                  plan.
+                </p>
+                <button
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  onClick={handleUpgrade}
+                >
+                  Upgrade
+                </button>
+              </>
+            ) : (
+              <StripePricingTable
+                orgId={orgId}
+                stripePublishableKey={stripePublishableKey}
+                pricingTableId={pricingTableId}
+              />
+            )}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
