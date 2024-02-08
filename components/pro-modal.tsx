@@ -19,6 +19,7 @@ import {
 } from "@/src/domain/models/OrgSubscriptions";
 import axios from "axios";
 import { Loader } from "lucide-react";
+import { Button } from "./ui/button";
 
 type Props = {
   orgId: string;
@@ -31,7 +32,8 @@ export const ProModal = ({ orgId }: Props) => {
 
   const proModal = useProModal();
   const [isMounted, setIsMounted] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(true);
+  const [isManageSessionLoading, setManageSessionLoading] = useState(false);
   const [subscription, setSubscription] = useState<OrgSubscriptionDto>();
 
   const fetchSubscription = async () => {
@@ -50,6 +52,7 @@ export const ProModal = ({ orgId }: Props) => {
   }, []);
 
   const handleUpgrade = async () => {
+    setManageSessionLoading(true);
     try {
       const host = window.location.host;
       const protocol = window.location.protocol;
@@ -63,6 +66,8 @@ export const ProModal = ({ orgId }: Props) => {
       window.location.href = data.manageSubscriptionRedirectUrl;
     } catch (error) {
       console.error("Failed to upgrade subscription", error);
+    } finally {
+      setManageSessionLoading(false);
     }
   };
 
@@ -79,7 +84,7 @@ export const ProModal = ({ orgId }: Props) => {
           </DialogTitle>
         </DialogHeader>
         <Separator />
-        {loading ? (
+        {isLoading ? (
           <div className="flex justify-center items-center h-32">
             <Loader className="w-16 h-16 spinner" />
           </div>
@@ -91,12 +96,17 @@ export const ProModal = ({ orgId }: Props) => {
                   You are subscribed to the {subscription.metadata.productName}{" "}
                   plan.
                 </p>
-                <button
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={handleUpgrade}
+                  disabled={isManageSessionLoading}
                 >
-                  Upgrade
-                </button>
+                  Update Plan
+                  {isManageSessionLoading && (
+                    <Loader className="w-4 h-4 ml-2 spinner" />
+                  )}
+                </Button>
               </>
             ) : (
               <StripePricingTable
