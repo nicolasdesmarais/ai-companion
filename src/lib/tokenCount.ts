@@ -9,3 +9,9 @@ export const convertGigabytesToTokens = (gigabytes: number) => {
   const tokens = bytes / 4;
   return tokens;
 };
+
+export const convertTokensToGigabytes = (tokens: number) => {
+  const bytes = tokens * 4;
+  const gigabytes = bytes / (1024 * 1024 * 1024);
+  return gigabytes;
+};
