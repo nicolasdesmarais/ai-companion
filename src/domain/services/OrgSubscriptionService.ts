@@ -27,6 +27,19 @@ export class OrgSubscriptionService {
       orgSubscription = await this.createInitialOrgSubscription(orgId);
     }
 
+    if (orgSubscription.externalSubscriptionId) {
+      const externalSubscription =
+        await stripeAdapter.fetchExternalSubscription(
+          orgSubscription.externalSubscriptionId
+        );
+      return {
+        ...orgSubscription,
+        dataUsageLimitInGb: externalSubscription.dataUsageLimitInGb,
+        apiUsageTokenLimit: externalSubscription.apiUsageTokenLimit,
+        metadata: externalSubscription.metadata,
+      };
+    }
+
     return orgSubscription;
   }
 

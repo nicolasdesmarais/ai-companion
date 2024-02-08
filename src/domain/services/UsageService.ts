@@ -1,5 +1,9 @@
 import { DataSourceRepositoryImpl } from "@/src/adapter-out/repositories/DataSourceRepositoryImpl";
 import { OrgSubscriptionRepositoryImpl } from "@/src/adapter-out/repositories/OrgSubscriptionRepositoryImpl";
+import {
+  convertGigabytesToTokens,
+  convertTokensToGigabytes,
+} from "@/src/lib/tokenCount";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { UsageSecurityService } from "@/src/security/services/UsageSecurityService";
 import { ForbiddenError } from "../errors/Errors";
@@ -25,24 +29,27 @@ export class UsageService {
       throw new ForbiddenError();
     }
 
-    const dataTokensUsed =
-      await this.dataSourceRepository.getNumberOfTokensStoredForOrg(orgId);
     const orgSubscription = await this.orgSubscriptionRepository.findByOrgId(
       orgId
     );
-    const dataUsageTokenLimit = orgSubscription
-      ? orgSubscription.dataUsageLimitInTokens
+
+    const dataUsageLimitInGb = orgSubscription
+      ? orgSubscription.dataUsageLimitInGb
       : null;
     const apiUsageTokenLimit = orgSubscription
       ? orgSubscription.apiUsageTokenLimit
       : null;
 
+    const dataTokensUsed =
+      await this.dataSourceRepository.getNumberOfTokensStoredForOrg(orgId);
+    const dataUsedInGb = convertTokensToGigabytes(dataTokensUsed);
+
     const apiTokensUsed = 0; // TODO: Implement API usage tracking
 
     return {
       orgId,
-      dataTokensUsed,
-      dataUsageTokenLimit,
+      dataUsedInGb,
+      dataUsageLimitInGb,
       apiTokensUsed,
       apiUsageTokenLimit,
     };
@@ -76,7 +83,11 @@ export class UsageService {
   ): Promise<boolean> {
     const orgSubscription =
       await this.orgSubscriptionRepository.findOrCreateByOrgId(orgId);
-    const dataUsageTokenLimit = orgSubscription?.dataUsageLimitInTokens;
+
+    const dataUsageTokenLimit = orgSubscription?.dataUsageLimitInGb
+      ? convertGigabytesToTokens(orgSubscription.dataUsageLimitInGb)
+      : undefined;
+
     const orgTokenCount =
       await this.dataSourceRepository.getNumberOfTokensStoredForOrg(orgId);
 

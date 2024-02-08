@@ -6,7 +6,6 @@ export interface OrgSubscriptionDto {
   updatedAt: Date;
   externalSubscriptionId: string | null;
   externalCustomerId: string | null;
-  dataUsageLimitInTokens: number | null;
   dataUsageLimitInGb: number | null;
   apiUsageTokenLimit: number | null;
   metadata?: any;
