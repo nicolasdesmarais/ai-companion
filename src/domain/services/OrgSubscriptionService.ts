@@ -2,7 +2,6 @@ import { OrgSubscriptionRepositoryImpl } from "@/src/adapter-out/repositories/Or
 import stripeAdapter from "@/src/adapter-out/stripe/StripeAdapter";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { OrgSubscriptionType } from "@prisma/client";
-import { EntityNotFoundError } from "../errors/Errors";
 import {
   CreateManageSubscriptionSessionRequest,
   ManageSubscriptionSession,
@@ -21,13 +20,11 @@ export class OrgSubscriptionService {
     authorizationContext: AuthorizationContext
   ): Promise<OrgSubscriptionDto> {
     const { orgId } = authorizationContext;
-    const orgSubscription = await this.orgSubscriptionRepository.findByOrgId(
+    let orgSubscription = await this.orgSubscriptionRepository.findByOrgId(
       orgId
     );
     if (!orgSubscription) {
-      throw new EntityNotFoundError(
-        `OrgSubscription not found for orgId: ${orgId}`
-      );
+      orgSubscription = await this.createInitialOrgSubscription(orgId);
     }
 
     return orgSubscription;
@@ -38,22 +35,20 @@ export class OrgSubscriptionService {
     input: CreateManageSubscriptionSessionRequest
   ): Promise<ManageSubscriptionSession> {
     const orgSubscription = await this.getOrgSubscription(authorizationContext);
-    if (!orgSubscription.externalId) {
+    if (!orgSubscription.externalCustomerId) {
       throw new Error(
         `ExternalId not found for org subscription for orgId: ${orgSubscription.orgId}`
       );
     }
 
-    const subscriptionRedirectUrl =
+    const manageSubscriptionRedirectUrl =
       await stripeAdapter.createManageSubscriptionSession(
-        orgSubscription,
+        orgSubscription.externalCustomerId,
         input.redirectUrl
       );
 
     return {
-      orgId: orgSubscription.orgId,
-      externalSubscriptionId: orgSubscription.externalId,
-      manageSubscriptionRedirectUrl: subscriptionRedirectUrl,
+      manageSubscriptionRedirectUrl,
     };
   }
 
@@ -72,7 +67,8 @@ export class OrgSubscriptionService {
     const {
       orgId,
       type,
-      externalId,
+      externalSubscriptionId,
+      externalCustomerId,
       dataUsageLimitInGb,
       apiUsageTokenLimit,
       metadata,
@@ -81,9 +77,10 @@ export class OrgSubscriptionService {
     return await this.orgSubscriptionRepository.upsertOrgSubscription(
       orgId,
       type,
+      externalSubscriptionId,
+      externalCustomerId,
       dataUsageLimitInGb,
       apiUsageTokenLimit,
-      externalId,
       metadata
     );
   }

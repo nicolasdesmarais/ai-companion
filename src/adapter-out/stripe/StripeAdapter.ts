@@ -1,11 +1,7 @@
-import {
-  ExternalOrgSubscription,
-  OrgSubscriptionDto,
-} from "@/src/domain/models/OrgSubscriptions";
+import { ExternalOrgSubscription } from "@/src/domain/models/OrgSubscriptions";
 import { stripe } from "@/src/lib/stripe";
 
 export interface StripeMetadata {
-  customer: string;
   productId: string;
   productName: string;
   productMetadata: any;
@@ -25,6 +21,7 @@ export class StripeAdapter {
       throw new Error("Subscription has no items");
     }
 
+    const externalCustomerId = subscription.customer as string;
     const productId = subscription.items.data[0].plan.product as string;
     const product = await stripe.products.retrieve(productId);
 
@@ -38,11 +35,11 @@ export class StripeAdapter {
       productId: product.id,
       productName: product.name,
       productMetadata: product.metadata,
-      customer: subscription.customer as string,
     };
 
     return {
-      externalId: subscriptionId,
+      externalSubscriptionId: subscriptionId,
+      externalCustomerId,
       dataUsageLimitInGb,
       apiUsageTokenLimit,
       metadata,
@@ -50,11 +47,11 @@ export class StripeAdapter {
   }
 
   public async createManageSubscriptionSession(
-    orgSubscription: OrgSubscriptionDto,
+    customerId: string,
     redirectUrl: string
   ): Promise<string> {
     const stripeSession = await stripe.billingPortal.sessions.create({
-      customer: orgSubscription.metadata.customer,
+      customer: customerId,
       return_url: redirectUrl,
     });
 

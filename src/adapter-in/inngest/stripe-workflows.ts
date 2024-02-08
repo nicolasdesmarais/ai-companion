@@ -54,12 +54,18 @@ const handleCheckoutSessionCompletedEvent = async (
     }
   );
 
-  const { externalId, dataUsageLimitInGb, metadata } = externalOrgSubscription;
+  const {
+    externalSubscriptionId,
+    externalCustomerId,
+    dataUsageLimitInGb,
+    metadata,
+  } = externalOrgSubscription;
   await step.run("update-org-subscription", async () => {
     return await orgSubscriptionService.updateOrgSubscription({
       orgId,
       type: OrgSubscriptionType.PAID,
-      externalId,
+      externalSubscriptionId,
+      externalCustomerId,
       dataUsageLimitInGb,
       metadata,
     });
