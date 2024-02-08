@@ -150,8 +150,8 @@ export const Sidebar = ({
   const routes = [
     {
       icon: Store,
-      href: "/index",
-      pathname: "/index",
+      href: "/",
+      pathname: "/",
       searchparams: { scope: null },
       label: "Browse",
       pro: false,
