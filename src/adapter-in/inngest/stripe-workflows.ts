@@ -11,6 +11,8 @@ export enum StripeEvent {
 
 enum StripeWebhookEventType {
   CHECKOUT_SESSION_COMPLETED = "checkout.session.completed",
+  CUSTOMER_SUBSCRIPTION_UPDATED = "customer.subscription.updated",
+  CUSTOMER_SUBSCRIPTION_DELETED = "customer.subscription.deleted",
   INVOICE_PAYMENT_SUCCEEDED = "invoice.payment_succeeded",
 }
 
@@ -28,6 +30,12 @@ export const stripeWebhookReceived = inngest.createFunction(
     switch (stripeEvent.type) {
       case StripeWebhookEventType.CHECKOUT_SESSION_COMPLETED:
         await handleCheckoutSessionCompletedEvent(step, stripeEvent);
+        break;
+      case StripeWebhookEventType.CUSTOMER_SUBSCRIPTION_UPDATED:
+        await handleCustomerSubscriptionUpdatedEvent(step, stripeEvent);
+        break;
+      case StripeWebhookEventType.CUSTOMER_SUBSCRIPTION_DELETED:
+        await handleCustomerSubscriptionDeletedEvent(step, stripeEvent);
         break;
       case StripeWebhookEventType.INVOICE_PAYMENT_SUCCEEDED:
         await handleInvoicePaymentSucceeded(step, stripeEvent);
@@ -71,6 +79,16 @@ const handleCheckoutSessionCompletedEvent = async (
     });
   });
 };
+
+const handleCustomerSubscriptionUpdatedEvent = async (
+  step: any,
+  event: Stripe.Event
+) => {};
+
+const handleCustomerSubscriptionDeletedEvent = async (
+  step: any,
+  event: Stripe.Event
+) => {};
 
 const handleInvoicePaymentSucceeded = async (
   step: any,
