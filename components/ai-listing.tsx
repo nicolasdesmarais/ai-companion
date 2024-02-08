@@ -112,7 +112,11 @@ export const AiListing = async ({ searchParams, scopeParam }: Props) => {
       {!(scope !== ListAIsRequestScope.PUBLIC || searchParams.groupId) && (
         <Categories data={categories} />
       )}
-      <Groups groups={groups} hasElevatedWriteAccess={hasElevatedWriteAccess} />
+      <Groups
+        groups={groups}
+        hasElevatedWriteAccess={hasElevatedWriteAccess}
+        scopeParam={scopeParam}
+      />
       <AIs
         data={data}
         authorizationContext={authorizationContext}

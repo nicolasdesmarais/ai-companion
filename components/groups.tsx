@@ -14,9 +14,14 @@ import { useEffect, useState } from "react";
 interface Props {
   groups: GroupSummaryDto[];
   hasElevatedWriteAccess: boolean;
+  scopeParam?: string;
 }
 
-export const Groups = ({ groups, hasElevatedWriteAccess }: Props) => {
+export const Groups = ({
+  groups,
+  hasElevatedWriteAccess,
+  scopeParam,
+}: Props) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const groupModal = useGroupModal();
@@ -24,8 +29,8 @@ export const Groups = ({ groups, hasElevatedWriteAccess }: Props) => {
   const { organization } = useOrganization();
   const [groupList, setGroupList] = useState<GroupSummaryDto[]>(groups);
 
+  const scope = scopeParam?.toUpperCase().replace(/-/g, "_");
   const groupId = searchParams.get("groupId");
-  const scope = searchParams.get("scope");
 
   const fetchGroups = async () => {
     const response = await axios.get("/api/v1/me/groups");
@@ -43,9 +48,9 @@ export const Groups = ({ groups, hasElevatedWriteAccess }: Props) => {
   const onClick = (id: string | undefined) => {
     let query;
     if (!id) {
-      query = { scope, groupId: undefined };
+      query = { groupId: undefined };
     } else {
-      query = { scope, groupId: id };
+      query = { groupId: id };
     }
 
     const url = qs.stringifyUrl(
