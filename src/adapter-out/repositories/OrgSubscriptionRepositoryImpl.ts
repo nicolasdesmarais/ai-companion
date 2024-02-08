@@ -5,22 +5,11 @@ import { OrgSubscription, OrgSubscriptionType } from "@prisma/client";
 
 const DEFAULT_DATA_USAGE_GB_LIMIT = 0.5;
 
-const gigabytesToBytes = (gigabytes: number) => {
-  return gigabytes * Math.pow(2, 30);
-};
-
 const mapOrgSubscriptionToDto = (
   orgSubscription: OrgSubscription
 ): OrgSubscriptionDto => {
   const { id, ...orgSubscriptionWithoutId } = orgSubscription;
-
-  let dataUsageLimitInTokens = null;
-  if (orgSubscription.dataUsageLimitInGb) {
-    dataUsageLimitInTokens =
-      gigabytesToBytes(orgSubscription.dataUsageLimitInGb) / 4;
-  }
-
-  return { ...orgSubscriptionWithoutId, dataUsageLimitInTokens };
+  return { ...orgSubscriptionWithoutId };
 };
 
 export class OrgSubscriptionRepositoryImpl
