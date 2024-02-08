@@ -30,25 +30,29 @@ interface Props {
     search: string;
     sort: string;
   };
+  scopeParam?: string;
 }
 
-export const AiListing = async ({ searchParams }: Props) => {
+export const AiListing = async ({ searchParams, scopeParam }: Props) => {
   const authorizationContext = getUserAuthorizationContext();
   if (!authorizationContext) {
     return;
   }
 
-  const scopeParam = searchParams.scope;
   let scope: ListAIsRequestScope | undefined;
-  if (
-    !scopeParam ||
-    !Object.values(ListAIsRequestScope).includes(
-      scopeParam as ListAIsRequestScope
-    )
-  ) {
+  if (!scopeParam) {
     scope = undefined;
   } else {
-    scope = ListAIsRequestScope[scopeParam as keyof typeof ListAIsRequestScope];
+    const scopeKey = scopeParam.toUpperCase().replace(/-/g, "_");
+    if (
+      !Object.values(ListAIsRequestScope).includes(
+        scopeKey as ListAIsRequestScope
+      )
+    ) {
+      scope = undefined;
+    } else {
+      scope = ListAIsRequestScope[scopeKey as keyof typeof ListAIsRequestScope];
+    }
   }
 
   const groups: GroupSummaryDto[] = await groupService.findGroupsByUser(

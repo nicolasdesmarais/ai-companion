@@ -7,23 +7,26 @@ import {
 } from "@/src/adapter-in/api/AIApi";
 import { cn } from "@/src/lib/utils";
 import { BadgeCheck } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
 
 export const Filters = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
-  const scope = searchParams.get("scope");
+  const scope = pathname.startsWith("/index/")
+    ? pathname.split("/")[2].toUpperCase().replace(/-/g, "_")
+    : "";
   const groupId = searchParams.get("groupId");
   const approvedByOrg = searchParams.get("approvedByOrg");
 
   const onClick = (id: string | undefined) => {
-    let query = { scope: id, groupId: undefined, approvedByOrg };
+    let query = { groupId: undefined, approvedByOrg };
 
     const url = qs.stringifyUrl(
       {
-        url: window.location.href,
+        url: `/index/${id?.toLowerCase().replace(/_/g, "-")}`,
         query,
       },
       { skipNull: true }
@@ -34,7 +37,7 @@ export const Filters = () => {
 
   const onClickCompanyApproved = () => {
     const updatedApprovedByOrg = approvedByOrg === "true" ? undefined : "true";
-    let query = { scope, groupId, approvedByOrg: updatedApprovedByOrg };
+    let query = { groupId, approvedByOrg: updatedApprovedByOrg };
     const url = qs.stringifyUrl(
       {
         url: window.location.href,
