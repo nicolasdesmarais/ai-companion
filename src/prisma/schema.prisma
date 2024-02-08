@@ -358,15 +358,16 @@ model AIOrgApproval {
 }
 
 model OrgSubscription {
-  id                 Int                 @id @default(autoincrement())
-  createdAt          DateTime            @default(now()) @map(name: "created_at")
-  updatedAt          DateTime            @default(now()) @updatedAt @map(name: "updated_at")
-  orgId              String              @map(name: "org_id")
-  type               OrgSubscriptionType @default(FREE)
-  externalId         String?             @map(name: "external_id")
-  dataUsageLimitInGb Float?              @map(name: "data_usage_limit_gb")
-  apiUsageTokenLimit Int?                @map(name: "api_usage_token_limit")
-  metadata           Json?
+  id                     Int                 @id @default(autoincrement())
+  createdAt              DateTime            @default(now()) @map(name: "created_at")
+  updatedAt              DateTime            @default(now()) @updatedAt @map(name: "updated_at")
+  orgId                  String              @map(name: "org_id")
+  type                   OrgSubscriptionType @default(FREE)
+  externalSubscriptionId String?             @map(name: "external_subscription_id")
+  externalCustomerId     String?             @map(name: "external_customer_id")
+  dataUsageLimitInGb     Float?              @map(name: "data_usage_limit_gb")
+  apiUsageTokenLimit     Int?                @map(name: "api_usage_token_limit")
+  metadata               Json?
 
   @@unique([orgId])
   @@map("org_subscriptions")

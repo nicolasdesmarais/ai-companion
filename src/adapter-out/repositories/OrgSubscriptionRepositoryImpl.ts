@@ -81,14 +81,16 @@ export class OrgSubscriptionRepositoryImpl
   public async upsertOrgSubscription(
     orgId: string,
     type: OrgSubscriptionType,
-    dataUsageLimitInGb?: number,
-    apiUsageTokenLimit?: number,
-    externalId?: string,
+    externalSubscriptionId?: string | null,
+    externalCustomerId?: string | null,
+    dataUsageLimitInGb?: number | null,
+    apiUsageTokenLimit?: number | null,
     metadata?: any
   ): Promise<OrgSubscriptionDto> {
     const orgSubscriptionData = {
       type,
-      externalId,
+      externalSubscriptionId,
+      externalCustomerId,
       dataUsageLimitInGb,
       apiUsageTokenLimit,
       metadata,

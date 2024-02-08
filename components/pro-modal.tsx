@@ -90,7 +90,7 @@ export const ProModal = ({ orgId }: Props) => {
           </div>
         ) : (
           <div className="overflow-auto h-screen">
-            {subscription?.externalId ? (
+            {subscription?.externalSubscriptionId ? (
               <>
                 <p>
                   You are subscribed to the {subscription.metadata.productName}{" "}
