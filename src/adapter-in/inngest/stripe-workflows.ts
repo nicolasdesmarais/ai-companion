@@ -1,6 +1,4 @@
-import stripeAdapter, {
-  OrgSubscriptionMetadata,
-} from "@/src/adapter-out/stripe/StripeAdapter";
+import stripeAdapter from "@/src/adapter-out/stripe/StripeAdapter";
 import { ExternalOrgSubscription } from "@/src/domain/models/OrgSubscriptions";
 import orgSubscriptionService from "@/src/domain/services/OrgSubscriptionService";
 import { OrgSubscriptionType } from "@prisma/client";
@@ -65,16 +63,6 @@ const handleCheckoutSessionCompletedEvent = async (
       dataUsageLimitInGb,
       metadata,
     });
-  });
-
-  const orgSubscriptionMetadata: OrgSubscriptionMetadata = {
-    orgId,
-  };
-  await step.run("update-subscription-metadata", async () => {
-    return await stripeAdapter.updateSubscriptionMetadata(
-      subscriptionId,
-      orgSubscriptionMetadata
-    );
   });
 };
 

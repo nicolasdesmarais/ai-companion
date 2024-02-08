@@ -60,15 +60,6 @@ export class StripeAdapter {
 
     return stripeSession.url;
   }
-
-  public async updateSubscriptionMetadata(
-    subscriptionId: string,
-    metadata: OrgSubscriptionMetadata
-  ) {
-    await stripe.subscriptions.update(subscriptionId, {
-      metadata: { ...metadata },
-    });
-  }
 }
 
 const stripeAdapter = new StripeAdapter();
