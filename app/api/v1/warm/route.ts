@@ -7,6 +7,8 @@ const testAiId = process.env.AUTOMATION_AI_ID;
 
 const paths = [
   "/",
+  "/index/owned",
+  "/index/shared",
   "/ai/new/edit",
   "/chat/",
   "/api/v1/me/chats",
