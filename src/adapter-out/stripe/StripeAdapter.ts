@@ -1,10 +1,18 @@
-import { ExternalOrgSubscription } from "@/src/domain/models/OrgSubscriptions";
+import {
+  ExternalOrgSubscription,
+  OrgSubscriptionDto,
+} from "@/src/domain/models/OrgSubscriptions";
 import { stripe } from "@/src/lib/stripe";
 
 export interface StripeMetadata {
+  customer: string;
   productId: string;
   productName: string;
   productMetadata: any;
+}
+
+export interface OrgSubscriptionMetadata {
+  orgId: string;
 }
 
 export class StripeAdapter {
@@ -30,6 +38,7 @@ export class StripeAdapter {
       productId: product.id,
       productName: product.name,
       productMetadata: product.metadata,
+      customer: subscription.customer as string,
     };
 
     return {
@@ -38,6 +47,18 @@ export class StripeAdapter {
       apiUsageTokenLimit,
       metadata,
     };
+  }
+
+  public async createManageSubscriptionSession(
+    orgSubscription: OrgSubscriptionDto,
+    redirectUrl: string
+  ): Promise<string> {
+    const stripeSession = await stripe.billingPortal.sessions.create({
+      customer: orgSubscription.metadata.customer,
+      return_url: redirectUrl,
+    });
+
+    return stripeSession.url;
   }
 }
 

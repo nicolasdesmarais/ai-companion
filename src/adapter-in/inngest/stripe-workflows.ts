@@ -48,7 +48,7 @@ const handleCheckoutSessionCompletedEvent = async (
 
   const subscriptionId = session.subscription as string;
   const externalOrgSubscription: ExternalOrgSubscription = await step.run(
-    "fetch-usage-limits",
+    "fetch-external-subscription",
     async () => {
       return await stripeAdapter.fetchExternalSubscription(subscriptionId);
     }
