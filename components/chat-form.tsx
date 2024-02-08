@@ -57,7 +57,7 @@ export const ChatForm = ({
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         placeholder="Type a message"
-        className="rounded-lg bg-primary/10 min-h-[38px]"
+        className="rounded-lg bg-primary/10 max-h-80 h-[38px] min-h-[38px]"
         ref={textAreaRef}
       />
       <Button disabled={isLoading} variant="ghost">
