@@ -57,18 +57,15 @@ const handleCheckoutSessionCompletedEvent = async (
   );
 
   const { externalId, dataUsageLimitInGb, metadata } = externalOrgSubscription;
-  const orgSubscription = await step.run(
-    "update-org-subscription",
-    async () => {
-      return await orgSubscriptionService.updateOrgSubscription({
-        orgId,
-        type: OrgSubscriptionType.PAID,
-        externalId,
-        dataUsageLimitInGb,
-        metadata,
-      });
-    }
-  );
+  await step.run("update-org-subscription", async () => {
+    return await orgSubscriptionService.updateOrgSubscription({
+      orgId,
+      type: OrgSubscriptionType.PAID,
+      externalId,
+      dataUsageLimitInGb,
+      metadata,
+    });
+  });
 
   const orgSubscriptionMetadata: OrgSubscriptionMetadata = {
     orgId,

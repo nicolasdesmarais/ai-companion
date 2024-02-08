@@ -1,8 +1,11 @@
 import { OrgSubscriptionRepositoryImpl } from "@/src/adapter-out/repositories/OrgSubscriptionRepositoryImpl";
+import stripeAdapter from "@/src/adapter-out/stripe/StripeAdapter";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { OrgSubscriptionType } from "@prisma/client";
 import { EntityNotFoundError } from "../errors/Errors";
 import {
+  CreateManageSubscriptionSessionRequest,
+  ManageSubscriptionSession,
   OrgSubscriptionDto,
   UpdateOrgSubscriptionInput,
 } from "../models/OrgSubscriptions";
@@ -16,7 +19,7 @@ export class OrgSubscriptionService {
 
   public async getOrgSubscription(
     authorizationContext: AuthorizationContext
-  ): Promise<OrgSubscriptionDto | null> {
+  ): Promise<OrgSubscriptionDto> {
     const { orgId } = authorizationContext;
     const orgSubscription = await this.orgSubscriptionRepository.findByOrgId(
       orgId
@@ -28,6 +31,30 @@ export class OrgSubscriptionService {
     }
 
     return orgSubscription;
+  }
+
+  public async createManageSubscriptionSession(
+    authorizationContext: AuthorizationContext,
+    input: CreateManageSubscriptionSessionRequest
+  ): Promise<ManageSubscriptionSession> {
+    const orgSubscription = await this.getOrgSubscription(authorizationContext);
+    if (!orgSubscription.externalId) {
+      throw new Error(
+        `ExternalId not found for org subscription for orgId: ${orgSubscription.orgId}`
+      );
+    }
+
+    const subscriptionRedirectUrl =
+      await stripeAdapter.createManageSubscriptionSession(
+        orgSubscription,
+        input.redirectUrl
+      );
+
+    return {
+      orgId: orgSubscription.orgId,
+      externalSubscriptionId: orgSubscription.externalId,
+      manageSubscriptionRedirectUrl: subscriptionRedirectUrl,
+    };
   }
 
   public async createInitialOrgSubscription(orgId: string) {
