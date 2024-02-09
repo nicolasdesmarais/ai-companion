@@ -80,6 +80,8 @@ export class OrgSubscriptionService {
     const {
       orgId,
       type,
+      status,
+      periodEndDate,
       externalSubscriptionId,
       externalCustomerId,
       dataUsageLimitInGb,
@@ -90,6 +92,8 @@ export class OrgSubscriptionService {
     return await this.orgSubscriptionRepository.upsertOrgSubscription(
       orgId,
       type,
+      status,
+      periodEndDate,
       externalSubscriptionId,
       externalCustomerId,
       dataUsageLimitInGb,

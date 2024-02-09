@@ -1,4 +1,4 @@
-import { OrgSubscriptionType } from "@prisma/client";
+import { OrgSubscriptionStatus, OrgSubscriptionType } from "@prisma/client";
 import { OrgSubscriptionDto } from "../../models/OrgSubscriptions";
 
 export interface OrgSubscriptionRepository {
@@ -16,6 +16,8 @@ export interface OrgSubscriptionRepository {
   upsertOrgSubscription(
     orgId: string,
     type: OrgSubscriptionType,
+    status: OrgSubscriptionStatus,
+    periodEndDate: Date | null,
     externalSubscriptionId?: string | null,
     externalCustomerId?: string | null,
     dataUsageLimitInGb?: number | null,

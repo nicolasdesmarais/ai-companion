@@ -63,6 +63,8 @@ const handleCheckoutSessionCompletedEvent = async (
   );
 
   const {
+    status,
+    periodEndDate,
     externalSubscriptionId,
     externalCustomerId,
     dataUsageLimitInGb,
@@ -72,6 +74,8 @@ const handleCheckoutSessionCompletedEvent = async (
     return await orgSubscriptionService.updateOrgSubscription({
       orgId,
       type: OrgSubscriptionType.PAID,
+      status,
+      periodEndDate,
       externalSubscriptionId,
       externalCustomerId,
       dataUsageLimitInGb,

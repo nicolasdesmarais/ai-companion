@@ -1,7 +1,11 @@
 import { OrgSubscriptionDto } from "@/src/domain/models/OrgSubscriptions";
 import { OrgSubscriptionRepository } from "@/src/domain/ports/outgoing/OrgSubscriptionRepository";
 import prismadb from "@/src/lib/prismadb";
-import { OrgSubscription, OrgSubscriptionType } from "@prisma/client";
+import {
+  OrgSubscription,
+  OrgSubscriptionStatus,
+  OrgSubscriptionType,
+} from "@prisma/client";
 
 const DEFAULT_DATA_USAGE_GB_LIMIT = 0.5;
 
@@ -70,6 +74,8 @@ export class OrgSubscriptionRepositoryImpl
   public async upsertOrgSubscription(
     orgId: string,
     type: OrgSubscriptionType,
+    status: OrgSubscriptionStatus,
+    periodEndDate: Date | null,
     externalSubscriptionId?: string | null,
     externalCustomerId?: string | null,
     dataUsageLimitInGb?: number | null,
@@ -78,6 +84,8 @@ export class OrgSubscriptionRepositoryImpl
   ): Promise<OrgSubscriptionDto> {
     const orgSubscriptionData = {
       type,
+      status,
+      periodEndDate,
       externalSubscriptionId,
       externalCustomerId,
       dataUsageLimitInGb,
