@@ -1,15 +1,20 @@
 "use client";
-import { useEffect } from "react";
 import { Table } from "@/components/table";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { KnowledgeIndexStatus } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { format } from "date-fns";
-import { ChevronRight, ChevronDown, Loader, MinusCircle } from "lucide-react";
-import { useState } from "react";
-import { DataSourceTypes } from "./datasource-types";
-import { KnowledgeIndexStatus } from "@prisma/client";
+import {
+  ChevronDown,
+  ChevronRight,
+  Loader,
+  MinusCircle,
+  RefreshCcw,
+} from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { DataSourceTypes } from "./datasource-types";
 
 export const SuperDataSources = () => {
   const [dataSources, setDataSources] = useState<any[]>([]);
@@ -18,6 +23,8 @@ export const SuperDataSources = () => {
   const { toast } = useToast();
 
   const removeDataSource = async (id: string) => {};
+
+  const refreshKnowledge = async (id: string) => {};
 
   const fetchDataSources = async () => {
     try {
@@ -73,7 +80,7 @@ export const SuperDataSources = () => {
           "Status",
           "Docs",
           "Tokens",
-          "Remove",
+          "Action",
         ]}
         className="w-full my-4 max-h-60"
       >
@@ -144,6 +151,18 @@ export const SuperDataSources = () => {
                   type="button"
                   variant="outline"
                   disabled={!!removing}
+                  onClick={() => {}}
+                >
+                  {removing === dataSource.id ? (
+                    <Loader className="w-4 h-4 spinner" />
+                  ) : (
+                    <RefreshCcw className="w-4 h-4 text-green" />
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!!removing}
                   onClick={() => removeDataSource(dataSource.id)}
                 >
                   {removing === dataSource.id ? (
@@ -199,7 +218,7 @@ export const SuperDataSources = () => {
                       : null}
                   </td>
                   <td
-                    onClick={() => onCopy(dataSource.id)}
+                    onClick={() => onCopy(knowledge.id)}
                     className="text-ring cursor-pointer"
                   >
                     {knowledge.id}
@@ -238,12 +257,12 @@ export const SuperDataSources = () => {
                       type="button"
                       variant="outline"
                       disabled={!!removing}
-                      onClick={() => removeDataSource(knowledge.id)}
+                      onClick={() => refreshKnowledge(knowledge.id)}
                     >
                       {removing === knowledge.id ? (
                         <Loader className="w-4 h-4 spinner" />
                       ) : (
-                        <MinusCircle className="w-4 h-4 text-destructive" />
+                        <RefreshCcw className="w-4 h-4 text-green" />
                       )}
                     </Button>
                   </td>
