@@ -88,24 +88,40 @@ const handleCustomerSubscriptionUpdatedEvent = async (
   event: Stripe.Event
 ) => {
   const subscription = event.data.object as Stripe.Subscription;
+  await updateOrgSubscriptionByExternalSubscriptionId(step, subscription.id);
+};
+
+const handleCustomerSubscriptionDeletedEvent = async (
+  step: any,
+  event: Stripe.Event
+) => {
+  const subscription = event.data.object as Stripe.Subscription;
+  await updateOrgSubscriptionByExternalSubscriptionId(step, subscription.id);
+};
+
+const updateOrgSubscriptionByExternalSubscriptionId = async (
+  step: any,
+  externalSubscriptionId: string
+) => {
   const externalOrgSubscription: ExternalOrgSubscription = await step.run(
     "fetch-external-subscription",
     async () => {
-      return await stripeAdapter.fetchExternalSubscription(subscription.id);
+      return await stripeAdapter.fetchExternalSubscription(
+        externalSubscriptionId
+      );
     }
   );
 
   const {
     status,
     periodEndDate,
-    externalSubscriptionId,
     externalCustomerId,
     dataUsageLimitInGb,
     metadata,
   } = externalOrgSubscription;
   await step.run("update-org-subscription", async () => {
     return await orgSubscriptionService.updateOrgSubscriptionByExternalSubscriptionId(
-      subscription.id,
+      externalSubscriptionId,
       {
         type: OrgSubscriptionType.PAID,
         status,
@@ -118,11 +134,6 @@ const handleCustomerSubscriptionUpdatedEvent = async (
     );
   });
 };
-
-const handleCustomerSubscriptionDeletedEvent = async (
-  step: any,
-  event: Stripe.Event
-) => {};
 
 const handleInvoicePaymentSucceeded = async (
   step: any,
