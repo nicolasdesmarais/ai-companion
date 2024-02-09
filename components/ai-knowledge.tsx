@@ -38,6 +38,7 @@ import { useEffect, useState } from "react";
 import { ConfirmModal } from "./confirm-modal";
 import { ConnectKnowledge } from "./connect-knowledge";
 import DataSourceCard from "./datasource-card";
+import { DataSourceDetailModal } from "./datasource-detail-modal";
 import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
 import { DataSourceTypes } from "./datasource-types";
 import { FileUploadKnowledge } from "./file-upload-knowledge";
@@ -82,6 +83,7 @@ export const AIKnowledge = ({
   const [modelId, setModelId] = useState(form.getValues("modelId"));
   const [removing, setRemoving] = useState("");
   const [refreshing, setRefreshing] = useState("");
+  const [detailDataSource, setDetailDataSource] = useState<any>(null);
   const pathname = usePathname();
   const router = useRouter();
   const aiId = form.getValues("id");
@@ -197,7 +199,7 @@ export const AIKnowledge = ({
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      if (autoRefresh) {
+      if (autoRefresh && !isLoading && !detailDataSource) {
         fetchDataSources();
       }
     }, 5000);
@@ -268,7 +270,10 @@ export const AIKnowledge = ({
             >
               {dataSources.map((dataSource: any) => (
                 <tr key={dataSource.id} className="items-center my-2 text-sm">
-                  <td className="p-2">
+                  <td
+                    className="p-2"
+                    onClick={() => setDetailDataSource(dataSource)}
+                  >
                     {dataSource.name.length > 30 ? (
                       <Tooltip
                         content={dataSource.name}
@@ -456,6 +461,10 @@ export const AIKnowledge = ({
         />
       )}
       <ConfirmModal />
+      <DataSourceDetailModal
+        dataSource={detailDataSource}
+        onClose={() => setDetailDataSource(null)}
+      />
     </div>
   );
 };
