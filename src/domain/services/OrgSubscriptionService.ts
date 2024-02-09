@@ -11,7 +11,7 @@ import {
 } from "../models/OrgSubscriptions";
 import { OrgSubscriptionRepository } from "../ports/outgoing/OrgSubscriptionRepository";
 
-const DEFAULT_DATA_USAGE_GB_LIMIT = 0.5;
+const DEFAULT_DATA_USAGE_GB_LIMIT = 0.2;
 const DEFAULT_API_USAGE_TOKEN_LIMIT = null;
 
 export class OrgSubscriptionService {
