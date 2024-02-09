@@ -977,6 +977,72 @@ export class DataSourceManagementService {
     }
     return dataSource;
   }
+
+  /**
+   * Marks a knowledge as failed
+   * @param knowledgeId
+   * @param error
+   */
+  public async failDataSourceKnowledge(knowledgeId: string, error: string) {
+    const knowledge = await prismadb.knowledge.findUnique({
+      where: { id: knowledgeId },
+    });
+    if (!knowledge) {
+      throw new EntityNotFoundError(
+        `Knowledge with id=${knowledgeId} not found`
+      );
+    }
+
+    const currentMeta = knowledge.metadata as any;
+    const indexKnowledgeResponse = {
+      indexStatus: KnowledgeIndexStatus.FAILED,
+      metadata: {
+        errors: {
+          knowledge: error,
+          ...(currentMeta?.errors || {}),
+        },
+      },
+    };
+
+    await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
+    await this.updateCompletedKnowledgeDataSources(knowledge.id);
+
+    return indexKnowledgeResponse;
+  }
+
+  /**
+   * Marks a knowledge chunk as failed
+   * @param knowledgeId
+   * @param error
+   */
+  public async failDataSourceKnowledgeChunk(
+    knowledgeId: string,
+    chunkIndex: number,
+    error: string
+  ) {
+    const knowledge = await prismadb.knowledge.findUnique({
+      where: { id: knowledgeId },
+    });
+    if (!knowledge) {
+      throw new EntityNotFoundError(
+        `Knowledge with id=${knowledgeId} not found`
+      );
+    }
+    const currentMeta = knowledge.metadata as any;
+    const errors = {
+      ...(currentMeta?.errors || {}),
+    };
+    errors[`chunk-${chunkIndex}`] = error;
+    const indexKnowledgeResponse = {
+      indexStatus: KnowledgeIndexStatus.FAILED,
+      metadata: { errors },
+    };
+
+    await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
+    await this.updateCompletedKnowledgeDataSources(knowledge.id);
+
+    return indexKnowledgeResponse;
+  }
 }
 
 const dataSourceRepository = new DataSourceRepositoryImpl();

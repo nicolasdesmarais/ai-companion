@@ -251,7 +251,7 @@ export const AIKnowledge = ({
           </p>
           {inProgress && (
             <Banner className="my-2">
-              Data sources are being indexed. You can continue without loosing
+              Data sources are being indexed. You can continue without losing
               any progress.
               <div>Return later to check on progress.</div>
             </Banner>

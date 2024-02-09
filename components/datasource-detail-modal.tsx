@@ -36,6 +36,7 @@ export const DataSourceDetailModal = ({ dataSource, onClose }: Props) => {
           <div key={knowledge.id} className="p-2">
             <div>{knowledge.name}</div>
             <div>{knowledge.indexStatus}</div>
+            <div>{JSON.stringify(knowledge.metadata.errors)}</div>
           </div>
         ))}
       </DialogContent>
