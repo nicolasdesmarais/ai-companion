@@ -49,10 +49,7 @@ export class OrgSubscriptionService {
     input: CreateManageSubscriptionSessionRequest
   ): Promise<ManageSubscriptionSession> {
     const orgSubscription = await this.getOrgSubscription(authorizationContext);
-    if (
-      !orgSubscription.externalSubscriptionId ||
-      !orgSubscription.externalCustomerId
-    ) {
+    if (!orgSubscription.externalCustomerId) {
       throw new Error(
         `ExternalId not found for org subscription for orgId: ${orgSubscription.orgId}`
       );
@@ -60,7 +57,6 @@ export class OrgSubscriptionService {
 
     const manageSubscriptionRedirectUrl =
       await stripeAdapter.createManageSubscriptionSession(
-        orgSubscription.externalSubscriptionId,
         orgSubscription.externalCustomerId,
         input.redirectUrl
       );

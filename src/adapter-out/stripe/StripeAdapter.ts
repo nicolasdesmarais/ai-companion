@@ -58,28 +58,9 @@ export class StripeAdapter {
   }
 
   public async createManageSubscriptionSession(
-    subscriptionId: string,
     customerId: string,
     redirectUrl: string
   ): Promise<string> {
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-
-    if (subscription.status === "canceled") {
-      // Current Subscription is cancelled. Create a new checkout session
-      const checkoutSession = await stripe.checkout.sessions.create({
-        customer: customerId,
-        success_url: redirectUrl,
-        cancel_url: redirectUrl,
-        // payment_method_types: ["card"],
-        // mode: "subscription",
-      });
-      if (!checkoutSession.url) {
-        throw new Error("No checkout session url");
-      }
-      return checkoutSession.url;
-    }
-
-    // Active subscription. Create a billing portal session to manage subscription
     const stripeSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: redirectUrl,
