@@ -6,6 +6,10 @@ export interface OrgSubscriptionRepository {
 
   findOrCreateByOrgId(orgId: string): Promise<OrgSubscriptionDto | null>;
 
+  findByExternalSubscriptionId(
+    externalSubscriptionId: string
+  ): Promise<OrgSubscriptionDto | null>;
+
   createOrgSubscription(
     orgId: string,
     type: OrgSubscriptionType,

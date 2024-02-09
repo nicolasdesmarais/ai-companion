@@ -372,6 +372,7 @@ model OrgSubscription {
   metadata               Json?
 
   @@unique([orgId])
+  @@unique([externalSubscriptionId])
   @@map("org_subscriptions")
 }
 

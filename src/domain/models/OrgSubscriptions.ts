@@ -15,7 +15,6 @@ export interface OrgSubscriptionDto {
 }
 
 export interface UpdateOrgSubscriptionInput {
-  orgId: string;
   type: OrgSubscriptionType;
   status: OrgSubscriptionStatus;
   periodEndDate: Date | null;

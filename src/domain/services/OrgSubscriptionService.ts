@@ -2,6 +2,7 @@ import { OrgSubscriptionRepositoryImpl } from "@/src/adapter-out/repositories/Or
 import stripeAdapter from "@/src/adapter-out/stripe/StripeAdapter";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { OrgSubscriptionType } from "@prisma/client";
+import { EntityNotFoundError } from "../errors/Errors";
 import {
   CreateManageSubscriptionSessionRequest,
   ManageSubscriptionSession,
@@ -75,10 +76,10 @@ export class OrgSubscriptionService {
   }
 
   public async updateOrgSubscription(
+    orgId: string,
     input: UpdateOrgSubscriptionInput
   ): Promise<OrgSubscriptionDto> {
     const {
-      orgId,
       type,
       status,
       periodEndDate,
@@ -91,6 +92,43 @@ export class OrgSubscriptionService {
 
     return await this.orgSubscriptionRepository.upsertOrgSubscription(
       orgId,
+      type,
+      status,
+      periodEndDate,
+      externalSubscriptionId,
+      externalCustomerId,
+      dataUsageLimitInGb,
+      apiUsageTokenLimit,
+      metadata
+    );
+  }
+
+  public async updateOrgSubscriptionByExternalSubscriptionId(
+    externalSubscriptionId: string,
+    input: UpdateOrgSubscriptionInput
+  ): Promise<OrgSubscriptionDto> {
+    const orgSubscription =
+      await this.orgSubscriptionRepository.findByExternalSubscriptionId(
+        externalSubscriptionId
+      );
+    if (!orgSubscription) {
+      throw new EntityNotFoundError(
+        `OrgSubscription not found for externalSubscriptionId: ${externalSubscriptionId}`
+      );
+    }
+
+    const {
+      type,
+      status,
+      periodEndDate,
+      externalCustomerId,
+      dataUsageLimitInGb,
+      apiUsageTokenLimit,
+      metadata,
+    } = input;
+
+    return await this.orgSubscriptionRepository.upsertOrgSubscription(
+      orgSubscription.orgId,
       type,
       status,
       periodEndDate,

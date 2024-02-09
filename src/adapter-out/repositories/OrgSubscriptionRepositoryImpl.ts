@@ -41,6 +41,18 @@ export class OrgSubscriptionRepositoryImpl
     return mapOrgSubscriptionToDto(newOrgSubscription);
   }
 
+  public async findByExternalSubscriptionId(
+    externalSubscriptionId: string
+  ): Promise<OrgSubscriptionDto | null> {
+    const orgSubscription = await prismadb.orgSubscription.findUnique({
+      where: { externalSubscriptionId },
+    });
+    if (!orgSubscription) {
+      return null;
+    }
+    return mapOrgSubscriptionToDto(orgSubscription);
+  }
+
   public async createOrgSubscription(
     orgId: string,
     type: OrgSubscriptionType,
