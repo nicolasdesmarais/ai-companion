@@ -1,7 +1,7 @@
 import { OrgSubscriptionRepositoryImpl } from "@/src/adapter-out/repositories/OrgSubscriptionRepositoryImpl";
 import stripeAdapter from "@/src/adapter-out/stripe/StripeAdapter";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
-import { OrgSubscriptionType } from "@prisma/client";
+import { OrgSubscriptionStatus, OrgSubscriptionType } from "@prisma/client";
 import { EntityNotFoundError } from "../errors/Errors";
 import {
   CreateManageSubscriptionSessionRequest,
@@ -117,15 +117,17 @@ export class OrgSubscriptionService {
       );
     }
 
-    const {
-      type,
-      status,
-      periodEndDate,
-      externalCustomerId,
-      dataUsageLimitInGb,
-      apiUsageTokenLimit,
-      metadata,
-    } = input;
+    const { type, status, periodEndDate, externalCustomerId, metadata } = input;
+
+    let dataUsageLimitInGb;
+    let apiUsageTokenLimit;
+    if (status === OrgSubscriptionStatus.ACTIVE) {
+      dataUsageLimitInGb = input.dataUsageLimitInGb;
+      apiUsageTokenLimit = input.apiUsageTokenLimit;
+    } else {
+      dataUsageLimitInGb = DEFAULT_DATA_USAGE_GB_LIMIT;
+      apiUsageTokenLimit = DEFAULT_API_USAGE_TOKEN_LIMIT;
+    }
 
     return await this.orgSubscriptionRepository.upsertOrgSubscription(
       orgSubscription.orgId,

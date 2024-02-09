@@ -17,6 +17,7 @@ import {
   ManageSubscriptionSession,
   OrgSubscriptionDto,
 } from "@/src/domain/models/OrgSubscriptions";
+import { OrgSubscriptionStatus } from "@prisma/client";
 import axios from "axios";
 import { Loader } from "lucide-react";
 import { Button } from "./ui/button";
@@ -35,6 +36,13 @@ export const ProModal = ({ orgId }: Props) => {
   const [isLoading, setLoading] = useState(true);
   const [isManageSessionLoading, setManageSessionLoading] = useState(false);
   const [subscription, setSubscription] = useState<OrgSubscriptionDto>();
+
+  const hasActiveSubscription = (subscription?: OrgSubscriptionDto) => {
+    return (
+      subscription?.externalSubscriptionId &&
+      subscription?.status === OrgSubscriptionStatus.ACTIVE
+    );
+  };
 
   const fetchSubscription = async () => {
     setLoading(true);
@@ -90,10 +98,10 @@ export const ProModal = ({ orgId }: Props) => {
           </div>
         ) : (
           <div className="overflow-auto h-screen">
-            {subscription?.externalSubscriptionId ? (
+            {hasActiveSubscription(subscription) ? (
               <>
                 <p>
-                  You are subscribed to the {subscription.metadata.productName}{" "}
+                  You are subscribed to the {subscription?.metadata.productName}{" "}
                   plan.
                 </p>
                 <Button
