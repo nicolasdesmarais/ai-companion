@@ -364,6 +364,7 @@ model OrgSubscription {
   orgId                  String                @map(name: "org_id")
   type                   OrgSubscriptionType   @default(FREE)
   status                 OrgSubscriptionStatus @default(ACTIVE)
+  periodEndDate          DateTime?             @map(name: "period_end_date")
   externalSubscriptionId String?               @map(name: "external_subscription_id")
   externalCustomerId     String?               @map(name: "external_customer_id")
   dataUsageLimitInGb     Float?                @map(name: "data_usage_limit_gb")
@@ -371,6 +372,7 @@ model OrgSubscription {
   metadata               Json?
 
   @@unique([orgId])
+  @@unique([externalSubscriptionId])
   @@map("org_subscriptions")
 }
 
