@@ -36,7 +36,7 @@ export class StripeAdapter {
 
     const dataUsageLimitMetadata = product.metadata.allowance_gb;
     const dataUsageLimitInGb = dataUsageLimitMetadata
-      ? parseInt(dataUsageLimitMetadata)
+      ? parseFloat(dataUsageLimitMetadata)
       : null;
     const apiUsageTokenLimit = null; // TODO: fetch from stripe
 
