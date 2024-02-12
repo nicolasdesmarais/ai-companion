@@ -510,42 +510,40 @@ export class DataSourceManagementService {
     indexKnowledgeResponse: IndexKnowledgeResponse,
     chunkCount: number
   ) {
-    await prismadb.$transaction(async (tx: any) => {
-      const knowledge = await tx.knowledge.findUnique({
-        where: { id: knowledgeId },
-      });
-      if (!knowledge) {
-        throw new EntityNotFoundError(
-          `Knowledge with id=${knowledgeId} not found`
+    const knowledge = await prismadb.knowledge.findUnique({
+      where: { id: knowledgeId },
+    });
+    if (!knowledge) {
+      throw new EntityNotFoundError(
+        `Knowledge with id=${knowledgeId} not found`
+      );
+    }
+    const meta = indexKnowledgeResponse.metadata as any;
+    if (knowledge.metadata) {
+      const currentMeta = knowledge.metadata as any;
+      if (currentMeta.documentCount) {
+        meta.documentCount += currentMeta.documentCount;
+      }
+      if (currentMeta.totalTokenCount) {
+        meta.totalTokenCount += currentMeta.totalTokenCount;
+      }
+      if (currentMeta.completedChunks) {
+        meta.completedChunks = meta.completedChunks.concat(
+          currentMeta.completedChunks
         );
       }
-      const meta = indexKnowledgeResponse.metadata as any;
-      if (knowledge.metadata) {
-        const currentMeta = knowledge.metadata as any;
-        if (currentMeta.documentCount) {
-          meta.documentCount += currentMeta.documentCount;
-        }
-        if (currentMeta.totalTokenCount) {
-          meta.totalTokenCount += currentMeta.totalTokenCount;
-        }
-        if (currentMeta.completedChunks) {
-          meta.completedChunks = meta.completedChunks.concat(
-            currentMeta.completedChunks
-          );
-        }
-      }
-      const uniqCompletedChunks = new Set(meta.completedChunks);
-      meta.percentComplete = (uniqCompletedChunks.size / chunkCount) * 100;
-      if (chunkCount === uniqCompletedChunks.size) {
-        indexKnowledgeResponse.indexStatus = KnowledgeIndexStatus.COMPLETED;
-      }
-      console.log(
-        `Knowledge ${knowledgeId}: ${uniqCompletedChunks.size} / ${chunkCount} loaded`
-      );
+    }
+    const uniqCompletedChunks = new Set(meta.completedChunks);
+    meta.percentComplete = (uniqCompletedChunks.size / chunkCount) * 100;
+    if (chunkCount === uniqCompletedChunks.size) {
+      indexKnowledgeResponse.indexStatus = KnowledgeIndexStatus.COMPLETED;
+    }
+    console.log(
+      `Knowledge ${knowledgeId}: ${uniqCompletedChunks.size} / ${chunkCount} loaded`
+    );
 
-      await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse, tx);
-      await this.updateCompletedKnowledgeDataSources(knowledge.id, tx);
-    });
+    await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
+    await this.updateCompletedKnowledgeDataSources(knowledge.id);
   }
 
   /**
@@ -976,6 +974,72 @@ export class DataSourceManagementService {
       );
     }
     return dataSource;
+  }
+
+  /**
+   * Marks a knowledge as failed
+   * @param knowledgeId
+   * @param error
+   */
+  public async failDataSourceKnowledge(knowledgeId: string, error: string) {
+    const knowledge = await prismadb.knowledge.findUnique({
+      where: { id: knowledgeId },
+    });
+    if (!knowledge) {
+      throw new EntityNotFoundError(
+        `Knowledge with id=${knowledgeId} not found`
+      );
+    }
+
+    const currentMeta = knowledge.metadata as any;
+    const indexKnowledgeResponse = {
+      indexStatus: KnowledgeIndexStatus.FAILED,
+      metadata: {
+        errors: {
+          knowledge: error,
+          ...(currentMeta?.errors || {}),
+        },
+      },
+    };
+
+    await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
+    await this.updateCompletedKnowledgeDataSources(knowledge.id);
+
+    return indexKnowledgeResponse;
+  }
+
+  /**
+   * Marks a knowledge chunk as failed
+   * @param knowledgeId
+   * @param error
+   */
+  public async failDataSourceKnowledgeChunk(
+    knowledgeId: string,
+    chunkIndex: number,
+    error: string
+  ) {
+    const knowledge = await prismadb.knowledge.findUnique({
+      where: { id: knowledgeId },
+    });
+    if (!knowledge) {
+      throw new EntityNotFoundError(
+        `Knowledge with id=${knowledgeId} not found`
+      );
+    }
+    const currentMeta = knowledge.metadata as any;
+    const errors = {
+      ...(currentMeta?.errors || {}),
+    };
+    errors[`chunk-${chunkIndex}`] = error;
+    const indexKnowledgeResponse = {
+      indexStatus: KnowledgeIndexStatus.FAILED,
+      metadata: { errors },
+    };
+
+    await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
+    await this.updateCompletedKnowledgeDataSources(knowledge.id);
+
+    return indexKnowledgeResponse;
   }
 }
 

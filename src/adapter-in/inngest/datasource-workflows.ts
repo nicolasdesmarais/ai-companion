@@ -141,7 +141,20 @@ export const dataSourceItemListReceived = inngest.createFunction(
 );
 
 export const knowledgeInitialized = inngest.createFunction(
-  { id: "knowledge-initialized" },
+  {
+    id: "knowledge-initialized",
+    onFailure: async ({ error, event }) => {
+      const { dataSourceId, knowledgeId } = event.data as any;
+      console.error(
+        `Failed to initialize knowledge ${knowledgeId} for data source ${dataSourceId}`,
+        error
+      );
+      await dataSourceManagementService.failDataSourceKnowledge(
+        knowledgeId,
+        error.message
+      );
+    },
+  },
   { event: DomainEvent.KNOWLEDGE_INITIALIZED },
   async ({ event, step }) => {
     const payload = event.data as KnowledgeInitializedEventPayload;
@@ -223,6 +236,16 @@ export const loadKnowledgeChunk = inngest.createFunction(
     id: "knowledge-chunk-received",
     concurrency: {
       limit: 1,
+    },
+    onFailure: async ({ error, event }) => {
+      console.error(
+        `Failed to load chunk ${event.data.event.data.index} of knowledge ${event.data.event.data.knowledgeIndexingResult.knowledgeId}: ${event.data.error.message}`
+      );
+      await dataSourceManagementService.failDataSourceKnowledgeChunk(
+        event.data.event.data.knowledgeIndexingResult.knowledgeId,
+        event.data.event.data.index,
+        event.data.error.message
+      );
     },
   },
   { event: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED },

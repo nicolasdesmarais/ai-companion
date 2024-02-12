@@ -1,20 +1,23 @@
-import { OrgSubscriptionType } from "@prisma/client";
+import { OrgSubscriptionStatus, OrgSubscriptionType } from "@prisma/client";
 
 export interface OrgSubscriptionDto {
   orgId: string;
   createdAt: Date;
   updatedAt: Date;
+  type: OrgSubscriptionType;
+  status: OrgSubscriptionStatus;
+  periodEndDate: Date | null;
   externalSubscriptionId: string | null;
   externalCustomerId: string | null;
-  dataUsageLimitInTokens: number | null;
   dataUsageLimitInGb: number | null;
   apiUsageTokenLimit: number | null;
   metadata?: any;
 }
 
 export interface UpdateOrgSubscriptionInput {
-  orgId: string;
   type: OrgSubscriptionType;
+  status: OrgSubscriptionStatus;
+  periodEndDate: Date | null;
   externalSubscriptionId: string | null;
   externalCustomerId: string | null;
   dataUsageLimitInGb?: number | null;
@@ -23,6 +26,8 @@ export interface UpdateOrgSubscriptionInput {
 }
 
 export interface ExternalOrgSubscription {
+  status: OrgSubscriptionStatus;
+  periodEndDate: Date | null;
   externalSubscriptionId: string;
   externalCustomerId: string;
   dataUsageLimitInGb: number | null;
