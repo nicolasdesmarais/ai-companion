@@ -204,11 +204,23 @@ export class AIService {
   ): Promise<AIDetailDto | null> {
     const { orgId, userId } = authorizationContext;
 
-    // Use INSTANCE scope if possible, otherwise fallback to ALL
-    const scope = this.determineScope(
+    const highestAccessLevel = BaseEntitySecurityService.getHighestAccessLevel(
       authorizationContext,
-      ListAIsRequestScope.INSTANCE
+      SecuredResourceType.AI,
+      SecuredAction.READ
     );
+    if (!highestAccessLevel) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    let scope;
+    if (highestAccessLevel === SecuredResourceAccessLevel.INSTANCE) {
+      scope = ListAIsRequestScope.INSTANCE;
+    } else if (highestAccessLevel === SecuredResourceAccessLevel.ORGANIZATION) {
+      scope = ListAIsRequestScope.ADMIN;
+    } else {
+      scope = ListAIsRequestScope.ALL;
+    }
 
     const whereCondition = { AND: [{}] };
     whereCondition.AND.push(this.getBaseWhereCondition(orgId, userId, scope));
