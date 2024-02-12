@@ -271,14 +271,11 @@ export const AIKnowledge = ({
               {dataSources.map((dataSource: any) => (
                 <tr key={dataSource.id} className="items-center my-2 text-sm">
                   <td
-                    className="p-2"
+                    className="p-2 cursor-pointer hover:text-ring"
                     onClick={() => setDetailDataSource(dataSource)}
                   >
                     {dataSource.name.length > 30 ? (
-                      <Tooltip
-                        content={dataSource.name}
-                        className="cursor-default"
-                      >
+                      <Tooltip content={dataSource.name} className="">
                         <div className="truncate max-w-[280px]">
                           {dataSource.name}
                         </div>
