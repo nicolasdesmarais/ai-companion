@@ -16,6 +16,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { useConfirmModal } from "@/hooks/use-confirm-modal";
 import { AIModel } from "@/src/domain/models/AIModel";
+import { cn } from "@/src/lib/utils";
 import {
   DataSourceIndexStatus,
   DataSourceType,
@@ -271,8 +272,16 @@ export const AIKnowledge = ({
               {dataSources.map((dataSource: any) => (
                 <tr key={dataSource.id} className="items-center my-2 text-sm">
                   <td
-                    className="p-2 cursor-pointer hover:text-ring"
-                    onClick={() => setDetailDataSource(dataSource)}
+                    className={cn(
+                      "p-2",
+                      dataSource.knowledges.length > 0 &&
+                        "cursor-pointer hover:text-ring"
+                    )}
+                    onClick={() => {
+                      if (dataSource.knowledges.length) {
+                        setDetailDataSource(dataSource);
+                      }
+                    }}
                   >
                     {dataSource.name.length > 30 ? (
                       <Tooltip content={dataSource.name} className="">

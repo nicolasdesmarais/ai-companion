@@ -11,7 +11,17 @@ import { KnowledgeIndexStatus } from "@prisma/client";
 import { inngest } from "./client";
 
 export const dataSourceInitialized = inngest.createFunction(
-  { id: "datasource-initialized" },
+  {
+    id: "datasource-initialized",
+    onFailure: async ({ error, event }) => {
+      const { dataSourceId } = event.data.event.data as any;
+      console.error(`Failed to initialize data source ${dataSourceId}`, error);
+      await dataSourceManagementService.failDataSource(
+        dataSourceId,
+        event.data.error.message
+      );
+    },
+  },
   { event: DomainEvent.DATASOURCE_INITIALIZED },
   async ({ event, step }) => {
     const dataSourceId = event.data.dataSourceId;
@@ -36,7 +46,17 @@ export const dataSourceInitialized = inngest.createFunction(
 );
 
 export const dataSourceRefreshRequested = inngest.createFunction(
-  { id: "datasource-refresh-requested" },
+  {
+    id: "datasource-refresh-requested",
+    onFailure: async ({ error, event }) => {
+      const { dataSourceId } = event.data.event.data as any;
+      console.error(`Failed to initialize data source ${dataSourceId}`, error);
+      await dataSourceManagementService.failDataSource(
+        dataSourceId,
+        event.data.error.message
+      );
+    },
+  },
   { event: DomainEvent.DATASOURCE_REFRESH_REQUESTED },
   async ({ event, step }) => {
     const dataSourceId = event.data.dataSourceId;

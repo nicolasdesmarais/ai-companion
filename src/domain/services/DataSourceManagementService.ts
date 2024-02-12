@@ -979,6 +979,33 @@ export class DataSourceManagementService {
   }
 
   /**
+   * Marks a data source as failed
+   * @param dataSourceId
+   * @param error
+   */
+  public async failDataSource(dataSourceId: string, error: string) {
+    const ds = await prismadb.dataSource.findUnique({
+      where: { id: dataSourceId },
+    });
+    if (!ds) {
+      throw new EntityNotFoundError(
+        `DataSource with id=${dataSourceId} not found`
+      );
+    }
+
+    await prismadb.dataSource.update({
+      where: { id: dataSourceId },
+      data: {
+        indexStatus: DataSourceIndexStatus.FAILED,
+        data: {
+          ...((ds.data as any) || {}),
+          error,
+        },
+      },
+    });
+  }
+
+  /**
    * Marks a knowledge as failed
    * @param knowledgeId
    * @param error
