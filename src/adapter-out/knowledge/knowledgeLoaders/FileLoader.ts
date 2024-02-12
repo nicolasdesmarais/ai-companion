@@ -73,6 +73,7 @@ export class FileLoader {
         const tokenCount = getTokenLength(doc.pageContent);
         totalTokenCount += tokenCount;
         doc.metadata.tokenCount = tokenCount;
+        delete doc.metadata.pdf;
       }
 
       const splitter = new RecursiveCharacterTextSplitter({
