@@ -8,6 +8,7 @@ export enum ApifySupportedEvents {
 export interface ApifyWebhookEvent {
   eventType: string;
   eventData: ApifyEventData;
+  orgId: string;
   knowledgeId: string;
 }
 

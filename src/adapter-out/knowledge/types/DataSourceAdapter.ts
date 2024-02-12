@@ -2,6 +2,7 @@ import { Knowledge } from "@prisma/client";
 import { DataSourceItem, DataSourceItemList } from "./DataSourceItemList";
 import { IndexKnowledgeResponse } from "./IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "./KnowlegeIndexingResult";
+import { OrgAndKnowledge } from "./OrgAndKnowledge";
 
 export interface DataSourceAdapter {
   getDataSourceItemList(
@@ -21,7 +22,7 @@ export interface DataSourceAdapter {
 
   shouldReindexKnowledge(knowledge: Knowledge, item: DataSourceItem): boolean;
 
-  retrieveKnowledgeIdFromEvent(data: any): string;
+  retrieveOrgAndKnowledgeIdFromEvent(data: any): OrgAndKnowledge;
 
   getKnowledgeResultFromEvent(
     knowledge: Knowledge,

@@ -24,6 +24,7 @@ import {
   KnowledgeIndexingResult,
   KnowledgeIndexingResultStatus,
 } from "../types/KnowlegeIndexingResult";
+import { OrgAndKnowledge } from "../types/OrgAndKnowledge";
 
 export class MsftDataSourceAdapter implements DataSourceAdapter {
   private static readonly GraphApiUrl = "https://graph.microsoft.com/v1.0";
@@ -254,7 +255,7 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     );
   }
 
-  public retrieveKnowledgeIdFromEvent(data: any): string {
+  public retrieveOrgAndKnowledgeIdFromEvent(data: any): OrgAndKnowledge {
     throw new Error("Method not implemented.");
   }
 

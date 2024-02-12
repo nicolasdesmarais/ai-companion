@@ -451,7 +451,8 @@ export class DataSourceManagementService {
   ) {
     const dataSourceAdapter =
       dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
-    const knowledgeId = dataSourceAdapter.retrieveKnowledgeIdFromEvent(data);
+    const { orgId, knowledgeId } =
+      dataSourceAdapter.retrieveOrgAndKnowledgeIdFromEvent(data);
     const knowledge = await prismadb.knowledge.findUnique({
       where: { id: knowledgeId },
     });
@@ -466,6 +467,7 @@ export class DataSourceManagementService {
       data
     );
     return {
+      orgId,
       knowledgeId: knowledge.id,
       result,
     };
