@@ -219,7 +219,7 @@ export const Sidebar = ({
           requiredPermission: {
             resourceType: SecuredResourceType.ORG_SETTINGS,
             action: SecuredAction.WRITE,
-            accessLevel: SecuredResourceAccessLevel.INSTANCE,
+            accessLevel: SecuredResourceAccessLevel.ORGANIZATION,
           },
           pro: false,
         },
