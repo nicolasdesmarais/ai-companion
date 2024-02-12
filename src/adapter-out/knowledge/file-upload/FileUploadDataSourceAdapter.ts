@@ -17,6 +17,7 @@ import {
   KnowledgeIndexingResultStatus,
 } from "../types/KnowlegeIndexingResult";
 import { FileUploadDataSourceInput } from "./types/FileUploadDataSourceInput";
+import { OrgAndKnowledge } from "../types/OrgAndKnowledge";
 
 export class FileUploadDataSourceAdapter implements DataSourceAdapter {
   public async getDataSourceItemList(
@@ -113,7 +114,7 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     return knowledge.uniqueId !== item.uniqueId;
   }
 
-  retrieveKnowledgeIdFromEvent(data: any): string {
+  retrieveOrgAndKnowledgeIdFromEvent(data: any): OrgAndKnowledge {
     throw new Error("Method not implemented.");
   }
   getKnowledgeResultFromEvent(

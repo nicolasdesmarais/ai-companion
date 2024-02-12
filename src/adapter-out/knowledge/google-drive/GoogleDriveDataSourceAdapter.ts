@@ -36,6 +36,7 @@ import {
   KnowledgeIndexingResult,
   KnowledgeIndexingResultStatus,
 } from "../types/KnowlegeIndexingResult";
+import { OrgAndKnowledge } from "../types/OrgAndKnowledge";
 import {
   GoogleDriveEvent,
   GoogleDriveFolderScanInitiatedPayload,
@@ -492,7 +493,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     };
   }
 
-  public retrieveKnowledgeIdFromEvent(data: any): string {
+  public retrieveOrgAndKnowledgeIdFromEvent(data: any): OrgAndKnowledge {
     throw new Error("Method not implemented.");
   }
 

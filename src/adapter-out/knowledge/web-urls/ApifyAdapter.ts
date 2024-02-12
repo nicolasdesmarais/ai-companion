@@ -1,8 +1,4 @@
-import {
-  ActorStartOptions,
-  ApifyClient,
-  DownloadItemsFormat,
-} from "apify-client";
+import { ActorStartOptions, ApifyClient } from "apify-client";
 import { KnowledgeIndexingResultStatus } from "../types/KnowlegeIndexingResult";
 
 const client = new ApifyClient({
@@ -18,7 +14,7 @@ const failedStatuses = ["FAILED", "ABORTING", "ABORTED"];
 const partialStatuses = ["TIMING-OUT", "TIMED-OUT"];
 
 export class ApifyAdapter {
-  async startUrlIndexing(knowledgeId: string, url: string) {
+  async startUrlIndexing(orgId: string, knowledgeId: string, url: string) {
     if (!webScraperActorId) {
       throw new Error("APIFY_WEB_SCRAPER_ACTOR_ID is not set");
     }
@@ -31,13 +27,16 @@ export class ApifyAdapter {
       .actor(webScraperActorId)
       .start(
         this.getWebScraperInput(url),
-        this.getActorStartOptions(knowledgeId)
+        this.getActorStartOptions(orgId, knowledgeId)
       );
 
     return actorRun.id;
   }
 
-  private getActorStartOptions(knowledgeId: string): ActorStartOptions {
+  private getActorStartOptions(
+    orgId: string,
+    knowledgeId: string
+  ): ActorStartOptions {
     return {
       timeout: this.getActorTimeout(),
       memory: this.getActorMemory(),
@@ -56,6 +55,7 @@ export class ApifyAdapter {
           payloadTemplate: `{
             "eventType": {{eventType}},
             "eventData": {{eventData}},
+            "orgId" : "${orgId}",
             "knowledgeId": "${knowledgeId}"
         }`,
         },

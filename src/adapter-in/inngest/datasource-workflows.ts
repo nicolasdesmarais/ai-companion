@@ -213,6 +213,7 @@ export const knowledgeEventReceived = inngest.createFunction(
         events.push({
           name: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
           data: {
+            orgId: knowledgeIndexingResult.orgId,
             knowledgeIndexingResult,
             dataSourceType,
             index: i,

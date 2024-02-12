@@ -14,6 +14,7 @@ import {
   KnowledgeIndexingResult,
   KnowledgeIndexingResultStatus,
 } from "../types/KnowlegeIndexingResult";
+import { OrgAndKnowledge } from "../types/OrgAndKnowledge";
 import apifyAdapter from "./ApifyAdapter";
 import { WebUrlDataSourceInput } from "./types/WebUrlDataSourceInput";
 import { WebUrlMetadata } from "./types/WebUrlMetadata";
@@ -45,6 +46,7 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
   ): Promise<IndexKnowledgeResponse> {
     const input = data as WebUrlDataSourceInput;
     const actorRunId = await apifyAdapter.startUrlIndexing(
+      orgId,
       knowledge.id,
       input.url
     );
@@ -76,9 +78,10 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
     return !knowledge.lastIndexedAt || knowledge.lastIndexedAt < oneWeekAgo;
   }
 
-  public retrieveKnowledgeIdFromEvent(data: any): string {
+  public retrieveOrgAndKnowledgeIdFromEvent(data: any): OrgAndKnowledge {
     const event = data as ApifyWebhookEvent;
-    return event.knowledgeId;
+    const { orgId, knowledgeId } = event;
+    return { orgId, knowledgeId };
   }
 
   public async getKnowledgeResultFromEvent(
