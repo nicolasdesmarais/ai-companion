@@ -6,6 +6,7 @@ import {
   KnowledgeInitializedEventPayload,
 } from "@/src/domain/events/domain-event";
 import { KnowledgeDto } from "@/src/domain/models/DataSources";
+import dataSourceAdapterService from "@/src/domain/services/DataSourceAdapterService";
 import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
 import { KnowledgeIndexStatus } from "@prisma/client";
 import { inngest } from "./client";
@@ -50,7 +51,7 @@ export const dataSourceRefreshRequested = inngest.createFunction(
     id: "datasource-refresh-requested",
     onFailure: async ({ error, event }) => {
       const { dataSourceId } = event.data.event.data as any;
-      console.error(`Failed to initialize data source ${dataSourceId}`, error);
+      console.error(`Failed to refresh data source ${dataSourceId}`, error);
       await dataSourceManagementService.failDataSource(
         dataSourceId,
         event.data.error.message
@@ -103,7 +104,21 @@ const publishDataSourceItemList = async (
 };
 
 export const dataSourceItemListReceived = inngest.createFunction(
-  { id: "datasource-item-list-received" },
+  {
+    id: "datasource-item-list-received",
+    onFailure: async ({ error, event }) => {
+      const { dataSourceId } = event.data.event
+        .data as DataSourceItemListReceivedPayload;
+      console.error(
+        `Failed to process datasource-item-list-received for data source ${dataSourceId}`,
+        error
+      );
+      await dataSourceManagementService.failDataSource(
+        dataSourceId,
+        event.data.error.message
+      );
+    },
+  },
   { event: DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED },
   async ({ event, step }) => {
     const payload = event.data as DataSourceItemListReceivedPayload;
@@ -212,7 +227,25 @@ export const knowledgeInitialized = inngest.createFunction(
 const INGEST_EVENT_MAX = 2000;
 
 export const knowledgeEventReceived = inngest.createFunction(
-  { id: "knowledge-event-received" },
+  {
+    id: "knowledge-event-received",
+    onFailure: async ({ error, event }) => {
+      const { dataSourceType, data } = event.data.event.data;
+      const dataSourceAdapter =
+        dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
+      const { knowledgeId } =
+        dataSourceAdapter.retrieveOrgAndKnowledgeIdFromEvent(data);
+
+      console.error(
+        `Failed to process knowledge-event-received for knowledgeId=${knowledgeId}`,
+        error
+      );
+      await dataSourceManagementService.failDataSourceKnowledge(
+        knowledgeId,
+        error.message
+      );
+    },
+  },
   { event: DomainEvent.KNOWLEDGE_EVENT_RECEIVED },
   async ({ event, step }) => {
     const { dataSourceType, data } = event.data;
