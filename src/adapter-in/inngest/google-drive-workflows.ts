@@ -8,10 +8,24 @@ import {
   DataSourceItemListReceivedPayload,
   DomainEvent,
 } from "@/src/domain/events/domain-event";
+import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
 import { inngest } from "./client";
 
 export const googleDriveFolderScanInitiated = inngest.createFunction(
-  { id: "google-drive-folder-scan-initiated" },
+  {
+    id: "google-drive-folder-scan-initiated",
+    onFailure: async ({ error, event }) => {
+      const { dataSourceId } = event.data.event.data as any;
+      console.error(
+        `Failed to scan Google Drive folder for data source ${dataSourceId}`,
+        error
+      );
+      await dataSourceManagementService.failDataSource(
+        dataSourceId,
+        error.message
+      );
+    },
+  },
   { event: GoogleDriveEvent.GOOGLE_DRIVE_FOLDER_SCAN_INITIATED },
   async ({ event, step }) => {
     const payload = event.data as GoogleDriveFolderScanInitiatedPayload;
