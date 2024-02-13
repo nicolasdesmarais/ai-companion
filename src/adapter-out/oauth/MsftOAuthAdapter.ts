@@ -1,6 +1,6 @@
+import msftDataSourceAdapter from "@/src/adapter-out/knowledge/msft/MsftDataSourceAdapter";
 import { OAuthAdapter, TokensFromRedirect } from "./OAuthAdapter";
 import { OAuthTokenInfo } from "./OAuthTokenInfo";
-import msftDataSourceAdapter from "@/src/adapter-out/knowledge/msft/MsftDataSourceAdapter";
 
 const scope = "offline_access%20user.read%20files.read.all";
 const msftUrl = "https://login.microsoftonline.com/common/oauth2/v2.0";
@@ -93,6 +93,16 @@ export class MsftOAuthAdapter implements OAuthAdapter {
     return {
       isExistingTokenValid: true,
     };
+  }
+
+  public async validateToken(token: any) {
+    return this.getOAuthTokenInfo(
+      {
+        clientId: process.env.MSFT_CLIENT_ID,
+        clientSecret: process.env.MSFT_SECRET,
+      },
+      token
+    );
   }
 }
 

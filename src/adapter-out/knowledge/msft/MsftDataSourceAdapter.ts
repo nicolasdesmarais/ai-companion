@@ -4,6 +4,7 @@ import {
   ForbiddenError,
 } from "@/src/domain/errors/Errors";
 import { DomainEvent } from "@/src/domain/events/domain-event";
+import oauthTokenService from "@/src/domain/services/OAuthTokenService";
 import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import {
@@ -13,6 +14,7 @@ import {
 } from "@prisma/client";
 import { put } from "@vercel/blob";
 import axios from "axios";
+import msftOAuthAdapter from "../../oauth/MsftOAuthAdapter";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import {
@@ -81,7 +83,18 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
       refresh_token: string;
     };
 
-    return oauthTokenData.access_token;
+    const { isExistingTokenValid, refreshedToken } =
+      await msftOAuthAdapter.validateToken(oauthTokenData);
+
+    if (isExistingTokenValid) {
+      return oauthTokenData.access_token;
+    } else {
+      await oauthTokenService.upsertToken({
+        ...oauthToken,
+        data: refreshedToken,
+      });
+      return refreshedToken.access_token;
+    }
   }
 
   public async fetch(token: string, url: string) {
