@@ -28,6 +28,9 @@ import {
 } from "../types/KnowlegeIndexingResult";
 import { OrgAndKnowledge } from "../types/OrgAndKnowledge";
 
+export enum MsftEvent {
+  ONEDRIVE_FOLDER_SCAN_INITIATED = "onedrive.folder.scan.initiated",
+}
 export class MsftDataSourceAdapter implements DataSourceAdapter {
   private static readonly GraphApiUrl = "https://graph.microsoft.com/v1.0";
   private static readonly ConvertibleExtensions = [
@@ -138,7 +141,8 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     orgId: string,
     userId: string,
     dataSourceId: string,
-    data: any
+    data: any,
+    forRefresh: boolean
   ): Promise<DataSourceItemList> {
     const token = await this.getToken(userId, data.oauthTokenId);
     const item = await this.fetch(token, `/me/drive/items/${data.fileId}`);
@@ -157,7 +161,19 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
         items: [dataSourceItem],
       };
     }
-    throw new Error("Method not implemented.");
+    if (item.folder) {
+      await publishEvent(MsftEvent.ONEDRIVE_FOLDER_SCAN_INITIATED, {
+        userId,
+        oauthTokenId: data.oauthTokenId,
+        dataSourceId,
+        folderId: data.fileId,
+        forRefresh,
+      });
+      return {
+        items: [],
+      };
+    }
+    throw new Error("Unknown MSFT item type.");
   }
 
   public async indexKnowledge(
@@ -346,6 +362,41 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
   ): Promise<string[]> {
     //TODO: Implement logic to identify removed knowledge
     return [];
+  }
+
+  /**
+   * Retrieves a list of files from a folder.
+   * Each file in the folder is returned as a DataSourceItem, with all relevant metadata.
+   * For each child folder in the folder, a FOLDER_SCAN_INITIATED event is published
+   * to process the folder asynchronously.
+   * @param orgId
+   * @param userId
+   * @param oauthTokenId
+   * @param dataSourceId
+   * @param folderId
+   * @returns
+   */
+  public async getDataSourceItemListFromFolder(
+    userId: string,
+    oauthTokenId: string,
+    dataSourceId: string,
+    folderId: string,
+    forRefresh: boolean
+  ): Promise<DataSourceItemList> {
+    const token = await this.getToken(userId, oauthTokenId);
+    const children = await this.fetch(
+      token,
+      `/me/drive/items/${folderId}/children`
+    );
+    console.log("children ", children);
+
+    if (!children) {
+      return {
+        items: [],
+      };
+    }
+
+    throw new Error("Method not implemented.");
   }
 }
 
