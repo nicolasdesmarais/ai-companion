@@ -19,7 +19,7 @@ export const dataSourceInitialized = inngest.createFunction(
       console.error(`Failed to initialize data source ${dataSourceId}`, error);
       await dataSourceManagementService.failDataSource(
         dataSourceId,
-        event.data.error.message
+        error.message
       );
     },
   },
@@ -54,7 +54,7 @@ export const dataSourceRefreshRequested = inngest.createFunction(
       console.error(`Failed to refresh data source ${dataSourceId}`, error);
       await dataSourceManagementService.failDataSource(
         dataSourceId,
-        event.data.error.message
+        error.message
       );
     },
   },
@@ -115,7 +115,7 @@ export const dataSourceItemListReceived = inngest.createFunction(
       );
       await dataSourceManagementService.failDataSource(
         dataSourceId,
-        event.data.error.message
+        error.message
       );
     },
   },
