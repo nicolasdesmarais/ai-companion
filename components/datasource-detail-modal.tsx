@@ -49,7 +49,11 @@ export const DataSourceDetailModal = ({ dataSource, onClose }: Props) => {
             {dataSource.knowledges.map(({ knowledge }: any) => (
               <>
                 <tr key={knowledge.id} className="p-2">
-                  <td className="p-2">{knowledge.name}</td>
+                  <td className="p-2 cursor-pointer hover:text-ring">
+                    <a href={knowledge.blobUrl} target="_blank">
+                      {knowledge.name}
+                    </a>
+                  </td>
                   <td className="p-2">
                     {dataSource.lastIndexedAt
                       ? format(
