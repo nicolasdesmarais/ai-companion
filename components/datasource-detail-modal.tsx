@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
+import { Table } from "./table";
 
 type Props = {
   dataSource: any;
@@ -16,7 +17,7 @@ type Props = {
 
 export const DataSourceDetailModal = ({ dataSource, onClose }: Props) => {
   if (!dataSource) return null;
-  console.log(dataSource);
+
   return (
     <Dialog
       open={!!dataSource}
@@ -28,34 +29,51 @@ export const DataSourceDetailModal = ({ dataSource, onClose }: Props) => {
     >
       <DialogContent className="max-w-[800px] overflow-auto">
         <DialogHeader className="space-y-4">
-          <DialogTitle className="text-center">
-            {dataSource.name} Details
+          <DialogTitle className="truncate max-w-[480px]">
+            <div className="truncate max-w-[480px]">
+              Details for {dataSource.name}
+            </div>
           </DialogTitle>
         </DialogHeader>
         <Separator />
-        {dataSource.knowledges.map(({ knowledge }: any) => (
-          <div key={knowledge.id} className="p-2">
-            <div className="flex justify-between">
-              <div>{knowledge.name}</div>
-              <div>
-                {format(new Date(dataSource.lastIndexedAt), "h:mma M/d/yyyy ")}
-              </div>
-              <div>{knowledge.indexStatus}</div>
-              {knowledge.metadata.percentComplete &&
-                knowledge.indexStatus === "PARTIALLY_COMPLETED" && (
-                  <div>{knowledge.metadata.percentComplete.toFixed(2)}%</div>
-                )}
-            </div>
-            {knowledge.metadata.errors && (
-              <div className="text-destructive text-sm">
-                Error:&nbsp;
-                {(Object.values(knowledge.metadata.errors) as string[]).find(
-                  (x: string) => x !== undefined
-                )}
-              </div>
-            )}
-          </div>
-        ))}
+        <Table
+          headers={["Name", "Last Indexed", "Status", "Progress"]}
+          className="w-full my-4 max-h-60"
+        >
+          {dataSource.knowledges.map(({ knowledge }: any) => (
+            <>
+              <tr key={knowledge.id} className="p-2">
+                <td className="p-2">{knowledge.name}</td>
+                <td className="p-2">
+                  {dataSource.lastIndexedAt
+                    ? format(
+                        new Date(dataSource.lastIndexedAt),
+                        "h:mma M/d/yyyy "
+                      )
+                    : "Never"}
+                </td>
+                <td className="p-2">{knowledge.indexStatus}</td>
+                <td className="p-2">
+                  {knowledge.metadata.percentComplete ? (
+                    <div>{knowledge.metadata.percentComplete.toFixed(2)}%</div>
+                  ) : (
+                    "0%"
+                  )}
+                </td>
+              </tr>
+              {knowledge.metadata.errors && (
+                <tr key={`error-${knowledge.id}`} className="p-2">
+                  <td colSpan={4} className="p-2 text-destructive text-sm">
+                    Error:&nbsp;
+                    {(
+                      Object.values(knowledge.metadata.errors) as string[]
+                    ).find((x: string) => x !== undefined)}
+                  </td>
+                </tr>
+              )}
+            </>
+          ))}
+        </Table>
       </DialogContent>
     </Dialog>
   );

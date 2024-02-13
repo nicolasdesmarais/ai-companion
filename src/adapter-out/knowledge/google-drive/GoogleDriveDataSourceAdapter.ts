@@ -115,6 +115,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
       fields: "files(id, name, mimeType, owners, modifiedTime)",
       supportsAllDrives: true,
       includeItemsFromAllDrives: true,
+      corpora: "allDrives",
     });
   }
 

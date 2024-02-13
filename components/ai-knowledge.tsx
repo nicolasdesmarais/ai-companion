@@ -16,6 +16,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { useConfirmModal } from "@/hooks/use-confirm-modal";
 import { AIModel } from "@/src/domain/models/AIModel";
+import { cn } from "@/src/lib/utils";
 import {
   DataSourceIndexStatus,
   DataSourceType,
@@ -53,8 +54,7 @@ import { WebUrlsForm } from "./web-urls-knowledge-form";
 const needsRefresh = (status: DataSourceIndexStatus) =>
   status !== DataSourceIndexStatus.COMPLETED &&
   status !== DataSourceIndexStatus.FAILED &&
-  status !== DataSourceIndexStatus.DELETED &&
-  status !== DataSourceIndexStatus.REFRESHING;
+  status !== DataSourceIndexStatus.DELETED;
 
 interface SelectDataSourceProps {
   form: any;
@@ -163,6 +163,7 @@ export const AIKnowledge = ({
       await axios.put(`/api/v1/data-sources/${id}/refresh`);
 
       toast({ description: "Data source refresh request accepted." });
+      fetchDataSources();
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -271,14 +272,19 @@ export const AIKnowledge = ({
               {dataSources.map((dataSource: any) => (
                 <tr key={dataSource.id} className="items-center my-2 text-sm">
                   <td
-                    className="p-2"
-                    onClick={() => setDetailDataSource(dataSource)}
+                    className={cn(
+                      "p-2",
+                      dataSource.knowledges.length > 0 &&
+                        "cursor-pointer hover:text-ring"
+                    )}
+                    onClick={() => {
+                      if (dataSource.knowledges.length) {
+                        setDetailDataSource(dataSource);
+                      }
+                    }}
                   >
                     {dataSource.name.length > 30 ? (
-                      <Tooltip
-                        content={dataSource.name}
-                        className="cursor-default"
-                      >
+                      <Tooltip content={dataSource.name} className="">
                         <div className="truncate max-w-[280px]">
                           {dataSource.name}
                         </div>
