@@ -344,7 +344,8 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
   public async getRemovedKnowledgeIds(
     dataSourceItemList: DataSourceItemList
   ): Promise<string[]> {
-    throw new Error("Method not implemented.");
+    //TODO: Implement logic to identify removed knowledge
+    return [];
   }
 }
 
