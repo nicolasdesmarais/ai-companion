@@ -274,11 +274,15 @@ export const AIKnowledge = ({
                   <td
                     className={cn(
                       "p-2",
-                      dataSource.knowledges.length > 0 &&
+                      (dataSource.knowledges.length > 0 ||
+                        dataSource.data.error) &&
                         "cursor-pointer hover:text-ring"
                     )}
                     onClick={() => {
-                      if (dataSource.knowledges.length) {
+                      if (
+                        dataSource.knowledges.length ||
+                        dataSource.data.error
+                      ) {
                         setDetailDataSource(dataSource);
                       }
                     }}

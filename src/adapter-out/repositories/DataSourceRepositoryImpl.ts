@@ -25,6 +25,7 @@ const dataSourceSummarySelect: Prisma.DataSourceSelect = {
   refreshPeriod: true,
   indexStatus: true,
   indexPercentage: true,
+  data: true,
   knowledges: {
     select: {
       knowledge: true,
