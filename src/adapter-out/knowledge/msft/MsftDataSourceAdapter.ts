@@ -22,11 +22,7 @@ import {
   DataSourceItemList,
 } from "../types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
-import {
-  KnowledgeIndexingResult,
-  KnowledgeIndexingResultStatus,
-} from "../types/KnowlegeIndexingResult";
-import { OrgAndKnowledge } from "../types/OrgAndKnowledge";
+import { KnowledgeIndexingResultStatus } from "../types/KnowlegeIndexingResult";
 
 export enum MsftEvent {
   ONEDRIVE_FOLDER_SCAN_INITIATED = "onedrive.folder.scan.initiated",
@@ -146,34 +142,16 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
   ): Promise<DataSourceItemList> {
     const token = await this.getToken(userId, data.oauthTokenId);
     const item = await this.fetch(token, `/me/drive/items/${data.fileId}`);
-    if (item.file) {
-      const dataSourceItem: DataSourceItem = {
-        name: item.name,
-        uniqueId: item.id,
-        metadata: {
-          fileId: item.id,
-          fileName: item.name,
-          mimeType: item.file.mimeType,
-          modifiedTime: item.lastModifiedDateTime,
-        },
-      };
-      return {
-        items: [dataSourceItem],
-      };
-    }
-    if (item.folder) {
-      await publishEvent(MsftEvent.ONEDRIVE_FOLDER_SCAN_INITIATED, {
-        userId,
-        oauthTokenId: data.oauthTokenId,
-        dataSourceId,
-        folderId: data.fileId,
-        forRefresh,
-      });
-      return {
-        items: [],
-      };
-    }
-    throw new Error("Unknown MSFT item type.");
+    const items = await this.extractDataSourceItemFromFile(
+      item,
+      userId,
+      dataSourceId,
+      data.oauthTokenId,
+      forRefresh
+    );
+    return {
+      items,
+    };
   }
 
   public async indexKnowledge(
@@ -191,21 +169,44 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
       console.error("Missing userId");
       return {
         indexStatus: KnowledgeIndexStatus.FAILED,
+        metadata: {
+          errors: {
+            knowledge: "Missing userId",
+          },
+        },
       };
     }
     if (!data?.oauthTokenId) {
       console.error("Missing oauthTokenId");
       return {
         indexStatus: KnowledgeIndexStatus.FAILED,
+        metadata: {
+          errors: {
+            knowledge: "Missing oauthTokenId",
+          },
+        },
+      };
+    }
+    const { fileId } = knowledge.metadata as any;
+
+    if (!fileId) {
+      console.error("Missing fileId");
+      return {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+        metadata: {
+          errors: {
+            knowledge: "Missing fileId",
+          },
+        },
       };
     }
 
     const token = await this.getToken(userId, data.oauthTokenId);
-    const item = await this.fetch(token, `/me/drive/items/${data.fileId}`);
+    const item = await this.fetch(token, `/me/drive/items/${fileId}`);
     let response;
     if (this.isConvertible(knowledge.name)) {
       response = await fetch(
-        `${MsftDataSourceAdapter.GraphApiUrl}/me/drive/items/${data.fileId}/content?format=pdf`,
+        `${MsftDataSourceAdapter.GraphApiUrl}/me/drive/items/${fileId}/content?format=pdf`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -216,6 +217,11 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
         console.error("Missing downloadUrl");
         return {
           indexStatus: KnowledgeIndexStatus.FAILED,
+          metadata: {
+            errors: {
+              knowledge: "Missing downloadUrl",
+            },
+          },
         };
       }
       response = await fetch(downloadUrl);
@@ -224,6 +230,11 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
       console.error("msft indexKnowledge: download fail");
       return {
         indexStatus: KnowledgeIndexStatus.FAILED,
+        metadata: {
+          errors: {
+            knowledge: "msft download fail",
+          },
+        },
       };
     }
     const blob = await response.blob();
@@ -388,7 +399,6 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
       token,
       `/me/drive/items/${folderId}/children`
     );
-    console.log("children ", children);
 
     if (!children) {
       return {
@@ -396,7 +406,54 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
       };
     }
 
-    throw new Error("Method not implemented.");
+    const files: DataSourceItem[] = [];
+    for (const file of children.value) {
+      const items = await this.extractDataSourceItemFromFile(
+        file,
+        userId,
+        dataSourceId,
+        oauthTokenId,
+        forRefresh
+      );
+      files.push(...items);
+    }
+
+    return {
+      items: files,
+    };
+  }
+
+  private async extractDataSourceItemFromFile(
+    item: any,
+    userId: string,
+    dataSourceId: string,
+    oauthTokenId: string,
+    forRefresh: boolean
+  ): Promise<DataSourceItem[]> {
+    if (item.file) {
+      const dataSourceItem: DataSourceItem = {
+        name: item.name,
+        uniqueId: item.id,
+        metadata: {
+          fileId: item.id,
+          fileName: item.name,
+          mimeType: item.file.mimeType,
+          modifiedTime: item.lastModifiedDateTime,
+        },
+      };
+      return [dataSourceItem];
+    }
+    if (item.folder) {
+      await publishEvent(MsftEvent.ONEDRIVE_FOLDER_SCAN_INITIATED, {
+        userId,
+        oauthTokenId: oauthTokenId,
+        dataSourceId,
+        folderId: item.id,
+        forRefresh,
+      });
+      return [];
+    }
+    throw new Error("Unknown MSFT item type.");
   }
 }
 
