@@ -54,8 +54,7 @@ import { WebUrlsForm } from "./web-urls-knowledge-form";
 const needsRefresh = (status: DataSourceIndexStatus) =>
   status !== DataSourceIndexStatus.COMPLETED &&
   status !== DataSourceIndexStatus.FAILED &&
-  status !== DataSourceIndexStatus.DELETED &&
-  status !== DataSourceIndexStatus.REFRESHING;
+  status !== DataSourceIndexStatus.DELETED;
 
 interface SelectDataSourceProps {
   form: any;
@@ -164,6 +163,7 @@ export const AIKnowledge = ({
       await axios.put(`/api/v1/data-sources/${id}/refresh`);
 
       toast({ description: "Data source refresh request accepted." });
+      fetchDataSources();
     } catch (error: any) {
       toast({
         variant: "destructive",
