@@ -4,7 +4,7 @@ import { inngest } from "./client";
 const configuration = client.createConfiguration();
 const apiInstance = new v1.EventsApi(configuration);
 
-export default inngest.createFunction(
+export const sendFailuresToDatadog = inngest.createFunction(
   {
     name: "Send failures to Datadog",
     id: "send-failed-function-events-to-datadog",

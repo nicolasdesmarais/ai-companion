@@ -9,6 +9,7 @@ import {
   loadKnowledgeChunk,
   refreshDataSources,
 } from "@/src/adapter-in/inngest/datasource-workflows";
+import { sendFailuresToDatadog } from "@/src/adapter-in/inngest/failure-workflows";
 import { googleDriveFolderScanInitiated } from "@/src/adapter-in/inngest/google-drive-workflows";
 import { onedriveFolderScanInitiated } from "@/src/adapter-in/inngest/onedrive-workflows";
 import { stripeWebhookReceived } from "@/src/adapter-in/inngest/stripe-workflows";
@@ -32,5 +33,6 @@ export const { GET, POST, PUT } = serve({
     refreshDataSources,
     stripeWebhookReceived,
     clerkWebhookReceived,
+    sendFailuresToDatadog,
   ],
 });
