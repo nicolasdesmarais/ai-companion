@@ -2,6 +2,7 @@ import DatadogInit from "@/components/datadog-init";
 import { Navbar } from "@/components/navbar";
 import PendoInit from "@/components/pendo-init";
 import { Sidebar } from "@/components/sidebar";
+import UserPilotInit from "@/components/userpilot-init";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
@@ -19,6 +20,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
     <>
       <DatadogInit userId={userId} />
       <PendoInit userId={userId} orgId={orgId} />
+      <UserPilotInit userId={userId} orgId={orgId} />
       <div className="h-full">
         <Navbar isPro={false} userPermissions={permissions} orgId={orgId} />
         <div className="hidden md:flex h-full w-20 flex-col fixed inset-y-0 z-40">
