@@ -2,13 +2,17 @@ import {
   CreateChatRequest,
   ListChatsResponse,
 } from "@/src/adapter-in/api/ChatsApi";
+import { gpt4ChatModel } from "@/src/adapter-out/ai-model/chat-models/Gpt4Model";
 import vectorDatabaseAdapter, {
   VectorKnowledgeResponse,
 } from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
+
+import { ChatRepositoryImpl } from "@/src/adapter-out/repositories/ChatRepositoryImpl";
 import { ChatDetailDto } from "@/src/domain/models/Chats";
 import prismadb from "@/src/lib/prismadb";
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
+import { SystemMessage } from "@langchain/core/messages";
 import { Prisma, Role } from "@prisma/client";
 import { JsonObject } from "@prisma/client/runtime/library";
 import axios from "axios";
@@ -18,14 +22,9 @@ import {
   EntityNotFoundError,
   ForbiddenError,
 } from "../errors/Errors";
+import { ChatRepository } from "../ports/outgoing/ChatRepository";
 import aiModelService from "./AIModelService";
 import aiService from "./AIService";
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { SystemMessage } from "@langchain/core/messages";
-import {
-  Gpt4Model,
-  gpt4ChatModel,
-} from "@/src/adapter-out/ai-model/chat-models/Gpt4Model";
 
 const BUFFER_TOKENS = 200;
 
@@ -68,21 +67,13 @@ const getChatResponseSelect: Prisma.ChatSelect = {
 };
 
 export class ChatService {
+  constructor(private chatRepository: ChatRepository) {}
+
   public async getChat(
     authorizationContext: AuthorizationContext,
     chatId: string
   ): Promise<ChatDetailDto> {
-    const chat = await prismadb.chat.findUnique({
-      select: getChatResponseSelect,
-      where: {
-        id: chatId,
-        isDeleted: false,
-      },
-    });
-
-    if (!chat) {
-      throw new EntityNotFoundError(`Chat with id ${chatId} not found`);
-    }
+    const chat = await this.chatRepository.getById(chatId);
 
     const hasPermission = ChatSecurityService.canReadChat(
       authorizationContext,
@@ -523,7 +514,33 @@ export class ChatService {
 
     return resp.content;
   }
+
+  public async resetChat(
+    authorizationContext: AuthorizationContext,
+    chatId: string
+  ) {
+    const chat = await this.chatRepository.getById(chatId);
+
+    const hasPermission = ChatSecurityService.canWriteChat(
+      authorizationContext,
+      chat
+    );
+    if (!hasPermission) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    await this.chatRepository.deleteChat(chatId);
+
+    return await this.chatRepository.createChat({
+      orgId: chat.orgId,
+      userId: chat.userId,
+      name: chat.name,
+      aiId: chat.ai.id,
+      pinPosition: chat.pinPosition,
+    });
+  }
 }
 
-const chatService = new ChatService();
+const chatRepository = new ChatRepositoryImpl();
+const chatService = new ChatService(chatRepository);
 export default chatService;

@@ -23,4 +23,22 @@ export class ChatSecurityService {
       SecuredAction.READ
     );
   }
+
+  /**
+   * Returns true if the user has permission to write the specified chat.
+   * @param authorizationContext
+   * @param chat
+   * @returns
+   */
+  public static canWriteChat(
+    authorizationContext: AuthorizationContext,
+    chat: ChatSummaryDto
+  ): boolean {
+    return BaseEntitySecurityService.hasPermissionOnEntity(
+      authorizationContext,
+      chat,
+      SecuredResourceType.CHATS,
+      SecuredAction.WRITE
+    );
+  }
 }
