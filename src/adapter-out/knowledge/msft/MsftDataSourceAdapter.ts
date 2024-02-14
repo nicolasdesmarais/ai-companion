@@ -22,7 +22,11 @@ import {
   DataSourceItemList,
 } from "../types/DataSourceItemList";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
-import { KnowledgeIndexingResultStatus } from "../types/KnowlegeIndexingResult";
+import {
+  KnowledgeIndexingResult,
+  KnowledgeIndexingResultStatus,
+} from "../types/KnowlegeIndexingResult";
+import { OrgAndKnowledge } from "../types/OrgAndKnowledge";
 
 export enum MsftEvent {
   ONEDRIVE_FOLDER_SCAN_INITIATED = "onedrive.folder.scan.initiated",
