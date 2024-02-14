@@ -371,8 +371,39 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
   public async getRemovedKnowledgeIds(
     dataSourceItemList: DataSourceItemList
   ): Promise<string[]> {
-    //TODO: Implement logic to identify removed knowledge
-    return [];
+    const parentFolderIds = new Set(
+      dataSourceItemList.items
+        .filter((item) => item.metadata?.parentFolderId)
+        .map((item) => item.metadata.parentFolderId)
+    );
+
+    const uniqueIds = dataSourceItemList.items
+      .map((item) => item.uniqueId)
+      .filter((uniqueId) => uniqueId !== undefined) as string[];
+
+    const removedKnowledgeIds: string[] = [];
+    for (const folderId of Array.from(parentFolderIds)) {
+      const folderRemovedKnowledgeIds = await prismadb.knowledge.findMany({
+        select: {
+          id: true,
+        },
+        where: {
+          uniqueId: {
+            not: {
+              in: uniqueIds,
+            },
+          },
+          metadata: {
+            path: "$.parentFolderId",
+            equals: folderId,
+          },
+        },
+      });
+      folderRemovedKnowledgeIds.forEach((knowledge) =>
+        removedKnowledgeIds.push(knowledge.id)
+      );
+    }
+    return removedKnowledgeIds;
   }
 
   /**
@@ -413,7 +444,8 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
         userId,
         dataSourceId,
         oauthTokenId,
-        forRefresh
+        forRefresh,
+        folderId
       );
       files.push(...items);
     }
@@ -428,7 +460,8 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     userId: string,
     dataSourceId: string,
     oauthTokenId: string,
-    forRefresh: boolean
+    forRefresh: boolean,
+    parentFolderId?: string
   ): Promise<DataSourceItem[]> {
     if (item.file) {
       const dataSourceItem: DataSourceItem = {
@@ -439,6 +472,7 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
           fileName: item.name,
           mimeType: item.file.mimeType,
           modifiedTime: item.lastModifiedDateTime,
+          parentFolderId,
         },
       };
       return [dataSourceItem];

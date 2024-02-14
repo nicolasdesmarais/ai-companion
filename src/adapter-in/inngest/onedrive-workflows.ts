@@ -26,7 +26,6 @@ export const onedriveFolderScanInitiated = inngest.createFunction(
   },
   { event: MsftEvent.ONEDRIVE_FOLDER_SCAN_INITIATED },
   async ({ event, step }) => {
-    console.log("onedriveFolderScanInitiated", event.data);
     const { userId, oauthTokenId, dataSourceId, folderId, forRefresh } =
       event.data;
 
@@ -48,6 +47,7 @@ export const onedriveFolderScanInitiated = inngest.createFunction(
       dataSourceItemList,
       forRefresh,
     };
+
     await step.sendEvent("datasource-item-list-received", {
       name: DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED,
       data: eventPayload,
