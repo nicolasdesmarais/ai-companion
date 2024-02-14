@@ -9,7 +9,7 @@ interface Props {
   orgId: string;
 }
 
-if (window) {
+if (typeof window !== "undefined") {
   (window as any).userpilotSettings = { token: "NX-4e374669" };
 }
 
