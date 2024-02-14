@@ -33,8 +33,8 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
 
+import { PaywallBanner } from "@/components/paywall-banner";
 import { Checkbox } from "@/components/ui/checkbox";
-import { isValidScope } from "@/src/security/models/Permission";
 import Link from "next/link";
 
 interface APIKeysFormProps {
@@ -167,6 +167,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({
 
   return (
     <div className="h-full p-4 max-w-3xl mx-auto">
+      <PaywallBanner className="mb-3" />
       <h1 className="text-lg font-medium">API Docs</h1>
       <p className="text-sm text-muted-foreground">
         There are several APIs available for your use. You can try them out on{" "}

@@ -1,12 +1,15 @@
 "use client";
 
+import { cn } from "@/src/lib/utils";
 import axios from "axios";
 import { AlertOctagon } from "lucide-react";
 import { useEffect, useState } from "react";
 
-interface Props {}
+interface Props {
+  className?: string;
+}
 
-export const PaywallBanner = ({}: Props) => {
+export const PaywallBanner = ({ className }: Props) => {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -22,8 +25,8 @@ export const PaywallBanner = ({}: Props) => {
   }
 
   return (
-    <div className="w-full z-30">
-      <div className="flex items-center text-center h-8 bg-ring mt-3 pl-4 rounded-md text-sm">
+    <div className={cn("w-full z-30", className)}>
+      <div className="flex items-center text-center h-8 bg-ring mt-1 pl-4 rounded-md text-sm">
         <AlertOctagon className="w-4 h-4 mr-2" />
         You have reached the limit of your plan. Please ask your administrator
         to upgrade.

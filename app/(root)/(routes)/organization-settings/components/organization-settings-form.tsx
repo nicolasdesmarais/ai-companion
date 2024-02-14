@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+import { PaywallBanner } from "@/components/paywall-banner";
 import { Button } from "@/components/ui/button"; // Assuming a Button component is available
 import {
   Dialog,
@@ -118,6 +119,7 @@ export const OrganizationSettingsForm: React.FC<
 
   return (
     <div className="p-4 max-w-3xl mx-auto">
+      <PaywallBanner className="mb-3" />
       <h1 className="text-lg font-medium">Data Source Integrations</h1>
       <Separator />
 

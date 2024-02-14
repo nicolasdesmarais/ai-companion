@@ -20,6 +20,7 @@ import categoryService from "@/src/domain/services/CategoryService";
 import groupService from "@/src/domain/services/GroupService";
 import { GroupSecurityService } from "@/src/security/services/GroupSecurityService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
+import { PaywallBanner } from "./paywall-banner";
 
 interface Props {
   searchParams: {
@@ -87,6 +88,7 @@ export const AiListing = async ({ searchParams, scopeParam }: Props) => {
 
   return (
     <div className="h-full pr-4 pl-2 space-y-2 pt-2">
+      <PaywallBanner />
       {scope && SuperuserScopes.includes(scope) && (
         <Banner className="my-2" variant="destructive">
           Warning: As a superuser, you are able to see and edit AIs where the

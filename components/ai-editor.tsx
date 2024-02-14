@@ -18,6 +18,7 @@ import { AICharacter } from "./ai-character";
 import { AIKnowledge } from "./ai-knowledge";
 import { AIPersonality } from "./ai-personality";
 import { AIProfileEditor } from "./ai-profile-editor";
+import { PaywallBanner } from "./paywall-banner";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -489,6 +490,7 @@ export const AIEditor = ({
 
   return (
     <div>
+      <PaywallBanner className="mt-2 max-w-3xl mx-auto" />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="pb-10">
           <div className="flex h-full p-1 md:p-4 space-x-1 max-w-3xl mx-auto">
