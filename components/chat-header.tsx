@@ -17,6 +17,7 @@ import {
 import { useRouter } from "next/navigation";
 
 import { BotAvatar } from "@/components/bot-avatar";
+import { PaywallBanner } from "@/components/paywall-banner";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -31,11 +32,11 @@ import { useConfirmModal } from "@/hooks/use-confirm-modal";
 import { useRateAI } from "@/hooks/use-rate-ai";
 import { AIDetailDto } from "@/src/domain/models/AI";
 import { ChatDetailDto } from "@/src/domain/models/Chats";
+import { AIVisibility } from "@prisma/client";
 import { useState } from "react";
 import { RateModal } from "./rate-modal";
 import { ShareModal } from "./share-modal";
 import { StarRating } from "./star-rating";
-import { AIVisibility } from "@prisma/client";
 
 interface ChatHeaderProps {
   ai: AIDetailDto | null;
@@ -324,6 +325,7 @@ export const ChatHeader = ({
         />
       )}
       {ai && <RateModal ai={ai} />}
+      <PaywallBanner />
     </div>
   );
 };

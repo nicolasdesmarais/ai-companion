@@ -1,6 +1,7 @@
 import { AIProfile } from "@/components/ai-profile";
 import { ChatList } from "@/components/chat-list";
 import { ChatClient } from "@/components/client";
+import { ConfirmModal } from "@/components/confirm-modal";
 import { ResizePanel } from "@/components/resize-panel";
 import aiService from "@/src/domain/services/AIService";
 import chatService from "@/src/domain/services/ChatService";
@@ -8,7 +9,6 @@ import { AISecurityService } from "@/src/security/services/AISecurityService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-import { ConfirmModal } from "@/components/confirm-modal";
 
 interface ChatIdPageProps {
   params: {
