@@ -15,7 +15,9 @@ export const PaywallBanner = ({ className }: Props) => {
   useEffect(() => {
     const fetchUsage = async () => {
       const result = await axios.get(`/api/v1/usage/org`);
-      setShow(result.data.dataUsedInGb > result.data.dataUsageLimitInGb);
+      if (result.data.dataUsageLimitInGb) {
+        setShow(result.data.dataUsedInGb > result.data.dataUsageLimitInGb);
+      }
     };
     fetchUsage();
   });
