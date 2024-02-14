@@ -5,8 +5,8 @@ import Script from "next/script";
 const isProd = process.env.NEXT_PUBLIC_VERCEL_ENV === "production";
 
 interface Props {
-  userId: string;
-  orgId: string;
+  userId?: string;
+  orgId?: string;
 }
 
 if (typeof window !== "undefined") {
