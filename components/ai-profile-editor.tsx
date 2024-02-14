@@ -312,15 +312,12 @@ export const AIProfileEditor = ({ ai, form }: ProfileSourceProps) => {
         />
       </div>
       <div className="space-y-2 w-full col-span-2 pt-4">
-        <div>
-          <h3 className="text-lg font-medium">
-            Training Specifications Visibility
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Decide what information you trained the AI on is visible to the
-            users
-          </p>
-        </div>
+        <h3 className="text-lg font-medium">
+          Training Specifications Visibility
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Decide what information you trained the AI on is visible to the users
+        </p>
         <Separator className="bg-primary/10" />
         <div className="pt-2">
           <div className="pb-8">
