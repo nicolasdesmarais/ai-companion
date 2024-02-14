@@ -3,12 +3,12 @@
 import { datadogRum } from "@datadog/browser-rum";
 
 datadogRum.init({
-  applicationId: "03817d82-3867-4802-b0d7-b9e8bd374b98",
-  clientToken: "pub17023fc825ff17c93288e95d1442a6c1",
+  applicationId: process.env.DATADOG_APPLICATION_ID ?? "",
+  clientToken: process.env.DATADOG_CLIENT_TOKEN ?? "",
   site: "us3.datadoghq.com",
   service: "appdirect.ai",
-  env: process.env.NEXT_PUBLIC_VERCEL_ENV || "local",
-  version: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA || "local",
+  env: process.env.NEXT_PUBLIC_VERCEL_ENV ?? "local",
+  version: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ?? "local",
   sessionSampleRate: 100,
   sessionReplaySampleRate: 20,
   trackUserInteractions: true,
