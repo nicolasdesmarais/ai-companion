@@ -81,7 +81,7 @@ export const ChatList = ({ className }: Props) => {
             )}
           >
             <div className="w-full @4xs:w-auto text-center @4xs:text-left">
-              <div className="w-full flex flex-col items-center">
+              <div className="w-full flex flex-col items-center mt-2">
                 <BotAvatar src={chat.ai.src} />
               </div>
               <div className="block @4xs:hidden mt-2 text-xs truncate ">
