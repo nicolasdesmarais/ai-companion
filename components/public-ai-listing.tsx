@@ -13,6 +13,7 @@ import { cn } from "@/src/lib/utils";
 import { AuthorizationContextType } from "@/src/security/models/AuthorizationContext";
 import { BadgeCheck, LogIn, UserPlus2 } from "lucide-react";
 import Link from "next/link";
+import { PublicSidebar } from "./public-sidebar";
 import { Button } from "./ui/button";
 
 interface Props {
@@ -90,68 +91,76 @@ export const PublicAiListing = async ({ searchParams, scopeParam }: Props) => {
   };
 
   return (
-    <div className="h-full pr-4 pl-2 space-y-2 pt-2">
-      <div className="flex justify-between">
-        <div className="flex flex-col md:flex-row">
-          <h1 className="text-4xl font-bold whitespace-nowrap pt-2 pr-2">
-            Browse AIs
-          </h1>
-        </div>
-        <div className="w-full overflow-x-auto space-x-0.5 flex p-1">
-          <div className="flex space-x-0.5">
-            <Link href="/sign-up" className="flex">
-              <button className={cn(btnClassNames, "rounded-l-md")}>
-                Public
-              </button>
-            </Link>
-            <Link href="/sign-up" className="flex">
-              <button className={cn(btnClassNames)}>Organization</button>
-            </Link>
-            <Link href="/sign-up" className="flex">
-              <button className={cn(btnClassNames, "rounded-r-md")}>
-                Private
-              </button>
-            </Link>
-          </div>
-          <Link href="/sign-up">
-            <button className={cn(btnClassNames, "flex rounded-md py-2")}>
-              <BadgeCheck className="w-6 h-6 mr-2 text-ring" />
-              Company Approved
-            </button>
-          </Link>
-        </div>
-        <div className="flex">
-          <Link href="/sign-up" className="flex">
-            <Button size="sm" variant="ring" className="my-2" type="button">
-              Invite
-              <UserPlus2 className="h-4 w-4 fill-white text-white ml-2" />
-            </Button>
-          </Link>
-          <Link href="/sign-in" className="ml-2 flex">
-            <Button
-              size="sm"
-              variant="ring"
-              className="my-2 text-nowrap"
-              type="button"
-            >
-              Sign in
-              <LogIn className="h-4 w-4  text-white ml-2" />
-            </Button>
-          </Link>
-        </div>
+    <div className="h-full">
+      <div className="hidden md:flex h-full w-20 flex-col fixed inset-y-0 z-40">
+        <PublicSidebar />
       </div>
-      <SearchInput />
-      <Categories data={categories} />
-      <Groups
-        groups={groups}
-        hasElevatedWriteAccess={hasElevatedWriteAccess}
-        scopeParam={scopeParam}
-      />
-      <AIs
-        data={data}
-        authorizationContext={authorizationContext}
-        groups={groups}
-      />
+      <main className="md:pl-20 pt-20 md:pt-0 h-full">
+        <div className="h-full pr-4 pl-2 space-y-2 pt-2">
+          <div className="flex justify-between">
+            <div className="flex flex-col md:flex-row">
+              <h1 className="text-4xl font-bold whitespace-nowrap pt-2 pr-2">
+                Browse AIs
+              </h1>
+            </div>
+            <div className="w-full overflow-x-auto space-x-0.5 flex p-1">
+              <div className="flex space-x-0.5">
+                <Link href="/sign-up" className="flex">
+                  <button className={cn(btnClassNames, "rounded-l-md")}>
+                    Public
+                  </button>
+                </Link>
+                <Link href="/sign-up" className="flex">
+                  <button className={cn(btnClassNames)}>Organization</button>
+                </Link>
+                <Link href="/sign-up" className="flex">
+                  <button className={cn(btnClassNames, "rounded-r-md")}>
+                    Private
+                  </button>
+                </Link>
+              </div>
+              <Link href="/sign-up">
+                <button className={cn(btnClassNames, "flex rounded-md py-2")}>
+                  <BadgeCheck className="w-6 h-6 mr-2 text-ring" />
+                  Company Approved
+                </button>
+              </Link>
+            </div>
+            <div className="flex">
+              <Link href="/sign-up" className="flex">
+                <Button size="sm" variant="ring" className="my-2" type="button">
+                  Invite
+                  <UserPlus2 className="h-4 w-4 fill-white text-white ml-2" />
+                </Button>
+              </Link>
+              <Link href="/sign-in" className="ml-2 flex">
+                <Button
+                  size="sm"
+                  variant="ring"
+                  className="my-2 text-nowrap"
+                  type="button"
+                >
+                  Sign in
+                  <LogIn className="h-4 w-4  text-white ml-2" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+          <SearchInput />
+          <Categories data={categories} />
+          <Groups
+            groups={groups}
+            hasElevatedWriteAccess={hasElevatedWriteAccess}
+            scopeParam={scopeParam}
+          />
+          <AIs
+            data={data}
+            authorizationContext={authorizationContext}
+            groups={groups}
+            path="/public"
+          />
+        </div>
+      </main>
     </div>
   );
 };

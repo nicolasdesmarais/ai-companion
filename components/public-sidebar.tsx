@@ -1,6 +1,5 @@
 import { ModeToggle } from "@/components/mode-toggle";
 import { cn } from "@/src/lib/utils";
-import { Permission } from "@/src/security/models/Permission";
 import {
   Atom,
   Building,
@@ -18,29 +17,10 @@ import Link from "next/link";
 
 interface Props {
   className?: string;
-  pathname?: string;
+  isChat?: boolean;
 }
 
-interface Route {
-  icon: any;
-  href: string;
-  pathname?: string;
-  searchparams?: Record<string, string>;
-  searchparamsregex?: Record<string, RegExp>;
-  label: string;
-  pro: boolean;
-  regex: RegExp;
-  requiredPermission?: Permission;
-  children?: Route[];
-}
-
-export const PublicSidebar = ({ className, pathname = "/" }: Props) => {
-  const shouldHideRoute = (route: Route) => {
-    return false;
-  };
-
-  const onNavigate = (href: string, pro: boolean) => {};
-
+export const PublicSidebar = ({ className, isChat = false }: Props) => {
   const routes = [
     {
       icon: Store,
@@ -80,7 +60,7 @@ export const PublicSidebar = ({ className, pathname = "/" }: Props) => {
         },
       ],
     },
-  ] as Route[];
+  ] as any[];
   const itemClass =
     "text-muted-foreground text-xs group py-3 px-8 flex w-full justify-center font-medium cursor-pointer hover:text-primary hover:bg-primary/10 rounded-lg transition";
   return (
@@ -105,7 +85,7 @@ export const PublicSidebar = ({ className, pathname = "/" }: Props) => {
         <div
           className={cn(
             "text-muted-foreground text-xs group py-3 px-8 flex w-full justify-center font-medium rounded-lg transition",
-            pathname.startsWith("/chat/")
+            isChat
               ? "bg-accent text-primary cursor-pointer hover:text-primary hover:bg-primary/10"
               : "cursor-pointer hover:text-primary hover:bg-primary/10"
           )}
@@ -115,8 +95,8 @@ export const PublicSidebar = ({ className, pathname = "/" }: Props) => {
             Chat
           </div>
         </div>
-        {routes.map((route) => (
-          <div key={route.href} className={cn(itemClass)}>
+        {routes.map((route, index) => (
+          <div key={`nav-item-${index}`} className={cn(itemClass)}>
             <Link href="/sign-up">
               <div className="flex flex-col items-center flex-1">
                 <route.icon className="h-5 w-5 mb-1" />
