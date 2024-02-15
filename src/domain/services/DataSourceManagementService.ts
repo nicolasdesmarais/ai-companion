@@ -1070,6 +1070,10 @@ export class DataSourceManagementService {
 
     return indexKnowledgeResponse;
   }
+
+  public async deleteUnusedKnowledges() {
+    return await this.dataSourceRepository.deleteUnusedKnowledges();
+  }
 }
 
 const dataSourceRepository = new DataSourceRepositoryImpl();

@@ -401,3 +401,24 @@ export const dataSourceDeleteRequested = inngest.createFunction(
     );
   }
 );
+
+export const deleteUnusedKnowledges = inngest.createFunction(
+  { id: "delete-unused-knowledges" },
+  { cron: "0 0 * * *" },
+  async ({ step }) => {
+    const deletedKnowledgeIds = await step.run(
+      "delete-unused-knowledges",
+      async () => {
+        return await dataSourceManagementService.deleteUnusedKnowledges();
+      }
+    );
+
+    await Promise.all(
+      deletedKnowledgeIds.map((knowledgeId) =>
+        step.run("delete-vectordb-knowledge", async () => {
+          await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
+        })
+      )
+    );
+  }
+);
