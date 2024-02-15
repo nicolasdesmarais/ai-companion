@@ -179,7 +179,7 @@ export const knowledgeInitialized = inngest.createFunction(
   {
     id: "knowledge-initialized",
     onFailure: async ({ error, event }) => {
-      const { dataSourceId, knowledgeId } = event.data as any;
+      const { dataSourceId, knowledgeId } = event.data.event.data as any;
       console.error(
         `Failed to initialize knowledge ${knowledgeId} for data source ${dataSourceId}`,
         error

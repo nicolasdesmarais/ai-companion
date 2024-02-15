@@ -1,8 +1,9 @@
 import { Document } from "@langchain/core/documents";
 import { OpenAIEmbeddings } from "@langchain/openai";
+import { PineconeStore } from "@langchain/pinecone";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { Redis } from "@upstash/redis";
-import { PineconeStore } from "@langchain/pinecone";
+import axios from "axios";
 
 const embeddingsConfig = {
   azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
@@ -34,13 +35,13 @@ export class MemoryManager {
       process.env.PINECONE_INDEX! || ""
     );
 
-    await PineconeStore.fromDocuments(
-      docs,
-      new OpenAIEmbeddings(embeddingsConfig),
-      {
-        pineconeIndex,
-      }
-    );
+    const embeddings = new OpenAIEmbeddings(embeddingsConfig);
+
+    const docIds = docs.map((doc, index) => {
+      return `${doc.metadata.knowledge}#${index}`;
+    });
+    const pineconeStore = new PineconeStore(embeddings, { pineconeIndex });
+    await pineconeStore.addDocuments(docs, { ids: docIds });
   }
 
   public async vectorSearch(
@@ -67,12 +68,35 @@ export class MemoryManager {
     return similarDocs;
   }
 
+  public async vectorIdList(knowledgeId: string): Promise<string[]> {
+    const host = process.env.PINECONE_INDEX_HOST;
+    if (!host) {
+      throw new Error("PINECONE_HOST is not set");
+    }
+
+    const response = await axios.get(
+      `${host}/vectors/list?prefix=${knowledgeId}#`,
+      {
+        headers: {
+          "Api-Key": process.env.PINECONE_API_KEY,
+        },
+      }
+    );
+
+    return response.data.vectors.map((v: any) => v.id as string);
+  }
+
   public async vectorDelete(knowledgeId: string) {
+    const vectorIds = await this.vectorIdList(knowledgeId);
+    if (vectorIds.length === 0) {
+      return;
+    }
+
     const pineconeIndex = this.pinecone.Index(
       process.env.PINECONE_INDEX! || ""
     );
 
-    await pineconeIndex.deleteMany({ knowledge: knowledgeId });
+    await pineconeIndex.deleteMany(vectorIds);
   }
 
   public static getInstance(): MemoryManager {
