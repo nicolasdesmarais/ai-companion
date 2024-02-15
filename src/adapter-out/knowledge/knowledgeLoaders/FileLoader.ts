@@ -96,9 +96,14 @@ export class FileLoader {
     }
   }
 
-  public async loadDocs(docs: Document[]) {
+  public async loadDocs(docs: Document[], chunkNumber: number) {
     const memoryManager = await MemoryManager.getInstance();
-    await memoryManager.vectorUpload(docs);
+
+    const docIds = docs.map((doc, index) => {
+      return `${doc.metadata.knowledge}#${chunkNumber}#${index}`;
+    });
+
+    await memoryManager.vectorUpload(docs, docIds);
     const totalTokenCount = docs.reduce((acc, doc) => {
       return doc.metadata.tokenCount + acc;
     }, 0);
@@ -164,8 +169,12 @@ export class FileLoader {
 
       const docOutput = await splitter.splitDocuments(docs);
 
+      const docIds = docOutput.map((doc, index) => {
+        return `${doc.metadata.knowledge}#${index}`;
+      });
+
       const memoryManager = await MemoryManager.getInstance();
-      await memoryManager.vectorUpload(docOutput);
+      await memoryManager.vectorUpload(docOutput, docIds);
 
       return {
         documentCount: docOutput.length,
@@ -195,9 +204,12 @@ export class FileLoader {
     });
 
     const docOutput = await splitter.splitDocuments(docs);
+    const docIds = docOutput.map((doc, index) => {
+      return `${doc.metadata.knowledge}#${index}`;
+    });
 
     const memoryManager = await MemoryManager.getInstance();
-    await memoryManager.vectorUpload(docOutput);
+    await memoryManager.vectorUpload(docOutput, docIds);
 
     return {
       documentCount: docOutput.length,

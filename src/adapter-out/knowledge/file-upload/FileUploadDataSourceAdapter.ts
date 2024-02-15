@@ -16,8 +16,8 @@ import {
   KnowledgeIndexingResult,
   KnowledgeIndexingResultStatus,
 } from "../types/KnowlegeIndexingResult";
-import { FileUploadDataSourceInput } from "./types/FileUploadDataSourceInput";
 import { OrgAndKnowledge } from "../types/OrgAndKnowledge";
+import { FileUploadDataSourceInput } from "./types/FileUploadDataSourceInput";
 
 export class FileUploadDataSourceAdapter implements DataSourceAdapter {
   public async getDataSourceItemList(
@@ -152,7 +152,7 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     }
 
     const docs = [data[index]];
-    const metadata = await fileLoader.loadDocs(docs);
+    const metadata = await fileLoader.loadDocs(docs, index);
 
     let indexStatus;
     switch (result.status) {

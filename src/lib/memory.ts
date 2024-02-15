@@ -30,16 +30,12 @@ export class MemoryManager {
     this.pinecone = new Pinecone();
   }
 
-  public async vectorUpload(docs: Document[]) {
+  public async vectorUpload(docs: Document[], docIds: string[]) {
     const pineconeIndex = this.pinecone.Index(
       process.env.PINECONE_INDEX! || ""
     );
 
     const embeddings = new OpenAIEmbeddings(embeddingsConfig);
-
-    const docIds = docs.map((doc, index) => {
-      return `${doc.metadata.knowledge}#${index}`;
-    });
     const pineconeStore = new PineconeStore(embeddings, { pineconeIndex });
     await pineconeStore.addDocuments(docs, { ids: docIds });
   }

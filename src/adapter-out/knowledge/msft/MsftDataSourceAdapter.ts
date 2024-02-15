@@ -338,7 +338,7 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     }
 
     const docs = [data[index]];
-    const metadata = await fileLoader.loadDocs(docs);
+    const metadata = await fileLoader.loadDocs(docs, index);
 
     console.log("msft chunk loading", knowledge.id, index);
 
