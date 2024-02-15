@@ -9,7 +9,11 @@ import {
   ListAIsRequestScope,
 } from "@/src/adapter-in/api/AIApi";
 import categoryService from "@/src/domain/services/CategoryService";
+import { cn } from "@/src/lib/utils";
 import { AuthorizationContextType } from "@/src/security/models/AuthorizationContext";
+import { BadgeCheck, UserPlus2 } from "lucide-react";
+import Link from "next/link";
+import { Button } from "./ui/button";
 
 interface Props {
   searchParams: {
@@ -22,6 +26,22 @@ interface Props {
   };
   scopeParam?: string;
 }
+
+const btnClassNames = `
+    flex
+    items-center
+    text-center
+    text-xs
+    md:text-sm
+    px-2
+    md:px-4
+    py-2
+    md:py-3
+    bg-primary/10
+    hover:opacity-75
+    transition
+    block
+  `;
 
 export const PublicAiListing = async ({ searchParams, scopeParam }: Props) => {
   let scope: ListAIsRequestScope | undefined;
@@ -77,6 +97,35 @@ export const PublicAiListing = async ({ searchParams, scopeParam }: Props) => {
             Browse AIs
           </h1>
         </div>
+        <div className="w-full overflow-x-auto space-x-0.5 flex p-1">
+          <div className="flex space-x-0.5">
+            <Link href="/sign-up" className="flex">
+              <button className={cn(btnClassNames, "rounded-l-md")}>
+                Public
+              </button>
+            </Link>
+            <Link href="/sign-up" className="flex">
+              <button className={cn(btnClassNames)}>Organization</button>
+            </Link>
+            <Link href="/sign-up" className="flex">
+              <button className={cn(btnClassNames, "rounded-r-md")}>
+                Private
+              </button>
+            </Link>
+          </div>
+          <Link href="/sign-up">
+            <button className={cn(btnClassNames, "flex rounded-md py-2")}>
+              <BadgeCheck className="w-6 h-6 mr-2 text-ring" />
+              Company Approved
+            </button>
+          </Link>
+        </div>
+        <Link href="/sign-up">
+          <Button size="sm" variant="ring" className="my-2" type="button">
+            Invite
+            <UserPlus2 className="h-4 w-4 fill-white text-white ml-2" />
+          </Button>
+        </Link>
       </div>
       <SearchInput />
       <Categories data={categories} />

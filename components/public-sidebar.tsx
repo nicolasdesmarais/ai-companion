@@ -28,6 +28,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   ReadonlyURLSearchParams,
   usePathname,
@@ -185,13 +186,15 @@ export const PublicSidebar = ({ className }: Props) => {
     >
       <div className="space-y-2 flex flex-col items-center">
         <div className="w-16">
-          <Image
-            src="/appdirect-blue-gradient.jpeg"
-            alt="AppDirect Logo"
-            width="64"
-            height="64"
-            className="rounded-lg"
-          />
+          <Link href="/sign-up">
+            <Image
+              src="/appdirect-blue-gradient.jpeg"
+              alt="AppDirect Logo"
+              width="64"
+              height="64"
+              className="rounded-lg"
+            />
+          </Link>
         </div>
         <div
           onClick={() => onNavigate(`/chat/`, false)}
