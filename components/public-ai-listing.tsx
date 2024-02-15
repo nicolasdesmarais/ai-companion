@@ -11,7 +11,7 @@ import {
 import categoryService from "@/src/domain/services/CategoryService";
 import { cn } from "@/src/lib/utils";
 import { AuthorizationContextType } from "@/src/security/models/AuthorizationContext";
-import { BadgeCheck, UserPlus2 } from "lucide-react";
+import { BadgeCheck, LogIn, UserPlus2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
 
@@ -120,12 +120,25 @@ export const PublicAiListing = async ({ searchParams, scopeParam }: Props) => {
             </button>
           </Link>
         </div>
-        <Link href="/sign-up">
-          <Button size="sm" variant="ring" className="my-2" type="button">
-            Invite
-            <UserPlus2 className="h-4 w-4 fill-white text-white ml-2" />
-          </Button>
-        </Link>
+        <div className="flex">
+          <Link href="/sign-up" className="flex">
+            <Button size="sm" variant="ring" className="my-2" type="button">
+              Invite
+              <UserPlus2 className="h-4 w-4 fill-white text-white ml-2" />
+            </Button>
+          </Link>
+          <Link href="/sign-in" className="ml-2 flex">
+            <Button
+              size="sm"
+              variant="ring"
+              className="my-2 text-nowrap"
+              type="button"
+            >
+              Sign in
+              <LogIn className="h-4 w-4  text-white ml-2" />
+            </Button>
+          </Link>
+        </div>
       </div>
       <SearchInput />
       <Categories data={categories} />
