@@ -13,13 +13,12 @@ import { Permission } from "@/src/security/models/Permission";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
-import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import {
   Atom,
   Building,
   Building2,
-  Eye,
   FileText,
   LockKeyhole,
   MessageSquare,
@@ -28,6 +27,7 @@ import {
   Store,
   UserPlus,
 } from "lucide-react";
+import Image from "next/image";
 import {
   ReadonlyURLSearchParams,
   usePathname,
@@ -139,18 +139,6 @@ export const PublicSidebar = ({ className }: Props) => {
       pro: false,
     },
     {
-      icon: Eye,
-      href: "/index/instance/",
-      regex: /\/index\/instance(.*)/,
-      label: "Super User",
-      pro: false,
-      requiredPermission: {
-        resourceType: SecuredResourceType.AI,
-        action: SecuredAction.READ,
-        accessLevel: SecuredResourceAccessLevel.INSTANCE,
-      },
-    },
-    {
       icon: Building2,
       href: "/index/admin/",
       regex: /\/index\/admin(.*)/,
@@ -196,12 +184,13 @@ export const PublicSidebar = ({ className }: Props) => {
       )}
     >
       <div className="space-y-2 flex flex-col items-center">
-        <div className="h-16">
-          <OrganizationSwitcher
-            hidePersonal={true}
-            appearance={{
-              baseTheme: dark,
-            }}
+        <div className="w-16">
+          <Image
+            src="/appdirect-blue-gradient.jpeg"
+            alt="AppDirect Logo"
+            width="64"
+            height="64"
+            className="rounded-lg"
           />
         </div>
         <div
