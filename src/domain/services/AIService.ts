@@ -192,6 +192,37 @@ export class AIService {
   }
 
   /**
+   * Returns an AI by ID, only if it's a public AI.
+   * @param aiId
+   * @returns
+   */
+  public async findPublicAI(aiId: string): Promise<AIDetailDto | null> {
+    const whereCondition = { AND: [{}] };
+    whereCondition.AND.push(this.getPublicCriteria());
+    whereCondition.AND.push({ id: aiId });
+
+    const ai = await prismadb.aI.findFirst({
+      select: listAIResponseSelect(),
+      where: whereCondition,
+    });
+    if (!ai) {
+      return null;
+    }
+
+    const messageCountPerAi: any[] = await this.getMessageCountPerAi([ai.id]);
+    const ratingPerAi: any[] = await this.getRatingPerAi([ai.id]);
+
+    const aiDto = this.mapToAIDto(
+      ai,
+      messageCountPerAi,
+      ratingPerAi,
+      [],
+      false
+    );
+    return aiDto;
+  }
+
+  /**
    * Returns an AI by ID, only if it's visible to the given user and organization.
    * @param orgId
    * @param userId
