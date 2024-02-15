@@ -4,6 +4,7 @@ import {
   dataSourceInitialized,
   dataSourceItemListReceived,
   dataSourceRefreshRequested,
+  deleteUnusedKnowledges,
   knowledgeEventReceived,
   knowledgeInitialized,
   loadKnowledgeChunk,
@@ -32,5 +33,6 @@ export const { GET, POST, PUT } = serve({
     refreshDataSources,
     stripeWebhookReceived,
     clerkWebhookReceived,
+    deleteUnusedKnowledges,
   ],
 });

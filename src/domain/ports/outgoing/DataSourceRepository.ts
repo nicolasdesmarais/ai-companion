@@ -33,4 +33,6 @@ export interface DataSourceRepository {
   getNumberOfTokensStoredForOrgPerAi(orgId: string): Promise<AIDataUsage[]>;
 
   updateDataSourceAis(dataSourceId: string, aiIds: string[]): Promise<void>;
+
+  deleteUnusedKnowledges(): Promise<string[]>;
 }
