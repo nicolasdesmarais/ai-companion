@@ -8,11 +8,8 @@ import {
   ListAIsRequestParams,
   ListAIsRequestScope,
 } from "@/src/adapter-in/api/AIApi";
-import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import categoryService from "@/src/domain/services/CategoryService";
-import groupService from "@/src/domain/services/GroupService";
-import { GroupSecurityService } from "@/src/security/services/GroupSecurityService";
-import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
+import { AuthorizationContextType } from "@/src/security/models/AuthorizationContext";
 
 interface Props {
   searchParams: {
@@ -27,11 +24,6 @@ interface Props {
 }
 
 export const PublicAiListing = async ({ searchParams, scopeParam }: Props) => {
-  const authorizationContext = getUserAuthorizationContext();
-  if (!authorizationContext) {
-    return;
-  }
-
   let scope: ListAIsRequestScope | undefined;
   if (!scopeParam) {
     scope = undefined;
@@ -47,10 +39,6 @@ export const PublicAiListing = async ({ searchParams, scopeParam }: Props) => {
       scope = ListAIsRequestScope[scopeKey as keyof typeof ListAIsRequestScope];
     }
   }
-
-  const groups: GroupSummaryDto[] = await groupService.findGroupsByUser(
-    authorizationContext
-  );
 
   let approvedByOrg;
   if (searchParams.approvedByOrg === "true") {
@@ -68,15 +56,18 @@ export const PublicAiListing = async ({ searchParams, scopeParam }: Props) => {
     sort: searchParams.sort,
   };
 
-  const data = await aiService.findAIsForUser(
-    authorizationContext,
-    requestParams
-  );
+  const data = await aiService.findPublicAIs(requestParams);
 
   const categories = await categoryService.getCategories();
 
-  const hasElevatedWriteAccess =
-    GroupSecurityService.hasElevatedWriteAccess(authorizationContext);
+  const hasElevatedWriteAccess = false;
+  const groups = [] as any[];
+  const authorizationContext = {
+    orgId: "",
+    userId: "",
+    type: AuthorizationContextType.USER,
+    permissions: [],
+  };
 
   return (
     <div className="h-full pr-4 pl-2 space-y-2 pt-2">

@@ -1,4 +1,4 @@
-import { authMiddleware, redirectToSignIn } from "@clerk/nextjs";
+import { authMiddleware } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
 // This example protects all routes including api/trpc routes
@@ -14,6 +14,7 @@ export default authMiddleware({
     "/api/v1/waitlist/export",
     "/api/v1/waitlist",
     "/api/v1/warm",
+    "/public(.*)",
   ],
   apiRoutes: [
     "/api/((?!webhook|v1/integrations/onedrive|v1/warm|v1/integrations/clerkWebhooks|v1/integrations/apify/webhooks|inngest).*)",

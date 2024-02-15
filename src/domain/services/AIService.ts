@@ -45,7 +45,7 @@ const openai = new ChatOpenAI({
   azureOpenAIApiDeploymentName: "ai-prod-16k",
 });
 
-const listAIResponseSelect = (orgId: string): Prisma.AISelect => ({
+const listAIResponseSelect = (): Prisma.AISelect => ({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -227,7 +227,7 @@ export class AIService {
     whereCondition.AND.push({ id: aiId });
 
     const ai = await prismadb.aI.findFirst({
-      select: listAIResponseSelect(orgId),
+      select: listAIResponseSelect(),
       where: whereCondition,
     });
     if (!ai) {
@@ -248,6 +248,61 @@ export class AIService {
       canUpdateAI
     );
     return aiDto;
+  }
+
+  /**
+   * Returns a list AIs which are public.
+   * The list of AIs is further filtered down based on the provided scope
+   * @param request
+   * @returns
+   */
+  public async findPublicAIs(
+    request: ListAIsRequestParams
+  ): Promise<AIDetailDto[]> {
+    const { categoryId, search } = request;
+    const whereCondition = { AND: [{}] };
+    whereCondition.AND.push(this.getPublicCriteria());
+
+    if (categoryId) {
+      whereCondition.AND.push(this.getCategoryCriteria(categoryId));
+    }
+
+    if (search) {
+      whereCondition.AND.push(this.getSearchCriteria(search));
+    }
+
+    const ais = await prismadb.aI.findMany({
+      select: {
+        ...listAIResponseSelect(),
+      },
+      where: whereCondition,
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    if (ais.length === 0) {
+      return [];
+    }
+
+    const aiIds = ais.map((ai) => ai.id);
+
+    const messageCountPerAi: any[] = await this.getMessageCountPerAi(aiIds);
+    const ratingPerAi: any[] = await this.getRatingPerAi(aiIds);
+
+    const result = ais.map((ai) => {
+      return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi, []);
+    });
+
+    if (request.sort === "newest") {
+      return result;
+    } else if (!request.sort || request.sort === "popularity") {
+      return result.sort((a, b) => b.messageCount - a.messageCount);
+    } else if (request.sort === "rating") {
+      return result.sort((a, b) => b.rating - a.rating);
+    }
+
+    return result;
   }
 
   /**
@@ -291,7 +346,7 @@ export class AIService {
 
     const ais = await prismadb.aI.findMany({
       select: {
-        ...listAIResponseSelect(orgId),
+        ...listAIResponseSelect(),
         chats: {
           where: {
             userId,
