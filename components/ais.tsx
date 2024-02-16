@@ -4,26 +4,32 @@ import Link from "next/link";
 import { StarRating } from "@/components/star-rating";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { AIDetailDto } from "@/src/domain/models/AI";
+import { GroupSummaryDto } from "@/src/domain/models/Groups";
+import { cn } from "@/src/lib/utils";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import {
+  BadgeCheck,
   Building,
   EyeOff,
   LockKeyhole,
   MessageSquareText,
   Users,
-  BadgeCheck,
 } from "lucide-react";
-import { cn } from "@/src/lib/utils";
-import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { Tooltip } from "./ui/tooltip";
-import { GroupSummaryDto } from "@/src/domain/models/Groups";
 
 interface AIsProps {
   data: AIDetailDto[];
   authorizationContext: AuthorizationContext;
   groups: GroupSummaryDto[];
+  path?: string;
 }
 
-export const AIs = ({ data, authorizationContext, groups }: AIsProps) => {
+export const AIs = ({
+  data,
+  authorizationContext,
+  groups,
+  path = "",
+}: AIsProps) => {
   if (data.length === 0) {
     return (
       <div className="pt-10 flex flex-col items-center justify-center space-y-3">
@@ -42,7 +48,7 @@ export const AIs = ({ data, authorizationContext, groups }: AIsProps) => {
           key={item.name}
           className="bg-card rounded-xl cursor-pointer border-0 p-1 group"
         >
-          <Link href={`/ai/${item.id}`}>
+          <Link href={`${path}/ai/${item.id}`}>
             <div className="h-full flex flex-col justify-between">
               <CardHeader className="flex">
                 <div className="relative w-full h-56">

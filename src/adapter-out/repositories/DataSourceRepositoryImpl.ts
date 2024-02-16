@@ -303,4 +303,37 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
       });
     });
   }
+
+  public async deleteUnusedKnowledges(): Promise<string[]> {
+    const knowledgesWithoutDataSource = await prismadb.knowledge.findMany({
+      where: {
+        indexStatus: {
+          not: "DELETED",
+        },
+        dataSources: {
+          none: {},
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const knowledgeIds = knowledgesWithoutDataSource.map(
+      (knowledge) => knowledge.id
+    );
+
+    await prismadb.knowledge.updateMany({
+      where: {
+        id: {
+          in: knowledgeIds,
+        },
+      },
+      data: {
+        indexStatus: "DELETED",
+      },
+    });
+
+    return knowledgeIds;
+  }
 }
