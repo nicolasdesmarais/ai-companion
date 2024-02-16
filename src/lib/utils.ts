@@ -19,3 +19,12 @@ export function getCurrentDateStr() {
   });
   return `${dayOfWeek}, ${now.toLocaleString()}`;
 }
+
+export const pixelCrop = (src: string | undefined, crop: string) => {
+  if (src) {
+    return src.replace(
+      /image\/upload\/.*\//gm,
+      `image/upload/c_fill,g_auto,${crop}/`
+    );
+  }
+};

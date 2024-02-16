@@ -5,7 +5,7 @@ import { StarRating } from "@/components/star-rating";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { AIDetailDto } from "@/src/domain/models/AI";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
-import { cn } from "@/src/lib/utils";
+import { cn, pixelCrop } from "@/src/lib/utils";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import {
   BadgeCheck,
@@ -53,12 +53,11 @@ export const AIs = ({
               <CardHeader className="flex">
                 <div className="relative w-full h-56">
                   <Image
-                    src={item.src}
+                    src={pixelCrop(item.src, "w_250,h_250") || item.src}
                     fill
                     className="rounded-xl object-cover group-hover:opacity-75 transition"
                     alt="Character"
                   />
-
                   {item.chats?.length && (
                     <div className="absolute top-2 left-2">
                       <Tooltip content="Active Chat">

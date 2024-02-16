@@ -3,7 +3,7 @@
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import * as React from "react";
 
-import { cn } from "@/src/lib/utils";
+import { cn, pixelCrop } from "@/src/lib/utils";
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
@@ -19,15 +19,6 @@ const Avatar = React.forwardRef<
   />
 ));
 Avatar.displayName = AvatarPrimitive.Root.displayName;
-
-const pixelCrop = (src: string | undefined, crop: string) => {
-  if (src) {
-    return src.replace(
-      /image\/upload\/.*\//gm,
-      `image/upload/c_fill,g_auto,${crop}/`
-    );
-  }
-};
 
 export interface AvatarProps
   extends React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image> {
