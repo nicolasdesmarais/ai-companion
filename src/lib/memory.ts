@@ -8,8 +8,8 @@ import axios from "axios";
 const embeddingsConfig = {
   azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
   azureOpenAIApiVersion: "2023-05-15",
-  azureOpenAIApiInstanceName: "prod-appdirectai-east2",
-  azureOpenAIApiDeploymentName: "text-embedding-ada-002",
+  azureOpenAIApiInstanceName: "appdirect-prod-ai-useast",
+  azureOpenAIApiDeploymentName: "ai-prod-ada2",
   batchSize: 16,
   maxConcurrency: 1,
 };
