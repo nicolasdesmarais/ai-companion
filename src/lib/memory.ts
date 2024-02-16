@@ -62,7 +62,7 @@ export class MemoryManager {
     numDocs = 100
   ) {
     const pineconeIndex = this.pinecone.Index(
-      process.env.PINECONE_INDEX! || ""
+      process.env.PINECONE_SEARCH_INDEX! || ""
     );
 
     const vectorStore = await PineconeStore.fromExistingIndex(
