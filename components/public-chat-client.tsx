@@ -25,7 +25,7 @@ export const PublicChatClient = ({ ai, ais }: ChatClientProps) => {
         max={600}
         className="hidden md:flex"
       >
-        <PublicChatList ais={ais} />
+        <PublicChatList ais={ais} ai={ai} />
       </ResizePanel>
       <div className="flex flex-col h-full w-full space-y-2 shrink">
         <ChatHeader
