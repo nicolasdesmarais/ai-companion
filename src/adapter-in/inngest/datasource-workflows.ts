@@ -179,7 +179,7 @@ export const knowledgeInitialized = inngest.createFunction(
   {
     id: "knowledge-initialized",
     onFailure: async ({ error, event }) => {
-      const { dataSourceId, knowledgeId } = event.data as any;
+      const { dataSourceId, knowledgeId } = event.data.event.data as any;
       console.error(
         `Failed to initialize knowledge ${knowledgeId} for data source ${dataSourceId}`,
         error
@@ -404,7 +404,7 @@ export const dataSourceDeleteRequested = inngest.createFunction(
 
 export const deleteUnusedKnowledges = inngest.createFunction(
   { id: "delete-unused-knowledges" },
-  { cron: "0 0 * * *" },
+  { cron: "* * * * *" },
   async ({ step }) => {
     const deletedKnowledgeIds = await step.run(
       "delete-unused-knowledges",

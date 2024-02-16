@@ -533,7 +533,7 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     }
 
     const docs = [data[index]];
-    const metadata = await fileLoader.loadDocs(docs);
+    const metadata = await fileLoader.loadDocs(docs, index);
 
     console.log("Chunk loading", knowledge.id, index);
 
