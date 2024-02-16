@@ -3,12 +3,12 @@ import {
   dataSourceDeleteRequested,
   dataSourceInitialized,
   dataSourceItemListReceived,
+  dataSourceMigrationRequested,
   dataSourceRefreshRequested,
   deleteUnusedKnowledges,
   knowledgeEventReceived,
   knowledgeInitialized,
   loadKnowledgeChunk,
-  migrateAllKnowledgeRequested,
   refreshDataSources,
 } from "@/src/adapter-in/inngest/datasource-workflows";
 import { googleDriveFolderScanInitiated } from "@/src/adapter-in/inngest/google-drive-workflows";
@@ -35,6 +35,6 @@ export const { GET, POST, PUT } = serve({
     stripeWebhookReceived,
     clerkWebhookReceived,
     deleteUnusedKnowledges,
-    migrateAllKnowledgeRequested,
+    dataSourceMigrationRequested,
   ],
 });

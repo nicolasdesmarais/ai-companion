@@ -424,8 +424,8 @@ export const deleteUnusedKnowledges = inngest.createFunction(
   }
 );
 
-export const migrateAllKnowledgeRequested = inngest.createFunction(
-  { id: "migrate-all-knowledge-requested" },
+export const dataSourceMigrationRequested = inngest.createFunction(
+  { id: "datasource-migration-requested" },
   { event: DomainEvent.DATASOURCE_MIGRATION_REQUESTED },
   async ({ event, step }) => {
     const dataSourceIds = await step.run(
