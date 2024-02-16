@@ -21,7 +21,10 @@ import {
   ForbiddenError,
   RateLimitError,
 } from "../errors/Errors";
-import { DomainEvent } from "../events/domain-event";
+import {
+  DataSourceRefreshRequestedPayload,
+  DomainEvent,
+} from "../events/domain-event";
 import { DataSourceDto, KnowledgeDto } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
 import dataSourceAdapterService from "./DataSourceAdapterService";
@@ -101,7 +104,8 @@ export class DataSourceManagementService {
    */
   public async upsertKnowledgeList(
     dataSourceId: string,
-    itemList: DataSourceItemList
+    itemList: DataSourceItemList,
+    forceRefresh: boolean
   ): Promise<KnowledgeDto[]> {
     if (itemList.items.length === 0) {
       return [];
@@ -120,7 +124,8 @@ export class DataSourceManagementService {
 
       if (
         knowledge &&
-        dataSourceAdapter.shouldReindexKnowledge(knowledge, item)
+        (forceRefresh ||
+          dataSourceAdapter.shouldReindexKnowledge(knowledge, item))
       ) {
         knowledge = undefined;
       }
@@ -915,7 +920,10 @@ export class DataSourceManagementService {
     await this.refreshDataSourceAndPublishEvent(dataSource);
   }
 
-  public async refreshDataSourceAsSystem(dataSourceId: string) {
+  public async refreshDataSourceAsSystem(
+    dataSourceId: string,
+    forceRefresh: boolean = false
+  ) {
     const dataSource = await this.dataSourceRepository.findById(dataSourceId);
     if (!dataSource) {
       throw new EntityNotFoundError(
@@ -923,7 +931,7 @@ export class DataSourceManagementService {
       );
     }
 
-    await this.refreshDataSourceAndPublishEvent(dataSource);
+    await this.refreshDataSourceAndPublishEvent(dataSource, forceRefresh);
   }
 
   private async getDataSource(dataSourceId: string) {
@@ -936,12 +944,18 @@ export class DataSourceManagementService {
     return dataSource;
   }
 
-  private async refreshDataSourceAndPublishEvent(dataSource: DataSourceDto) {
+  private async refreshDataSourceAndPublishEvent(
+    dataSource: DataSourceDto,
+    forceRefresh: boolean = false
+  ) {
     dataSource.indexStatus = DataSourceIndexStatus.REFRESHING;
     await this.dataSourceRepository.updateDataSource(dataSource);
-    await publishEvent(DomainEvent.DATASOURCE_REFRESH_REQUESTED, {
+    const eventPayload: DataSourceRefreshRequestedPayload = {
       dataSourceId: dataSource.id,
-    });
+      forceRefresh,
+    };
+
+    await publishEvent(DomainEvent.DATASOURCE_REFRESH_REQUESTED, eventPayload);
   }
 
   public async updateDataSource(
