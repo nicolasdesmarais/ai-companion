@@ -31,9 +31,25 @@ export class MemoryManager {
   }
 
   public async vectorUpload(docs: Document[], docIds: string[]) {
-    const pineconeIndex = this.pinecone.Index(
-      process.env.PINECONE_INDEX! || ""
-    );
+    const pineconeIndex = process.env.PINECONE_INDEX!;
+    const pineconeServerlessIndex = process.env.PINECONE_SERVERLESS_INDEX;
+
+    await this.vectorUploadToIndex(pineconeIndex, docs, docIds);
+
+    // If a serverless index is available, upload to it as well
+    // Temporarily upload to both indexes until we can confirm the serverless index is working as expected
+    // and all vectors are migrated
+    if (pineconeServerlessIndex) {
+      await this.vectorUploadToIndex(pineconeServerlessIndex, docs, docIds);
+    }
+  }
+
+  private async vectorUploadToIndex(
+    index: string,
+    docs: Document[],
+    docIds: string[]
+  ) {
+    const pineconeIndex = this.pinecone.Index(index);
 
     const embeddings = new OpenAIEmbeddings(embeddingsConfig);
     const pineconeStore = new PineconeStore(embeddings, { pineconeIndex });
@@ -65,7 +81,7 @@ export class MemoryManager {
   }
 
   public async vectorIdList(knowledgeId: string): Promise<string[]> {
-    const host = process.env.PINECONE_INDEX_HOST;
+    const host = process.env.PINECONE_SERVERLESS_INDEX_HOST;
     if (!host) {
       throw new Error("PINECONE_HOST is not set");
     }
@@ -83,16 +99,23 @@ export class MemoryManager {
   }
 
   public async vectorDelete(knowledgeId: string) {
-    const vectorIds = await this.vectorIdList(knowledgeId);
-    if (vectorIds.length === 0) {
-      return;
-    }
-
     const pineconeIndex = this.pinecone.Index(
       process.env.PINECONE_INDEX! || ""
     );
+    await pineconeIndex.deleteMany({ knowledge: knowledgeId });
 
-    await pineconeIndex.deleteMany(vectorIds);
+    const pineconeServerlessIndexName = process.env.PINECONE_SERVERLESS_INDEX;
+    if (pineconeServerlessIndexName) {
+      const vectorIds = await this.vectorIdList(knowledgeId);
+      if (vectorIds.length === 0) {
+        return;
+      }
+
+      const pineconeServerlessIndex = this.pinecone.Index(
+        pineconeServerlessIndexName
+      );
+      await pineconeServerlessIndex.deleteMany(vectorIds);
+    }
   }
 
   public static getInstance(): MemoryManager {
