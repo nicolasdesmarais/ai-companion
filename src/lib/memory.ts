@@ -6,7 +6,7 @@ import { Redis } from "@upstash/redis";
 import axios from "axios";
 
 const embeddingsConfig = {
-  azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
+  azureOpenAIApiKey: process.env.AZURE_GPT35_KEY,
   azureOpenAIApiVersion: "2023-05-15",
   azureOpenAIApiInstanceName: "appdirect-prod-ai-useast",
   azureOpenAIApiDeploymentName: "ai-prod-ada2",
