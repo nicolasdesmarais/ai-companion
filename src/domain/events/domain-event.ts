@@ -17,6 +17,12 @@ export interface DataSourceItemListReceivedPayload {
   dataSourceId: string;
   dataSourceItemList: DataSourceItemList;
   forRefresh: boolean;
+  forceRefresh: boolean;
+}
+
+export interface DataSourceRefreshRequestedPayload {
+  dataSourceId: string;
+  forceRefresh: boolean;
 }
 
 export interface KnowledgeInitializedEventPayload {

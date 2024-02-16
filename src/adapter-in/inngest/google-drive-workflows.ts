@@ -29,8 +29,15 @@ export const googleDriveFolderScanInitiated = inngest.createFunction(
   { event: GoogleDriveEvent.GOOGLE_DRIVE_FOLDER_SCAN_INITIATED },
   async ({ event, step }) => {
     const payload = event.data as GoogleDriveFolderScanInitiatedPayload;
-    const { orgId, userId, oauthTokenId, dataSourceId, folderId, forRefresh } =
-      payload;
+    const {
+      orgId,
+      userId,
+      oauthTokenId,
+      dataSourceId,
+      folderId,
+      forRefresh,
+      forceRefresh,
+    } = payload;
 
     const dataSourceItemList: DataSourceItemList = await step.run(
       "get-datasource-item-list-from-folder",
@@ -41,7 +48,8 @@ export const googleDriveFolderScanInitiated = inngest.createFunction(
           oauthTokenId,
           dataSourceId,
           folderId,
-          forRefresh
+          forRefresh,
+          forceRefresh
         );
       }
     );
@@ -50,6 +58,7 @@ export const googleDriveFolderScanInitiated = inngest.createFunction(
       dataSourceId,
       dataSourceItemList,
       forRefresh,
+      forceRefresh,
     };
     await step.sendEvent("datasource-item-list-received", {
       name: DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED,

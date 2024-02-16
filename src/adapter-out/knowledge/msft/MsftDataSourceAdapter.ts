@@ -142,7 +142,8 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     userId: string,
     dataSourceId: string,
     data: any,
-    forRefresh: boolean
+    forRefresh: boolean,
+    forceRefresh: boolean
   ): Promise<DataSourceItemList> {
     const token = await this.getToken(userId, data.oauthTokenId);
     const item = await this.fetch(token, `/me/drive/items/${data.fileId}`);
@@ -151,7 +152,8 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
       userId,
       dataSourceId,
       data.oauthTokenId,
-      forRefresh
+      forRefresh,
+      forceRefresh
     );
     return {
       items,
@@ -427,7 +429,8 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     oauthTokenId: string,
     dataSourceId: string,
     folderId: string,
-    forRefresh: boolean
+    forRefresh: boolean,
+    forceRefresh: boolean
   ): Promise<DataSourceItemList> {
     const token = await this.getToken(userId, oauthTokenId);
     const children = await this.fetch(
@@ -449,6 +452,7 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
         dataSourceId,
         oauthTokenId,
         forRefresh,
+        forceRefresh,
         folderId
       );
       files.push(...items);
@@ -465,6 +469,7 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     dataSourceId: string,
     oauthTokenId: string,
     forRefresh: boolean,
+    forceRefresh: boolean,
     parentFolderId?: string
   ): Promise<DataSourceItem[]> {
     if (item.file) {
@@ -488,6 +493,7 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
         dataSourceId,
         folderId: item.id,
         forRefresh,
+        forceRefresh,
       });
       return [];
     }

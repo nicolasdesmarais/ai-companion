@@ -10,7 +10,8 @@ export interface DataSourceAdapter {
     userId: string,
     dataSourceId: string,
     data: any,
-    forRefresh?: boolean
+    forRefresh?: boolean,
+    forceRefresh?: boolean
   ): Promise<DataSourceItemList>;
 
   indexKnowledge(

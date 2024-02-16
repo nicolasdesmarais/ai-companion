@@ -2,6 +2,7 @@ import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSource
 import vectorDatabaseAdapter from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 import {
   DataSourceItemListReceivedPayload,
+  DataSourceRefreshRequestedPayload,
   DomainEvent,
   KnowledgeInitializedEventPayload,
 } from "@/src/domain/events/domain-event";
@@ -28,13 +29,15 @@ export const dataSourceInitialized = inngest.createFunction(
   async ({ event, step }) => {
     const dataSourceId = event.data.dataSourceId;
     const forRefresh = false;
+    const forceRefresh = false;
 
     const dataSourceItemList = await step.run(
       "get-datasource-item-list",
       async () => {
         return await dataSourceManagementService.getDataSourceItemList(
           dataSourceId,
-          forRefresh
+          forRefresh,
+          forceRefresh
         );
       }
     );
@@ -42,7 +45,8 @@ export const dataSourceInitialized = inngest.createFunction(
       dataSourceId,
       dataSourceItemList,
       step,
-      forRefresh
+      forRefresh,
+      forceRefresh
     );
   }
 );
@@ -61,7 +65,8 @@ export const dataSourceRefreshRequested = inngest.createFunction(
   },
   { event: DomainEvent.DATASOURCE_REFRESH_REQUESTED },
   async ({ event, step }) => {
-    const dataSourceId = event.data.dataSourceId;
+    const { dataSourceId, forceRefresh } =
+      event.data as DataSourceRefreshRequestedPayload;
     const forRefresh = true;
 
     const dataSourceItemList = await step.run(
@@ -69,7 +74,8 @@ export const dataSourceRefreshRequested = inngest.createFunction(
       async () => {
         return await dataSourceManagementService.getDataSourceItemList(
           dataSourceId,
-          forRefresh
+          forRefresh,
+          forceRefresh
         );
       }
     );
@@ -78,7 +84,8 @@ export const dataSourceRefreshRequested = inngest.createFunction(
       dataSourceId,
       dataSourceItemList,
       step,
-      forRefresh
+      forRefresh,
+      forceRefresh
     );
   }
 );
@@ -87,7 +94,8 @@ const publishDataSourceItemList = async (
   dataSourceId: string,
   dataSourceItemList: DataSourceItemList | null,
   step: any,
-  forRefresh: boolean
+  forRefresh: boolean,
+  forceRefresh: boolean
 ) => {
   if (!dataSourceItemList || dataSourceItemList.items.length === 0) {
     return;
@@ -97,6 +105,7 @@ const publishDataSourceItemList = async (
     dataSourceId,
     dataSourceItemList,
     forRefresh,
+    forceRefresh,
   };
   await step.sendEvent("datasource-item-list-received", {
     name: DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED,
@@ -123,14 +132,16 @@ export const dataSourceItemListReceived = inngest.createFunction(
   { event: DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED },
   async ({ event, step }) => {
     const payload = event.data as DataSourceItemListReceivedPayload;
-    const { dataSourceId, dataSourceItemList, forRefresh } = payload;
+    const { dataSourceId, dataSourceItemList, forRefresh, forceRefresh } =
+      payload;
 
     const knowledgeList: KnowledgeDto[] = await step.run(
       "upsert-knowledge-list",
       async () => {
         return await dataSourceManagementService.upsertKnowledgeList(
           dataSourceId,
-          dataSourceItemList
+          dataSourceItemList,
+          forceRefresh
         );
       }
     );
@@ -439,7 +450,8 @@ export const dataSourceMigrationRequested = inngest.createFunction(
       dataSourceIds.map((dataSourceId) =>
         step.run("refresh-datasource", async () => {
           await dataSourceManagementService.refreshDataSourceAsSystem(
-            dataSourceId
+            dataSourceId,
+            true
           );
         })
       )
