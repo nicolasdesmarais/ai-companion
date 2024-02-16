@@ -134,6 +134,7 @@ export class DataSourceManagementService {
             indexStatus: KnowledgeIndexStatus.INITIALIZED,
             blobUrl: item.blobUrl,
             metadata: item.metadata,
+            isMigrated: true,
           },
         });
       }
@@ -693,6 +694,7 @@ export class DataSourceManagementService {
         indexStatus: KnowledgeIndexStatus.INITIALIZED,
         blobUrl: knowledge.blobUrl,
         metadata: knowledge.metadata as any,
+        isMigrated: true,
       },
     });
 
