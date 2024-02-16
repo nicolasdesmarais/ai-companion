@@ -8,6 +8,7 @@ import {
 import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import dataSourceAdapterService from "@/src/domain/services/DataSourceAdapterService";
 import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
+import dataSourceViewingService from "@/src/domain/services/DataSourceViewingService";
 import { KnowledgeIndexStatus } from "@prisma/client";
 import { inngest } from "./client";
 
@@ -417,6 +418,29 @@ export const deleteUnusedKnowledges = inngest.createFunction(
       deletedKnowledgeIds.map((knowledgeId) =>
         step.run("delete-vectordb-knowledge", async () => {
           await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
+        })
+      )
+    );
+  }
+);
+
+export const migrateAllKnowledgeRequested = inngest.createFunction(
+  { id: "migrate-all-knowledge-requested" },
+  { event: DomainEvent.DATASOURCE_MIGRATION_REQUESTED },
+  async ({ event, step }) => {
+    const dataSourceIds = await step.run(
+      "find-datasources-to-refresh",
+      async () => {
+        return await dataSourceViewingService.findDataSourcesToMigrate();
+      }
+    );
+
+    await Promise.all(
+      dataSourceIds.map((dataSourceId) =>
+        step.run("refresh-datasource", async () => {
+          await dataSourceManagementService.refreshDataSourceAsSystem(
+            dataSourceId
+          );
         })
       )
     );

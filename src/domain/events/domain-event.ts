@@ -7,6 +7,7 @@ export enum DomainEvent {
   DATASOURCE_REFRESH_REQUESTED = "datasource.refresh.requested",
   DATASOURCE_ITEM_LIST_RECEIVED = "datasource.item.list.received",
   DATASOURCE_DELETE_REQUESTED = "datasource.delete.requested",
+  DATASOURCE_MIGRATION_REQUESTED = "datasource.migration.requested",
   KNOWLEDGE_INITIALIZED = "knowledge.initialized",
   KNOWLEDGE_EVENT_RECEIVED = "knowledge.event.received",
   KNOWLEDGE_CHUNK_RECEIVED = "knowledge.chunk.received",

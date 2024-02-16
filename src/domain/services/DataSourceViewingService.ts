@@ -99,6 +99,22 @@ export class DataSourceViewingService {
 
     return await this.dataSourceRepository.findByAiId(aiId);
   }
+
+  public async findDataSourcesToMigrate(): Promise<string[]> {
+    const dataSourceKnowledges = await prismadb.dataSourceKnowledge.findMany({
+      select: {
+        dataSourceId: true,
+      },
+      distinct: ["dataSourceId"],
+      where: {
+        knowledge: {
+          isMigrated: false,
+        },
+      },
+    });
+
+    return dataSourceKnowledges.map((dk) => dk.dataSourceId);
+  }
 }
 
 const dataSourceRepository = new DataSourceRepositoryImpl();
