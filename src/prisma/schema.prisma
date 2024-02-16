@@ -151,7 +151,7 @@ model Knowledge {
   lastIndexedAt DateTime?             @map(name: "last_indexed_at")
   name          String                @db.Text
   type          String
-  uniqueId      String?               @map(name: "unique_id")
+  uniqueId      String?               @map(name: "unique_id") @db.VarChar(500)
   indexStatus   KnowledgeIndexStatus? @map(name: "index_status")
   blobUrl       String?               @map(name: "blob_url") @db.Text
   metadata      Json?
