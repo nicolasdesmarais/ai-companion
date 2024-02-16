@@ -31,27 +31,34 @@ export class MemoryManager {
   }
 
   public async vectorUpload(docs: Document[], docIds: string[]) {
-    const pineconeIndex = process.env.PINECONE_INDEX!;
+    const pineconeIndex = process.env.PINECONE_INDEX;
     const pineconeServerlessIndex = process.env.PINECONE_SERVERLESS_INDEX;
+    const embeddings = new OpenAIEmbeddings(embeddingsConfig);
 
-    await this.vectorUploadToIndex(pineconeIndex, docs, docIds);
+    // Temporarily attempt to upload to both indexes until we can confirm the serverless index
+    // is working as expected
+    if (pineconeIndex) {
+      await this.vectorUploadToIndex(pineconeIndex, embeddings, docs, docIds);
+    }
 
-    // If a serverless index is available, upload to it as well
-    // Temporarily upload to both indexes until we can confirm the serverless index is working as expected
-    // and all vectors are migrated
     if (pineconeServerlessIndex) {
-      await this.vectorUploadToIndex(pineconeServerlessIndex, docs, docIds);
+      await this.vectorUploadToIndex(
+        pineconeServerlessIndex,
+        embeddings,
+        docs,
+        docIds
+      );
     }
   }
 
   private async vectorUploadToIndex(
     index: string,
+    embeddings: OpenAIEmbeddings,
     docs: Document[],
     docIds: string[]
   ) {
     const pineconeIndex = this.pinecone.Index(index);
 
-    const embeddings = new OpenAIEmbeddings(embeddingsConfig);
     const pineconeStore = new PineconeStore(embeddings, { pineconeIndex });
     await pineconeStore.addDocuments(docs, { ids: docIds });
   }
