@@ -33,7 +33,7 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
         {
           name: input.filename,
           blobUrl: input.blobUrl,
-          uniqueId: input.fileHash,
+          uniqueId: input.blobUrl,
         },
       ],
     };
