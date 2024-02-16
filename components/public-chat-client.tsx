@@ -10,9 +10,10 @@ import { PublicChatList } from "./public-chat-list";
 
 interface ChatClientProps {
   ai: AIDetailDto | null;
+  ais: AIDetailDto[];
 }
 
-export const PublicChatClient = ({ ai }: ChatClientProps) => {
+export const PublicChatClient = ({ ai, ais }: ChatClientProps) => {
   const canEditAi = false;
   const canApproveAi = false;
   return (
@@ -24,7 +25,7 @@ export const PublicChatClient = ({ ai }: ChatClientProps) => {
         max={600}
         className="hidden md:flex"
       >
-        <PublicChatList />
+        <PublicChatList ais={ais} />
       </ResizePanel>
       <div className="flex flex-col h-full w-full space-y-2 shrink">
         <ChatHeader

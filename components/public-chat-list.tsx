@@ -1,14 +1,32 @@
 import { BotAvatar } from "@/components/bot-avatar";
+import { AIDetailDto } from "@/src/domain/models/AI";
 import { ChatSummaryDto } from "@/src/domain/models/Chats";
 import { cn } from "@/src/lib/utils";
 
 type Props = {
   className?: string;
+  ais: AIDetailDto[];
 };
 
-export const PublicChatList = ({ className }: Props) => {
-  const chats = [] as ChatSummaryDto[];
+export const PublicChatList = async ({ className, ais }: Props) => {
   const activeChat = "" as string;
+
+  const now = new Date();
+
+  const chats = ais.map((ai) => {
+    return {
+      id: ai.id,
+      createdAt: now,
+      updatedAt: now,
+      messagedAt: now,
+      name: ai.name,
+      summary: ai.description,
+      orgId: "",
+      userId: "",
+      pinPosition: null,
+      ai,
+    } as ChatSummaryDto;
+  });
 
   return (
     <div

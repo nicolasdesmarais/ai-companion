@@ -288,7 +288,7 @@ export class AIService {
    * @returns
    */
   public async findPublicAIs(
-    request: ListAIsRequestParams
+    request: ListAIsRequestParams = {}
   ): Promise<AIDetailDto[]> {
     const { categoryId, search } = request;
     const whereCondition = { AND: [{}] };

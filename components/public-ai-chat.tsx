@@ -9,14 +9,19 @@ interface Props {
 
 export const PublicAiChat = async ({ aiId }: Props) => {
   try {
-    const ai = await aiService.findPublicAI(aiId);
+    const ais = await aiService.findPublicAIs();
+    const ai = ais.find((ai) => ai.id === aiId);
+    if (!ai) {
+      throw new Error("AI not found");
+    }
+
     return (
       <div className="h-full">
         <div className="hidden md:flex h-full w-20 flex-col fixed inset-y-0 z-40">
           <PublicSidebar isChat={true} />
         </div>
         <main className="md:pl-20 pt-20 md:pt-0 h-full">
-          <PublicChatClient ai={ai} />
+          <PublicChatClient ai={ai} ais={ais} />
         </main>
       </div>
     );
