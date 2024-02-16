@@ -6,6 +6,7 @@ import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourc
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { AISecurityService } from "@/src/security/services/AISecurityService";
 import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
+import { KnowledgeIndexStatus } from "@prisma/client";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import { DataSourceDto, DataSourceFilter } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
@@ -109,6 +110,9 @@ export class DataSourceViewingService {
       where: {
         knowledge: {
           isMigrated: false,
+          indexStatus: {
+            not: KnowledgeIndexStatus.DELETED,
+          },
         },
       },
     });
