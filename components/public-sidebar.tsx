@@ -1,66 +1,17 @@
 import { ModeToggle } from "@/components/mode-toggle";
+import { AIDetailDto } from "@/src/domain/models/AI";
 import { cn } from "@/src/lib/utils";
-import {
-  Atom,
-  Building,
-  Building2,
-  FileText,
-  LockKeyhole,
-  MessageSquare,
-  Plus,
-  Settings,
-  Store,
-  UserPlus,
-} from "lucide-react";
+import { MessageSquare, Plus, Store } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 interface Props {
   className?: string;
   isChat?: boolean;
+  ais: AIDetailDto[];
 }
 
-export const PublicSidebar = ({ className, isChat = false }: Props) => {
-  const routes = [
-    {
-      icon: Store,
-      label: "Browse",
-    },
-    {
-      icon: Plus,
-      label: "Create",
-    },
-    {
-      icon: Atom,
-      label: "Your AIs",
-    },
-    {
-      icon: UserPlus,
-      label: "Shared",
-    },
-    {
-      icon: FileText,
-      label: "Data",
-    },
-    {
-      icon: Building2,
-      label: "Admin",
-    },
-    {
-      icon: Settings,
-      label: "Settings",
-      children: [
-        {
-          icon: Building,
-          label: "Company Settings",
-        },
-        {
-          icon: LockKeyhole,
-          label: "API Keys",
-        },
-      ],
-    },
-  ] as any[];
+export const PublicSidebar = ({ className, ais, isChat = false }: Props) => {
   const itemClass =
     "text-muted-foreground text-xs group py-3 px-8 flex w-full justify-center font-medium cursor-pointer hover:text-primary hover:bg-primary/10 rounded-lg transition";
   return (
@@ -82,29 +33,32 @@ export const PublicSidebar = ({ className, isChat = false }: Props) => {
             />
           </Link>
         </div>
-        <div
-          className={cn(
-            "text-muted-foreground text-xs group py-3 px-8 flex w-full justify-center font-medium rounded-lg transition",
-            isChat
-              ? "bg-accent text-primary cursor-pointer hover:text-primary hover:bg-primary/10"
-              : "cursor-pointer hover:text-primary hover:bg-primary/10"
-          )}
-        >
-          <div className="flex flex-col items-center flex-1">
-            <MessageSquare className="h-5 w-5 mb-1" />
-            Chat
-          </div>
+        <div className={cn(itemClass, isChat && "bg-accent text-primary")}>
+          <Link
+            href={ais && ais.length ? `/public/ai/${ais[0].id}` : "/sign-up"}
+          >
+            <div className="flex flex-col items-center flex-1">
+              <MessageSquare className="h-5 w-5 mb-1" />
+              Chat
+            </div>
+          </Link>
         </div>
-        {routes.map((route, index) => (
-          <div key={`nav-item-${index}`} className={cn(itemClass)}>
-            <Link href="/sign-up">
-              <div className="flex flex-col items-center flex-1">
-                <route.icon className="h-5 w-5 mb-1" />
-                <span className="w-12 text-center">{route.label}</span>
-              </div>
-            </Link>
-          </div>
-        ))}
+        <div className={cn(itemClass, !isChat && "bg-accent text-primary")}>
+          <Link href="/public">
+            <div className="flex flex-col items-center flex-1">
+              <Store className="h-5 w-5 mb-1" />
+              <span className="w-12 text-center">Browse</span>
+            </div>
+          </Link>
+        </div>
+        <div className={cn(itemClass)}>
+          <Link href="/sign-up">
+            <div className="flex flex-col items-center flex-1">
+              <Plus className="h-5 w-5 mb-1" />
+              <span className="w-12 text-center">Create</span>
+            </div>
+          </Link>
+        </div>
       </div>
       <div className="space-y-2 flex flex-col items-center py-3 px-8">
         <ModeToggle />

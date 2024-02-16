@@ -93,7 +93,7 @@ export const PublicAiListing = async ({ searchParams, scopeParam }: Props) => {
   return (
     <div className="h-full">
       <div className="hidden md:flex h-full w-20 flex-col fixed inset-y-0 z-40">
-        <PublicSidebar />
+        <PublicSidebar ais={data} />
       </div>
       <main className="md:pl-20 pt-20 md:pt-0 h-full">
         <div className="h-full pr-4 pl-2 space-y-2 pt-2">
