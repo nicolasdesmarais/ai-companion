@@ -75,7 +75,8 @@ export class DataSourceManagementService {
    */
   public async getDataSourceItemList(
     dataSourceId: string,
-    forRefresh: boolean
+    forRefresh: boolean,
+    forceRefresh: boolean
   ) {
     const { dataSource, dataSourceAdapter } =
       await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
@@ -85,7 +86,8 @@ export class DataSourceManagementService {
       dataSource.ownerUserId,
       dataSourceId,
       dataSource.data,
-      forRefresh
+      forRefresh,
+      forceRefresh
     );
   }
 

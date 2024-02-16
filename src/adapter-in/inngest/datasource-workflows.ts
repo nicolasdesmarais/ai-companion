@@ -36,7 +36,8 @@ export const dataSourceInitialized = inngest.createFunction(
       async () => {
         return await dataSourceManagementService.getDataSourceItemList(
           dataSourceId,
-          forRefresh
+          forRefresh,
+          forceRefresh
         );
       }
     );
@@ -73,7 +74,8 @@ export const dataSourceRefreshRequested = inngest.createFunction(
       async () => {
         return await dataSourceManagementService.getDataSourceItemList(
           dataSourceId,
-          forRefresh
+          forRefresh,
+          forceRefresh
         );
       }
     );

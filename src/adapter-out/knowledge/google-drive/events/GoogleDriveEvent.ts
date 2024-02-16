@@ -9,4 +9,5 @@ export interface GoogleDriveFolderScanInitiatedPayload {
   dataSourceId: string;
   folderId: string;
   forRefresh: boolean;
+  forceRefresh: boolean;
 }
