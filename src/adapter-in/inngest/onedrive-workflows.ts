@@ -26,8 +26,14 @@ export const onedriveFolderScanInitiated = inngest.createFunction(
   },
   { event: MsftEvent.ONEDRIVE_FOLDER_SCAN_INITIATED },
   async ({ event, step }) => {
-    const { userId, oauthTokenId, dataSourceId, folderId, forRefresh } =
-      event.data;
+    const {
+      userId,
+      oauthTokenId,
+      dataSourceId,
+      folderId,
+      forRefresh,
+      forceRefresh,
+    } = event.data;
 
     const dataSourceItemList: DataSourceItemList = await step.run(
       "get-datasource-item-list-from-folder",
@@ -37,7 +43,8 @@ export const onedriveFolderScanInitiated = inngest.createFunction(
           oauthTokenId,
           dataSourceId,
           folderId,
-          forRefresh
+          forRefresh,
+          forceRefresh
         );
       }
     );
@@ -46,6 +53,7 @@ export const onedriveFolderScanInitiated = inngest.createFunction(
       dataSourceId,
       dataSourceItemList,
       forRefresh,
+      forceRefresh,
     };
 
     await step.sendEvent("datasource-item-list-received", {
