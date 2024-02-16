@@ -158,6 +158,7 @@ model Knowledge {
   documentCount Int?                  @map(name: "document_count")
   tokenCount    Int?                  @map(name: "token_count")
   dataSources   DataSourceKnowledge[]
+  isMigrated    Boolean               @default(false) @map(name: "is_migrated")
 
   @@map("knowledge")
 }
