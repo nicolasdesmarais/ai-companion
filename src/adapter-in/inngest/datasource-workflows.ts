@@ -404,7 +404,7 @@ export const dataSourceDeleteRequested = inngest.createFunction(
 
 export const deleteUnusedKnowledges = inngest.createFunction(
   { id: "delete-unused-knowledges" },
-  { cron: "0 0 * * *" },
+  { cron: "* * * * *" },
   async ({ step }) => {
     const deletedKnowledgeIds = await step.run(
       "delete-unused-knowledges",
