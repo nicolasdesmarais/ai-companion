@@ -293,6 +293,18 @@ export class DataSourceManagementService {
     }
   }
 
+  /**
+   * Retrieves knowledge content for the specified data source and knowledge
+   * We have 3 possible scenarios:
+   * 1. The knowledge content has already been retrieved and is available in the contentBlobUrl field
+   * 2. The knowledge content is retrieve synchronously by the data source adapter and a contentBlobUrl is returned
+   * 3. The knowledge content is retrieved asynchronously by the data source adapter. In this case, the knowledge
+   * is updated with a status of RETRIEVING_CONTENT and the contentBlobUrl field is left empty.
+   *
+   * For cases 1 & 2, the knowledge is updated with the contentBlobUrl and a status of CONTENT_RETRIEVED
+   * @param dataSourceId
+   * @param knowledgeId
+   */
   public async retrieveKnowledgeContent(
     dataSourceId: string,
     knowledgeId: string
