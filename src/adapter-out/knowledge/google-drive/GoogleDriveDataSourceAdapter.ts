@@ -371,7 +371,31 @@ export class GoogleDriveDataSourceAdapter
       };
     }
 
-    throw new Error("Method not implemented.");
+    const oauth2Client = await this.setOAuthCredentials(
+      orgId,
+      userId,
+      data?.oauthTokenId
+    );
+    const driveClient = googleDriveClient(oauth2Client);
+
+    const { fileId, fileName, mimeType } =
+      knowledge.metadata as unknown as GoogleDriveFileMetadata;
+
+    const { fileResponse } = await this.getFileContent(
+      driveClient,
+      fileId,
+      mimeType
+    );
+
+    const buffer = await this.streamToBuffer(fileResponse.data);
+    const blob = await put(fileName, buffer, {
+      access: "public",
+    });
+
+    return {
+      status: RetrieveContentResponseStatus.SUCCESS,
+      contentBlobUrl: blob.url,
+    };
   }
 
   public async indexKnowledge(
@@ -636,6 +660,14 @@ export class GoogleDriveDataSourceAdapter
     }
 
     return removedKnowledgeIds;
+  }
+
+  private async streamToBuffer(stream: Readable): Promise<Buffer> {
+    const chunks: Buffer[] = [];
+    for await (const chunk of stream) {
+      chunks.push(chunk instanceof Buffer ? chunk : Buffer.from(chunk));
+    }
+    return Buffer.concat(chunks);
   }
 }
 
