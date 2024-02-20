@@ -828,7 +828,7 @@ export class AIService {
       throw new ForbiddenError("Forbidden");
     }
 
-    const dataSourceId = await dataSourceManagementService.createDataSource(
+    const dataSourceId = await dataSourceManagementService.initializeDataSource(
       authorizationContext,
       name,
       type,
