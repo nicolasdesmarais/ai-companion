@@ -293,7 +293,7 @@ export const loadKnowledgeChunk = inngest.createFunction(
   {
     id: "knowledge-chunk-received",
     concurrency: {
-      limit: 1,
+      limit: 2,
     },
     onFailure: async ({ error, event }) => {
       console.error(
