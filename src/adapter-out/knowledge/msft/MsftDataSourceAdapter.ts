@@ -250,15 +250,15 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
         },
       };
     }
-    const msftResponseBlob = await response.blob();
 
-    const blob = await put(fileId, msftResponseBlob, {
+    const msftResponseBlob = await response.blob();
+    const contentBlob = await put(fileId, msftResponseBlob, {
       access: "public",
     });
 
     return {
       status: RetrieveContentResponseStatus.SUCCESS,
-      contentBlobUrl: blob.url,
+      contentBlobUrl: contentBlob.url,
     };
   }
 

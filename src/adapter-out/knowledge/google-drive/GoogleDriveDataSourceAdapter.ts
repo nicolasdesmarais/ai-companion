@@ -398,13 +398,13 @@ export class GoogleDriveDataSourceAdapter
     );
 
     const buffer = await this.streamToBuffer(fileResponse.data);
-    const blob = await put(fileName, buffer, {
+    const contentBlob = await put(fileName, buffer, {
       access: "public",
     });
 
     return {
       status: RetrieveContentResponseStatus.SUCCESS,
-      contentBlobUrl: blob.url,
+      contentBlobUrl: contentBlob.url,
     };
   }
 
