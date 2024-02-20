@@ -22,6 +22,7 @@ import {
   RateLimitError,
 } from "../errors/Errors";
 import {
+  DataSourceInitializedPayload,
   DataSourceRefreshRequestedPayload,
   DomainEvent,
 } from "../events/domain-event";
@@ -61,9 +62,10 @@ export class DataSourceManagementService {
     );
 
     const dataSourceId = dataSource.id;
-    await publishEvent(DomainEvent.DATASOURCE_INITIALIZED, {
+    const eventPayload: DataSourceInitializedPayload = {
       dataSourceId,
-    });
+    };
+    await publishEvent(DomainEvent.DATASOURCE_INITIALIZED, eventPayload);
 
     return dataSourceId;
   }
@@ -75,8 +77,8 @@ export class DataSourceManagementService {
    */
   public async getDataSourceItemList(
     dataSourceId: string,
-    forRefresh: boolean,
-    forceRefresh: boolean
+    forRefresh: boolean = false,
+    forceRefresh: boolean = false
   ) {
     const { dataSource, dataSourceAdapter } =
       await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
@@ -139,7 +141,7 @@ export class DataSourceManagementService {
             type: dataSource.type,
             uniqueId: item.uniqueId,
             indexStatus: KnowledgeIndexStatus.INITIALIZED,
-            blobUrl: item.blobUrl,
+            contentBlobUrl: item.contentBlobUrl,
             metadata: item.metadata,
             isMigrated: true,
           },
@@ -286,6 +288,24 @@ export class DataSourceManagementService {
         },
       });
     }
+  }
+
+  public async retrieveKnowledgeContent(
+    dataSourceId: string,
+    knowledgeId: string
+  ) {
+    const knowledge = await prismadb.knowledge.findUnique({
+      where: { id: knowledgeId },
+    });
+    if (!knowledge) {
+      throw new EntityNotFoundError(
+        `Knowledge with id=${knowledgeId} not found`
+      );
+    }
+
+    const dataSourceAdapter = dataSourceAdapterService.getDataSourceAdapter(
+      knowledge.type
+    );
   }
 
   /**

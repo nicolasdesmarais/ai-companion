@@ -9,6 +9,7 @@ import {
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "../types/KnowlegeIndexingResult";
 import { OrgAndKnowledge } from "../types/OrgAndKnowledge";
+import { ApiDataSourceInput } from "./ApiDataSourceInput";
 
 export class ApiDataSourceAdapter implements DataSourceAdapter {
   public async getDataSourceItemList(
@@ -17,12 +18,14 @@ export class ApiDataSourceAdapter implements DataSourceAdapter {
     dataSourceId: string,
     data: any
   ): Promise<DataSourceItemList> {
-    const input = data as CreateApiDataSourceRequest;
+    const input = data as ApiDataSourceInput;
 
     const result: DataSourceItemList = {
       items: [
         {
-          name: data.name,
+          name: input.name,
+          contentBlobUrl: input.blobUrl,
+          uniqueId: input.hash,
         },
       ],
     };

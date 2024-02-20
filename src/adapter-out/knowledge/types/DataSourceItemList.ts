@@ -5,6 +5,6 @@ export interface DataSourceItemList {
 export interface DataSourceItem {
   name: string;
   uniqueId?: string;
-  blobUrl?: string;
+  contentBlobUrl?: string;
   metadata?: any;
 }

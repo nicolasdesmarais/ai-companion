@@ -1,6 +1,7 @@
 import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceItemList";
 import vectorDatabaseAdapter from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 import {
+  DataSourceInitializedPayload,
   DataSourceItemListReceivedPayload,
   DataSourceRefreshRequestedPayload,
   DomainEvent,
@@ -15,7 +16,7 @@ import { inngest } from "./client";
 
 export const onDataSourceInitialized = inngest.createFunction(
   {
-    id: "datasource-initialized",
+    id: "on-datasource-initialized",
     onFailure: async ({ error, event }) => {
       const { dataSourceId } = event.data.event.data as any;
       console.error(`Failed to initialize data source ${dataSourceId}`, error);
@@ -27,33 +28,23 @@ export const onDataSourceInitialized = inngest.createFunction(
   },
   { event: DomainEvent.DATASOURCE_INITIALIZED },
   async ({ event, step }) => {
-    const dataSourceId = event.data.dataSourceId;
-    const forRefresh = false;
-    const forceRefresh = false;
+    const { dataSourceId } = event.data as DataSourceInitializedPayload;
 
     const dataSourceItemList = await step.run(
       "get-datasource-item-list",
       async () => {
         return await dataSourceManagementService.getDataSourceItemList(
-          dataSourceId,
-          forRefresh,
-          forceRefresh
+          dataSourceId
         );
       }
     );
-    await publishDataSourceItemList(
-      dataSourceId,
-      dataSourceItemList,
-      step,
-      forRefresh,
-      forceRefresh
-    );
+    await publishDataSourceItemList(dataSourceId, dataSourceItemList, step);
   }
 );
 
-export const dataSourceRefreshRequested = inngest.createFunction(
+export const onDataSourceRefreshRequested = inngest.createFunction(
   {
-    id: "datasource-refresh-requested",
+    id: "on-datasource-refresh-requested",
     onFailure: async ({ error, event }) => {
       const { dataSourceId } = event.data.event.data as any;
       console.error(`Failed to refresh data source ${dataSourceId}`, error);
@@ -94,8 +85,8 @@ const publishDataSourceItemList = async (
   dataSourceId: string,
   dataSourceItemList: DataSourceItemList | null,
   step: any,
-  forRefresh: boolean,
-  forceRefresh: boolean
+  forRefresh: boolean = false,
+  forceRefresh: boolean = false
 ) => {
   if (!dataSourceItemList || dataSourceItemList.items.length === 0) {
     return;
@@ -113,9 +104,9 @@ const publishDataSourceItemList = async (
   });
 };
 
-export const dataSourceItemListReceived = inngest.createFunction(
+export const onDataSourceItemListReceived = inngest.createFunction(
   {
-    id: "datasource-item-list-received",
+    id: "on-datasource-item-list-received",
     onFailure: async ({ error, event }) => {
       const { dataSourceId } = event.data.event
         .data as DataSourceItemListReceivedPayload;
@@ -187,11 +178,12 @@ export const dataSourceItemListReceived = inngest.createFunction(
   }
 );
 
-export const knowledgeInitialized = inngest.createFunction(
+export const onKnowledgeInitialized = inngest.createFunction(
   {
-    id: "knowledge-initialized",
+    id: "on-knowledge-initialized",
     onFailure: async ({ error, event }) => {
-      const { dataSourceId, knowledgeId } = event.data.event.data as any;
+      const { dataSourceId, knowledgeId } = event.data.event
+        .data as KnowledgeInitializedEventPayload;
       console.error(
         `Failed to initialize knowledge ${knowledgeId} for data source ${dataSourceId}`,
         error

@@ -13,6 +13,10 @@ export enum DomainEvent {
   KNOWLEDGE_CHUNK_RECEIVED = "knowledge.chunk.received",
 }
 
+export interface DataSourceInitializedPayload {
+  dataSourceId: string;
+}
+
 export interface DataSourceItemListReceivedPayload {
   dataSourceId: string;
   dataSourceItemList: DataSourceItemList;

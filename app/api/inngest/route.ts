@@ -1,14 +1,14 @@
 import { clerkWebhookReceived } from "@/src/adapter-in/inngest/clerk-workflows";
 import {
   dataSourceDeleteRequested,
-  dataSourceItemListReceived,
   dataSourceMigrationRequested,
-  dataSourceRefreshRequested,
   deleteUnusedKnowledges,
   knowledgeEventReceived,
-  knowledgeInitialized,
   loadKnowledgeChunk,
   onDataSourceInitialized,
+  onDataSourceItemListReceived,
+  onDataSourceRefreshRequested,
+  onKnowledgeInitialized,
   refreshDataSources,
 } from "@/src/adapter-in/inngest/datasource-workflows";
 import { googleDriveFolderScanInitiated } from "@/src/adapter-in/inngest/google-drive-workflows";
@@ -23,12 +23,12 @@ export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
     onDataSourceInitialized,
-    dataSourceRefreshRequested,
-    dataSourceItemListReceived,
+    onDataSourceRefreshRequested,
+    onDataSourceItemListReceived,
     dataSourceDeleteRequested,
     googleDriveFolderScanInitiated,
     onedriveFolderScanInitiated,
-    knowledgeInitialized,
+    onKnowledgeInitialized,
     knowledgeEventReceived,
     loadKnowledgeChunk,
     refreshDataSources,
