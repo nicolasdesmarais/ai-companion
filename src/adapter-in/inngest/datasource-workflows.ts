@@ -1,4 +1,4 @@
-import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceItemList";
+import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import vectorDatabaseAdapter from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 import {
   DataSourceInitializedPayload,
@@ -199,32 +199,40 @@ export const onKnowledgeInitialized = inngest.createFunction(
     const payload = event.data as KnowledgeInitializedEventPayload;
     const { dataSourceId, knowledgeId } = payload;
 
-    const result = await step.run("index-knowledge", async () => {
-      return await dataSourceManagementService.indexDataSourceKnowledge(
+    await step.run("retrieve-knowledge-content", async () => {
+      return await dataSourceManagementService.retrieveKnowledgeContent(
         dataSourceId,
         knowledgeId
       );
     });
-    if (result?.events?.length && result?.events?.length > 0) {
-      while (result.events.length) {
-        const eventBatch = result.events.splice(0, INGEST_EVENT_MAX);
-        await step.sendEvent("fan-out-knowledge-chunks", eventBatch);
-      }
-    }
 
-    const relatedKnowledgeIds = await step.run("delete-knowledge", async () => {
-      return await dataSourceManagementService.deleteRelatedKnowledgeInstances(
-        knowledgeId
-      );
-    });
+    // const result = await step.run("index-knowledge", async () => {
+    //   return await dataSourceManagementService.indexDataSourceKnowledge(
+    //     dataSourceId,
+    //     knowledgeId
+    //   );
+    // });
 
-    await Promise.all(
-      relatedKnowledgeIds.map((knowledgeId) =>
-        step.run("delete-vectordb-knowledge", async () => {
-          await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
-        })
-      )
-    );
+    // if (result?.events?.length && result?.events?.length > 0) {
+    //   while (result.events.length) {
+    //     const eventBatch = result.events.splice(0, INGEST_EVENT_MAX);
+    //     await step.sendEvent("fan-out-knowledge-chunks", eventBatch);
+    //   }
+    // }
+
+    // const relatedKnowledgeIds = await step.run("delete-knowledge", async () => {
+    //   return await dataSourceManagementService.deleteRelatedKnowledgeInstances(
+    //     knowledgeId
+    //   );
+    // });
+
+    // await Promise.all(
+    //   relatedKnowledgeIds.map((knowledgeId) =>
+    //     step.run("delete-vectordb-knowledge", async () => {
+    //       await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
+    //     })
+    //   )
+    // );
   }
 );
 

@@ -1,6 +1,9 @@
 import { UpdateDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
-import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceItemList";
+import {
+  DataSourceItemList,
+  RetrieveContentResponseStatus,
+} from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
 import { DataSourceRepositoryImpl } from "@/src/adapter-out/repositories/DataSourceRepositoryImpl";
@@ -294,6 +297,15 @@ export class DataSourceManagementService {
     dataSourceId: string,
     knowledgeId: string
   ) {
+    const dataSource = await prismadb.dataSource.findUnique({
+      where: { id: dataSourceId },
+    });
+    if (!dataSource) {
+      throw new EntityNotFoundError(
+        `DataSource with id=${dataSourceId} not found`
+      );
+    }
+
     const knowledge = await prismadb.knowledge.findUnique({
       where: { id: knowledgeId },
     });
@@ -303,9 +315,49 @@ export class DataSourceManagementService {
       );
     }
 
-    const dataSourceAdapter = dataSourceAdapterService.getDataSourceAdapter(
-      knowledge.type
-    );
+    let knowledgeStatus;
+    let newMetadata: any;
+    let contentBlobUrl = knowledge.contentBlobUrl;
+    if (contentBlobUrl) {
+      knowledgeStatus = KnowledgeIndexStatus.CONTENT_RETRIEVED;
+    } else {
+      const dataSourceAdapter =
+        dataSourceAdapterService.getContentRetrievingDataSourceAdapter(
+          knowledge.type
+        );
+
+      const result = await dataSourceAdapter.retrieveKnowledgeContent(
+        dataSource.orgId,
+        dataSource.ownerUserId,
+        knowledge,
+        dataSource.data
+      );
+
+      switch (result.status) {
+        case RetrieveContentResponseStatus.PENDING:
+          knowledgeStatus = KnowledgeIndexStatus.RETRIEVING_CONTENT;
+          break;
+        case RetrieveContentResponseStatus.SUCCESS:
+          knowledgeStatus = KnowledgeIndexStatus.CONTENT_RETRIEVED;
+          break;
+        case RetrieveContentResponseStatus.FAILED:
+          knowledgeStatus = KnowledgeIndexStatus.FAILED;
+          break;
+      }
+      contentBlobUrl = result.contentBlobUrl ?? null;
+      newMetadata = result.metadata;
+    }
+
+    // Merge existing metadata with the new metadata
+    const updatedMetadata = this.mergeMetadata(knowledge.metadata, newMetadata);
+    await prismadb.knowledge.update({
+      where: { id: knowledge.id },
+      data: {
+        indexStatus: knowledgeStatus,
+        metadata: updatedMetadata,
+        contentBlobUrl,
+      },
+    });
   }
 
   /**
@@ -1111,6 +1163,17 @@ export class DataSourceManagementService {
 
   public async deleteUnusedKnowledges() {
     return await this.dataSourceRepository.deleteUnusedKnowledges();
+  }
+
+  private mergeMetadata(currentMetadata: any, newMetadata: any) {
+    if (currentMetadata && typeof currentMetadata === "object") {
+      return {
+        ...currentMetadata,
+        ...newMetadata,
+      };
+    }
+
+    return newMetadata;
   }
 }
 

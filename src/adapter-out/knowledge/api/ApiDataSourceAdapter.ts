@@ -2,10 +2,7 @@ import { CreateApiDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi"
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
-import {
-  DataSourceItem,
-  DataSourceItemList,
-} from "../types/DataSourceItemList";
+import { DataSourceItem, DataSourceItemList } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "../types/KnowlegeIndexingResult";
 import { OrgAndKnowledge } from "../types/OrgAndKnowledge";

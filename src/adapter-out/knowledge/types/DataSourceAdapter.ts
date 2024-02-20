@@ -1,5 +1,9 @@
 import { Knowledge } from "@prisma/client";
-import { DataSourceItem, DataSourceItemList } from "./DataSourceItemList";
+import {
+  DataSourceItem,
+  DataSourceItemList,
+  RetrieveContentResponse,
+} from "./DataSourceTypes";
 import { IndexKnowledgeResponse } from "./IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "./KnowlegeIndexingResult";
 import { OrgAndKnowledge } from "./OrgAndKnowledge";
@@ -45,4 +49,13 @@ export interface DataSourceAdapter {
   getRemovedKnowledgeIds(
     dataSourceItemList: DataSourceItemList
   ): Promise<string[]>;
+}
+
+export interface ContentRetrievingDataSourceAdapter extends DataSourceAdapter {
+  retrieveKnowledgeContent(
+    orgId: string,
+    userId: string,
+    knowledge: Knowledge,
+    data: any
+  ): Promise<RetrieveContentResponse>;
 }

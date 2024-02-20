@@ -7,10 +7,7 @@ import {
 import { put } from "@vercel/blob";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
-import {
-  DataSourceItem,
-  DataSourceItemList,
-} from "../types/DataSourceItemList";
+import { DataSourceItem, DataSourceItemList } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import {
   KnowledgeIndexingResult,

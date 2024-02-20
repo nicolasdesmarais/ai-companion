@@ -26,11 +26,13 @@ import {
   googleDriveOauth2Client,
 } from "../../oauth/GoogleDriveClient";
 import fileLoader from "../knowledgeLoaders/FileLoader";
-import { DataSourceAdapter } from "../types/DataSourceAdapter";
+import { ContentRetrievingDataSourceAdapter } from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
   DataSourceItemList,
-} from "../types/DataSourceItemList";
+  RetrieveContentResponse,
+  RetrieveContentResponseStatus,
+} from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import {
   KnowledgeIndexingResult,
@@ -55,7 +57,9 @@ import {
   mapGoogleDriveFileToDataSourceItem,
 } from "./util/GoogleDriveUtils";
 
-export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
+export class GoogleDriveDataSourceAdapter
+  implements ContentRetrievingDataSourceAdapter
+{
   private getNamesQuery(names: string[]) {
     return names.map((name) => `name contains '${name}'`).join(" AND ");
   }
@@ -346,6 +350,28 @@ export class GoogleDriveDataSourceAdapter implements DataSourceAdapter {
     }
 
     return mapGoogleDriveFileToDataSourceItem(file, parentFolderId);
+  }
+
+  public async retrieveKnowledgeContent(
+    orgId: string,
+    userId: string,
+    knowledge: Knowledge,
+    data: any
+  ): Promise<RetrieveContentResponse> {
+    if (!userId) {
+      console.error("Missing userId");
+      return {
+        status: RetrieveContentResponseStatus.FAILED,
+      };
+    }
+    if (!data?.oauthTokenId) {
+      console.error("Missing oauthTokenId");
+      return {
+        status: RetrieveContentResponseStatus.FAILED,
+      };
+    }
+
+    throw new Error("Method not implemented.");
   }
 
   public async indexKnowledge(

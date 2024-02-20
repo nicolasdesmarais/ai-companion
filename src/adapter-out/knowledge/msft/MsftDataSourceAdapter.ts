@@ -20,7 +20,8 @@ import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
   DataSourceItemList,
-} from "../types/DataSourceItemList";
+  RetrieveContentResponse,
+} from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import {
   KnowledgeIndexingResult,
@@ -158,6 +159,24 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     return {
       items,
     };
+  }
+
+  public async retrieveContent(
+    orgId: string,
+    userId: string,
+    knowledge: Knowledge,
+    data: any
+  ): Promise<RetrieveContentResponse> {
+    throw new Error("Method not implemented.");
+  }
+
+  public async retrieveKnowledgeContent(
+    orgId: string,
+    userId: string,
+    knowledge: Knowledge,
+    data: any
+  ): Promise<RetrieveContentResponse> {
+    throw new Error("Method not implemented.");
   }
 
   public async indexKnowledge(

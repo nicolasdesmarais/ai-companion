@@ -4,11 +4,16 @@ import { logWithTimestamp } from "@/src/lib/logging";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import { put } from "@vercel/blob";
 import fileLoader from "../knowledgeLoaders/FileLoader";
-import { DataSourceAdapter } from "../types/DataSourceAdapter";
+import {
+  ContentRetrievingDataSourceAdapter,
+  DataSourceAdapter,
+} from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
   DataSourceItemList,
-} from "../types/DataSourceItemList";
+  RetrieveContentResponse,
+  RetrieveContentResponseStatus,
+} from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import {
   KnowledgeIndexingResult,
@@ -19,7 +24,9 @@ import apifyAdapter from "./ApifyAdapter";
 import { WebUrlDataSourceInput } from "./types/WebUrlDataSourceInput";
 import { WebUrlMetadata } from "./types/WebUrlMetadata";
 
-export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
+export class WebUrlsDataSourceAdapter
+  implements DataSourceAdapter, ContentRetrievingDataSourceAdapter
+{
   public async getDataSourceItemList(
     orgId: string,
     userId: string,
@@ -36,6 +43,34 @@ export class WebUrlsDataSourceAdapter implements DataSourceAdapter {
       ],
     };
     return result;
+  }
+
+  public async retrieveKnowledgeContent(
+    orgId: string,
+    userId: string,
+    knowledge: Knowledge,
+    data: any
+  ): Promise<RetrieveContentResponse> {
+    const input = data as WebUrlDataSourceInput;
+    const actorRunId = await apifyAdapter.startUrlIndexing(
+      orgId,
+      knowledge.id,
+      input.url
+    );
+
+    if (!actorRunId) {
+      return {
+        status: RetrieveContentResponseStatus.FAILED,
+      };
+    }
+
+    const metadata: WebUrlMetadata = {
+      indexingRunId: actorRunId,
+    };
+    return {
+      status: RetrieveContentResponseStatus.PENDING,
+      metadata,
+    };
   }
 
   public async indexKnowledge(

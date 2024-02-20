@@ -1,4 +1,4 @@
-import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceItemList";
+import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
 import { DataSourceType } from "@prisma/client";
 

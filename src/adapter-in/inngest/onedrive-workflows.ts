@@ -1,7 +1,7 @@
 import msftDataSourceAdapter, {
   MsftEvent,
 } from "@/src/adapter-out/knowledge/msft/MsftDataSourceAdapter";
-import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceItemList";
+import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import {
   DataSourceItemListReceivedPayload,
   DomainEvent,
