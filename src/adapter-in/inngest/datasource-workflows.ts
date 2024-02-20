@@ -13,7 +13,7 @@ import dataSourceViewingService from "@/src/domain/services/DataSourceViewingSer
 import { KnowledgeIndexStatus } from "@prisma/client";
 import { inngest } from "./client";
 
-export const dataSourceInitialized = inngest.createFunction(
+export const onDataSourceInitialized = inngest.createFunction(
   {
     id: "datasource-initialized",
     onFailure: async ({ error, event }) => {
