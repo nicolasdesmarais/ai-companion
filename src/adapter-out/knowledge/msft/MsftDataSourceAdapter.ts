@@ -21,6 +21,7 @@ import {
   DataSourceItem,
   DataSourceItemList,
   RetrieveContentResponse,
+  RetrieveContentResponseStatus,
 } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import {
@@ -176,7 +177,89 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     knowledge: Knowledge,
     data: any
   ): Promise<RetrieveContentResponse> {
-    throw new Error("Method not implemented.");
+    if (!userId) {
+      console.error("Missing userId");
+      return {
+        status: RetrieveContentResponseStatus.FAILED,
+        metadata: {
+          errors: {
+            knowledge: "Missing userId",
+          },
+        },
+      };
+    }
+    if (!data?.oauthTokenId) {
+      console.error("Missing oauthTokenId");
+      return {
+        status: RetrieveContentResponseStatus.FAILED,
+        metadata: {
+          errors: {
+            knowledge: "Missing oauthTokenId",
+          },
+        },
+      };
+    }
+
+    const { fileId } = knowledge.metadata as any;
+
+    if (!fileId) {
+      console.error("Missing fileId");
+      return {
+        status: RetrieveContentResponseStatus.FAILED,
+        metadata: {
+          errors: {
+            knowledge: "Missing fileId",
+          },
+        },
+      };
+    }
+
+    const token = await this.getToken(userId, data.oauthTokenId);
+    const item = await this.fetch(token, `/me/drive/items/${fileId}`);
+    let response;
+    if (this.isConvertible(knowledge.name)) {
+      response = await fetch(
+        `${MsftDataSourceAdapter.GraphApiUrl}/me/drive/items/${fileId}/content?format=pdf`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+    } else {
+      const downloadUrl = item["@microsoft.graph.downloadUrl"];
+      if (!downloadUrl) {
+        console.error("Missing downloadUrl");
+        return {
+          status: RetrieveContentResponseStatus.FAILED,
+          metadata: {
+            errors: {
+              knowledge: "Missing downloadUrl",
+            },
+          },
+        };
+      }
+      response = await fetch(downloadUrl);
+    }
+    if (!response.body || response.status !== 200) {
+      console.error("msft indexKnowledge: download fail");
+      return {
+        status: RetrieveContentResponseStatus.FAILED,
+        metadata: {
+          errors: {
+            knowledge: "msft download fail",
+          },
+        },
+      };
+    }
+    const msftResponseBlob = await response.blob();
+
+    const blob = await put(fileId, msftResponseBlob, {
+      access: "public",
+    });
+
+    return {
+      status: RetrieveContentResponseStatus.SUCCESS,
+      contentBlobUrl: blob.url,
+    };
   }
 
   public async indexKnowledge(

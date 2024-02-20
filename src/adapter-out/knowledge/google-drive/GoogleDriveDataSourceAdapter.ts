@@ -362,12 +362,22 @@ export class GoogleDriveDataSourceAdapter
       console.error("Missing userId");
       return {
         status: RetrieveContentResponseStatus.FAILED,
+        metadata: {
+          errors: {
+            knowledge: "Missing userId",
+          },
+        },
       };
     }
     if (!data?.oauthTokenId) {
       console.error("Missing oauthTokenId");
       return {
         status: RetrieveContentResponseStatus.FAILED,
+        metadata: {
+          errors: {
+            knowledge: "Missing oauthTokenId",
+          },
+        },
       };
     }
 
