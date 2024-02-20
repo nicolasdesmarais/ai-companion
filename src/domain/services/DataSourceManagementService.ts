@@ -34,7 +34,7 @@ export class DataSourceManagementService {
   constructor(private dataSourceRepository: DataSourceRepository) {}
 
   /**
-   * Create and persist a data source entity.
+   * Persist a new data source entity, in INITIALIZED status
    * Publishes a DATASOURCE_INITIALIZED event.
    * @param authorizationContext
    * @param name
@@ -42,7 +42,7 @@ export class DataSourceManagementService {
    * @param data
    * @returns
    */
-  public async createDataSource(
+  public async initializeDataSource(
     authorizationContext: AuthorizationContext,
     name: string,
     type: DataSourceType,
