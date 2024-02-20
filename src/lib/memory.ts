@@ -11,7 +11,7 @@ const embeddingsConfig = {
   azureOpenAIApiInstanceName: "appdirect-prod-ai-useast",
   azureOpenAIApiDeploymentName: "ai-prod-ada2",
   batchSize: 16,
-  maxConcurrency: 1,
+  maxConcurrency: 2,
 };
 
 export type AIKey = {
