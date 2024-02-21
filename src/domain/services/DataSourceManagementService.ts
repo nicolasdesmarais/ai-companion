@@ -10,6 +10,7 @@ import {
 import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
 import { DataSourceRepositoryImpl } from "@/src/adapter-out/repositories/DataSourceRepositoryImpl";
+import { KnowledgeRepositoryImpl } from "@/src/adapter-out/repositories/KnowledgeRepositoryImpl";
 import prismadb from "@/src/lib/prismadb";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { DataSourceSecurityService } from "@/src/security/services/DataSourceSecurityService";
@@ -34,12 +35,16 @@ import {
 } from "../events/domain-event";
 import { DataSourceDto, KnowledgeDto } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
+import { KnowledgeRepository } from "../ports/outgoing/KnowledgeRepository";
 import dataSourceAdapterService from "./DataSourceAdapterService";
 import { FileStorageService } from "./FileStorageService";
 import usageService from "./UsageService";
 
 export class DataSourceManagementService {
-  constructor(private dataSourceRepository: DataSourceRepository) {}
+  constructor(
+    private dataSourceRepository: DataSourceRepository,
+    private knowledgeRepository: KnowledgeRepository
+  ) {}
 
   /**
    * Persist a new data source entity, in INITIALIZED status
@@ -385,28 +390,32 @@ export class DataSourceManagementService {
     };
   }
 
-  public async handleContentRetrieved(
+  /**
+   * Stores a reference to the knowledge content in the knowledge entity,
+   * in the originalContent field
+   * @param knowledgeId
+   * @param originalContent
+   * @returns
+   */
+  public async storeKnowledgeContent(
     knowledgeId: string,
     originalContent: KnowledgeOriginalContent
   ) {
-    const knowledge = await prismadb.knowledge.findUnique({
-      where: { id: knowledgeId },
-    });
-    if (!knowledge) {
-      throw new EntityNotFoundError(
-        `Knowledge with id=${knowledgeId} not found`
-      );
-    }
-
-    await prismadb.knowledge.update({
+    const knowledge = await this.knowledgeRepository.getById(knowledgeId);
+    return await prismadb.knowledge.update({
       where: { id: knowledge.id },
       data: {
         indexStatus: KnowledgeIndexStatus.CONTENT_RETRIEVED,
         originalContent: originalContent as any,
       },
     });
+  }
 
-    const { filename, mimeType, contentBlobUrl } = originalContent;
+  public async createDocumentsFromContent(knowledgeId: string) {
+    const knowledge = await this.knowledgeRepository.getById(knowledgeId);
+    const { filename, mimeType, contentBlobUrl } =
+      knowledge as unknown as KnowledgeOriginalContent;
+
     const contentBlob = await FileStorageService.get(contentBlobUrl);
 
     const { docs, metadata } = await fileLoader.getLangchainDocs(
@@ -1200,7 +1209,9 @@ export class DataSourceManagementService {
 }
 
 const dataSourceRepository = new DataSourceRepositoryImpl();
+const knowledgeRepository = new KnowledgeRepositoryImpl();
 const dataSourceManagementService = new DataSourceManagementService(
-  dataSourceRepository
+  dataSourceRepository,
+  knowledgeRepository
 );
 export default dataSourceManagementService;

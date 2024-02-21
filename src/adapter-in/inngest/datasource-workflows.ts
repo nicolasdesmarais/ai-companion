@@ -235,10 +235,16 @@ export const onKnowledgeContentRetrieved = inngest.createFunction(
     const payload = event.data as KnowledgeContentRetrievedPayload;
     const { knowledgeId, originalContent } = payload;
 
-    await step.run("retrieve-knowledge-content", async () => {
-      return await dataSourceManagementService.handleContentRetrieved(
+    await step.run("store-knowledge-content", async () => {
+      return await dataSourceManagementService.storeKnowledgeContent(
         knowledgeId,
         originalContent
+      );
+    });
+
+    await step.run("retrieve-knowledge-content", async () => {
+      return await dataSourceManagementService.createDocumentsFromContent(
+        knowledgeId
       );
     });
   }
