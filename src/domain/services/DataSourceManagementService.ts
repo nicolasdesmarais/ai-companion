@@ -411,6 +411,13 @@ export class DataSourceManagementService {
     });
   }
 
+  /**
+   * Retrieves knowledge content for the specified knowledge and
+   * computes the documents and metadata using the appropriate langchain loader
+   * The computed documents are uploaded to the file storage service
+   *
+   * @param knowledgeId
+   */
   public async createDocumentsFromContent(knowledgeId: string) {
     const knowledge = await this.knowledgeRepository.getById(knowledgeId);
     const { filename, mimeType, contentBlobUrl } =
