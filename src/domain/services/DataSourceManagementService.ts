@@ -385,7 +385,7 @@ export class DataSourceManagementService {
 
   public async handleContentRetrieved(
     knowledgeId: string,
-    contentBlobUrl: string
+    originalContent: KnowledgeOriginalContent
   ) {
     const knowledge = await prismadb.knowledge.findUnique({
       where: { id: knowledgeId },
@@ -400,7 +400,7 @@ export class DataSourceManagementService {
       where: { id: knowledge.id },
       data: {
         indexStatus: KnowledgeIndexStatus.CONTENT_RETRIEVED,
-        contentBlobUrl,
+        originalContent: originalContent as any,
       },
     });
 

@@ -209,14 +209,14 @@ export const onKnowledgeInitialized = inngest.createFunction(
       }
     );
 
-    const { indexStatus, contentBlobUrl } = retrieveKnowledgeResponse;
+    const { indexStatus, originalContent } = retrieveKnowledgeResponse;
     if (
       indexStatus === KnowledgeIndexStatus.CONTENT_RETRIEVED &&
-      contentBlobUrl
+      originalContent
     ) {
       const eventPayload: KnowledgeContentRetrievedPayload = {
         knowledgeId,
-        contentBlobUrl,
+        originalContent,
       };
       await step.sendEvent("knowledge-content-received-event", {
         name: DomainEvent.KNOWLEDGE_CONTENT_RETRIEVED,
@@ -233,12 +233,12 @@ export const onKnowledgeContentRetrieved = inngest.createFunction(
   { event: DomainEvent.KNOWLEDGE_CONTENT_RETRIEVED },
   async ({ event, step }) => {
     const payload = event.data as KnowledgeContentRetrievedPayload;
-    const { knowledgeId, contentBlobUrl } = payload;
+    const { knowledgeId, originalContent } = payload;
 
     await step.run("retrieve-knowledge-content", async () => {
       return await dataSourceManagementService.handleContentRetrieved(
         knowledgeId,
-        contentBlobUrl
+        originalContent
       );
     });
   }

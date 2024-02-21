@@ -1,4 +1,7 @@
-import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
+import {
+  DataSourceItemList,
+  KnowledgeOriginalContent,
+} from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
 import { DataSourceType } from "@prisma/client";
 
@@ -36,7 +39,7 @@ export interface KnowledgeInitializedEventPayload {
 
 export interface KnowledgeContentReceivedPayload {
   knowledgeId: string;
-  contentBlobUrl: string;
+  originalContent: KnowledgeOriginalContent;
 }
 
 export interface KnowledgeChunkReceivedPayload {
