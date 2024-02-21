@@ -38,6 +38,7 @@ export interface KnowledgeInitializedEventPayload {
 }
 
 export interface KnowledgeContentReceivedPayload {
+  dataSourceId: string;
   knowledgeId: string;
   originalContent: KnowledgeOriginalContent;
 }

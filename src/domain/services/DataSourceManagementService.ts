@@ -8,7 +8,10 @@ import {
   RetrieveContentResponseStatus,
 } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
-import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
+import {
+  KnowledgeIndexingResult,
+  KnowledgeIndexingResultStatus,
+} from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
 import { DataSourceRepositoryImpl } from "@/src/adapter-out/repositories/DataSourceRepositoryImpl";
 import { KnowledgeRepositoryImpl } from "@/src/adapter-out/repositories/KnowledgeRepositoryImpl";
 import prismadb from "@/src/lib/prismadb";
@@ -176,6 +179,8 @@ export class DataSourceManagementService {
       documentCount,
       tokenCount,
       originalContent,
+      documentsBlobUrl,
+      metadata,
       ...rest
     } = knowledge;
 
@@ -188,6 +193,8 @@ export class DataSourceManagementService {
       documentCount,
       tokenCount,
       originalContent: originalContent as unknown as KnowledgeOriginalContent,
+      documentsBlobUrl,
+      metadata,
     };
   }
 
@@ -428,7 +435,7 @@ export class DataSourceManagementService {
     }
 
     const { filename, mimeType, contentBlobUrl } = originalContent;
-    const contentBlob = await FileStorageService.get(contentBlobUrl);
+    const contentBlob = await FileStorageService.getBlob(contentBlobUrl);
 
     const { docs, metadata } = await fileLoader.getLangchainDocs(
       knowledgeId,
@@ -449,6 +456,60 @@ export class DataSourceManagementService {
         documentsBlobUrl,
         documentCount: metadata.documentCount,
         tokenCount: metadata.totalTokenCount,
+      },
+    });
+  }
+
+  public async publishKnowledgeChunkEvents(
+    dataSourceId: string,
+    knowledgeId: string
+  ) {
+    const dataSource = await this.dataSourceRepository.findById(dataSourceId);
+    if (!dataSource) {
+      throw new EntityNotFoundError(
+        `DataSource with id=${dataSourceId} not found`
+      );
+    }
+    const knowledge = await this.knowledgeRepository.getById(knowledgeId);
+
+    const { documentsBlobUrl } = knowledge;
+    if (!documentsBlobUrl) {
+      throw new Error(
+        `Knowledge with id=${knowledgeId} does not have documents blob url`
+      );
+    }
+
+    const documentsJson = await FileStorageService.getJson(documentsBlobUrl);
+    const documents: Document[] = documentsJson;
+    let eventIds: string[] = [];
+    for (let i = 0; i < documents.length; i++) {
+      const eventResult = await publishEvent(
+        DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
+        {
+          orgId: dataSource.orgId,
+          knowledgeIndexingResult: {
+            knowledgeId: knowledge.id,
+            result: {
+              chunkCount: documents.length,
+              status: KnowledgeIndexingResultStatus.SUCCESSFUL,
+            },
+          },
+          dataSourceType: dataSource.type,
+          index: i,
+        }
+      );
+      eventIds = eventIds.concat(eventResult.ids);
+    }
+
+    const newMetadata = {
+      eventIds,
+    };
+    const updatedMetadata = this.mergeMetadata(knowledge.metadata, newMetadata);
+    await prismadb.knowledge.update({
+      where: { id: knowledge.id },
+      data: {
+        indexStatus: KnowledgeIndexStatus.INDEXING,
+        metadata: updatedMetadata,
       },
     });
   }

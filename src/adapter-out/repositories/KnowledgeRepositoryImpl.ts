@@ -15,6 +15,8 @@ const mapKnowledgeToDto = (knowledge: Knowledge): KnowledgeDto => {
     documentCount,
     tokenCount,
     originalContent,
+    documentsBlobUrl,
+    metadata,
     ...rest
   } = knowledge;
 
@@ -27,6 +29,8 @@ const mapKnowledgeToDto = (knowledge: Knowledge): KnowledgeDto => {
     documentCount,
     tokenCount,
     originalContent: originalContent as unknown as KnowledgeOriginalContent,
+    documentsBlobUrl,
+    metadata,
   };
 };
 

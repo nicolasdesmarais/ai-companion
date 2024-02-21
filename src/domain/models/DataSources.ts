@@ -53,4 +53,6 @@ export interface KnowledgeDto {
   documentCount: number | null;
   tokenCount: number | null;
   originalContent: KnowledgeOriginalContent | null;
+  documentsBlobUrl: string | null;
+  metadata: any;
 }

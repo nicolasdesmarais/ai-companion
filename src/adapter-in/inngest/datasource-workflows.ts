@@ -214,6 +214,7 @@ export const onKnowledgeInitialized = inngest.createFunction(
       originalContent
     ) {
       const eventPayload: KnowledgeContentRetrievedPayload = {
+        dataSourceId,
         knowledgeId,
         originalContent,
       };
@@ -232,7 +233,7 @@ export const onKnowledgeContentRetrieved = inngest.createFunction(
   { event: DomainEvent.KNOWLEDGE_CONTENT_RETRIEVED },
   async ({ event, step }) => {
     const payload = event.data as KnowledgeContentRetrievedPayload;
-    const { knowledgeId, originalContent } = payload;
+    const { dataSourceId, knowledgeId, originalContent } = payload;
 
     await step.run("store-knowledge-content", async () => {
       return await dataSourceManagementService.storeKnowledgeContent(
@@ -243,6 +244,13 @@ export const onKnowledgeContentRetrieved = inngest.createFunction(
 
     await step.run("create-documents-from-content", async () => {
       return await dataSourceManagementService.createDocumentsFromContent(
+        knowledgeId
+      );
+    });
+
+    await step.run("publish-knowledge-chunk-events", async () => {
+      return await dataSourceManagementService.publishKnowledgeChunkEvents(
+        dataSourceId,
         knowledgeId
       );
     });

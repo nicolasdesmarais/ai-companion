@@ -5,13 +5,21 @@ const VERCEL_BLOB_ACCESS = "public";
 
 export class FileStorageService {
   /**
-   * Retrieves a file from the file storage service
+   * Retrieves a file from the file storage service as a Blob
    * @param url
    * @returns
    */
-  public static async get(url: string): Promise<Blob> {
+  public static async getBlob(url: string): Promise<Blob> {
     const fetchResponse = await fetch(url);
     return await fetchResponse.blob();
+  }
+
+  /**
+   * Retrieves a file from the file storage service as a JSON object
+   */
+  public static async getJson(url: string): Promise<any> {
+    const fetchResponse = await fetch(url);
+    return await fetchResponse.json();
   }
 
   /**
