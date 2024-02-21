@@ -154,7 +154,6 @@ model Knowledge {
   uniqueId         String?               @map(name: "unique_id") @db.VarChar(500)
   indexStatus      KnowledgeIndexStatus? @map(name: "index_status")
   originalContent  Json?                 @map(name: "original_content")
-  contentBlobUrl   String?               @map(name: "content_blob_url") @db.Text
   documentsBlobUrl String?               @map(name: "documents_blob_url") @db.Text
   blobUrl          String?               @map(name: "blob_url") @db.Text
   metadata         Json?
