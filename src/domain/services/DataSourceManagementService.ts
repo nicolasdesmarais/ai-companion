@@ -175,7 +175,7 @@ export class DataSourceManagementService {
       indexStatus,
       documentCount,
       tokenCount,
-      metadata,
+      originalContent,
       ...rest
     } = knowledge;
 
@@ -187,7 +187,7 @@ export class DataSourceManagementService {
       indexStatus,
       documentCount,
       tokenCount,
-      metadata,
+      originalContent: originalContent as unknown as KnowledgeOriginalContent,
     };
   }
 
