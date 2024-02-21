@@ -159,10 +159,9 @@ export const onDataSourceItemListReceived = inngest.createFunction(
       (knowledge) => knowledge.indexStatus === KnowledgeIndexStatus.INITIALIZED
     );
 
-    if (knowledgeListToUpdate.length === 0) {
+    await step.run("update-datasource-status", async () => {
       await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
-      return;
-    }
+    });
 
     for (const knowledge of knowledgeListToUpdate) {
       const eventPayload: KnowledgeInitializedEventPayload = {
@@ -242,7 +241,7 @@ export const onKnowledgeContentRetrieved = inngest.createFunction(
       );
     });
 
-    await step.run("retrieve-knowledge-content", async () => {
+    await step.run("create-documents-from-content", async () => {
       return await dataSourceManagementService.createDocumentsFromContent(
         knowledgeId
       );

@@ -532,6 +532,10 @@ export class DataSourceManagementService {
       totalTokenCount += knowledge.tokenCount ?? 0;
 
       switch (knowledge.indexStatus) {
+        case KnowledgeIndexStatus.INITIALIZED:
+        case KnowledgeIndexStatus.RETRIEVING_CONTENT:
+        case KnowledgeIndexStatus.CONTENT_RETRIEVED:
+        case KnowledgeIndexStatus.DOCUMENTS_CREATED:
         case KnowledgeIndexStatus.INDEXING:
           indexingKnowledges++;
           break;
