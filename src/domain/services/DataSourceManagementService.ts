@@ -22,7 +22,6 @@ import {
   KnowledgeIndexStatus,
   PrismaClient,
 } from "@prisma/client";
-import { put } from "@vercel/blob";
 import {
   EntityNotFoundError,
   ForbiddenError,
@@ -36,6 +35,7 @@ import {
 import { DataSourceDto, KnowledgeDto } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
 import dataSourceAdapterService from "./DataSourceAdapterService";
+import { FileStorageService } from "./FileStorageService";
 import usageService from "./UsageService";
 
 export class DataSourceManagementService {
@@ -407,8 +407,7 @@ export class DataSourceManagementService {
     });
 
     const { filename, mimeType, contentBlobUrl } = originalContent;
-    const fetchContentResponse = await fetch(contentBlobUrl);
-    const contentBlob = await fetchContentResponse.blob();
+    const contentBlob = await FileStorageService.get(contentBlobUrl);
 
     const { docs, metadata } = await fileLoader.getLangchainDocs(
       knowledgeId,
@@ -417,19 +416,16 @@ export class DataSourceManagementService {
       contentBlob
     );
 
-    const documentsBlob = await put(
+    const documentsBlobUrl = await FileStorageService.put(
       `${knowledge.name}.json`,
-      JSON.stringify(docs),
-      {
-        access: "public",
-      }
+      JSON.stringify(docs)
     );
 
     await prismadb.knowledge.update({
       where: { id: knowledge.id },
       data: {
         indexStatus: KnowledgeIndexStatus.DOCUMENTS_CREATED,
-        documentsBlobUrl: documentsBlob.url,
+        documentsBlobUrl,
         documentCount: metadata.documentCount,
         tokenCount: metadata.totalTokenCount,
       },
