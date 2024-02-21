@@ -1,3 +1,4 @@
+import { KnowledgeOriginalContent } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import {
   DataSourceIndexStatus,
   DataSourceRefreshPeriod,
@@ -51,5 +52,5 @@ export interface KnowledgeDto {
   indexStatus: KnowledgeIndexStatus | null;
   documentCount: number | null;
   tokenCount: number | null;
-  metadata: any;
+  originalContent: KnowledgeOriginalContent | null;
 }

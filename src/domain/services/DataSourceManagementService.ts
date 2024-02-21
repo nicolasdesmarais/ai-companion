@@ -420,9 +420,14 @@ export class DataSourceManagementService {
    */
   public async createDocumentsFromContent(knowledgeId: string) {
     const knowledge = await this.knowledgeRepository.getById(knowledgeId);
-    const { filename, mimeType, contentBlobUrl } =
-      knowledge as unknown as KnowledgeOriginalContent;
+    const { originalContent } = knowledge;
+    if (!originalContent) {
+      throw new Error(
+        `Knowledge with id=${knowledgeId} does not have original content`
+      );
+    }
 
+    const { filename, mimeType, contentBlobUrl } = originalContent;
     const contentBlob = await FileStorageService.get(contentBlobUrl);
 
     const { docs, metadata } = await fileLoader.getLangchainDocs(
@@ -536,6 +541,7 @@ export class DataSourceManagementService {
         case KnowledgeIndexStatus.RETRIEVING_CONTENT:
         case KnowledgeIndexStatus.CONTENT_RETRIEVED:
         case KnowledgeIndexStatus.DOCUMENTS_CREATED:
+
         case KnowledgeIndexStatus.INDEXING:
           indexingKnowledges++;
           break;

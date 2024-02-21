@@ -3,6 +3,7 @@ import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import { KnowledgeRepository } from "@/src/domain/ports/outgoing/KnowledgeRepository";
 import prismadb from "@/src/lib/prismadb";
 import { Knowledge } from "@prisma/client";
+import { KnowledgeOriginalContent } from "../knowledge/types/DataSourceTypes";
 
 const mapKnowledgeToDto = (knowledge: Knowledge): KnowledgeDto => {
   const {
@@ -13,7 +14,7 @@ const mapKnowledgeToDto = (knowledge: Knowledge): KnowledgeDto => {
     indexStatus,
     documentCount,
     tokenCount,
-    metadata,
+    originalContent,
     ...rest
   } = knowledge;
 
@@ -25,7 +26,7 @@ const mapKnowledgeToDto = (knowledge: Knowledge): KnowledgeDto => {
     indexStatus,
     documentCount,
     tokenCount,
-    metadata,
+    originalContent: originalContent as unknown as KnowledgeOriginalContent,
   };
 };
 
