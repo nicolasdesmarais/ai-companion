@@ -1,5 +1,6 @@
 import { UpdateDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
+import fileLoader from "@/src/adapter-out/knowledge/knowledgeLoaders/FileLoader";
 import {
   DataSourceItemList,
   KnowledgeOriginalContent,
@@ -21,6 +22,7 @@ import {
   KnowledgeIndexStatus,
   PrismaClient,
 } from "@prisma/client";
+import { put } from "@vercel/blob";
 import {
   EntityNotFoundError,
   ForbiddenError,
@@ -404,20 +406,34 @@ export class DataSourceManagementService {
       },
     });
 
-    // const { docs, metadata } = await fileLoader.getLangchainDocs(
-    //   knowledge.id,
-    //   fileName,
-    //   derivedMimeType,
-    //   blob
-    // );
+    const { filename, mimeType, contentBlobUrl } = originalContent;
+    const fetchContentResponse = await fetch(contentBlobUrl);
+    const contentBlob = await fetchContentResponse.blob();
 
-    // const cloudBlob = await put(
-    //   `${knowledge.name}.json`,
-    //   JSON.stringify(docs),
-    //   {
-    //     access: "public",
-    //   }
-    // );
+    const { docs, metadata } = await fileLoader.getLangchainDocs(
+      knowledgeId,
+      filename,
+      mimeType,
+      contentBlob
+    );
+
+    const documentsBlob = await put(
+      `${knowledge.name}.json`,
+      JSON.stringify(docs),
+      {
+        access: "public",
+      }
+    );
+
+    await prismadb.knowledge.update({
+      where: { id: knowledge.id },
+      data: {
+        indexStatus: KnowledgeIndexStatus.DOCUMENTS_CREATED,
+        documentsBlobUrl: documentsBlob.url,
+        documentCount: metadata.documentCount,
+        tokenCount: metadata.totalTokenCount,
+      },
+    });
   }
 
   /**

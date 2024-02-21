@@ -7,9 +7,11 @@ import { fileTypeFromBlob } from "file-type";
 import { writeFile } from "fs/promises";
 import { CSVLoader } from "langchain/document_loaders/fs/csv";
 import { EPubLoader } from "langchain/document_loaders/fs/epub";
+import { JSONLoader } from "langchain/document_loaders/fs/json";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+
 import mime from "mime-types";
 import { DocxLoader } from "./DocxLoader";
 
@@ -61,6 +63,9 @@ export class FileLoader {
         docs = await loader.load();
       } else if (mimeType === "application/pdf") {
         const loader = new PDFLoader(filePathOrBlob);
+        docs = await loader.load();
+      } else if (mimeType === "application/json") {
+        const loader = new JSONLoader(filePathOrBlob);
         docs = await loader.load();
       } else {
         throw new BadRequestError(`Unsupported file type ${mimeType}`);
