@@ -403,7 +403,11 @@ export class GoogleDriveDataSourceAdapter
 
     return {
       status: RetrieveContentResponseStatus.SUCCESS,
-      contentBlobUrl: contentBlob.url,
+      originalContent: {
+        contentBlobUrl: contentBlob.url,
+        filename: fileName,
+        mimeType,
+      },
     };
   }
 

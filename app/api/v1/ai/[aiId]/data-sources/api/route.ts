@@ -34,7 +34,7 @@ async function postHandler(
   const buffer = Buffer.from(jsonData);
   const hash = createSha256Hash(buffer);
 
-  const blob = await put(body.name, buffer, {
+  const blob = await put(`${body.name}.json`, buffer, {
     access: "public",
   });
 

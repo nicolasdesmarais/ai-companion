@@ -2,6 +2,7 @@ import { UpdateDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
 import {
   DataSourceItemList,
+  KnowledgeOriginalContent,
   RetrieveContentResponse,
   RetrieveContentResponseStatus,
 } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
@@ -145,7 +146,7 @@ export class DataSourceManagementService {
             type: dataSource.type,
             uniqueId: item.uniqueId,
             indexStatus: KnowledgeIndexStatus.INITIALIZED,
-            contentBlobUrl: item.contentBlobUrl,
+            originalContent: item.originalContent as any,
             metadata: item.metadata,
             isMigrated: true,
           },
@@ -332,8 +333,9 @@ export class DataSourceManagementService {
 
     let knowledgeStatus;
     let newMetadata: any;
-    let contentBlobUrl = knowledge.contentBlobUrl;
-    if (contentBlobUrl) {
+    let originalContent: KnowledgeOriginalContent | undefined =
+      knowledge.originalContent as unknown as KnowledgeOriginalContent;
+    if (originalContent) {
       knowledgeStatus = KnowledgeIndexStatus.CONTENT_RETRIEVED;
     } else {
       const dataSourceAdapter =
@@ -359,7 +361,7 @@ export class DataSourceManagementService {
           knowledgeStatus = KnowledgeIndexStatus.FAILED;
           break;
       }
-      contentBlobUrl = result.contentBlobUrl ?? null;
+      originalContent = result.originalContent;
       newMetadata = result.metadata;
     }
 
@@ -370,13 +372,13 @@ export class DataSourceManagementService {
       data: {
         indexStatus: knowledgeStatus,
         metadata: updatedMetadata,
-        contentBlobUrl,
+        originalContent: originalContent as any,
       },
     });
 
     return {
       indexStatus: knowledgeStatus,
-      contentBlobUrl,
+      originalContent,
       metadata: updatedMetadata,
     };
   }

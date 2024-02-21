@@ -24,12 +24,21 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
   ): Promise<DataSourceItemList> {
     const input = data as FileUploadDataSourceInput;
 
+    let originalContent;
+    if (input.blobUrl) {
+      originalContent = {
+        contentBlobUrl: input.blobUrl,
+        filename: input.filename,
+        mimeType: input.mimetype,
+      };
+    }
+
     const result: DataSourceItemList = {
       items: [
         {
           name: input.filename,
-          contentBlobUrl: input.blobUrl,
           uniqueId: input.blobUrl,
+          originalContent,
         },
       ],
     };

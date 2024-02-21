@@ -125,29 +125,31 @@ export class WebUrlsDataSourceAdapter
 
     const result = await apifyAdapter.getActorRunResult(metadata.indexingRunId);
 
-    let contentBlobUrl;
     let status: RetrieveContentResponseStatus;
+    let originalContent;
     if (
       result.items &&
       (result.status === KnowledgeIndexingResultStatus.PARTIAL ||
         result.status === KnowledgeIndexingResultStatus.SUCCESSFUL)
     ) {
-      const cloudBlob = await put(
-        `${knowledge.name}.json`,
-        JSON.stringify(result),
-        {
-          access: "public",
-        }
-      );
+      const filename = `${knowledge.name}.json`;
+      const cloudBlob = await put(filename, JSON.stringify(result), {
+        access: "public",
+      });
       status = RetrieveContentResponseStatus.SUCCESS;
-      contentBlobUrl = cloudBlob.url;
+
+      originalContent = {
+        contentBlobUrl: cloudBlob.url,
+        filename,
+        mimeType: "application/json",
+      };
     } else {
       status = RetrieveContentResponseStatus.FAILED;
     }
 
     return {
       status,
-      contentBlobUrl,
+      originalContent,
     };
   }
 
@@ -225,39 +227,6 @@ export class WebUrlsDataSourceAdapter
 
   public async deleteKnowledge(knowledgeId: string): Promise<void> {
     fileLoader.deleteKnowledge(knowledgeId);
-  }
-
-  private async getActorRunResult(
-    knowledge: Knowledge,
-    metadata: WebUrlMetadata
-  ) {
-    logWithTimestamp(
-      `Retrieving actor run result for indexingRunId=${metadata.indexingRunId}`
-    );
-    const result = await apifyAdapter.getActorRunResult(metadata.indexingRunId);
-
-    let blobUrl, chunkCount;
-    if (
-      result.items &&
-      (result.status === KnowledgeIndexingResultStatus.PARTIAL ||
-        result.status === KnowledgeIndexingResultStatus.SUCCESSFUL)
-    ) {
-      const cloudBlob = await put(
-        `${knowledge.name}.json`,
-        JSON.stringify(result),
-        {
-          access: "public",
-        }
-      );
-      blobUrl = cloudBlob.url;
-      chunkCount = result.items.length;
-    }
-
-    return {
-      status: result.status,
-      blobUrl,
-      chunkCount,
-    };
   }
 
   public async getRemovedKnowledgeIds(

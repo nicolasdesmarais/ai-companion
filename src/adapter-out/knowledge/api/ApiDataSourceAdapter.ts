@@ -20,8 +20,12 @@ export class ApiDataSourceAdapter implements DataSourceAdapter {
       items: [
         {
           name: input.name,
-          contentBlobUrl: input.blobUrl,
           uniqueId: input.hash,
+          originalContent: {
+            contentBlobUrl: input.blobUrl,
+            filename: input.name,
+            mimeType: "application/json",
+          },
         },
       ],
     };

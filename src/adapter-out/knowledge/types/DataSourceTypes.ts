@@ -7,13 +7,19 @@ export interface DataSourceItemList {
 export interface DataSourceItem {
   name: string;
   uniqueId?: string;
-  contentBlobUrl?: string;
+  originalContent?: KnowledgeOriginalContent;
   metadata?: any;
+}
+
+export interface KnowledgeOriginalContent {
+  contentBlobUrl: string;
+  filename: string;
+  mimeType: string;
 }
 
 export interface RetrieveContentAdapterResponse {
   status: RetrieveContentResponseStatus;
-  contentBlobUrl?: string;
+  originalContent?: KnowledgeOriginalContent;
   metadata?: any;
 }
 
@@ -25,6 +31,6 @@ export enum RetrieveContentResponseStatus {
 
 export interface RetrieveContentResponse {
   indexStatus: KnowledgeIndexStatus;
-  contentBlobUrl: string | null;
+  originalContent?: KnowledgeOriginalContent;
   metadata?: any;
 }
