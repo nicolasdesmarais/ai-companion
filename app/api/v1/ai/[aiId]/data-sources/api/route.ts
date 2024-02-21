@@ -23,7 +23,12 @@ async function postHandler(
 ): Promise<NextResponse> {
   const { params, authorizationContext } = context;
 
-  const body: CreateApiDataSourceRequest = await request.json();
+  let body: CreateApiDataSourceRequest;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return NextResponse.json("Invalid JSON", { status: 400 });
+  }
 
   if (!body.name || !body.data) {
     return NextResponse.json("Missing name or data", { status: 400 });
