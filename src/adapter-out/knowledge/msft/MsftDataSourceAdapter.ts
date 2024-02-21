@@ -257,7 +257,11 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
 
     return {
       status: RetrieveContentResponseStatus.SUCCESS,
-      contentBlobUrl: contentBlob.url,
+      originalContent: {
+        contentBlobUrl: contentBlob.url,
+        filename: fileId,
+        mimeType: "",
+      },
     };
   }
 
