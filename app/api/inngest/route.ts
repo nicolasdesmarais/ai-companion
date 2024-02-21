@@ -7,6 +7,7 @@ import {
   onDataSourceInitialized,
   onDataSourceItemListReceived,
   onDataSourceRefreshRequested,
+  onKnowledgeContentRetrieved,
   onKnowledgeInitialized,
   refreshDataSources,
 } from "@/src/adapter-in/inngest/datasource-workflows";
@@ -34,5 +35,6 @@ export const { GET, POST, PUT } = serve({
     clerkWebhookReceived,
     deleteUnusedKnowledges,
     dataSourceMigrationRequested,
+    onKnowledgeContentRetrieved,
   ],
 });
