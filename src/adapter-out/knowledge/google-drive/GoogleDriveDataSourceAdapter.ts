@@ -7,6 +7,7 @@ import {
   ForbiddenError,
 } from "@/src/domain/errors/Errors";
 import { DomainEvent } from "@/src/domain/events/domain-event";
+import { FileStorageService } from "@/src/domain/services/FileStorageService";
 import orgClientCredentialsService from "@/src/domain/services/OrgClientCredentialsService";
 import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
@@ -390,23 +391,21 @@ export class GoogleDriveDataSourceAdapter
     const { fileId, fileName, mimeType } =
       knowledge.metadata as unknown as GoogleDriveFileMetadata;
 
-    const { fileResponse } = await this.getFileContent(
+    const { fileResponse, derivedMimeType } = await this.getFileContent(
       driveClient,
       fileId,
       mimeType
     );
 
     const buffer = await this.streamToBuffer(fileResponse.data);
-    const contentBlob = await put(fileName, buffer, {
-      access: "public",
-    });
+    const contentBlobUrl = await FileStorageService.put(fileName, buffer);
 
     return {
       status: RetrieveContentResponseStatus.SUCCESS,
       originalContent: {
-        contentBlobUrl: contentBlob.url,
+        contentBlobUrl,
         filename: fileName,
-        mimeType,
+        mimeType: derivedMimeType,
       },
     };
   }

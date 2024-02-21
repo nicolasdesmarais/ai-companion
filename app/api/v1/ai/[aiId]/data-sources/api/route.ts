@@ -1,6 +1,7 @@
 import { CreateApiDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
 import { ApiDataSourceInput } from "@/src/adapter-out/knowledge/api/ApiDataSourceInput";
 import aiService from "@/src/domain/services/AIService";
+import { FileStorageService } from "@/src/domain/services/FileStorageService";
 import { createSha256Hash } from "@/src/lib/encryptionUtils";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
@@ -9,7 +10,6 @@ import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { DataSourceRefreshPeriod, DataSourceType } from "@prisma/client";
-import { put } from "@vercel/blob";
 import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 300;
@@ -39,13 +39,11 @@ async function postHandler(
   const buffer = Buffer.from(jsonData);
   const hash = createSha256Hash(buffer);
 
-  const blob = await put(`${body.name}.json`, buffer, {
-    access: "public",
-  });
+  const blobUrl = await FileStorageService.put(`${body.name}.json`, buffer);
 
   const dataSourceInput: ApiDataSourceInput = {
     name: body.name,
-    blobUrl: blob.url,
+    blobUrl,
     hash,
   };
 
