@@ -391,20 +391,18 @@ export class GoogleDriveDataSourceAdapter
     const { fileId, fileName, mimeType } =
       knowledge.metadata as unknown as GoogleDriveFileMetadata;
 
-    const { fileResponse, derivedMimeType } = await this.getFileContent(
-      driveClient,
-      fileId,
-      mimeType
-    );
+    const { fileResponse, derivedMimeType, fileExtension } =
+      await this.getFileContent(driveClient, fileId, mimeType);
 
+    const fullFileName = `${fileName}${fileExtension}`;
     const buffer = await this.streamToBuffer(fileResponse.data);
-    const contentBlobUrl = await FileStorageService.put(fileName, buffer);
+    const contentBlobUrl = await FileStorageService.put(fullFileName, buffer);
 
     return {
       status: RetrieveContentResponseStatus.SUCCESS,
       originalContent: {
         contentBlobUrl,
-        filename: fileName,
+        filename: fullFileName,
         mimeType: derivedMimeType,
       },
     };
@@ -527,6 +525,7 @@ export class GoogleDriveDataSourceAdapter
   ) {
     let fileResponse: GaxiosResponse<Readable>;
     let derivedMimeType = mimeType;
+    let fileExtension;
     switch (mimeType) {
       case MIME_TYPE_GOOGLE_DOC:
         fileResponse = await this.getGoogleDocContent(
@@ -535,6 +534,7 @@ export class GoogleDriveDataSourceAdapter
           MIME_TYPE_DOCX
         );
         derivedMimeType = MIME_TYPE_DOCX;
+        fileExtension = ".docx";
         break;
       case MIME_TYPE_GOOGLE_SHEETS:
         fileResponse = await this.getGoogleDocContent(
@@ -543,6 +543,7 @@ export class GoogleDriveDataSourceAdapter
           MIME_TYPE_CSV
         );
         derivedMimeType = MIME_TYPE_CSV;
+        fileExtension = ".csv";
         break;
       case MIME_TYPE_GOOGLE_SLIDES:
         fileResponse = await this.getGoogleDocContent(
@@ -551,6 +552,7 @@ export class GoogleDriveDataSourceAdapter
           MIME_TYPE_PDF
         );
         derivedMimeType = MIME_TYPE_PDF;
+        fileExtension = ".pdf";
         break;
       default:
         fileResponse = await this.getFileAsStream(googleDriveClient, fileId);
@@ -559,6 +561,7 @@ export class GoogleDriveDataSourceAdapter
     return {
       fileResponse,
       derivedMimeType,
+      fileExtension,
     };
   }
 
