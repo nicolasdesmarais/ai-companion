@@ -9,7 +9,7 @@ export enum DomainEvent {
   DATASOURCE_DELETE_REQUESTED = "datasource.delete.requested",
   DATASOURCE_MIGRATION_REQUESTED = "datasource.migration.requested",
   KNOWLEDGE_INITIALIZED = "knowledge.initialized",
-  KNOWLEDGE_EVENT_RECEIVED = "knowledge.event.received",
+  KNOWLEDGE_CONTENT_RETRIEVED = "knowledge.content.received",
   KNOWLEDGE_CHUNK_RECEIVED = "knowledge.chunk.received",
 }
 
@@ -32,6 +32,11 @@ export interface DataSourceRefreshRequestedPayload {
 export interface KnowledgeInitializedEventPayload {
   dataSourceId: string;
   knowledgeId: string;
+}
+
+export interface KnowledgeContentReceivedPayload {
+  knowledgeId: string;
+  contentBlobUrl: string;
 }
 
 export interface KnowledgeChunkReceivedPayload {

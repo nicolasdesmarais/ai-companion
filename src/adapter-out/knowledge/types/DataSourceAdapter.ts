@@ -2,11 +2,10 @@ import { Knowledge } from "@prisma/client";
 import {
   DataSourceItem,
   DataSourceItemList,
-  RetrieveContentResponse,
+  RetrieveContentAdapterResponse,
 } from "./DataSourceTypes";
 import { IndexKnowledgeResponse } from "./IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "./KnowlegeIndexingResult";
-import { OrgAndKnowledge } from "./OrgAndKnowledge";
 
 export interface DataSourceAdapter {
   getDataSourceItemList(
@@ -26,13 +25,6 @@ export interface DataSourceAdapter {
   ): Promise<IndexKnowledgeResponse>;
 
   shouldReindexKnowledge(knowledge: Knowledge, item: DataSourceItem): boolean;
-
-  retrieveOrgAndKnowledgeIdFromEvent(data: any): OrgAndKnowledge;
-
-  getKnowledgeResultFromEvent(
-    knowledge: Knowledge,
-    data: any
-  ): Promise<KnowledgeIndexingResult>;
 
   loadKnowledgeResult(
     knowledge: Knowledge,
@@ -57,5 +49,5 @@ export interface ContentRetrievingDataSourceAdapter extends DataSourceAdapter {
     userId: string,
     knowledge: Knowledge,
     data: any
-  ): Promise<RetrieveContentResponse>;
+  ): Promise<RetrieveContentAdapterResponse>;
 }

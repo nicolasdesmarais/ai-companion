@@ -30,7 +30,7 @@ import { ContentRetrievingDataSourceAdapter } from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
   DataSourceItemList,
-  RetrieveContentResponse,
+  RetrieveContentAdapterResponse,
   RetrieveContentResponseStatus,
 } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
@@ -38,7 +38,6 @@ import {
   KnowledgeIndexingResult,
   KnowledgeIndexingResultStatus,
 } from "../types/KnowlegeIndexingResult";
-import { OrgAndKnowledge } from "../types/OrgAndKnowledge";
 import {
   GoogleDriveEvent,
   GoogleDriveFolderScanInitiatedPayload,
@@ -357,7 +356,7 @@ export class GoogleDriveDataSourceAdapter
     userId: string,
     knowledge: Knowledge,
     data: any
-  ): Promise<RetrieveContentResponse> {
+  ): Promise<RetrieveContentAdapterResponse> {
     if (!userId) {
       console.error("Missing userId");
       return {
@@ -558,17 +557,6 @@ export class GoogleDriveDataSourceAdapter
       fileResponse,
       derivedMimeType,
     };
-  }
-
-  public retrieveOrgAndKnowledgeIdFromEvent(data: any): OrgAndKnowledge {
-    throw new Error("Method not implemented.");
-  }
-
-  getKnowledgeResultFromEvent(
-    knowledge: Knowledge,
-    data: any
-  ): Promise<KnowledgeIndexingResult> {
-    throw new Error("Method not supported.");
   }
 
   public async loadKnowledgeResult(

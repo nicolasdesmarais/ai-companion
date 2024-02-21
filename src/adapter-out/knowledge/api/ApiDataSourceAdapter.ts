@@ -5,7 +5,6 @@ import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import { DataSourceItem, DataSourceItemList } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResult } from "../types/KnowlegeIndexingResult";
-import { OrgAndKnowledge } from "../types/OrgAndKnowledge";
 import { ApiDataSourceInput } from "./ApiDataSourceInput";
 
 export class ApiDataSourceAdapter implements DataSourceAdapter {
@@ -59,15 +58,6 @@ export class ApiDataSourceAdapter implements DataSourceAdapter {
     return true;
   }
 
-  public retrieveOrgAndKnowledgeIdFromEvent(data: any): OrgAndKnowledge {
-    throw new Error("Method not implemented.");
-  }
-  public async getKnowledgeResultFromEvent(
-    knowledge: Knowledge,
-    data: any
-  ): Promise<KnowledgeIndexingResult> {
-    throw new Error("Method not implemented.");
-  }
   loadKnowledgeResult(
     knowledge: Knowledge,
     result: KnowledgeIndexingResult,

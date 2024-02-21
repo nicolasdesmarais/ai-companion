@@ -56,7 +56,7 @@ const handleCheckoutSessionCompletedEvent = async (
 
   const subscriptionId = session.subscription as string;
   const externalOrgSubscription: ExternalOrgSubscription = await step.run(
-    "fetch-external-subscription",
+    "fetch-exterdatanal-subscription",
     async () => {
       return await stripeAdapter.fetchExternalSubscription(subscriptionId);
     }

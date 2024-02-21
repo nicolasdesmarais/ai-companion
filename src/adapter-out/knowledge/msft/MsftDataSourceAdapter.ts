@@ -20,7 +20,7 @@ import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
   DataSourceItemList,
-  RetrieveContentResponse,
+  RetrieveContentAdapterResponse,
   RetrieveContentResponseStatus,
 } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
@@ -28,7 +28,6 @@ import {
   KnowledgeIndexingResult,
   KnowledgeIndexingResultStatus,
 } from "../types/KnowlegeIndexingResult";
-import { OrgAndKnowledge } from "../types/OrgAndKnowledge";
 
 export enum MsftEvent {
   ONEDRIVE_FOLDER_SCAN_INITIATED = "onedrive.folder.scan.initiated",
@@ -167,7 +166,7 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     userId: string,
     knowledge: Knowledge,
     data: any
-  ): Promise<RetrieveContentResponse> {
+  ): Promise<RetrieveContentAdapterResponse> {
     throw new Error("Method not implemented.");
   }
 
@@ -176,7 +175,7 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     userId: string,
     knowledge: Knowledge,
     data: any
-  ): Promise<RetrieveContentResponse> {
+  ): Promise<RetrieveContentAdapterResponse> {
     if (!userId) {
       console.error("Missing userId");
       return {
@@ -401,17 +400,6 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     return (
       (knowledge.metadata as any)?.modifiedTime !== item.metadata.modifiedTime
     );
-  }
-
-  public retrieveOrgAndKnowledgeIdFromEvent(data: any): OrgAndKnowledge {
-    throw new Error("Method not implemented.");
-  }
-
-  getKnowledgeResultFromEvent(
-    knowledge: Knowledge,
-    data: any
-  ): Promise<KnowledgeIndexingResult> {
-    throw new Error("Method not supported.");
   }
 
   public async loadKnowledgeResult(

@@ -51,4 +51,5 @@ export interface KnowledgeDto {
   indexStatus: KnowledgeIndexStatus | null;
   documentCount: number | null;
   tokenCount: number | null;
+  metadata: any;
 }

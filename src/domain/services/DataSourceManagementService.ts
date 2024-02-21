@@ -2,6 +2,7 @@ import { UpdateDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
 import {
   DataSourceItemList,
+  RetrieveContentResponse,
   RetrieveContentResponseStatus,
 } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
@@ -166,6 +167,7 @@ export class DataSourceManagementService {
       indexStatus,
       documentCount,
       tokenCount,
+      metadata,
       ...rest
     } = knowledge;
 
@@ -177,6 +179,7 @@ export class DataSourceManagementService {
       indexStatus,
       documentCount,
       tokenCount,
+      metadata,
     };
   }
 
@@ -308,7 +311,7 @@ export class DataSourceManagementService {
   public async retrieveKnowledgeContent(
     dataSourceId: string,
     knowledgeId: string
-  ) {
+  ): Promise<RetrieveContentResponse> {
     const dataSource = await prismadb.dataSource.findUnique({
       where: { id: dataSourceId },
     });
@@ -374,7 +377,7 @@ export class DataSourceManagementService {
     return {
       indexStatus: knowledgeStatus,
       contentBlobUrl,
-      updatedMetadata,
+      metadata: updatedMetadata,
     };
   }
 
@@ -519,56 +522,6 @@ export class DataSourceManagementService {
         tokenCount: totalTokenCount,
       },
     });
-  }
-
-  /**
-   * Accept data received from a knowledge indexed event and publish a
-   * KNOWLEDGE_INDEXED_EVENT_RECEIVED domain event.
-   * @param dataSourceType
-   * @param data
-   */
-  public async knowledgeEventReceived(
-    dataSourceType: DataSourceType,
-    data: any
-  ) {
-    await publishEvent(DomainEvent.KNOWLEDGE_EVENT_RECEIVED, {
-      dataSourceType,
-      data,
-    });
-  }
-
-  /**
-   * Updates a knowledge with data received through an event
-   *
-   * @param dataSourceType
-   * @param data
-   */
-  public async getKnowledgeResultFromEvent(
-    dataSourceType: DataSourceType,
-    data: any
-  ) {
-    const dataSourceAdapter =
-      dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
-    const { orgId, knowledgeId } =
-      dataSourceAdapter.retrieveOrgAndKnowledgeIdFromEvent(data);
-    const knowledge = await prismadb.knowledge.findUnique({
-      where: { id: knowledgeId },
-    });
-    if (!knowledge) {
-      throw new EntityNotFoundError(
-        `Knowledge with id=${knowledgeId} not found`
-      );
-    }
-
-    const result = await dataSourceAdapter.getKnowledgeResultFromEvent(
-      knowledge,
-      data
-    );
-    return {
-      orgId,
-      knowledgeId: knowledge.id,
-      result,
-    };
   }
 
   public async loadKnowledgeResult(

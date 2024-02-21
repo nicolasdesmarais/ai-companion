@@ -1,5 +1,6 @@
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import { ApifyWebhookEvent } from "@/src/domain/models/ApifyWebhookEvent";
+import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import { logWithTimestamp } from "@/src/lib/logging";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import { put } from "@vercel/blob";
@@ -11,7 +12,7 @@ import {
 import {
   DataSourceItem,
   DataSourceItemList,
-  RetrieveContentResponse,
+  RetrieveContentAdapterResponse,
   RetrieveContentResponseStatus,
 } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
@@ -19,7 +20,6 @@ import {
   KnowledgeIndexingResult,
   KnowledgeIndexingResultStatus,
 } from "../types/KnowlegeIndexingResult";
-import { OrgAndKnowledge } from "../types/OrgAndKnowledge";
 import apifyAdapter from "./ApifyAdapter";
 import { WebUrlDataSourceInput } from "./types/WebUrlDataSourceInput";
 import { WebUrlMetadata } from "./types/WebUrlMetadata";
@@ -50,7 +50,7 @@ export class WebUrlsDataSourceAdapter
     userId: string,
     knowledge: Knowledge,
     data: any
-  ): Promise<RetrieveContentResponse> {
+  ): Promise<RetrieveContentAdapterResponse> {
     const input = data as WebUrlDataSourceInput;
     const actorRunId = await apifyAdapter.startUrlIndexing(
       orgId,
@@ -113,24 +113,42 @@ export class WebUrlsDataSourceAdapter
     return !knowledge.lastIndexedAt || knowledge.lastIndexedAt < oneWeekAgo;
   }
 
-  public retrieveOrgAndKnowledgeIdFromEvent(data: any): OrgAndKnowledge {
-    const event = data as ApifyWebhookEvent;
-    const { orgId, knowledgeId } = event;
-    return { orgId, knowledgeId };
-  }
-
-  public async getKnowledgeResultFromEvent(
-    knowledge: Knowledge,
-    data: any
-  ): Promise<KnowledgeIndexingResult> {
-    const event = data as ApifyWebhookEvent;
+  public async retrieveContentFromEvent(
+    knowledge: KnowledgeDto,
+    data: ApifyWebhookEvent
+  ): Promise<RetrieveContentAdapterResponse> {
+    const { actorRunId } = data.eventData;
     const metadata = knowledge.metadata as unknown as WebUrlMetadata;
-    const actorRunId = event.eventData.actorRunId;
     if (actorRunId !== metadata.indexingRunId) {
       throw new BadRequestError("Event actorRunId does not match metadata");
     }
 
-    return await this.getActorRunResult(knowledge, metadata);
+    const result = await apifyAdapter.getActorRunResult(metadata.indexingRunId);
+
+    let contentBlobUrl;
+    let status: RetrieveContentResponseStatus;
+    if (
+      result.items &&
+      (result.status === KnowledgeIndexingResultStatus.PARTIAL ||
+        result.status === KnowledgeIndexingResultStatus.SUCCESSFUL)
+    ) {
+      const cloudBlob = await put(
+        `${knowledge.name}.json`,
+        JSON.stringify(result),
+        {
+          access: "public",
+        }
+      );
+      status = RetrieveContentResponseStatus.SUCCESS;
+      contentBlobUrl = cloudBlob.url;
+    } else {
+      status = RetrieveContentResponseStatus.FAILED;
+    }
+
+    return {
+      status,
+      contentBlobUrl,
+    };
   }
 
   public async loadKnowledgeResult(

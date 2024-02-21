@@ -5,10 +5,10 @@ import {
   DataSourceItemListReceivedPayload,
   DataSourceRefreshRequestedPayload,
   DomainEvent,
+  KnowledgeContentReceivedPayload as KnowledgeContentRetrievedPayload,
   KnowledgeInitializedEventPayload,
 } from "@/src/domain/events/domain-event";
 import { KnowledgeDto } from "@/src/domain/models/DataSources";
-import dataSourceAdapterService from "@/src/domain/services/DataSourceAdapterService";
 import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
 import dataSourceViewingService from "@/src/domain/services/DataSourceViewingService";
 import { KnowledgeIndexStatus } from "@prisma/client";
@@ -209,19 +209,20 @@ export const onKnowledgeInitialized = inngest.createFunction(
       }
     );
 
+    const { indexStatus, contentBlobUrl } = retrieveKnowledgeResponse;
     if (
-      retrieveKnowledgeResponse.indexStatus ===
-      KnowledgeIndexStatus.CONTENT_RETRIEVED
+      indexStatus === KnowledgeIndexStatus.CONTENT_RETRIEVED &&
+      contentBlobUrl
     ) {
-      // TODO: Publich Content Retrieved event
+      const eventPayload: KnowledgeContentRetrievedPayload = {
+        knowledgeId,
+        contentBlobUrl,
+      };
+      await step.sendEvent("knowledge-content-received-event", {
+        name: DomainEvent.KNOWLEDGE_CONTENT_RETRIEVED,
+        data: eventPayload,
+      });
     }
-
-    // const result = await step.run("index-knowledge", async () => {
-    //   return await dataSourceManagementService.indexDataSourceKnowledge(
-    //     dataSourceId,
-    //     knowledgeId
-    //   );
-    // });
 
     // if (result?.events?.length && result?.events?.length > 0) {
     //   while (result.events.length) {
@@ -243,67 +244,6 @@ export const onKnowledgeInitialized = inngest.createFunction(
     //     })
     //   )
     // );
-  }
-);
-
-const INGEST_EVENT_MAX = 2000;
-
-export const knowledgeEventReceived = inngest.createFunction(
-  {
-    id: "knowledge-event-received",
-    onFailure: async ({ error, event }) => {
-      const { dataSourceType, data } = event.data.event.data;
-      const dataSourceAdapter =
-        dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
-      const { knowledgeId } =
-        dataSourceAdapter.retrieveOrgAndKnowledgeIdFromEvent(data);
-
-      console.error(
-        `Failed to process knowledge-event-received for knowledgeId=${knowledgeId}`,
-        error
-      );
-      await dataSourceManagementService.failDataSourceKnowledge(
-        knowledgeId,
-        error.message
-      );
-    },
-  },
-  { event: DomainEvent.KNOWLEDGE_EVENT_RECEIVED },
-  async ({ event, step }) => {
-    const { dataSourceType, data } = event.data;
-
-    const knowledgeIndexingResult = await step.run(
-      "handle-knowledge-event-received",
-      async () => {
-        return await dataSourceManagementService.getKnowledgeResultFromEvent(
-          dataSourceType,
-          data
-        );
-      }
-    );
-
-    if (knowledgeIndexingResult.result.chunkCount) {
-      let events = [];
-      for (let i = 0; i < knowledgeIndexingResult.result.chunkCount; i++) {
-        events.push({
-          name: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
-          data: {
-            orgId: knowledgeIndexingResult.orgId,
-            knowledgeIndexingResult,
-            dataSourceType,
-            index: i,
-          },
-        });
-        if (events.length >= INGEST_EVENT_MAX) {
-          await step.sendEvent("fan-out-knowledge-chunks", events);
-          events = [];
-        }
-      }
-      if (events.length > 0) {
-        await step.sendEvent("fan-out-knowledge-chunks", events);
-      }
-      return { count: events.length };
-    }
   }
 );
 
