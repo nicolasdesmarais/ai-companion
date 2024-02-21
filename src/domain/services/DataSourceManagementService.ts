@@ -370,6 +370,12 @@ export class DataSourceManagementService {
         contentBlobUrl,
       },
     });
+
+    return {
+      indexStatus: knowledgeStatus,
+      contentBlobUrl,
+      updatedMetadata,
+    };
   }
 
   /**
