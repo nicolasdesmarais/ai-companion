@@ -381,6 +381,43 @@ export class DataSourceManagementService {
     };
   }
 
+  public async handleContentRetrieved(
+    knowledgeId: string,
+    contentBlobUrl: string
+  ) {
+    const knowledge = await prismadb.knowledge.findUnique({
+      where: { id: knowledgeId },
+    });
+    if (!knowledge) {
+      throw new EntityNotFoundError(
+        `Knowledge with id=${knowledgeId} not found`
+      );
+    }
+
+    await prismadb.knowledge.update({
+      where: { id: knowledge.id },
+      data: {
+        indexStatus: KnowledgeIndexStatus.CONTENT_RETRIEVED,
+        contentBlobUrl,
+      },
+    });
+
+    // const { docs, metadata } = await fileLoader.getLangchainDocs(
+    //   knowledge.id,
+    //   fileName,
+    //   derivedMimeType,
+    //   blob
+    // );
+
+    // const cloudBlob = await put(
+    //   `${knowledge.name}.json`,
+    //   JSON.stringify(docs),
+    //   {
+    //     access: "public",
+    //   }
+    // );
+  }
+
   /**
    * Indexes a knowledge for the specified data source
    * @param dataSourceId

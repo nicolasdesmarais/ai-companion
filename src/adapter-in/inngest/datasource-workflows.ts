@@ -223,27 +223,24 @@ export const onKnowledgeInitialized = inngest.createFunction(
         data: eventPayload,
       });
     }
+  }
+);
 
-    // if (result?.events?.length && result?.events?.length > 0) {
-    //   while (result.events.length) {
-    //     const eventBatch = result.events.splice(0, INGEST_EVENT_MAX);
-    //     await step.sendEvent("fan-out-knowledge-chunks", eventBatch);
-    //   }
-    // }
+export const onKnowledgeContentRetrieved = inngest.createFunction(
+  {
+    id: "on-knowledge-content-retrieved",
+  },
+  { event: DomainEvent.KNOWLEDGE_CONTENT_RETRIEVED },
+  async ({ event, step }) => {
+    const payload = event.data as KnowledgeContentRetrievedPayload;
+    const { knowledgeId, contentBlobUrl } = payload;
 
-    // const relatedKnowledgeIds = await step.run("delete-knowledge", async () => {
-    //   return await dataSourceManagementService.deleteRelatedKnowledgeInstances(
-    //     knowledgeId
-    //   );
-    // });
-
-    // await Promise.all(
-    //   relatedKnowledgeIds.map((knowledgeId) =>
-    //     step.run("delete-vectordb-knowledge", async () => {
-    //       await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
-    //     })
-    //   )
-    // );
+    await step.run("retrieve-knowledge-content", async () => {
+      return await dataSourceManagementService.handleContentRetrieved(
+        knowledgeId,
+        contentBlobUrl
+      );
+    });
   }
 );
 
