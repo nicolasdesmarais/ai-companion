@@ -199,12 +199,22 @@ export const onKnowledgeInitialized = inngest.createFunction(
     const payload = event.data as KnowledgeInitializedEventPayload;
     const { dataSourceId, knowledgeId } = payload;
 
-    await step.run("retrieve-knowledge-content", async () => {
-      return await dataSourceManagementService.retrieveKnowledgeContent(
-        dataSourceId,
-        knowledgeId
-      );
-    });
+    const retrieveKnowledgeResponse = await step.run(
+      "retrieve-knowledge-content",
+      async () => {
+        return await dataSourceManagementService.retrieveKnowledgeContent(
+          dataSourceId,
+          knowledgeId
+        );
+      }
+    );
+
+    if (
+      retrieveKnowledgeResponse.indexStatus ===
+      KnowledgeIndexStatus.CONTENT_RETRIEVED
+    ) {
+      // TODO: Publich Content Retrieved event
+    }
 
     // const result = await step.run("index-knowledge", async () => {
     //   return await dataSourceManagementService.indexDataSourceKnowledge(
