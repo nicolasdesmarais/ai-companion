@@ -587,7 +587,9 @@ export class AIService {
         baseWhereCondition = { visibility: AIVisibility.PRIVATE };
         break;
       case ListAIsRequestScope.ADMIN:
-        baseWhereCondition = this.getAllAdminCriteria(orgId);
+        baseWhereCondition = {
+          OR: [this.getAllAdminCriteria(orgId), this.getPublicCriteria()],
+        };
         break;
       case ListAIsRequestScope.ADMIN_ORGANIZATION:
         baseWhereCondition = this.getAllAdminOrganizationCriteria(orgId);
