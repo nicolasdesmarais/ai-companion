@@ -31,24 +31,10 @@ export class MemoryManager {
   }
 
   public async vectorUpload(docs: Document[], docIds: string[]) {
-    const pineconeIndex = process.env.PINECONE_INDEX;
-    const pineconeServerlessIndex = process.env.PINECONE_SERVERLESS_INDEX;
+    const pineconeIndex = process.env.PINECONE_SERVERLESS_INDEX!;
     const embeddings = new OpenAIEmbeddings(embeddingsConfig);
 
-    // Temporarily attempt to upload to both indexes until we can confirm the serverless index
-    // is working as expected
-    if (pineconeIndex) {
-      await this.vectorUploadToIndex(pineconeIndex, embeddings, docs, docIds);
-    }
-
-    if (pineconeServerlessIndex) {
-      await this.vectorUploadToIndex(
-        pineconeServerlessIndex,
-        embeddings,
-        docs,
-        docIds
-      );
-    }
+    await this.vectorUploadToIndex(pineconeIndex, embeddings, docs, docIds);
   }
 
   private async vectorUploadToIndex(
@@ -69,7 +55,7 @@ export class MemoryManager {
     numDocs = 100
   ) {
     const pineconeIndex = this.pinecone.Index(
-      process.env.PINECONE_SEARCH_INDEX! || ""
+      process.env.PINECONE_SERVERLESS_INDEX!
     );
 
     const vectorStore = await PineconeStore.fromExistingIndex(
@@ -106,23 +92,16 @@ export class MemoryManager {
   }
 
   public async vectorDelete(knowledgeId: string) {
-    const pineconeIndex = this.pinecone.Index(
-      process.env.PINECONE_INDEX! || ""
-    );
-    await pineconeIndex.deleteMany({ knowledge: knowledgeId });
-
-    const pineconeServerlessIndexName = process.env.PINECONE_SERVERLESS_INDEX;
-    if (pineconeServerlessIndexName) {
-      const vectorIds = await this.vectorIdList(knowledgeId);
-      if (vectorIds.length === 0) {
-        return;
-      }
-
-      const pineconeServerlessIndex = this.pinecone.Index(
-        pineconeServerlessIndexName
-      );
-      await pineconeServerlessIndex.deleteMany(vectorIds);
+    const vectorIds = await this.vectorIdList(knowledgeId);
+    if (vectorIds.length === 0) {
+      return;
     }
+
+    const pineconeServerlessIndexName = process.env.PINECONE_SERVERLESS_INDEX!;
+    const pineconeServerlessIndex = this.pinecone.Index(
+      pineconeServerlessIndexName
+    );
+    await pineconeServerlessIndex.deleteMany(vectorIds);
   }
 
   public static getInstance(): MemoryManager {
