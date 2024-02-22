@@ -13,8 +13,8 @@ export interface ApifyWebhookReceivedPayload {
   apifyEvent: ApifyWebhookEvent;
 }
 
-export const apifyWebhookReceived = inngest.createFunction(
-  { id: "apify-webhook-received" },
+export const onApifyWebhookReceived = inngest.createFunction(
+  { id: "on-apify-webhook-received" },
   { event: ApifyEvent.APIFY_WEBHOOK_RECEIVED },
   async ({ event, step }) => {
     const eventPayload = event.data as ApifyWebhookReceivedPayload;

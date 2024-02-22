@@ -1,3 +1,4 @@
+import { onApifyWebhookReceived } from "@/src/adapter-in/inngest/apify-workflows";
 import { clerkWebhookReceived } from "@/src/adapter-in/inngest/clerk-workflows";
 import {
   dataSourceDeleteRequested,
@@ -36,5 +37,6 @@ export const { GET, POST, PUT } = serve({
     deleteUnusedKnowledges,
     dataSourceMigrationRequested,
     onKnowledgeContentRetrieved,
+    onApifyWebhookReceived,
   ],
 });
