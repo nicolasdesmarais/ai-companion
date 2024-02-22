@@ -326,13 +326,13 @@ export class DataSourceManagementService {
     const dataSource = await this.dataSourceRepository.getById(dataSourceId);
     const knowledge = await this.knowledgeRepository.getById(knowledgeId);
 
-    let knowledgeStatus;
-    let newMetadata: any;
     let originalContent: KnowledgeOriginalContent | undefined =
       knowledge.originalContent as unknown as KnowledgeOriginalContent;
-    if (originalContent) {
-      knowledgeStatus = KnowledgeIndexStatus.CONTENT_RETRIEVED;
-    } else {
+    let knowledgeStatus: KnowledgeIndexStatus =
+      KnowledgeIndexStatus.CONTENT_RETRIEVED;
+    let newMetadata: any;
+
+    if (!originalContent) {
       const dataSourceAdapter =
         dataSourceAdapterService.getContentRetrievingDataSourceAdapter(
           knowledge.type
@@ -345,17 +345,15 @@ export class DataSourceManagementService {
         dataSource.data
       );
 
-      switch (result.status) {
-        case RetrieveContentResponseStatus.PENDING:
-          knowledgeStatus = KnowledgeIndexStatus.RETRIEVING_CONTENT;
-          break;
-        case RetrieveContentResponseStatus.SUCCESS:
-          knowledgeStatus = KnowledgeIndexStatus.CONTENT_RETRIEVED;
-          break;
-        case RetrieveContentResponseStatus.FAILED:
-          knowledgeStatus = KnowledgeIndexStatus.FAILED;
-          break;
-      }
+      const statusMapping = {
+        [RetrieveContentResponseStatus.PENDING]:
+          KnowledgeIndexStatus.RETRIEVING_CONTENT,
+        [RetrieveContentResponseStatus.SUCCESS]:
+          KnowledgeIndexStatus.CONTENT_RETRIEVED,
+        [RetrieveContentResponseStatus.FAILED]: KnowledgeIndexStatus.FAILED,
+      };
+
+      knowledgeStatus = statusMapping[result.status];
       originalContent = result.originalContent;
       newMetadata = result.metadata;
     }
