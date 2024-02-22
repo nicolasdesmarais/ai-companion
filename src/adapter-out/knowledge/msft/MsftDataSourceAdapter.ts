@@ -3,11 +3,11 @@ import {
   EntityNotFoundError,
   ForbiddenError,
 } from "@/src/domain/errors/Errors";
+import { FileStorageService } from "@/src/domain/services/FileStorageService";
 import oauthTokenService from "@/src/domain/services/OAuthTokenService";
 import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
-import { put } from "@vercel/blob";
 import axios from "axios";
 import msftOAuthAdapter from "../../oauth/MsftOAuthAdapter";
 import fileLoader from "../knowledgeLoaders/FileLoader";
@@ -152,15 +152,6 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     };
   }
 
-  public async retrieveContent(
-    orgId: string,
-    userId: string,
-    knowledge: Knowledge,
-    data: any
-  ): Promise<RetrieveContentAdapterResponse> {
-    throw new Error("Method not implemented.");
-  }
-
   public async retrieveKnowledgeContent(
     orgId: string,
     userId: string,
@@ -242,14 +233,15 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     }
 
     const msftResponseBlob = await response.blob();
-    const contentBlob = await put(fileId, msftResponseBlob, {
-      access: "public",
-    });
+    const contentBlobUrl = await FileStorageService.put(
+      fileId,
+      msftResponseBlob
+    );
 
     return {
       status: RetrieveContentResponseStatus.SUCCESS,
       originalContent: {
-        contentBlobUrl: contentBlob.url,
+        contentBlobUrl,
         filename: fileId,
         mimeType: "",
       },
