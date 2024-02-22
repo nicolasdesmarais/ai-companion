@@ -690,10 +690,10 @@ export class DataSourceManagementService {
     const knowledge = await knowledgeRepository.getById(knowledgeId);
 
     const currentMeta = knowledge.metadata as any;
-    const chunkCount = currentMeta.chunkCount;
-    const completedChunks = currentMeta.completedChunks.push(
-      chunkLoadingResult.chunkNumber
-    );
+    const { chunkCount, completedChunks } = currentMeta;
+
+    completedChunks.push(chunkLoadingResult.chunkNumber);
+
     const uniqCompletedChunks = new Set(completedChunks);
     const percentComplete = (uniqCompletedChunks.size / chunkCount) * 100;
 
@@ -708,6 +708,7 @@ export class DataSourceManagementService {
     const updatedMetadata = this.mergeMetadata(currentMeta, {
       completedChunks: Array.from(uniqCompletedChunks),
       percentComplete,
+      documentIds: chunkLoadingResult.docIds,
     });
 
     await prismadb.knowledge.update({
