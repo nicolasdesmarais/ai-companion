@@ -406,12 +406,9 @@ export class DataSourceManagementService {
     originalContent: KnowledgeOriginalContent
   ) {
     const knowledge = await this.knowledgeRepository.getById(knowledgeId);
-    return await prismadb.knowledge.update({
-      where: { id: knowledge.id },
-      data: {
-        indexStatus: KnowledgeIndexStatus.CONTENT_RETRIEVED,
-        originalContent: originalContent as any,
-      },
+    return await this.knowledgeRepository.update(knowledgeId, {
+      indexStatus: KnowledgeIndexStatus.CONTENT_RETRIEVED,
+      originalContent: originalContent as any,
     });
   }
 
