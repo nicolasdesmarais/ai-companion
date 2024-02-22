@@ -71,8 +71,14 @@ export class FileLoader {
         throw new BadRequestError(`Unsupported file type ${mimeType}`);
       }
 
+      const splitter = new RecursiveCharacterTextSplitter({
+        chunkSize: 4000,
+        chunkOverlap: 600,
+      });
+      const docOutput = await splitter.splitDocuments(docs);
+
       let totalTokenCount = 0;
-      for (const doc of docs) {
+      for (const doc of docOutput) {
         doc.metadata.source = filename;
         doc.metadata.knowledge = knowledgeId;
         const tokenCount = getTokenLength(doc.pageContent);
@@ -80,13 +86,6 @@ export class FileLoader {
         doc.metadata.tokenCount = tokenCount;
         delete doc.metadata.pdf;
       }
-
-      const splitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 4000,
-        chunkOverlap: 600,
-      });
-
-      const docOutput = await splitter.splitDocuments(docs);
 
       return {
         docs: docOutput,
