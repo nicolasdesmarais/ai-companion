@@ -425,6 +425,13 @@ export class DataSourceManagementService {
     });
   }
 
+  /**
+   * Validates that the organization associated with the data source has sufficient data storage.
+   * If the organization does not have sufficient data storage, the data source is updated with a status of FAILED
+   * @param dataSourceId
+   * @param knowledge
+   * @returns
+   */
   public async validateDataStorageUsage(
     dataSourceId: string,
     knowledge: KnowledgeDto
@@ -450,7 +457,15 @@ export class DataSourceManagementService {
     return hasSufficientDataStorage;
   }
 
-  public async publishKnowledgeChunkEvents(knowledgeId: string) {
+  /**
+   * Retrieves knowledge content for the specified knowledge from file storage, breaks down the content
+   * into chunks and publishes a KNOWLEDGE_CHUNK_RECEIVED event for each chunk.
+   * Each document batch holds up to a maximum of KNOWLEDGE_CHUNK_TOKEN_COUNT tokens
+   * @param knowledgeId
+   */
+  public async publishKnowledgeChunkEvents(
+    knowledgeId: string
+  ): Promise<KnowledgeDto> {
     const knowledge = await this.knowledgeRepository.getById(knowledgeId);
 
     const { documentsBlobUrl } = knowledge;
@@ -494,7 +509,7 @@ export class DataSourceManagementService {
     const metadataWithEventIds = this.mergeMetadata(metadataWithChunkInfo, {
       eventIds,
     });
-    await this.knowledgeRepository.update(knowledgeId, {
+    return await this.knowledgeRepository.update(knowledgeId, {
       metadata: metadataWithEventIds,
     });
   }
@@ -545,8 +560,63 @@ export class DataSourceManagementService {
     return await publishEvent(DomainEvent.KNOWLEDGE_CHUNK_RECEIVED, payload);
   }
 
+  /**
+   * Loads a chunk of knowledge content into the knowledge index
+   * @param chunk
+   * @param chunkNumber
+   * @returns
+   */
   public async loadKnowledgeChunk(chunk: Document[], chunkNumber: number) {
     return await fileLoader.loadDocs(chunk, chunkNumber);
+  }
+
+  /**
+   * Persists the result of loading a chunk of knowledge content into the knowledge index
+   * @param knowledgeId
+   * @param chunkLoadingResult
+   * @returns
+   */
+  public async persistChunkLoadingResult(
+    knowledgeId: string,
+    chunkLoadingResult: ChunkLoadingResult
+  ): Promise<KnowledgeDto> {
+    const knowledge = await knowledgeRepository.getById(knowledgeId);
+
+    const currentMeta = knowledge.metadata as any;
+    const { completedChunks } = currentMeta;
+    const { chunkNumber, chunkCount } = chunkLoadingResult;
+
+    completedChunks.push(chunkNumber);
+
+    const uniqCompletedChunks = new Set(completedChunks);
+    const percentComplete = (uniqCompletedChunks.size / chunkCount) * 100;
+
+    let indexStatus: KnowledgeIndexStatus | undefined;
+    if (chunkCount === uniqCompletedChunks.size) {
+      indexStatus = KnowledgeIndexStatus.COMPLETED;
+    }
+    console.log(
+      `Knowledge ${knowledgeId}: ${uniqCompletedChunks.size} / ${chunkCount} loaded`
+    );
+
+    const updatedMetadata = this.mergeMetadata(currentMeta, {
+      completedChunks: Array.from(uniqCompletedChunks),
+      percentComplete,
+      documentIds: chunkLoadingResult.docIds,
+    });
+
+    const updatedKnowledge = await this.knowledgeRepository.update(
+      knowledgeId,
+      {
+        lastIndexedAt: new Date(),
+        indexStatus,
+        metadata: updatedMetadata,
+      }
+    );
+
+    await this.updateCompletedKnowledgeDataSources(knowledgeId);
+
+    return updatedKnowledge;
   }
 
   public async updateDataSourceStatus(
@@ -642,49 +712,6 @@ export class DataSourceManagementService {
         tokenCount: totalTokenCount,
       },
     });
-  }
-
-  public async persistChunkLoadingResult(
-    knowledgeId: string,
-    chunkLoadingResult: ChunkLoadingResult
-  ): Promise<KnowledgeDto> {
-    const knowledge = await knowledgeRepository.getById(knowledgeId);
-
-    const currentMeta = knowledge.metadata as any;
-    const { completedChunks } = currentMeta;
-    const { chunkNumber, chunkCount } = chunkLoadingResult;
-
-    completedChunks.push(chunkNumber);
-
-    const uniqCompletedChunks = new Set(completedChunks);
-    const percentComplete = (uniqCompletedChunks.size / chunkCount) * 100;
-
-    let indexStatus: KnowledgeIndexStatus | undefined;
-    if (chunkCount === uniqCompletedChunks.size) {
-      indexStatus = KnowledgeIndexStatus.COMPLETED;
-    }
-    console.log(
-      `Knowledge ${knowledgeId}: ${uniqCompletedChunks.size} / ${chunkCount} loaded`
-    );
-
-    const updatedMetadata = this.mergeMetadata(currentMeta, {
-      completedChunks: Array.from(uniqCompletedChunks),
-      percentComplete,
-      documentIds: chunkLoadingResult.docIds,
-    });
-
-    const updatedKnowledge = await this.knowledgeRepository.update(
-      knowledgeId,
-      {
-        lastIndexedAt: new Date(),
-        indexStatus,
-        metadata: updatedMetadata,
-      }
-    );
-
-    await this.updateCompletedKnowledgeDataSources(knowledgeId);
-
-    return updatedKnowledge;
   }
 
   /**
