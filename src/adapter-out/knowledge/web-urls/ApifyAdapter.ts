@@ -14,7 +14,12 @@ const failedStatuses = ["FAILED", "ABORTING", "ABORTED"];
 const partialStatuses = ["TIMING-OUT", "TIMED-OUT"];
 
 export class ApifyAdapter {
-  async startUrlIndexing(orgId: string, knowledgeId: string, url: string) {
+  async startUrlIndexing(
+    orgId: string,
+    dataSourceId: string,
+    knowledgeId: string,
+    url: string
+  ) {
     if (!webScraperActorId) {
       throw new Error("APIFY_WEB_SCRAPER_ACTOR_ID is not set");
     }
@@ -27,7 +32,7 @@ export class ApifyAdapter {
       .actor(webScraperActorId)
       .start(
         this.getWebScraperInput(url),
-        this.getActorStartOptions(orgId, knowledgeId)
+        this.getActorStartOptions(orgId, dataSourceId, knowledgeId)
       );
 
     return actorRun.id;
@@ -35,6 +40,7 @@ export class ApifyAdapter {
 
   private getActorStartOptions(
     orgId: string,
+    dataSourceId: string,
     knowledgeId: string
   ): ActorStartOptions {
     return {
@@ -56,6 +62,7 @@ export class ApifyAdapter {
             "eventType": {{eventType}},
             "eventData": {{eventData}},
             "orgId" : "${orgId}",
+            "dataSourceId": "${dataSourceId}",
             "knowledgeId": "${knowledgeId}"
         }`,
         },

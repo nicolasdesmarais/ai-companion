@@ -157,6 +157,7 @@ export class MsftDataSourceAdapter
   public async retrieveKnowledgeContent(
     orgId: string,
     userId: string,
+    dataSourceId: string,
     knowledge: KnowledgeDto,
     data: any
   ): Promise<RetrieveContentAdapterResponse> {

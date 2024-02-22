@@ -348,6 +348,7 @@ export class GoogleDriveDataSourceAdapter
   public async retrieveKnowledgeContent(
     orgId: string,
     userId: string,
+    dataSourceId: string,
     knowledge: KnowledgeDto,
     data: any
   ): Promise<RetrieveContentAdapterResponse> {

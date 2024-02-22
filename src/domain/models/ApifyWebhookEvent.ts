@@ -9,6 +9,7 @@ export interface ApifyWebhookEvent {
   eventType: string;
   eventData: ApifyEventData;
   orgId: string;
+  dataSourceId: string;
   knowledgeId: string;
 }
 
