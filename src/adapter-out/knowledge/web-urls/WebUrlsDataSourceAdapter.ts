@@ -43,12 +43,14 @@ export class WebUrlsDataSourceAdapter
   public async retrieveKnowledgeContent(
     orgId: string,
     userId: string,
+    dataSourceId: string,
     knowledge: KnowledgeDto,
     data: any
   ): Promise<RetrieveContentAdapterResponse> {
     const input = data as WebUrlDataSourceInput;
     const actorRunId = await apifyAdapter.startUrlIndexing(
       orgId,
+      dataSourceId,
       knowledge.id,
       input.url
     );

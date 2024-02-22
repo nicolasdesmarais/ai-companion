@@ -340,6 +340,7 @@ export class DataSourceManagementService {
       const result = await dataSourceAdapter.retrieveKnowledgeContent(
         dataSource.orgId,
         dataSource.ownerUserId,
+        dataSourceId,
         knowledge,
         dataSource.data
       );
