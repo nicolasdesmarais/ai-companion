@@ -1,6 +1,8 @@
-import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceItemList";
-import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
-import { DataSourceType } from "@prisma/client";
+import {
+  DataSourceItemList,
+  KnowledgeOriginalContent,
+} from "@/src/adapter-out/knowledge/types/DataSourceTypes";
+import { Document } from "@langchain/core/documents";
 
 export enum DomainEvent {
   DATASOURCE_INITIALIZED = "datasource.initialized",
@@ -9,8 +11,12 @@ export enum DomainEvent {
   DATASOURCE_DELETE_REQUESTED = "datasource.delete.requested",
   DATASOURCE_MIGRATION_REQUESTED = "datasource.migration.requested",
   KNOWLEDGE_INITIALIZED = "knowledge.initialized",
-  KNOWLEDGE_EVENT_RECEIVED = "knowledge.event.received",
+  KNOWLEDGE_CONTENT_RETRIEVED = "knowledge.content.received",
   KNOWLEDGE_CHUNK_RECEIVED = "knowledge.chunk.received",
+}
+
+export interface DataSourceInitializedPayload {
+  dataSourceId: string;
 }
 
 export interface DataSourceItemListReceivedPayload {
@@ -30,9 +36,15 @@ export interface KnowledgeInitializedEventPayload {
   knowledgeId: string;
 }
 
+export interface KnowledgeContentReceivedPayload {
+  dataSourceId: string;
+  knowledgeId: string;
+  originalContent: KnowledgeOriginalContent;
+}
+
 export interface KnowledgeChunkReceivedPayload {
-  orgId: string;
-  dataSourceType: DataSourceType;
-  knowledgeIndexingResult: KnowledgeIndexingResult;
-  index: number;
+  knowledgeId: string;
+  chunk: Document[];
+  chunkNumber: number;
+  chunkCount: number;
 }

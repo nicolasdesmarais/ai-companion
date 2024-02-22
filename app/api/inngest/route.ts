@@ -1,14 +1,15 @@
+import { onApifyWebhookReceived } from "@/src/adapter-in/inngest/apify-workflows";
 import { clerkWebhookReceived } from "@/src/adapter-in/inngest/clerk-workflows";
 import {
   dataSourceDeleteRequested,
-  dataSourceItemListReceived,
   dataSourceMigrationRequested,
-  dataSourceRefreshRequested,
   deleteUnusedKnowledges,
-  knowledgeEventReceived,
-  knowledgeInitialized,
-  loadKnowledgeChunk,
   onDataSourceInitialized,
+  onDataSourceItemListReceived,
+  onDataSourceRefreshRequested,
+  onKnowledgeChunkReceived,
+  onKnowledgeContentRetrieved,
+  onKnowledgeInitialized,
   refreshDataSources,
 } from "@/src/adapter-in/inngest/datasource-workflows";
 import { googleDriveFolderScanInitiated } from "@/src/adapter-in/inngest/google-drive-workflows";
@@ -23,18 +24,19 @@ export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
     onDataSourceInitialized,
-    dataSourceRefreshRequested,
-    dataSourceItemListReceived,
+    onDataSourceRefreshRequested,
+    onDataSourceItemListReceived,
     dataSourceDeleteRequested,
     googleDriveFolderScanInitiated,
     onedriveFolderScanInitiated,
-    knowledgeInitialized,
-    knowledgeEventReceived,
-    loadKnowledgeChunk,
+    onKnowledgeInitialized,
+    onKnowledgeChunkReceived,
     refreshDataSources,
     stripeWebhookReceived,
     clerkWebhookReceived,
     deleteUnusedKnowledges,
     dataSourceMigrationRequested,
+    onKnowledgeContentRetrieved,
+    onApifyWebhookReceived,
   ],
 });

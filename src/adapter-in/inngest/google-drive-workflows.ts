@@ -3,7 +3,7 @@ import {
   GoogleDriveEvent,
   GoogleDriveFolderScanInitiatedPayload,
 } from "@/src/adapter-out/knowledge/google-drive/events/GoogleDriveEvent";
-import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceItemList";
+import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import {
   DataSourceItemListReceivedPayload,
   DomainEvent,

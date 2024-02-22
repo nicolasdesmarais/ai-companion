@@ -1,5 +1,5 @@
 import { drive_v3 } from "googleapis";
-import { DataSourceItem } from "../../types/DataSourceItemList";
+import { DataSourceItem } from "../../types/DataSourceTypes";
 import { GoogleDriveFileMetadata } from "../types/GoogleDriveFileMetaData";
 
 export const MIME_TYPE_TEXT = "text/plain";

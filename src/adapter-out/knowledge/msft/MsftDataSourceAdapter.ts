@@ -3,35 +3,29 @@ import {
   EntityNotFoundError,
   ForbiddenError,
 } from "@/src/domain/errors/Errors";
-import { DomainEvent } from "@/src/domain/events/domain-event";
+import { KnowledgeDto } from "@/src/domain/models/DataSources";
+import { FileStorageService } from "@/src/domain/services/FileStorageService";
 import oauthTokenService from "@/src/domain/services/OAuthTokenService";
 import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
-import {
-  DataSourceType,
-  Knowledge,
-  KnowledgeIndexStatus,
-} from "@prisma/client";
-import { put } from "@vercel/blob";
+import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import axios from "axios";
 import msftOAuthAdapter from "../../oauth/MsftOAuthAdapter";
-import fileLoader from "../knowledgeLoaders/FileLoader";
-import { DataSourceAdapter } from "../types/DataSourceAdapter";
+import { ContentRetrievingDataSourceAdapter } from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
   DataSourceItemList,
-} from "../types/DataSourceItemList";
+  RetrieveContentAdapterResponse,
+  RetrieveContentResponseStatus,
+} from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
-import {
-  KnowledgeIndexingResult,
-  KnowledgeIndexingResultStatus,
-} from "../types/KnowlegeIndexingResult";
-import { OrgAndKnowledge } from "../types/OrgAndKnowledge";
 
 export enum MsftEvent {
   ONEDRIVE_FOLDER_SCAN_INITIATED = "onedrive.folder.scan.initiated",
 }
-export class MsftDataSourceAdapter implements DataSourceAdapter {
+export class MsftDataSourceAdapter
+  implements ContentRetrievingDataSourceAdapter
+{
   private static readonly GraphApiUrl = "https://graph.microsoft.com/v1.0";
   private static readonly ConvertibleExtensions = [
     "doc",
@@ -160,21 +154,16 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     };
   }
 
-  public async indexKnowledge(
+  public async retrieveKnowledgeContent(
     orgId: string,
     userId: string,
-    knowledge: Knowledge,
+    knowledge: KnowledgeDto,
     data: any
-  ): Promise<IndexKnowledgeResponse> {
-    if (knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
-      return {
-        indexStatus: KnowledgeIndexStatus.COMPLETED,
-      };
-    }
+  ): Promise<RetrieveContentAdapterResponse> {
     if (!userId) {
       console.error("Missing userId");
       return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
+        status: RetrieveContentResponseStatus.FAILED,
         metadata: {
           errors: {
             knowledge: "Missing userId",
@@ -185,7 +174,7 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     if (!data?.oauthTokenId) {
       console.error("Missing oauthTokenId");
       return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
+        status: RetrieveContentResponseStatus.FAILED,
         metadata: {
           errors: {
             knowledge: "Missing oauthTokenId",
@@ -193,12 +182,13 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
         },
       };
     }
+
     const { fileId } = knowledge.metadata as any;
 
     if (!fileId) {
       console.error("Missing fileId");
       return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
+        status: RetrieveContentResponseStatus.FAILED,
         metadata: {
           errors: {
             knowledge: "Missing fileId",
@@ -222,7 +212,7 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
       if (!downloadUrl) {
         console.error("Missing downloadUrl");
         return {
-          indexStatus: KnowledgeIndexStatus.FAILED,
+          status: RetrieveContentResponseStatus.FAILED,
           metadata: {
             errors: {
               knowledge: "Missing downloadUrl",
@@ -235,7 +225,7 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     if (!response.body || response.status !== 200) {
       console.error("msft indexKnowledge: download fail");
       return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
+        status: RetrieveContentResponseStatus.FAILED,
         metadata: {
           errors: {
             knowledge: "msft download fail",
@@ -243,51 +233,19 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
         },
       };
     }
-    const blob = await response.blob();
 
-    const { docs, metadata } = await fileLoader.getLangchainDocs(
-      knowledge.id,
-      item.name,
-      "",
-      blob
+    const msftResponseBlob = await response.blob();
+    const contentBlobUrl = await FileStorageService.put(
+      fileId,
+      msftResponseBlob
     );
 
-    const cloudBlob = await put(
-      `${knowledge.name}.json`,
-      JSON.stringify(docs),
-      {
-        access: "public",
-      }
-    );
-    knowledge.blobUrl = cloudBlob.url;
-
-    let eventIds: string[] = [];
-    for (let i = 0; i < docs.length; i++) {
-      const eventResult = await publishEvent(
-        DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
-        {
-          orgId,
-          knowledgeIndexingResult: {
-            knowledgeId: knowledge.id,
-            result: {
-              chunkCount: docs.length,
-              status: KnowledgeIndexingResultStatus.SUCCESSFUL,
-            },
-          },
-          dataSourceType: DataSourceType.ONEDRIVE,
-          index: i,
-        }
-      );
-      eventIds = eventIds.concat(eventResult.ids);
-    }
     return {
-      userId,
-      indexStatus: KnowledgeIndexStatus.INDEXING,
-      documentCount: metadata.documentCount,
-      tokenCount: metadata.totalTokenCount,
-      metadata: {
-        eventIds,
-        ...metadata,
+      status: RetrieveContentResponseStatus.SUCCESS,
+      originalContent: {
+        contentBlobUrl,
+        filename: fileId,
+        mimeType: "",
       },
     };
   }
@@ -301,77 +259,12 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     );
   }
 
-  public retrieveOrgAndKnowledgeIdFromEvent(data: any): OrgAndKnowledge {
-    throw new Error("Method not implemented.");
-  }
-
-  getKnowledgeResultFromEvent(
-    knowledge: Knowledge,
-    data: any
-  ): Promise<KnowledgeIndexingResult> {
-    throw new Error("Method not supported.");
-  }
-
-  public async loadKnowledgeResult(
-    knowledge: Knowledge,
-    result: KnowledgeIndexingResult,
-    index: number
-  ): Promise<IndexKnowledgeResponse> {
-    if (!knowledge.blobUrl) {
-      console.error("msft loadKnowledgeResult: blob fail");
-      return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
-      };
-    }
-
-    const response = await fetch(knowledge.blobUrl);
-    if (response.status !== 200) {
-      console.error("msft loadKnowledgeResult: fetch fail");
-      return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
-      };
-    }
-    const data = await response.json();
-    if (!data || !data[index]) {
-      console.error("msft loadKnowledgeResult: data fail");
-      return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
-      };
-    }
-
-    const docs = [data[index]];
-    const metadata = await fileLoader.loadDocs(docs, index);
-
-    console.log("msft chunk loading", knowledge.id, index);
-
-    let indexStatus;
-    switch (result.status) {
-      case KnowledgeIndexingResultStatus.SUCCESSFUL:
-      case KnowledgeIndexingResultStatus.PARTIAL:
-        indexStatus = KnowledgeIndexStatus.PARTIALLY_COMPLETED;
-        break;
-      case KnowledgeIndexingResultStatus.FAILED:
-        indexStatus = KnowledgeIndexStatus.FAILED;
-    }
-    return {
-      indexStatus,
-      metadata: {
-        ...metadata,
-        completedChunks: [index],
-      },
-    };
-  }
-
   public async pollKnowledgeIndexingStatus(
     knowledge: Knowledge
   ): Promise<IndexKnowledgeResponse> {
     return {
       indexStatus: knowledge.indexStatus ?? KnowledgeIndexStatus.INITIALIZED,
     };
-  }
-
-  public async deleteKnowledge(knowledgeId: string): Promise<void> {
-    await fileLoader.deleteKnowledge(knowledgeId);
   }
 
   public async getRemovedKnowledgeIds(

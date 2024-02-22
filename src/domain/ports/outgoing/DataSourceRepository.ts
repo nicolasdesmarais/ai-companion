@@ -1,9 +1,14 @@
-import { DataSourceRefreshPeriod, DataSourceType } from "@prisma/client";
+import {
+  DataSourceRefreshPeriod,
+  DataSourceType,
+  Prisma,
+} from "@prisma/client";
 import { DataSourceDto, DataSourceFilter } from "../../models/DataSources";
 import { AIDataUsage } from "../../models/OrgUsage";
 
 export interface DataSourceRepository {
   findById(id: string): Promise<DataSourceDto | null>;
+  getById(id: string): Promise<DataSourceDto>;
   findAll(filter?: DataSourceFilter): Promise<DataSourceDto[]>;
   findByOrgId(
     orgId: string,
@@ -26,7 +31,10 @@ export interface DataSourceRepository {
     data: any
   ): Promise<DataSourceDto>;
 
-  updateDataSource(dataSourceDto: DataSourceDto): Promise<DataSourceDto>;
+  updateDataSource(
+    id: string,
+    input: Prisma.DataSourceUpdateInput
+  ): Promise<DataSourceDto>;
 
   getNumberOfTokensStoredForOrg(orgId: string): Promise<number>;
 

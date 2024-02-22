@@ -2,7 +2,10 @@ import apiDataSourceAdapter from "@/src/adapter-out/knowledge/api/ApiDataSourceA
 import fileUploadDataSourceAdapter from "@/src/adapter-out/knowledge/file-upload/FileUploadDataSourceAdapter";
 import googleDriveDataSourceAdapter from "@/src/adapter-out/knowledge/google-drive/GoogleDriveDataSourceAdapter";
 import msftDataSourceAdapter from "@/src/adapter-out/knowledge/msft/MsftDataSourceAdapter";
-import { DataSourceAdapter } from "@/src/adapter-out/knowledge/types/DataSourceAdapter";
+import {
+  ContentRetrievingDataSourceAdapter,
+  DataSourceAdapter,
+} from "@/src/adapter-out/knowledge/types/DataSourceAdapter";
 import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
 import prismadb from "@/src/lib/prismadb";
 import { DataSource, DataSourceType } from "@prisma/client";
@@ -40,6 +43,21 @@ export class DataSourceAdapterService {
         return fileUploadDataSourceAdapter;
       case DataSourceType.API:
         return apiDataSourceAdapter;
+      case DataSourceType.ONEDRIVE:
+        return msftDataSourceAdapter;
+      default:
+        throw new Error(`DataSourceType ${type} not supported`);
+    }
+  }
+
+  public getContentRetrievingDataSourceAdapter(
+    type: DataSourceType
+  ): ContentRetrievingDataSourceAdapter {
+    switch (type) {
+      case DataSourceType.GOOGLE_DRIVE:
+        return googleDriveDataSourceAdapter;
+      case DataSourceType.WEB_URL:
+        return webUrlsDataSourceAdapter;
       case DataSourceType.ONEDRIVE:
         return msftDataSourceAdapter;
       default:
