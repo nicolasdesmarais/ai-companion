@@ -24,11 +24,7 @@ import {
   KnowledgeIndexStatus,
   PrismaClient,
 } from "@prisma/client";
-import {
-  EntityNotFoundError,
-  ForbiddenError,
-  RateLimitError,
-} from "../errors/Errors";
+import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import {
   DataSourceInitializedPayload,
   DataSourceRefreshRequestedPayload,
@@ -426,7 +422,9 @@ export class DataSourceManagementService {
    *
    * @param knowledgeId
    */
-  public async createDocumentsFromContent(knowledgeId: string) {
+  public async createDocumentsFromContent(
+    knowledgeId: string
+  ): Promise<KnowledgeDto> {
     const knowledge = await this.knowledgeRepository.getById(knowledgeId);
     const { originalContent } = knowledge;
     if (!originalContent) {
@@ -450,15 +448,37 @@ export class DataSourceManagementService {
       JSON.stringify(docs)
     );
 
-    await prismadb.knowledge.update({
-      where: { id: knowledge.id },
-      data: {
-        indexStatus: KnowledgeIndexStatus.DOCUMENTS_CREATED,
-        documentsBlobUrl,
-        documentCount: metadata.documentCount,
-        tokenCount: metadata.totalTokenCount,
-      },
+    return await this.knowledgeRepository.update(knowledgeId, {
+      indexStatus: KnowledgeIndexStatus.DOCUMENTS_CREATED,
+      documentsBlobUrl,
+      documentCount: metadata.documentCount,
+      tokenCount: metadata.totalTokenCount,
     });
+  }
+
+  public async validateDataStorageUsage(
+    dataSourceId: string,
+    knowledge: KnowledgeDto
+  ): Promise<boolean> {
+    if (!knowledge.tokenCount) {
+      return true;
+    }
+
+    const dataSource = await this.dataSourceRepository.getById(dataSourceId);
+
+    const hasSufficientDataStorage =
+      await usageService.hasSufficientDataStorage(
+        dataSource.orgId,
+        knowledge.tokenCount
+      );
+
+    if (!hasSufficientDataStorage) {
+      await this.dataSourceRepository.updateDataSource(dataSourceId, {
+        indexStatus: DataSourceIndexStatus.FAILED,
+      });
+    }
+
+    return hasSufficientDataStorage;
   }
 
   public async publishKnowledgeChunkEvents(knowledgeId: string) {
@@ -659,32 +679,6 @@ export class DataSourceManagementService {
         tokenCount: totalTokenCount,
       },
     });
-  }
-
-  public async loadKnowledgeResult(
-    orgId: string,
-    dataSourceType: DataSourceType,
-    knowledgeId: string
-  ) {
-    const dataSourceAdapter =
-      dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
-    const knowledge = await prismadb.knowledge.findUnique({
-      where: { id: knowledgeId },
-    });
-    if (!knowledge) {
-      throw new EntityNotFoundError(
-        `Knowledge with id=${knowledgeId} not found`
-      );
-    }
-    const knowledgeTokenCount = knowledge.tokenCount || 0;
-
-    const hasSufficientDataStorage =
-      await usageService.hasSufficientDataStorage(orgId, knowledgeTokenCount);
-    if (!hasSufficientDataStorage) {
-      throw new RateLimitError(
-        "Insufficient data storage to load knowledge result"
-      );
-    }
   }
 
   public async persistChunkLoadingResult(
@@ -1116,10 +1110,12 @@ export class DataSourceManagementService {
     dataSource: DataSourceDto,
     forceRefresh: boolean = false
   ) {
-    dataSource.indexStatus = DataSourceIndexStatus.REFRESHING;
-    await this.dataSourceRepository.updateDataSource(dataSource);
+    const dataSourceId = dataSource.id;
+    await this.dataSourceRepository.updateDataSource(dataSourceId, {
+      indexStatus: DataSourceIndexStatus.REFRESHING,
+    });
     const eventPayload: DataSourceRefreshRequestedPayload = {
-      dataSourceId: dataSource.id,
+      dataSourceId,
       forceRefresh,
     };
 
@@ -1143,14 +1139,9 @@ export class DataSourceManagementService {
     }
 
     if (updateRequest.refreshPeriod) {
-      const updatedDataSource: DataSourceDto = {
-        ...dataSource,
+      return await this.dataSourceRepository.updateDataSource(dataSourceId, {
         refreshPeriod: updateRequest.refreshPeriod,
-      };
-
-      return await this.dataSourceRepository.updateDataSource(
-        updatedDataSource
-      );
+      });
     }
 
     if (updateRequest.ais) {

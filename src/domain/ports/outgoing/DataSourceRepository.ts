@@ -1,4 +1,8 @@
-import { DataSourceRefreshPeriod, DataSourceType } from "@prisma/client";
+import {
+  DataSourceRefreshPeriod,
+  DataSourceType,
+  Prisma,
+} from "@prisma/client";
 import { DataSourceDto, DataSourceFilter } from "../../models/DataSources";
 import { AIDataUsage } from "../../models/OrgUsage";
 
@@ -27,7 +31,10 @@ export interface DataSourceRepository {
     data: any
   ): Promise<DataSourceDto>;
 
-  updateDataSource(dataSourceDto: DataSourceDto): Promise<DataSourceDto>;
+  updateDataSource(
+    id: string,
+    input: Prisma.DataSourceUpdateInput
+  ): Promise<DataSourceDto>;
 
   getNumberOfTokensStoredForOrg(orgId: string): Promise<number>;
 

@@ -247,11 +247,28 @@ export const onKnowledgeContentRetrieved = inngest.createFunction(
       );
     });
 
-    await step.run("create-documents-from-content", async () => {
-      return await dataSourceManagementService.createDocumentsFromContent(
-        knowledgeId
-      );
-    });
+    const knowledgeWithDocuments = await step.run(
+      "create-documents-from-content",
+      async () => {
+        return await dataSourceManagementService.createDocumentsFromContent(
+          knowledgeId
+        );
+      }
+    );
+
+    const hasSufficientDataStorage = await step.run(
+      "validate-storage-usage",
+      async () => {
+        return await dataSourceManagementService.validateDataStorageUsage(
+          dataSourceId,
+          knowledgeWithDocuments
+        );
+      }
+    );
+
+    if (!hasSufficientDataStorage) {
+      return;
+    }
 
     await step.run("publish-knowledge-chunk-events", async () => {
       return await dataSourceManagementService.publishKnowledgeChunkEvents(

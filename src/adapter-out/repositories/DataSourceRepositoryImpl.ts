@@ -236,15 +236,14 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
   }
 
   public async updateDataSource(
-    dataSourceDto: DataSourceDto
+    id: string,
+    input: Prisma.DataSourceUpdateInput
   ): Promise<DataSourceDto> {
     const dataSource = await prismadb.dataSource.update({
       where: {
-        id: dataSourceDto.id,
+        id,
       },
-      data: {
-        ...dataSourceDto,
-      },
+      data: input,
     });
     return this.mapDataSourceToDto(dataSource);
   }
