@@ -36,7 +36,7 @@ import dataSourceAdapterService from "./DataSourceAdapterService";
 import { FileStorageService } from "./FileStorageService";
 import usageService from "./UsageService";
 
-const KNOWLEDGE_CHUNK_TOKEN_COUNT = 1000;
+const KNOWLEDGE_CHUNK_TOKEN_COUNT = 5000;
 
 export class DataSourceManagementService {
   constructor(
