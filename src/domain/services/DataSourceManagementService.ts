@@ -378,7 +378,6 @@ export class DataSourceManagementService {
     knowledgeId: string,
     originalContent: KnowledgeOriginalContent
   ) {
-    const knowledge = await this.knowledgeRepository.getById(knowledgeId);
     return await this.knowledgeRepository.update(knowledgeId, {
       indexStatus: KnowledgeIndexStatus.CONTENT_RETRIEVED,
       originalContent: originalContent as any,
