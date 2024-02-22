@@ -23,7 +23,8 @@ export const onDataSourceInitialized = inngest.createFunction(
   {
     id: "on-datasource-initialized",
     onFailure: async ({ error, event }) => {
-      const { dataSourceId } = event.data.event.data as any;
+      const { dataSourceId } = event.data.event
+        .data as DataSourceInitializedPayload;
       console.error(`Failed to initialize data source ${dataSourceId}`, error);
       await dataSourceManagementService.failDataSource(
         dataSourceId,
@@ -51,7 +52,8 @@ export const onDataSourceRefreshRequested = inngest.createFunction(
   {
     id: "on-datasource-refresh-requested",
     onFailure: async ({ error, event }) => {
-      const { dataSourceId } = event.data.event.data as any;
+      const { dataSourceId } = event.data.event
+        .data as DataSourceRefreshRequestedPayload;
       console.error(`Failed to refresh data source ${dataSourceId}`, error);
       await dataSourceManagementService.failDataSource(
         dataSourceId,
@@ -234,6 +236,18 @@ export const onKnowledgeInitialized = inngest.createFunction(
 export const onKnowledgeContentRetrieved = inngest.createFunction(
   {
     id: "on-knowledge-content-retrieved",
+    onFailure: async ({ error, event }) => {
+      const { dataSourceId, knowledgeId } = event.data.event
+        .data as KnowledgeContentRetrievedPayload;
+      console.error(
+        `Failed to handle knowledge content retrieved for knowledge ${knowledgeId} and data source ${dataSourceId}`,
+        error
+      );
+      await dataSourceManagementService.failDataSourceKnowledge(
+        knowledgeId,
+        error.message
+      );
+    },
   },
   { event: DomainEvent.KNOWLEDGE_CONTENT_RETRIEVED },
   async ({ event, step }) => {
@@ -285,13 +299,17 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
       limit: 3,
     },
     onFailure: async ({ error, event }) => {
+      const { knowledgeId, chunk, chunkNumber, chunkCount } = event.data.event
+        .data as KnowledgeChunkReceivedPayload;
+      const errorMessage = event.data.error.message;
+
       console.error(
-        `Failed to load chunk ${event.data.event.data.index} of knowledge ${event.data.event.data.knowledgeIndexingResult.knowledgeId}: ${event.data.error.message}`
+        `Failed to load chunk ${chunkNumber} of knowledge ${knowledgeId}: ${errorMessage}`
       );
       await dataSourceManagementService.failDataSourceKnowledgeChunk(
-        event.data.event.data.knowledgeIndexingResult.knowledgeId,
-        event.data.event.data.index,
-        event.data.error.message
+        knowledgeId,
+        chunkNumber,
+        errorMessage
       );
     },
   },

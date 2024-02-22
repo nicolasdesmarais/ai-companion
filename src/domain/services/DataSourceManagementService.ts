@@ -7,7 +7,6 @@ import {
   KnowledgeOriginalContent,
   RetrieveContentResponseStatus,
 } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
-import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
 import { DataSourceRepositoryImpl } from "@/src/adapter-out/repositories/DataSourceRepositoryImpl";
 import { KnowledgeRepositoryImpl } from "@/src/adapter-out/repositories/KnowledgeRepositoryImpl";
 import prismadb from "@/src/lib/prismadb";
@@ -742,78 +741,26 @@ export class DataSourceManagementService {
     dataSourceId: string,
     dataSourceType: DataSourceType
   ) {
-    const knowledgeList = await prismadb.knowledge.findMany({
-      where: {
-        indexStatus: {
-          in: [KnowledgeIndexStatus.INITIALIZED, KnowledgeIndexStatus.INDEXING],
-        },
-        dataSources: {
-          some: {
-            dataSourceId: dataSourceId,
-          },
-        },
-      },
-    });
-
-    const dataSourceAdapter =
-      dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
-    for (const knowledge of knowledgeList) {
-      const indexKnowledgeResponse =
-        await dataSourceAdapter.pollKnowledgeIndexingStatus(knowledge);
-
-      await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
-    }
-
-    await this.updateDataSourceStatus(dataSourceId);
-  }
-
-  private async persistIndexedKnowledge(
-    knowledge: Knowledge,
-    indexKnowledgeResponse: IndexKnowledgeResponse,
-    tx: PrismaClient = prismadb
-  ) {
-    let updateDataForKnowledge: {
-      indexStatus: KnowledgeIndexStatus;
-      blobUrl: string | null;
-      lastIndexedAt: Date;
-      documentCount?: number;
-      tokenCount?: number;
-      metadata?: any;
-    } = {
-      indexStatus: indexKnowledgeResponse.indexStatus,
-      blobUrl: knowledge.blobUrl || indexKnowledgeResponse.blobUrl || null,
-      lastIndexedAt: new Date(),
-      documentCount: indexKnowledgeResponse.documentCount,
-      tokenCount: indexKnowledgeResponse.tokenCount,
-    };
-
-    if (indexKnowledgeResponse.metadata) {
-      const currentKnowledge = await tx.knowledge.findUnique({
-        where: { id: knowledge.id },
-        select: { metadata: true },
-      });
-
-      if (!currentKnowledge) {
-        return;
-      }
-
-      const currentMetadata =
-        currentKnowledge.metadata &&
-        typeof currentKnowledge.metadata === "object"
-          ? currentKnowledge.metadata
-          : {};
-
-      // Merge existing metadata with the new metadata
-      updateDataForKnowledge.metadata = {
-        ...currentMetadata,
-        ...indexKnowledgeResponse.metadata,
-      };
-    }
-
-    await tx.knowledge.update({
-      where: { id: knowledge.id },
-      data: updateDataForKnowledge,
-    });
+    // TODO: Re-implement
+    // const knowledgeList = await prismadb.knowledge.findMany({
+    //   where: {
+    //     indexStatus: {
+    //       in: [KnowledgeIndexStatus.INITIALIZED, KnowledgeIndexStatus.INDEXING],
+    //     },
+    //     dataSources: {
+    //       some: {
+    //         dataSourceId: dataSourceId,
+    //       },
+    //     },
+    //   },
+    // });
+    // const dataSourceAdapter =
+    //   dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
+    // for (const knowledge of knowledgeList) {
+    //   const indexKnowledgeResponse =
+    //     await dataSourceAdapter.pollKnowledgeIndexingStatus(knowledge);
+    // }
+    // await this.updateDataSourceStatus(dataSourceId);
   }
 
   private async updateCompletedKnowledgeDataSources(
@@ -1176,30 +1123,22 @@ export class DataSourceManagementService {
    * @param error
    */
   public async failDataSourceKnowledge(knowledgeId: string, error: string) {
-    const knowledge = await prismadb.knowledge.findUnique({
-      where: { id: knowledgeId },
-    });
-    if (!knowledge) {
-      throw new EntityNotFoundError(
-        `Knowledge with id=${knowledgeId} not found`
-      );
-    }
+    const knowledge = await this.knowledgeRepository.getById(knowledgeId);
 
-    const currentMeta = knowledge.metadata as any;
-    const indexKnowledgeResponse = {
-      indexStatus: KnowledgeIndexStatus.FAILED,
-      metadata: {
-        errors: {
-          knowledge: error,
-          ...(currentMeta?.errors || {}),
-        },
+    const updatedMetadata = this.mergeMetadata(knowledge.metadata, {
+      errors: {
+        knowledge: error,
       },
-    };
+    });
 
-    await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
+    const updatedKnowledge = this.knowledgeRepository.update(knowledgeId, {
+      indexStatus: KnowledgeIndexStatus.FAILED,
+      metadata: updatedMetadata,
+    });
+
     await this.updateCompletedKnowledgeDataSources(knowledge.id);
 
-    return indexKnowledgeResponse;
+    return updatedKnowledge;
   }
 
   /**
@@ -1209,31 +1148,28 @@ export class DataSourceManagementService {
    */
   public async failDataSourceKnowledgeChunk(
     knowledgeId: string,
-    chunkIndex: number,
+    chunkNumber: number,
     error: string
   ) {
-    const knowledge = await prismadb.knowledge.findUnique({
-      where: { id: knowledgeId },
-    });
-    if (!knowledge) {
-      throw new EntityNotFoundError(
-        `Knowledge with id=${knowledgeId} not found`
-      );
-    }
+    const knowledge = await this.knowledgeRepository.getById(knowledgeId);
+
     const currentMeta = knowledge.metadata as any;
     const errors = {
       ...(currentMeta?.errors || {}),
     };
-    errors[`chunk-${chunkIndex}`] = error;
-    const indexKnowledgeResponse = {
-      indexStatus: KnowledgeIndexStatus.FAILED,
-      metadata: { errors },
-    };
+    errors[`chunk-${chunkNumber}`] = error;
+    const updatedMetadata = this.mergeMetadata(currentMeta, {
+      errors,
+    });
 
-    await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
+    const updatedKnowledge = this.knowledgeRepository.update(knowledgeId, {
+      indexStatus: KnowledgeIndexStatus.FAILED,
+      metadata: updatedMetadata,
+    });
+
     await this.updateCompletedKnowledgeDataSources(knowledge.id);
 
-    return indexKnowledgeResponse;
+    return updatedKnowledge;
   }
 
   public async deleteUnusedKnowledges() {
