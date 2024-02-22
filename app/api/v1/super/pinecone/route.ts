@@ -31,7 +31,7 @@ export async function GET(req: Request) {
           const indexDescription = await pinecone.describeIndex(name);
           const index = pinecone.Index(name);
           const indexStats = await index.describeIndexStats();
-          const isCurrent = process.env.PINECONE_INDEX === name;
+          const isCurrent = process.env.PINECONE_SERVERLESS_INDEX === name;
           return { indexDescription, indexStats, isCurrent };
         })
       );
