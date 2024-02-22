@@ -24,7 +24,6 @@ import {
   googleDriveClient,
   googleDriveOauth2Client,
 } from "../../oauth/GoogleDriveClient";
-import fileLoader from "../knowledgeLoaders/FileLoader";
 import { ContentRetrievingDataSourceAdapter } from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
@@ -464,10 +463,6 @@ export class GoogleDriveDataSourceAdapter
     return {
       indexStatus: knowledge.indexStatus ?? KnowledgeIndexStatus.INITIALIZED,
     };
-  }
-
-  public async deleteKnowledge(knowledgeId: string): Promise<void> {
-    await fileLoader.deleteKnowledge(knowledgeId);
   }
 
   public async getRemovedKnowledgeIds(

@@ -11,7 +11,6 @@ import prismadb from "@/src/lib/prismadb";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import axios from "axios";
 import msftOAuthAdapter from "../../oauth/MsftOAuthAdapter";
-import fileLoader from "../knowledgeLoaders/FileLoader";
 import { ContentRetrievingDataSourceAdapter } from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
@@ -266,10 +265,6 @@ export class MsftDataSourceAdapter
     return {
       indexStatus: knowledge.indexStatus ?? KnowledgeIndexStatus.INITIALIZED,
     };
-  }
-
-  public async deleteKnowledge(knowledgeId: string): Promise<void> {
-    await fileLoader.deleteKnowledge(knowledgeId);
   }
 
   public async getRemovedKnowledgeIds(

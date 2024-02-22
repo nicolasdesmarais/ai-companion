@@ -3,7 +3,6 @@ import { ApifyWebhookEvent } from "@/src/domain/models/ApifyWebhookEvent";
 import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import { FileStorageService } from "@/src/domain/services/FileStorageService";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
-import fileLoader from "../knowledgeLoaders/FileLoader";
 import {
   ContentRetrievingDataSourceAdapter,
   DataSourceAdapter,
@@ -138,10 +137,6 @@ export class WebUrlsDataSourceAdapter
     return {
       indexStatus: KnowledgeIndexStatus.INDEXING,
     };
-  }
-
-  public async deleteKnowledge(knowledgeId: string): Promise<void> {
-    fileLoader.deleteKnowledge(knowledgeId);
   }
 
   public async getRemovedKnowledgeIds(

@@ -2,7 +2,6 @@ import { BadRequestError } from "@/src/domain/errors/Errors";
 import { MemoryManager } from "@/src/lib/memory";
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { Document } from "@langchain/core/documents";
-import { Knowledge } from "@prisma/client";
 import { fileTypeFromBlob } from "file-type";
 import { writeFile } from "fs/promises";
 import { CSVLoader } from "langchain/document_loaders/fs/csv";
@@ -140,17 +139,6 @@ export class FileLoader {
       documentCount: docOutput.length,
       totalTokenCount,
     };
-  }
-
-  public async pollKnowledgeIndexingStatus(
-    knowledge: Knowledge
-  ): Promise<void> {
-    return;
-  }
-
-  public async deleteKnowledge(knowledgeId: string): Promise<void> {
-    const memoryManager = await MemoryManager.getInstance();
-    await memoryManager.vectorDelete(knowledgeId);
   }
 
   public async computeMimeType(filename: string, file: string | Blob) {

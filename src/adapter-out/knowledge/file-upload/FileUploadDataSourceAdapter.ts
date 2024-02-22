@@ -1,5 +1,4 @@
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
-import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import { DataSourceItem, DataSourceItemList } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
@@ -48,10 +47,6 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     return {
       indexStatus: knowledge.indexStatus ?? KnowledgeIndexStatus.INITIALIZED,
     };
-  }
-
-  public async deleteKnowledge(knowledgeId: string): Promise<void> {
-    await fileLoader.deleteKnowledge(knowledgeId);
   }
 
   public async getRemovedKnowledgeIds(
