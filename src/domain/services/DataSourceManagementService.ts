@@ -475,9 +475,10 @@ export class DataSourceManagementService {
     const documents: Document[] = documentsJson;
 
     let chunks: Document[][] = this.getDocumentChunks(documents);
+    const chunkCount = chunks.length;
 
     const chunkMetadata = {
-      chunkCount: chunks.length,
+      chunkCount,
       completedChunks: [],
     };
 
@@ -498,7 +499,8 @@ export class DataSourceManagementService {
       const eventResult = await this.publishKnowledgeChunkEvent(
         knowledgeId,
         chunks[i],
-        i
+        i,
+        chunkCount
       );
       eventIds = eventIds.concat(eventResult.ids);
     }
@@ -548,12 +550,14 @@ export class DataSourceManagementService {
   private async publishKnowledgeChunkEvent(
     knowledgeId: string,
     chunk: Document[],
-    chunkNumber: number
+    chunkNumber: number,
+    chunkCount: number
   ) {
     const payload: KnowledgeChunkReceivedPayload = {
       knowledgeId,
       chunk,
       chunkNumber,
+      chunkCount,
     };
     return await publishEvent(DomainEvent.KNOWLEDGE_CHUNK_RECEIVED, payload);
   }
@@ -690,9 +694,10 @@ export class DataSourceManagementService {
     const knowledge = await knowledgeRepository.getById(knowledgeId);
 
     const currentMeta = knowledge.metadata as any;
-    const { chunkCount, completedChunks } = currentMeta;
+    const { completedChunks } = currentMeta;
+    const { chunkNumber, chunkCount } = chunkLoadingResult;
 
-    completedChunks.push(chunkLoadingResult.chunkNumber);
+    completedChunks.push(chunkNumber);
 
     const uniqCompletedChunks = new Set(completedChunks);
     const percentComplete = (uniqCompletedChunks.size / chunkCount) * 100;

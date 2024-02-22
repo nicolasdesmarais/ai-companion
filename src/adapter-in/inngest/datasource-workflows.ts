@@ -280,7 +280,7 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
   },
   { event: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED },
   async ({ event, step }) => {
-    const { knowledgeId, chunk, chunkNumber } =
+    const { knowledgeId, chunk, chunkNumber, chunkCount } =
       event.data as KnowledgeChunkReceivedPayload;
 
     const docIds = await step.run("load-knowledge-chunk", async () => {
@@ -293,6 +293,7 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
     const chunkLoadingResult: ChunkLoadingResult = {
       docIds,
       chunkNumber,
+      chunkCount,
       status: ChunkLoadingResultStatus.SUCCESSFUL,
     };
 
