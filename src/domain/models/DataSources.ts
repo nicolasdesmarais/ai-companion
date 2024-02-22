@@ -1,3 +1,4 @@
+import { KnowledgeOriginalContent } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import {
   DataSourceIndexStatus,
   DataSourceRefreshPeriod,
@@ -17,6 +18,7 @@ export interface DataSourceDto {
   refreshPeriod: DataSourceRefreshPeriod | null;
   indexStatus: DataSourceIndexStatus | null;
   indexPercentage: string;
+  data: any;
 }
 
 export interface DataSourceFilter {
@@ -46,9 +48,12 @@ export enum DataSourceOrderByDirection {
 export interface KnowledgeDto {
   id: string;
   name: string;
-  type: string;
+  type: DataSourceType;
   uniqueId: string | null;
   indexStatus: KnowledgeIndexStatus | null;
   documentCount: number | null;
   tokenCount: number | null;
+  originalContent: KnowledgeOriginalContent | null;
+  documentsBlobUrl: string | null;
+  metadata: any;
 }
