@@ -3,6 +3,7 @@ import {
   EntityNotFoundError,
   ForbiddenError,
 } from "@/src/domain/errors/Errors";
+import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import { FileStorageService } from "@/src/domain/services/FileStorageService";
 import oauthTokenService from "@/src/domain/services/OAuthTokenService";
 import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
@@ -11,7 +12,7 @@ import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import axios from "axios";
 import msftOAuthAdapter from "../../oauth/MsftOAuthAdapter";
 import fileLoader from "../knowledgeLoaders/FileLoader";
-import { DataSourceAdapter } from "../types/DataSourceAdapter";
+import { ContentRetrievingDataSourceAdapter } from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
   DataSourceItemList,
@@ -23,7 +24,9 @@ import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 export enum MsftEvent {
   ONEDRIVE_FOLDER_SCAN_INITIATED = "onedrive.folder.scan.initiated",
 }
-export class MsftDataSourceAdapter implements DataSourceAdapter {
+export class MsftDataSourceAdapter
+  implements ContentRetrievingDataSourceAdapter
+{
   private static readonly GraphApiUrl = "https://graph.microsoft.com/v1.0";
   private static readonly ConvertibleExtensions = [
     "doc",
@@ -155,7 +158,7 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
   public async retrieveKnowledgeContent(
     orgId: string,
     userId: string,
-    knowledge: Knowledge,
+    knowledge: KnowledgeDto,
     data: any
   ): Promise<RetrieveContentAdapterResponse> {
     if (!userId) {

@@ -1,5 +1,3 @@
-import { KnowledgeIndexStatus } from "@prisma/client";
-
 export interface DataSourceItemList {
   items: DataSourceItem[];
 }
@@ -27,10 +25,4 @@ export enum RetrieveContentResponseStatus {
   PENDING,
   SUCCESS,
   FAILED,
-}
-
-export interface RetrieveContentResponse {
-  indexStatus: KnowledgeIndexStatus;
-  originalContent?: KnowledgeOriginalContent;
-  metadata?: any;
 }

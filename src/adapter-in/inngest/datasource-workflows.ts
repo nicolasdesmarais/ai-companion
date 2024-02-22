@@ -203,7 +203,7 @@ export const onKnowledgeInitialized = inngest.createFunction(
     const payload = event.data as KnowledgeInitializedEventPayload;
     const { dataSourceId, knowledgeId } = payload;
 
-    const retrieveKnowledgeResponse = await step.run(
+    const knowledgeWithContent = await step.run(
       "retrieve-knowledge-content",
       async () => {
         return await dataSourceManagementService.retrieveKnowledgeContent(
@@ -213,7 +213,7 @@ export const onKnowledgeInitialized = inngest.createFunction(
       }
     );
 
-    const { indexStatus, originalContent } = retrieveKnowledgeResponse;
+    const { indexStatus, originalContent } = knowledgeWithContent;
     if (
       indexStatus === KnowledgeIndexStatus.CONTENT_RETRIEVED &&
       originalContent

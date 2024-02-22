@@ -1,3 +1,4 @@
+import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import { Knowledge } from "@prisma/client";
 import {
   DataSourceItem,
@@ -33,7 +34,7 @@ export interface ContentRetrievingDataSourceAdapter extends DataSourceAdapter {
   retrieveKnowledgeContent(
     orgId: string,
     userId: string,
-    knowledge: Knowledge,
+    knowledge: KnowledgeDto,
     data: any
   ): Promise<RetrieveContentAdapterResponse>;
 }

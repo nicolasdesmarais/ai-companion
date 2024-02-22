@@ -44,7 +44,7 @@ export class WebUrlsDataSourceAdapter
   public async retrieveKnowledgeContent(
     orgId: string,
     userId: string,
-    knowledge: Knowledge,
+    knowledge: KnowledgeDto,
     data: any
   ): Promise<RetrieveContentAdapterResponse> {
     const input = data as WebUrlDataSourceInput;

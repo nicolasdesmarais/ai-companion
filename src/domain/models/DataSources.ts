@@ -18,6 +18,7 @@ export interface DataSourceDto {
   refreshPeriod: DataSourceRefreshPeriod | null;
   indexStatus: DataSourceIndexStatus | null;
   indexPercentage: string;
+  data: any;
 }
 
 export interface DataSourceFilter {

@@ -6,6 +6,7 @@ import {
   EntityNotFoundError,
   ForbiddenError,
 } from "@/src/domain/errors/Errors";
+import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import { FileStorageService } from "@/src/domain/services/FileStorageService";
 import orgClientCredentialsService from "@/src/domain/services/OrgClientCredentialsService";
 import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
@@ -348,7 +349,7 @@ export class GoogleDriveDataSourceAdapter
   public async retrieveKnowledgeContent(
     orgId: string,
     userId: string,
-    knowledge: Knowledge,
+    knowledge: KnowledgeDto,
     data: any
   ): Promise<RetrieveContentAdapterResponse> {
     if (!userId) {

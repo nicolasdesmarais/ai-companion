@@ -5,7 +5,6 @@ import { ChunkLoadingResult } from "@/src/adapter-out/knowledge/types/ChunkLoadi
 import {
   DataSourceItemList,
   KnowledgeOriginalContent,
-  RetrieveContentResponse,
   RetrieveContentResponseStatus,
 } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
@@ -323,24 +322,9 @@ export class DataSourceManagementService {
   public async retrieveKnowledgeContent(
     dataSourceId: string,
     knowledgeId: string
-  ): Promise<RetrieveContentResponse> {
-    const dataSource = await prismadb.dataSource.findUnique({
-      where: { id: dataSourceId },
-    });
-    if (!dataSource) {
-      throw new EntityNotFoundError(
-        `DataSource with id=${dataSourceId} not found`
-      );
-    }
-
-    const knowledge = await prismadb.knowledge.findUnique({
-      where: { id: knowledgeId },
-    });
-    if (!knowledge) {
-      throw new EntityNotFoundError(
-        `Knowledge with id=${knowledgeId} not found`
-      );
-    }
+  ): Promise<KnowledgeDto> {
+    const dataSource = await this.dataSourceRepository.getById(dataSourceId);
+    const knowledge = await this.knowledgeRepository.getById(knowledgeId);
 
     let knowledgeStatus;
     let newMetadata: any;
@@ -378,20 +362,11 @@ export class DataSourceManagementService {
 
     // Merge existing metadata with the new metadata
     const updatedMetadata = this.mergeMetadata(knowledge.metadata, newMetadata);
-    await prismadb.knowledge.update({
-      where: { id: knowledge.id },
-      data: {
-        indexStatus: knowledgeStatus,
-        metadata: updatedMetadata,
-        originalContent: originalContent as any,
-      },
-    });
-
-    return {
+    return await this.knowledgeRepository.update(knowledgeId, {
       indexStatus: knowledgeStatus,
-      originalContent,
       metadata: updatedMetadata,
-    };
+      originalContent: originalContent as any,
+    });
   }
 
   /**
