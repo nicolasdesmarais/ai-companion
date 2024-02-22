@@ -1,3 +1,7 @@
+import {
+  ChunkLoadingResult,
+  ChunkLoadingResultStatus,
+} from "@/src/adapter-out/knowledge/types/ChunkLoadingResult";
 import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import vectorDatabaseAdapter from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 import {
@@ -276,12 +280,26 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
   },
   { event: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED },
   async ({ event, step }) => {
-    const { chunk, chunkNumber } = event.data as KnowledgeChunkReceivedPayload;
+    const { knowledgeId, chunk, chunkNumber } =
+      event.data as KnowledgeChunkReceivedPayload;
 
     const docIds = await step.run("load-knowledge-chunk", async () => {
       return await dataSourceManagementService.loadKnowledgeChunk(
         chunk,
         chunkNumber
+      );
+    });
+
+    const chunkLoadingResult: ChunkLoadingResult = {
+      docIds,
+      chunkNumber,
+      status: ChunkLoadingResultStatus.SUCCESSFUL,
+    };
+
+    await step.run("persist-indexing-result", async () => {
+      return await dataSourceManagementService.persistChunkLoadingResult(
+        knowledgeId,
+        chunkLoadingResult
       );
     });
   }

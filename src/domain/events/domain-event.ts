@@ -43,6 +43,7 @@ export interface KnowledgeContentReceivedPayload {
 }
 
 export interface KnowledgeChunkReceivedPayload {
+  knowledgeId: string;
   chunk: Document[];
   chunkNumber: number;
 }

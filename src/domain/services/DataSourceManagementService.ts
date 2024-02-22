@@ -1,6 +1,7 @@
 import { UpdateDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
 import fileLoader from "@/src/adapter-out/knowledge/knowledgeLoaders/FileLoader";
+import { ChunkLoadingResult } from "@/src/adapter-out/knowledge/types/ChunkLoadingResult";
 import {
   DataSourceItemList,
   KnowledgeOriginalContent,
@@ -8,7 +9,6 @@ import {
   RetrieveContentResponseStatus,
 } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
-import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
 import { DataSourceRepositoryImpl } from "@/src/adapter-out/repositories/DataSourceRepositoryImpl";
 import { KnowledgeRepositoryImpl } from "@/src/adapter-out/repositories/KnowledgeRepositoryImpl";
 import prismadb from "@/src/lib/prismadb";
@@ -478,6 +478,7 @@ export class DataSourceManagementService {
 
     const chunkMetadata = {
       chunkCount: chunks.length,
+      completedChunks: [],
     };
 
     const metadataWithChunkInfo = this.mergeMetadata(
@@ -494,7 +495,11 @@ export class DataSourceManagementService {
 
     let eventIds: string[] = [];
     for (let i = 0; i < chunks.length; i++) {
-      const eventResult = await this.publishKnowledgeChunkEvent(chunks[i], i);
+      const eventResult = await this.publishKnowledgeChunkEvent(
+        knowledgeId,
+        chunks[i],
+        i
+      );
       eventIds = eventIds.concat(eventResult.ids);
     }
 
@@ -541,10 +546,12 @@ export class DataSourceManagementService {
   }
 
   private async publishKnowledgeChunkEvent(
+    knowledgeId: string,
     chunk: Document[],
     chunkNumber: number
   ) {
     const payload: KnowledgeChunkReceivedPayload = {
+      knowledgeId,
       chunk,
       chunkNumber,
     };
@@ -591,7 +598,6 @@ export class DataSourceManagementService {
         case KnowledgeIndexStatus.RETRIEVING_CONTENT:
         case KnowledgeIndexStatus.CONTENT_RETRIEVED:
         case KnowledgeIndexStatus.DOCUMENTS_CREATED:
-
         case KnowledgeIndexStatus.INDEXING:
           indexingKnowledges++;
           break;
@@ -654,9 +660,7 @@ export class DataSourceManagementService {
   public async loadKnowledgeResult(
     orgId: string,
     dataSourceType: DataSourceType,
-    knowledgeId: string,
-    result: KnowledgeIndexingResult,
-    index: number
+    knowledgeId: string
   ) {
     const dataSourceAdapter =
       dataSourceAdapterService.getDataSourceAdapter(dataSourceType);
@@ -679,45 +683,43 @@ export class DataSourceManagementService {
     }
   }
 
-  public async persistIndexingResult(
+  public async persistChunkLoadingResult(
     knowledgeId: string,
-    indexKnowledgeResponse: IndexKnowledgeResponse,
-    chunkCount: number
+    chunkLoadingResult: ChunkLoadingResult
   ) {
-    const knowledge = await prismadb.knowledge.findUnique({
-      where: { id: knowledgeId },
-    });
-    if (!knowledge) {
-      throw new EntityNotFoundError(
-        `Knowledge with id=${knowledgeId} not found`
-      );
-    }
-    const meta = indexKnowledgeResponse.metadata as any;
-    if (knowledge.metadata) {
-      const currentMeta = knowledge.metadata as any;
-      if (currentMeta.documentCount) {
-        meta.documentCount += currentMeta.documentCount;
-      }
-      if (currentMeta.totalTokenCount) {
-        meta.totalTokenCount += currentMeta.totalTokenCount;
-      }
-      if (currentMeta.completedChunks) {
-        meta.completedChunks = meta.completedChunks.concat(
-          currentMeta.completedChunks
-        );
-      }
-    }
-    const uniqCompletedChunks = new Set(meta.completedChunks);
-    meta.percentComplete = (uniqCompletedChunks.size / chunkCount) * 100;
+    const knowledge = await knowledgeRepository.getById(knowledgeId);
+
+    const currentMeta = knowledge.metadata as any;
+    const chunkCount = currentMeta.chunkCount;
+    const completedChunks = currentMeta.completedChunks.push(
+      chunkLoadingResult.chunkNumber
+    );
+    const uniqCompletedChunks = new Set(completedChunks);
+    const percentComplete = (uniqCompletedChunks.size / chunkCount) * 100;
+
+    let indexStatus: KnowledgeIndexStatus | undefined;
     if (chunkCount === uniqCompletedChunks.size) {
-      indexKnowledgeResponse.indexStatus = KnowledgeIndexStatus.COMPLETED;
+      indexStatus = KnowledgeIndexStatus.COMPLETED;
     }
     console.log(
       `Knowledge ${knowledgeId}: ${uniqCompletedChunks.size} / ${chunkCount} loaded`
     );
 
-    await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
-    await this.updateCompletedKnowledgeDataSources(knowledge.id);
+    const updatedMetadata = this.mergeMetadata(currentMeta, {
+      completedChunks: Array.from(uniqCompletedChunks),
+      percentComplete,
+    });
+
+    await prismadb.knowledge.update({
+      where: { id: knowledgeId },
+      data: {
+        lastIndexedAt: new Date(),
+        indexStatus,
+        metadata: updatedMetadata,
+      },
+    });
+
+    await this.updateCompletedKnowledgeDataSources(knowledgeId);
   }
 
   /**
