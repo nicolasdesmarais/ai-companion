@@ -1,8 +1,8 @@
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import { ApifyWebhookEvent } from "@/src/domain/models/ApifyWebhookEvent";
 import { KnowledgeDto } from "@/src/domain/models/DataSources";
+import { FileStorageService } from "@/src/domain/services/FileStorageService";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
-import { put } from "@vercel/blob";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import {
   ContentRetrievingDataSourceAdapter,
@@ -102,13 +102,14 @@ export class WebUrlsDataSourceAdapter
         result.status === KnowledgeIndexingResultStatus.SUCCESSFUL)
     ) {
       const filename = `${knowledge.name}.json`;
-      const cloudBlob = await put(filename, JSON.stringify(result), {
-        access: "public",
-      });
+      const contentBlobUrl = await FileStorageService.put(
+        filename,
+        JSON.stringify(result)
+      );
       status = RetrieveContentResponseStatus.SUCCESS;
 
       originalContent = {
-        contentBlobUrl: cloudBlob.url,
+        contentBlobUrl,
         filename,
         mimeType: "application/json",
       };
