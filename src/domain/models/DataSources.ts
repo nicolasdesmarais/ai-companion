@@ -47,7 +47,7 @@ export enum DataSourceOrderByDirection {
 export interface KnowledgeDto {
   id: string;
   name: string;
-  type: string;
+  type: DataSourceType;
   uniqueId: string | null;
   indexStatus: KnowledgeIndexStatus | null;
   documentCount: number | null;

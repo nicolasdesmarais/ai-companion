@@ -296,12 +296,34 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
       status: ChunkLoadingResultStatus.SUCCESSFUL,
     };
 
-    await step.run("persist-indexing-result", async () => {
-      return await dataSourceManagementService.persistChunkLoadingResult(
-        knowledgeId,
-        chunkLoadingResult
+    const updatedKnowledge = await step.run(
+      "persist-indexing-result",
+      async () => {
+        return await dataSourceManagementService.persistChunkLoadingResult(
+          knowledgeId,
+          chunkLoadingResult
+        );
+      }
+    );
+
+    if (updatedKnowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
+      const relatedKnowledgeIds = await step.run(
+        "delete-related-knowledge-instances",
+        async () => {
+          return await dataSourceManagementService.deleteRelatedKnowledgeInstances(
+            knowledgeId
+          );
+        }
       );
-    });
+
+      await Promise.all(
+        relatedKnowledgeIds.map((knowledgeId) =>
+          step.run("delete-vectordb-knowledge", async () => {
+            await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
+          })
+        )
+      );
+    }
   }
 );
 

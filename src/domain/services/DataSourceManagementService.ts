@@ -686,7 +686,7 @@ export class DataSourceManagementService {
   public async persistChunkLoadingResult(
     knowledgeId: string,
     chunkLoadingResult: ChunkLoadingResult
-  ) {
+  ): Promise<KnowledgeDto> {
     const knowledge = await knowledgeRepository.getById(knowledgeId);
 
     const currentMeta = knowledge.metadata as any;
@@ -711,16 +711,18 @@ export class DataSourceManagementService {
       documentIds: chunkLoadingResult.docIds,
     });
 
-    await prismadb.knowledge.update({
-      where: { id: knowledgeId },
-      data: {
+    const updatedKnowledge = await this.knowledgeRepository.update(
+      knowledgeId,
+      {
         lastIndexedAt: new Date(),
         indexStatus,
         metadata: updatedMetadata,
-      },
-    });
+      }
+    );
 
     await this.updateCompletedKnowledgeDataSources(knowledgeId);
+
+    return updatedKnowledge;
   }
 
   /**
@@ -891,15 +893,7 @@ export class DataSourceManagementService {
   public async deleteRelatedKnowledgeInstances(
     knowledgeId: string
   ): Promise<string[]> {
-    const knowledge = await prismadb.knowledge.findUnique({
-      where: { id: knowledgeId },
-    });
-
-    if (!knowledge) {
-      throw new EntityNotFoundError(
-        `Knowledge with id=${knowledgeId} not found`
-      );
-    }
+    const knowledge = await knowledgeRepository.getById(knowledgeId);
 
     if (!knowledge.uniqueId) {
       return [];

@@ -2,7 +2,7 @@ import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import { KnowledgeRepository } from "@/src/domain/ports/outgoing/KnowledgeRepository";
 import prismadb from "@/src/lib/prismadb";
-import { Knowledge } from "@prisma/client";
+import { Knowledge, Prisma } from "@prisma/client";
 import { KnowledgeOriginalContent } from "../knowledge/types/DataSourceTypes";
 
 const mapKnowledgeToDto = (knowledge: Knowledge): KnowledgeDto => {
@@ -53,5 +53,16 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
       throw new EntityNotFoundError(`Knowledge with id ${id} not found`);
     }
     return knowledge;
+  }
+
+  public async update(
+    id: string,
+    input: Prisma.KnowledgeUpdateInput
+  ): Promise<KnowledgeDto> {
+    const updatedKnowledge = await prismadb.knowledge.update({
+      where: { id },
+      data: input,
+    });
+    return mapKnowledgeToDto(updatedKnowledge);
   }
 }
