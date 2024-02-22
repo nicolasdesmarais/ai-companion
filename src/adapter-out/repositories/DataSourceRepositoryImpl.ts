@@ -1,3 +1,4 @@
+import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import {
   DataSourceDto,
   DataSourceFilter,
@@ -91,6 +92,14 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
     }
 
     return this.mapDataSourceToDto(dataSource);
+  }
+
+  public async getById(id: string): Promise<DataSourceDto> {
+    const dataSource = await this.findById(id);
+    if (!dataSource) {
+      throw new EntityNotFoundError(`DataSource with id ${id} not found`);
+    }
+    return dataSource;
   }
 
   public async findAll(filter?: DataSourceFilter): Promise<DataSourceDto[]> {

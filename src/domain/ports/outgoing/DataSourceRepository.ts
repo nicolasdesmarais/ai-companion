@@ -4,6 +4,7 @@ import { AIDataUsage } from "../../models/OrgUsage";
 
 export interface DataSourceRepository {
   findById(id: string): Promise<DataSourceDto | null>;
+  getById(id: string): Promise<DataSourceDto>;
   findAll(filter?: DataSourceFilter): Promise<DataSourceDto[]>;
   findByOrgId(
     orgId: string,

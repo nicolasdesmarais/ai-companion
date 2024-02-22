@@ -8,15 +8,13 @@ import {
   RetrieveContentResponseStatus,
 } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "@/src/adapter-out/knowledge/types/IndexKnowledgeResponse";
-import {
-  KnowledgeIndexingResult,
-  KnowledgeIndexingResultStatus,
-} from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
+import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
 import { DataSourceRepositoryImpl } from "@/src/adapter-out/repositories/DataSourceRepositoryImpl";
 import { KnowledgeRepositoryImpl } from "@/src/adapter-out/repositories/KnowledgeRepositoryImpl";
 import prismadb from "@/src/lib/prismadb";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { DataSourceSecurityService } from "@/src/security/services/DataSourceSecurityService";
+import { Document } from "@langchain/core/documents";
 import {
   DataSource,
   DataSourceIndexStatus,
@@ -35,6 +33,7 @@ import {
   DataSourceInitializedPayload,
   DataSourceRefreshRequestedPayload,
   DomainEvent,
+  KnowledgeChunkReceivedPayload,
 } from "../events/domain-event";
 import { DataSourceDto, KnowledgeDto } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
@@ -42,6 +41,8 @@ import { KnowledgeRepository } from "../ports/outgoing/KnowledgeRepository";
 import dataSourceAdapterService from "./DataSourceAdapterService";
 import { FileStorageService } from "./FileStorageService";
 import usageService from "./UsageService";
+
+const KNOWLEDGE_CHUNK_TOKEN_COUNT = 1000;
 
 export class DataSourceManagementService {
   constructor(
@@ -460,16 +461,7 @@ export class DataSourceManagementService {
     });
   }
 
-  public async publishKnowledgeChunkEvents(
-    dataSourceId: string,
-    knowledgeId: string
-  ) {
-    const dataSource = await this.dataSourceRepository.findById(dataSourceId);
-    if (!dataSource) {
-      throw new EntityNotFoundError(
-        `DataSource with id=${dataSourceId} not found`
-      );
-    }
+  public async publishKnowledgeChunkEvents(knowledgeId: string) {
     const knowledge = await this.knowledgeRepository.getById(knowledgeId);
 
     const { documentsBlobUrl } = knowledge;
@@ -481,89 +473,86 @@ export class DataSourceManagementService {
 
     const documentsJson = await FileStorageService.getJson(documentsBlobUrl);
     const documents: Document[] = documentsJson;
-    let eventIds: string[] = [];
-    for (let i = 0; i < documents.length; i++) {
-      const eventResult = await publishEvent(
-        DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
-        {
-          orgId: dataSource.orgId,
-          knowledgeIndexingResult: {
-            knowledgeId: knowledge.id,
-            result: {
-              chunkCount: documents.length,
-              status: KnowledgeIndexingResultStatus.SUCCESSFUL,
-            },
-          },
-          dataSourceType: dataSource.type,
-          index: i,
-        }
-      );
-      eventIds = eventIds.concat(eventResult.ids);
-    }
 
-    const newMetadata = {
-      eventIds,
+    let chunks: Document[][] = this.getDocumentChunks(documents);
+
+    const chunkMetadata = {
+      chunkCount: chunks.length,
     };
-    const updatedMetadata = this.mergeMetadata(knowledge.metadata, newMetadata);
+
+    const metadataWithChunkInfo = this.mergeMetadata(
+      knowledge.metadata,
+      chunkMetadata
+    );
     await prismadb.knowledge.update({
       where: { id: knowledge.id },
       data: {
         indexStatus: KnowledgeIndexStatus.INDEXING,
-        metadata: updatedMetadata,
+        metadata: metadataWithChunkInfo,
+      },
+    });
+
+    let eventIds: string[] = [];
+    for (let i = 0; i < chunks.length; i++) {
+      const eventResult = await this.publishKnowledgeChunkEvent(chunks[i], i);
+      eventIds = eventIds.concat(eventResult.ids);
+    }
+
+    const metadataWithEventIds = this.mergeMetadata(metadataWithChunkInfo, {
+      eventIds,
+    });
+    await prismadb.knowledge.update({
+      where: { id: knowledge.id },
+      data: {
+        metadata: metadataWithEventIds,
       },
     });
   }
 
-  /**
-   * Indexes a knowledge for the specified data source
-   * @param dataSourceId
-   * @param knowledgeId
-   */
-  public async indexDataSourceKnowledge(
-    dataSourceId: string,
-    knowledgeId: string
-  ) {
-    const dataSource = await prismadb.dataSource.findUnique({
-      where: { id: dataSourceId },
-    });
-    if (!dataSource) {
-      throw new EntityNotFoundError(
-        `DataSource with id=${dataSourceId} not found`
-      );
-    }
+  private getDocumentChunks(documents: Document[]) {
+    let chunks: Document[][] = [];
+    let currentChunk: Document[] = [];
+    let currentTokenCount = 0;
 
-    const knowledge = await prismadb.knowledge.findUnique({
-      where: { id: knowledgeId },
-    });
-    if (!knowledge) {
-      throw new EntityNotFoundError(
-        `Knowledge with id=${knowledgeId} not found`
-      );
-    }
-
-    let indexKnowledgeResponse;
-    if (knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED) {
-      const dataSourceAdapter = dataSourceAdapterService.getDataSourceAdapter(
-        dataSource.type
-      );
-      try {
-        indexKnowledgeResponse = await dataSourceAdapter.indexKnowledge(
-          dataSource.orgId,
-          dataSource.ownerUserId,
-          knowledge,
-          dataSource.data
-        );
-      } catch (error) {
-        console.error(error);
-        indexKnowledgeResponse = {
-          indexStatus: KnowledgeIndexStatus.FAILED,
-        };
+    for (const document of documents) {
+      // Check if adding the current document exceeds the limit
+      // And if currentTokenCount is not 0 (the batch is not empty)
+      if (
+        currentTokenCount + document.metadata.tokenCount >
+          KNOWLEDGE_CHUNK_TOKEN_COUNT &&
+        currentTokenCount !== 0
+      ) {
+        // Start a new batch
+        chunks.push(currentChunk);
+        currentChunk = [];
+        currentTokenCount = 0;
       }
 
-      await this.persistIndexedKnowledge(knowledge, indexKnowledgeResponse);
+      currentChunk.push(document);
+      currentTokenCount += document.metadata.tokenCount;
     }
-    await this.updateDataSourceStatus(dataSourceId);
-    return indexKnowledgeResponse;
+
+    // Add the last batch if it has documents
+    if (currentChunk.length > 0) {
+      chunks.push(currentChunk);
+    }
+
+    return chunks;
+  }
+
+  private async publishKnowledgeChunkEvent(
+    chunk: Document[],
+    chunkNumber: number
+  ) {
+    const payload: KnowledgeChunkReceivedPayload = {
+      chunk,
+      chunkNumber,
+    };
+    return await publishEvent(DomainEvent.KNOWLEDGE_CHUNK_RECEIVED, payload);
+  }
+
+  public async loadKnowledgeChunk(chunk: Document[], chunkNumber: number) {
+    return await fileLoader.loadDocs(chunk, chunkNumber);
   }
 
   public async updateDataSourceStatus(
@@ -688,12 +677,6 @@ export class DataSourceManagementService {
         "Insufficient data storage to load knowledge result"
       );
     }
-
-    return await dataSourceAdapter.loadKnowledgeResult(
-      knowledge,
-      result,
-      index
-    );
   }
 
   public async persistIndexingResult(

@@ -5,6 +5,7 @@ import {
   DataSourceItemListReceivedPayload,
   DataSourceRefreshRequestedPayload,
   DomainEvent,
+  KnowledgeChunkReceivedPayload,
   KnowledgeContentReceivedPayload as KnowledgeContentRetrievedPayload,
   KnowledgeInitializedEventPayload,
 } from "@/src/domain/events/domain-event";
@@ -250,16 +251,15 @@ export const onKnowledgeContentRetrieved = inngest.createFunction(
 
     await step.run("publish-knowledge-chunk-events", async () => {
       return await dataSourceManagementService.publishKnowledgeChunkEvents(
-        dataSourceId,
         knowledgeId
       );
     });
   }
 );
 
-export const loadKnowledgeChunk = inngest.createFunction(
+export const onKnowledgeChunkReceived = inngest.createFunction(
   {
-    id: "knowledge-chunk-received",
+    id: "on-knowledge-chunk-received",
     concurrency: {
       limit: 3,
     },
@@ -275,30 +275,15 @@ export const loadKnowledgeChunk = inngest.createFunction(
     },
   },
   { event: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED },
-  async ({ event }) => {
-    try {
-      const indexingResult =
-        await dataSourceManagementService.loadKnowledgeResult(
-          event.data.orgId,
-          event.data.dataSourceType,
-          event.data.knowledgeIndexingResult.knowledgeId,
-          event.data.knowledgeIndexingResult.result,
-          event.data.index
-        );
-      await dataSourceManagementService.persistIndexingResult(
-        event.data.knowledgeIndexingResult.knowledgeId,
-        indexingResult,
-        event.data.knowledgeIndexingResult.result.chunkCount
+  async ({ event, step }) => {
+    const { chunk, chunkNumber } = event.data as KnowledgeChunkReceivedPayload;
+
+    const docIds = await step.run("load-knowledge-chunk", async () => {
+      return await dataSourceManagementService.loadKnowledgeChunk(
+        chunk,
+        chunkNumber
       );
-    } catch (e) {
-      console.error(
-        "[KNOWLEDGE CHUNK]",
-        event.data.knowledgeIndexingResult.knowledgeId,
-        event.data.index,
-        e
-      );
-      throw (new Error("Error loading knowledge chunk"), e);
-    }
+    });
   }
 );
 

@@ -5,7 +5,6 @@ import {
   RetrieveContentAdapterResponse,
 } from "./DataSourceTypes";
 import { IndexKnowledgeResponse } from "./IndexKnowledgeResponse";
-import { KnowledgeIndexingResult } from "./KnowlegeIndexingResult";
 
 export interface DataSourceAdapter {
   getDataSourceItemList(
@@ -17,20 +16,7 @@ export interface DataSourceAdapter {
     forceRefresh?: boolean
   ): Promise<DataSourceItemList>;
 
-  indexKnowledge(
-    orgId: string,
-    userId: string,
-    knowledge: Knowledge,
-    data: any
-  ): Promise<IndexKnowledgeResponse>;
-
   shouldReindexKnowledge(knowledge: Knowledge, item: DataSourceItem): boolean;
-
-  loadKnowledgeResult(
-    knowledge: Knowledge,
-    result: KnowledgeIndexingResult,
-    chunkCount: number
-  ): Promise<IndexKnowledgeResponse>;
 
   pollKnowledgeIndexingStatus(
     knowledge: Knowledge

@@ -2,8 +2,7 @@ import {
   DataSourceItemList,
   KnowledgeOriginalContent,
 } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
-import { KnowledgeIndexingResult } from "@/src/adapter-out/knowledge/types/KnowlegeIndexingResult";
-import { DataSourceType } from "@prisma/client";
+import { Document } from "@langchain/core/documents";
 
 export enum DomainEvent {
   DATASOURCE_INITIALIZED = "datasource.initialized",
@@ -44,8 +43,6 @@ export interface KnowledgeContentReceivedPayload {
 }
 
 export interface KnowledgeChunkReceivedPayload {
-  orgId: string;
-  dataSourceType: DataSourceType;
-  knowledgeIndexingResult: KnowledgeIndexingResult;
-  index: number;
+  chunk: Document[];
+  chunkNumber: number;
 }

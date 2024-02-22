@@ -1,10 +1,8 @@
-import { CreateApiDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
-import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
+import { Knowledge } from "@prisma/client";
 import fileLoader from "../knowledgeLoaders/FileLoader";
 import { DataSourceAdapter } from "../types/DataSourceAdapter";
 import { DataSourceItem, DataSourceItemList } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
-import { KnowledgeIndexingResult } from "../types/KnowlegeIndexingResult";
 import { ApiDataSourceInput } from "./ApiDataSourceInput";
 
 export class ApiDataSourceAdapter implements DataSourceAdapter {
@@ -31,29 +29,6 @@ export class ApiDataSourceAdapter implements DataSourceAdapter {
     };
     return result;
   }
-  public async indexKnowledge(
-    orgId: string,
-    userId: string,
-    knowledge: Knowledge,
-    data: any
-  ): Promise<IndexKnowledgeResponse> {
-    const input = data as CreateApiDataSourceRequest;
-
-    const { documentCount, totalTokenCount } = await fileLoader.loadJsonArray(
-      [input.data],
-      knowledge.id
-    );
-
-    return {
-      indexStatus: KnowledgeIndexStatus.COMPLETED,
-      documentCount: documentCount,
-      tokenCount: totalTokenCount,
-      metadata: {
-        documentCount,
-        totalTokenCount,
-      },
-    };
-  }
 
   public shouldReindexKnowledge(
     knowledge: Knowledge,
@@ -62,13 +37,6 @@ export class ApiDataSourceAdapter implements DataSourceAdapter {
     return true;
   }
 
-  loadKnowledgeResult(
-    knowledge: Knowledge,
-    result: KnowledgeIndexingResult,
-    chunkCount: number
-  ): Promise<IndexKnowledgeResponse> {
-    throw new Error("Method not implemented.");
-  }
   pollKnowledgeIndexingStatus(
     knowledge: Knowledge
   ): Promise<IndexKnowledgeResponse> {

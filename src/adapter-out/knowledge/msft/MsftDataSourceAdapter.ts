@@ -3,15 +3,10 @@ import {
   EntityNotFoundError,
   ForbiddenError,
 } from "@/src/domain/errors/Errors";
-import { DomainEvent } from "@/src/domain/events/domain-event";
 import oauthTokenService from "@/src/domain/services/OAuthTokenService";
 import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
-import {
-  DataSourceType,
-  Knowledge,
-  KnowledgeIndexStatus,
-} from "@prisma/client";
+import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import { put } from "@vercel/blob";
 import axios from "axios";
 import msftOAuthAdapter from "../../oauth/MsftOAuthAdapter";
@@ -24,10 +19,6 @@ import {
   RetrieveContentResponseStatus,
 } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
-import {
-  KnowledgeIndexingResult,
-  KnowledgeIndexingResultStatus,
-} from "../types/KnowlegeIndexingResult";
 
 export enum MsftEvent {
   ONEDRIVE_FOLDER_SCAN_INITIATED = "onedrive.folder.scan.initiated",
@@ -265,138 +256,6 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     };
   }
 
-  public async indexKnowledge(
-    orgId: string,
-    userId: string,
-    knowledge: Knowledge,
-    data: any
-  ): Promise<IndexKnowledgeResponse> {
-    if (knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
-      return {
-        indexStatus: KnowledgeIndexStatus.COMPLETED,
-      };
-    }
-    if (!userId) {
-      console.error("Missing userId");
-      return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
-        metadata: {
-          errors: {
-            knowledge: "Missing userId",
-          },
-        },
-      };
-    }
-    if (!data?.oauthTokenId) {
-      console.error("Missing oauthTokenId");
-      return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
-        metadata: {
-          errors: {
-            knowledge: "Missing oauthTokenId",
-          },
-        },
-      };
-    }
-    const { fileId } = knowledge.metadata as any;
-
-    if (!fileId) {
-      console.error("Missing fileId");
-      return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
-        metadata: {
-          errors: {
-            knowledge: "Missing fileId",
-          },
-        },
-      };
-    }
-
-    const token = await this.getToken(userId, data.oauthTokenId);
-    const item = await this.fetch(token, `/me/drive/items/${fileId}`);
-    let response;
-    if (this.isConvertible(knowledge.name)) {
-      response = await fetch(
-        `${MsftDataSourceAdapter.GraphApiUrl}/me/drive/items/${fileId}/content?format=pdf`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-    } else {
-      const downloadUrl = item["@microsoft.graph.downloadUrl"];
-      if (!downloadUrl) {
-        console.error("Missing downloadUrl");
-        return {
-          indexStatus: KnowledgeIndexStatus.FAILED,
-          metadata: {
-            errors: {
-              knowledge: "Missing downloadUrl",
-            },
-          },
-        };
-      }
-      response = await fetch(downloadUrl);
-    }
-    if (!response.body || response.status !== 200) {
-      console.error("msft indexKnowledge: download fail");
-      return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
-        metadata: {
-          errors: {
-            knowledge: "msft download fail",
-          },
-        },
-      };
-    }
-    const blob = await response.blob();
-
-    const { docs, metadata } = await fileLoader.getLangchainDocs(
-      knowledge.id,
-      item.name,
-      "",
-      blob
-    );
-
-    const cloudBlob = await put(
-      `${knowledge.name}.json`,
-      JSON.stringify(docs),
-      {
-        access: "public",
-      }
-    );
-    knowledge.blobUrl = cloudBlob.url;
-
-    let eventIds: string[] = [];
-    for (let i = 0; i < docs.length; i++) {
-      const eventResult = await publishEvent(
-        DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
-        {
-          orgId,
-          knowledgeIndexingResult: {
-            knowledgeId: knowledge.id,
-            result: {
-              chunkCount: docs.length,
-              status: KnowledgeIndexingResultStatus.SUCCESSFUL,
-            },
-          },
-          dataSourceType: DataSourceType.ONEDRIVE,
-          index: i,
-        }
-      );
-      eventIds = eventIds.concat(eventResult.ids);
-    }
-    return {
-      userId,
-      indexStatus: KnowledgeIndexStatus.INDEXING,
-      documentCount: metadata.documentCount,
-      tokenCount: metadata.totalTokenCount,
-      metadata: {
-        eventIds,
-        ...metadata,
-      },
-    };
-  }
-
   public shouldReindexKnowledge(
     knowledge: Knowledge,
     item: DataSourceItem
@@ -404,56 +263,6 @@ export class MsftDataSourceAdapter implements DataSourceAdapter {
     return (
       (knowledge.metadata as any)?.modifiedTime !== item.metadata.modifiedTime
     );
-  }
-
-  public async loadKnowledgeResult(
-    knowledge: Knowledge,
-    result: KnowledgeIndexingResult,
-    index: number
-  ): Promise<IndexKnowledgeResponse> {
-    if (!knowledge.blobUrl) {
-      console.error("msft loadKnowledgeResult: blob fail");
-      return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
-      };
-    }
-
-    const response = await fetch(knowledge.blobUrl);
-    if (response.status !== 200) {
-      console.error("msft loadKnowledgeResult: fetch fail");
-      return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
-      };
-    }
-    const data = await response.json();
-    if (!data || !data[index]) {
-      console.error("msft loadKnowledgeResult: data fail");
-      return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
-      };
-    }
-
-    const docs = [data[index]];
-    const metadata = await fileLoader.loadDocs(docs, index);
-
-    console.log("msft chunk loading", knowledge.id, index);
-
-    let indexStatus;
-    switch (result.status) {
-      case KnowledgeIndexingResultStatus.SUCCESSFUL:
-      case KnowledgeIndexingResultStatus.PARTIAL:
-        indexStatus = KnowledgeIndexStatus.PARTIALLY_COMPLETED;
-        break;
-      case KnowledgeIndexingResultStatus.FAILED:
-        indexStatus = KnowledgeIndexStatus.FAILED;
-    }
-    return {
-      indexStatus,
-      metadata: {
-        ...metadata,
-        completedChunks: [index],
-      },
-    };
   }
 
   public async pollKnowledgeIndexingStatus(
