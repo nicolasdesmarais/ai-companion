@@ -475,12 +475,9 @@ export class DataSourceManagementService {
       knowledge.metadata,
       chunkMetadata
     );
-    await prismadb.knowledge.update({
-      where: { id: knowledge.id },
-      data: {
-        indexStatus: KnowledgeIndexStatus.INDEXING,
-        metadata: metadataWithChunkInfo,
-      },
+    await this.knowledgeRepository.update(knowledgeId, {
+      indexStatus: KnowledgeIndexStatus.INDEXING,
+      metadata: metadataWithChunkInfo,
     });
 
     let eventIds: string[] = [];
@@ -497,11 +494,8 @@ export class DataSourceManagementService {
     const metadataWithEventIds = this.mergeMetadata(metadataWithChunkInfo, {
       eventIds,
     });
-    await prismadb.knowledge.update({
-      where: { id: knowledge.id },
-      data: {
-        metadata: metadataWithEventIds,
-      },
+    await this.knowledgeRepository.update(knowledgeId, {
+      metadata: metadataWithEventIds,
     });
   }
 
