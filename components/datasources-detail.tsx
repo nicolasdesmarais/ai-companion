@@ -252,7 +252,7 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
                   )}
                   <div>
                     {knowledge.indexPercentage
-                      ? `(${knowledge.indexPercentage.toFixed(1)}% indexed)`
+                      ? `(${knowledge.indexPercentage}% indexed)`
                       : ""}
                   </div>
                 </div>

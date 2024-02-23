@@ -65,7 +65,7 @@ export const DataSourceDetailModal = ({ dataSource, onClose }: Props) => {
                   <td className="p-2">{knowledge.indexStatus}</td>
                   <td className="p-2">
                     {knowledge.indexPercentage ? (
-                      <div>{knowledge.indexPercentage.toFixed(2)}%</div>
+                      <div>{knowledge.indexPercentage}%</div>
                     ) : (
                       "0%"
                     )}
