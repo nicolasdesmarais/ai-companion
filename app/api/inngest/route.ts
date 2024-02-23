@@ -3,7 +3,7 @@ import { clerkWebhookReceived } from "@/src/adapter-in/inngest/clerk-workflows";
 import {
   dataSourceMigrationRequested,
   deleteUnusedKnowledges,
-  dataSourceDeleteRequested as onDataSourceDeleteRequested,
+  onDataSourceDeleteRequested,
   onDataSourceInitialized,
   onDataSourceItemListReceived,
   onDataSourceRefreshRequested,

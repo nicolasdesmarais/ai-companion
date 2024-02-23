@@ -472,7 +472,7 @@ export const pollIndexingDataSources = inngest.createFunction(
   }
 );
 
-export const dataSourceDeleteRequested = inngest.createFunction(
+export const onDataSourceDeleteRequested = inngest.createFunction(
   { id: "datasource-delete-requested" },
   { event: DomainEvent.DATASOURCE_DELETE_REQUESTED },
   async ({ event, step }) => {
