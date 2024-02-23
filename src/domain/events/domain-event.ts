@@ -3,6 +3,7 @@ import {
   KnowledgeOriginalContent,
 } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import { Document } from "@langchain/core/documents";
+import { KnowledgeDto } from "../models/DataSources";
 
 export enum DomainEvent {
   DATASOURCE_INITIALIZED = "datasource.initialized",
@@ -13,6 +14,7 @@ export enum DomainEvent {
   KNOWLEDGE_INITIALIZED = "knowledge.initialized",
   KNOWLEDGE_CONTENT_RETRIEVED = "knowledge.content.received",
   KNOWLEDGE_CHUNK_RECEIVED = "knowledge.chunk.received",
+  KNOWLEDGE_INDEXING_COMPLETED = "knowledge.indexing.completed",
 }
 
 export interface DataSourceInitializedPayload {
@@ -47,4 +49,9 @@ export interface KnowledgeChunkReceivedPayload {
   knowledgeId: string;
   chunk: Document[];
   chunkNumber: number;
+}
+
+export interface KnowledgeIndexingCompletedPayload {
+  dataSourceId: string;
+  knowledge: KnowledgeDto;
 }

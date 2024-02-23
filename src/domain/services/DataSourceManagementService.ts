@@ -469,7 +469,10 @@ export class DataSourceManagementService {
   public async publishKnowledgeChunkEvents(
     dataSourceId: string,
     knowledgeId: string
-  ): Promise<KnowledgeChunkEvent[]> {
+  ): Promise<{
+    knowledge: KnowledgeDto;
+    knowledgeChunkEvents: KnowledgeChunkEvent[];
+  }> {
     const knowledge = await this.knowledgeRepository.getById(knowledgeId);
 
     const { documentsBlobUrl } = knowledge;
@@ -487,17 +490,22 @@ export class DataSourceManagementService {
 
     // Mark knowledge as completed if there are no documents
     if (chunkCount === 0) {
-      await this.knowledgeRepository.update(knowledgeId, {
-        indexStatus: KnowledgeIndexStatus.COMPLETED,
-        indexPercentage: 100,
-      });
-      await this.updateDataSourceStatus(dataSourceId);
-      return [];
+      const updatedKnowledge = await this.knowledgeRepository.update(
+        knowledgeId,
+        {
+          indexStatus: KnowledgeIndexStatus.COMPLETED,
+          indexPercentage: 100,
+        }
+      );
+      return { knowledge: updatedKnowledge, knowledgeChunkEvents: [] };
     }
 
-    await this.knowledgeRepository.update(knowledgeId, {
-      indexStatus: KnowledgeIndexStatus.INDEXING,
-    });
+    const updatedKnowledge = await this.knowledgeRepository.update(
+      knowledgeId,
+      {
+        indexStatus: KnowledgeIndexStatus.INDEXING,
+      }
+    );
 
     await this.knowledgeRepository.initializeKnowledgeChunks(
       knowledgeId,
@@ -518,7 +526,7 @@ export class DataSourceManagementService {
       });
     }
 
-    return knowledgeChunkEvents;
+    return { knowledge: updatedKnowledge, knowledgeChunkEvents };
   }
 
   private getDocumentChunks(documents: Document[]) {
@@ -616,11 +624,10 @@ export class DataSourceManagementService {
    * - PARTIALLY_COMPLETED if all chunks have been processed but some have failed
    * - Otherwise, the status is left unchanged
    *
-   * @param knowledgeId Updated
+   * @param knowledgeId
    * @returns
    */
   public async updateKnowledgeStatus(
-    dataSourceId: string,
     knowledgeId: string
   ): Promise<KnowledgeDto> {
     const { totalCount, completedCount, failedCount } =
@@ -645,7 +652,6 @@ export class DataSourceManagementService {
       }
     );
 
-    await this.updateDataSourceStatus(dataSourceId);
     return updatedKnowledge;
   }
 
@@ -792,7 +798,10 @@ export class DataSourceManagementService {
   ): Promise<string[]> {
     const knowledge = await knowledgeRepository.getById(knowledgeId);
 
-    if (!knowledge.uniqueId) {
+    if (
+      !knowledge.uniqueId ||
+      knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED
+    ) {
       return [];
     }
 
@@ -1126,10 +1135,7 @@ export class DataSourceManagementService {
       error,
     });
 
-    const updatedKnowledge = await this.updateKnowledgeStatus(
-      dataSourceId,
-      knowledgeId
-    );
+    const updatedKnowledge = await this.updateKnowledgeStatus(dataSourceId);
     await this.updateDataSourceStatus(dataSourceId);
     return updatedKnowledge;
   }
