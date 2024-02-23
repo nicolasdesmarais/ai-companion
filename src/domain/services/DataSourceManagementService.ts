@@ -485,6 +485,16 @@ export class DataSourceManagementService {
     let chunks: Document[][] = this.getDocumentChunks(documents);
     const chunkCount = chunks.length;
 
+    // Mark knowledge as completed if there are no documents
+    if (chunkCount === 0) {
+      await this.knowledgeRepository.update(knowledgeId, {
+        indexStatus: KnowledgeIndexStatus.COMPLETED,
+        indexPercentage: 100,
+      });
+      await this.updateDataSourceStatus(dataSourceId);
+      return [];
+    }
+
     await this.knowledgeRepository.update(knowledgeId, {
       indexStatus: KnowledgeIndexStatus.INDEXING,
     });
