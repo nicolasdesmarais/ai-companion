@@ -55,6 +55,7 @@ export interface KnowledgeDto {
   tokenCount: number | null;
   originalContent: KnowledgeOriginalContent | null;
   documentsBlobUrl: string | null;
+  indexPercentage: string;
   metadata: any;
 }
 

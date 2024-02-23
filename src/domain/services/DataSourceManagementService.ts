@@ -179,6 +179,7 @@ export class DataSourceManagementService {
       originalContent,
       documentsBlobUrl,
       metadata,
+      indexPercentage,
       ...rest
     } = knowledge;
 
@@ -192,6 +193,7 @@ export class DataSourceManagementService {
       tokenCount,
       originalContent: originalContent as unknown as KnowledgeOriginalContent,
       documentsBlobUrl,
+      indexPercentage: indexPercentage.toString(),
       metadata,
     };
   }
