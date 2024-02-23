@@ -57,3 +57,20 @@ export interface KnowledgeDto {
   documentsBlobUrl: string | null;
   metadata: any;
 }
+
+export interface KnowledgeChunkCounts {
+  totalCount: number;
+  completedCount: number;
+  failedCount: number;
+}
+
+export interface KnowledgeCounts {
+  totalCount: number;
+  indexingCount: number;
+  completedCount: number;
+  partiallyCompletedCount: number;
+  failedCount: number;
+  totalDocumentCount: number;
+  totalTokenCount: number;
+  indexPercentage: number;
+}
