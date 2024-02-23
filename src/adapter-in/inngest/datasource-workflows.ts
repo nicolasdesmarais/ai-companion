@@ -398,10 +398,6 @@ export const onKnowledgeIndexingCompleted = inngest.createFunction(
     const payload = event.data as KnowledgeIndexingCompletedPayload;
     const { dataSourceId, knowledge } = payload;
 
-    await step.run("update-datasource-status", async () => {
-      await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
-    });
-
     if (knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
       const relatedKnowledgeIds = await step.run(
         "delete-related-knowledge-instances",
@@ -420,6 +416,10 @@ export const onKnowledgeIndexingCompleted = inngest.createFunction(
         )
       );
     }
+
+    await step.run("update-datasource-status", async () => {
+      await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
+    });
   }
 );
 
