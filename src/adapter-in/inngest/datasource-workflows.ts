@@ -1,8 +1,5 @@
-import {
-  ChunkLoadingResult,
-  ChunkLoadingResultStatus,
-} from "@/src/adapter-out/knowledge/types/ChunkLoadingResult";
 import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
+import { ChunkLoadingResult } from "@/src/adapter-out/knowledge/types/KnowledgeChunkTypes";
 import vectorDatabaseAdapter from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 import {
   DataSourceInitializedPayload,
@@ -16,7 +13,7 @@ import {
 import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
 import dataSourceViewingService from "@/src/domain/services/DataSourceViewingService";
-import { KnowledgeIndexStatus } from "@prisma/client";
+import { KnowledgeChunkStatus, KnowledgeIndexStatus } from "@prisma/client";
 import { inngest } from "./client";
 
 export const onDataSourceInitialized = inngest.createFunction(
@@ -195,6 +192,7 @@ export const onKnowledgeInitialized = inngest.createFunction(
         error
       );
       await dataSourceManagementService.failDataSourceKnowledge(
+        dataSourceId,
         knowledgeId,
         error.message
       );
@@ -244,6 +242,7 @@ export const onKnowledgeContentRetrieved = inngest.createFunction(
         error
       );
       await dataSourceManagementService.failDataSourceKnowledge(
+        dataSourceId,
         knowledgeId,
         error.message
       );
@@ -284,9 +283,20 @@ export const onKnowledgeContentRetrieved = inngest.createFunction(
       return;
     }
 
-    await step.run("publish-knowledge-chunk-events", async () => {
-      return await dataSourceManagementService.publishKnowledgeChunkEvents(
-        knowledgeId
+    const knowledgeChunkEvents = await step.run(
+      "publish-knowledge-chunk-events",
+      async () => {
+        return await dataSourceManagementService.publishKnowledgeChunkEvents(
+          dataSourceId,
+          knowledgeId
+        );
+      }
+    );
+
+    await step.run("persist-knowledge-chunk-events", async () => {
+      return await dataSourceManagementService.persistKnowledgeChunkEvents(
+        knowledgeId,
+        knowledgeChunkEvents
       );
     });
   }
@@ -299,7 +309,7 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
       limit: 3,
     },
     onFailure: async ({ error, event }) => {
-      const { knowledgeId, chunk, chunkNumber, chunkCount } = event.data.event
+      const { dataSourceId, knowledgeId, chunkNumber } = event.data.event
         .data as KnowledgeChunkReceivedPayload;
       const errorMessage = event.data.error.message;
 
@@ -307,6 +317,7 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
         `Failed to load chunk ${chunkNumber} of knowledge ${knowledgeId}: ${errorMessage}`
       );
       await dataSourceManagementService.failDataSourceKnowledgeChunk(
+        dataSourceId,
         knowledgeId,
         chunkNumber,
         errorMessage
@@ -315,7 +326,7 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
   },
   { event: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED },
   async ({ event, step }) => {
-    const { knowledgeId, chunk, chunkNumber, chunkCount } =
+    const { dataSourceId, knowledgeId, chunk, chunkNumber } =
       event.data as KnowledgeChunkReceivedPayload;
 
     const docIds = await step.run("load-knowledge-chunk", async () => {
@@ -328,16 +339,22 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
     const chunkLoadingResult: ChunkLoadingResult = {
       docIds,
       chunkNumber,
-      chunkCount,
-      status: ChunkLoadingResultStatus.SUCCESSFUL,
+      status: KnowledgeChunkStatus.COMPLETED,
     };
 
+    await step.run("persist-indexing-result", async () => {
+      return await dataSourceManagementService.persistChunkLoadingResult(
+        knowledgeId,
+        chunkLoadingResult
+      );
+    });
+
     const updatedKnowledge = await step.run(
-      "persist-indexing-result",
+      "update-knowledge-status",
       async () => {
-        return await dataSourceManagementService.persistChunkLoadingResult(
-          knowledgeId,
-          chunkLoadingResult
+        return await dataSourceManagementService.updateKnowledgeStatus(
+          dataSourceId,
+          knowledgeId
         );
       }
     );

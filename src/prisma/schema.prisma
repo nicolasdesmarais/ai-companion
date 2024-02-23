@@ -152,7 +152,7 @@ model Knowledge {
   name             String                @db.Text
   type             DataSourceType
   uniqueId         String?               @map(name: "unique_id") @db.VarChar(500)
-  indexStatus      KnowledgeIndexStatus? @map(name: "index_status")
+  indexStatus      KnowledgeIndexStatus  @map(name: "index_status")
   originalContent  Json?                 @map(name: "original_content")
   documentsBlobUrl String?               @map(name: "documents_blob_url") @db.Text
   blobUrl          String?               @map(name: "blob_url") @db.Text
@@ -161,6 +161,8 @@ model Knowledge {
   tokenCount       Int?                  @map(name: "token_count")
   dataSources      DataSourceKnowledge[]
   isMigrated       Boolean               @default(false) @map(name: "is_migrated")
+  indexPercentage  Decimal               @default(0) @map(name: "index_percentage")
+  KnowledgeChunks  KnowledgeChunk[]
 
   @@map("knowledge")
 }
@@ -175,6 +177,26 @@ enum KnowledgeIndexStatus {
   COMPLETED
   FAILED
   DELETED
+}
+
+model KnowledgeChunk {
+  id          Int                  @id @default(autoincrement())
+  knowledge   Knowledge            @relation(fields: [knowledgeId], references: [id])
+  knowledgeId String               @map(name: "knowledge_id")
+  chunkNumber Int                  @map(name: "chunk_number")
+  status      KnowledgeChunkStatus
+  eventId     String?              @map(name: "event_id")
+  error       String?              @db.Text
+
+  @@unique([knowledgeId, chunkNumber])
+  @@index([knowledgeId, status])
+  @@map("knowledge_chunks")
+}
+
+enum KnowledgeChunkStatus {
+  INDEXING
+  COMPLETED
+  FAILED
 }
 
 model AIPermissions {
