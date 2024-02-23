@@ -635,10 +635,7 @@ export class DataSourceManagementService {
       }
     );
 
-    if (indexStatus) {
-      await this.updateDataSourceStatus(dataSourceId);
-    }
-
+    await this.updateDataSourceStatus(dataSourceId);
     return updatedKnowledge;
   }
 
