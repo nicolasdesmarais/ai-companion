@@ -973,7 +973,8 @@ export class DataSourceManagementService {
 
   public async refreshDataSourceAsUser(
     authorizationContext: AuthorizationContext,
-    dataSourceId: string
+    dataSourceId: string,
+    forceRefresh?: boolean
   ) {
     const dataSource = await this.getDataSource(dataSourceId);
 
@@ -986,7 +987,7 @@ export class DataSourceManagementService {
       throw new ForbiddenError("Forbidden");
     }
 
-    await this.refreshDataSourceAndPublishEvent(dataSource);
+    await this.refreshDataSourceAndPublishEvent(dataSource, forceRefresh);
   }
 
   public async refreshDataSourceAsSystem(

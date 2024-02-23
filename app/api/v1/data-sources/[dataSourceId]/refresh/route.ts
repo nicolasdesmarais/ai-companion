@@ -18,9 +18,16 @@ async function putHandler(
 ) {
   const { params, authorizationContext } = context;
 
+  const { searchParams } = new URL(request.url);
+  let forceRefresh;
+  if (searchParams.get("forceRefresh")) {
+    forceRefresh = searchParams.get("forceRefresh") === "true";
+  }
+
   await dataSourceManagementService.refreshDataSourceAsUser(
     authorizationContext,
-    params.dataSourceId
+    params.dataSourceId,
+    forceRefresh
   );
   return new NextResponse("Accepted", { status: 202 });
 }
