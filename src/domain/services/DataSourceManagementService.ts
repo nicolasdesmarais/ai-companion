@@ -1,12 +1,15 @@
 import { UpdateDataSourceRequest } from "@/src/adapter-in/api/DataSourcesApi";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
 import fileLoader from "@/src/adapter-out/knowledge/knowledgeLoaders/FileLoader";
-import { ChunkLoadingResult } from "@/src/adapter-out/knowledge/types/ChunkLoadingResult";
 import {
   DataSourceItemList,
   KnowledgeOriginalContent,
   RetrieveContentResponseStatus,
 } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
+import {
+  ChunkLoadingResult,
+  KnowledgeChunkEvent,
+} from "@/src/adapter-out/knowledge/types/KnowledgeChunkTypes";
 import { DataSourceRepositoryImpl } from "@/src/adapter-out/repositories/DataSourceRepositoryImpl";
 import { KnowledgeRepositoryImpl } from "@/src/adapter-out/repositories/KnowledgeRepositoryImpl";
 import prismadb from "@/src/lib/prismadb";
@@ -19,8 +22,8 @@ import {
   DataSourceRefreshPeriod,
   DataSourceType,
   Knowledge,
+  KnowledgeChunkStatus,
   KnowledgeIndexStatus,
-  PrismaClient,
 } from "@prisma/client";
 import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
 import {
@@ -176,6 +179,7 @@ export class DataSourceManagementService {
       originalContent,
       documentsBlobUrl,
       metadata,
+      indexPercentage,
       ...rest
     } = knowledge;
 
@@ -189,6 +193,7 @@ export class DataSourceManagementService {
       tokenCount,
       originalContent: originalContent as unknown as KnowledgeOriginalContent,
       documentsBlobUrl,
+      indexPercentage: indexPercentage.toString(),
       metadata,
     };
   }
@@ -464,8 +469,12 @@ export class DataSourceManagementService {
    * @param knowledgeId
    */
   public async publishKnowledgeChunkEvents(
+    dataSourceId: string,
     knowledgeId: string
-  ): Promise<KnowledgeDto> {
+  ): Promise<{
+    knowledge: KnowledgeDto;
+    knowledgeChunkEvents: KnowledgeChunkEvent[];
+  }> {
     const knowledge = await this.knowledgeRepository.getById(knowledgeId);
 
     const { documentsBlobUrl } = knowledge;
@@ -481,37 +490,45 @@ export class DataSourceManagementService {
     let chunks: Document[][] = this.getDocumentChunks(documents);
     const chunkCount = chunks.length;
 
-    const chunkMetadata = {
-      chunkCount,
-      completedChunks: [],
-    };
-
-    const metadataWithChunkInfo = this.mergeMetadata(
-      knowledge.metadata,
-      chunkMetadata
-    );
-    await this.knowledgeRepository.update(knowledgeId, {
-      indexStatus: KnowledgeIndexStatus.INDEXING,
-      metadata: metadataWithChunkInfo,
-    });
-
-    let eventIds: string[] = [];
-    for (let i = 0; i < chunks.length; i++) {
-      const eventResult = await this.publishKnowledgeChunkEvent(
+    // Mark knowledge as completed if there are no documents
+    if (chunkCount === 0) {
+      const updatedKnowledge = await this.knowledgeRepository.update(
         knowledgeId,
-        chunks[i],
-        i,
-        chunkCount
+        {
+          indexStatus: KnowledgeIndexStatus.COMPLETED,
+          indexPercentage: 100,
+        }
       );
-      eventIds = eventIds.concat(eventResult.ids);
+      return { knowledge: updatedKnowledge, knowledgeChunkEvents: [] };
     }
 
-    const metadataWithEventIds = this.mergeMetadata(metadataWithChunkInfo, {
-      eventIds,
-    });
-    return await this.knowledgeRepository.update(knowledgeId, {
-      metadata: metadataWithEventIds,
-    });
+    const updatedKnowledge = await this.knowledgeRepository.update(
+      knowledgeId,
+      {
+        indexStatus: KnowledgeIndexStatus.INDEXING,
+      }
+    );
+
+    await this.knowledgeRepository.initializeKnowledgeChunks(
+      knowledgeId,
+      chunkCount
+    );
+
+    const knowledgeChunkEvents: KnowledgeChunkEvent[] = [];
+    for (let i = 0; i < chunks.length; i++) {
+      const eventResult = await this.publishKnowledgeChunkEvent(
+        dataSourceId,
+        knowledgeId,
+        chunks[i],
+        i
+      );
+      knowledgeChunkEvents.push({
+        chunkNumber: i,
+        eventId: eventResult.ids[0],
+      });
+    }
+
+    return { knowledge: updatedKnowledge, knowledgeChunkEvents };
   }
 
   private getDocumentChunks(documents: Document[]) {
@@ -546,18 +563,28 @@ export class DataSourceManagementService {
   }
 
   private async publishKnowledgeChunkEvent(
+    dataSourceId: string,
     knowledgeId: string,
     chunk: Document[],
-    chunkNumber: number,
-    chunkCount: number
+    chunkNumber: number
   ) {
     const payload: KnowledgeChunkReceivedPayload = {
+      dataSourceId,
       knowledgeId,
       chunk,
       chunkNumber,
-      chunkCount,
     };
     return await publishEvent(DomainEvent.KNOWLEDGE_CHUNK_RECEIVED, payload);
+  }
+
+  public async persistKnowledgeChunkEvents(
+    knowledgeId: string,
+    knowledgeChunkEvents: KnowledgeChunkEvent[]
+  ) {
+    await this.knowledgeRepository.persistKnowledgeChunkEvents(
+      knowledgeId,
+      knowledgeChunkEvents
+    );
   }
 
   /**
@@ -579,138 +606,95 @@ export class DataSourceManagementService {
   public async persistChunkLoadingResult(
     knowledgeId: string,
     chunkLoadingResult: ChunkLoadingResult
-  ): Promise<KnowledgeDto> {
-    const knowledge = await knowledgeRepository.getById(knowledgeId);
+  ): Promise<void> {
+    const { chunkNumber, status, error } = chunkLoadingResult;
 
-    const currentMeta = knowledge.metadata as any;
-    const { completedChunks } = currentMeta;
-    const { chunkNumber, chunkCount } = chunkLoadingResult;
-
-    completedChunks.push(chunkNumber);
-
-    const uniqCompletedChunks = new Set(completedChunks);
-    const percentComplete = (uniqCompletedChunks.size / chunkCount) * 100;
-
-    let indexStatus: KnowledgeIndexStatus | undefined;
-    if (chunkCount === uniqCompletedChunks.size) {
-      indexStatus = KnowledgeIndexStatus.COMPLETED;
-    }
-    console.log(
-      `Knowledge ${knowledgeId}: ${uniqCompletedChunks.size} / ${chunkCount} loaded`
+    await this.knowledgeRepository.updateKnowledgeChunkStatus(
+      knowledgeId,
+      chunkNumber,
+      status,
+      error
     );
+  }
 
-    const updatedMetadata = this.mergeMetadata(currentMeta, {
-      completedChunks: Array.from(uniqCompletedChunks),
-      percentComplete,
-      documentIds: chunkLoadingResult.docIds,
-    });
+  /**
+   * Updates the status and indexPercentage of the specified knowledge based on the status of its chunks.
+   * indexPercentage is calculated at the number of completed chunks / total chunks
+   * The status is set to as follows:
+   * - COMPLETED if all chunks are completed
+   * - FAILED if all chunks are failed,
+   * - PARTIALLY_COMPLETED if all chunks have been processed but some have failed
+   * - Otherwise, the status is left unchanged
+   *
+   * @param knowledgeId
+   * @returns
+   */
+  public async updateKnowledgeStatus(
+    knowledgeId: string
+  ): Promise<KnowledgeDto> {
+    const { totalCount, completedCount, failedCount } =
+      await this.knowledgeRepository.getKnowledgeChunkCounts(knowledgeId);
+
+    const indexPercentage = (completedCount / totalCount) * 100;
+
+    let indexStatus;
+    if (completedCount === totalCount) {
+      indexStatus = KnowledgeIndexStatus.COMPLETED;
+    } else if (failedCount === totalCount) {
+      indexStatus = KnowledgeIndexStatus.FAILED;
+    } else if (completedCount + failedCount === totalCount) {
+      indexStatus = KnowledgeIndexStatus.PARTIALLY_COMPLETED;
+    }
 
     const updatedKnowledge = await this.knowledgeRepository.update(
       knowledgeId,
       {
-        lastIndexedAt: new Date(),
+        indexPercentage,
         indexStatus,
-        metadata: updatedMetadata,
       }
     );
-
-    await this.updateCompletedKnowledgeDataSources(knowledgeId);
 
     return updatedKnowledge;
   }
 
-  public async updateDataSourceStatus(
-    dataSourceId: string,
-    tx: PrismaClient = prismadb
-  ) {
-    const dataSource = await tx.dataSource.findUnique({
-      where: { id: dataSourceId },
-      include: {
-        knowledges: {
-          include: {
-            knowledge: true,
-          },
-        },
-      },
-    });
+  public async updateDataSourceStatus(dataSourceId: string) {
+    const knowledgeCounts = await this.knowledgeRepository.getKnowledgeCounts(
+      dataSourceId
+    );
 
-    if (!dataSource) {
-      return;
+    const {
+      completedCount,
+      partiallyCompletedCount,
+      failedCount,
+      totalCount,
+      totalDocumentCount,
+      totalTokenCount,
+      indexPercentage,
+    } = knowledgeCounts;
+
+    let indexStatus;
+    if (completedCount === totalCount) {
+      indexStatus = DataSourceIndexStatus.COMPLETED;
+    } else if (failedCount === totalCount) {
+      indexStatus = DataSourceIndexStatus.FAILED;
+    } else if (
+      completedCount + failedCount + partiallyCompletedCount ===
+      totalCount
+    ) {
+      indexStatus = DataSourceIndexStatus.PARTIALLY_COMPLETED;
     }
 
-    const knowledgeCount = dataSource.knowledges.length;
-    let partiallyCompletedKnowledges = 0,
-      partiallyCompletedPercents = 0,
-      indexingKnowledges = 0,
-      completedKnowledges = 0,
-      failedKnowledges = 0,
-      totalDocumentCount = 0,
-      totalTokenCount = 0;
-    for (const { knowledge } of dataSource.knowledges) {
-      totalDocumentCount += knowledge.documentCount ?? 0;
-      totalTokenCount += knowledge.tokenCount ?? 0;
-
-      switch (knowledge.indexStatus) {
-        case KnowledgeIndexStatus.INITIALIZED:
-        case KnowledgeIndexStatus.RETRIEVING_CONTENT:
-        case KnowledgeIndexStatus.CONTENT_RETRIEVED:
-        case KnowledgeIndexStatus.DOCUMENTS_CREATED:
-        case KnowledgeIndexStatus.INDEXING:
-          indexingKnowledges++;
-          break;
-        case KnowledgeIndexStatus.COMPLETED:
-          completedKnowledges++;
-          break;
-        case KnowledgeIndexStatus.PARTIALLY_COMPLETED:
-          partiallyCompletedKnowledges++;
-          partiallyCompletedPercents +=
-            ((knowledge.metadata as any)?.percentComplete || 0) / 100;
-          break;
-        case KnowledgeIndexStatus.FAILED:
-          failedKnowledges++;
-          break;
-      }
+    let lastIndexedAt;
+    if (indexStatus) {
+      lastIndexedAt = new Date();
     }
 
-    let indexPercentage;
-    if (knowledgeCount === 0) {
-      indexPercentage = 100;
-    } else {
-      indexPercentage =
-        (((partiallyCompletedKnowledges === 0
-          ? 0
-          : partiallyCompletedPercents / partiallyCompletedKnowledges) +
-          completedKnowledges) /
-          knowledgeCount) *
-        100;
-    }
-
-    let indexingStatus;
-    if (indexingKnowledges > 0) {
-      indexingStatus =
-        dataSource.indexStatus === DataSourceIndexStatus.REFRESHING
-          ? DataSourceIndexStatus.REFRESHING
-          : DataSourceIndexStatus.INDEXING;
-    } else if (failedKnowledges === knowledgeCount) {
-      indexingStatus = DataSourceIndexStatus.FAILED;
-    } else if (completedKnowledges === knowledgeCount) {
-      indexingStatus = DataSourceIndexStatus.COMPLETED;
-    } else {
-      indexingStatus = DataSourceIndexStatus.PARTIALLY_COMPLETED;
-    }
-
-    const lastIndexedAt =
-      indexingStatus === DataSourceIndexStatus.INDEXING ? null : new Date();
-
-    await tx.dataSource.update({
-      where: { id: dataSource.id },
-      data: {
-        indexStatus: indexingStatus,
-        indexPercentage,
-        lastIndexedAt,
-        documentCount: totalDocumentCount,
-        tokenCount: totalTokenCount,
-      },
+    await this.dataSourceRepository.updateDataSource(dataSourceId, {
+      indexStatus,
+      indexPercentage,
+      lastIndexedAt,
+      documentCount: totalDocumentCount,
+      tokenCount: totalTokenCount,
     });
   }
 
@@ -762,22 +746,6 @@ export class DataSourceManagementService {
     //     await dataSourceAdapter.pollKnowledgeIndexingStatus(knowledge);
     // }
     // await this.updateDataSourceStatus(dataSourceId);
-  }
-
-  private async updateCompletedKnowledgeDataSources(
-    knowledgeId: string,
-    tx: PrismaClient = prismadb
-  ) {
-    const dataSourceIds = await tx.dataSource.findMany({
-      select: { id: true },
-      where: {
-        knowledges: { some: { knowledgeId } },
-      },
-    });
-
-    for (const dataSource of dataSourceIds) {
-      await this.updateDataSourceStatus(dataSource.id, tx);
-    }
   }
 
   /**
@@ -832,7 +800,10 @@ export class DataSourceManagementService {
   ): Promise<string[]> {
     const knowledge = await knowledgeRepository.getById(knowledgeId);
 
-    if (!knowledge.uniqueId) {
+    if (
+      !knowledge.uniqueId ||
+      knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED
+    ) {
       return [];
     }
 
@@ -1004,7 +975,8 @@ export class DataSourceManagementService {
 
   public async refreshDataSourceAsUser(
     authorizationContext: AuthorizationContext,
-    dataSourceId: string
+    dataSourceId: string,
+    forceRefresh?: boolean
   ) {
     const dataSource = await this.getDataSource(dataSourceId);
 
@@ -1017,7 +989,7 @@ export class DataSourceManagementService {
       throw new ForbiddenError("Forbidden");
     }
 
-    await this.refreshDataSourceAndPublishEvent(dataSource);
+    await this.refreshDataSourceAndPublishEvent(dataSource, forceRefresh);
   }
 
   public async refreshDataSourceAsSystem(
@@ -1123,7 +1095,11 @@ export class DataSourceManagementService {
    * @param knowledgeId
    * @param error
    */
-  public async failDataSourceKnowledge(knowledgeId: string, error: string) {
+  public async failDataSourceKnowledge(
+    dataSourceId: string,
+    knowledgeId: string,
+    error: string
+  ) {
     const knowledge = await this.knowledgeRepository.getById(knowledgeId);
 
     const updatedMetadata = this.mergeMetadata(knowledge.metadata, {
@@ -1132,12 +1108,15 @@ export class DataSourceManagementService {
       },
     });
 
-    const updatedKnowledge = this.knowledgeRepository.update(knowledgeId, {
-      indexStatus: KnowledgeIndexStatus.FAILED,
-      metadata: updatedMetadata,
-    });
+    const updatedKnowledge = await this.knowledgeRepository.update(
+      knowledgeId,
+      {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+        metadata: updatedMetadata,
+      }
+    );
 
-    await this.updateCompletedKnowledgeDataSources(knowledge.id);
+    await this.updateDataSourceStatus(dataSourceId);
 
     return updatedKnowledge;
   }
@@ -1148,28 +1127,19 @@ export class DataSourceManagementService {
    * @param error
    */
   public async failDataSourceKnowledgeChunk(
+    dataSourceId: string,
     knowledgeId: string,
     chunkNumber: number,
     error: string
   ) {
-    const knowledge = await this.knowledgeRepository.getById(knowledgeId);
-
-    const currentMeta = knowledge.metadata as any;
-    const errors = {
-      ...(currentMeta?.errors || {}),
-    };
-    errors[`chunk-${chunkNumber}`] = error;
-    const updatedMetadata = this.mergeMetadata(currentMeta, {
-      errors,
+    this.persistChunkLoadingResult(knowledgeId, {
+      chunkNumber,
+      status: KnowledgeChunkStatus.FAILED,
+      error,
     });
 
-    const updatedKnowledge = this.knowledgeRepository.update(knowledgeId, {
-      indexStatus: KnowledgeIndexStatus.FAILED,
-      metadata: updatedMetadata,
-    });
-
-    await this.updateCompletedKnowledgeDataSources(knowledge.id);
-
+    const updatedKnowledge = await this.updateKnowledgeStatus(dataSourceId);
+    await this.updateDataSourceStatus(dataSourceId);
     return updatedKnowledge;
   }
 

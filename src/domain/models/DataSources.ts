@@ -50,10 +50,34 @@ export interface KnowledgeDto {
   name: string;
   type: DataSourceType;
   uniqueId: string | null;
-  indexStatus: KnowledgeIndexStatus | null;
+  indexStatus: KnowledgeIndexStatus;
   documentCount: number | null;
   tokenCount: number | null;
   originalContent: KnowledgeOriginalContent | null;
   documentsBlobUrl: string | null;
+  indexPercentage: string;
   metadata: any;
 }
+
+export interface KnowledgeChunkCounts {
+  totalCount: number;
+  completedCount: number;
+  failedCount: number;
+}
+
+export interface KnowledgeCounts {
+  totalCount: number;
+  indexingCount: number;
+  completedCount: number;
+  partiallyCompletedCount: number;
+  failedCount: number;
+  totalDocumentCount: number;
+  totalTokenCount: number;
+  indexPercentage: number;
+}
+
+export const knowldedgeEndStatuses: KnowledgeIndexStatus[] = [
+  KnowledgeIndexStatus.COMPLETED,
+  KnowledgeIndexStatus.PARTIALLY_COMPLETED,
+  KnowledgeIndexStatus.FAILED,
+];

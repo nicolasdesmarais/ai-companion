@@ -1,8 +1,5 @@
-import {
-  ChunkLoadingResult,
-  ChunkLoadingResultStatus,
-} from "@/src/adapter-out/knowledge/types/ChunkLoadingResult";
 import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
+import { ChunkLoadingResult } from "@/src/adapter-out/knowledge/types/KnowledgeChunkTypes";
 import vectorDatabaseAdapter from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 import {
   DataSourceInitializedPayload,
@@ -11,12 +8,16 @@ import {
   DomainEvent,
   KnowledgeChunkReceivedPayload,
   KnowledgeContentReceivedPayload as KnowledgeContentRetrievedPayload,
+  KnowledgeIndexingCompletedPayload,
   KnowledgeInitializedEventPayload,
 } from "@/src/domain/events/domain-event";
-import { KnowledgeDto } from "@/src/domain/models/DataSources";
+import {
+  KnowledgeDto,
+  knowldedgeEndStatuses as knowledgeEndStatuses,
+} from "@/src/domain/models/DataSources";
 import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
 import dataSourceViewingService from "@/src/domain/services/DataSourceViewingService";
-import { KnowledgeIndexStatus } from "@prisma/client";
+import { KnowledgeChunkStatus, KnowledgeIndexStatus } from "@prisma/client";
 import { inngest } from "./client";
 
 export const onDataSourceInitialized = inngest.createFunction(
@@ -195,6 +196,7 @@ export const onKnowledgeInitialized = inngest.createFunction(
         error
       );
       await dataSourceManagementService.failDataSourceKnowledge(
+        dataSourceId,
         knowledgeId,
         error.message
       );
@@ -244,6 +246,7 @@ export const onKnowledgeContentRetrieved = inngest.createFunction(
         error
       );
       await dataSourceManagementService.failDataSourceKnowledge(
+        dataSourceId,
         knowledgeId,
         error.message
       );
@@ -284,9 +287,25 @@ export const onKnowledgeContentRetrieved = inngest.createFunction(
       return;
     }
 
-    await step.run("publish-knowledge-chunk-events", async () => {
-      return await dataSourceManagementService.publishKnowledgeChunkEvents(
-        knowledgeId
+    const { knowledge, knowledgeChunkEvents } = await step.run(
+      "publish-knowledge-chunk-events",
+      async () => {
+        return await dataSourceManagementService.publishKnowledgeChunkEvents(
+          dataSourceId,
+          knowledgeId
+        );
+      }
+    );
+
+    if (knowledgeChunkEvents.length === 0) {
+      await onKnowledgeStatusUpdated(dataSourceId, knowledge, step);
+      return;
+    }
+
+    await step.run("persist-knowledge-chunk-events", async () => {
+      return await dataSourceManagementService.persistKnowledgeChunkEvents(
+        knowledgeId,
+        knowledgeChunkEvents
       );
     });
   }
@@ -299,14 +318,16 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
       limit: 3,
     },
     onFailure: async ({ error, event }) => {
-      const { knowledgeId, chunk, chunkNumber, chunkCount } = event.data.event
+      const { dataSourceId, knowledgeId, chunkNumber } = event.data.event
         .data as KnowledgeChunkReceivedPayload;
       const errorMessage = event.data.error.message;
 
       console.error(
         `Failed to load chunk ${chunkNumber} of knowledge ${knowledgeId}: ${errorMessage}`
       );
+
       await dataSourceManagementService.failDataSourceKnowledgeChunk(
+        dataSourceId,
         knowledgeId,
         chunkNumber,
         errorMessage
@@ -315,7 +336,7 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
   },
   { event: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED },
   async ({ event, step }) => {
-    const { knowledgeId, chunk, chunkNumber, chunkCount } =
+    const { dataSourceId, knowledgeId, chunk, chunkNumber } =
       event.data as KnowledgeChunkReceivedPayload;
 
     const docIds = await step.run("load-knowledge-chunk", async () => {
@@ -328,26 +349,61 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
     const chunkLoadingResult: ChunkLoadingResult = {
       docIds,
       chunkNumber,
-      chunkCount,
-      status: ChunkLoadingResultStatus.SUCCESSFUL,
+      status: KnowledgeChunkStatus.COMPLETED,
     };
 
+    await step.run("persist-indexing-result", async () => {
+      return await dataSourceManagementService.persistChunkLoadingResult(
+        knowledgeId,
+        chunkLoadingResult
+      );
+    });
+
     const updatedKnowledge = await step.run(
-      "persist-indexing-result",
+      "update-knowledge-status",
       async () => {
-        return await dataSourceManagementService.persistChunkLoadingResult(
-          knowledgeId,
-          chunkLoadingResult
+        return await dataSourceManagementService.updateKnowledgeStatus(
+          knowledgeId
         );
       }
     );
 
-    if (updatedKnowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
+    await onKnowledgeStatusUpdated(dataSourceId, updatedKnowledge, step);
+  }
+);
+
+const onKnowledgeStatusUpdated = async (
+  dataSourceId: string,
+  knowledge: KnowledgeDto,
+  step: any
+) => {
+  if (knowledgeEndStatuses.includes(knowledge.indexStatus)) {
+    const eventPayload: KnowledgeIndexingCompletedPayload = {
+      dataSourceId,
+      knowledge,
+    };
+    await step.sendEvent("knowledge-indexing-completed", {
+      name: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED,
+      data: eventPayload,
+    });
+  }
+};
+
+export const onKnowledgeIndexingCompleted = inngest.createFunction(
+  {
+    id: "on-knowledge-indexing-completed",
+  },
+  { event: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED },
+  async ({ event, step }) => {
+    const payload = event.data as KnowledgeIndexingCompletedPayload;
+    const { dataSourceId, knowledge } = payload;
+
+    if (knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
       const relatedKnowledgeIds = await step.run(
         "delete-related-knowledge-instances",
         async () => {
           return await dataSourceManagementService.deleteRelatedKnowledgeInstances(
-            knowledgeId
+            knowledge.id
           );
         }
       );
@@ -360,6 +416,10 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
         )
       );
     }
+
+    await step.run("update-datasource-status", async () => {
+      await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
+    });
   }
 );
 
@@ -412,7 +472,7 @@ export const pollIndexingDataSources = inngest.createFunction(
   }
 );
 
-export const dataSourceDeleteRequested = inngest.createFunction(
+export const onDataSourceDeleteRequested = inngest.createFunction(
   { id: "datasource-delete-requested" },
   { event: DomainEvent.DATASOURCE_DELETE_REQUESTED },
   async ({ event, step }) => {

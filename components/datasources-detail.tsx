@@ -251,10 +251,8 @@ export const DataSourcesDetails = ({ dataSources, onChange }: Props) => {
                     <FormDescription>{knowledge.name}</FormDescription>
                   )}
                   <div>
-                    {knowledge.metadata?.percentComplete
-                      ? `(${knowledge.metadata?.percentComplete.toFixed(
-                          1
-                        )}% indexed)`
+                    {knowledge.indexPercentage
+                      ? `(${knowledge.indexPercentage}% indexed)`
                       : ""}
                   </div>
                 </div>

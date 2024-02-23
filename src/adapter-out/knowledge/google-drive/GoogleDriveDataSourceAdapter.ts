@@ -388,7 +388,7 @@ export class GoogleDriveDataSourceAdapter
     const { fileResponse, derivedMimeType, fileExtension } =
       await this.getFileContent(driveClient, fileId, mimeType);
 
-    const fullFileName = `${fileName}${fileExtension}`;
+    const fullFileName = `${fileName}${fileExtension ?? ""}`;
     const buffer = await this.streamToBuffer(fileResponse.data);
     const contentBlobUrl = await FileStorageService.put(fullFileName, buffer);
 

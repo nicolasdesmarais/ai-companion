@@ -1293,6 +1293,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "forceRefresh",
+            "description": "Indicates if the data source should be refreshed even if the content has not been updated",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
