@@ -65,13 +65,13 @@ export const DataSourceDetailModal = ({ dataSource, onClose }: Props) => {
                   <td className="p-2">{knowledge.indexStatus}</td>
                   <td className="p-2">
                     {knowledge.indexPercentage ? (
-                      <div>{knowledge.indexPercentage}%</div>
+                      <div>{Math.round(knowledge.indexPercentage)}%</div>
                     ) : (
                       "0%"
                     )}
                   </td>
                 </tr>
-                {knowledge.metadata.errors && (
+                {knowledge.metadata?.errors && (
                   <tr key={`error-${knowledge.id}`} className="p-2">
                     <td colSpan={4} className="p-2 text-destructive text-sm">
                       Error:&nbsp;
