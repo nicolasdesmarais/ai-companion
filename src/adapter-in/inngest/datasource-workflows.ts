@@ -386,6 +386,10 @@ const onKnowledgeStatusUpdated = async (
       name: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED,
       data: eventPayload,
     });
+  } else {
+    await step.run("update-datasource-status", async () => {
+      await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
+    });
   }
 };
 
