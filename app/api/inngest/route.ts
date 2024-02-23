@@ -1,14 +1,15 @@
 import { onApifyWebhookReceived } from "@/src/adapter-in/inngest/apify-workflows";
 import { clerkWebhookReceived } from "@/src/adapter-in/inngest/clerk-workflows";
 import {
-  dataSourceDeleteRequested,
   dataSourceMigrationRequested,
   deleteUnusedKnowledges,
+  dataSourceDeleteRequested as onDataSourceDeleteRequested,
   onDataSourceInitialized,
   onDataSourceItemListReceived,
   onDataSourceRefreshRequested,
   onKnowledgeChunkReceived,
   onKnowledgeContentRetrieved,
+  onKnowledgeIndexingCompleted,
   onKnowledgeInitialized,
   refreshDataSources,
 } from "@/src/adapter-in/inngest/datasource-workflows";
@@ -26,17 +27,18 @@ export const { GET, POST, PUT } = serve({
     onDataSourceInitialized,
     onDataSourceRefreshRequested,
     onDataSourceItemListReceived,
-    dataSourceDeleteRequested,
+    onDataSourceDeleteRequested,
     googleDriveFolderScanInitiated,
     onedriveFolderScanInitiated,
     onKnowledgeInitialized,
     onKnowledgeChunkReceived,
+    onKnowledgeContentRetrieved,
+    onKnowledgeIndexingCompleted,
     refreshDataSources,
     stripeWebhookReceived,
     clerkWebhookReceived,
     deleteUnusedKnowledges,
     dataSourceMigrationRequested,
-    onKnowledgeContentRetrieved,
     onApifyWebhookReceived,
   ],
 });

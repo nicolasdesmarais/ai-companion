@@ -8,9 +8,13 @@ import {
   DomainEvent,
   KnowledgeChunkReceivedPayload,
   KnowledgeContentReceivedPayload as KnowledgeContentRetrievedPayload,
+  KnowledgeIndexingCompletedPayload,
   KnowledgeInitializedEventPayload,
 } from "@/src/domain/events/domain-event";
-import { KnowledgeDto } from "@/src/domain/models/DataSources";
+import {
+  KnowledgeDto,
+  knowldedgeEndStatuses as knowledgeEndStatuses,
+} from "@/src/domain/models/DataSources";
 import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
 import dataSourceViewingService from "@/src/domain/services/DataSourceViewingService";
 import { KnowledgeChunkStatus, KnowledgeIndexStatus } from "@prisma/client";
@@ -283,7 +287,7 @@ export const onKnowledgeContentRetrieved = inngest.createFunction(
       return;
     }
 
-    const knowledgeChunkEvents = await step.run(
+    const { knowledge, knowledgeChunkEvents } = await step.run(
       "publish-knowledge-chunk-events",
       async () => {
         return await dataSourceManagementService.publishKnowledgeChunkEvents(
@@ -292,6 +296,11 @@ export const onKnowledgeContentRetrieved = inngest.createFunction(
         );
       }
     );
+
+    if (knowledgeChunkEvents.length === 0) {
+      await onKnowledgeStatusUpdated(dataSourceId, knowledge, step);
+      return;
+    }
 
     await step.run("persist-knowledge-chunk-events", async () => {
       return await dataSourceManagementService.persistKnowledgeChunkEvents(
@@ -316,6 +325,7 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
       console.error(
         `Failed to load chunk ${chunkNumber} of knowledge ${knowledgeId}: ${errorMessage}`
       );
+
       await dataSourceManagementService.failDataSourceKnowledgeChunk(
         dataSourceId,
         knowledgeId,
@@ -353,18 +363,51 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
       "update-knowledge-status",
       async () => {
         return await dataSourceManagementService.updateKnowledgeStatus(
-          dataSourceId,
           knowledgeId
         );
       }
     );
 
-    if (updatedKnowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
+    await onKnowledgeStatusUpdated(dataSourceId, updatedKnowledge, step);
+  }
+);
+
+const onKnowledgeStatusUpdated = async (
+  dataSourceId: string,
+  knowledge: KnowledgeDto,
+  step: any
+) => {
+  if (knowledgeEndStatuses.includes(knowledge.indexStatus)) {
+    const eventPayload: KnowledgeIndexingCompletedPayload = {
+      dataSourceId,
+      knowledge,
+    };
+    await step.sendEvent("knowledge-indexing-completed", {
+      name: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED,
+      data: eventPayload,
+    });
+  }
+};
+
+export const onKnowledgeIndexingCompleted = inngest.createFunction(
+  {
+    id: "on-knowledge-indexing-completed",
+  },
+  { event: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED },
+  async ({ event, step }) => {
+    const payload = event.data as KnowledgeIndexingCompletedPayload;
+    const { dataSourceId, knowledge } = payload;
+
+    await step.run("update-datasource-status", async () => {
+      await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
+    });
+
+    if (knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
       const relatedKnowledgeIds = await step.run(
         "delete-related-knowledge-instances",
         async () => {
           return await dataSourceManagementService.deleteRelatedKnowledgeInstances(
-            knowledgeId
+            knowledge.id
           );
         }
       );
