@@ -524,7 +524,7 @@ export const deleteUnusedKnowledges = inngest.createFunction(
 
 export const deleteBlobStorage = inngest.createFunction(
   { id: "delete-blob-storage" },
-  { cron: "* * * * *" },
+  { cron: "0 0 * * *" },
   async ({ step }) => {
     const knowledgeIds = await step.run(
       "find-deleted-knowledge-with-blob-storage",
