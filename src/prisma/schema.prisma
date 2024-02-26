@@ -155,7 +155,6 @@ model Knowledge {
   indexStatus      KnowledgeIndexStatus  @map(name: "index_status")
   originalContent  Json?                 @map(name: "original_content")
   documentsBlobUrl String?               @map(name: "documents_blob_url") @db.Text
-  blobUrl          String?               @map(name: "blob_url") @db.Text
   metadata         Json?
   documentCount    Int?                  @map(name: "document_count")
   tokenCount       Int?                  @map(name: "token_count")
