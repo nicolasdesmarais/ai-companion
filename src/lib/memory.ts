@@ -31,7 +31,7 @@ export class MemoryManager {
   }
 
   public async vectorUpload(docs: Document[], docIds: string[]) {
-    const pineconeIndex = process.env.PINECONE_SERVERLESS_INDEX!;
+    const pineconeIndex = process.env.PINECONE_INDEX!;
     const embeddings = new OpenAIEmbeddings(embeddingsConfig);
 
     await this.vectorUploadToIndex(pineconeIndex, embeddings, docs, docIds);
@@ -54,9 +54,7 @@ export class MemoryManager {
     knowledgeIds: string[],
     numDocs = 100
   ) {
-    const pineconeIndex = this.pinecone.Index(
-      process.env.PINECONE_SERVERLESS_INDEX!
-    );
+    const pineconeIndex = this.pinecone.Index(process.env.PINECONE_INDEX!);
 
     const vectorStore = await PineconeStore.fromExistingIndex(
       new OpenAIEmbeddings(embeddingsConfig),
@@ -74,7 +72,7 @@ export class MemoryManager {
   }
 
   public async vectorIdList(knowledgeId: string): Promise<string[]> {
-    const host = process.env.PINECONE_SERVERLESS_INDEX_HOST;
+    const host = process.env.PINECONE_INDEX_HOST;
     if (!host) {
       throw new Error("PINECONE_HOST is not set");
     }
@@ -97,7 +95,7 @@ export class MemoryManager {
       return;
     }
 
-    const pineconeServerlessIndexName = process.env.PINECONE_SERVERLESS_INDEX!;
+    const pineconeServerlessIndexName = process.env.PINECONE_INDEX!;
     const pineconeServerlessIndex = this.pinecone.Index(
       pineconeServerlessIndexName
     );
