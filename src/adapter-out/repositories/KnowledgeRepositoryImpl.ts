@@ -250,7 +250,7 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
       select: {
         id: true,
       },
-      take: 1000,
+      take: 500,
     });
 
     return deletedKnowledgeIds.map((knowledge) => knowledge.id);

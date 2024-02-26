@@ -1117,16 +1117,24 @@ export class DataSourceManagementService {
 
   public async deleteBlobStorage(knowledgeId: string) {
     const knowledge = await this.knowledgeRepository.getById(knowledgeId);
-    if (knowledge.documentsBlobUrl) {
-      await FileStorageService.delete(knowledge.documentsBlobUrl);
+    try {
+      if (knowledge.documentsBlobUrl) {
+        await FileStorageService.delete(knowledge.documentsBlobUrl);
+      }
+      if (knowledge.originalContent?.contentBlobUrl) {
+        await FileStorageService.delete(
+          knowledge.originalContent.contentBlobUrl
+        );
+      }
+      await this.knowledgeRepository.update(knowledgeId, {
+        isBlobStorageDeleted: true,
+      });
+    } catch (e) {
+      console.error(
+        `Error deleting blob storage for knowledge ${knowledgeId}`,
+        e
+      );
     }
-    if (knowledge.originalContent?.contentBlobUrl) {
-      await FileStorageService.delete(knowledge.originalContent.contentBlobUrl);
-    }
-
-    await this.knowledgeRepository.update(knowledgeId, {
-      isBlobStorageDeleted: true,
-    });
   }
 }
 
