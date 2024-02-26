@@ -176,6 +176,9 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
     const results = await prismadb.knowledge.groupBy({
       by: ["indexStatus"],
       where: {
+        indexStatus: {
+          not: KnowledgeIndexStatus.DELETED,
+        },
         dataSources: {
           some: {
             dataSourceId,
@@ -236,5 +239,20 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
       totalTokenCount,
       indexPercentage,
     };
+  }
+
+  public async findDeletedKnowledgeIdsWithBlobStorageUrl(): Promise<string[]> {
+    const deletedKnowledgeIds = await prismadb.knowledge.findMany({
+      where: {
+        indexStatus: KnowledgeIndexStatus.DELETED,
+        isBlobStorageDeleted: false,
+      },
+      select: {
+        id: true,
+      },
+      take: 1000,
+    });
+
+    return deletedKnowledgeIds.map((knowledge) => knowledge.id);
   }
 }

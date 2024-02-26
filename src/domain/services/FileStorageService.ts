@@ -1,4 +1,4 @@
-import { put } from "@vercel/blob";
+import { del, put } from "@vercel/blob";
 import stream from "stream";
 
 const VERCEL_BLOB_ACCESS = "public";
@@ -44,5 +44,13 @@ export class FileStorageService {
     });
 
     return blob.url;
+  }
+
+  public static async delete(url: string): Promise<void> {
+    if (!url) {
+      return;
+    }
+
+    await del(url);
   }
 }
