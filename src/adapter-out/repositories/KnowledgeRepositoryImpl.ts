@@ -176,6 +176,9 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
     const results = await prismadb.knowledge.groupBy({
       by: ["indexStatus"],
       where: {
+        indexStatus: {
+          not: KnowledgeIndexStatus.DELETED,
+        },
         dataSources: {
           some: {
             dataSourceId,
@@ -242,9 +245,7 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
     const deletedKnowledgeIds = await prismadb.knowledge.findMany({
       where: {
         indexStatus: KnowledgeIndexStatus.DELETED,
-        documentsBlobUrl: {
-          not: null,
-        },
+        isBlobStorageDeleted: false,
       },
       select: {
         id: true,

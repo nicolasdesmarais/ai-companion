@@ -1111,7 +1111,7 @@ export class DataSourceManagementService {
     return newMetadata;
   }
 
-  public async findDeletedKnowledgeWithBlobStorage() {
+  public async findDeletedKnowledgeWithBlobStorage(): Promise<string[]> {
     return await this.knowledgeRepository.findDeletedKnowledgeIdsWithBlobStorageUrl();
   }
 
@@ -1125,11 +1125,7 @@ export class DataSourceManagementService {
     }
 
     await this.knowledgeRepository.update(knowledgeId, {
-      documentsBlobUrl: null,
-      originalContent: {
-        ...knowledge.originalContent,
-        contentBlobUrl: null,
-      },
+      isBlobStorageDeleted: true,
     });
   }
 }
