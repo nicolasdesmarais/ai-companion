@@ -511,11 +511,14 @@ export const deleteUnusedKnowledges = inngest.createFunction(
     );
 
     await Promise.all(
-      deletedKnowledgeIds.map((knowledgeId) =>
+      deletedKnowledgeIds.flatMap((knowledgeId) => [
         step.run("delete-vectordb-knowledge", async () => {
           await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
-        })
-      )
+        }),
+        step.run("delete-blob-storage", async () => {
+          await dataSourceManagementService.deleteBlobStorage(knowledgeId);
+        }),
+      ])
     );
   }
 );

@@ -1110,6 +1110,24 @@ export class DataSourceManagementService {
 
     return newMetadata;
   }
+
+  public async deleteBlobStorage(knowledgeId: string) {
+    const knowledge = await this.knowledgeRepository.getById(knowledgeId);
+    if (knowledge.documentsBlobUrl) {
+      await FileStorageService.delete(knowledge.documentsBlobUrl);
+    }
+    if (knowledge.originalContent?.contentBlobUrl) {
+      await FileStorageService.delete(knowledge.originalContent.contentBlobUrl);
+    }
+
+    await this.knowledgeRepository.update(knowledgeId, {
+      documentsBlobUrl: null,
+      originalContent: {
+        ...knowledge.originalContent,
+        contentBlobUrl: null,
+      },
+    });
+  }
 }
 
 const dataSourceRepository = new DataSourceRepositoryImpl();
