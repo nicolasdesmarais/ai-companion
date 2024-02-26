@@ -748,53 +748,6 @@ export class DataSourceManagementService {
     // await this.updateDataSourceStatus(dataSourceId);
   }
 
-  /**
-   * Creates a copy of an existing knowledge and copies over
-   * all existing data source associations
-   * @param knowledge
-   * @returns
-   */
-  public async copyKnowledgeAndAssociations(knowledgeId: string) {
-    const knowledge = await prismadb.knowledge.findUnique({
-      where: { id: knowledgeId },
-      include: {
-        dataSources: true,
-      },
-    });
-    if (!knowledge) {
-      throw new EntityNotFoundError(
-        `Knowledge with id=${knowledgeId} not found`
-      );
-    }
-
-    const newKnowledge = await prismadb.knowledge.create({
-      data: {
-        name: knowledge.name,
-        type: knowledge.type,
-        uniqueId: knowledge.uniqueId,
-        indexStatus: KnowledgeIndexStatus.INITIALIZED,
-        blobUrl: knowledge.blobUrl,
-        metadata: knowledge.metadata as any,
-        isMigrated: true,
-      },
-    });
-
-    const dataSourceKnowledgeRelations = knowledge.dataSources.map(
-      (existingAssociation) => {
-        return {
-          dataSourceId: existingAssociation.dataSourceId,
-          knowledgeId: newKnowledge.id,
-        };
-      }
-    );
-
-    await prismadb.dataSourceKnowledge.createMany({
-      data: dataSourceKnowledgeRelations,
-    });
-
-    return newKnowledge;
-  }
-
   public async deleteRelatedKnowledgeInstances(
     knowledgeId: string
   ): Promise<string[]> {
