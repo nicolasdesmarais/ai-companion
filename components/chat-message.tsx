@@ -74,12 +74,12 @@ export const ChatMessage = ({
   return (
     <div
       className={cn(
-        "group flex items-start gap-x-3 py-4 w-full",
+        "group flex items-start gap-x-1 sm:gap-x-3 py-4 w-full",
         role === "user" && "justify-end"
       )}
     >
       {role !== "user" && src && <BotAvatar src={src} />}
-      <div className="rounded-md px-4 py-2 max-w-sm lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl text-sm bg-primary/10">
+      <div className="rounded-md px-2 sm:px-4 sm:py-2 max-w-xs sm:max-w-sm lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl text-sm bg-primary/10 place-self-center">
         {isLoading ? (
           <BeatLoader color={theme === "light" ? "black" : "white"} size={5} />
         ) : (
@@ -105,7 +105,7 @@ export const ChatMessage = ({
       {onInspect && role !== "user" && !isLoading && (
         <Button
           onClick={onInspect}
-          className="opacity-0 group-hover:opacity-100 transition"
+          className="opacity-0 group-hover:opacity-100 transition hidden md:visible"
           size="icon"
           variant="ghost"
         >
