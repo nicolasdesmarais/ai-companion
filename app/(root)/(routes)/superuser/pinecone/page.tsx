@@ -12,7 +12,7 @@ const SuperPineconePage = async () => {
   if (!(sessionClaims?.meta as any)?.superuser) {
     return redirect("/");
   }
-  if (!process.env.PINECONE_SERVERLESS_INDEX) {
+  if (!process.env.PINECONE_INDEX) {
     return <div>Set PINECONE_INDEX</div>;
   }
 
