@@ -1,5 +1,4 @@
 "use client";
-import { ResizePanel } from "@/components/resize-panel";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useAIProfile } from "@/hooks/use-ai-profile";
 import { useRateAI } from "@/hooks/use-rate-ai";
@@ -10,11 +9,11 @@ import axios from "axios";
 import { X } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
+import { ResizePanel } from "./resize-panel";
 import { StarRating } from "./star-rating";
 import { StarSvg } from "./svg/star-svg";
 import { Button } from "./ui/button";
-import { Fragment } from "react";
 
 const aiModelRepository = new StaticAIModelRepository();
 interface Props {
@@ -78,6 +77,8 @@ export const AIProfile = ({ ai }: Props) => {
     ai.profile?.showPersonality ||
     ai.profile?.trainingDescription;
 
+  const showFeatures =
+    ai.profile?.features.length > 0 && ai.profile?.features[0].title;
   return (
     <ResizePanel
       name="profile-resize-panel"
@@ -163,11 +164,11 @@ export const AIProfile = ({ ai }: Props) => {
         </div>
         <div className="text-2xl font-bold">{ai.profile?.headline}</div>
         <div className="text-sm">{ai.profile?.description}</div>
-        {ai.profile?.features.length > 0 && (
+        {showFeatures ? (
           <div className="text-2xl font-bold">
             <span className="border-b border-ring pb-1 pr-4">Features</span>
           </div>
-        )}
+        ) : null}
         {ai.profile?.features.map((feature: any, index: number) => (
           <div key={`feature-${index}`}>
             <div className="text-xl font-bold mb-2">{feature.title}</div>
@@ -251,7 +252,7 @@ export const AIProfile = ({ ai }: Props) => {
             Write a Review
           </Button>
         </div>
-        {ai.rating && (
+        {ai.rating ? (
           <>
             <div className="grid gap-3 grid-cols-[50px_auto_50px]">
               {[...Array(5)].map((_, i) => (
@@ -302,7 +303,7 @@ export const AIProfile = ({ ai }: Props) => {
               </div>
             ))}
           </>
-        )}
+        ) : null}
       </div>
     </ResizePanel>
   );

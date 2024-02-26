@@ -1,0 +1,22 @@
+"use client";
+import { useEffect, useMemo, useState } from "react";
+
+const useMatchMedia = (mediaQuery: string): boolean => {
+  const mediaQueryList = useMemo<MediaQueryList>(
+    () => window.matchMedia(mediaQuery),
+    [mediaQuery]
+  );
+  const [matches, setMatches] = useState<boolean>(() => mediaQueryList.matches);
+
+  useEffect(() => {
+    setMatches(mediaQueryList.matches);
+    const listener = (event_: MediaQueryListEventMap["change"]) =>
+      setMatches(event_.matches);
+    mediaQueryList.addEventListener("change", listener);
+    return () => mediaQueryList.removeEventListener("change", listener);
+  }, [mediaQueryList]);
+
+  return matches;
+};
+
+export default useMatchMedia;

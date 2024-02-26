@@ -1,15 +1,8 @@
 "use client";
 import useLocalStorageState from "@/hooks/use-local-storage-state";
+import useMatchMedia from "@/hooks/use-match-media";
 import { cn } from "@/src/lib/utils";
-import { is } from "date-fns/locale";
-import {
-  ReactNode,
-  useCallback,
-  useRef,
-  useState,
-  useEffect,
-  use,
-} from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 type Props = {
   children: ReactNode;
@@ -42,6 +35,7 @@ export const ResizePanel = ({
   );
   const [ephemeralWidth, setEphemeralWidth] = useState(initial);
   const [allowAnimation, setAllowAnimation] = useState(true);
+  const isMobile = useMatchMedia("(max-width: 768px)");
 
   const startResizing = useCallback((e: any) => {
     setAllowAnimation(false);
@@ -77,30 +71,32 @@ export const ResizePanel = ({
   );
 
   useEffect(() => {
-    window.addEventListener("mousemove", resize);
-    window.addEventListener("mouseup", stopResizing);
-    return () => {
-      window.removeEventListener("mousemove", resize);
-      window.removeEventListener("mouseup", stopResizing);
-    };
-  }, [resize, stopResizing]);
+    if (!isMobile) {
+      window.addEventListener("mousemove", resize);
+      window.addEventListener("mouseup", stopResizing);
+      return () => {
+        window.removeEventListener("mousemove", resize);
+        window.removeEventListener("mouseup", stopResizing);
+      };
+    }
+  }, [resize, stopResizing, isMobile]);
 
   useEffect(() => {
-    if (sidebarRef.current) {
+    if (sidebarRef.current && !isMobile) {
       const w = persist ? sidebarWidth : ephemeralWidth;
       (sidebarRef.current as any).style.width = w + "px";
     }
-  }, [sidebarWidth, ephemeralWidth, persist]);
+  }, [sidebarWidth, ephemeralWidth, persist, isMobile]);
 
   return (
     <div
       className={cn(
         className,
         "shrink-0",
-        allowAnimation && animationClassName
+        !isMobile && allowAnimation && animationClassName
       )}
       ref={sidebarRef}
-      style={{ width: initial }}
+      style={isMobile ? {} : { width: initial }}
       onMouseDown={(e) => e.preventDefault()}
     >
       {position === "left" && children}
