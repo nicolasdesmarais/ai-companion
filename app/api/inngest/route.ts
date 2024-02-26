@@ -1,7 +1,7 @@
 import { onApifyWebhookReceived } from "@/src/adapter-in/inngest/apify-workflows";
 import { clerkWebhookReceived } from "@/src/adapter-in/inngest/clerk-workflows";
 import {
-  dataSourceMigrationRequested,
+  deleteBlobStorage,
   deleteUnusedKnowledges,
   onDataSourceDeleteRequested,
   onDataSourceInitialized,
@@ -38,7 +38,7 @@ export const { GET, POST, PUT } = serve({
     stripeWebhookReceived,
     clerkWebhookReceived,
     deleteUnusedKnowledges,
-    dataSourceMigrationRequested,
     onApifyWebhookReceived,
+    deleteBlobStorage,
   ],
 });
