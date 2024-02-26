@@ -30,4 +30,6 @@ export interface KnowledgeRepository {
   getKnowledgeChunkCounts(knowledgeId: string): Promise<KnowledgeChunkCounts>;
 
   getKnowledgeCounts(dataSourceId: string): Promise<KnowledgeCounts>;
+
+  findDeletedKnowledgeIdsWithBlobStorageUrl(): Promise<string[]>;
 }

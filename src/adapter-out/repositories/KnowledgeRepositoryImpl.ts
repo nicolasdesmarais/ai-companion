@@ -237,4 +237,21 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
       indexPercentage,
     };
   }
+
+  public async findDeletedKnowledgeIdsWithBlobStorageUrl(): Promise<string[]> {
+    const deletedKnowledgeIds = await prismadb.knowledge.findMany({
+      where: {
+        indexStatus: KnowledgeIndexStatus.DELETED,
+        documentsBlobUrl: {
+          not: null,
+        },
+      },
+      select: {
+        id: true,
+      },
+      take: 1000,
+    });
+
+    return deletedKnowledgeIds.map((knowledge) => knowledge.id);
+  }
 }

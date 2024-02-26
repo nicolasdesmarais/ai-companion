@@ -1111,6 +1111,10 @@ export class DataSourceManagementService {
     return newMetadata;
   }
 
+  public async findDeletedKnowledgeWithBlobStorage() {
+    return await this.knowledgeRepository.findDeletedKnowledgeIdsWithBlobStorageUrl();
+  }
+
   public async deleteBlobStorage(knowledgeId: string) {
     const knowledge = await this.knowledgeRepository.getById(knowledgeId);
     if (knowledge.documentsBlobUrl) {

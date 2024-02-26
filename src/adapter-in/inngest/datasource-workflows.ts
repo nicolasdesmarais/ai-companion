@@ -16,7 +16,6 @@ import {
   knowldedgeEndStatuses as knowledgeEndStatuses,
 } from "@/src/domain/models/DataSources";
 import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
-import dataSourceViewingService from "@/src/domain/services/DataSourceViewingService";
 import { KnowledgeChunkStatus, KnowledgeIndexStatus } from "@prisma/client";
 import { inngest } from "./client";
 
@@ -523,24 +522,21 @@ export const deleteUnusedKnowledges = inngest.createFunction(
   }
 );
 
-export const dataSourceMigrationRequested = inngest.createFunction(
-  { id: "datasource-migration-requested" },
-  { event: DomainEvent.DATASOURCE_MIGRATION_REQUESTED },
-  async ({ event, step }) => {
-    const dataSourceIds = await step.run(
-      "find-datasources-to-refresh",
+export const deleteBlobStorage = inngest.createFunction(
+  { id: "delete-blob-storage" },
+  { cron: "* * * * *" },
+  async ({ step }) => {
+    const knowledgeIds = await step.run(
+      "find-deleted-knowledge-with-blob-storage",
       async () => {
-        return await dataSourceViewingService.findDataSourcesToMigrate();
+        return await dataSourceManagementService.findDeletedKnowledgeWithBlobStorage();
       }
     );
 
     await Promise.all(
-      dataSourceIds.map((dataSourceId) =>
-        step.run("refresh-datasource", async () => {
-          await dataSourceManagementService.refreshDataSourceAsSystem(
-            dataSourceId,
-            true
-          );
+      knowledgeIds.map((knowledgeId) =>
+        step.run("delete-blob-storage", async () => {
+          await dataSourceManagementService.deleteBlobStorage(knowledgeId);
         })
       )
     );
