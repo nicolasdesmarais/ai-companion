@@ -1,9 +1,5 @@
 "use client";
 
-import { Search } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import qs from "query-string";
-import { ChangeEventHandler, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -13,6 +9,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDebounce } from "@/hooks/use-debounce";
+import { Search } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import qs from "query-string";
+import { ChangeEventHandler, useEffect, useState } from "react";
 
 const filterOptions = [
   { id: "popularity", name: "Popularity" },
@@ -38,7 +38,7 @@ export const SearchInput = () => {
 
   useEffect(() => {
     const query = {
-      search: debouncedValue,
+      search: debouncedValue ? `*${debouncedValue}*` : null,
       categoryId: categoryId,
       sort,
     };
