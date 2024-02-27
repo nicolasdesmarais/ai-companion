@@ -157,6 +157,10 @@ body,
   display: grid;
 }
 
+.markdown-chat-message pre code {
+  overflow-x: auto;
+}
+
 .markdown-chat-message table {
   margin: 5px 0 10px;
 }

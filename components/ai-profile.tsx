@@ -86,7 +86,7 @@ export const AIProfile = ({ ai }: Props) => {
       min={415}
       max={2000}
       position="right"
-      className={cn("flex", !isOpen && "hidden")}
+      className={cn("bg-profile flex", !isOpen && "hidden")}
       animationClassName="animate-in slide-in-from-right duration-200"
       persist={false}
     >
