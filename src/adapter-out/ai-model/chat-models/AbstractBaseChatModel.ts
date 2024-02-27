@@ -1,27 +1,18 @@
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
-import { LangChainStream } from "ai";
 import { PostToChatInput, PostToChatResponse } from "./ChatModel";
 
 export abstract class AbstractBaseChatModel {
-  protected abstract getChatModelInstance(options: any): BaseChatModel;
+  protected abstract getChatModelInstance(
+    options: any,
+    callback?: any
+  ): BaseChatModel;
 
   public async postToChat(input: PostToChatInput): Promise<PostToChatResponse> {
     const { ai, messages, date, getKnowledgeCallback, endCallback } = input;
 
-    const chatModel = this.getChatModelInstance(input.options);
-
-    const { stream, handlers } = LangChainStream();
-    const customHandleLLMEnd = async (_output: any, runId: string) => {
-      await endCallback(_output.generations[0][0].text);
-      return await handlers.handleLLMEnd(_output, runId);
-    };
-
-    const customHandlers = {
-      ...handlers,
-      handleLLMEnd: customHandleLLMEnd,
-    };
+    const chatModel = this.getChatModelInstance(input.options, endCallback);
 
     let historySeed = [];
     if (ai.seed) {
@@ -69,7 +60,8 @@ export abstract class AbstractBaseChatModel {
     chatLog.push(...historySeed);
     chatLog.push(...historyMessages);
 
-    chatModel.call(chatLog, {}, [customHandlers]);
+    const stream = await chatModel.stream(chatLog);
+
     return {
       isStream: true,
       response: stream,

@@ -16,13 +16,21 @@ export class Gpt4Model extends AbstractBaseChatModel implements ChatModel {
     return model.id === MODEL_ID;
   }
 
-  protected getChatModelInstance(options: any): BaseChatModel {
+  protected getChatModelInstance(
+    options: any,
+    endCallback: (answer: string, externalChatId?: string) => void
+  ): BaseChatModel {
     return new ChatOpenAI({
       azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
       azureOpenAIApiVersion: AZURE_OPENAI_API_VERSION,
       azureOpenAIApiInstanceName: AZURE_OPENAI_API_INSTANCE_NAME,
       azureOpenAIApiDeploymentName: AZURE_OPENAI_API_DEPLOYMENT_NAME,
       streaming: true,
+      callbacks: {
+        handleLLMEnd: async (_output: any, runId: string) => {
+          endCallback(_output.generations[0][0].text);
+        },
+      },
       ...options,
     });
   }
