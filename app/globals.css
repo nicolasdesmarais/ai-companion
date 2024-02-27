@@ -153,6 +153,8 @@ body,
 }
 .markdown-chat-message pre {
   padding: 0 10px;
+  /* fixes horizontal scroll blowout */
+  display: grid;
 }
 
 .markdown-chat-message table {

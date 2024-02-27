@@ -3,10 +3,10 @@
 import { ElementRef, useEffect, useRef, useState } from "react";
 
 import { ChatMessage } from "@/components/chat-message";
+import { useInspectMessage } from "@/hooks/use-inspect-message";
 import { AISummaryDto } from "@/src/domain/models/AI";
 import { ChatMessageDto } from "@/src/domain/models/Chats";
 import { InspectMessageModal } from "./inspect-message-modal";
-import { useInspectMessage } from "@/hooks/use-inspect-message";
 
 interface ChatMessagesProps {
   messages: ChatMessageDto[];
@@ -39,7 +39,7 @@ export const ChatMessages = ({
   }, []);
 
   useEffect(() => {
-    scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
+    scrollRef?.current?.scrollIntoView();
   }, [messages.length]);
 
   const onInspect = (message: any, index: number) => {
@@ -49,7 +49,7 @@ export const ChatMessages = ({
   };
 
   return (
-    <div className="flex-1 overflow-y-auto px-4">
+    <div className="flex-1 overflow-y-auto px-1 sm:px-4">
       <InspectMessageModal />
       {ai && (
         <ChatMessage
