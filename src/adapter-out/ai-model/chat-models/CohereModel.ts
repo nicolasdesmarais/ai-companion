@@ -11,10 +11,14 @@ export class CohereModel extends AbstractBaseChatModel implements ChatModel {
     return model.id === MODEL_ID;
   }
 
-  protected getChatModelInstance(options: any): BaseLangChainChatModel {
+  protected getChatModelInstance(
+    options: any,
+    callbacks: any
+  ): BaseLangChainChatModel {
     return new ChatCohere({
       apiKey: process.env.COHERE_API_KEY,
       model: "command",
+      callbacks,
       ...options,
     });
   }
