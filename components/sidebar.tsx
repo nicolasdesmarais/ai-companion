@@ -184,18 +184,7 @@ export const Sidebar = ({
       label: "Data",
       pro: false,
     },
-    {
-      icon: Eye,
-      href: "/index/instance/",
-      regex: /\/index\/instance(.*)/,
-      label: "Super User",
-      pro: false,
-      requiredPermission: {
-        resourceType: SecuredResourceType.AI,
-        action: SecuredAction.READ,
-        accessLevel: SecuredResourceAccessLevel.INSTANCE,
-      },
-    },
+
     {
       icon: Building2,
       href: "/index/admin/",
@@ -212,6 +201,18 @@ export const Sidebar = ({
       icon: Settings,
       label: "Settings",
       children: [
+        {
+          icon: Eye,
+          href: "/index/instance/",
+          regex: /\/index\/instance(.*)/,
+          label: "Super User",
+          pro: false,
+          requiredPermission: {
+            resourceType: SecuredResourceType.AI,
+            action: SecuredAction.READ,
+            accessLevel: SecuredResourceAccessLevel.INSTANCE,
+          },
+        },
         {
           icon: Building,
           href: "/organization-settings",
@@ -237,7 +238,7 @@ export const Sidebar = ({
   return (
     <div
       className={cn(
-        "p-3 flex-1 flex justify-between flex-col h-full",
+        "p-3 flex-1 flex justify-between flex-col h-full overflow-auto",
         className
       )}
     >
@@ -331,8 +332,14 @@ export const Sidebar = ({
       </div>
       <div className="space-y-2 flex flex-col items-center py-3 px-8">
         {showUpgrade && (
-          <Button onClick={proModal.onOpen} size="sm" variant="premium">
+          <Button
+            onClick={proModal.onOpen}
+            size="sm"
+            variant="premium"
+            className="flex flex-col items-center flex-1 text-xs group py-3"
+          >
             <Sparkles className="h-4 w-4 fill-white text-white" />
+            <span className="w-12 text-center">Upgrade</span>
           </Button>
         )}
         <ModeToggle />
