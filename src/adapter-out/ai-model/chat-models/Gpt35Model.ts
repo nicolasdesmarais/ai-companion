@@ -16,7 +16,11 @@ export class Gpt35Model extends AbstractBaseChatModel implements ChatModel {
     return model.id === MODEL_ID;
   }
 
-  protected getChatModelInstance(options: any, callbacks: any): BaseChatModel {
+  protected getChatModelInstance(
+    model: AIModel,
+    options: any,
+    callbacks: any
+  ): BaseChatModel {
     return new ChatOpenAI({
       azureOpenAIApiKey: process.env.AZURE_GPT35_KEY,
       azureOpenAIApiVersion: AZURE_OPENAI_API_VERSION,

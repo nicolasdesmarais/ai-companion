@@ -1,6 +1,7 @@
 import { AIModel } from "@/src/domain/models/AIModel";
 import { ChatCohere } from "@langchain/cohere";
 import { BaseChatModel as BaseLangChainChatModel } from "@langchain/core/language_models/chat_models";
+import { HumanMessage } from "@langchain/core/messages";
 import { AbstractBaseChatModel } from "./AbstractBaseChatModel";
 import { ChatModel } from "./ChatModel";
 
@@ -12,6 +13,7 @@ export class CohereModel extends AbstractBaseChatModel implements ChatModel {
   }
 
   protected getChatModelInstance(
+    model: AIModel,
     options: any,
     callbacks: any
   ): BaseLangChainChatModel {
@@ -21,5 +23,12 @@ export class CohereModel extends AbstractBaseChatModel implements ChatModel {
       callbacks,
       ...options,
     });
+  }
+
+  protected createEngineeredPromptMessage(
+    engineeredPrompt: string,
+    knowledge: string
+  ) {
+    return new HumanMessage(`${engineeredPrompt}${knowledge}\n`);
   }
 }
