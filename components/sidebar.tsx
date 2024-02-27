@@ -330,16 +330,16 @@ export const Sidebar = ({
           )
         )}
       </div>
-      <div className="space-y-2 flex flex-col items-center py-3 px-8">
+      <div className="space-y-2 flex flex-col items-center py-3 px-6">
         {showUpgrade && (
           <Button
             onClick={proModal.onOpen}
             size="sm"
             variant="premium"
-            className="flex flex-col items-center flex-1 text-xs group py-3"
+            className="flex flex-col items-center flex-1 text-xs group py-3 px-2"
           >
             <Sparkles className="h-4 w-4 fill-white text-white" />
-            <span className="w-12 text-center">Upgrade</span>
+            <span className="text-center">Upgrade</span>
           </Button>
         )}
         <ModeToggle />

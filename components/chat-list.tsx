@@ -41,7 +41,7 @@ export const ChatList = ({ className }: Props) => {
   return (
     <div
       className={cn(
-        "flex flex-col h-full py-4 px-2 bg-accent/30 overflow-y-auto w-full @container",
+        "flex flex-col h-full py-4 px-2 bg-accent/30 overflow-y-auto w-full @container overflow-x-hidden",
         className
       )}
     >

@@ -1,6 +1,7 @@
 "use client";
 import useLocalStorageState from "@/hooks/use-local-storage-state";
 import useMatchMedia from "@/hooks/use-match-media";
+import useWindowSize from "@/hooks/use-window-size";
 import { cn } from "@/src/lib/utils";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
@@ -14,6 +15,8 @@ type Props = {
   position?: "left" | "right";
   persist?: boolean;
   animationClassName?: string;
+  breakpoint?: number;
+  breakpointMax?: number;
 };
 
 export const ResizePanel = ({
@@ -26,6 +29,8 @@ export const ResizePanel = ({
   position = "left",
   persist = true,
   animationClassName,
+  breakpoint,
+  breakpointMax,
 }: Props) => {
   const sidebarRef = useRef(null);
   const [isResizing, setIsResizing] = useState(false);
@@ -36,6 +41,7 @@ export const ResizePanel = ({
   const [ephemeralWidth, setEphemeralWidth] = useState(initial);
   const [allowAnimation, setAllowAnimation] = useState(true);
   const isMobile = useMatchMedia("(max-width: 768px)");
+  const windowSize = useWindowSize();
 
   const startResizing = useCallback((e: any) => {
     setAllowAnimation(false);
@@ -83,10 +89,27 @@ export const ResizePanel = ({
 
   useEffect(() => {
     if (sidebarRef.current && !isMobile) {
-      const w = persist ? sidebarWidth : ephemeralWidth;
+      let w = persist ? sidebarWidth : ephemeralWidth;
+      if (
+        breakpoint &&
+        breakpointMax &&
+        windowSize.width &&
+        windowSize.width < breakpoint &&
+        w > breakpointMax
+      ) {
+        w = breakpointMax;
+      }
       (sidebarRef.current as any).style.width = w + "px";
     }
-  }, [sidebarWidth, ephemeralWidth, persist, isMobile]);
+  }, [
+    sidebarWidth,
+    ephemeralWidth,
+    persist,
+    isMobile,
+    windowSize,
+    breakpoint,
+    breakpointMax,
+  ]);
 
   return (
     <div

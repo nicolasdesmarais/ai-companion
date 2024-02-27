@@ -39,6 +39,8 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
           initial={360}
           min={80}
           max={600}
+          breakpoint={1100}
+          breakpointMax={300}
           className="hidden md:flex"
         >
           <ChatList />

@@ -49,7 +49,7 @@ export const ChatMessages = ({
   };
 
   return (
-    <div className="flex-1 overflow-y-auto px-1 sm:px-4">
+    <div className="flex-1 overflow-y-auto px-1 sm:px-4 overflow-x-hidden">
       <InspectMessageModal />
       {ai && (
         <ChatMessage
