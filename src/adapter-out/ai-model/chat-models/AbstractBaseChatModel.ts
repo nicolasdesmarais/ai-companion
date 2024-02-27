@@ -16,7 +16,7 @@ export abstract class AbstractBaseChatModel {
     const callbacks = [
       {
         handleLLMEnd: async (_output: any, runId: string) => {
-          endCallback(_output.generations[0][0].text);
+          await endCallback(_output.generations[0][0].text);
         },
       },
     ];
