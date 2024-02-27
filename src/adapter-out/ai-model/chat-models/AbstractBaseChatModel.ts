@@ -7,13 +7,19 @@ import { PostToChatInput, PostToChatResponse } from "./ChatModel";
 export abstract class AbstractBaseChatModel {
   protected abstract getChatModelInstance(
     options: any,
-    callback?: any
+    callbackHandler: any
   ): BaseChatModel;
 
   public async postToChat(input: PostToChatInput): Promise<PostToChatResponse> {
     const { ai, messages, date, getKnowledgeCallback, endCallback } = input;
 
-    const chatModel = this.getChatModelInstance(input.options, endCallback);
+    const callbackHandler = {
+      handleLLMEnd: async (_output: any, runId: string) => {
+        endCallback(_output.generations[0][0].text);
+      },
+    };
+
+    const chatModel = this.getChatModelInstance(input.options, callbackHandler);
 
     let historySeed = [];
     if (ai.seed) {

@@ -18,7 +18,7 @@ export class Gpt4Model extends AbstractBaseChatModel implements ChatModel {
 
   protected getChatModelInstance(
     options: any,
-    endCallback: (answer: string, externalChatId?: string) => void
+    callbackHandler: any
   ): BaseChatModel {
     return new ChatOpenAI({
       azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
@@ -26,11 +26,7 @@ export class Gpt4Model extends AbstractBaseChatModel implements ChatModel {
       azureOpenAIApiInstanceName: AZURE_OPENAI_API_INSTANCE_NAME,
       azureOpenAIApiDeploymentName: AZURE_OPENAI_API_DEPLOYMENT_NAME,
       streaming: true,
-      callbacks: {
-        handleLLMEnd: async (_output: any, runId: string) => {
-          endCallback(_output.generations[0][0].text);
-        },
-      },
+      callbacks: [callbackHandler],
       ...options,
     });
   }
