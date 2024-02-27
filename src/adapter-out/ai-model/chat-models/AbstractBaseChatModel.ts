@@ -1,22 +1,25 @@
+import { AIModel } from "@/src/domain/models/AIModel";
 import { getTokenLength } from "@/src/lib/tokenCount";
-import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import {
   AIMessage,
   HumanMessage,
   SystemMessage,
 } from "@langchain/core/messages";
+import { Runnable } from "@langchain/core/runnables";
 import { AI, Message } from "@prisma/client";
 import { HttpResponseOutputParser } from "langchain/output_parsers";
 import { PostToChatInput, PostToChatResponse } from "./ChatModel";
 
 export abstract class AbstractBaseChatModel {
   protected abstract getChatModelInstance(
+    model: AIModel,
     options: any,
     callbackHandler: any
-  ): BaseChatModel;
+  ): Runnable;
 
   public async postToChat(input: PostToChatInput): Promise<PostToChatResponse> {
-    const { ai, messages, date, getKnowledgeCallback, endCallback } = input;
+    const { ai, aiModel, messages, date, getKnowledgeCallback, endCallback } =
+      input;
 
     const callbacks = [
       {
@@ -26,7 +29,11 @@ export abstract class AbstractBaseChatModel {
       },
     ];
 
-    const chatModel = this.getChatModelInstance(input.options, callbacks);
+    const chatModel = this.getChatModelInstance(
+      aiModel,
+      input.options,
+      callbacks
+    );
 
     const historySeed = this.ensureAlternatingMessages(this.parseSeed(ai));
 
@@ -44,8 +51,13 @@ export abstract class AbstractBaseChatModel {
 
     const knowledge = await getKnowledgeCallback(tokensUsed);
 
+    const engineeredPromptMessage = this.createEngineeredPromptMessage(
+      engineeredPrompt,
+      knowledge.knowledge
+    );
+
     const chatLog = [
-      new SystemMessage(`${engineeredPrompt}${knowledge.knowledge}\n`),
+      engineeredPromptMessage,
       ...historySeed,
       ...historyMessages,
     ];
@@ -57,6 +69,13 @@ export abstract class AbstractBaseChatModel {
       isStream: true,
       response: stream,
     };
+  }
+
+  protected createEngineeredPromptMessage(
+    engineeredPrompt: string,
+    knowledge: string
+  ) {
+    return new SystemMessage(`${engineeredPrompt}${knowledge}\n`);
   }
 
   private parseSeed(ai: AI): (HumanMessage | AIMessage)[] {

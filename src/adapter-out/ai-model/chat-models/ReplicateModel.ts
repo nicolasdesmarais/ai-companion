@@ -1,19 +1,14 @@
 import { AIModel, AIModelProvider } from "@/src/domain/models/AIModel";
 import { Replicate } from "@langchain/community/llms/replicate";
-import { CallbackManager } from "@langchain/core/callbacks/manager";
-import { BaseCompletionModel } from "./BaseCompletionModel";
+import { AbstractBaseChatModel } from "./AbstractBaseChatModel";
 import { ChatModel } from "./ChatModel";
 
-export class ReplicateModel extends BaseCompletionModel implements ChatModel {
+export class ReplicateModel extends AbstractBaseChatModel implements ChatModel {
   public supports(model: AIModel): boolean {
     return model.provider === AIModelProvider.REPLICATE;
   }
 
-  protected getChatModelInstance(
-    model: AIModel,
-    options: any,
-    customHandlers: any
-  ) {
+  protected getChatModelInstance(model: AIModel, options: any, callbacks: any) {
     return new Replicate({
       model: `${model.additionalData.owner}/${model.externalModelId}:${model.additionalData.version}`,
       input: {
@@ -22,7 +17,7 @@ export class ReplicateModel extends BaseCompletionModel implements ChatModel {
         max_tokens: options.maxTokens,
       },
       apiKey: process.env.REPLICATE_API_TOKEN,
-      callbackManager: CallbackManager.fromHandlers(customHandlers),
+      callbacks,
     });
   }
 }
