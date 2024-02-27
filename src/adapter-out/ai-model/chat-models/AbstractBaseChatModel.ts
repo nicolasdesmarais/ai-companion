@@ -1,6 +1,7 @@
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { HttpResponseOutputParser } from "langchain/output_parsers";
 import { PostToChatInput, PostToChatResponse } from "./ChatModel";
 
 export abstract class AbstractBaseChatModel {
@@ -60,7 +61,8 @@ export abstract class AbstractBaseChatModel {
     chatLog.push(...historySeed);
     chatLog.push(...historyMessages);
 
-    const stream = await chatModel.stream(chatLog);
+    const parser = new HttpResponseOutputParser();
+    const stream = await chatModel.pipe(parser).stream(chatLog);
 
     return {
       isStream: true,
