@@ -13,13 +13,15 @@ export abstract class AbstractBaseChatModel {
   public async postToChat(input: PostToChatInput): Promise<PostToChatResponse> {
     const { ai, messages, date, getKnowledgeCallback, endCallback } = input;
 
-    const callbackHandler = {
-      handleLLMEnd: async (_output: any, runId: string) => {
-        endCallback(_output.generations[0][0].text);
+    const callbacks = [
+      {
+        handleLLMEnd: async (_output: any, runId: string) => {
+          endCallback(_output.generations[0][0].text);
+        },
       },
-    };
+    ];
 
-    const chatModel = this.getChatModelInstance(input.options, callbackHandler);
+    const chatModel = this.getChatModelInstance(input.options, callbacks);
 
     let historySeed = [];
     if (ai.seed) {

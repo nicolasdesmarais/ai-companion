@@ -13,12 +13,12 @@ export class CohereModel extends AbstractBaseChatModel implements ChatModel {
 
   protected getChatModelInstance(
     options: any,
-    callbackHandler: any
+    callbacks: any
   ): BaseLangChainChatModel {
     return new ChatCohere({
       apiKey: process.env.COHERE_API_KEY,
       model: "command",
-      callbacks: [callbackHandler],
+      callbacks,
       ...options,
     });
   }

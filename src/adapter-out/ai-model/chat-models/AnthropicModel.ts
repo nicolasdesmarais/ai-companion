@@ -11,13 +11,10 @@ export class AnthropicModel extends AbstractBaseChatModel implements ChatModel {
     return model.id === MODEL_ID;
   }
 
-  protected getChatModelInstance(
-    options: any,
-    callbackHandler: any
-  ): BaseChatModel {
+  protected getChatModelInstance(options: any, callbacks: any): BaseChatModel {
     return new ChatAnthropicMessages({
       anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-      callbacks: [callbackHandler],
+      callbacks,
       ...options,
     });
   }
