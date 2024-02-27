@@ -39,7 +39,7 @@ export const ChatMessages = ({
   }, []);
 
   useEffect(() => {
-    scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
+    scrollRef?.current?.scrollIntoView();
   }, [messages.length]);
 
   const onInspect = (message: any, index: number) => {
