@@ -244,7 +244,9 @@ export const Sidebar = ({
       )}
     >
       <div className="space-y-2 flex flex-col items-center">
-        <OrgSwitcher />
+        <div className="h-16 w-16">
+          <OrgSwitcher />
+        </div>
         <div
           onClick={() => onNavigate(`/chat/`, false)}
           className={cn(

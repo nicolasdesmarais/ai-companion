@@ -3,7 +3,6 @@
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 
 import {
   DropdownMenu,
@@ -16,9 +15,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ArrowLeftRight, Plus, Settings } from "lucide-react";
 
+const itemClass =
+  "text-muted-foreground text-xs p-3 flex w-full font-medium cursor-pointer hover:text-primary hover:bg-primary/10 rounded-lg group";
+
 export const OrgSwitcher = () => {
   const clerk = useClerk();
-  const router = useRouter();
   const { has } = useAuth();
 
   let role = "User";
@@ -32,28 +33,26 @@ export const OrgSwitcher = () => {
   if (!clerk.loaded) return null;
   if (!clerk.organization?.id) return null;
 
-  console.log(clerk.session);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="w-16">
-          <Image
-            alt={clerk.organization?.name}
-            src={clerk.organization?.imageUrl}
-            width="64"
-            height="64"
-            className="rounded-lg"
-          />
-        </button>
+        <Image
+          alt={clerk.organization?.name}
+          src={clerk.organization?.imageUrl}
+          width="64"
+          height="64"
+          className="rounded-lg cursor-pointer"
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
         side="right"
-        sideOffset={20}
-        alignOffset={-20}
+        sideOffset={10}
+        alignOffset={10}
+        className="mt-2"
       >
         <DropdownMenuLabel>
-          <div className="flex flex-row">
+          <div className="flex flex-row pl-4 pt-4 mb-1">
             <Image
               alt={clerk.organization?.name}
               src={clerk.organization?.imageUrl}
@@ -61,15 +60,15 @@ export const OrgSwitcher = () => {
               height="44"
               className="rounded-lg"
             />
-            <div>
+            <div className="pl-4">
               <div>{clerk.organization?.name}</div>
-              <div>{role}</div>
+              <div className="text-muted-foreground text-xs mt-1">{role}</div>
             </div>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <button
+          <div className={itemClass}>
+            <DropdownMenuItem
               onClick={() =>
                 clerk.openOrganizationProfile({
                   appearance: {
@@ -77,40 +76,46 @@ export const OrgSwitcher = () => {
                   },
                 })
               }
+              className="cursor-pointer"
             >
-              <Settings className="h-5 w-5" />
+              <Settings className="h-4 w-4 mr-6 ml-2" />
               Manage Organization
-            </button>
-          </DropdownMenuItem>
+            </DropdownMenuItem>
+          </div>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         {clerk.user?.organizationMemberships?.map(
           (membership) =>
             membership.organization.id !== clerk.organization?.id && (
-              <DropdownMenuItem asChild key={membership.id}>
-                <button
+              <div className={itemClass} key={membership.id}>
+                <DropdownMenuItem
                   onClick={() =>
                     clerk.setActive({
                       session: clerk.session?.id,
                       organization: membership.organization.id,
                     })
                   }
+                  className="w-full cursor-pointer"
                 >
                   <Image
                     alt={membership.organization.name}
                     src={membership.organization.imageUrl}
                     width="32"
                     height="32"
-                    className="rounded-lg"
+                    className="rounded-lg mr-4"
                   />
-                  {membership.organization.name}
-                  <ArrowLeftRight className="h-5 w-5" />
-                </button>
-              </DropdownMenuItem>
+                  <div className="flex justify-between w-full">
+                    <div>{membership.organization.name}</div>
+                    <div>
+                      <ArrowLeftRight className="h-5 w-5 invisible group-hover:visible" />
+                    </div>
+                  </div>
+                </DropdownMenuItem>
+              </div>
             )
         )}
-        <DropdownMenuItem asChild>
-          <button
+        <div className={itemClass}>
+          <DropdownMenuItem
             onClick={() =>
               clerk.openCreateOrganization({
                 appearance: {
@@ -118,11 +123,14 @@ export const OrgSwitcher = () => {
                 },
               })
             }
+            className="cursor-pointer"
           >
-            <Plus className="h-5 w-5" />
-            Create Organization
-          </button>
-        </DropdownMenuItem>
+            <div className="flex">
+              <Plus className="h-5 w-5 mr-6 ml-2" />
+              Create Organization
+            </div>
+          </DropdownMenuItem>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );
