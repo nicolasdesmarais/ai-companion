@@ -24,7 +24,8 @@ export class CohereModel extends AbstractBaseChatModel implements ChatModel {
   protected async createStream(
     input: PostToChatInput
   ): Promise<ReadableStream> {
-    const { ai, messages, aiModel, date, getKnowledgeCallback } = input;
+    const { chat, messages, aiModel, date, getKnowledgeCallback } = input;
+    const { ai } = chat;
 
     const engineeredPrompt = this.createEngineeredPrompt(ai, date);
 

@@ -1,6 +1,7 @@
+import { ChatMessageDto } from "@/src/domain/models/Chats";
+import { KnowledgeSummary } from "@/src/domain/models/DataSources";
 import { MemoryManager } from "@/src/lib/memory";
 import { getTokenLength } from "@/src/lib/tokenCount";
-import { Message } from "@prisma/client";
 
 export interface VectorKnowledgeResponse {
   knowledge: string;
@@ -10,48 +11,22 @@ export interface VectorKnowledgeResponse {
 export class VectorDatabaseAdapter {
   public async getKnowledge(
     prompt: string,
-    history: Message[],
-    dataSources: any[],
+    history: ChatMessageDto[],
+    aiKnowledgeSummary: KnowledgeSummary,
     availTokens: number
   ): Promise<VectorKnowledgeResponse> {
-    if (dataSources.length === 0) {
+    const { knowledgeIds, tokenCount, documentCount } = aiKnowledgeSummary;
+    if (knowledgeIds.length === 0 || tokenCount === 0) {
       return { knowledge: "", docMeta: [] };
     }
 
-    const knowledgeIds: string[] = dataSources
-      .map((ds) => ds.dataSource.knowledges.map((k: any) => k.knowledgeId))
-      .reduce((acc, curr) => acc.concat(curr), []);
-
-    const { totalDocs, totalTokens } = dataSources.reduce(
-      (dsAcc, ds) => {
-        const { docs, tokens } = ds.dataSource.knowledges.reduce(
-          (acc: any, k: any) => {
-            if (k.knowledge.tokenCount && k.knowledge.documentCount) {
-              acc.tokens += k.knowledge.tokenCount;
-              acc.docs += k.knowledge.documentCount;
-              return acc;
-            } else {
-              return { docs: NaN, tokens: NaN };
-            }
-          },
-          { docs: 0, tokens: 0 }
-        );
-        dsAcc.totalDocs += docs;
-        dsAcc.totalTokens += tokens;
-        return dsAcc;
-      },
-      { totalDocs: 0, totalTokens: 0 }
-    );
-    const docDensity = totalTokens / totalDocs;
+    const docDensity = tokenCount / documentCount;
     let estDocsNeeded = Math.ceil(availTokens / docDensity) || 100;
     estDocsNeeded = Math.min(10000, Math.max(estDocsNeeded, 1));
 
     let query = prompt;
-    if (history.length > 1) {
-      query = `${history[history.length - 2].content}\n${query}`;
-    }
-    if (history.length > 2) {
-      query = `${history[history.length - 3].content}\n${query}`;
+    for (let i = 2; i <= Math.min(3, history.length); i++) {
+      query = `${history[history.length - i].content}\n${query}`;
     }
 
     const memoryManager = await MemoryManager.getInstance();
@@ -64,8 +39,7 @@ export class VectorDatabaseAdapter {
     let knowledge = "",
       docMeta = [];
     if (!!similarDocs && similarDocs.length !== 0) {
-      for (let i = 0; i < similarDocs.length; i++) {
-        const doc = similarDocs[i];
+      for (const doc of similarDocs) {
         const newKnowledge = `${knowledge}\n${doc.pageContent}`;
         const newKnowledgeTokens = getTokenLength(newKnowledge);
         if (newKnowledgeTokens < availTokens) {

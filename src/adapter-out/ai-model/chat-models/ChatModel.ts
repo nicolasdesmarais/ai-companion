@@ -1,5 +1,6 @@
 import { AIModel } from "@/src/domain/models/AIModel";
-import { AI, Chat, Message } from "@prisma/client";
+import { ChatForWriteDto, ChatMessageDto } from "@/src/domain/models/Chats";
+import { ChatCallbackContext } from "@/src/domain/services/ChatService";
 import { VectorKnowledgeResponse } from "../../knowledge/vector-database/VectorDatabaseAdapter";
 
 export interface ChatModel {
@@ -9,17 +10,22 @@ export interface ChatModel {
 }
 
 export interface PostToChatInput {
-  ai: AI;
-  chat: Chat;
-  messages: Message[];
+  chat: ChatForWriteDto;
+  messages: ChatMessageDto[];
   aiModel: AIModel;
   prompt: string;
   date: string;
   options: any;
+  callbackContext: ChatCallbackContext;
   getKnowledgeCallback: (
+    input: PostToChatInput,
     tokensUsed: number
   ) => Promise<VectorKnowledgeResponse>;
-  endCallback: (answer: string, externalChatId?: string) => void;
+  endChatCallback: (
+    callbackContext: ChatCallbackContext,
+    answer: string,
+    externalChatId?: string
+  ) => Promise<void>;
 }
 
 export interface PostToChatResponse {

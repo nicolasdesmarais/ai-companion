@@ -7,15 +7,18 @@ import vectorDatabaseAdapter, {
   VectorKnowledgeResponse,
 } from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 
+import { PostToChatInput } from "@/src/adapter-out/ai-model/chat-models/ChatModel";
 import { ChatRepositoryImpl } from "@/src/adapter-out/repositories/ChatRepositoryImpl";
-import { ChatDetailDto } from "@/src/domain/models/Chats";
+import {
+  ChatDetailDto,
+  ChatForWriteDto,
+  ChatMessageDto,
+} from "@/src/domain/models/Chats";
 import prismadb from "@/src/lib/prismadb";
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { SystemMessage } from "@langchain/core/messages";
 import { Prisma, Role } from "@prisma/client";
-import { JsonObject } from "@prisma/client/runtime/library";
-import axios from "axios";
 import { ChatSecurityService } from "../../security/services/ChatSecurityService";
 import {
   BadRequestError,
@@ -25,6 +28,7 @@ import {
 import { ChatRepository } from "../ports/outgoing/ChatRepository";
 import aiModelService from "./AIModelService";
 import aiService from "./AIService";
+import knowledgeService from "./KnowledgeService";
 
 const BUFFER_TOKENS = 200;
 
@@ -66,6 +70,16 @@ const getChatResponseSelect: Prisma.ChatSelect = {
   },
 };
 
+export interface ChatCallbackContext {
+  chatId: string;
+  userId: string;
+  start: number;
+  endSetup: number;
+  endKnowledge: number;
+  recordedTokensUsed: number;
+  knowledgeMeta?: any;
+}
+
 export class ChatService {
   constructor(private chatRepository: ChatRepository) {}
 
@@ -76,6 +90,23 @@ export class ChatService {
     const chat = await this.chatRepository.getById(chatId);
 
     const hasPermission = ChatSecurityService.canReadChat(
+      authorizationContext,
+      chat
+    );
+    if (!hasPermission) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    return chat;
+  }
+
+  private async getChatForWrite(
+    authorizationContext: AuthorizationContext,
+    chatId: string
+  ): Promise<ChatForWriteDto> {
+    const chat = await this.chatRepository.getByIdForWrite(chatId);
+
+    const hasPermission = ChatSecurityService.canWriteChat(
       authorizationContext,
       chat
     );
@@ -165,92 +196,64 @@ export class ChatService {
     return chat;
   }
 
-  public async updateChat(
+  public async addMessageToChat(
     chatId: string,
     userId: string,
     content: string,
     role: Role,
     externalChatId?: string,
     metadata?: any
-  ) {
-    const chat = await prismadb.chat.update({
-      where: {
-        id: chatId,
-        userId,
-      },
-      include: {
-        ai: {
-          include: {
-            dataSources: {
-              include: {
-                dataSource: {
-                  include: {
-                    knowledges: {
-                      include: {
-                        knowledge: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        messages: {
-          orderBy: {
-            createdAt: "asc",
-          },
-        },
-      },
-      data: {
-        externalId: externalChatId,
-        messagedAt: new Date(),
-        messages: {
-          create: {
-            content: content,
-            role,
-            userId,
-            metadata,
-          },
+  ): Promise<ChatForWriteDto> {
+    return await this.chatRepository.updateChat(chatId, {
+      externalId: externalChatId,
+      messagedAt: new Date(),
+      messages: {
+        create: {
+          content,
+          role,
+          userId,
+          metadata,
         },
       },
     });
-
-    return chat;
   }
 
   public async getTestChat(
+    chatId: string,
     aiId: string,
+    orgId: string,
     userId: string,
-    messages: any[],
+    messages: ChatMessageDto[],
     prompt: string
-  ) {
+  ): Promise<ChatForWriteDto> {
     const ai = await prismadb.aI.findUnique({
       where: {
         id: aiId,
       },
-      include: {
-        dataSources: {
-          include: {
-            dataSource: {
-              include: {
-                knowledges: {
-                  include: {
-                    knowledge: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
     });
-    const chat = { ai, messages: messages || [] };
+    const chat = {
+      id: chatId,
+      orgId,
+      userId,
+      messages: messages || [],
+      name: "Test Chat",
+      summary: "",
+      pinPosition: null,
+      ai: {
+        id: aiId,
+        name: ai?.name || "Test AI",
+        src: "",
+        description: "",
+        userId: ai?.userId || "",
+        userName: "",
+        modelId: "",
+      },
+    };
     chat.messages.push({
       content: prompt,
       role: Role.user,
-      userId,
     });
+
     return chat;
   }
 
@@ -280,39 +283,31 @@ export class ChatService {
   }
 
   public async postToChat(
+    authorizationContext: AuthorizationContext,
     chatId: string,
-    userId: string,
     request: CreateChatRequest
   ) {
-    const { prompt, date, messages, aiId } = request;
-
     const start = performance.now();
-    let endSetup = start,
-      endKnowledge = start,
-      recordedTokensUsed = 0,
-      knowledgeMeta: any,
-      chat: any;
 
-    if (chatId === "test-chat") {
-      if (!aiId) {
-        throw new Error("AI id not found");
-      }
-      chat = await this.getTestChat(aiId, userId, messages || [], prompt);
-    } else {
-      // Save prompt as a new message to chat
-      chat = await this.updateChat(chatId, userId, request.prompt, Role.user);
-    }
+    const { prompt, date } = request;
+    const { userId } = authorizationContext;
 
-    if (!chat) {
-      throw new EntityNotFoundError(`Chat with id ${chatId} not found`);
-    }
+    const chatCallbackContext: ChatCallbackContext = {
+      chatId,
+      userId,
+      start,
+      endSetup: start,
+      endKnowledge: start,
+      recordedTokensUsed: 0,
+    };
 
-    const model = await aiModelService.findAIModelById(chat.ai.modelId);
-    if (!model) {
-      throw new EntityNotFoundError(
-        `AI model with id ${chat.ai.modelId} not found`
-      );
-    }
+    const chat = await this.retrieveChatAndAddMessage(
+      authorizationContext,
+      request,
+      chatId
+    );
+
+    const aiModel = await aiModelService.getAIModelById(chat.ai.modelId);
 
     let options = {} as any;
     Object.entries(chat.ai.options || {}).forEach(([key, value]) => {
@@ -321,98 +316,12 @@ export class ChatService {
       }
     });
 
-    const endCallback = async (answer: string, externalChatId?: string) => {
-      if (chatId !== "test-chat") {
-        const end = performance.now();
-        const setupTime = Math.round(endSetup - start);
-        const knowledgeTime = Math.round(endKnowledge - endSetup);
-        const llmTime = Math.round(end - endKnowledge);
-        const totalTime = Math.round(end - start);
-        await this.updateChat(
-          chatId,
-          userId,
-          answer,
-          Role.system,
-          externalChatId,
-          {
-            setupTime,
-            knowledgeTime,
-            llmTime,
-            totalTime,
-            knowledgeMeta,
-            tokensUsed: recordedTokensUsed,
-          }
-        );
-      }
-    };
-
-    const chatModel = aiModelService.getChatModelInstance(model);
+    const chatModel = aiModelService.getChatModelInstance(aiModel);
     if (!chatModel) {
-      throw new Error(`Chat model with id ${model.id} not found`);
+      throw new Error(`Chat model with id ${aiModel.id} not found`);
     }
 
-    endSetup = performance.now();
-
-    const getKnowledgeCallback = async (
-      tokensUsed: number
-    ): Promise<VectorKnowledgeResponse> => {
-      let bootstrapKnowledge;
-      if (chat.ai.dataSources.length === 1) {
-        if (chat.ai.dataSources[0].dataSource.knowledges.length === 1) {
-          const meta = chat.ai.dataSources[0].dataSource.knowledges[0].knowledge
-            .metadata as any;
-          if (
-            meta &&
-            meta.mimeType &&
-            meta.totalTokenCount &&
-            meta.mimeType === "text/plain"
-          ) {
-            bootstrapKnowledge = {
-              ...chat.ai.dataSources[0].dataSource.knowledges[0].knowledge,
-              ...meta,
-            };
-          }
-        }
-      }
-
-      const questionTokens = getTokenLength(prompt);
-      const answerTokens = ((chat.ai.options as JsonObject)?.maxTokens ||
-        model.options.maxTokens.default) as number;
-
-      const remainingTokens =
-        model.contextSize -
-        answerTokens -
-        questionTokens -
-        tokensUsed -
-        BUFFER_TOKENS;
-
-      let knowledgeResponse: VectorKnowledgeResponse = {
-        knowledge: "",
-        docMeta: [],
-      };
-      if (
-        bootstrapKnowledge?.blobUrl &&
-        remainingTokens > bootstrapKnowledge.totalTokenCount
-      ) {
-        const resp = await axios.get(bootstrapKnowledge.blobUrl);
-        if (resp.status === 200) {
-          knowledgeResponse.knowledge = resp.data;
-        }
-      }
-      if (!knowledgeResponse.knowledge) {
-        const vectorKnowledge = await vectorDatabaseAdapter.getKnowledge(
-          prompt,
-          chat.messages,
-          chat.ai.dataSources,
-          remainingTokens
-        );
-        knowledgeResponse.knowledge = vectorKnowledge.knowledge;
-      }
-
-      endKnowledge = performance.now();
-      recordedTokensUsed = tokensUsed;
-      return knowledgeResponse;
-    };
+    chatCallbackContext.endSetup = performance.now();
 
     //TODO: fix timeout for long chat history
     let prunedMessages = chat.messages;
@@ -420,29 +329,187 @@ export class ChatService {
       prunedMessages = prunedMessages.slice(prunedMessages.length - 60);
     }
     return await chatModel.postToChat({
-      ai: chat.ai,
       chat,
       messages: prunedMessages,
-      aiModel: model,
+      aiModel,
       prompt,
       date,
       options,
-      getKnowledgeCallback,
-      endCallback,
+      callbackContext: chatCallbackContext,
+      getKnowledgeCallback: this.getKnowledgeCallback,
+      endChatCallback: this.endChatCallback,
     });
   }
 
-  public async getKnowledge(
+  private async retrieveChatAndAddMessage(
+    authorizationContext: AuthorizationContext,
     request: CreateChatRequest,
-    userId: string,
+    chatId: string
+  ): Promise<ChatForWriteDto> {
+    const { prompt, date, messages, aiId } = request;
+    const { orgId, userId } = authorizationContext;
+
+    let chat: ChatForWriteDto;
+    if (chatId === "test-chat") {
+      if (!aiId) {
+        throw new Error("AI id not found");
+      }
+      chat = await this.getTestChat(
+        chatId,
+        aiId,
+        orgId,
+        userId,
+        messages || [],
+        prompt
+      );
+    } else {
+      // Retrieve chat to perform authorization checks
+      await this.getChatForWrite(authorizationContext, chatId);
+
+      // Save prompt as a new message to chat
+      chat = await this.addMessageToChat(
+        chatId,
+        userId,
+        request.prompt,
+        Role.user
+      );
+    }
+    return chat;
+  }
+
+  private async endChatCallback(
+    context: ChatCallbackContext,
+    answer: string,
+    externalChatId?: string
+  ): Promise<void> {
+    const {
+      chatId,
+      userId,
+      start,
+      endSetup,
+      endKnowledge,
+      recordedTokensUsed,
+      knowledgeMeta,
+    } = context;
+
+    if (chatId !== "test-chat") {
+      const end = performance.now();
+      const setupTime = Math.round(endSetup - start);
+      const knowledgeTime = Math.round(endKnowledge - endSetup);
+      const llmTime = Math.round(end - endKnowledge);
+      const totalTime = Math.round(end - start);
+      await chatService.addMessageToChat(
+        chatId,
+        userId,
+        answer,
+        Role.system,
+        externalChatId,
+        {
+          setupTime,
+          knowledgeTime,
+          llmTime,
+          totalTime,
+          knowledgeMeta,
+          tokensUsed: recordedTokensUsed,
+        }
+      );
+    }
+  }
+
+  private async getKnowledgeCallback(
+    input: PostToChatInput,
+    tokensUsed: number
+  ): Promise<VectorKnowledgeResponse> {
+    const { chat, messages, aiModel, prompt, callbackContext } = input;
+    const { ai } = chat;
+
+    // let bootstrapKnowledge;
+    // if (chat.ai.dataSources.length === 1) {
+    //   if (chat.ai.dataSources[0].dataSource.knowledges.length === 1) {
+    //     const meta = chat.ai.dataSources[0].dataSource.knowledges[0].knowledge
+    //       .metadata as any;
+    //     if (
+    //       meta &&
+    //       meta.mimeType &&
+    //       meta.totalTokenCount &&
+    //       meta.mimeType === "text/plain"
+    //     ) {
+    //       bootstrapKnowledge = {
+    //         ...chat.ai.dataSources[0].dataSource.knowledges[0].knowledge,
+    //         ...meta,
+    //       };
+    //     }
+    //   }
+    // }
+
+    const questionTokens = getTokenLength(prompt);
+
+    const answerTokens = (ai.options?.maxTokens ??
+      aiModel.options.maxTokens.default) as number;
+
+    const remainingTokens =
+      aiModel.contextSize -
+      answerTokens -
+      questionTokens -
+      tokensUsed -
+      BUFFER_TOKENS;
+
+    let knowledgeResponse: VectorKnowledgeResponse = {
+      knowledge: "",
+      docMeta: [],
+    };
+    // if (
+    //   bootstrapKnowledge?.blobUrl &&
+    //   remainingTokens > bootstrapKnowledge.totalTokenCount
+    // ) {
+    //   const resp = await axios.get(bootstrapKnowledge.blobUrl);
+    //   if (resp.status === 200) {
+    //     knowledgeResponse.knowledge = resp.data;
+    //   }
+    // }
+
+    const knowledgeSummary = await knowledgeService.getAiKnowledgeSummary(
+      ai.id
+    );
+
+    if (!knowledgeResponse.knowledge) {
+      const vectorKnowledge = await vectorDatabaseAdapter.getKnowledge(
+        prompt,
+        messages,
+        knowledgeSummary,
+        remainingTokens
+      );
+      knowledgeResponse.knowledge = vectorKnowledge.knowledge;
+    }
+
+    callbackContext.endKnowledge = performance.now();
+    callbackContext.recordedTokensUsed = tokensUsed;
+    return knowledgeResponse;
+  }
+
+  public async getKnowledge(
+    authorizationContext: AuthorizationContext,
+    request: CreateChatRequest,
     tokensUsed: number
   ) {
-    const { prompt, messages, aiId } = request;
+    const { orgId, userId } = authorizationContext;
+    const { prompt, aiId } = request;
+
+    const messages = request.messages || [];
 
     if (!aiId) {
       throw new Error("AI id not found");
     }
-    const chat = await this.getTestChat(aiId, userId, messages || [], prompt);
+
+    const chat = await this.getTestChat(
+      "test-chat",
+      aiId,
+      orgId,
+      userId,
+      messages || [],
+      prompt
+    );
+
     if (!chat || !chat.ai) {
       throw new EntityNotFoundError(`AI with id ${aiId} not found`);
     }
@@ -453,7 +520,7 @@ export class ChatService {
       );
     }
     const questionTokens = getTokenLength(prompt);
-    const answerTokens = ((chat.ai.options as JsonObject)?.maxTokens ||
+    const answerTokens = (chat.ai.options?.maxTokens ||
       model.options.maxTokens.default) as number;
 
     const remainingTokens =
@@ -463,10 +530,14 @@ export class ChatService {
       tokensUsed -
       BUFFER_TOKENS;
 
+    const knowledgeSummary = await knowledgeService.getAiKnowledgeSummary(
+      chat.ai.id
+    );
+
     const vectorKnowledge = await vectorDatabaseAdapter.getKnowledge(
       prompt,
-      chat.messages,
-      chat.ai.dataSources,
+      messages,
+      knowledgeSummary,
       remainingTokens
     );
     return vectorKnowledge;
@@ -519,15 +590,7 @@ export class ChatService {
     authorizationContext: AuthorizationContext,
     chatId: string
   ) {
-    const chat = await this.chatRepository.getById(chatId);
-
-    const hasPermission = ChatSecurityService.canWriteChat(
-      authorizationContext,
-      chat
-    );
-    if (!hasPermission) {
-      throw new ForbiddenError("Forbidden");
-    }
+    const chat = await this.getChatForWrite(authorizationContext, chatId);
 
     await this.chatRepository.deleteChat(chatId);
 

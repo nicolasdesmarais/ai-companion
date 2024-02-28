@@ -12,6 +12,7 @@ import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
+import { EntityNotFoundError } from "../errors/Errors";
 import { AIModel } from "../models/AIModel";
 import { AIModelRepository } from "../ports/outgoing/AIModelRepository";
 
@@ -48,6 +49,14 @@ export class AIModelService {
 
   public findAIModelById(id: string): AIModel | null {
     return this.aiModelRepository.findById(id);
+  }
+
+  public getAIModelById(id: string): AIModel {
+    const model = this.aiModelRepository.findById(id);
+    if (!model) {
+      throw new EntityNotFoundError(`AIModel with id ${id} not found`);
+    }
+    return model;
   }
 
   public getChatModelInstance(model: AIModel): ChatModel | null {

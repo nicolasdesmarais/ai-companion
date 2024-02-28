@@ -32,10 +32,14 @@ async function getHandler(
 
 async function postHandler(
   request: Request,
-  context: { params: { chatId: string }; orgId: string; userId: string }
+  context: {
+    params: { chatId: string };
+    authorizationContext: AuthorizationContext;
+  }
 ) {
-  const { params, userId } = context;
+  const { params, authorizationContext } = context;
   const chatId = params.chatId;
+  const { userId } = authorizationContext;
 
   const chatRequest: CreateChatRequest = await request.json();
 
@@ -47,8 +51,8 @@ async function postHandler(
   }
 
   const chatResponse = await chatService.postToChat(
+    authorizationContext,
     chatId,
-    userId,
     chatRequest
   );
 

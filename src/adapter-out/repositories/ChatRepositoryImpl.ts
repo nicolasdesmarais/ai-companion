@@ -1,5 +1,6 @@
 import { EntityNotFoundError } from "@/src/domain/errors/Errors";
-import { ChatDetailDto } from "@/src/domain/models/Chats";
+import { AIModelOptions } from "@/src/domain/models/AIModel";
+import { ChatDetailDto, ChatForWriteDto } from "@/src/domain/models/Chats";
 import { ChatRepository } from "@/src/domain/ports/outgoing/ChatRepository";
 import prismadb from "@/src/lib/prismadb";
 import { Prisma } from "@prisma/client";
@@ -42,15 +43,33 @@ const chatDetailSelect: Prisma.ChatSelect = {
   },
 };
 
-export class ChatRepositoryImpl implements ChatRepository {
-  public async getById(id: string): Promise<ChatDetailDto> {
-    const chat = await this.findById(id);
-    if (!chat) {
-      throw new EntityNotFoundError(`Chat with id ${id} not found`);
-    }
-    return chat;
-  }
+const chatForWriteSelect: Prisma.ChatSelect = {
+  ai: {
+    select: {
+      id: true,
+      name: true,
+      src: true,
+      description: true,
+      userId: true,
+      userName: true,
+      modelId: true,
+      options: true,
+      instructions: true,
+    },
+  },
+};
 
+const mapToChatForWriteDto = (chat: any) => {
+  return {
+    ...chat,
+    ai: {
+      ...chat.ai,
+      options: chat.ai.options as unknown as AIModelOptions,
+    },
+  };
+};
+
+export class ChatRepositoryImpl implements ChatRepository {
   public async findById(id: string): Promise<ChatDetailDto | null> {
     const chat = await prismadb.chat.findUnique({
       select: chatDetailSelect,
@@ -62,6 +81,28 @@ export class ChatRepositoryImpl implements ChatRepository {
     return chat;
   }
 
+  public async getById(id: string): Promise<ChatDetailDto> {
+    const chat = await this.findById(id);
+    if (!chat) {
+      throw new EntityNotFoundError(`Chat with id ${id} not found`);
+    }
+    return chat;
+  }
+
+  public async getByIdForWrite(id: string): Promise<ChatForWriteDto> {
+    const chat = await prismadb.chat.findUnique({
+      select: chatForWriteSelect,
+      where: {
+        id,
+      },
+    });
+
+    if (!chat) {
+      throw new EntityNotFoundError(`Chat with id ${id} not found`);
+    }
+    return mapToChatForWriteDto(chat);
+  }
+
   public async createChat(
     chat: Prisma.ChatUncheckedCreateInput
   ): Promise<ChatDetailDto> {
@@ -69,6 +110,21 @@ export class ChatRepositoryImpl implements ChatRepository {
       select: chatDetailSelect,
       data: chat,
     });
+  }
+
+  public async updateChat(
+    id: string,
+    chat: Prisma.ChatUpdateInput
+  ): Promise<ChatForWriteDto> {
+    const updatedChat = await prismadb.chat.update({
+      select: chatForWriteSelect,
+      where: {
+        id,
+      },
+      data: chat,
+    });
+
+    return mapToChatForWriteDto(updatedChat);
   }
 
   public async deleteChat(id: string): Promise<void> {

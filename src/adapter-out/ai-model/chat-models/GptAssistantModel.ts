@@ -88,7 +88,13 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
   }
 
   public async postToChat(input: PostToChatInput): Promise<PostToChatResponse> {
-    const { ai, chat, prompt, getKnowledgeCallback, endCallback } = input;
+    const {
+      ai,
+      chat,
+      prompt,
+      getKnowledgeCallback,
+      endChatCallback: endCallback,
+    } = input;
 
     if (!ai.externalId) {
       throw new Error("AI does not have an external ID");
