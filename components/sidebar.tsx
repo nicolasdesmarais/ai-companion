@@ -46,6 +46,7 @@ interface SidebarProps {
   className?: string;
   userPermissions: Permission[];
   orgId: string;
+  setOpen?: (open: boolean) => void;
 }
 
 interface Route {
@@ -105,6 +106,7 @@ export const Sidebar = ({
   className,
   userPermissions,
   orgId,
+  setOpen,
 }: SidebarProps) => {
   const { chats, fetchChats, loading } = useChats();
   const proModal = useProModal();
@@ -245,7 +247,7 @@ export const Sidebar = ({
     >
       <div className="space-y-2 flex flex-col items-center">
         <div className="h-16 w-16">
-          <OrgSwitcher />
+          <OrgSwitcher setOpen={setOpen} />
         </div>
         <div
           onClick={() => onNavigate(`/chat/`, false)}

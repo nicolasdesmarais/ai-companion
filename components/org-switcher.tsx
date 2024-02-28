@@ -13,19 +13,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import useMatchMedia from "@/hooks/use-match-media";
 import { ArrowLeftRight, Plus, Settings } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 const itemClass =
   "text-muted-foreground text-xs p-3 flex w-full font-medium cursor-pointer hover:text-primary hover:bg-primary/10 rounded-lg group";
 
-export const OrgSwitcher = () => {
+interface Props {
+  setOpen?: (open: boolean) => void;
+}
+
+export const OrgSwitcher = ({ setOpen }: Props) => {
   const clerk = useClerk();
   const { has } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const isMobile = useMatchMedia("(max-width: 768px)");
+  const isMobile = setOpen !== undefined;
 
   let role = "User";
   if (has && has({ permission: "org:sys_profile:manage" })) {
@@ -53,7 +56,7 @@ export const OrgSwitcher = () => {
         align="end"
         side={isMobile ? "top" : "right"}
         sideOffset={isMobile ? 0 : 10}
-        className="mt-2 w-full"
+        className="mt-2 w-screen md:w-full"
       >
         <DropdownMenuLabel>
           <div className="flex flex-row pl-4 pt-4 mb-1">
@@ -75,13 +78,16 @@ export const OrgSwitcher = () => {
         <DropdownMenuGroup>
           <div className={itemClass}>
             <DropdownMenuItem
-              onClick={() =>
+              onClick={() => {
+                if (isMobile) {
+                  setOpen(false);
+                }
                 clerk.openOrganizationProfile({
                   appearance: {
                     baseTheme: dark,
                   },
-                })
-              }
+                });
+              }}
               className="cursor-pointer"
             >
               <Settings className="h-4 w-4 mr-6 ml-2" />
@@ -118,7 +124,7 @@ export const OrgSwitcher = () => {
                       {membership.organization.name}
                     </div>
                     <div>
-                      <ArrowLeftRight className="h-5 w-5 ml-2 invisible group-hover:visible" />
+                      <ArrowLeftRight className="h-5 w-5 ml-2 md:invisible group-hover:visible" />
                     </div>
                   </div>
                 </DropdownMenuItem>
@@ -127,13 +133,16 @@ export const OrgSwitcher = () => {
         )}
         <div className={itemClass}>
           <DropdownMenuItem
-            onClick={() =>
+            onClick={() => {
+              if (isMobile) {
+                setOpen(false);
+              }
               clerk.openCreateOrganization({
                 appearance: {
                   baseTheme: dark,
                 },
-              })
-            }
+              });
+            }}
             className="cursor-pointer"
           >
             <div className="flex">
