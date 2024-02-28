@@ -26,13 +26,9 @@ export class VectorDatabaseAdapter {
       (dsAcc, ds) => {
         const { docs, tokens } = ds.dataSource.knowledges.reduce(
           (acc: any, k: any) => {
-            if (
-              k.knowledge.metadata &&
-              k.knowledge.metadata.totalTokenCount &&
-              k.knowledge.metadata.documentCount
-            ) {
-              acc.tokens += k.knowledge.metadata.totalTokenCount;
-              acc.docs += k.knowledge.metadata.documentCount;
+            if (k.knowledge.tokenCount && k.knowledge.documentCount) {
+              acc.tokens += k.knowledge.tokenCount;
+              acc.docs += k.knowledge.documentCount;
               return acc;
             } else {
               return { docs: NaN, tokens: NaN };
