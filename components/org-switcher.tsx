@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import useMatchMedia from "@/hooks/use-match-media";
 import { ArrowLeftRight, Plus, Settings } from "lucide-react";
 
 const itemClass =
@@ -21,6 +22,7 @@ const itemClass =
 export const OrgSwitcher = () => {
   const clerk = useClerk();
   const { has } = useAuth();
+  const isMobile = useMatchMedia("(max-width: 768px)");
 
   let role = "User";
   if (has && has({ permission: "org:sys_profile:manage" })) {
@@ -46,10 +48,9 @@ export const OrgSwitcher = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        side="right"
-        sideOffset={10}
-        alignOffset={10}
-        className="mt-2"
+        side={isMobile ? "top" : "right"}
+        sideOffset={isMobile ? 0 : 10}
+        className="mt-2 w-full"
       >
         <DropdownMenuLabel>
           <div className="flex flex-row pl-4 pt-4 mb-1">
