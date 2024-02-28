@@ -32,6 +32,7 @@ export const OrgSwitcher = () => {
   if (!clerk.loaded) return null;
   if (!clerk.organization?.id) return null;
 
+  console.log(clerk.session);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -87,7 +88,14 @@ export const OrgSwitcher = () => {
           (membership) =>
             membership.organization.id !== clerk.organization?.id && (
               <DropdownMenuItem asChild key={membership.id}>
-                <button onClick={() => {}}>
+                <button
+                  onClick={() =>
+                    clerk.setActive({
+                      session: clerk.session?.id,
+                      organization: membership.organization.id,
+                    })
+                  }
+                >
                   <Image
                     alt={membership.organization.name}
                     src={membership.organization.imageUrl}
