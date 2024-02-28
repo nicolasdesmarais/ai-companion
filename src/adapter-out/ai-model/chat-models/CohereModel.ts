@@ -1,9 +1,9 @@
 import { AIModel } from "@/src/domain/models/AIModel";
 import { ChatCohere } from "@langchain/cohere";
-import { BaseChatModel as BaseLangChainChatModel } from "@langchain/core/language_models/chat_models";
 import { HumanMessage } from "@langchain/core/messages";
+import { HttpResponseOutputParser } from "langchain/output_parsers";
 import { AbstractBaseChatModel } from "./AbstractBaseChatModel";
-import { ChatModel } from "./ChatModel";
+import { ChatModel, PostToChatInput } from "./ChatModel";
 
 const MODEL_ID = "cohere";
 
@@ -12,11 +12,7 @@ export class CohereModel extends AbstractBaseChatModel implements ChatModel {
     return model.id === MODEL_ID;
   }
 
-  protected getChatModelInstance(
-    model: AIModel,
-    options: any,
-    callbacks: any
-  ): BaseLangChainChatModel {
+  protected getChatModelInstance(model: AIModel, options: any, callbacks: any) {
     return new ChatCohere({
       apiKey: process.env.COHERE_API_KEY,
       model: "command",
@@ -25,10 +21,40 @@ export class CohereModel extends AbstractBaseChatModel implements ChatModel {
     });
   }
 
-  protected createEngineeredPromptMessage(
-    engineeredPrompt: string,
-    knowledge: string
-  ) {
-    return new HumanMessage(`${engineeredPrompt}${knowledge}\n`);
+  protected async createStream(
+    input: PostToChatInput
+  ): Promise<ReadableStream> {
+    const { ai, messages, aiModel, date, getKnowledgeCallback } = input;
+
+    const engineeredPrompt = this.createEngineeredPrompt(ai, date);
+
+    const historySeed = this.createHistorySeed(ai);
+
+    const historyMessages = this.createHistoryMessages(messages);
+
+    const tokensUsed = this.calculateTokensUsed([
+      engineeredPrompt,
+      historyMessages,
+      historySeed,
+    ]);
+
+    const knowledge = await getKnowledgeCallback(tokensUsed);
+
+    const chatLog = [
+      new HumanMessage(`${engineeredPrompt}${knowledge.knowledge}\n`),
+      ...historySeed,
+      ...historyMessages,
+    ];
+
+    const callbacks = super.getCallbacks(input);
+
+    const chatModel = this.getChatModelInstance(
+      aiModel,
+      input.options,
+      callbacks
+    );
+
+    const parser = new HttpResponseOutputParser();
+    return await chatModel.pipe(parser).stream(chatLog);
   }
 }

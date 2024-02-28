@@ -18,30 +18,24 @@ export abstract class AbstractBaseChatModel {
   ): Runnable;
 
   public async postToChat(input: PostToChatInput): Promise<PostToChatResponse> {
-    const { ai, aiModel, messages, date, getKnowledgeCallback, endCallback } =
-      input;
+    const stream = await this.createStream(input);
 
-    const callbacks = [
-      {
-        handleLLMEnd: async (_output: any, runId: string) => {
-          await endCallback(_output.generations[0][0].text);
-        },
-      },
-    ];
+    return {
+      isStream: true,
+      response: stream,
+    };
+  }
 
-    const chatModel = this.getChatModelInstance(
-      aiModel,
-      input.options,
-      callbacks
-    );
-
-    const historySeed = this.ensureAlternatingMessages(this.parseSeed(ai));
-
-    const historyMessages = this.ensureAlternatingMessages(
-      this.parseMessages(messages)
-    );
+  protected async createStream(
+    input: PostToChatInput
+  ): Promise<ReadableStream> {
+    const { ai, aiModel, messages, date, getKnowledgeCallback } = input;
 
     const engineeredPrompt = this.createEngineeredPrompt(ai, date);
+
+    const historySeed = this.createHistorySeed(ai);
+
+    const historyMessages = this.createHistoryMessages(messages);
 
     const tokensUsed = this.calculateTokensUsed([
       engineeredPrompt,
@@ -51,31 +45,36 @@ export abstract class AbstractBaseChatModel {
 
     const knowledge = await getKnowledgeCallback(tokensUsed);
 
-    const engineeredPromptMessage = this.createEngineeredPromptMessage(
-      engineeredPrompt,
-      knowledge.knowledge
-    );
-
     const chatLog = [
-      engineeredPromptMessage,
+      new SystemMessage(`${engineeredPrompt}${knowledge.knowledge}\n`),
       ...historySeed,
       ...historyMessages,
     ];
 
-    const parser = new HttpResponseOutputParser();
-    const stream = await chatModel.pipe(parser).stream(chatLog);
+    const callbacks = this.getCallbacks(input);
+    const chatModel = this.getChatModelInstance(
+      aiModel,
+      input.options,
+      callbacks
+    );
 
-    return {
-      isStream: true,
-      response: stream,
-    };
+    const parser = new HttpResponseOutputParser();
+    return await chatModel.pipe(parser).stream(chatLog);
   }
 
-  protected createEngineeredPromptMessage(
-    engineeredPrompt: string,
-    knowledge: string
-  ) {
-    return new SystemMessage(`${engineeredPrompt}${knowledge}\n`);
+  protected createEngineeredPrompt(ai: AI, date: string): string {
+    return `
+      Pretend you are ${ai.name}, ${ai.description}.
+      The user date and time is ${date}. Output format is markdown, including tables.
+      DO NOT use ${ai.name}: prefix.
+      Here are more details about your character:\n
+      ${ai.instructions}
+      Answer questions using this knowledge:\n
+    `;
+  }
+
+  protected createHistorySeed(ai: AI): (HumanMessage | AIMessage)[] {
+    return this.ensureAlternatingMessages(this.parseSeed(ai));
   }
 
   private parseSeed(ai: AI): (HumanMessage | AIMessage)[] {
@@ -94,7 +93,13 @@ export abstract class AbstractBaseChatModel {
     return isAIMessage ? new AIMessage(content) : new HumanMessage(content);
   }
 
-  private parseMessages(messages: Message[]): (HumanMessage | AIMessage)[] {
+  protected createHistoryMessages(
+    messages: Message[]
+  ): (HumanMessage | AIMessage)[] {
+    return this.ensureAlternatingMessages(this.parseMessages(messages));
+  }
+
+  protected parseMessages(messages: Message[]): (HumanMessage | AIMessage)[] {
     return messages.map((message) =>
       message.role === "user"
         ? new HumanMessage(message.content)
@@ -102,18 +107,19 @@ export abstract class AbstractBaseChatModel {
     );
   }
 
-  private createEngineeredPrompt(ai: AI, date: string): string {
-    return `
-      Pretend you are ${ai.name}, ${ai.description}.
-      The user date and time is ${date}. Output format is markdown, including tables.
-      DO NOT use ${ai.name}: prefix.
-      Here are more details about your character:\n
-      ${ai.instructions}
-      Answer questions using this knowledge:\n
-    `;
+  protected getCallbacks(input: PostToChatInput): any {
+    const { endCallback } = input;
+
+    return [
+      {
+        handleLLMEnd: async (_output: any, runId: string) => {
+          await endCallback(_output.generations[0][0].text);
+        },
+      },
+    ];
   }
 
-  private calculateTokensUsed(
+  protected calculateTokensUsed(
     elements: (string | (HumanMessage | AIMessage)[])[]
   ): number {
     return elements.reduce(
@@ -126,7 +132,7 @@ export abstract class AbstractBaseChatModel {
     );
   }
 
-  private ensureAlternatingMessages(
+  protected ensureAlternatingMessages(
     messages: (HumanMessage | AIMessage)[]
   ): (HumanMessage | AIMessage)[] {
     const result: (HumanMessage | AIMessage)[] = [];
