@@ -1,14 +1,26 @@
 import { Prisma } from "@prisma/client";
-import { ChatDetailDto, ChatForWriteDto } from "../../models/Chats";
+import {
+  ChatDetailDto,
+  ChatForWriteDto,
+  ChatMessageDto,
+} from "../../models/Chats";
 
 export interface ChatRepository {
   findById(id: string): Promise<ChatDetailDto | null>;
+
   getById(id: string): Promise<ChatDetailDto>;
+
   getByIdForWrite(id: string): Promise<ChatForWriteDto>;
+
   createChat(chat: Prisma.ChatUncheckedCreateInput): Promise<ChatDetailDto>;
-  updateChat(
+
+  addMessageToChat(
     id: string,
-    chat: Prisma.ChatUpdateInput
+    orgId: string,
+    userId: string,
+    message: ChatMessageDto,
+    externalChatId?: string
   ): Promise<ChatForWriteDto>;
+
   deleteChat(id: string): Promise<void>;
 }

@@ -72,6 +72,7 @@ const getChatResponseSelect: Prisma.ChatSelect = {
 
 export interface ChatCallbackContext {
   chatId: string;
+  orgId: string;
   userId: string;
   start: number;
   endSetup: number;
@@ -196,28 +197,6 @@ export class ChatService {
     return chat;
   }
 
-  public async addMessageToChat(
-    chatId: string,
-    userId: string,
-    content: string,
-    role: Role,
-    externalChatId?: string,
-    metadata?: any
-  ): Promise<ChatForWriteDto> {
-    return await this.chatRepository.updateChat(chatId, {
-      externalId: externalChatId,
-      messagedAt: new Date(),
-      messages: {
-        create: {
-          content,
-          role,
-          userId,
-          metadata,
-        },
-      },
-    });
-  }
-
   public async getTestChat(
     chatId: string,
     aiId: string,
@@ -290,10 +269,11 @@ export class ChatService {
     const start = performance.now();
 
     const { prompt, date } = request;
-    const { userId } = authorizationContext;
+    const { orgId, userId } = authorizationContext;
 
     const chatCallbackContext: ChatCallbackContext = {
       chatId,
+      orgId,
       userId,
       start,
       endSetup: start,
@@ -346,7 +326,7 @@ export class ChatService {
     request: CreateChatRequest,
     chatId: string
   ): Promise<ChatForWriteDto> {
-    const { prompt, date, messages, aiId } = request;
+    const { prompt, messages, aiId } = request;
     const { orgId, userId } = authorizationContext;
 
     let chat: ChatForWriteDto;
@@ -363,16 +343,24 @@ export class ChatService {
         prompt
       );
     } else {
-      // Retrieve chat to perform authorization checks
-      await this.getChatForWrite(authorizationContext, chatId);
-
       // Save prompt as a new message to chat
-      chat = await this.addMessageToChat(
+      const message: ChatMessageDto = {
+        role: Role.user,
+        content: prompt,
+      };
+
+      chat = await this.chatRepository.addMessageToChat(
         chatId,
+        orgId,
         userId,
-        request.prompt,
-        Role.user
+        message
       );
+
+      if (!chat) {
+        throw new EntityNotFoundError(
+          `Chat with id=${chatId} not found for org=${orgId} and user=${userId}`
+        );
+      }
     }
     return chat;
   }
@@ -384,6 +372,7 @@ export class ChatService {
   ): Promise<void> {
     const {
       chatId,
+      orgId,
       userId,
       start,
       endSetup,
@@ -392,28 +381,36 @@ export class ChatService {
       knowledgeMeta,
     } = context;
 
-    if (chatId !== "test-chat") {
-      const end = performance.now();
-      const setupTime = Math.round(endSetup - start);
-      const knowledgeTime = Math.round(endKnowledge - endSetup);
-      const llmTime = Math.round(end - endKnowledge);
-      const totalTime = Math.round(end - start);
-      await chatService.addMessageToChat(
-        chatId,
-        userId,
-        answer,
-        Role.system,
-        externalChatId,
-        {
-          setupTime,
-          knowledgeTime,
-          llmTime,
-          totalTime,
-          knowledgeMeta,
-          tokensUsed: recordedTokensUsed,
-        }
-      );
+    if (chatId === "test-chat") {
+      return;
     }
+
+    const end = performance.now();
+    const setupTime = Math.round(endSetup - start);
+    const knowledgeTime = Math.round(endKnowledge - endSetup);
+    const llmTime = Math.round(end - endKnowledge);
+    const totalTime = Math.round(end - start);
+
+    const message: ChatMessageDto = {
+      role: Role.system,
+      content: answer,
+      metadata: {
+        setupTime,
+        knowledgeTime,
+        llmTime,
+        totalTime,
+        knowledgeMeta,
+        tokensUsed: recordedTokensUsed,
+      },
+    };
+
+    await this.chatRepository.addMessageToChat(
+      chatId,
+      orgId,
+      userId,
+      message,
+      externalChatId
+    );
   }
 
   private async getKnowledgeCallback(

@@ -1,6 +1,10 @@
 import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import { AIModelOptions } from "@/src/domain/models/AIModel";
-import { ChatDetailDto, ChatForWriteDto } from "@/src/domain/models/Chats";
+import {
+  ChatDetailDto,
+  ChatForWriteDto,
+  ChatMessageDto,
+} from "@/src/domain/models/Chats";
 import { ChatRepository } from "@/src/domain/ports/outgoing/ChatRepository";
 import prismadb from "@/src/lib/prismadb";
 import { Prisma } from "@prisma/client";
@@ -116,16 +120,32 @@ export class ChatRepositoryImpl implements ChatRepository {
     });
   }
 
-  public async updateChat(
+  public async addMessageToChat(
     id: string,
-    chat: Prisma.ChatUpdateInput
+    orgId: string,
+    userId: string,
+    message: ChatMessageDto,
+    externalChatId?: string
   ): Promise<ChatForWriteDto> {
     const updatedChat = await prismadb.chat.update({
       select: chatForWriteSelect,
       where: {
         id,
+        orgId,
+        userId,
       },
-      data: chat,
+      data: {
+        messagedAt: new Date(),
+        externalId: externalChatId,
+        messages: {
+          create: {
+            content: message.content,
+            role: message.role,
+            userId,
+            metadata: message.metadata,
+          },
+        },
+      },
     });
 
     return mapToChatForWriteDto(updatedChat);
