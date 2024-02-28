@@ -423,25 +423,6 @@ export class ChatService {
     const { chat, messages, aiModel, prompt, callbackContext } = input;
     const { ai } = chat;
 
-    // let bootstrapKnowledge;
-    // if (chat.ai.dataSources.length === 1) {
-    //   if (chat.ai.dataSources[0].dataSource.knowledges.length === 1) {
-    //     const meta = chat.ai.dataSources[0].dataSource.knowledges[0].knowledge
-    //       .metadata as any;
-    //     if (
-    //       meta &&
-    //       meta.mimeType &&
-    //       meta.totalTokenCount &&
-    //       meta.mimeType === "text/plain"
-    //     ) {
-    //       bootstrapKnowledge = {
-    //         ...chat.ai.dataSources[0].dataSource.knowledges[0].knowledge,
-    //         ...meta,
-    //       };
-    //     }
-    //   }
-    // }
-
     const questionTokens = getTokenLength(prompt);
 
     const answerTokens = (ai.options?.maxTokens ??
@@ -454,37 +435,20 @@ export class ChatService {
       tokensUsed -
       BUFFER_TOKENS;
 
-    let knowledgeResponse: VectorKnowledgeResponse = {
-      knowledge: "",
-      docMeta: [],
-    };
-    // if (
-    //   bootstrapKnowledge?.blobUrl &&
-    //   remainingTokens > bootstrapKnowledge.totalTokenCount
-    // ) {
-    //   const resp = await axios.get(bootstrapKnowledge.blobUrl);
-    //   if (resp.status === 200) {
-    //     knowledgeResponse.knowledge = resp.data;
-    //   }
-    // }
-
     const knowledgeSummary = await knowledgeService.getAiKnowledgeSummary(
       ai.id
     );
 
-    if (!knowledgeResponse.knowledge) {
-      const vectorKnowledge = await vectorDatabaseAdapter.getKnowledge(
-        prompt,
-        messages,
-        knowledgeSummary,
-        remainingTokens
-      );
-      knowledgeResponse.knowledge = vectorKnowledge.knowledge;
-    }
+    const vectorKnowledge = await vectorDatabaseAdapter.getKnowledge(
+      prompt,
+      messages,
+      knowledgeSummary,
+      remainingTokens
+    );
 
     callbackContext.endKnowledge = performance.now();
     callbackContext.recordedTokensUsed = tokensUsed;
-    return knowledgeResponse;
+    return vectorKnowledge;
   }
 
   public async getKnowledge(
