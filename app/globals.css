@@ -119,17 +119,6 @@ body,
   margin-top: -400px;
 }
 
-.organizationPreviewTextContainer,
-.cl-organizationSwitcherTriggerIcon {
-  display: none;
-}
-
-.cl-organizationSwitcherTrigger,
-.cl-organizationSwitcherTrigger .cl-avatarBox {
-  width: 64px;
-  height: 64px;
-}
-
 .markdown-chat-message {
   white-space: normal;
 }

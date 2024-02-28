@@ -14,7 +14,7 @@ import { Permission } from "@/src/security/models/Permission";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
-import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import {
   Atom,
@@ -37,6 +37,7 @@ import {
   useSearchParams,
 } from "next/navigation";
 import { useEffect } from "react";
+import { OrgSwitcher } from "./org-switcher";
 import { ProModal } from "./pro-modal";
 import { Button } from "./ui/button";
 
@@ -243,14 +244,7 @@ export const Sidebar = ({
       )}
     >
       <div className="space-y-2 flex flex-col items-center">
-        <div className="h-16">
-          <OrganizationSwitcher
-            hidePersonal={true}
-            appearance={{
-              baseTheme: dark,
-            }}
-          />
-        </div>
+        <OrgSwitcher />
         <div
           onClick={() => onNavigate(`/chat/`, false)}
           className={cn(

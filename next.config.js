@@ -4,6 +4,7 @@ const nextConfig = {
     domains: [
       "res.cloudinary.com",
       "oaidalleapiprodscus.blob.core.windows.net",
+      "img.clerk.com",
     ],
   },
   webpack: (config, { webpack }) => {
