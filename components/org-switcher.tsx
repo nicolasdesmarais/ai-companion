@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth, useClerk } from "@clerk/nextjs";
-// import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { dark } from "@clerk/themes";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -15,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ArrowLeftRight, Plus, Settings } from "lucide-react";
 
 export const OrgSwitcher = () => {
   const clerk = useClerk();
@@ -32,7 +32,6 @@ export const OrgSwitcher = () => {
   if (!clerk.loaded) return null;
   if (!clerk.organization?.id) return null;
 
-  console.log(clerk.user?.publicMetadata);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -53,15 +52,19 @@ export const OrgSwitcher = () => {
         alignOffset={-20}
       >
         <DropdownMenuLabel>
-          <Image
-            alt={clerk.organization?.name}
-            src={clerk.organization?.imageUrl}
-            width="44"
-            height="44"
-            className="rounded-lg"
-          />
-          {clerk.organization?.name}
-          {role}
+          <div className="flex flex-row">
+            <Image
+              alt={clerk.organization?.name}
+              src={clerk.organization?.imageUrl}
+              width="44"
+              height="44"
+              className="rounded-lg"
+            />
+            <div>
+              <div>{clerk.organization?.name}</div>
+              <div>{role}</div>
+            </div>
+          </div>
         </DropdownMenuLabel>
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
@@ -74,11 +77,30 @@ export const OrgSwitcher = () => {
                 })
               }
             >
+              <Settings className="h-5 w-5" />
               Manage Organization
             </button>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
+        {clerk.user?.organizationMemberships?.map(
+          (membership) =>
+            membership.organization.id !== clerk.organization?.id && (
+              <DropdownMenuItem asChild key={membership.id}>
+                <button onClick={() => {}}>
+                  <Image
+                    alt={membership.organization.name}
+                    src={membership.organization.imageUrl}
+                    width="32"
+                    height="32"
+                    className="rounded-lg"
+                  />
+                  {membership.organization.name}
+                  <ArrowLeftRight className="h-5 w-5" />
+                </button>
+              </DropdownMenuItem>
+            )
+        )}
         <DropdownMenuItem asChild>
           <button
             onClick={() =>
@@ -89,6 +111,7 @@ export const OrgSwitcher = () => {
               })
             }
           >
+            <Plus className="h-5 w-5" />
             Create Organization
           </button>
         </DropdownMenuItem>
