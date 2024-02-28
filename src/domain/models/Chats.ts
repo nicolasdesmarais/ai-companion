@@ -19,6 +19,7 @@ export interface ChatDetailDto extends ChatSummaryDto {
 }
 
 export interface ChatForWriteDto extends ChatDetailDto {
+  externalId?: string;
   ai: ChatAiForWriteDto;
 }
 
@@ -44,4 +45,5 @@ export interface ChatAiForWriteDto extends ChatAiDto {
   modelId: string;
   options?: AIModelOptions;
   instructions?: string;
+  externalId?: string;
 }

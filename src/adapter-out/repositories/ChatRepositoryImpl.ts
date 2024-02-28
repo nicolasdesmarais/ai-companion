@@ -44,6 +44,8 @@ const chatDetailSelect: Prisma.ChatSelect = {
 };
 
 const chatForWriteSelect: Prisma.ChatSelect = {
+  ...chatDetailSelect,
+  externalId: true,
   ai: {
     select: {
       id: true,
@@ -55,6 +57,7 @@ const chatForWriteSelect: Prisma.ChatSelect = {
       modelId: true,
       options: true,
       instructions: true,
+      externalId: true,
     },
   },
 };
