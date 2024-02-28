@@ -10,7 +10,7 @@ import { usePathname } from "next/navigation";
 export const MobileSidebar = ({
   isPro,
   userPermissions,
-  orgId
+  orgId,
 }: {
   isPro: boolean;
   userPermissions: Permission[];

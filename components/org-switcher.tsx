@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import useMatchMedia from "@/hooks/use-match-media";
 import { ArrowLeftRight, Plus, Settings } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 
 const itemClass =
   "text-muted-foreground text-xs p-3 flex w-full font-medium cursor-pointer hover:text-primary hover:bg-primary/10 rounded-lg group";
@@ -22,6 +23,8 @@ const itemClass =
 export const OrgSwitcher = () => {
   const clerk = useClerk();
   const { has } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
   const isMobile = useMatchMedia("(max-width: 768px)");
 
   let role = "User";
@@ -62,7 +65,9 @@ export const OrgSwitcher = () => {
               className="rounded-lg"
             />
             <div className="pl-4">
-              <div>{clerk.organization?.name}</div>
+              <div className="truncate max-w-64">
+                {clerk.organization?.name}
+              </div>
               <div className="text-muted-foreground text-xs mt-1">{role}</div>
             </div>
           </div>
@@ -90,12 +95,15 @@ export const OrgSwitcher = () => {
             membership.organization.id !== clerk.organization?.id && (
               <div className={itemClass} key={membership.id}>
                 <DropdownMenuItem
-                  onClick={() =>
+                  onClick={() => {
                     clerk.setActive({
                       session: clerk.session?.id,
                       organization: membership.organization.id,
-                    })
-                  }
+                    });
+                    if (pathname.startsWith("/chat")) {
+                      router.push("/");
+                    }
+                  }}
                   className="w-full cursor-pointer"
                 >
                   <Image
@@ -106,9 +114,11 @@ export const OrgSwitcher = () => {
                     className="rounded-lg mr-4"
                   />
                   <div className="flex justify-between w-full">
-                    <div>{membership.organization.name}</div>
+                    <div className="truncate max-w-64">
+                      {membership.organization.name}
+                    </div>
                     <div>
-                      <ArrowLeftRight className="h-5 w-5 invisible group-hover:visible" />
+                      <ArrowLeftRight className="h-5 w-5 ml-2 invisible group-hover:visible" />
                     </div>
                   </div>
                 </DropdownMenuItem>
