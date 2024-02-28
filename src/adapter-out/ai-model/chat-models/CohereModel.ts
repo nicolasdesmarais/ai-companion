@@ -24,20 +24,27 @@ export class CohereModel extends AbstractBaseChatModel implements ChatModel {
   protected async createStream(
     input: PostToChatInput
   ): Promise<ReadableStream> {
-    const { ai, aiModel, date, getKnowledgeCallback } = input;
+    const { ai, messages, aiModel, date, getKnowledgeCallback } = input;
 
-    const engineeredPrompt = super.createEngineeredPrompt(ai, date);
+    const engineeredPrompt = this.createEngineeredPrompt(ai, date);
 
-    const historySeed = super.createHistorySeed(ai);
+    const historySeed = this.createHistorySeed(ai);
 
-    const tokensUsed = super.calculateTokensUsed([
+    const historyMessages = this.createHistoryMessages(messages);
+
+    const tokensUsed = this.calculateTokensUsed([
       engineeredPrompt,
+      historyMessages,
       historySeed,
     ]);
 
     const knowledge = await getKnowledgeCallback(tokensUsed);
 
-    const chatLog = [new HumanMessage(`${engineeredPrompt}\n`), ...historySeed];
+    const chatLog = [
+      new HumanMessage(`${engineeredPrompt}${knowledge.knowledge}\n`),
+      ...historySeed,
+      ...historyMessages,
+    ];
 
     const callbacks = super.getCallbacks(input);
 
@@ -48,11 +55,6 @@ export class CohereModel extends AbstractBaseChatModel implements ChatModel {
     );
 
     const parser = new HttpResponseOutputParser();
-    const streamOptions: any = {
-      conversationId: input.chat.id,
-      documents: knowledge.docMeta,
-    };
-
-    return await chatModel.pipe(parser).stream(chatLog, streamOptions);
+    return await chatModel.pipe(parser).stream(chatLog);
   }
 }
