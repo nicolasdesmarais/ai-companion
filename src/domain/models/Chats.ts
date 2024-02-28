@@ -46,4 +46,5 @@ export interface ChatAiForWriteDto extends ChatAiDto {
   options?: AIModelOptions;
   instructions?: string;
   externalId?: string;
+  seed?: string;
 }

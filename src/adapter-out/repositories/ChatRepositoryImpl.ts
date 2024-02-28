@@ -58,6 +58,7 @@ const chatForWriteSelect: Prisma.ChatSelect = {
       options: true,
       instructions: true,
       externalId: true,
+      seed: true,
     },
   },
 };

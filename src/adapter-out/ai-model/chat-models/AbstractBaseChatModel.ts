@@ -7,7 +7,6 @@ import {
   SystemMessage,
 } from "@langchain/core/messages";
 import { Runnable } from "@langchain/core/runnables";
-import { AI } from "@prisma/client";
 import { HttpResponseOutputParser } from "langchain/output_parsers";
 import { PostToChatInput, PostToChatResponse } from "./ChatModel";
 
@@ -15,7 +14,7 @@ export abstract class AbstractBaseChatModel {
   protected abstract getChatModelInstance(
     model: AIModel,
     options: any,
-    callbackHandler: any
+    callbacks: any
   ): Runnable;
 
   public async postToChat(input: PostToChatInput): Promise<PostToChatResponse> {
@@ -45,7 +44,7 @@ export abstract class AbstractBaseChatModel {
       historySeed,
     ]);
 
-    const knowledge = await getKnowledgeCallback(tokensUsed);
+    const knowledge = await getKnowledgeCallback(input, tokensUsed);
 
     const chatLog = [
       new SystemMessage(`${engineeredPrompt}${knowledge.knowledge}\n`),
@@ -84,7 +83,7 @@ export abstract class AbstractBaseChatModel {
     return this.ensureAlternatingMessages(this.parseSeed(ai));
   }
 
-  private parseSeed(ai: AI): (HumanMessage | AIMessage)[] {
+  private parseSeed(ai: ChatAiForWriteDto): (HumanMessage | AIMessage)[] {
     if (!ai.seed) {
       return [];
     }

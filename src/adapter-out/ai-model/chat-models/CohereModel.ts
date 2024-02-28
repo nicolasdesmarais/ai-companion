@@ -39,7 +39,7 @@ export class CohereModel extends AbstractBaseChatModel implements ChatModel {
       historySeed,
     ]);
 
-    const knowledge = await getKnowledgeCallback(tokensUsed);
+    const knowledge = await getKnowledgeCallback(input, tokensUsed);
 
     const chatLog = [
       new HumanMessage(`${engineeredPrompt}${knowledge.knowledge}\n`),
