@@ -396,7 +396,7 @@ export class ChatService {
     const end = performance.now();
     const setupTime = Math.round(endSetup - start);
     const knowledgeTime = Math.round(endKnowledge - endSetup);
-    const startLlmTime = Math.round(startChat - start);
+    const startLlmTime = Math.round(startChat - endKnowledge);
     const llmTime = Math.round(end - endKnowledge);
     const totalTime = Math.round(end - start);
 
