@@ -14,8 +14,6 @@ import { Permission } from "@/src/security/models/Permission";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
-import { UserButton } from "@clerk/nextjs";
-import { dark } from "@clerk/themes";
 import {
   Atom,
   Building,
@@ -40,6 +38,7 @@ import { useEffect } from "react";
 import { OrgSwitcher } from "./org-switcher";
 import { ProModal } from "./pro-modal";
 import { Button } from "./ui/button";
+import { UserButton } from "./user-button";
 
 interface SidebarProps {
   isPro: boolean;
@@ -341,12 +340,9 @@ export const Sidebar = ({
           </Button>
         )}
         <ModeToggle />
-        <UserButton
-          afterSignOutUrl="/"
-          appearance={{
-            baseTheme: dark,
-          }}
-        />
+        <div className="h-8 w-8">
+          <UserButton />
+        </div>
       </div>
       <ProModal orgId={orgId} />
     </div>

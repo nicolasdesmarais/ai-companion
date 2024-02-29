@@ -113,7 +113,10 @@ export const OrgSwitcher = ({ setOpen }: Props) => {
                       session: clerk.session?.id,
                       organization: membership.organization.id,
                     });
-                    if (pathname.startsWith("/chat")) {
+                    if (
+                      pathname.startsWith("/chat") ||
+                      pathname.startsWith("/ai")
+                    ) {
                       router.push("/");
                     }
                   }}
