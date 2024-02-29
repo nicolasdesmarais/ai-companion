@@ -120,10 +120,6 @@ export abstract class AbstractBaseChatModel {
 
     return [
       {
-        handleLLMStart: async (llm: any, prompts: string[]) => {
-          startChatCallback(callbackContext);
-        },
-
         handleLLMEnd: async (_output: any, runId: string) => {
           await endChatCallback(
             callbackContext,

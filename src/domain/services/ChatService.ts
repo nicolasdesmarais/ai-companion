@@ -396,7 +396,7 @@ export class ChatService {
     const end = performance.now();
     const setupTime = Math.round(endSetup - start);
     const knowledgeTime = Math.round(endKnowledge - endSetup);
-    const startLlmTime = Math.round(startChat - endKnowledge);
+    const startLlmTime = Math.round(startChat - start);
     const llmTime = Math.round(end - endKnowledge);
     const totalTime = Math.round(end - start);
 
@@ -414,7 +414,7 @@ export class ChatService {
       },
     };
 
-    await this.chatRepository.addMessageToChat(
+    await chatRepository.addMessageToChat(
       chatId,
       orgId,
       userId,
