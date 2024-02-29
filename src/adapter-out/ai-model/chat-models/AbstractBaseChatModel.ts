@@ -116,12 +116,19 @@ export abstract class AbstractBaseChatModel {
   }
 
   protected getCallbacks(input: PostToChatInput): any {
-    const { callbackContext, endChatCallback: endCallback } = input;
+    const { callbackContext, startChatCallback, endChatCallback } = input;
 
     return [
       {
+        handleLLMStart: async (llm: any, prompts: string[]) => {
+          startChatCallback(callbackContext);
+        },
+
         handleLLMEnd: async (_output: any, runId: string) => {
-          await endCallback(callbackContext, _output.generations[0][0].text);
+          await endChatCallback(
+            callbackContext,
+            _output.generations[0][0].text
+          );
         },
       },
     ];

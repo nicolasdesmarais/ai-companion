@@ -21,6 +21,7 @@ export interface PostToChatInput {
     input: PostToChatInput,
     tokensUsed: number
   ) => Promise<VectorKnowledgeResponse>;
+  startChatCallback: (callbackContext: ChatCallbackContext) => void;
   endChatCallback: (
     callbackContext: ChatCallbackContext,
     answer: string,

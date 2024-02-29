@@ -77,6 +77,7 @@ export interface ChatCallbackContext {
   start: number;
   endSetup: number;
   endKnowledge: number;
+  startChat: number;
   recordedTokensUsed: number;
   knowledgeMeta?: any;
 }
@@ -278,6 +279,7 @@ export class ChatService {
       start,
       endSetup: start,
       endKnowledge: start,
+      startChat: start,
       recordedTokensUsed: 0,
     };
 
@@ -317,6 +319,7 @@ export class ChatService {
       options,
       callbackContext: chatCallbackContext,
       getKnowledgeCallback: this.getKnowledgeCallback,
+      startChatCallback: this.startChatCallback,
       endChatCallback: this.endChatCallback,
     });
   }
@@ -365,6 +368,10 @@ export class ChatService {
     return chat;
   }
 
+  private startChatCallback(context: ChatCallbackContext): void {
+    context.startChat = performance.now();
+  }
+
   private async endChatCallback(
     context: ChatCallbackContext,
     answer: string,
@@ -377,6 +384,7 @@ export class ChatService {
       start,
       endSetup,
       endKnowledge,
+      startChat,
       recordedTokensUsed,
       knowledgeMeta,
     } = context;
@@ -388,6 +396,7 @@ export class ChatService {
     const end = performance.now();
     const setupTime = Math.round(endSetup - start);
     const knowledgeTime = Math.round(endKnowledge - endSetup);
+    const startLlmTime = Math.round(startChat - endKnowledge);
     const llmTime = Math.round(end - endKnowledge);
     const totalTime = Math.round(end - start);
 
@@ -397,6 +406,7 @@ export class ChatService {
       metadata: {
         setupTime,
         knowledgeTime,
+        startLlmTime,
         llmTime,
         totalTime,
         knowledgeMeta,
