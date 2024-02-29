@@ -45,7 +45,7 @@ export const UserButton = ({ setOpen }: Props) => {
       <DropdownMenuContent
         align="start"
         side={isMobile ? "top" : "right"}
-        sideOffset={isMobile ? 0 : 35}
+        sideOffset={isMobile ? 0 : 25}
         className="mb-2 w-[98vw] h-[99vh] relative top-[60px] left-[-4px] md:static md:w-max md:h-auto"
       >
         <div
