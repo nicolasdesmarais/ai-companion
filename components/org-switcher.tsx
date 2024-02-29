@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowLeftRight, Plus, Settings } from "lucide-react";
+import { ArrowLeftRight, Plus, Settings, X } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 const itemClass =
@@ -53,11 +53,18 @@ export const OrgSwitcher = ({ setOpen }: Props) => {
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        align="end"
+        align="start"
         side={isMobile ? "top" : "right"}
-        sideOffset={isMobile ? 0 : 10}
-        className="mt-2 w-screen md:w-full"
+        sideOffset={isMobile ? 50 : 35}
+        alignOffset={isMobile ? -30 : -10}
+        className="md:mt-2 mx-1 w-[98vw] h-[99vh] absolute top-0 left-[-32px] right-0 md:w-max md:h-auto"
       >
+        <div
+          onClick={() => setOpen && setOpen(false)}
+          className="md:hidden absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer"
+        >
+          <X className="h-4 w-4" />
+        </div>
         <DropdownMenuLabel>
           <div className="flex flex-row pl-4 pt-4 mb-1">
             <Image
