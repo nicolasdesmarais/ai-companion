@@ -3,6 +3,7 @@ import {
   KnowledgeChunkCounts,
   KnowledgeCounts,
   KnowledgeDto,
+  KnowledgeSummary,
 } from "../../models/DataSources";
 
 export interface KnowledgeRepository {
@@ -32,4 +33,6 @@ export interface KnowledgeRepository {
   getKnowledgeCounts(dataSourceId: string): Promise<KnowledgeCounts>;
 
   findDeletedKnowledgeIdsWithBlobStorageUrl(): Promise<string[]>;
+
+  getAiKnowledgeSummary(aiId: string): Promise<KnowledgeSummary>;
 }

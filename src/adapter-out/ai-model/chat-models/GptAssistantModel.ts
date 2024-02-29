@@ -88,13 +88,20 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
   }
 
   public async postToChat(input: PostToChatInput): Promise<PostToChatResponse> {
-    const { ai, chat, prompt, getKnowledgeCallback, endCallback } = input;
+    const {
+      chat,
+      prompt,
+      callbackContext,
+      getKnowledgeCallback,
+      endChatCallback: endCallback,
+    } = input;
+    const { ai } = chat;
 
     if (!ai.externalId) {
       throw new Error("AI does not have an external ID");
     }
 
-    const { knowledge } = await getKnowledgeCallback(0);
+    const { knowledge } = await getKnowledgeCallback(input, 0);
 
     let promptWithKnowledge;
     if (knowledge.length === 0) {
@@ -134,7 +141,7 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
     }
 
     console.log("Response from Chat GPT Assistant", responseText);
-    await endCallback(responseText, externalChatId);
+    await endCallback(callbackContext, responseText, externalChatId);
 
     return {
       isStream: false,

@@ -1,4 +1,5 @@
 import { AIModel } from "@/src/domain/models/AIModel";
+import { ChatAiForWriteDto, ChatMessageDto } from "@/src/domain/models/Chats";
 import { getTokenLength } from "@/src/lib/tokenCount";
 import {
   AIMessage,
@@ -6,7 +7,6 @@ import {
   SystemMessage,
 } from "@langchain/core/messages";
 import { Runnable } from "@langchain/core/runnables";
-import { AI, Message } from "@prisma/client";
 import { HttpResponseOutputParser } from "langchain/output_parsers";
 import { PostToChatInput, PostToChatResponse } from "./ChatModel";
 
@@ -14,7 +14,7 @@ export abstract class AbstractBaseChatModel {
   protected abstract getChatModelInstance(
     model: AIModel,
     options: any,
-    callbackHandler: any
+    callbacks: any
   ): Runnable;
 
   public async postToChat(input: PostToChatInput): Promise<PostToChatResponse> {
@@ -29,7 +29,8 @@ export abstract class AbstractBaseChatModel {
   protected async createStream(
     input: PostToChatInput
   ): Promise<ReadableStream> {
-    const { ai, aiModel, messages, date, getKnowledgeCallback } = input;
+    const { chat, aiModel, messages, date, getKnowledgeCallback } = input;
+    const { ai } = chat;
 
     const engineeredPrompt = this.createEngineeredPrompt(ai, date);
 
@@ -43,7 +44,7 @@ export abstract class AbstractBaseChatModel {
       historySeed,
     ]);
 
-    const knowledge = await getKnowledgeCallback(tokensUsed);
+    const knowledge = await getKnowledgeCallback(input, tokensUsed);
 
     const chatLog = [
       new SystemMessage(`${engineeredPrompt}${knowledge.knowledge}\n`),
@@ -62,7 +63,10 @@ export abstract class AbstractBaseChatModel {
     return await chatModel.pipe(parser).stream(chatLog);
   }
 
-  protected createEngineeredPrompt(ai: AI, date: string): string {
+  protected createEngineeredPrompt(
+    ai: ChatAiForWriteDto,
+    date: string
+  ): string {
     return `
       Pretend you are ${ai.name}, ${ai.description}.
       The user date and time is ${date}. Output format is markdown, including tables.
@@ -73,11 +77,13 @@ export abstract class AbstractBaseChatModel {
     `;
   }
 
-  protected createHistorySeed(ai: AI): (HumanMessage | AIMessage)[] {
+  protected createHistorySeed(
+    ai: ChatAiForWriteDto
+  ): (HumanMessage | AIMessage)[] {
     return this.ensureAlternatingMessages(this.parseSeed(ai));
   }
 
-  private parseSeed(ai: AI): (HumanMessage | AIMessage)[] {
+  private parseSeed(ai: ChatAiForWriteDto): (HumanMessage | AIMessage)[] {
     if (!ai.seed) {
       return [];
     }
@@ -94,12 +100,14 @@ export abstract class AbstractBaseChatModel {
   }
 
   protected createHistoryMessages(
-    messages: Message[]
+    messages: ChatMessageDto[]
   ): (HumanMessage | AIMessage)[] {
     return this.ensureAlternatingMessages(this.parseMessages(messages));
   }
 
-  protected parseMessages(messages: Message[]): (HumanMessage | AIMessage)[] {
+  protected parseMessages(
+    messages: ChatMessageDto[]
+  ): (HumanMessage | AIMessage)[] {
     return messages.map((message) =>
       message.role === "user"
         ? new HumanMessage(message.content)
@@ -108,12 +116,15 @@ export abstract class AbstractBaseChatModel {
   }
 
   protected getCallbacks(input: PostToChatInput): any {
-    const { endCallback } = input;
+    const { callbackContext, startChatCallback, endChatCallback } = input;
 
     return [
       {
         handleLLMEnd: async (_output: any, runId: string) => {
-          await endCallback(_output.generations[0][0].text);
+          await endChatCallback(
+            callbackContext,
+            _output.generations[0][0].text
+          );
         },
       },
     ];

@@ -19,8 +19,8 @@ async function postHandler(
   const { params, authorizationContext } = context;
   const { tokensUsed, prompt, messages } = await request.json();
   const chat = await chatService.getKnowledge(
+    authorizationContext,
     { aiId: params.aiId, date: "", prompt, messages },
-    authorizationContext.userId,
     tokensUsed
   );
   return NextResponse.json(chat, { status: 201 });
