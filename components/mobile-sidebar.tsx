@@ -6,19 +6,21 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/src/lib/utils";
 import { Permission } from "@/src/security/models/Permission";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 export const MobileSidebar = ({
   isPro,
   userPermissions,
-  orgId
+  orgId,
 }: {
   isPro: boolean;
   userPermissions: Permission[];
   orgId: string;
 }) => {
+  const [open, setOpen] = useState(false);
   const pathname = usePathname();
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger className="md:hidden pr-4" aria-controls="mobile-sidebar">
         <Menu />
       </SheetTrigger>
@@ -36,6 +38,7 @@ export const MobileSidebar = ({
               isPro={isPro}
               userPermissions={userPermissions}
               orgId={orgId}
+              setOpen={setOpen}
             />
           </div>
           {pathname.startsWith("/chat") && (

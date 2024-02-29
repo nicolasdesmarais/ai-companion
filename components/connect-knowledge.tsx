@@ -156,7 +156,7 @@ export const ConnectKnowledge = ({ goBack, form }: Props) => {
       <div className="flex flex-row-reverse w-full mt-4">
         <Button
           type="button"
-          disabled={connecting}
+          disabled={connecting || !selected}
           onClick={() => connect()}
           variant="ring"
         >

@@ -11,6 +11,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+const itemClass =
+  "text-muted-foreground text-xs p-3 flex w-full font-medium cursor-pointer hover:text-primary hover:bg-primary/10 rounded-lg group";
+
 export function ModeToggle() {
   const { setTheme } = useTheme();
 
@@ -31,16 +34,25 @@ export function ModeToggle() {
       <DropdownMenuContent
         align="end"
         side="right"
-        sideOffset={20}
+        sideOffset={40}
         alignOffset={-20}
       >
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+        <DropdownMenuItem
+          onClick={() => setTheme("light")}
+          className={itemClass}
+        >
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem
+          onClick={() => setTheme("dark")}
+          className={itemClass}
+        >
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
+        <DropdownMenuItem
+          onClick={() => setTheme("system")}
+          className={itemClass}
+        >
           System
         </DropdownMenuItem>
       </DropdownMenuContent>
