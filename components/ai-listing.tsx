@@ -87,7 +87,7 @@ export const AiListing = async ({ searchParams, scopeParam }: Props) => {
     GroupSecurityService.hasElevatedWriteAccess(authorizationContext);
 
   return (
-    <div className="h-full pr-4 pl-2 space-y-2 pt-2">
+    <div className="h-full pr-4 pl-2 space-y-2 md:pt-2">
       <PaywallBanner />
       {scope && SuperuserScopes.includes(scope) && (
         <Banner className="my-2" variant="destructive">
@@ -103,12 +103,12 @@ export const AiListing = async ({ searchParams, scopeParam }: Props) => {
       )}
       <div className="flex justify-between">
         <div className="flex flex-col md:flex-row">
-          <h1 className="text-4xl font-bold whitespace-nowrap pt-2 pr-2">
+          <h1 className="text-4xl font-bold whitespace-nowrap pt-2 pr-2 hidden md:block">
             Browse AIs
           </h1>
           <Filters />
         </div>
-        <InviteButton />
+        <InviteButton className="hidden md:flex" />
       </div>
       <SearchInput />
       {!(scope !== ListAIsRequestScope.PUBLIC || searchParams.groupId) && (

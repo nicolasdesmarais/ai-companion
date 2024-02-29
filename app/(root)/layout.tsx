@@ -26,7 +26,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
         <div className="hidden md:flex h-full w-20 flex-col fixed inset-y-0 z-40">
           <Sidebar isPro={false} userPermissions={permissions} orgId={orgId} />
         </div>
-        <main className="md:pl-20 pt-20 md:pt-0 h-full overflow-x-hidden">
+        <main className="md:pl-20 pt-16 md:pt-0 h-full overflow-x-hidden">
           {children}
         </main>
       </div>
