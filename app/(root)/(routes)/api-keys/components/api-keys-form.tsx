@@ -166,7 +166,7 @@ export const APIKeysForm: React.FC<APIKeysFormProps> = ({
   };
 
   return (
-    <div className="h-full p-4 max-w-3xl mx-auto">
+    <div className="h-full p-4 max-w-3xl mx-auto pt-12 md:pt-0">
       <PaywallBanner className="mb-3" />
       <h1 className="text-lg font-medium">API Docs</h1>
       <p className="text-sm text-muted-foreground">

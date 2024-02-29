@@ -489,7 +489,7 @@ export const AIEditor = ({
   const activeTab = tabs.find((tab) => pathname.endsWith(tab.route));
 
   return (
-    <div>
+    <div className="pt-14 md:pt-0">
       <PaywallBanner className="mt-2 max-w-3xl mx-auto" />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="pb-10">

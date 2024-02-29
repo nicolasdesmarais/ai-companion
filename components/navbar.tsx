@@ -20,6 +20,7 @@ export const Navbar = ({ isPro, userPermissions, orgId }: NavbarProps) => {
     pathname.startsWith("/public/index");
   const isEditor = pathname.startsWith("/ai");
   const isData = pathname.startsWith("/data-sources");
+  const isChat = pathname.startsWith("/chat");
   let title = null;
   if (isIndex) {
     title = "Browse AIs";
@@ -27,6 +28,18 @@ export const Navbar = ({ isPro, userPermissions, orgId }: NavbarProps) => {
     title = "Data Sources";
   } else if (isEditor) {
     title = "Edit AI";
+  }
+
+  if (isChat) {
+    return (
+      <div className="absolute pt-7 pl-5">
+        <MobileSidebar
+          isPro={isPro}
+          userPermissions={userPermissions}
+          orgId={orgId}
+        />
+      </div>
+    );
   }
 
   return (

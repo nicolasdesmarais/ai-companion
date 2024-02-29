@@ -66,8 +66,8 @@ export const DataSourcesSearch = () => {
         />
       </div>
       <Select onValueChange={(val) => setSort(val)} value={sort || "name"}>
-        <SelectTrigger className="bg-accent w-44 ml-4 flex-none">
-          Sort By:
+        <SelectTrigger className="bg-accent w-32 md:w-44 ml-4 flex-none">
+          <span className="hidden md:inline">Sort By:</span>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
