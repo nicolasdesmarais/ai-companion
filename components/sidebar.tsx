@@ -341,7 +341,7 @@ export const Sidebar = ({
         )}
         <ModeToggle />
         <div className="h-8 w-8">
-          <UserButton />
+          <UserButton setOpen={setOpen} />
         </div>
       </div>
       <ProModal orgId={orgId} />
