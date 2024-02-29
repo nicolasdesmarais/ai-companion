@@ -16,6 +16,7 @@ import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourc
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import {
   Atom,
+  BookText,
   Building,
   Building2,
   Eye,
@@ -232,6 +233,12 @@ export const Sidebar = ({
           label: "API Keys",
           pro: false,
         },
+        {
+          icon: BookText,
+          href: "/api-doc",
+          label: "API Docs",
+          pro: false,
+        },
       ],
     },
   ] as Route[];
@@ -285,15 +292,17 @@ export const Sidebar = ({
                     <DropdownMenuItem
                       key={child.href}
                       onClick={() => onNavigate(child.href, child.pro)}
-                      className="focus:bg-transparent focus:text-primary focus:outline-none"
+                      className={cn(
+                        "focus:bg-transparent focus:text-primary focus:outline-none",
+                        shouldHideRoute(child) && "hidden"
+                      )}
                     >
                       <div
                         className={cn(
                           itemClass,
                           "px-0",
                           isActive(child, pathname, searchparams) &&
-                            "bg-accent text-primary",
-                          shouldHideRoute(child) && "hidden"
+                            "bg-accent text-primary"
                         )}
                       >
                         <div className="flex flex-col items-center flex-1">
