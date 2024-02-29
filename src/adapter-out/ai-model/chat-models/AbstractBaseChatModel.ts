@@ -126,6 +126,9 @@ export abstract class AbstractBaseChatModel {
             _output.generations[0][0].text
           );
         },
+        handleLLMStart: async (llm: any, prompts: string[]) => {
+          startChatCallback(callbackContext);
+        },
       },
     ];
   }
