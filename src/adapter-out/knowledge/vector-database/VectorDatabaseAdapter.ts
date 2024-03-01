@@ -6,6 +6,8 @@ import { getTokenLength } from "@/src/lib/tokenCount";
 export interface VectorKnowledgeResponse {
   knowledge: string;
   docMeta: Record<string, any>[];
+  docsRequested: number;
+  tokensReturned: number;
 }
 
 export class VectorDatabaseAdapter {
@@ -17,12 +19,17 @@ export class VectorDatabaseAdapter {
   ): Promise<VectorKnowledgeResponse> {
     const { knowledgeIds, tokenCount, documentCount } = aiKnowledgeSummary;
     if (knowledgeIds.length === 0 || tokenCount === 0) {
-      return { knowledge: "", docMeta: [] };
+      return {
+        knowledge: "",
+        docMeta: [],
+        docsRequested: 0,
+        tokensReturned: 0,
+      };
     }
 
     const docDensity = tokenCount / documentCount;
     let estDocsNeeded = Math.ceil(availTokens / docDensity) || 100;
-    estDocsNeeded = Math.min(10000, Math.max(estDocsNeeded, 1));
+    estDocsNeeded = Math.min(100, Math.max(estDocsNeeded, 1));
 
     let query = prompt;
     for (let i = 2; i <= Math.min(3, history.length); i++) {
@@ -38,19 +45,27 @@ export class VectorDatabaseAdapter {
 
     let knowledge = "",
       docMeta = [];
-    if (!!similarDocs && similarDocs.length !== 0) {
+    let totalTokenCount = 0;
+    if (similarDocs) {
       for (const doc of similarDocs) {
-        const newKnowledge = `${knowledge}\n${doc.pageContent}`;
-        const newKnowledgeTokens = getTokenLength(newKnowledge);
-        if (newKnowledgeTokens < availTokens) {
-          knowledge = newKnowledge;
+        const documentTokens =
+          doc.metadata.tokenCount || getTokenLength(doc.pageContent);
+
+        if (documentTokens + totalTokenCount < availTokens) {
+          knowledge = `${knowledge}\n${doc.pageContent}`;
+          totalTokenCount += documentTokens;
           docMeta.push(doc.metadata);
         } else {
           break;
         }
       }
     }
-    return { knowledge, docMeta };
+    return {
+      knowledge,
+      docMeta,
+      docsRequested: estDocsNeeded,
+      tokensReturned: totalTokenCount,
+    };
   }
 
   public async deleteKnowledge(knowledgeId: string): Promise<void> {
