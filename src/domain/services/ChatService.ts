@@ -79,6 +79,8 @@ export interface ChatCallbackContext {
   endKnowledge: number;
   startChat: number;
   recordedTokensUsed: number;
+  knowledgeDocumentsRequested: number;
+  knowledgeTokensReturned: number;
   knowledgeMeta?: any;
 }
 
@@ -281,6 +283,8 @@ export class ChatService {
       endKnowledge: start,
       startChat: start,
       recordedTokensUsed: 0,
+      knowledgeDocumentsRequested: 0,
+      knowledgeTokensReturned: 0,
     };
 
     const chat = await this.retrieveChatAndAddMessage(
@@ -386,6 +390,8 @@ export class ChatService {
       endKnowledge,
       startChat,
       recordedTokensUsed,
+      knowledgeDocumentsRequested,
+      knowledgeTokensReturned,
       knowledgeMeta,
     } = context;
 
@@ -411,6 +417,8 @@ export class ChatService {
         totalTime,
         knowledgeMeta,
         tokensUsed: recordedTokensUsed,
+        knowledgeDocumentsRequested: knowledgeDocumentsRequested,
+        knowledgeTokensReturned: knowledgeTokensReturned,
       },
     };
 
@@ -449,6 +457,8 @@ export class ChatService {
 
     callbackContext.endKnowledge = performance.now();
     callbackContext.recordedTokensUsed = tokensUsed;
+    callbackContext.knowledgeDocumentsRequested = vectorKnowledge.docsRequested;
+    callbackContext.knowledgeTokensReturned = vectorKnowledge.tokensReturned;
     return vectorKnowledge;
   }
 
@@ -475,7 +485,7 @@ export class ChatService {
       prompt
     );
 
-    if (!chat || !chat.ai) {
+    if (!chat?.ai) {
       throw new EntityNotFoundError(`AI with id ${aiId} not found`);
     }
     const model = await aiModelService.findAIModelById(chat.ai.modelId);
