@@ -3,6 +3,8 @@ import { KnowledgeSummary } from "@/src/domain/models/DataSources";
 import { MemoryManager } from "@/src/lib/memory";
 import { getTokenLength } from "@/src/lib/tokenCount";
 
+const MAX_DOCS_REQUESTED = 1000;
+
 export interface VectorKnowledgeResponse {
   knowledge: string;
   docMeta: Record<string, any>[];
@@ -29,7 +31,7 @@ export class VectorDatabaseAdapter {
 
     const docDensity = tokenCount / documentCount;
     let estDocsNeeded = Math.ceil(availTokens / docDensity) || 100;
-    estDocsNeeded = Math.min(100, Math.max(estDocsNeeded, 1));
+    estDocsNeeded = Math.min(MAX_DOCS_REQUESTED, Math.max(estDocsNeeded, 1));
 
     let query = prompt;
     for (let i = 2; i <= Math.min(3, history.length); i++) {
