@@ -187,7 +187,7 @@ export const ChatHeader = ({
             <div className="flex">
               <p className="font-bold">{chat.ai.name}</p>
               {isApproved ? (
-                <BadgeCheck className="w-6 h-6 ml-1 text-ring" />
+                <BadgeCheck className="w-6 h-6 ml-1 text-ring hidden md:block" />
               ) : null}
             </div>
             <div className="items-center gap-x-2 hidden md:flex">
@@ -289,7 +289,7 @@ export const ChatHeader = ({
       </div>
 
       {ai && (
-        <div className="flex ml-14">
+        <div className="flex ml-10 md:ml-14 mt-2 md:mt-0">
           <StarRating
             value={Math.round(ai.rating)}
             count={ai.ratingCount}

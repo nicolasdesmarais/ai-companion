@@ -247,7 +247,7 @@ export const Sidebar = ({
   return (
     <div
       className={cn(
-        "p-3 flex-1 flex justify-between flex-col h-full overflow-auto",
+        "p-3 flex-1 flex justify-between flex-col h-full overflow-y-auto overflow-x-hidden",
         className
       )}
     >
