@@ -430,17 +430,11 @@ export class ChatService {
     const { chat, messages, aiModel, prompt, callbackContext } = input;
     const { ai } = chat;
 
-    const questionTokens = getTokenLength(prompt);
-
     const answerTokens = (ai.options?.maxTokens ??
       aiModel.options.maxTokens.default) as number;
 
     const remainingTokens =
-      aiModel.contextSize -
-      answerTokens -
-      questionTokens -
-      tokensUsed -
-      BUFFER_TOKENS;
+      aiModel.contextSize - answerTokens - tokensUsed - BUFFER_TOKENS;
 
     const knowledgeSummary = await knowledgeService.getAiKnowledgeSummary(
       ai.id
