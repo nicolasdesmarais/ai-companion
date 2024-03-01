@@ -4,6 +4,7 @@ import { MemoryManager } from "@/src/lib/memory";
 import { getTokenLength } from "@/src/lib/tokenCount";
 
 const MAX_DOCS_REQUESTED = 1000;
+const MINIMUM_RELEVANCE_SCORE = 0.7;
 
 export interface VectorKnowledgeResponse {
   knowledge: string;
@@ -49,11 +50,16 @@ export class VectorDatabaseAdapter {
       docMeta = [];
     let totalTokenCount = 0;
     if (similarDocs) {
-      for (const doc of similarDocs) {
+      for (const docWithRelevanceScore of similarDocs) {
+        const doc = docWithRelevanceScore[0];
+        const relevanceSore = docWithRelevanceScore[1];
         const documentTokens =
           doc.metadata.tokenCount || getTokenLength(doc.pageContent);
 
-        if (documentTokens + totalTokenCount < availTokens) {
+        if (
+          documentTokens + totalTokenCount < availTokens &&
+          relevanceSore > MINIMUM_RELEVANCE_SCORE
+        ) {
           knowledge = `${knowledge}\n${doc.pageContent}`;
           totalTokenCount += documentTokens;
           docMeta.push(doc.metadata);
