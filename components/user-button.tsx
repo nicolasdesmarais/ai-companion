@@ -83,7 +83,7 @@ export const UserButton = ({ setOpen }: Props) => {
                 },
               });
             }}
-            className="cursor-pointer"
+            className="focus:bg-transparent"
           >
             <Settings className="h-4 w-4 mr-6 ml-2" />
             Manage account
@@ -97,7 +97,7 @@ export const UserButton = ({ setOpen }: Props) => {
               }
               clerk.signOut(() => router.push("/"));
             }}
-            className="cursor-pointer"
+            className="focus:bg-transparent"
           >
             <div className="flex">
               <LogOut className="h-4 w-4 mr-6 ml-2" />
