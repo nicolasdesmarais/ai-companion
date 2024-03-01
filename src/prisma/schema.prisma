@@ -164,6 +164,7 @@ model Knowledge {
   KnowledgeChunks      KnowledgeChunk[]
   isBlobStorageDeleted Boolean               @default(false) @map(name: "is_blob_storage_deleted")
 
+  @@index([uniqueId])
   @@map("knowledge")
 }
 
@@ -258,6 +259,7 @@ model Chat {
   ai   AI     @relation(fields: [aiId], references: [id], onDelete: Cascade)
   aiId String @map(name: "ai_id")
 
+  @@index([userId])
   @@map("chats")
 }
 
