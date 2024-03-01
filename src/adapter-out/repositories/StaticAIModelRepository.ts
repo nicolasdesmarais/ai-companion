@@ -91,7 +91,15 @@ export class StaticAIModelRepository implements AIModelRepository {
       name: "LLAMA2 70B Chat (4K Context)",
       externalModelId: "llama-2-70b-chat",
       contextSize: 4096,
-      options: commonOptions,
+      options: {
+        ...commonOptions,
+        maxTokens: {
+          default: 1000,
+          max: 3500,
+          min: 1,
+          step: 1,
+        },
+      },
       provider: AIModelProvider.REPLICATE,
       isVisible: false,
       additionalData: {
@@ -105,7 +113,15 @@ export class StaticAIModelRepository implements AIModelRepository {
       name: "Llava 13b",
       externalModelId: "llava-13b",
       contextSize: 4096,
-      options: commonOptions,
+      options: {
+        ...commonOptions,
+        maxTokens: {
+          default: 1000,
+          max: 3500,
+          min: 1,
+          step: 1,
+        },
+      },
       provider: AIModelProvider.REPLICATE,
       isVisible: false,
       additionalData: {
@@ -119,7 +135,15 @@ export class StaticAIModelRepository implements AIModelRepository {
       name: "Cohere",
       externalModelId: "cohere",
       contextSize: 4096,
-      options: commonOptions,
+      options: {
+        ...commonOptions,
+        maxTokens: {
+          default: 1000,
+          max: 3500,
+          min: 1,
+          step: 1,
+        },
+      },
       provider: AIModelProvider.COHERE,
       isVisible: false,
     },
