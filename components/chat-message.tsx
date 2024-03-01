@@ -123,7 +123,7 @@ export const ChatMessage = ({
       {role !== "user" && !isLoading && (
         <Button
           onClick={onCopy}
-          className="opacity-0 group-hover:opacity-100 transition"
+          className="opacity-0 group-hover:opacity-100 transition shrink-0"
           size="icon"
           variant="ghost"
         >
@@ -133,7 +133,7 @@ export const ChatMessage = ({
       {onInspect && role !== "user" && !isLoading && (
         <Button
           onClick={onInspect}
-          className="opacity-0 group-hover:opacity-100 transition hidden md:visible"
+          className="opacity-0 group-hover:opacity-100 transition hidden md:inline-flex"
           size="icon"
           variant="ghost"
         >
