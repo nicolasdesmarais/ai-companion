@@ -14,6 +14,9 @@ import hljs from "highlight.js";
 import "highlight.js/styles/github.css";
 import { Marked } from "marked";
 import { markedHighlight } from "marked-highlight";
+import { useEffect, useState } from "react";
+
+const delay = 15;
 
 const marked = new Marked(
   markedHighlight({
@@ -47,6 +50,8 @@ export interface ChatMessageProps {
   isLoading?: boolean;
   src?: string;
   onInspect?: () => void;
+  isAnimated?: boolean;
+  scrollRef?: any;
 }
 
 export const ChatMessage = ({
@@ -55,9 +60,28 @@ export const ChatMessage = ({
   isLoading,
   src,
   onInspect,
+  isAnimated,
+  scrollRef,
 }: ChatMessageProps) => {
+  const [animatedText, setAnimatedText] = useState<string>("");
+  const [animatedIndex, setAnimatedIndex] = useState<number>(0);
   const { toast } = useToast();
   const { theme } = useTheme();
+
+  useEffect(() => {
+    if (!content || !isAnimated) {
+      return;
+    }
+    if (animatedIndex < content.length) {
+      const timeout = setTimeout(() => {
+        setAnimatedText((prevText) => prevText + content[animatedIndex]);
+        setAnimatedIndex((prevIndex) => prevIndex + 1);
+        scrollRef?.current?.scrollIntoView();
+      }, delay);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [animatedIndex, delay, animatedText, content, isAnimated]);
 
   const onCopy = () => {
     if (!content) {
@@ -70,6 +94,10 @@ export const ChatMessage = ({
       duration: 3000,
     });
   };
+
+  const renderedContent = isAnimated
+    ? animatedText + '<span class="blinking-cursor">|</span>'
+    : content;
 
   return (
     <div
@@ -86,7 +114,7 @@ export const ChatMessage = ({
           <div
             className="markdown-chat-message"
             dangerouslySetInnerHTML={{
-              __html: content ? marked.parse(content) : "",
+              __html: renderedContent ? marked.parse(renderedContent) : "",
             }}
           ></div>
         )}
