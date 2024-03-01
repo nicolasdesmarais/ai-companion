@@ -106,7 +106,7 @@ export const AIs = ({
                     </div>
                   )}
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center mt-2 leading-5">
                   {item.isApprovedByOrg ? (
                     <BadgeCheck className="w-4 h-4 mr-1 text-ring" />
                   ) : null}
