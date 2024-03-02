@@ -208,6 +208,7 @@ model AIPermissions {
   email  String
 
   @@unique([aiId, email])
+  @@index([userId])
   @@map("ai_permissions")
 }
 
