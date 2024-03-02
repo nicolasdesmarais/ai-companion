@@ -119,17 +119,6 @@ body,
   margin-top: -400px;
 }
 
-.organizationPreviewTextContainer,
-.cl-organizationSwitcherTriggerIcon {
-  display: none;
-}
-
-.cl-organizationSwitcherTrigger,
-.cl-organizationSwitcherTrigger .cl-avatarBox {
-  width: 64px;
-  height: 64px;
-}
-
 .markdown-chat-message {
   white-space: normal;
 }
@@ -187,4 +176,18 @@ body,
 }
 .text-xxs {
   font-size: 0.6rem;
+}
+
+.blinking-cursor {
+  margin-left: 5px;
+  background-color: #fff;
+  animation: blink 1s infinite;
+}
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  50.1%, 100% {
+    opacity: 0;
+  }
 }

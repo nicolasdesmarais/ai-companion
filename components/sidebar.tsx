@@ -14,10 +14,9 @@ import { Permission } from "@/src/security/models/Permission";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
-import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
-import { dark } from "@clerk/themes";
 import {
   Atom,
+  BookText,
   Building,
   Building2,
   Eye,
@@ -37,14 +36,17 @@ import {
   useSearchParams,
 } from "next/navigation";
 import { useEffect } from "react";
+import { OrgSwitcher } from "./org-switcher";
 import { ProModal } from "./pro-modal";
 import { Button } from "./ui/button";
+import { UserButton } from "./user-button";
 
 interface SidebarProps {
   isPro: boolean;
   className?: string;
   userPermissions: Permission[];
   orgId: string;
+  setOpen?: (open: boolean) => void;
 }
 
 interface Route {
@@ -104,6 +106,7 @@ export const Sidebar = ({
   className,
   userPermissions,
   orgId,
+  setOpen,
 }: SidebarProps) => {
   const { chats, fetchChats, loading } = useChats();
   const proModal = useProModal();
@@ -230,6 +233,12 @@ export const Sidebar = ({
           label: "API Keys",
           pro: false,
         },
+        {
+          icon: BookText,
+          href: "/api-doc",
+          label: "API Docs",
+          pro: false,
+        },
       ],
     },
   ] as Route[];
@@ -238,18 +247,13 @@ export const Sidebar = ({
   return (
     <div
       className={cn(
-        "p-3 flex-1 flex justify-between flex-col h-full overflow-auto",
+        "p-3 flex-1 flex justify-between flex-col h-full overflow-y-auto overflow-x-hidden",
         className
       )}
     >
       <div className="space-y-2 flex flex-col items-center">
-        <div className="h-16">
-          <OrganizationSwitcher
-            hidePersonal={true}
-            appearance={{
-              baseTheme: dark,
-            }}
-          />
+        <div className="h-16 w-16">
+          <OrgSwitcher setOpen={setOpen} />
         </div>
         <div
           onClick={() => onNavigate(`/chat/`, false)}
@@ -288,15 +292,17 @@ export const Sidebar = ({
                     <DropdownMenuItem
                       key={child.href}
                       onClick={() => onNavigate(child.href, child.pro)}
-                      className="focus:bg-transparent focus:text-primary focus:outline-none"
+                      className={cn(
+                        "focus:bg-transparent focus:text-primary focus:outline-none",
+                        shouldHideRoute(child) && "hidden"
+                      )}
                     >
                       <div
                         className={cn(
                           itemClass,
                           "px-0",
                           isActive(child, pathname, searchparams) &&
-                            "bg-accent text-primary",
-                          shouldHideRoute(child) && "hidden"
+                            "bg-accent text-primary"
                         )}
                       >
                         <div className="flex flex-col items-center flex-1">
@@ -343,12 +349,9 @@ export const Sidebar = ({
           </Button>
         )}
         <ModeToggle />
-        <UserButton
-          afterSignOutUrl="/"
-          appearance={{
-            baseTheme: dark,
-          }}
-        />
+        <div className="h-8 w-8">
+          <UserButton setOpen={setOpen} />
+        </div>
       </div>
       <ProModal orgId={orgId} />
     </div>

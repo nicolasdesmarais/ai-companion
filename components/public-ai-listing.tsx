@@ -95,7 +95,7 @@ export const PublicAiListing = async ({ searchParams, scopeParam }: Props) => {
       <div className="hidden md:flex h-full w-20 flex-col fixed inset-y-0 z-40">
         <PublicSidebar ais={data} />
       </div>
-      <main className="md:pl-20 pt-20 md:pt-0 h-full">
+      <main className="md:pl-20 md:pt-0 h-full">
         <div className="h-full pr-4 pl-2 space-y-2 pt-2">
           <div className="flex justify-between">
             <div className="flex flex-col md:flex-row">
@@ -103,7 +103,7 @@ export const PublicAiListing = async ({ searchParams, scopeParam }: Props) => {
                 Browse AIs
               </h1>
             </div>
-            <div className="w-full overflow-x-auto space-x-0.5 flex p-1">
+            <div className="w-full overflow-x-auto space-x-0.5 p-1 hidden md:flex">
               <div className="flex space-x-0.5">
                 <Link href="/sign-up" className="flex">
                   <button className={cn(btnClassNames, "rounded-l-md")}>
@@ -130,7 +130,7 @@ export const PublicAiListing = async ({ searchParams, scopeParam }: Props) => {
               <Link href="/sign-up" className="flex">
                 <Button size="sm" variant="ring" className="my-2" type="button">
                   Invite
-                  <UserPlus2 className="h-4 w-4 fill-white text-white ml-2" />
+                  <UserPlus2 className="h-4 w-4 fill-white text-white ml-2 hidden md:inline" />
                 </Button>
               </Link>
               <Link href="/sign-in" className="ml-2 flex">
@@ -141,7 +141,7 @@ export const PublicAiListing = async ({ searchParams, scopeParam }: Props) => {
                   type="button"
                 >
                   Sign in
-                  <LogIn className="h-4 w-4  text-white ml-2" />
+                  <LogIn className="h-4 w-4 text-white ml-2 hidden md:inline" />
                 </Button>
               </Link>
             </div>

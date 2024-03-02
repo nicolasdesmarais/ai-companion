@@ -20,7 +20,7 @@ export const PaywallBanner = ({ className }: Props) => {
       }
     };
     fetchUsage();
-  });
+  }, []);
 
   if (!show) {
     return null;

@@ -75,7 +75,15 @@ export const ChatMessages = ({
         />
       ))}
       {isLoading && <ChatMessage src={ai?.src} role="system" isLoading />}
-      {stream && <ChatMessage src={ai?.src} role="system" content={stream} />}
+      {stream && (
+        <ChatMessage
+          src={ai?.src}
+          role="system"
+          content={stream}
+          scrollRef={scrollRef}
+          isAnimated
+        />
+      )}
       <div ref={scrollRef} />
     </div>
   );

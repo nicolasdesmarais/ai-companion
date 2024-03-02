@@ -3,6 +3,7 @@ import {
   KnowledgeChunkCounts,
   KnowledgeCounts,
   KnowledgeDto,
+  KnowledgeSummary,
 } from "@/src/domain/models/DataSources";
 import { KnowledgeRepository } from "@/src/domain/ports/outgoing/KnowledgeRepository";
 import prismadb from "@/src/lib/prismadb";
@@ -254,5 +255,50 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
     });
 
     return deletedKnowledgeIds.map((knowledge) => knowledge.id);
+  }
+  public async getAiKnowledgeSummary(aiId: string): Promise<KnowledgeSummary> {
+    const knowledgeList = await prismadb.knowledge.findMany({
+      select: {
+        id: true,
+        documentCount: true,
+        tokenCount: true,
+      },
+      where: {
+        indexStatus: {
+          in: [
+            KnowledgeIndexStatus.COMPLETED,
+            KnowledgeIndexStatus.PARTIALLY_COMPLETED,
+          ],
+        },
+        dataSources: {
+          some: {
+            dataSource: {
+              ais: {
+                some: {
+                  aiId,
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const summary: KnowledgeSummary = knowledgeList.reduce(
+      (acc: KnowledgeSummary, knowledge) => {
+        return {
+          tokenCount: acc.tokenCount + (knowledge.tokenCount || 0),
+          documentCount: acc.documentCount + (knowledge.documentCount || 0),
+          knowledgeIds: [...acc.knowledgeIds, knowledge.id],
+        };
+      },
+      {
+        tokenCount: 0,
+        documentCount: 0,
+        knowledgeIds: [],
+      }
+    );
+
+    return summary;
   }
 }

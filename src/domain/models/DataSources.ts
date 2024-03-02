@@ -81,3 +81,9 @@ export const knowldedgeEndStatuses: KnowledgeIndexStatus[] = [
   KnowledgeIndexStatus.PARTIALLY_COMPLETED,
   KnowledgeIndexStatus.FAILED,
 ];
+
+export interface KnowledgeSummary {
+  documentCount: number;
+  tokenCount: number;
+  knowledgeIds: string[];
+}

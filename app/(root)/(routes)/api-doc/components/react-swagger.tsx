@@ -1,11 +1,11 @@
 "use client";
 
+import { Separator } from "@/components/ui/separator";
+import { Loader } from "lucide-react";
+import React from "react";
 import SwaggerUI from "swagger-ui-react";
 import "swagger-ui-react/swagger-ui.css";
 import "./custom-swagger.css";
-import React from "react";
-import { Separator } from "@/components/ui/separator";
-import { Loader } from "lucide-react";
 
 type Props = {
   getComponent: (name: string, isIndex?: boolean) => any;
@@ -29,7 +29,7 @@ class Layout extends React.Component<Props> {
       );
     }
     return (
-      <div>
+      <div className="pt-4 md:pt-0">
         <div className="pb-8">
           <div className="space-y-2 w-full mb-8 ml-4 pr-8">
             <div className="pt-8">

@@ -10,8 +10,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import useMatchMedia from "@/hooks/use-match-media";
+
+const itemClass =
+  "text-muted-foreground text-xs p-3 flex w-full font-medium cursor-pointer hover:text-primary hover:bg-primary/10 rounded-lg group";
 
 export function ModeToggle() {
+  const isMobile = useMatchMedia("(max-width: 768px)");
   const { setTheme } = useTheme();
 
   return (
@@ -31,16 +36,25 @@ export function ModeToggle() {
       <DropdownMenuContent
         align="end"
         side="right"
-        sideOffset={20}
+        sideOffset={isMobile ? 40 : 25}
         alignOffset={-20}
       >
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+        <DropdownMenuItem
+          onClick={() => setTheme("light")}
+          className={itemClass}
+        >
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem
+          onClick={() => setTheme("dark")}
+          className={itemClass}
+        >
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
+        <DropdownMenuItem
+          onClick={() => setTheme("system")}
+          className={itemClass}
+        >
           System
         </DropdownMenuItem>
       </DropdownMenuContent>
