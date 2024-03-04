@@ -111,43 +111,55 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
           <h3 className="text-lg font-medium">Share AI - {ai.name}</h3>
           {ai.visibility === AIVisibility.PUBLIC ? (
             <div>
-              <div className="flex justify-between mb-8">
-                <TwitterShareButton
-                  title={shareTitle}
-                  url={aiLink}
-                  hashtags={["appdirectai"]}
-                  related={["AppDirect"]}
-                >
-                  {" "}
-                  <XIcon size={32} round />
-                </TwitterShareButton>
-                <LinkedinShareButton url={aiLink}>
-                  <LinkedinIcon size={32} round />
-                </LinkedinShareButton>
+              <div className="flex justify-between mb-2">
+                <div className="mb-4">
+                  <TwitterShareButton
+                    title={shareTitle}
+                    url={aiLink}
+                    hashtags={["appdirectai"]}
+                    related={["AppDirect"]}
+                  >
+                    {" "}
+                    <XIcon size={32} round />
+                  </TwitterShareButton>
+                </div>
+                <div className="mb-4">
+                  <LinkedinShareButton url={aiLink}>
+                    <LinkedinIcon size={32} round />
+                  </LinkedinShareButton>
+                </div>
                 <div>
                   <FacebookShareButton url={aiLink}>
                     <FacebookIcon size={32} round />
                   </FacebookShareButton>
-                  <div>
+                  <div className="flex justify-center">
                     <FacebookShareCount url={aiLink}>
                       {(count) => count}
                     </FacebookShareCount>
                   </div>
                 </div>
-                <EmailShareButton url={aiLink} subject={shareTitle} body="body">
-                  <EmailIcon size={32} round />
-                </EmailShareButton>
+                <div className="mb-4">
+                  <EmailShareButton
+                    url={aiLink}
+                    subject={shareTitle}
+                    body="body"
+                  >
+                    <EmailIcon size={32} round />
+                  </EmailShareButton>
+                </div>
                 <div>
                   <PinterestShareButton url={aiLink} media={ai.src}>
                     <PinterestIcon size={32} round />
                   </PinterestShareButton>
-                  <div>
+                  <div className="flex justify-center">
                     <PinterestShareCount url={aiLink} />
                   </div>
                 </div>
-                <PocketShareButton url={aiLink} title={shareTitle}>
-                  <PocketIcon size={32} round />
-                </PocketShareButton>
+                <div className="mb-4">
+                  <PocketShareButton url={aiLink} title={shareTitle}>
+                    <PocketIcon size={32} round />
+                  </PocketShareButton>
+                </div>
                 <div>
                   <RedditShareButton
                     url={aiLink}
@@ -157,20 +169,24 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
                   >
                     <RedditIcon size={32} round />
                   </RedditShareButton>
-                  <div>
+                  <div className="flex justify-center">
                     <RedditShareCount url={aiLink} />
                   </div>
                 </div>
-                <TelegramShareButton url={aiLink} title={shareTitle}>
-                  <TelegramIcon size={32} round />
-                </TelegramShareButton>
-                <WhatsappShareButton
-                  url={aiLink}
-                  title={shareTitle}
-                  separator=":: "
-                >
-                  <WhatsappIcon size={32} round />
-                </WhatsappShareButton>
+                <div className="mb-4">
+                  <TelegramShareButton url={aiLink} title={shareTitle}>
+                    <TelegramIcon size={32} round />
+                  </TelegramShareButton>
+                </div>
+                <div className="mb-4">
+                  <WhatsappShareButton
+                    url={aiLink}
+                    title={shareTitle}
+                    separator=":: "
+                  >
+                    <WhatsappIcon size={32} round />
+                  </WhatsappShareButton>
+                </div>
               </div>
               <div className="flex items-center">
                 <p className="text-xs px-3 py-3 mr-2 bg-ring/10 rounded-lg w-full">
