@@ -25,12 +25,12 @@ export async function generateMetadata(
         images: [
           {
             url: ai.src,
-            width: 512,
-            height: 512,
+            width: 256,
+            height: 256,
           },
         ],
         description: ai.description,
-        url: `https://appdirect.ai/public/ai/${ai.id}`,
+        url: `./public/ai/${ai.id}`,
         siteName: "AppDirect AI",
         locale: "en_US",
         type: "website",
