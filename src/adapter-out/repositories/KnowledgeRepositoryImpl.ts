@@ -256,6 +256,25 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
 
     return deletedKnowledgeIds.map((knowledge) => knowledge.id);
   }
+
+  public async findCompletedKnowledgeWithRelatedInstances(): Promise<string[]> {
+    const result = await prismadb.$queryRaw<{ id: string }[]>`
+    SELECT k.id
+    FROM knowledge k
+    WHERE k.index_status = 'COMPLETED'
+      AND EXISTS
+        (SELECT 1
+        FROM knowledge kr
+        WHERE k.unique_id = kr.unique_id
+          AND k.type = kr.type
+          AND k.id != kr.id
+          AND kr.created_at < k.created_at
+          AND kr.index_status != 'DELETED');
+    `;
+
+    return result.map((knowledge) => knowledge.id);
+  }
+
   public async getAiKnowledgeSummary(aiId: string): Promise<KnowledgeSummary> {
     const knowledgeList = await prismadb.knowledge.findMany({
       select: {
