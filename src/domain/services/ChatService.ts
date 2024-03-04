@@ -77,6 +77,7 @@ export interface ChatCallbackContext {
   start: number;
   endSetup: number;
   endKnowledge: number;
+  hasChatStarted: boolean;
   startChat: number;
   recordedTokensUsed: number;
   knowledgeDocumentsRequested: number;
@@ -281,6 +282,7 @@ export class ChatService {
       start,
       endSetup: start,
       endKnowledge: start,
+      hasChatStarted: false,
       startChat: start,
       recordedTokensUsed: 0,
       knowledgeDocumentsRequested: 0,
@@ -373,7 +375,10 @@ export class ChatService {
   }
 
   private startChatCallback(context: ChatCallbackContext): void {
-    context.startChat = performance.now();
+    if (!context.hasChatStarted) {
+      context.startChat = performance.now();
+      context.hasChatStarted = true;
+    }
   }
 
   private async endChatCallback(
