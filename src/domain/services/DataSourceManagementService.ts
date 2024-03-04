@@ -748,16 +748,24 @@ export class DataSourceManagementService {
     // await this.updateDataSourceStatus(dataSourceId);
   }
 
-  public async deleteRelatedKnowledgeInstances(
-    knowledgeId: string
-  ): Promise<string[]> {
+  public async deleteRelatedKnowledgeInstances(knowledgeId: string): Promise<{
+    deletedKnowledgeIds: string[];
+    updatedDataSourceIds: string[];
+  }> {
+    const response: {
+      deletedKnowledgeIds: string[];
+      updatedDataSourceIds: string[];
+    } = {
+      deletedKnowledgeIds: [],
+      updatedDataSourceIds: [],
+    };
     const knowledge = await knowledgeRepository.getById(knowledgeId);
 
     if (
       !knowledge.uniqueId ||
       knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED
     ) {
-      return [];
+      return response;
     }
 
     const relatedKnowledgeInstances = await prismadb.knowledge.findMany({
@@ -772,9 +780,10 @@ export class DataSourceManagementService {
     );
 
     if (relatedKnowledgeIds.length === 0) {
-      return [];
+      return response;
     }
 
+    response.deletedKnowledgeIds = relatedKnowledgeIds;
     const relatedAndNewKnowledgeIds = [...relatedKnowledgeIds, knowledgeId];
 
     // Find all data sources which are associated with the related or the new knowledge instances
@@ -786,13 +795,15 @@ export class DataSourceManagementService {
       },
     });
 
-    // Create new data source knowledge relationships for the new knowledge instance
-    const newDataSourceRelationships = relatedDataSources.map((dataSource) => {
-      return {
-        dataSourceId: dataSource.dataSourceId,
-        knowledgeId,
-      };
-    });
+    const newDataSourceRelationships: {
+      dataSourceId: string;
+      knowledgeId: string;
+    }[] = [];
+    for (const dataSource of relatedDataSources) {
+      const dataSourceId = dataSource.dataSourceId;
+      newDataSourceRelationships.push({ dataSourceId, knowledgeId });
+      response.updatedDataSourceIds.push(dataSourceId);
+    }
 
     await prismadb.$transaction(async (tx) => {
       // Delete all data source knowledge relationships for the related and new knowledge instances
@@ -815,7 +826,7 @@ export class DataSourceManagementService {
       });
     });
 
-    return relatedKnowledgeIds;
+    return response;
   }
 
   /**

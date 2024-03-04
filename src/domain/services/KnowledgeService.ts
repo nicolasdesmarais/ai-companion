@@ -12,6 +12,10 @@ export class KnowledgeService {
   public async getAiKnowledgeSummary(aiId: string): Promise<KnowledgeSummary> {
     return await this.knowledgeRepository.getAiKnowledgeSummary(aiId);
   }
+
+  public async findCompletedKnowledgeWithRelatedInstances(): Promise<string[]> {
+    return await this.knowledgeRepository.findCompletedKnowledgeWithRelatedInstances();
+  }
 }
 
 const knowledgeRepository = new KnowledgeRepositoryImpl();
