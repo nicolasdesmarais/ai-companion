@@ -2,10 +2,10 @@
 
 import { AIProfile } from "@/components/ai-profile";
 import { ChatForm } from "@/components/chat-form";
-import { ChatHeader } from "@/components/chat-header";
 import { ChatMessages } from "@/components/chat-messages";
 import { ResizePanel } from "@/components/resize-panel";
 import { AIDetailDto } from "@/src/domain/models/AI";
+import { PublicChatHeader } from "./public-chat-header";
 import { PublicChatList } from "./public-chat-list";
 
 interface ChatClientProps {
@@ -14,8 +14,6 @@ interface ChatClientProps {
 }
 
 export const PublicChatClient = ({ ai, ais }: ChatClientProps) => {
-  const canEditAi = false;
-  const canApproveAi = false;
   return (
     <div className="flex h-full">
       <ResizePanel
@@ -28,18 +26,13 @@ export const PublicChatClient = ({ ai, ais }: ChatClientProps) => {
         <PublicChatList ais={ais} ai={ai} />
       </ResizePanel>
       <div className="flex flex-col h-full w-full space-y-2 shrink">
-        <ChatHeader
-          ai={ai}
-          chat={{ messages: [], ai } as any}
-          canEditAi={canEditAi}
-          canApproveAi={canApproveAi}
-        />
+        <PublicChatHeader ai={ai} chat={{ messages: [], ai } as any} />
         <ChatMessages
           ai={ai}
           isLoading={false}
           messages={[]}
           stream={""}
-          canEditAi={canEditAi}
+          canEditAi={false}
         />
         <ChatForm
           isLoading={!ai}
