@@ -3,6 +3,7 @@
 import {
   CopyPlus,
   ExternalLink,
+  LogIn,
   MessagesSquare,
   MoreVertical,
   Pin,
@@ -105,6 +106,17 @@ export const PublicChatHeader = ({ ai, chat }: Props) => {
               </Link>
             </DropdownMenuContent>
           </DropdownMenu>
+          <Link href="/sign-in" className="ml-2 flex">
+            <Button
+              size="sm"
+              variant="ring"
+              className=" text-nowrap"
+              type="button"
+            >
+              Sign in
+              <LogIn className="h-4 w-4 text-white ml-2 hidden md:inline" />
+            </Button>
+          </Link>
         </div>
       </div>
 
