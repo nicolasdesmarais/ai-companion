@@ -1,6 +1,8 @@
 import { PublicAiChat } from "@/components/public-ai-chat";
 import aiService from "@/src/domain/services/AIService";
+import { auth } from "@clerk/nextjs";
 import type { Metadata, ResolvingMetadata } from "next";
+import { redirect } from "next/navigation";
 
 interface Props {
   params: {
@@ -15,6 +17,12 @@ export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
+  const { userId } = auth();
+
+  if (userId) {
+    return redirect(`/ai/${params.aiId}`);
+  }
+
   const ais = await aiService.findPublicAIs();
   const ai = ais.find((ai) => ai.id === params.aiId);
 
