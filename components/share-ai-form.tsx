@@ -20,8 +20,6 @@ import {
   EmailIcon,
   EmailShareButton,
   FacebookIcon,
-  FacebookMessengerIcon,
-  FacebookMessengerShareButton,
   FacebookShareButton,
   FacebookShareCount,
   LinkedinIcon,
@@ -61,7 +59,11 @@ interface ShareAIFormProps {
 
 export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
   const { toast } = useToast();
-  const aiLink = `appdirect.ai/ai/${ai.id}`;
+  let host = "https://appdirect.ai";
+  if (typeof window !== "undefined") {
+    host = window.location.origin;
+  }
+  const aiLink = `${host}/public/ai/${ai.id}`;
   const form = useForm<z.infer<typeof groupFormSchema>>({
     resolver: zodResolver(groupFormSchema),
     defaultValues: {
@@ -132,9 +134,6 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
                     </FacebookShareCount>
                   </div>
                 </div>
-                <FacebookMessengerShareButton url={aiLink} appId="">
-                  <FacebookMessengerIcon size={32} round />
-                </FacebookMessengerShareButton>
                 <EmailShareButton url={aiLink} subject={shareTitle} body="body">
                   <EmailIcon size={32} round />
                 </EmailShareButton>
