@@ -1,10 +1,10 @@
 "use client";
 
 import { AIProfile } from "@/components/ai-profile";
-import { ChatForm } from "@/components/chat-form";
 import { ChatMessages } from "@/components/chat-messages";
 import { ResizePanel } from "@/components/resize-panel";
 import { AIDetailDto } from "@/src/domain/models/AI";
+import { PublicChatForm } from "./public-chat-form";
 import { PublicChatHeader } from "./public-chat-header";
 import { PublicChatList } from "./public-chat-list";
 
@@ -34,12 +34,7 @@ export const PublicChatClient = ({ ai, ais }: ChatClientProps) => {
           stream={""}
           canEditAi={false}
         />
-        <ChatForm
-          isLoading={!ai}
-          input={""}
-          handleInputChange={() => {}}
-          onSubmit={() => {}}
-        />
+        <PublicChatForm isLoading={!ai} />
       </div>
       {ai && <AIProfile ai={ai} />}
     </div>
