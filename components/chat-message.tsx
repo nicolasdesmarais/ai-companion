@@ -17,12 +17,14 @@ import { markedHighlight } from "marked-highlight";
 import { useEffect, useState } from "react";
 
 const delay = 15;
+const BLINKING_CURSOR = '<span class="blinking-cursor">|</span>';
 
 const marked = new Marked(
   markedHighlight({
     langPrefix: "hljs language-",
     highlight(code, lang) {
       const language = hljs.getLanguage(lang) ? lang : "plaintext";
+      code = code.replace(BLINKING_CURSOR, "");
       return hljs.highlight(code, { language }).value;
     },
   })
@@ -95,9 +97,7 @@ export const ChatMessage = ({
     });
   };
 
-  const renderedContent = isAnimated
-    ? animatedText + '<span class="blinking-cursor">|</span>'
-    : content;
+  const renderedContent = isAnimated ? animatedText + BLINKING_CURSOR : content;
 
   return (
     <div

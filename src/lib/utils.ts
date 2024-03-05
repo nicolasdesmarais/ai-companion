@@ -28,3 +28,12 @@ export const pixelCrop = (src: string | undefined, crop: string) => {
     );
   }
 };
+
+export const aspectFill = (src: string | undefined, fill: string) => {
+  if (src) {
+    return src.replace(
+      /image\/upload\/.*\//gm,
+      `image/upload/b_gen_fill,c_pad,ar_${fill}/`
+    );
+  }
+};

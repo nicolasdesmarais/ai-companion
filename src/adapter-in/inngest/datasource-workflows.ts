@@ -8,14 +8,12 @@ import {
   DomainEvent,
   KnowledgeChunkReceivedPayload,
   KnowledgeContentReceivedPayload as KnowledgeContentRetrievedPayload,
-  KnowledgeIndexingCompletedPayload,
+  KnowledgeIndexingCompletedSuccessfullyPayload,
   KnowledgeInitializedEventPayload,
 } from "@/src/domain/events/domain-event";
-import {
-  KnowledgeDto,
-  knowldedgeEndStatuses as knowledgeEndStatuses,
-} from "@/src/domain/models/DataSources";
+import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
+import knowledgeService from "@/src/domain/services/KnowledgeService";
 import { KnowledgeChunkStatus, KnowledgeIndexStatus } from "@prisma/client";
 import { inngest } from "./client";
 
@@ -376,53 +374,56 @@ const onKnowledgeStatusUpdated = async (
   knowledge: KnowledgeDto,
   step: any
 ) => {
-  if (knowledgeEndStatuses.includes(knowledge.indexStatus)) {
-    const eventPayload: KnowledgeIndexingCompletedPayload = {
-      dataSourceId,
-      knowledge,
+  await step.run("update-datasource-status", async () => {
+    await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
+  });
+
+  if (knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
+    const eventPayload: KnowledgeIndexingCompletedSuccessfullyPayload = {
+      knowledgeId: knowledge.id,
     };
-    await step.sendEvent("knowledge-indexing-completed", {
-      name: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED,
+    await step.sendEvent("knowledge-indexing-completed-successfully", {
+      name: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED_SUCCESSFULLY,
       data: eventPayload,
-    });
-  } else {
-    await step.run("update-datasource-status", async () => {
-      await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
     });
   }
 };
 
-export const onKnowledgeIndexingCompleted = inngest.createFunction(
+export const onKnowledgeIndexingCompletedSuccessfully = inngest.createFunction(
   {
-    id: "on-knowledge-indexing-completed",
+    id: "on-knowledge-indexing-completed-successfully",
   },
-  { event: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED },
+  { event: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED_SUCCESSFULLY },
   async ({ event, step }) => {
-    const payload = event.data as KnowledgeIndexingCompletedPayload;
-    const { dataSourceId, knowledge } = payload;
+    const payload = event.data as KnowledgeIndexingCompletedSuccessfullyPayload;
+    const { knowledgeId } = payload;
 
-    if (knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
-      const relatedKnowledgeIds = await step.run(
-        "delete-related-knowledge-instances",
-        async () => {
-          return await dataSourceManagementService.deleteRelatedKnowledgeInstances(
-            knowledge.id
+    const { deletedKnowledgeIds, updatedDataSourceIds } = await step.run(
+      "delete-related-knowledge-instances",
+      async () => {
+        return await dataSourceManagementService.deleteRelatedKnowledgeInstances(
+          knowledgeId
+        );
+      }
+    );
+
+    await Promise.all(
+      deletedKnowledgeIds.map((knowledgeId) =>
+        step.run("delete-vectordb-knowledge", async () => {
+          await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
+        })
+      )
+    );
+
+    await Promise.all(
+      updatedDataSourceIds.map((dataSourceId) =>
+        step.run("update-datasource-status", async () => {
+          await dataSourceManagementService.updateDataSourceStatus(
+            dataSourceId
           );
-        }
-      );
-
-      await Promise.all(
-        relatedKnowledgeIds.map((knowledgeId) =>
-          step.run("delete-vectordb-knowledge", async () => {
-            await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
-          })
-        )
-      );
-    }
-
-    await step.run("update-datasource-status", async () => {
-      await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
-    });
+        })
+      )
+    );
   }
 );
 
@@ -540,5 +541,28 @@ export const deleteBlobStorage = inngest.createFunction(
         })
       )
     );
+  }
+);
+
+export const deleteRelatedKnowledgeInstances = inngest.createFunction(
+  { id: "delete-related-knowledge-instances" },
+  { cron: "0 * * * *" },
+  async ({ step }) => {
+    const knowledgeIds = await step.run(
+      "find-knowledge-with-related-knowledge-instances",
+      async () => {
+        return await knowledgeService.findCompletedKnowledgeWithRelatedInstances();
+      }
+    );
+
+    for (const knowledgeId of knowledgeIds) {
+      const eventPayload: KnowledgeIndexingCompletedSuccessfullyPayload = {
+        knowledgeId,
+      };
+      await step.sendEvent("knowledge-indexing-completed-successfully", {
+        name: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED_SUCCESSFULLY,
+        data: eventPayload,
+      });
+    }
   }
 );

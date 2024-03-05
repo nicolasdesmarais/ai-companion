@@ -2,6 +2,7 @@ import { onApifyWebhookReceived } from "@/src/adapter-in/inngest/apify-workflows
 import { clerkWebhookReceived } from "@/src/adapter-in/inngest/clerk-workflows";
 import {
   deleteBlobStorage,
+  deleteRelatedKnowledgeInstances,
   deleteUnusedKnowledges,
   onDataSourceDeleteRequested,
   onDataSourceInitialized,
@@ -9,7 +10,7 @@ import {
   onDataSourceRefreshRequested,
   onKnowledgeChunkReceived,
   onKnowledgeContentRetrieved,
-  onKnowledgeIndexingCompleted,
+  onKnowledgeIndexingCompletedSuccessfully,
   onKnowledgeInitialized,
   refreshDataSources,
 } from "@/src/adapter-in/inngest/datasource-workflows";
@@ -33,12 +34,13 @@ export const { GET, POST, PUT } = serve({
     onKnowledgeInitialized,
     onKnowledgeChunkReceived,
     onKnowledgeContentRetrieved,
-    onKnowledgeIndexingCompleted,
+    onKnowledgeIndexingCompletedSuccessfully,
     refreshDataSources,
     stripeWebhookReceived,
     clerkWebhookReceived,
     deleteUnusedKnowledges,
     onApifyWebhookReceived,
     deleteBlobStorage,
+    deleteRelatedKnowledgeInstances,
   ],
 });

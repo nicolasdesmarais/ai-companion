@@ -1,4 +1,9 @@
 import { PublicAiChat } from "@/components/public-ai-chat";
+import aiService from "@/src/domain/services/AIService";
+import { aspectFill } from "@/src/lib/utils";
+import { auth } from "@clerk/nextjs";
+import type { Metadata, ResolvingMetadata } from "next";
+import { redirect } from "next/navigation";
 
 interface Props {
   params: {
@@ -8,5 +13,42 @@ interface Props {
 const PublicAiPage = async ({ params }: Props) => {
   return <PublicAiChat aiId={params.aiId} />;
 };
+
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { userId } = auth();
+
+  if (userId) {
+    return redirect(`/ai/${params.aiId}`);
+  }
+
+  const ais = await aiService.findPublicAIs();
+  const ai = ais.find((ai) => ai.id === params.aiId);
+
+  if (ai) {
+    return {
+      title: `${ai.name} | AppDirect AI`,
+      openGraph: {
+        images: [
+          {
+            url: aspectFill(ai.src, "1.91") || ai.src,
+            width: 512,
+            height: 512,
+          },
+        ],
+        description: ai.description,
+        url: `./public/ai/${ai.id}`,
+        siteName: "AppDirect AI",
+        locale: "en_US",
+        type: "website",
+      },
+    };
+  } else
+    return {
+      title: "AppDirect AI",
+    };
+}
 
 export default PublicAiPage;

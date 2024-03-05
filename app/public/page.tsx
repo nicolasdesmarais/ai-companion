@@ -1,4 +1,6 @@
 import { PublicAiListing } from "@/components/public-ai-listing";
+import { auth } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
 
 interface Props {
   searchParams: {
@@ -12,6 +14,12 @@ interface Props {
 }
 
 const PublicIndex = ({ searchParams }: Props) => {
+  const { userId } = auth();
+
+  if (userId) {
+    return redirect("/index/public");
+  }
+
   return <PublicAiListing searchParams={searchParams} />;
 };
 
