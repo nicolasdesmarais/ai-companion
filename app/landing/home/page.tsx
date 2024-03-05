@@ -9,9 +9,9 @@ const LandingHome = () => {
       <LandingNav />
       <div className="max-h-[785px] h-screen pb-16 overflow-hidden flex flex-col">
         <div className="flex justify-center">
-          <div className="mt-40 mr-16 w-96 text-center lg:text-left">
+          <div className="mt-24 mr-16 w-[440px] text-center lg:text-left">
             <h2
-              className="me-4 mb-4 font-extrabold leading-none tracking-tight text-4xl"
+              className="me-4 mb-8 font-extrabold leading-none tracking-tight text-6xl"
               title="AI made simple"
             >
               AppDirect AI Marketplace & Creation Studio
