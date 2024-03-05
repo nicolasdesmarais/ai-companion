@@ -10,7 +10,7 @@ export enum DomainEvent {
   DATASOURCE_DELETE_REQUESTED = "datasource.delete.requested",
   DATASOURCE_MIGRATION_REQUESTED = "datasource.migration.requested",
   KNOWLEDGE_INITIALIZED = "knowledge.initialized",
-  KNOWLEDGE_CONTENT_RETRIEVED = "knowledge.content.received",
+  KNOWLEDGE_CONTENT_RETRIEVED = "knowledge.content.retrieved",
   KNOWLEDGE_CHUNK_RECEIVED = "knowledge.chunk.received",
   KNOWLEDGE_INDEXING_COMPLETED_SUCCESSFULLY = "knowledge.indexing.completed",
 }
