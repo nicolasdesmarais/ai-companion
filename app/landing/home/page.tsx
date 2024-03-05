@@ -1,6 +1,7 @@
-"use client";
 import LandingNav from "@/components/landing-nav";
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 const LandingHome = () => {
   return (
@@ -15,18 +16,23 @@ const LandingHome = () => {
             >
               AppDirect AI Marketplace & Creation Studio
             </h2>
-            <div>
+            <div className="mb-8">
               Create custom AIs for yourself, your team, or your customers in
               under 30 minutes. No coding required.
             </div>
+            <Link href="/sign-up" className="ml-10 px-8 py-2 bg-sky">
+              Sign up
+            </Link>
+            <Link href="/sign-up" className="ml-10 px-4 py-2">
+              Take tour
+              <ArrowRight className="inline-block w-4 h-4 ml-2" />
+            </Link>
           </div>
-          <Image
-            src="/browse_screenshot.jpg"
-            alt="Browse Page"
-            width="512"
-            height="377"
-            className="mt-20 shadow-glow"
-          />
+          <div className="mt-20 shadow-glow">
+            <video width="640" height="420" preload="none" autoPlay loop muted>
+              <source src="/create-demo.mp4" type="video/mp4" />
+            </video>
+          </div>
         </div>
       </div>
 
