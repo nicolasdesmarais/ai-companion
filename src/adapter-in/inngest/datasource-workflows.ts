@@ -1,5 +1,8 @@
 import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
-import { ChunkLoadingResult } from "@/src/adapter-out/knowledge/types/KnowledgeChunkTypes";
+import {
+  ChunkLoadingResult,
+  KnowledgeChunkEvent,
+} from "@/src/adapter-out/knowledge/types/KnowledgeChunkTypes";
 import vectorDatabaseAdapter from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 import {
   DataSourceInitializedPayload,
@@ -284,19 +287,42 @@ export const onKnowledgeContentRetrieved = inngest.createFunction(
       return;
     }
 
-    const { knowledge, knowledgeChunkEvents } = await step.run(
-      "publish-knowledge-chunk-events",
+    const { knowledge, knowledgeChunkIndexes } = await step.run(
+      "create-knowledge-chunks",
       async () => {
-        return await dataSourceManagementService.publishKnowledgeChunkEvents(
-          dataSourceId,
+        return await dataSourceManagementService.createKnowledgeChunks(
           knowledgeId
         );
       }
     );
 
-    if (knowledgeChunkEvents.length === 0) {
+    if (knowledgeChunkIndexes.length === 0) {
       await onKnowledgeStatusUpdated(dataSourceId, knowledge, step);
       return;
+    }
+
+    await step.run("persist-knowledge-chunks", async () => {
+      return await dataSourceManagementService.persistKnowledgeChunks(
+        knowledgeId,
+        knowledgeChunkIndexes
+      );
+    });
+
+    let knowledgeChunkEvents: KnowledgeChunkEvent[] = [];
+    for (const chunk of knowledgeChunkIndexes) {
+      const eventPayload: KnowledgeChunkReceivedPayload = {
+        dataSourceId,
+        knowledgeId,
+        chunkNumber: chunk.chunkNumber,
+      };
+      const event = await step.sendEvent("knowledge-chunk-received", {
+        name: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
+        data: eventPayload,
+      });
+      knowledgeChunkEvents.push({
+        chunkNumber: chunk.chunkNumber,
+        eventId: event.ids[0],
+      });
     }
 
     await step.run("persist-knowledge-chunk-events", async () => {
@@ -333,12 +359,12 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
   },
   { event: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED },
   async ({ event, step }) => {
-    const { dataSourceId, knowledgeId, chunk, chunkNumber } =
+    const { dataSourceId, knowledgeId, chunkNumber } =
       event.data as KnowledgeChunkReceivedPayload;
 
     const docIds = await step.run("load-knowledge-chunk", async () => {
       return await dataSourceManagementService.loadKnowledgeChunk(
-        chunk,
+        knowledgeId,
         chunkNumber
       );
     });

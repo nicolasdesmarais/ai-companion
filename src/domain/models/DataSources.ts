@@ -59,6 +59,12 @@ export interface KnowledgeDto {
   metadata: any;
 }
 
+export interface KnowledgeChunkDto {
+  chunkNumber: number;
+  startIndex: number | null;
+  endIndex: number | null;
+}
+
 export interface KnowledgeChunkCounts {
   totalCount: number;
   completedCount: number;

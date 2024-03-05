@@ -2,7 +2,6 @@ import {
   DataSourceItemList,
   KnowledgeOriginalContent,
 } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
-import { Document } from "@langchain/core/documents";
 
 export enum DomainEvent {
   DATASOURCE_INITIALIZED = "datasource.initialized",
@@ -46,7 +45,6 @@ export interface KnowledgeContentReceivedPayload {
 export interface KnowledgeChunkReceivedPayload {
   dataSourceId: string;
   knowledgeId: string;
-  chunk: Document[];
   chunkNumber: number;
 }
 
