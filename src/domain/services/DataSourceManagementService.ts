@@ -9,6 +9,7 @@ import {
 import {
   ChunkLoadingResult,
   KnowledgeChunkEvent,
+  KnowledgeChunkIndexes,
 } from "@/src/adapter-out/knowledge/types/KnowledgeChunkTypes";
 import { DataSourceRepositoryImpl } from "@/src/adapter-out/repositories/DataSourceRepositoryImpl";
 import { KnowledgeRepositoryImpl } from "@/src/adapter-out/repositories/KnowledgeRepositoryImpl";
@@ -30,7 +31,6 @@ import {
   DataSourceInitializedPayload,
   DataSourceRefreshRequestedPayload,
   DomainEvent,
-  KnowledgeChunkReceivedPayload,
 } from "../events/domain-event";
 import { DataSourceDto, KnowledgeDto } from "../models/DataSources";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
@@ -39,7 +39,7 @@ import dataSourceAdapterService from "./DataSourceAdapterService";
 import { FileStorageService } from "./FileStorageService";
 import usageService from "./UsageService";
 
-const KNOWLEDGE_CHUNK_TOKEN_COUNT = 5000;
+const KNOWLEDGE_CHUNK_TOKEN_COUNT = 20000;
 
 export class DataSourceManagementService {
   constructor(
@@ -463,17 +463,14 @@ export class DataSourceManagementService {
   }
 
   /**
-   * Retrieves knowledge content for the specified knowledge from file storage, breaks down the content
-   * into chunks and publishes a KNOWLEDGE_CHUNK_RECEIVED event for each chunk.
-   * Each document batch holds up to a maximum of KNOWLEDGE_CHUNK_TOKEN_COUNT tokens
+   * Retrieves knowledge content for the specified knowledge from file storage and breaks down content
+   * into chunks. Each document batch holds up to a maximum of KNOWLEDGE_CHUNK_TOKEN_COUNT tokens.
+   * Returns a list of knowledge chunk indexes, which hold the start & end index of each batch
    * @param knowledgeId
    */
-  public async publishKnowledgeChunkEvents(
-    dataSourceId: string,
-    knowledgeId: string
-  ): Promise<{
+  public async createKnowledgeChunks(knowledgeId: string): Promise<{
     knowledge: KnowledgeDto;
-    knowledgeChunkEvents: KnowledgeChunkEvent[];
+    knowledgeChunkIndexes: KnowledgeChunkIndexes[];
   }> {
     const knowledge = await this.knowledgeRepository.getById(knowledgeId);
 
@@ -487,56 +484,42 @@ export class DataSourceManagementService {
     const documentsJson = await FileStorageService.getJson(documentsBlobUrl);
     const documents: Document[] = documentsJson;
 
-    let chunks: Document[][] = this.getDocumentChunks(documents);
-    const chunkCount = chunks.length;
+    let chunkIndexes: KnowledgeChunkIndexes[] =
+      this.getKnowledgeChunkIndexes(documents);
+    const chunkCount = chunkIndexes.length;
 
-    // Mark knowledge as completed if there are no documents
+    const updatedMetadata = this.mergeMetadata(knowledge.metadata, {
+      chunkCount,
+    });
+
+    let indexStatus;
+    let indexPercentage;
     if (chunkCount === 0) {
-      const updatedKnowledge = await this.knowledgeRepository.update(
-        knowledgeId,
-        {
-          indexStatus: KnowledgeIndexStatus.COMPLETED,
-          indexPercentage: 100,
-        }
-      );
-      return { knowledge: updatedKnowledge, knowledgeChunkEvents: [] };
+      indexStatus = KnowledgeIndexStatus.COMPLETED;
+      indexPercentage = 100;
+    } else {
+      indexStatus = KnowledgeIndexStatus.INDEXING;
     }
-
     const updatedKnowledge = await this.knowledgeRepository.update(
       knowledgeId,
       {
-        indexStatus: KnowledgeIndexStatus.INDEXING,
+        indexStatus,
+        indexPercentage,
+        metadata: updatedMetadata,
       }
     );
 
-    await this.knowledgeRepository.initializeKnowledgeChunks(
-      knowledgeId,
-      chunkCount
-    );
-
-    const knowledgeChunkEvents: KnowledgeChunkEvent[] = [];
-    for (let i = 0; i < chunks.length; i++) {
-      const eventResult = await this.publishKnowledgeChunkEvent(
-        dataSourceId,
-        knowledgeId,
-        chunks[i],
-        i
-      );
-      knowledgeChunkEvents.push({
-        chunkNumber: i,
-        eventId: eventResult.ids[0],
-      });
-    }
-
-    return { knowledge: updatedKnowledge, knowledgeChunkEvents };
+    return { knowledge: updatedKnowledge, knowledgeChunkIndexes: chunkIndexes };
   }
 
-  private getDocumentChunks(documents: Document[]) {
-    let chunks: Document[][] = [];
-    let currentChunk: Document[] = [];
+  private getKnowledgeChunkIndexes(documents: Document[]) {
+    let chunks: KnowledgeChunkIndexes[] = [];
+    let currentChunkStartIndex = 0;
     let currentTokenCount = 0;
 
-    for (const document of documents) {
+    for (let i = 0; i < documents.length; i++) {
+      const document = documents[i];
+
       // Check if adding the current document exceeds the limit
       // And if currentTokenCount is not 0 (the batch is not empty)
       if (
@@ -545,36 +528,38 @@ export class DataSourceManagementService {
         currentTokenCount !== 0
       ) {
         // Start a new batch
-        chunks.push(currentChunk);
-        currentChunk = [];
+        chunks.push({
+          chunkNumber: chunks.length,
+          startIndex: currentChunkStartIndex,
+          endIndex: i - 1,
+        });
+        currentChunkStartIndex = i;
         currentTokenCount = 0;
       }
 
-      currentChunk.push(document);
       currentTokenCount += document.metadata.tokenCount;
     }
 
     // Add the last batch if it has documents
-    if (currentChunk.length > 0) {
-      chunks.push(currentChunk);
+    if (currentChunkStartIndex < documents.length) {
+      chunks.push({
+        chunkNumber: chunks.length,
+        startIndex: currentChunkStartIndex,
+        endIndex: documents.length - 1,
+      });
     }
 
     return chunks;
   }
 
-  private async publishKnowledgeChunkEvent(
-    dataSourceId: string,
+  public async persistKnowledgeChunks(
     knowledgeId: string,
-    chunk: Document[],
-    chunkNumber: number
+    knowledgeChunkIndexes: KnowledgeChunkIndexes[]
   ) {
-    const payload: KnowledgeChunkReceivedPayload = {
-      dataSourceId,
+    await this.knowledgeRepository.persistKnowledgeChunks(
       knowledgeId,
-      chunk,
-      chunkNumber,
-    };
-    return await publishEvent(DomainEvent.KNOWLEDGE_CHUNK_RECEIVED, payload);
+      knowledgeChunkIndexes
+    );
   }
 
   public async persistKnowledgeChunkEvents(
@@ -593,8 +578,31 @@ export class DataSourceManagementService {
    * @param chunkNumber
    * @returns
    */
-  public async loadKnowledgeChunk(chunk: Document[], chunkNumber: number) {
-    return await fileLoader.loadDocs(chunk, chunkNumber);
+  public async loadKnowledgeChunk(knowledgeId: string, chunkNumber: number) {
+    const knowledge = await this.knowledgeRepository.getById(knowledgeId);
+    const { documentsBlobUrl } = knowledge;
+    if (!documentsBlobUrl) {
+      throw new Error(
+        `Knowledge with id=${knowledgeId} does not have documents blob url`
+      );
+    }
+    const knowledgeChunk =
+      await this.knowledgeRepository.getKnowledgeChunkByNumber(
+        knowledgeId,
+        chunkNumber
+      );
+
+    const documentsJson = await FileStorageService.getJson(documentsBlobUrl);
+    const documents: Document[] = documentsJson;
+    const { startIndex, endIndex } = knowledgeChunk;
+    if (startIndex === null || endIndex === null) {
+      throw new Error(
+        `Knowledge chunk with knowledgeId=${knowledgeId} and chunkNumber=${chunkNumber} does not have start or end index`
+      );
+    }
+
+    const documentsToLoad = documents.slice(startIndex, endIndex + 1);
+    return await fileLoader.loadDocs(documentsToLoad, chunkNumber);
   }
 
   /**

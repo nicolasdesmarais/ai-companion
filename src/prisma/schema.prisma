@@ -185,6 +185,8 @@ model KnowledgeChunk {
   knowledge   Knowledge            @relation(fields: [knowledgeId], references: [id])
   knowledgeId String               @map(name: "knowledge_id")
   chunkNumber Int                  @map(name: "chunk_number")
+  startIndex  Int?                 @map(name: "start_index")
+  endIndex    Int?                 @map(name: "end_index")
   status      KnowledgeChunkStatus
   eventId     String?              @map(name: "event_id")
   error       String?              @db.Text

@@ -1,6 +1,8 @@
+import { KnowledgeChunkIndexes } from "@/src/adapter-out/knowledge/types/KnowledgeChunkTypes";
 import { KnowledgeChunkStatus, Prisma } from "@prisma/client";
 import {
   KnowledgeChunkCounts,
+  KnowledgeChunkDto,
   KnowledgeCounts,
   KnowledgeDto,
   KnowledgeSummary,
@@ -11,9 +13,14 @@ export interface KnowledgeRepository {
   getById(id: string): Promise<KnowledgeDto>;
   update(id: string, input: Prisma.KnowledgeUpdateInput): Promise<KnowledgeDto>;
 
-  initializeKnowledgeChunks(
+  getKnowledgeChunkByNumber(
     knowledgeId: string,
-    chunkCount: number
+    chunkNumber: number
+  ): Promise<KnowledgeChunkDto>;
+
+  persistKnowledgeChunks(
+    knowledgeId: string,
+    knowledgeChunkIndexes: KnowledgeChunkIndexes[]
   ): Promise<void>;
 
   persistKnowledgeChunkEvents(

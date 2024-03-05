@@ -1,6 +1,7 @@
 import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import {
   KnowledgeChunkCounts,
+  KnowledgeChunkDto,
   KnowledgeCounts,
   KnowledgeDto,
   KnowledgeSummary,
@@ -14,7 +15,10 @@ import {
   Prisma,
 } from "@prisma/client";
 import { KnowledgeOriginalContent } from "../knowledge/types/DataSourceTypes";
-import { KnowledgeChunkEvent } from "../knowledge/types/KnowledgeChunkTypes";
+import {
+  KnowledgeChunkEvent,
+  KnowledgeChunkIndexes,
+} from "../knowledge/types/KnowledgeChunkTypes";
 
 const mapKnowledgeToDto = (knowledge: Knowledge): KnowledgeDto => {
   const {
@@ -68,6 +72,28 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
     return knowledge;
   }
 
+  public async getKnowledgeChunkByNumber(
+    knowledgeId: string,
+    chunkNumber: number
+  ): Promise<KnowledgeChunkDto> {
+    const knowledgeChunk = await prismadb.knowledgeChunk.findUnique({
+      where: {
+        knowledgeId_chunkNumber: {
+          knowledgeId,
+          chunkNumber,
+        },
+      },
+    });
+
+    if (!knowledgeChunk) {
+      throw new EntityNotFoundError(
+        `Knowledge chunk with knowledgeId ${knowledgeId} and chunkNumber ${chunkNumber} not found`
+      );
+    }
+
+    return knowledgeChunk;
+  }
+
   public async update(
     id: string,
     input: Prisma.KnowledgeUpdateInput
@@ -79,23 +105,27 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
     return mapKnowledgeToDto(updatedKnowledge);
   }
 
-  public async initializeKnowledgeChunks(
+  public async persistKnowledgeChunks(
     knowledgeId: string,
-    chunkCount: number
+    knowledgeChunkIndexes: KnowledgeChunkIndexes[]
   ): Promise<void> {
-    for (let i = 0; i < chunkCount; i++) {
-      const chunkNumber = i;
+    for (const chunk of knowledgeChunkIndexes) {
       await prismadb.knowledgeChunk.upsert({
         where: {
           knowledgeId_chunkNumber: {
             knowledgeId,
-            chunkNumber,
+            chunkNumber: chunk.chunkNumber,
           },
         },
-        update: {},
+        update: {
+          startIndex: chunk.startIndex,
+          endIndex: chunk.endIndex,
+        },
         create: {
           knowledgeId,
-          chunkNumber,
+          chunkNumber: chunk.chunkNumber,
+          startIndex: chunk.startIndex,
+          endIndex: chunk.endIndex,
           status: KnowledgeChunkStatus.INDEXING,
         },
       });

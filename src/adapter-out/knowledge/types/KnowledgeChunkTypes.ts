@@ -1,5 +1,11 @@
 import { KnowledgeChunkStatus } from "@prisma/client";
 
+export interface KnowledgeChunkIndexes {
+  chunkNumber: number;
+  startIndex: number;
+  endIndex: number;
+}
+
 export interface KnowledgeChunkEvent {
   chunkNumber: number;
   eventId: string;
