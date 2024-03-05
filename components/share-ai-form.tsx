@@ -24,9 +24,6 @@ import {
   FacebookShareCount,
   LinkedinIcon,
   LinkedinShareButton,
-  PinterestIcon,
-  PinterestShareButton,
-  PinterestShareCount,
   PocketIcon,
   PocketShareButton,
   RedditIcon,
@@ -118,8 +115,9 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
                     url={aiLink}
                     hashtags={["appdirectai"]}
                     related={["AppDirect"]}
+                    windowWidth={1100}
+                    windowHeight={700}
                   >
-                    {" "}
                     <XIcon size={32} round />
                   </TwitterShareButton>
                 </div>
@@ -147,14 +145,6 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
                     <EmailIcon size={32} round />
                   </EmailShareButton>
                 </div>
-                <div>
-                  <PinterestShareButton url={aiLink} media={ai.src}>
-                    <PinterestIcon size={32} round />
-                  </PinterestShareButton>
-                  <div className="flex justify-center">
-                    <PinterestShareCount url={aiLink} />
-                  </div>
-                </div>
                 <div className="mb-4">
                   <PocketShareButton url={aiLink} title={shareTitle}>
                     <PocketIcon size={32} round />
@@ -164,8 +154,8 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
                   <RedditShareButton
                     url={aiLink}
                     title={shareTitle}
-                    windowWidth={660}
-                    windowHeight={460}
+                    windowWidth={1100}
+                    windowHeight={700}
                   >
                     <RedditIcon size={32} round />
                   </RedditShareButton>
@@ -183,6 +173,8 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
                     url={aiLink}
                     title={shareTitle}
                     separator=":: "
+                    windowWidth={1100}
+                    windowHeight={700}
                   >
                     <WhatsappIcon size={32} round />
                   </WhatsappShareButton>
