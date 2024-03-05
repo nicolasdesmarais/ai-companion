@@ -19,6 +19,8 @@ import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
 import { SystemMessage } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
+import _ from "lodash";
+
 import {
   AI,
   AIVisibility,
@@ -771,16 +773,18 @@ export class AIService {
   }
 
   private getSearchCriteria(search: string) {
+    const escapedSearch = _.escapeRegExp(search);
+
     return {
       OR: [
         {
           name: {
-            search: search,
+            search: escapedSearch,
           },
         },
         {
           userName: {
-            search: search,
+            search: escapedSearch,
           },
         },
       ],

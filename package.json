@@ -103,6 +103,7 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.202",
     "@types/mime-types": "^2.1.4",
     "encoding": "^0.1.13",
     "prisma": "^5.8.1"
