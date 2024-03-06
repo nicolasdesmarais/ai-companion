@@ -607,13 +607,14 @@ const deleteKnowledge = async (knowledgeId: string, step: any) => {
   let paginationNextToken;
   do {
     const { vectorIds, paginationNextToken: newPaginationNextToken } =
-      await step.run("delete-vectordb-knowledge", async () => {
-        const response = await vectorDatabaseAdapter.vectorIdList(knowledgeId);
-        return response;
+      await step.run("vector-id-list", async () => {
+        return await vectorDatabaseAdapter.vectorIdList(knowledgeId);
       });
 
     if (vectorIds.length > 0) {
-      await vectorDatabaseAdapter.deleteVectors(vectorIds);
+      await step.run("delete-vectors", async () => {
+        await vectorDatabaseAdapter.deleteVectors(vectorIds);
+      });
     }
 
     paginationNextToken = newPaginationNextToken;
