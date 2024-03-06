@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 
 const ais = [
@@ -33,28 +34,32 @@ const LandingStartChat = () => {
     <div className="flex flex-col items-center">
       <h3 className="text-3xl font-bold mb-8">Start chatting with AIs</h3>
       <div className="flex">
-        <div className="">
-          <ul>
-            {ais.map((ai) => (
-              <li>
-                <Image
-                  src={ai.src}
-                  alt={`{ai.name} AI`}
-                  width="70"
-                  height="75"
-                />
-                Meet {ai.name}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="m-8">
-          <div>{selectedAi.description}</div>
-          <div>{selectedAi.bold}</div>
-          {selectedAi.questions?.map((question) => (
-            <div>{question}</div>
+        <ul className="flex flex-col justify-evenly items-center">
+          {ais.map((ai) => (
+            <li>
+              <Image
+                src={ai.src}
+                alt={`{ai.name} AI`}
+                width="70"
+                height="75"
+                className="mb-2"
+              />
+              Meet {ai.name}
+            </li>
           ))}
-          <div>Start chatting with {selectedAi.name}</div>
+        </ul>
+        <div className="m-8 p-4 w-[800px] bg-white drop-shadow-lg">
+          <div>{selectedAi.header}</div>
+          <div>{selectedAi.bold}</div>
+          <div className="flex flex-wrap justify-evenly m-8">
+            {selectedAi.questions?.map((question) => (
+              <div className="bg-lime p-4 m-2 rounded-lg">{question}</div>
+            ))}
+          </div>
+          <div>
+            Start chatting with {selectedAi.name}
+            <ArrowRight className="inline-block w-4 h-4 ml-2" />
+          </div>
         </div>
       </div>
     </div>
