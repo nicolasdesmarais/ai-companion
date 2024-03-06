@@ -1,5 +1,6 @@
 import LandingNav from "@/components/landing-nav";
 import LandingStartChat from "@/components/landing-start-chat";
+import LandingTutorials from "@/components/landing-tutorials";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -57,7 +58,7 @@ const LandingHome = () => {
               </h4>
               <div>
                 Fearlessly build your AI using even the most sensitive data. Our
-                admin-first approach puts IT leaders in the driver's seat,
+                admin-first approach puts IT leaders in the driver&apos;s seat,
                 ensuring meticulous oversight and control over AI
                 implementations.
               </div>
@@ -95,12 +96,14 @@ const LandingHome = () => {
                 For companies ready to build a fully custom, enterprise-ready AI
                 solution, AppDirect partner Ivado labs provides professional
                 services to help develop your vision, strategy, and
-                implementation. 
+                implementation.
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <LandingTutorials />
     </div>
   );
 };
