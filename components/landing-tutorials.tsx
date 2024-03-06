@@ -38,7 +38,6 @@ const steps = [
 
 const LandingTutorials = () => {
   const [selectedStep, setSelectedStep] = useState(steps[0]);
-  console.log(selectedStep.src);
   return (
     <div className="flex flex-col items-center mb-14 mt-20">
       <h3 className="text-3xl font-bold mb-16">Create apps without code</h3>
