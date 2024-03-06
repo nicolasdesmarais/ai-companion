@@ -1,7 +1,6 @@
 import LandingNav from "@/components/landing-nav";
 import LandingStartChat from "@/components/landing-start-chat";
 import { ArrowRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 
 const LandingHome = () => {
@@ -39,43 +38,66 @@ const LandingHome = () => {
 
       <LandingStartChat />
 
-      <div className="flex flex-col lg:flex-row justify-center p-8 lg:p-14 items-center lg:items-start">
-        <div className="md:m-8 lg:w-96 space-y-4">
-          <h3 className="mt-5 text-3xl font-bold">Interact with AIs</h3>
-          <div>
-            Chat with AIs to ask broad questions that help you summarize complex
-            data sets or dig into the details quickly with specific queries.
-          </div>
-          <div>
-            AIs learn what is most helpful for you with every interaction.
-          </div>
-        </div>
-        <Image
-          src="/interact_screenshot.jpg"
-          alt="Chat Page"
-          width="512"
-          height="360"
-          className="mt-5 shadow-glow"
-        />
-      </div>
-
-      <div className="flex flex-col lg:flex-row justify-center p-8 lg:p-14 items-center lg:items-start">
-        <Image
-          src="/share_screenshot.jpg"
-          alt="Chat Page"
-          width="512"
-          height="377"
-          className="mt-5 shadow-glow"
-        />
-        <div className="md:ml-8 mt-4 lg:w-[400px] space-y-4 text-left lg:text-right">
-          <h3 className="mt-5 text-3xl font-bold">Share with confidence</h3>
-          <div>
-            Sharing your AI bot securely is paramount. AppDirect delivers robust
-            enterprise-grade access control.
-          </div>
-          <div>
-            You can specify who can interact with your bot and to what extent,
-            safeguarding sensitive information and ensuring proper usage.
+      <div className="flex flex-col items-center mb-14 mt-20">
+        <div className="bg-unleash-pattern w-[1110px] px-20 py-16 flex flex-col items-center">
+          <h3 className="text-3xl font-bold mb-16">
+            Unleash productivity and innovation
+          </h3>
+          <div className="grid grid-cols-3 gap-8">
+            <div className="bg-white px-8 py-8 drop-shadow-lg">
+              <h4 className="text-xl font-bold mb-11">Low/no code</h4>
+              <div>
+                Our low/no code solution empowers you to effortlessly create
+                tailor-made AI applications for your business and clientele.
+              </div>
+            </div>
+            <div className="bg-white px-8 py-8 drop-shadow-lg">
+              <h4 className="text-xl font-bold mb-4">
+                Enterprise-grade governance
+              </h4>
+              <div>
+                Fearlessly build your AI using even the most sensitive data. Our
+                admin-first approach puts IT leaders in the driver's seat,
+                ensuring meticulous oversight and control over AI
+                implementations.
+              </div>
+            </div>
+            <div className="bg-white px-8 py-8 drop-shadow-lg">
+              <h4 className="text-xl font-bold mb-11">Choose your LLM</h4>
+              <div>
+                App creators can choose the LLM provider most suitable to meet
+                their business purpose for every app they create.
+              </div>
+            </div>
+            <div className="bg-white px-8 py-8 drop-shadow-lg">
+              <h4 className="text-xl font-bold mb-4">
+                Collaborative workspace
+              </h4>
+              <div>
+                Our workspace fosters seamless collaboration, giving teams a
+                powerful tool to gain new insights, unlock innovation, and
+                increase productivity.
+              </div>
+            </div>
+            <div className="bg-white px-8 py-8 drop-shadow-lg">
+              <h4 className="text-xl font-bold mb-11">Your data, your AI</h4>
+              <div>
+                Train your AI with your proprietary assets to provide results
+                that are important to you, then watch it unlock unique insights
+                into your business.
+              </div>
+            </div>
+            <div className="bg-white px-8 py-8 drop-shadow-lg">
+              <h4 className="text-xl font-bold mb-4">
+                Custom deployment options
+              </h4>
+              <div>
+                For companies ready to build a fully custom, enterprise-ready AI
+                solution, AppDirect partner Ivado labs provides professional
+                services to help develop your vision, strategy, and
+                implementation. 
+              </div>
+            </div>
           </div>
         </div>
       </div>

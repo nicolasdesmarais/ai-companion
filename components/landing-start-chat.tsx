@@ -76,7 +76,7 @@ const LandingStartChat = () => {
             </li>
           ))}
         </ul>
-        <div className="m-8 p-4 w-[800px] bg-white drop-shadow-lg">
+        <div className="m-8 py-8 px-12 w-[900px] bg-white drop-shadow-lg">
           <div>{selectedAi.header}</div>
           <div className="font-bold">{selectedAi.bold}</div>
           <div className="flex flex-wrap justify-evenly m-8 min-h-72">
