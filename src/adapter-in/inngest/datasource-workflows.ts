@@ -395,26 +395,6 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
   }
 );
 
-const onKnowledgeStatusUpdated = async (
-  dataSourceId: string,
-  knowledge: KnowledgeDto,
-  step: any
-) => {
-  await step.run("update-datasource-status", async () => {
-    await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
-  });
-
-  if (knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
-    const eventPayload: KnowledgeIndexingCompletedSuccessfullyPayload = {
-      knowledgeId: knowledge.id,
-    };
-    await step.sendEvent("knowledge-indexing-completed-successfully", {
-      name: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED_SUCCESSFULLY,
-      data: eventPayload,
-    });
-  }
-};
-
 export const onKnowledgeIndexingCompletedSuccessfully = inngest.createFunction(
   {
     id: "on-knowledge-indexing-completed-successfully",
@@ -433,13 +413,7 @@ export const onKnowledgeIndexingCompletedSuccessfully = inngest.createFunction(
       }
     );
 
-    await Promise.all(
-      deletedKnowledgeIds.map((knowledgeId) =>
-        step.run("delete-vectordb-knowledge", async () => {
-          await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
-        })
-      )
-    );
+    await onKnowledgeDeleted(deletedKnowledgeIds, step);
 
     await Promise.all(
       updatedDataSourceIds.map((dataSourceId) =>
@@ -515,13 +489,7 @@ export const onDataSourceDeleteRequested = inngest.createFunction(
       }
     );
 
-    await Promise.all(
-      deletedKnowledgeIds.map((knowledgeId) =>
-        step.run("delete-vectordb-knowledge", async () => {
-          await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
-        })
-      )
-    );
+    await onKnowledgeDeleted(deletedKnowledgeIds, step);
   }
 );
 
@@ -536,16 +504,7 @@ export const deleteUnusedKnowledges = inngest.createFunction(
       }
     );
 
-    await Promise.all(
-      deletedKnowledgeIds.flatMap((knowledgeId) => [
-        step.run("delete-vectordb-knowledge", async () => {
-          await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
-        }),
-        step.run("delete-blob-storage", async () => {
-          await dataSourceManagementService.deleteBlobStorage(knowledgeId);
-        }),
-      ])
-    );
+    await onKnowledgeDeleted(deletedKnowledgeIds, step);
   }
 );
 
@@ -556,7 +515,7 @@ export const deleteBlobStorage = inngest.createFunction(
     const knowledgeIds = await step.run(
       "find-deleted-knowledge-with-blob-storage",
       async () => {
-        return await dataSourceManagementService.findDeletedKnowledgeWithBlobStorage();
+        return await knowledgeService.findDeletedKnowledgeWithBlobStorage();
       }
     );
 
@@ -565,6 +524,25 @@ export const deleteBlobStorage = inngest.createFunction(
         step.run("delete-blob-storage", async () => {
           await dataSourceManagementService.deleteBlobStorage(knowledgeId);
         })
+      )
+    );
+  }
+);
+
+export const deleteVectorDBStorage = inngest.createFunction(
+  { id: "delete-vectordb-storage" },
+  { cron: "*/10 * * * *" },
+  async ({ step }) => {
+    const knowledgeIds = await step.run(
+      "find-deleted-knowledge-with-vector-storage",
+      async () => {
+        return await knowledgeService.findDeletedKnowledgeWithVectorStorage();
+      }
+    );
+
+    await Promise.all(
+      knowledgeIds.map((knowledgeId) =>
+        deleteKnowledgeVectorStorage(knowledgeId, step)
       )
     );
   }
@@ -592,3 +570,62 @@ export const deleteRelatedKnowledgeInstances = inngest.createFunction(
     }
   }
 );
+
+const onKnowledgeStatusUpdated = async (
+  dataSourceId: string,
+  knowledge: KnowledgeDto,
+  step: any
+) => {
+  await step.run("update-datasource-status", async () => {
+    await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
+  });
+
+  if (knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
+    const eventPayload: KnowledgeIndexingCompletedSuccessfullyPayload = {
+      knowledgeId: knowledge.id,
+    };
+    await step.sendEvent("knowledge-indexing-completed-successfully", {
+      name: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED_SUCCESSFULLY,
+      data: eventPayload,
+    });
+  }
+};
+
+const onKnowledgeDeleted = async (deletedKnowledgeIds: string[], step: any) => {
+  for (const knowledgeId of deletedKnowledgeIds) {
+    await deleteKnowledgeVectorStorage(knowledgeId, step);
+  }
+
+  await Promise.all(
+    deletedKnowledgeIds.map((knowledgeId) =>
+      step.run("delete-blob-storage", async () => {
+        await dataSourceManagementService.deleteBlobStorage(knowledgeId);
+      })
+    )
+  );
+};
+
+const deleteKnowledgeVectorStorage = async (knowledgeId: string, step: any) => {
+  let paginationNextToken: string;
+  do {
+    const { vectorIds, paginationNextToken: newPaginationNextToken } =
+      await step.run("vector-id-list", async () => {
+        return await vectorDatabaseAdapter.vectorIdList(
+          knowledgeId,
+          paginationNextToken
+        );
+      });
+
+    if (vectorIds.length > 0) {
+      await step.run("delete-vectors", async () => {
+        await vectorDatabaseAdapter.deleteVectors(vectorIds);
+      });
+    }
+
+    paginationNextToken = newPaginationNextToken;
+  } while (paginationNextToken);
+
+  await step.run("set-vector-storage-as-deleted", async () => {
+    await knowledgeService.setVectorStorageAsDeleted(knowledgeId);
+  });
+};
