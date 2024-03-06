@@ -77,35 +77,39 @@ export class MemoryManager {
     return similarDocs;
   }
 
-  public async vectorIdList(knowledgeId: string): Promise<string[]> {
+  public async vectorIdList(
+    knowledgeId: string,
+    paginationToken?: string
+  ): Promise<{ vectorIds: string[]; paginationNextToken: string | undefined }> {
     const host = process.env.PINECONE_INDEX_HOST;
     if (!host) {
       throw new Error("PINECONE_HOST is not set");
     }
 
-    const response = await axios.get(
-      `${host}/vectors/list?prefix=${knowledgeId}#`,
-      {
-        headers: {
-          "Api-Key": process.env.PINECONE_API_KEY,
-        },
-      }
-    );
+    let requestUrl = `${host}/vectors/list?prefix=${knowledgeId}#`;
+    if (paginationToken) {
+      requestUrl += `&paginationToken=${paginationToken}`;
+    }
 
-    return response.data.vectors.map((v: any) => v.id as string);
+    const response = await axios.get(requestUrl, {
+      headers: {
+        "Api-Key": process.env.PINECONE_API_KEY,
+      },
+    });
+    const vectorIds = response.data.vectors.map((v: any) => v.id as string);
+    const paginationNextToken = response.data.pagination?.next;
+
+    return { vectorIds, paginationNextToken };
   }
 
-  public async vectorDelete(knowledgeId: string) {
-    const vectorIds = await this.vectorIdList(knowledgeId);
+  public async vectorDelete(vectorIds: string[]) {
     if (vectorIds.length === 0) {
       return;
     }
 
-    const pineconeServerlessIndexName = process.env.PINECONE_INDEX!;
-    const pineconeServerlessIndex = this.pinecone.Index(
-      pineconeServerlessIndexName
-    );
-    await pineconeServerlessIndex.deleteMany(vectorIds);
+    const pineconeIndexName = process.env.PINECONE_INDEX!;
+    const pineconeIndex = this.pinecone.Index(pineconeIndexName);
+    await pineconeIndex.deleteMany(vectorIds);
   }
 
   public static getInstance(): MemoryManager {

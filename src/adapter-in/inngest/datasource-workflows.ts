@@ -433,13 +433,7 @@ export const onKnowledgeIndexingCompletedSuccessfully = inngest.createFunction(
       }
     );
 
-    await Promise.all(
-      deletedKnowledgeIds.map((knowledgeId) =>
-        step.run("delete-vectordb-knowledge", async () => {
-          await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
-        })
-      )
-    );
+    await onKnowledgeDeleted(deletedKnowledgeIds, step);
 
     await Promise.all(
       updatedDataSourceIds.map((dataSourceId) =>
@@ -515,13 +509,7 @@ export const onDataSourceDeleteRequested = inngest.createFunction(
       }
     );
 
-    await Promise.all(
-      deletedKnowledgeIds.map((knowledgeId) =>
-        step.run("delete-vectordb-knowledge", async () => {
-          await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
-        })
-      )
-    );
+    await onKnowledgeDeleted(deletedKnowledgeIds, step);
   }
 );
 
@@ -536,16 +524,7 @@ export const deleteUnusedKnowledges = inngest.createFunction(
       }
     );
 
-    await Promise.all(
-      deletedKnowledgeIds.flatMap((knowledgeId) => [
-        step.run("delete-vectordb-knowledge", async () => {
-          await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
-        }),
-        step.run("delete-blob-storage", async () => {
-          await dataSourceManagementService.deleteBlobStorage(knowledgeId);
-        }),
-      ])
-    );
+    await onKnowledgeDeleted(deletedKnowledgeIds, step);
   }
 );
 
@@ -592,3 +571,28 @@ export const deleteRelatedKnowledgeInstances = inngest.createFunction(
     }
   }
 );
+
+const onKnowledgeDeleted = async (deletedKnowledgeIds: string[], step: any) => {
+  for (const knowledgeId of deletedKnowledgeIds) {
+    let paginationNextToken;
+
+    do {
+      const { vectorIds, paginationNextToken: newPaginationNextToken } =
+        await step.run("delete-vectordb-knowledge", async () => {
+          await vectorDatabaseAdapter.vectorIdList(knowledgeId);
+        });
+
+      await vectorDatabaseAdapter.deleteVectors(vectorIds);
+
+      paginationNextToken = newPaginationNextToken;
+    } while (paginationNextToken);
+  }
+
+  await Promise.all(
+    deletedKnowledgeIds.map((knowledgeId) =>
+      step.run("delete-blob-storage", async () => {
+        await dataSourceManagementService.deleteBlobStorage(knowledgeId);
+      })
+    )
+  );
+};
