@@ -395,26 +395,6 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
   }
 );
 
-const onKnowledgeStatusUpdated = async (
-  dataSourceId: string,
-  knowledge: KnowledgeDto,
-  step: any
-) => {
-  await step.run("update-datasource-status", async () => {
-    await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
-  });
-
-  if (knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
-    const eventPayload: KnowledgeIndexingCompletedSuccessfullyPayload = {
-      knowledgeId: knowledge.id,
-    };
-    await step.sendEvent("knowledge-indexing-completed-successfully", {
-      name: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED_SUCCESSFULLY,
-      data: eventPayload,
-    });
-  }
-};
-
 export const onKnowledgeIndexingCompletedSuccessfully = inngest.createFunction(
   {
     id: "on-knowledge-indexing-completed-successfully",
@@ -571,6 +551,26 @@ export const deleteRelatedKnowledgeInstances = inngest.createFunction(
     }
   }
 );
+
+const onKnowledgeStatusUpdated = async (
+  dataSourceId: string,
+  knowledge: KnowledgeDto,
+  step: any
+) => {
+  await step.run("update-datasource-status", async () => {
+    await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
+  });
+
+  if (knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
+    const eventPayload: KnowledgeIndexingCompletedSuccessfullyPayload = {
+      knowledgeId: knowledge.id,
+    };
+    await step.sendEvent("knowledge-indexing-completed-successfully", {
+      name: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED_SUCCESSFULLY,
+      data: eventPayload,
+    });
+  }
+};
 
 const onKnowledgeDeleted = async (deletedKnowledgeIds: string[], step: any) => {
   for (const knowledgeId of deletedKnowledgeIds) {
