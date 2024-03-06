@@ -145,24 +145,25 @@ model GroupAI {
 }
 
 model Knowledge {
-  id                   String                @id @default(cuid())
-  createdAt            DateTime              @default(now()) @map(name: "created_at")
-  updatedAt            DateTime              @default(now()) @updatedAt @map(name: "updated_at")
-  lastIndexedAt        DateTime?             @map(name: "last_indexed_at")
-  name                 String                @db.Text
-  type                 DataSourceType
-  uniqueId             String?               @map(name: "unique_id") @db.VarChar(500)
-  indexStatus          KnowledgeIndexStatus  @map(name: "index_status")
-  originalContent      Json?                 @map(name: "original_content")
-  documentsBlobUrl     String?               @map(name: "documents_blob_url") @db.Text
-  metadata             Json?
-  documentCount        Int?                  @map(name: "document_count")
-  tokenCount           Int?                  @map(name: "token_count")
-  dataSources          DataSourceKnowledge[]
-  isMigrated           Boolean               @default(false) @map(name: "is_migrated")
-  indexPercentage      Decimal               @default(0) @map(name: "index_percentage")
-  KnowledgeChunks      KnowledgeChunk[]
-  isBlobStorageDeleted Boolean               @default(false) @map(name: "is_blob_storage_deleted")
+  id                     String                @id @default(cuid())
+  createdAt              DateTime              @default(now()) @map(name: "created_at")
+  updatedAt              DateTime              @default(now()) @updatedAt @map(name: "updated_at")
+  lastIndexedAt          DateTime?             @map(name: "last_indexed_at")
+  name                   String                @db.Text
+  type                   DataSourceType
+  uniqueId               String?               @map(name: "unique_id") @db.VarChar(500)
+  indexStatus            KnowledgeIndexStatus  @map(name: "index_status")
+  originalContent        Json?                 @map(name: "original_content")
+  documentsBlobUrl       String?               @map(name: "documents_blob_url") @db.Text
+  metadata               Json?
+  documentCount          Int?                  @map(name: "document_count")
+  tokenCount             Int?                  @map(name: "token_count")
+  dataSources            DataSourceKnowledge[]
+  isMigrated             Boolean               @default(false) @map(name: "is_migrated")
+  indexPercentage        Decimal               @default(0) @map(name: "index_percentage")
+  KnowledgeChunks        KnowledgeChunk[]
+  isBlobStorageDeleted   Boolean               @default(false) @map(name: "is_blob_storage_deleted")
+  isVectorStorageDeleted Boolean               @default(false) @map(name: "is_vector_storage_deleted")
 
   @@index([uniqueId])
   @@map("knowledge")
