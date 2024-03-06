@@ -287,6 +287,21 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
     return deletedKnowledgeIds.map((knowledge) => knowledge.id);
   }
 
+  public async findDeletedKnowledgeIdsWithVectorStorage(): Promise<string[]> {
+    const deletedKnowledgeIds = await prismadb.knowledge.findMany({
+      where: {
+        indexStatus: KnowledgeIndexStatus.DELETED,
+        isVectorStorageDeleted: false,
+      },
+      select: {
+        id: true,
+      },
+      take: 500,
+    });
+
+    return deletedKnowledgeIds.map((knowledge) => knowledge.id);
+  }
+
   public async findCompletedKnowledgeWithRelatedInstances(): Promise<string[]> {
     const result = await prismadb.$queryRaw<{ id: string }[]>`
     SELECT k.id

@@ -1130,10 +1130,6 @@ export class DataSourceManagementService {
     return newMetadata;
   }
 
-  public async findDeletedKnowledgeWithBlobStorage(): Promise<string[]> {
-    return await this.knowledgeRepository.findDeletedKnowledgeIdsWithBlobStorageUrl();
-  }
-
   public async deleteBlobStorage(knowledgeId: string) {
     const knowledge = await this.knowledgeRepository.getById(knowledgeId);
     try {

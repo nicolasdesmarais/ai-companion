@@ -81,7 +81,7 @@ export class VectorDatabaseAdapter {
     paginationToken?: string
   ): Promise<{ vectorIds: string[]; paginationNextToken: string | undefined }> {
     const memoryManager = await MemoryManager.getInstance();
-    return await memoryManager.vectorIdList(knowledgeId);
+    return await memoryManager.vectorIdList(knowledgeId, paginationToken);
   }
 
   public async deleteVectors(vectorIds: string[]): Promise<void> {

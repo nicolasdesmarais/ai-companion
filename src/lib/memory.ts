@@ -96,7 +96,9 @@ export class MemoryManager {
         "Api-Key": process.env.PINECONE_API_KEY,
       },
     });
-    const vectorIds = response.data.vectors.map((v: any) => v.id as string);
+    const vectorIds: string[] = response.data.vectors.map(
+      (v: any) => v.id as string
+    );
     const paginationNextToken = response.data.pagination?.next;
 
     return { vectorIds, paginationNextToken };

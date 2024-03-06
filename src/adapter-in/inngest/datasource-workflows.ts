@@ -515,7 +515,7 @@ export const deleteBlobStorage = inngest.createFunction(
     const knowledgeIds = await step.run(
       "find-deleted-knowledge-with-blob-storage",
       async () => {
-        return await dataSourceManagementService.findDeletedKnowledgeWithBlobStorage();
+        return await knowledgeService.findDeletedKnowledgeWithBlobStorage();
       }
     );
 
@@ -525,6 +525,23 @@ export const deleteBlobStorage = inngest.createFunction(
           await dataSourceManagementService.deleteBlobStorage(knowledgeId);
         })
       )
+    );
+  }
+);
+
+export const deleteVectorDBStorage = inngest.createFunction(
+  { id: "delete-vectordb-storage" },
+  { cron: "* * * * *" },
+  async ({ step }) => {
+    const knowledgeIds = await step.run(
+      "find-deleted-knowledge-with-blob-storage",
+      async () => {
+        return await knowledgeService.findDeletedKnowledgeWithVectorStorageStorage();
+      }
+    );
+
+    await Promise.all(
+      knowledgeIds.map((knowledgeId) => deleteKnowledge(knowledgeId, step))
     );
   }
 );
@@ -574,18 +591,7 @@ const onKnowledgeStatusUpdated = async (
 
 const onKnowledgeDeleted = async (deletedKnowledgeIds: string[], step: any) => {
   for (const knowledgeId of deletedKnowledgeIds) {
-    let paginationNextToken;
-
-    do {
-      const { vectorIds, paginationNextToken: newPaginationNextToken } =
-        await step.run("delete-vectordb-knowledge", async () => {
-          await vectorDatabaseAdapter.vectorIdList(knowledgeId);
-        });
-
-      await vectorDatabaseAdapter.deleteVectors(vectorIds);
-
-      paginationNextToken = newPaginationNextToken;
-    } while (paginationNextToken);
+    await deleteKnowledge(knowledgeId, step);
   }
 
   await Promise.all(
@@ -595,4 +601,25 @@ const onKnowledgeDeleted = async (deletedKnowledgeIds: string[], step: any) => {
       })
     )
   );
+};
+
+const deleteKnowledge = async (knowledgeId: string, step: any) => {
+  let paginationNextToken;
+  do {
+    const { vectorIds, paginationNextToken: newPaginationNextToken } =
+      await step.run("delete-vectordb-knowledge", async () => {
+        const response = await vectorDatabaseAdapter.vectorIdList(knowledgeId);
+        return response;
+      });
+
+    if (vectorIds.length > 0) {
+      await vectorDatabaseAdapter.deleteVectors(vectorIds);
+    }
+
+    paginationNextToken = newPaginationNextToken;
+  } while (paginationNextToken);
+
+  await step.run("set-vector-storage-as-deleted", async () => {
+    await knowledgeService.setVectorStorageAsDeleted(knowledgeId);
+  });
 };
