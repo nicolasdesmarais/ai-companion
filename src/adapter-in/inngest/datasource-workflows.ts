@@ -536,7 +536,7 @@ export const deleteVectorDBStorage = inngest.createFunction(
     const knowledgeIds = await step.run(
       "find-deleted-knowledge-with-vector-storage",
       async () => {
-        return await knowledgeService.findDeletedKnowledgeWithVectorStorageStorage();
+        return await knowledgeService.findDeletedKnowledgeWithVectorStorage();
       }
     );
 
