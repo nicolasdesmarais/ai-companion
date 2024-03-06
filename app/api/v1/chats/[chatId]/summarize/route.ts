@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 
+import chatService from "@/src/domain/services/ChatService";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
-import chatService from "@/src/domain/services/ChatService";
+
+export const maxDuration = 60;
 
 async function putHandler(
   req: Request,
