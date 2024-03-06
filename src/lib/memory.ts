@@ -1,4 +1,4 @@
-import { Document } from "@langchain/core/documents";
+import { Document, DocumentInterface } from "@langchain/core/documents";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { PineconeStore } from "@langchain/pinecone";
 import { Pinecone } from "@pinecone-database/pinecone";
@@ -53,7 +53,7 @@ export class MemoryManager {
     query: string,
     knowledgeIds: string[],
     numDocs = 100
-  ) {
+  ): Promise<[DocumentInterface<Record<string, any>>, number][]> {
     const pineconeIndex = this.pinecone.Index(process.env.PINECONE_INDEX!);
 
     const vectorStore = await PineconeStore.fromExistingIndex(
@@ -61,13 +61,19 @@ export class MemoryManager {
       { pineconeIndex }
     );
 
-    const similarDocs = await vectorStore
-      .similaritySearch(query, numDocs, {
-        knowledge: { $in: knowledgeIds },
-      })
-      .catch((err) => {
-        console.log("WARNING: failed to get vector search results.", err);
-      });
+    let similarDocs: [DocumentInterface<Record<string, any>>, number][] = [];
+    try {
+      similarDocs = await vectorStore.similaritySearchWithScore(
+        query,
+        numDocs,
+        {
+          knowledge: { $in: knowledgeIds },
+        }
+      );
+    } catch (err) {
+      console.log("WARNING: failed to get vector search results.", err);
+    }
+
     return similarDocs;
   }
 
