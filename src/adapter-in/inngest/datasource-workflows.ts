@@ -534,7 +534,7 @@ export const deleteVectorDBStorage = inngest.createFunction(
   { cron: "0 * * * *" },
   async ({ step }) => {
     const knowledgeIds = await step.run(
-      "find-deleted-knowledge-with-blob-storage",
+      "find-deleted-knowledge-with-vector-storage",
       async () => {
         return await knowledgeService.findDeletedKnowledgeWithVectorStorageStorage();
       }
