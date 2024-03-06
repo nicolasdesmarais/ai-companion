@@ -35,8 +35,8 @@ const LandingStartChat = () => {
       <h3 className="text-3xl font-bold mb-8">Start chatting with AIs</h3>
       <div className="flex">
         <ul className="flex flex-col justify-evenly items-center">
-          {ais.map((ai) => (
-            <li>
+          {ais.map((ai, index) => (
+            <li key={index}>
               <Image
                 src={ai.src}
                 alt={`{ai.name} AI`}
@@ -52,8 +52,10 @@ const LandingStartChat = () => {
           <div>{selectedAi.header}</div>
           <div>{selectedAi.bold}</div>
           <div className="flex flex-wrap justify-evenly m-8">
-            {selectedAi.questions?.map((question) => (
-              <div className="bg-lime p-4 m-2 rounded-lg">{question}</div>
+            {selectedAi.questions?.map((question, index) => (
+              <div key={index} className="bg-lime p-4 m-2 rounded-lg">
+                {question}
+              </div>
             ))}
           </div>
           <div>
