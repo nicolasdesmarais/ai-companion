@@ -4,6 +4,7 @@ import {
   deleteBlobStorage,
   deleteRelatedKnowledgeInstances,
   deleteUnusedKnowledges,
+  deleteVectorDBStorage,
   onDataSourceDeleteRequested,
   onDataSourceInitialized,
   onDataSourceItemListReceived,
@@ -42,5 +43,6 @@ export const { GET, POST, PUT } = serve({
     onApifyWebhookReceived,
     deleteBlobStorage,
     deleteRelatedKnowledgeInstances,
+    deleteVectorDBStorage,
   ],
 });

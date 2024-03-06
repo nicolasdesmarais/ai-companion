@@ -531,7 +531,7 @@ export const deleteBlobStorage = inngest.createFunction(
 
 export const deleteVectorDBStorage = inngest.createFunction(
   { id: "delete-vectordb-storage" },
-  { cron: "* * * * *" },
+  { cron: "0 * * * *" },
   async ({ step }) => {
     const knowledgeIds = await step.run(
       "find-deleted-knowledge-with-blob-storage",
@@ -541,7 +541,9 @@ export const deleteVectorDBStorage = inngest.createFunction(
     );
 
     await Promise.all(
-      knowledgeIds.map((knowledgeId) => deleteKnowledge(knowledgeId, step))
+      knowledgeIds.map((knowledgeId) =>
+        deleteKnowledgeVectorStorage(knowledgeId, step)
+      )
     );
   }
 );
@@ -591,7 +593,7 @@ const onKnowledgeStatusUpdated = async (
 
 const onKnowledgeDeleted = async (deletedKnowledgeIds: string[], step: any) => {
   for (const knowledgeId of deletedKnowledgeIds) {
-    await deleteKnowledge(knowledgeId, step);
+    await deleteKnowledgeVectorStorage(knowledgeId, step);
   }
 
   await Promise.all(
@@ -603,12 +605,15 @@ const onKnowledgeDeleted = async (deletedKnowledgeIds: string[], step: any) => {
   );
 };
 
-const deleteKnowledge = async (knowledgeId: string, step: any) => {
+const deleteKnowledgeVectorStorage = async (knowledgeId: string, step: any) => {
   let paginationNextToken;
   do {
     const { vectorIds, paginationNextToken: newPaginationNextToken } =
       await step.run("vector-id-list", async () => {
-        return await vectorDatabaseAdapter.vectorIdList(knowledgeId);
+        return await vectorDatabaseAdapter.vectorIdList(
+          knowledgeId,
+          newPaginationNextToken
+        );
       });
 
     if (vectorIds.length > 0) {
