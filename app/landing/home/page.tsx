@@ -1,4 +1,5 @@
 import LandingNav from "@/components/landing-nav";
+import LandingStartChat from "@/components/landing-start-chat";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -36,27 +37,7 @@ const LandingHome = () => {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row justify-center p-8 lg:p-14 items-center lg:items-start">
-        <Image
-          src="/datasources_screenshot.jpg"
-          alt="Create AI Page"
-          width="512"
-          height="360"
-          className="mt-5 shadow-glow"
-        />
-        <div className="md:ml-8 mt-8 lg:w-[395px] space-y-4 text-left lg:text-right">
-          <h3 className="text-3xl font-bold">Create your own AI</h3>
-          <div>
-            Create custom AIs for yourself, your team, or your customers in
-            under 30 minutes. No coding required.
-          </div>
-          <div>
-            Whether you&apos;re a seasoned developer or a newcomer to the AI
-            scene, our platform provides a guided user-friendly experience to
-            create and manage AIs.
-          </div>
-        </div>
-      </div>
+      <LandingStartChat />
 
       <div className="flex flex-col lg:flex-row justify-center p-8 lg:p-14 items-center lg:items-start">
         <div className="md:m-8 lg:w-96 space-y-4">
