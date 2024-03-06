@@ -606,13 +606,13 @@ const onKnowledgeDeleted = async (deletedKnowledgeIds: string[], step: any) => {
 };
 
 const deleteKnowledgeVectorStorage = async (knowledgeId: string, step: any) => {
-  let paginationNextToken;
+  let paginationNextToken: string;
   do {
     const { vectorIds, paginationNextToken: newPaginationNextToken } =
       await step.run("vector-id-list", async () => {
         return await vectorDatabaseAdapter.vectorIdList(
           knowledgeId,
-          newPaginationNextToken
+          paginationNextToken
         );
       });
 
