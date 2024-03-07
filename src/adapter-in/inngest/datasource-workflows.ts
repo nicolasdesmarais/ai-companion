@@ -612,8 +612,8 @@ const onKnowledgeStatusUpdated = async (
 
 const publishKnowledgeDeletedEvents = async (
   deletedKnowledgeIds: string[],
-  deleteBlobStorage: boolean = true,
-  deleteVectorDBStorage: boolean = true,
+  deleteBlobStorage: boolean,
+  deleteVectorDBStorage: boolean,
   step: any
 ) => {
   await Promise.all(
