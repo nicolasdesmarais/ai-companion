@@ -553,7 +553,7 @@ export const deleteVectorDBStorage = inngest.createFunction(
   { id: "delete-vectordb-storage" },
   { cron: "*/10 * * * *" },
   async ({ step }) => {
-    const numberOfIdsToFetch = 5000;
+    const numberOfIdsToFetch = 1000;
     const knowledgeIds = await step.run(
       "find-deleted-knowledge-with-vector-storage",
       async () => {
