@@ -45,14 +45,14 @@ const LandingHome = () => {
             Unleash productivity and innovation
           </h3>
           <div className="grid grid-cols-3 gap-8">
-            <div className="bg-white px-8 py-8 drop-shadow-lg">
+            <div className="bg-white px-8 py-16 drop-shadow-lg">
               <h4 className="text-xl font-bold mb-11">Low/no code</h4>
               <div>
                 Our low/no code solution empowers you to effortlessly create
                 tailor-made AI applications for your business and clientele.
               </div>
             </div>
-            <div className="bg-white px-8 py-8 drop-shadow-lg">
+            <div className="bg-white px-8 py-16 drop-shadow-lg">
               <h4 className="text-xl font-bold mb-4">
                 Enterprise-grade governance
               </h4>
@@ -63,14 +63,14 @@ const LandingHome = () => {
                 implementations.
               </div>
             </div>
-            <div className="bg-white px-8 py-8 drop-shadow-lg">
+            <div className="bg-white px-8 py-16 drop-shadow-lg">
               <h4 className="text-xl font-bold mb-11">Choose your LLM</h4>
               <div>
                 App creators can choose the LLM provider most suitable to meet
                 their business purpose for every app they create.
               </div>
             </div>
-            <div className="bg-white px-8 py-8 drop-shadow-lg">
+            <div className="bg-white px-8 py-16 drop-shadow-lg">
               <h4 className="text-xl font-bold mb-4">
                 Collaborative workspace
               </h4>
@@ -80,7 +80,7 @@ const LandingHome = () => {
                 increase productivity.
               </div>
             </div>
-            <div className="bg-white px-8 py-8 drop-shadow-lg">
+            <div className="bg-white px-8 py-16 drop-shadow-lg">
               <h4 className="text-xl font-bold mb-11">Your data, your AI</h4>
               <div>
                 Train your AI with your proprietary assets to provide results
@@ -88,7 +88,28 @@ const LandingHome = () => {
                 into your business.
               </div>
             </div>
-            <div className="bg-white px-8 py-8 drop-shadow-lg">
+            <div className="bg-navy text-white px-8 py-16 drop-shadow-lg">
+              <div className="absolute top-0 right-0">
+                <svg
+                  width="45"
+                  height="45"
+                  viewBox="0 0 56 57"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    x="0.116211"
+                    y="0.522156"
+                    width="55.6335"
+                    height="55.6212"
+                    fill="#CDFDDA"
+                  />
+                  <path
+                    d="M18.9391 19.7697L15.712 22.996L13.7217 21.006L20.3465 14.3828L26.9712 21.006L24.9809 22.996L21.7538 19.7697L21.7538 26.9258H18.9391V19.7697ZM34.4204 24.8152C36.3636 24.8152 37.9389 23.2402 37.9389 21.2975C37.9389 19.3547 36.3636 17.7798 34.4204 17.7798C32.4772 17.7798 30.902 19.3547 30.902 21.2975C30.902 23.2402 32.4772 24.8152 34.4204 24.8152ZM34.4204 27.6293C30.9226 27.6293 28.0872 24.7945 28.0872 21.2975C28.0872 17.8005 30.9226 14.9656 34.4204 14.9656C37.9182 14.9656 40.7537 17.8005 40.7537 21.2975C40.7537 24.7945 37.9182 27.6293 34.4204 27.6293ZM41.0452 35.6597L39.0549 33.6698L35.8278 36.8961V29.7399H33.013V36.8961L29.786 33.6698L27.7957 35.6597L34.4204 42.283L41.0452 35.6597ZM17.5317 38.1824H23.1612L23.1612 32.5541H17.5317V38.1824ZM24.5687 29.7399C25.346 29.7399 25.9761 30.3699 25.9761 31.147V39.5895C25.9761 40.3667 25.346 40.9966 24.5687 40.9966H16.1242C15.347 40.9966 14.7168 40.3667 14.7169 39.5895V31.147C14.7169 30.3699 15.347 29.7399 16.1243 29.7399H24.5687Z"
+                    fill="#011B58"
+                  />
+                </svg>
+              </div>
               <h4 className="text-xl font-bold mb-4">
                 Custom deployment options
               </h4>
