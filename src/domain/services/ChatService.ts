@@ -229,7 +229,7 @@ export class ChatService {
         description: ai?.description || "",
         userId: ai?.userId || "",
         userName: "",
-        modelId: ai?.modelId,
+        modelId: ai?.modelId || "",
       },
     };
     chat.messages.push({
