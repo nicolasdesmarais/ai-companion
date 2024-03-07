@@ -12,7 +12,7 @@ const LandingNav = () => {
           </div>
           <ul className="flex justify-between gap-14 py-2">
             <li>
-              <Link href="/landing/how">How it works</Link>
+              <Link href="/landing/features">How it works</Link>
             </li>
             <li>
               <Link href="/landing/pricing">Pricing</Link>
