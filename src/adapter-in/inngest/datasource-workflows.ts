@@ -414,7 +414,7 @@ export const onKnowledgeIndexingCompletedSuccessfully = inngest.createFunction(
       }
     );
 
-    await publishKnowledgeDeletedEvents(deletedKnowledgeIds, step);
+    await publishKnowledgeDeletedEvents(deletedKnowledgeIds, true, true, step);
 
     await Promise.all(
       updatedDataSourceIds.map((dataSourceId) =>
@@ -490,7 +490,7 @@ export const onDataSourceDeleteRequested = inngest.createFunction(
       }
     );
 
-    await publishKnowledgeDeletedEvents(deletedKnowledgeIds, step);
+    await publishKnowledgeDeletedEvents(deletedKnowledgeIds, true, true, step);
   }
 );
 
@@ -498,13 +498,18 @@ export const onKnowledgeDeleted = inngest.createFunction(
   { id: "on-knowledge-deleted" },
   { event: DomainEvent.KNOWLEDGE_DELETED },
   async ({ event, step }) => {
-    const { knowledgeId } = event.data as KnowledgeDeletedPayload;
+    const { knowledgeId, deleteBlobStorage, deleteVectorDBStorage } =
+      event.data as KnowledgeDeletedPayload;
 
-    await step.run("delete-blob-storage", async () => {
-      await dataSourceManagementService.deleteBlobStorage(knowledgeId);
-    });
+    if (deleteBlobStorage) {
+      await step.run("delete-blob-storage", async () => {
+        await dataSourceManagementService.deleteBlobStorage(knowledgeId);
+      });
+    }
 
-    await deleteKnowledgeVectorStorage(knowledgeId, step);
+    if (deleteVectorDBStorage) {
+      await deleteKnowledgeVectorStorage(knowledgeId, step);
+    }
   }
 );
 
@@ -519,7 +524,7 @@ export const deleteUnusedKnowledges = inngest.createFunction(
       }
     );
 
-    await publishKnowledgeDeletedEvents(deletedKnowledgeIds, step);
+    await publishKnowledgeDeletedEvents(deletedKnowledgeIds, true, true, step);
   }
 );
 
@@ -546,16 +551,19 @@ export const deleteBlobStorage = inngest.createFunction(
 
 export const deleteVectorDBStorage = inngest.createFunction(
   { id: "delete-vectordb-storage" },
-  { cron: "* * * * *" },
+  { cron: "*/10 * * * *" },
   async ({ step }) => {
+    const numberOfIdsToFetch = 5000;
     const knowledgeIds = await step.run(
       "find-deleted-knowledge-with-vector-storage",
       async () => {
-        return await knowledgeService.findDeletedKnowledgeWithVectorStorage();
+        return await knowledgeService.findDeletedKnowledgeWithVectorStorage(
+          numberOfIdsToFetch
+        );
       }
     );
 
-    await publishKnowledgeDeletedEvents(knowledgeIds, step);
+    await publishKnowledgeDeletedEvents(knowledgeIds, false, true, step);
   }
 );
 
@@ -604,11 +612,17 @@ const onKnowledgeStatusUpdated = async (
 
 const publishKnowledgeDeletedEvents = async (
   deletedKnowledgeIds: string[],
+  deleteBlobStorage: boolean,
+  deleteVectorDBStorage: boolean,
   step: any
 ) => {
   await Promise.all(
     deletedKnowledgeIds.map((knowledgeId) => {
-      const knowledgeDeletedPayload: KnowledgeDeletedPayload = { knowledgeId };
+      const knowledgeDeletedPayload: KnowledgeDeletedPayload = {
+        knowledgeId,
+        deleteBlobStorage,
+        deleteVectorDBStorage,
+      };
       return step.sendEvent("knowledge-deleted", {
         name: DomainEvent.KNOWLEDGE_DELETED,
         data: knowledgeDeletedPayload,
@@ -647,7 +661,10 @@ const deleteKnowledgeVectorStorage = async (knowledgeId: string, step: any) => {
     });
   }
 
-  if (!paginationNextToken) {
+  if (paginationNextToken) {
+    // Publish another KnowledgeDeleted event to continue deleting vectors with a new function invocation
+    await publishKnowledgeDeletedEvents([knowledgeId], false, true, step);
+  } else {
     await step.run("set-vector-storage-as-deleted", async () => {
       await knowledgeService.setVectorStorageAsDeleted(knowledgeId);
     });

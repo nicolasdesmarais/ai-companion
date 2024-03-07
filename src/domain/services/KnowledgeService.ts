@@ -21,8 +21,12 @@ export class KnowledgeService {
     return await this.knowledgeRepository.findDeletedKnowledgeIdsWithBlobStorageUrl();
   }
 
-  public async findDeletedKnowledgeWithVectorStorage(): Promise<string[]> {
-    return await this.knowledgeRepository.findDeletedKnowledgeIdsWithVectorStorage();
+  public async findDeletedKnowledgeWithVectorStorage(
+    limit?: number
+  ): Promise<string[]> {
+    return await this.knowledgeRepository.findDeletedKnowledgeIdsWithVectorStorage(
+      limit
+    );
   }
 
   public async setVectorStorageAsDeleted(knowledgeId: string): Promise<void> {

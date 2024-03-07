@@ -55,4 +55,6 @@ export interface KnowledgeIndexingCompletedSuccessfullyPayload {
 
 export interface KnowledgeDeletedPayload {
   knowledgeId: string;
+  deleteBlobStorage: boolean;
+  deleteVectorDBStorage: boolean;
 }
