@@ -226,10 +226,10 @@ export class ChatService {
         id: aiId,
         name: ai?.name || "Test AI",
         src: "",
-        description: "",
+        description: ai?.description || "",
         userId: ai?.userId || "",
         userName: "",
-        modelId: "",
+        modelId: ai?.modelId,
       },
     };
     chat.messages.push({
