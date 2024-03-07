@@ -287,6 +287,23 @@ const LandingHome = () => {
           </div>
         </div>
       </div>
+
+      <div className="flex flex-col items-center mb-14 mt-20">
+        <div className="bg-unleash-pattern w-[1100px] py-28 px-16">
+          <div className="flex bg-white py-20 px-8">
+            <h3 className="text-3xl font-bold">
+              Start chatting with or creating AI apps today.
+            </h3>
+            <Link
+              href="/sign-up"
+              className="ml-10 px-8 py-2 bg-navy text-white flex items-center"
+            >
+              Get Started
+              <ArrowRight className="inline-block w-4 h-4 ml-2" />
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
