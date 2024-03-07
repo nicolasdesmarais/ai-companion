@@ -14,9 +14,11 @@ import {
   KnowledgeDeletedPayload,
   KnowledgeIndexingCompletedSuccessfullyPayload,
   KnowledgeInitializedEventPayload,
+  KnowledgeRetryRequestedPayload,
 } from "@/src/domain/events/domain-event";
 import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
+import dataSourceViewingService from "@/src/domain/services/DataSourceViewingService";
 import knowledgeService from "@/src/domain/services/KnowledgeService";
 import { KnowledgeChunkStatus, KnowledgeIndexStatus } from "@prisma/client";
 import { inngest } from "./client";
@@ -584,6 +586,81 @@ export const deleteRelatedKnowledgeInstances = inngest.createFunction(
       };
       await step.sendEvent("knowledge-indexing-completed-successfully", {
         name: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED_SUCCESSFULLY,
+        data: eventPayload,
+      });
+    }
+  }
+);
+
+export const retryFailedKnowledge = inngest.createFunction(
+  { id: "retry-failed-knowledge" },
+  { cron: "0 * * * *" },
+  async ({ step }) => {
+    const batchSize = 100;
+    const knowledgeIds = await step.run("find-failed-knowledge", async () => {
+      return await knowledgeService.findFailedKnowledge(batchSize);
+    });
+
+    await Promise.all(
+      knowledgeIds.map((knowledgeId) => {
+        const knowledgeRetryRequestedPayload: KnowledgeRetryRequestedPayload = {
+          knowledgeId,
+        };
+        return step.sendEvent("knowledge-deleted", {
+          name: DomainEvent.KNOWLEDGE_RETRY_REQUESTED,
+          data: knowledgeRetryRequestedPayload,
+        });
+      })
+    );
+  }
+);
+
+export const onKnowledgeRetryRequested = inngest.createFunction(
+  {
+    id: "on-knowledge-retry-requested",
+  },
+  { event: DomainEvent.KNOWLEDGE_RETRY_REQUESTED },
+  async ({ event, step }) => {
+    const { knowledgeId } = event.data as KnowledgeRetryRequestedPayload;
+
+    const { vectorIds } = await step.run("vector-id-list", async () => {
+      return await vectorDatabaseAdapter.vectorIdList(knowledgeId);
+    });
+
+    if (vectorIds.length > 0) {
+      // Delete any existing vectors first before retrying
+      // Return and expect another event to be published for retry, as vector deletion is asynchronous
+      await deleteKnowledgeVectorStorage(knowledgeId, step);
+      return;
+    }
+
+    const resetKnowledge = await step.run(
+      "reset-knowledge-chunks",
+      async () => {
+        return await knowledgeService.resetKnowledgeChunks(knowledgeId);
+      }
+    );
+
+    const dataSourceId = await step.run("get-datasource-id", async () => {
+      return await dataSourceViewingService.getOriginalDataSourceIdForKnowledge(
+        knowledgeId
+      );
+    });
+
+    if (!dataSourceId) {
+      // No data source associated with knowledge, knowledge is orphaned
+      // Knowledge will be deleted by deleteUnusedKnowledges
+      return;
+    }
+
+    if (resetKnowledge.originalContent) {
+      const eventPayload: KnowledgeContentRetrievedPayload = {
+        dataSourceId,
+        knowledgeId,
+        originalContent: resetKnowledge.originalContent,
+      };
+      await step.sendEvent("knowledge-content-received-event", {
+        name: DomainEvent.KNOWLEDGE_CONTENT_RETRIEVED,
         data: eventPayload,
       });
     }

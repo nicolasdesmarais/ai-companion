@@ -344,4 +344,19 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
 
     return knowledgeIds;
   }
+
+  public async getOriginalDataSourceIdForKnowledge(
+    knowledgeId: string
+  ): Promise<string | null> {
+    const dataSourceKnowledge = await prismadb.dataSourceKnowledge.findFirst({
+      where: {
+        knowledgeId,
+      },
+      select: {
+        dataSourceId: true,
+      },
+    });
+
+    return dataSourceKnowledge?.dataSourceId ?? null;
+  }
 }

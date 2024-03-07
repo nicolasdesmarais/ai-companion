@@ -29,10 +29,41 @@ export class KnowledgeService {
     );
   }
 
+  public async findFailedKnowledge(limit?: number): Promise<string[]> {
+    return await this.knowledgeRepository.findFailedKnowledge(limit);
+  }
+
   public async setVectorStorageAsDeleted(knowledgeId: string): Promise<void> {
     await this.knowledgeRepository.update(knowledgeId, {
       isVectorStorageDeleted: true,
     });
+  }
+
+  public async resetKnowledgeChunks(
+    knowledgeId: string
+  ): Promise<KnowledgeDto> {
+    await this.knowledgeRepository.deleteKnowledgeChunks(knowledgeId);
+
+    const knowledge = await this.knowledgeRepository.getById(knowledgeId);
+    const updatedMetadata = this.mergeMetadata(knowledge.metadata, {
+      chunkCount: 0,
+    });
+
+    return await this.knowledgeRepository.update(knowledgeId, {
+      isVectorStorageDeleted: false,
+      metadata: updatedMetadata,
+    });
+  }
+
+  private mergeMetadata(currentMetadata: any, newMetadata: any) {
+    if (currentMetadata && typeof currentMetadata === "object") {
+      return {
+        ...currentMetadata,
+        ...newMetadata,
+      };
+    }
+
+    return newMetadata;
   }
 }
 

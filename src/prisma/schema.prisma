@@ -329,6 +329,7 @@ model DataSourceKnowledge {
   knowledgeId  String     @map(name: "knowledge_id")
 
   @@id([dataSourceId, knowledgeId])
+  @@index([knowledgeId])
   @@map("data_source_knowledges")
 }
 

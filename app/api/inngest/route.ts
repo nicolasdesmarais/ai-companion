@@ -14,6 +14,7 @@ import {
   onKnowledgeDeleted,
   onKnowledgeIndexingCompletedSuccessfully,
   onKnowledgeInitialized,
+  onKnowledgeRetryRequested,
   refreshDataSources,
 } from "@/src/adapter-in/inngest/datasource-workflows";
 import { googleDriveFolderScanInitiated } from "@/src/adapter-in/inngest/google-drive-workflows";
@@ -38,6 +39,7 @@ export const { GET, POST, PUT } = serve({
     onKnowledgeContentRetrieved,
     onKnowledgeIndexingCompletedSuccessfully,
     onKnowledgeDeleted,
+    onKnowledgeRetryRequested,
     refreshDataSources,
     stripeWebhookReceived,
     clerkWebhookReceived,
