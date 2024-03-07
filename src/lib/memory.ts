@@ -1,8 +1,7 @@
 import { Document, DocumentInterface } from "@langchain/core/documents";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { PineconeStore } from "@langchain/pinecone";
-import { Pinecone } from "@pinecone-database/pinecone";
-import { Redis } from "@upstash/redis";
+import { Index, Pinecone, RecordMetadata } from "@pinecone-database/pinecone";
 import axios from "axios";
 
 const embeddingsConfig = {
@@ -14,6 +13,9 @@ const embeddingsConfig = {
   maxConcurrency: 3,
 };
 
+const pineconeIndexName = process.env.PINECONE_INDEX!;
+const pineconeHost = process.env.PINECONE_INDEX_HOST!;
+
 export type AIKey = {
   aiName: string;
   modelName: string;
@@ -22,30 +24,20 @@ export type AIKey = {
 
 export class MemoryManager {
   private static instance: MemoryManager;
-  private history: Redis;
   private pinecone: Pinecone;
+  private pineconeIndex: Index<RecordMetadata>;
 
   public constructor() {
-    this.history = Redis.fromEnv();
     this.pinecone = new Pinecone();
+    this.pineconeIndex = this.pinecone.Index(pineconeIndexName, pineconeHost);
   }
 
   public async vectorUpload(docs: Document[], docIds: string[]) {
-    const pineconeIndex = process.env.PINECONE_INDEX!;
     const embeddings = new OpenAIEmbeddings(embeddingsConfig);
 
-    await this.vectorUploadToIndex(pineconeIndex, embeddings, docs, docIds);
-  }
-
-  private async vectorUploadToIndex(
-    index: string,
-    embeddings: OpenAIEmbeddings,
-    docs: Document[],
-    docIds: string[]
-  ) {
-    const pineconeIndex = this.pinecone.Index(index);
-
-    const pineconeStore = new PineconeStore(embeddings, { pineconeIndex });
+    const pineconeStore = new PineconeStore(embeddings, {
+      pineconeIndex: this.pineconeIndex,
+    });
     await pineconeStore.addDocuments(docs, { ids: docIds });
   }
 
@@ -54,11 +46,9 @@ export class MemoryManager {
     knowledgeIds: string[],
     numDocs = 100
   ): Promise<[DocumentInterface<Record<string, any>>, number][]> {
-    const pineconeIndex = this.pinecone.Index(process.env.PINECONE_INDEX!);
-
     const vectorStore = await PineconeStore.fromExistingIndex(
       new OpenAIEmbeddings(embeddingsConfig),
-      { pineconeIndex }
+      { pineconeIndex: this.pineconeIndex }
     );
 
     let similarDocs: [DocumentInterface<Record<string, any>>, number][] = [];
@@ -81,12 +71,7 @@ export class MemoryManager {
     knowledgeId: string,
     paginationToken?: string
   ): Promise<{ vectorIds: string[]; paginationNextToken: string | undefined }> {
-    const host = process.env.PINECONE_INDEX_HOST;
-    if (!host) {
-      throw new Error("PINECONE_HOST is not set");
-    }
-
-    let requestUrl = `${host}/vectors/list?prefix=${knowledgeId}#`;
+    let requestUrl = `${pineconeHost}/vectors/list?prefix=${knowledgeId}#`;
     if (paginationToken) {
       requestUrl += `&paginationToken=${paginationToken}`;
     }
@@ -109,9 +94,7 @@ export class MemoryManager {
       return;
     }
 
-    const pineconeIndexName = process.env.PINECONE_INDEX!;
-    const pineconeIndex = this.pinecone.Index(pineconeIndexName);
-    await pineconeIndex.deleteMany(vectorIds);
+    await this.pineconeIndex.deleteMany(vectorIds);
   }
 
   public static getInstance(): MemoryManager {
