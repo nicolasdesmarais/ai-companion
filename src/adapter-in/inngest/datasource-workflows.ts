@@ -546,7 +546,7 @@ export const deleteBlobStorage = inngest.createFunction(
 
 export const deleteVectorDBStorage = inngest.createFunction(
   { id: "delete-vectordb-storage" },
-  { cron: "*/10 * * * *" },
+  { cron: "* * * * *" },
   async ({ step }) => {
     const knowledgeIds = await step.run(
       "find-deleted-knowledge-with-vector-storage",
@@ -643,7 +643,11 @@ const deleteKnowledgeVectorStorage = async (knowledgeId: string, step: any) => {
 
   if (vectorIdsToDelete.length > 0) {
     await step.run("delete-vectors", async () => {
-      await vectorDatabaseAdapter.deleteVectors(vectorIdsToDelete);
+      const batchSize = 1000;
+      for (let i = 0; i < vectorIdsToDelete.length; i += batchSize) {
+        let batch = vectorIdsToDelete.slice(i, i + batchSize);
+        await vectorDatabaseAdapter.deleteVectors(batch);
+      }
     });
   }
 
