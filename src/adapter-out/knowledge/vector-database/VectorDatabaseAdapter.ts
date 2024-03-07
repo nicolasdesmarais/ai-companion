@@ -76,9 +76,17 @@ export class VectorDatabaseAdapter {
     };
   }
 
-  public async deleteKnowledge(knowledgeId: string): Promise<void> {
+  public async vectorIdList(
+    knowledgeId: string,
+    paginationToken?: string
+  ): Promise<{ vectorIds: string[]; paginationNextToken: string | undefined }> {
     const memoryManager = await MemoryManager.getInstance();
-    await memoryManager.vectorDelete(knowledgeId);
+    return await memoryManager.vectorIdList(knowledgeId, paginationToken);
+  }
+
+  public async deleteVectors(vectorIds: string[]): Promise<void> {
+    const memoryManager = await MemoryManager.getInstance();
+    await memoryManager.vectorDelete(vectorIds);
   }
 }
 

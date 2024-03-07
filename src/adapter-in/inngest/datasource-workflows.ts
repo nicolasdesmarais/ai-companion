@@ -11,6 +11,7 @@ import {
   DomainEvent,
   KnowledgeChunkReceivedPayload,
   KnowledgeContentReceivedPayload as KnowledgeContentRetrievedPayload,
+  KnowledgeDeletedPayload,
   KnowledgeIndexingCompletedSuccessfullyPayload,
   KnowledgeInitializedEventPayload,
 } from "@/src/domain/events/domain-event";
@@ -395,26 +396,6 @@ export const onKnowledgeChunkReceived = inngest.createFunction(
   }
 );
 
-const onKnowledgeStatusUpdated = async (
-  dataSourceId: string,
-  knowledge: KnowledgeDto,
-  step: any
-) => {
-  await step.run("update-datasource-status", async () => {
-    await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
-  });
-
-  if (knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
-    const eventPayload: KnowledgeIndexingCompletedSuccessfullyPayload = {
-      knowledgeId: knowledge.id,
-    };
-    await step.sendEvent("knowledge-indexing-completed-successfully", {
-      name: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED_SUCCESSFULLY,
-      data: eventPayload,
-    });
-  }
-};
-
 export const onKnowledgeIndexingCompletedSuccessfully = inngest.createFunction(
   {
     id: "on-knowledge-indexing-completed-successfully",
@@ -433,13 +414,7 @@ export const onKnowledgeIndexingCompletedSuccessfully = inngest.createFunction(
       }
     );
 
-    await Promise.all(
-      deletedKnowledgeIds.map((knowledgeId) =>
-        step.run("delete-vectordb-knowledge", async () => {
-          await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
-        })
-      )
-    );
+    await publishKnowledgeDeletedEvents(deletedKnowledgeIds, step);
 
     await Promise.all(
       updatedDataSourceIds.map((dataSourceId) =>
@@ -515,13 +490,21 @@ export const onDataSourceDeleteRequested = inngest.createFunction(
       }
     );
 
-    await Promise.all(
-      deletedKnowledgeIds.map((knowledgeId) =>
-        step.run("delete-vectordb-knowledge", async () => {
-          await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
-        })
-      )
-    );
+    await publishKnowledgeDeletedEvents(deletedKnowledgeIds, step);
+  }
+);
+
+export const onKnowledgeDeleted = inngest.createFunction(
+  { id: "on-knowledge-deleted" },
+  { event: DomainEvent.KNOWLEDGE_DELETED },
+  async ({ event, step }) => {
+    const { knowledgeId } = event.data as KnowledgeDeletedPayload;
+
+    await step.run("delete-blob-storage", async () => {
+      await dataSourceManagementService.deleteBlobStorage(knowledgeId);
+    });
+
+    await deleteKnowledgeVectorStorage(knowledgeId, step);
   }
 );
 
@@ -536,16 +519,7 @@ export const deleteUnusedKnowledges = inngest.createFunction(
       }
     );
 
-    await Promise.all(
-      deletedKnowledgeIds.flatMap((knowledgeId) => [
-        step.run("delete-vectordb-knowledge", async () => {
-          await vectorDatabaseAdapter.deleteKnowledge(knowledgeId);
-        }),
-        step.run("delete-blob-storage", async () => {
-          await dataSourceManagementService.deleteBlobStorage(knowledgeId);
-        }),
-      ])
-    );
+    await publishKnowledgeDeletedEvents(deletedKnowledgeIds, step);
   }
 );
 
@@ -556,7 +530,7 @@ export const deleteBlobStorage = inngest.createFunction(
     const knowledgeIds = await step.run(
       "find-deleted-knowledge-with-blob-storage",
       async () => {
-        return await dataSourceManagementService.findDeletedKnowledgeWithBlobStorage();
+        return await knowledgeService.findDeletedKnowledgeWithBlobStorage();
       }
     );
 
@@ -565,6 +539,25 @@ export const deleteBlobStorage = inngest.createFunction(
         step.run("delete-blob-storage", async () => {
           await dataSourceManagementService.deleteBlobStorage(knowledgeId);
         })
+      )
+    );
+  }
+);
+
+export const deleteVectorDBStorage = inngest.createFunction(
+  { id: "delete-vectordb-storage" },
+  { cron: "* * * * *" },
+  async ({ step }) => {
+    const knowledgeIds = await step.run(
+      "find-deleted-knowledge-with-vector-storage",
+      async () => {
+        return await knowledgeService.findDeletedKnowledgeWithVectorStorage();
+      }
+    );
+
+    await Promise.all(
+      knowledgeIds.map((knowledgeId) =>
+        deleteKnowledgeVectorStorage(knowledgeId, step)
       )
     );
   }
@@ -592,3 +585,75 @@ export const deleteRelatedKnowledgeInstances = inngest.createFunction(
     }
   }
 );
+
+const onKnowledgeStatusUpdated = async (
+  dataSourceId: string,
+  knowledge: KnowledgeDto,
+  step: any
+) => {
+  await step.run("update-datasource-status", async () => {
+    await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
+  });
+
+  if (knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED) {
+    const eventPayload: KnowledgeIndexingCompletedSuccessfullyPayload = {
+      knowledgeId: knowledge.id,
+    };
+    await step.sendEvent("knowledge-indexing-completed-successfully", {
+      name: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED_SUCCESSFULLY,
+      data: eventPayload,
+    });
+  }
+};
+
+const publishKnowledgeDeletedEvents = async (
+  deletedKnowledgeIds: string[],
+  step: any
+) => {
+  await Promise.all(
+    deletedKnowledgeIds.map((knowledgeId) => {
+      const knowledgeDeletedPayload: KnowledgeDeletedPayload = { knowledgeId };
+      return step.sendEvent("knowledge-deleted", {
+        name: DomainEvent.KNOWLEDGE_DELETED,
+        data: knowledgeDeletedPayload,
+      });
+    })
+  );
+};
+
+const deleteKnowledgeVectorStorage = async (knowledgeId: string, step: any) => {
+  let paginationNextToken: string;
+  let vectorIdsToDelete: string[] = [];
+  let count = 0;
+  do {
+    const { vectorIds, paginationNextToken: newPaginationNextToken } =
+      await step.run("vector-id-list", async () => {
+        return await vectorDatabaseAdapter.vectorIdList(
+          knowledgeId,
+          paginationNextToken
+        );
+      });
+    paginationNextToken = newPaginationNextToken;
+    vectorIdsToDelete.push(...vectorIds);
+    count++;
+
+    // Loop while paginationNextToken is not null, indicating that there are more vectors to delete
+    // Limit to 100 loops to avoid running into timeouts or hitting inngest limit for maximum steps in a workflow
+  } while (paginationNextToken && count < 100);
+
+  if (vectorIdsToDelete.length > 0) {
+    await step.run("delete-vectors", async () => {
+      const batchSize = 1000;
+      for (let i = 0; i < vectorIdsToDelete.length; i += batchSize) {
+        let batch = vectorIdsToDelete.slice(i, i + batchSize);
+        await vectorDatabaseAdapter.deleteVectors(batch);
+      }
+    });
+  }
+
+  if (!paginationNextToken) {
+    await step.run("set-vector-storage-as-deleted", async () => {
+      await knowledgeService.setVectorStorageAsDeleted(knowledgeId);
+    });
+  }
+};

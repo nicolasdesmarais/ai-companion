@@ -33,6 +33,7 @@ const mapKnowledgeToDto = (knowledge: Knowledge): KnowledgeDto => {
     documentsBlobUrl,
     indexPercentage,
     metadata,
+    isBlobStorageDeleted,
     ...rest
   } = knowledge;
 
@@ -48,6 +49,7 @@ const mapKnowledgeToDto = (knowledge: Knowledge): KnowledgeDto => {
     documentsBlobUrl,
     indexPercentage: indexPercentage.toString(),
     metadata,
+    isBlobStorageDeleted,
   };
 };
 
@@ -277,6 +279,21 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
       where: {
         indexStatus: KnowledgeIndexStatus.DELETED,
         isBlobStorageDeleted: false,
+      },
+      select: {
+        id: true,
+      },
+      take: 500,
+    });
+
+    return deletedKnowledgeIds.map((knowledge) => knowledge.id);
+  }
+
+  public async findDeletedKnowledgeIdsWithVectorStorage(): Promise<string[]> {
+    const deletedKnowledgeIds = await prismadb.knowledge.findMany({
+      where: {
+        indexStatus: KnowledgeIndexStatus.DELETED,
+        isVectorStorageDeleted: false,
       },
       select: {
         id: true,

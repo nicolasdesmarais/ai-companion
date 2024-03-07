@@ -13,6 +13,7 @@ export enum DomainEvent {
   KNOWLEDGE_CONTENT_RETRIEVED = "knowledge.content.retrieved",
   KNOWLEDGE_CHUNK_RECEIVED = "knowledge.chunk.received",
   KNOWLEDGE_INDEXING_COMPLETED_SUCCESSFULLY = "knowledge.indexing.completed",
+  KNOWLEDGE_DELETED = "knowledge.deleted",
 }
 
 export interface DataSourceInitializedPayload {
@@ -49,5 +50,9 @@ export interface KnowledgeChunkReceivedPayload {
 }
 
 export interface KnowledgeIndexingCompletedSuccessfullyPayload {
+  knowledgeId: string;
+}
+
+export interface KnowledgeDeletedPayload {
   knowledgeId: string;
 }

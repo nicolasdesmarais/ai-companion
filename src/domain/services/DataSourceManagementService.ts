@@ -180,6 +180,7 @@ export class DataSourceManagementService {
       documentsBlobUrl,
       metadata,
       indexPercentage,
+      isBlobStorageDeleted,
       ...rest
     } = knowledge;
 
@@ -195,6 +196,7 @@ export class DataSourceManagementService {
       documentsBlobUrl,
       indexPercentage: indexPercentage.toString(),
       metadata,
+      isBlobStorageDeleted,
     };
   }
 
@@ -1130,12 +1132,12 @@ export class DataSourceManagementService {
     return newMetadata;
   }
 
-  public async findDeletedKnowledgeWithBlobStorage(): Promise<string[]> {
-    return await this.knowledgeRepository.findDeletedKnowledgeIdsWithBlobStorageUrl();
-  }
-
   public async deleteBlobStorage(knowledgeId: string) {
     const knowledge = await this.knowledgeRepository.getById(knowledgeId);
+    if (knowledge.isBlobStorageDeleted) {
+      return;
+    }
+
     try {
       if (knowledge.documentsBlobUrl) {
         await FileStorageService.delete(knowledge.documentsBlobUrl);

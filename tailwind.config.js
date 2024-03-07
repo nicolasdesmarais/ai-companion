@@ -85,6 +85,9 @@ module.exports = {
         "6xs": "2rem",
         "7xs": "1rem",
       },
+      backgroundImage: {
+        "unleash-pattern": "url('/unleash-bg.png')",
+      },
     },
     boxShadow: {
       glow: "0 0 25px 10px rgba(255, 255, 255, 0.15)",
