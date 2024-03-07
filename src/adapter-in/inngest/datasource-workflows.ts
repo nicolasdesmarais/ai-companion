@@ -555,11 +555,7 @@ export const deleteVectorDBStorage = inngest.createFunction(
       }
     );
 
-    await Promise.all(
-      knowledgeIds.map((knowledgeId) =>
-        deleteKnowledgeVectorStorage(knowledgeId, step)
-      )
-    );
+    await publishKnowledgeDeletedEvents(knowledgeIds, step);
   }
 );
 
