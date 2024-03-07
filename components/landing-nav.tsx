@@ -4,13 +4,13 @@ import { AppdirectSvg } from "./svg/appdirect-svg";
 const LandingNav = () => {
   return (
     <div className="flex text-navy justify-center w-full">
-      <nav className="flex my-4 w-[1144px] justify-between">
+      <nav className="flex m-4 w-[1144px] justify-between">
         <div className="flex">
-          <div className="flex items-center mr-20">
+          <div className="flex items-center md:mr-10 lg:mr-20">
             <AppdirectSvg className="h-5 w-5" />
             AppDirect <span className="font-extrabold ml-2">AI</span>
           </div>
-          <ul className="flex justify-between gap-14 py-2">
+          <ul className="hidden md:flex justify-between md:gap-8 lg:gap-14 py-2">
             <li>
               <Link href="/landing/features">How it works</Link>
             </li>
@@ -25,11 +25,11 @@ const LandingNav = () => {
             </li>
           </ul>
         </div>
-        <div>
+        <div className="flex">
           <Link href="/sign-in" className="py-2">
             Login
           </Link>
-          <Link href="/sign-up" className="ml-10 px-4 py-2 bg-sky">
+          <Link href="/sign-up" className="ml-4 lg:ml-10 px-4 py-2 bg-sky">
             Sign up
           </Link>
         </div>

@@ -9,11 +9,11 @@ const LandingHome = () => {
   return (
     <div className="bg-white flex flex-col text-navy">
       <LandingNav />
-      <div className="max-h-[785px] h-screen pb-16 overflow-hidden flex flex-col">
-        <div className="flex justify-center">
-          <div className="mt-24 mr-16 w-[440px] text-center lg:text-left">
+      <div className="max-h-[785px] h-screen pb-16 overflow-hidden flex flex-col mx-4">
+        <div className="flex flex-col md:flex-row justify-center  items-center">
+          <div className="mt-24 md:mr-16 w-[440px] text-center lg:text-left">
             <h2
-              className="me-4 mb-8 font-extrabold leading-none tracking-tight text-6xl"
+              className="me-4 mb-8 font-extrabold leading-none tracking-tight text-4xl md:text-5xl lg:text-6xl"
               title="AI made simple"
             >
               AppDirect AI Marketplace & Creation Studio
@@ -22,13 +22,15 @@ const LandingHome = () => {
               Create custom AIs for yourself, your team, or your customers in
               under 30 minutes. No coding required.
             </div>
-            <Link href="/sign-up" className="ml-10 px-8 py-2 bg-sky">
-              Sign up
-            </Link>
-            <Link href="/sign-up" className="ml-10 px-4 py-2">
-              Take tour
-              <ArrowRight className="inline-block w-4 h-4 ml-2" />
-            </Link>
+            <div className="flex justify-evenly">
+              <Link href="/sign-up" className="px-8 py-2 bg-sky">
+                Sign up
+              </Link>
+              <Link href="/sign-up" className="px-4 py-2">
+                Take tour
+                <ArrowRight className="inline-block w-4 h-4 ml-2" />
+              </Link>
+            </div>
           </div>
           <div className="mt-20 shadow-glow">
             <video width="640" height="420" preload="none" autoPlay loop muted>
