@@ -1,3 +1,4 @@
+import LandingFooter from "@/components/landing-footer";
 import LandingNav from "@/components/landing-nav";
 import LandingStartChat from "@/components/landing-start-chat";
 import LandingTutorials from "@/components/landing-tutorials";
@@ -325,6 +326,8 @@ const LandingHome = () => {
           </div>
         </div>
       </div>
+
+      <LandingFooter />
     </div>
   );
 };
