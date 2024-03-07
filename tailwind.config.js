@@ -88,6 +88,7 @@ module.exports = {
       },
       backgroundImage: {
         "unleash-pattern": "url('/unleash-bg.png')",
+        "cta-pattern": "url('/cta-bg.png')",
       },
     },
     boxShadow: {

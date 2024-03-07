@@ -310,9 +310,9 @@ const LandingHome = () => {
       </div>
 
       <div className="flex flex-col items-center mb-14 mt-20">
-        <div className="bg-unleash-pattern w-[1100px] py-28 px-16">
-          <div className="flex bg-white py-20 px-8">
-            <h3 className="text-3xl font-bold">
+        <div className="bg-cta-pattern bg-center w-[1100px] py-28 px-32">
+          <div className="flex bg-white py-12 px-20 justify-evenly items-center">
+            <h3 className="text-3xl font-bold w-[400px]">
               Start chatting with or creating AI apps today.
             </h3>
             <Link
