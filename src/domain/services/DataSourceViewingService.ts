@@ -119,6 +119,14 @@ export class DataSourceViewingService {
 
     return dataSourceKnowledges.map((dk) => dk.dataSourceId);
   }
+
+  public async getOriginalDataSourceIdForKnowledge(
+    knowledgeId: string
+  ): Promise<string | null> {
+    return await this.dataSourceRepository.getOriginalDataSourceIdForKnowledge(
+      knowledgeId
+    );
+  }
 }
 
 const dataSourceRepository = new DataSourceRepositoryImpl();

@@ -402,7 +402,14 @@ export class DataSourceManagementService {
     knowledgeId: string
   ): Promise<KnowledgeDto> {
     const knowledge = await this.knowledgeRepository.getById(knowledgeId);
-    const { originalContent } = knowledge;
+    const { originalContent, documentsBlobUrl: existingDocumentsBlobUrl } =
+      knowledge;
+
+    if (existingDocumentsBlobUrl) {
+      // Documents have already been created
+      return knowledge;
+    }
+
     if (!originalContent) {
       throw new Error(
         `Knowledge with id=${knowledgeId} does not have original content`
@@ -1112,7 +1119,7 @@ export class DataSourceManagementService {
       error,
     });
 
-    const updatedKnowledge = await this.updateKnowledgeStatus(dataSourceId);
+    const updatedKnowledge = await this.updateKnowledgeStatus(knowledgeId);
     await this.updateDataSourceStatus(dataSourceId);
     return updatedKnowledge;
   }
