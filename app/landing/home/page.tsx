@@ -9,7 +9,7 @@ const LandingHome = () => {
   return (
     <div className="bg-white flex flex-col text-navy">
       <LandingNav />
-      <div className="max-h-[785px] h-screen pb-16 overflow-hidden flex flex-col mx-4">
+      <div className="max-h-[785px] h-screen mb-16 overflow-hidden flex flex-col mx-4">
         <div className="flex flex-col md:flex-row justify-center  items-center">
           <div className="mt-24 md:mr-16 w-[440px] text-center lg:text-left">
             <h2
