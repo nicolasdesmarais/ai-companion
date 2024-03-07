@@ -41,7 +41,7 @@ export interface KnowledgeRepository {
 
   findDeletedKnowledgeIdsWithBlobStorageUrl(): Promise<string[]>;
 
-  findDeletedKnowledgeIdsWithVectorStorage(): Promise<string[]>;
+  findDeletedKnowledgeIdsWithVectorStorage(limit?: number): Promise<string[]>;
 
   findCompletedKnowledgeWithRelatedInstances(): Promise<string[]>;
 
