@@ -33,6 +33,7 @@ const mapKnowledgeToDto = (knowledge: Knowledge): KnowledgeDto => {
     documentsBlobUrl,
     indexPercentage,
     metadata,
+    isBlobStorageDeleted,
     ...rest
   } = knowledge;
 
@@ -48,6 +49,7 @@ const mapKnowledgeToDto = (knowledge: Knowledge): KnowledgeDto => {
     documentsBlobUrl,
     indexPercentage: indexPercentage.toString(),
     metadata,
+    isBlobStorageDeleted,
   };
 };
 

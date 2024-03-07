@@ -57,6 +57,7 @@ export interface KnowledgeDto {
   documentsBlobUrl: string | null;
   indexPercentage: string;
   metadata: any;
+  isBlobStorageDeleted: boolean;
 }
 
 export interface KnowledgeChunkDto {
