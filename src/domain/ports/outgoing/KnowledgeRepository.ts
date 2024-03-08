@@ -45,5 +45,9 @@ export interface KnowledgeRepository {
 
   findCompletedKnowledgeWithRelatedInstances(): Promise<string[]>;
 
+  findFailedKnowledge(limit?: number): Promise<string[]>;
+
   getAiKnowledgeSummary(aiId: string): Promise<KnowledgeSummary>;
+
+  deleteKnowledgeChunks(knowledgeId: string): Promise<void>;
 }

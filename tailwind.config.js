@@ -27,6 +27,7 @@ module.exports = {
         foreground: "hsl(var(--foreground))",
         profile: "hsl(var(--profile))",
         navy: "hsl(var(--navy))",
+        navylight: "hsl(var(--navy-light))",
         sky: "hsl(var(--sky))",
         lime: "hsl(var(--lime))",
         primary: {
@@ -87,6 +88,7 @@ module.exports = {
       },
       backgroundImage: {
         "unleash-pattern": "url('/unleash-bg.png')",
+        "cta-pattern": "url('/cta-bg.png')",
       },
     },
     boxShadow: {

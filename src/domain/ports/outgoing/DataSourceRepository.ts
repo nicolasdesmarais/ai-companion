@@ -43,4 +43,8 @@ export interface DataSourceRepository {
   updateDataSourceAis(dataSourceId: string, aiIds: string[]): Promise<void>;
 
   deleteUnusedKnowledges(): Promise<string[]>;
+
+  getOriginalDataSourceIdForKnowledge(
+    knowledgeId: string
+  ): Promise<string | null>;
 }

@@ -324,6 +324,20 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
     return result.map((knowledge) => knowledge.id);
   }
 
+  public async findFailedKnowledge(limit: number = 100): Promise<string[]> {
+    const result = await prismadb.knowledge.findMany({
+      where: {
+        indexStatus: KnowledgeIndexStatus.FAILED,
+      },
+      select: {
+        id: true,
+      },
+      take: limit,
+    });
+
+    return result.map((knowledge) => knowledge.id);
+  }
+
   public async getAiKnowledgeSummary(aiId: string): Promise<KnowledgeSummary> {
     const knowledgeList = await prismadb.knowledge.findMany({
       select: {
@@ -368,5 +382,13 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
     );
 
     return summary;
+  }
+
+  public async deleteKnowledgeChunks(knowledgeId: string): Promise<void> {
+    await prismadb.knowledgeChunk.deleteMany({
+      where: {
+        knowledgeId,
+      },
+    });
   }
 }

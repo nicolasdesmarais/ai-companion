@@ -14,6 +14,7 @@ export enum DomainEvent {
   KNOWLEDGE_CHUNK_RECEIVED = "knowledge.chunk.received",
   KNOWLEDGE_INDEXING_COMPLETED_SUCCESSFULLY = "knowledge.indexing.completed",
   KNOWLEDGE_DELETED = "knowledge.deleted",
+  KNOWLEDGE_RETRY_REQUESTED = "knowledge.retry.requested",
 }
 
 export interface DataSourceInitializedPayload {
@@ -57,4 +58,8 @@ export interface KnowledgeDeletedPayload {
   knowledgeId: string;
   deleteBlobStorage: boolean;
   deleteVectorDBStorage: boolean;
+}
+
+export interface KnowledgeRetryRequestedPayload {
+  knowledgeId: string;
 }
