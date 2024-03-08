@@ -1,8 +1,5 @@
 import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
-import {
-  ChunkLoadingResult,
-  KnowledgeChunkEvent,
-} from "@/src/adapter-out/knowledge/types/KnowledgeChunkTypes";
+import { ChunkLoadingResult } from "@/src/adapter-out/knowledge/types/KnowledgeChunkTypes";
 import vectorDatabaseAdapter from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 import {
   DataSourceInitializedPayload,
@@ -22,6 +19,8 @@ import dataSourceViewingService from "@/src/domain/services/DataSourceViewingSer
 import knowledgeService from "@/src/domain/services/KnowledgeService";
 import { KnowledgeChunkStatus, KnowledgeIndexStatus } from "@prisma/client";
 import { inngest } from "./client";
+
+const MAX_EVENTS_PER_STEP = 1000;
 
 export const onDataSourceInitialized = inngest.createFunction(
   {
@@ -311,29 +310,33 @@ export const onKnowledgeContentRetrieved = inngest.createFunction(
       );
     });
 
-    let knowledgeChunkEvents: KnowledgeChunkEvent[] = [];
+    let knowledgeChunkEvents = [];
     for (const chunk of knowledgeChunkIndexes) {
       const eventPayload: KnowledgeChunkReceivedPayload = {
         dataSourceId,
         knowledgeId,
         chunkNumber: chunk.chunkNumber,
       };
-      const event = await step.sendEvent("knowledge-chunk-received", {
+      knowledgeChunkEvents.push({
         name: DomainEvent.KNOWLEDGE_CHUNK_RECEIVED,
         data: eventPayload,
       });
-      knowledgeChunkEvents.push({
-        chunkNumber: chunk.chunkNumber,
-        eventId: event.ids[0],
-      });
+
+      if (knowledgeChunkEvents.length >= MAX_EVENTS_PER_STEP) {
+        await step.sendEvent(
+          "fan-out-knowledge-chunk-received",
+          knowledgeChunkEvents
+        );
+        knowledgeChunkEvents = [];
+      }
     }
 
-    await step.run("persist-knowledge-chunk-events", async () => {
-      return await dataSourceManagementService.persistKnowledgeChunkEvents(
-        knowledgeId,
+    if (knowledgeChunkEvents.length > 0) {
+      await step.sendEvent(
+        "fan-out-knowledge-chunk-received",
         knowledgeChunkEvents
       );
-    });
+    }
   }
 );
 
