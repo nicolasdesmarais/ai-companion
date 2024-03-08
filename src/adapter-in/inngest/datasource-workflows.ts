@@ -323,13 +323,19 @@ export const onKnowledgeContentRetrieved = inngest.createFunction(
       });
 
       if (knowledgeChunkEvents.length >= MAX_EVENTS_PER_STEP) {
-        await step.sendEvent("knowledge-chunk-received", knowledgeChunkEvents);
+        await step.sendEvent(
+          "fan-out-knowledge-chunk-received",
+          knowledgeChunkEvents
+        );
         knowledgeChunkEvents = [];
       }
     }
 
     if (knowledgeChunkEvents.length > 0) {
-      await step.sendEvent("knowledge-chunk-received", knowledgeChunkEvents);
+      await step.sendEvent(
+        "fan-out-knowledge-chunk-received",
+        knowledgeChunkEvents
+      );
     }
   }
 );
