@@ -12,7 +12,7 @@ const LandingHome = () => {
       <LandingNav />
       <div className="max-h-[785px] h-screen mb-16 overflow-hidden flex flex-col mx-4">
         <div className="flex flex-col md:flex-row justify-center  items-center">
-          <div className="mt-24 md:mr-16 w-[440px] text-center lg:text-left">
+          <div className="mt-24 md:mr-16 md:w-[440px] text-center lg:text-left">
             <h2
               className="me-4 mb-8 font-extrabold leading-none tracking-tight text-4xl md:text-5xl lg:text-6xl"
               title="AI made simple"
