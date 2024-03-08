@@ -1,4 +1,5 @@
 import { BadRequestError } from "@/src/domain/errors/Errors";
+import { DataSourceItemListReceivedPayload } from "@/src/domain/events/domain-event";
 import { ApifyWebhookEvent } from "@/src/domain/models/ApifyWebhookEvent";
 import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import { FileStorageService } from "@/src/domain/services/FileStorageService";
@@ -16,6 +17,7 @@ import {
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResultStatus } from "../types/KnowlegeIndexingResult";
 import apifyAdapter from "./ApifyAdapter";
+import crawler from "./crawler";
 import { WebUrlDataSourceInput } from "./types/WebUrlDataSourceInput";
 import { WebUrlMetadata } from "./types/WebUrlMetadata";
 
@@ -48,26 +50,57 @@ export class WebUrlsDataSourceAdapter
     data: any
   ): Promise<RetrieveContentAdapterResponse> {
     const input = data as WebUrlDataSourceInput;
-    const actorRunId = await apifyAdapter.startUrlIndexing(
-      orgId,
-      dataSourceId,
-      knowledge.id,
-      input.url
+    const { url } = input;
+
+    const page = await crawler.crawl(url);
+    console.log(page);
+
+    const filename = `${knowledge.name}.md`;
+    const contentBlobUrl = await FileStorageService.put(
+      `${filename}.md`,
+      page.content
     );
 
-    if (!actorRunId) {
-      return {
-        status: RetrieveContentResponseStatus.FAILED,
-      };
-    }
+    const dataSourceItemList: DataSourceItemList = {
+      items: page.childUrls.map((url) => ({
+        name: url,
+        uniqueId: url,
+        metadata: { url } as WebUrlDataSourceInput,
+      })),
+    };
 
-    const metadata: WebUrlMetadata = {
-      indexingRunId: actorRunId,
+    const eventPayload: DataSourceItemListReceivedPayload = {
+      dataSourceId,
+      dataSourceItemList,
+      forRefresh: false,
+      forceRefresh: false,
     };
+
     return {
-      status: RetrieveContentResponseStatus.PENDING,
-      metadata,
+      status: RetrieveContentResponseStatus.SUCCESS,
+      originalContent: {
+        contentBlobUrl,
+        filename,
+        mimeType: "text/markdown",
+      },
     };
+
+    // const actorRunId = await apifyAdapter.startUrlIndexing(
+    //   orgId,
+    //   dataSourceId,
+    //   knowledge.id,
+    //   input.url
+    // );
+
+    // if (!actorRunId) {
+    //   return {
+    //     status: RetrieveContentResponseStatus.FAILED,
+    //   };
+    // }
+
+    // const metadata: WebUrlMetadata = {
+    //   indexingRunId: actorRunId,
+    // };
   }
 
   public shouldReindexKnowledge(
