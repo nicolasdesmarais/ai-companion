@@ -1,3 +1,4 @@
+import LandingCTA from "@/components/landing-cta";
 import LandingFooter from "@/components/landing-footer";
 import LandingNav from "@/components/landing-nav";
 import LandingStartChat from "@/components/landing-start-chat";
@@ -312,22 +313,7 @@ const LandingHome = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mb-14 mt-20">
-        <div className="bg-cta-pattern bg-center w-[1100px] py-28 px-32">
-          <div className="flex bg-white py-12 px-20 justify-evenly items-center">
-            <h3 className="text-3xl font-bold w-[400px]">
-              Start chatting with or creating AI apps today.
-            </h3>
-            <Link
-              href="/sign-up"
-              className="ml-10 px-8 py-2 bg-navy text-white flex items-center"
-            >
-              Get Started
-              <ArrowRight className="inline-block w-4 h-4 ml-2" />
-            </Link>
-          </div>
-        </div>
-      </div>
+      <LandingCTA />
 
       <LandingFooter />
     </div>
