@@ -129,9 +129,9 @@ const LandingHome = () => {
 
       <LandingTutorials />
 
-      <div className="flex flex-col items-center mb-14 mt-20 bg-navy">
-        <div className="w-[1000px] py-32 text-white">
-          <q className="text-4xl italic font-serif font-light leading-relaxed">
+      <div className="flex flex-col items-center mb-14 mt-20 bg-navy ">
+        <div className="lg:w-[1000px] py-32 text-white mx-10">
+          <q className="text-2xl md:text-4xl italic font-serif font-light leading-relaxed">
             At AppDirect, we&apos;re democratizing the AI space. Creating apps
             is quick and simple, anyone can get one up and running within
             minutes, no coding skills required.
@@ -141,15 +141,15 @@ const LandingHome = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mb-14 mt-24">
-        <h3 className="text-3xl font-bold mb-8">
+      <div className="flex flex-col items-center mb-14 mt-24 mx-4">
+        <h3 className="text-3xl font-bold mb-8 text-center">
           Explore the AppDirect AI Marketplace
         </h3>
-        <h4 className="text-xl mb-11 w-[710px] text-center">
+        <h4 className="text-xl mb-11 lg:w-[710px] text-center">
           AI apps ready to use today, purpose-built to help you solve business
           problems, gain insights, and manage workloads.
         </h4>
-        <div className="grid grid-cols-4 gap-8 w-[1100px]">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:w-[1100px]">
           <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
             <svg
               width="54"
