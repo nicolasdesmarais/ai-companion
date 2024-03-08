@@ -44,11 +44,11 @@ const LandingHome = () => {
       <LandingStartChat />
 
       <div className="flex flex-col items-center mb-14 mt-20">
-        <div className="blue-bg lg:bg-unleash-pattern lg:w-[1110px] px-20 py-16 flex flex-col items-center mx-4">
+        <div className="unleash-gradient lg:bg-unleash-pattern lg:bg-no-repeat lg:w-[1110px] px-8 md:px-20 py-16 flex flex-col items-center">
           <h3 className="text-3xl font-bold mb-16">
             Unleash productivity and innovation
           </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="bg-white px-8 py-16 drop-shadow-lg">
               <h4 className="text-xl font-bold mb-11">Low/no code</h4>
               <div>
@@ -150,7 +150,7 @@ const LandingHome = () => {
           AI apps ready to use today, purpose-built to help you solve business
           problems, gain insights, and manage workloads.
         </h4>
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:w-[1100px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:w-[1100px]">
           <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
             <svg
               width="54"

@@ -114,6 +114,12 @@ body,
   background: linear-gradient(349deg, rgba(16,16,59,1) 0%, rgba(28,39,88,1) 65%, rgba(155,217,249,1) 126%);
 }
 
+
+.unleash-gradient {
+  background: white;
+  background: linear-gradient(75deg, rgba(8,17,64,1) 0%, rgb(251, 252, 253) 35%, rgba(250,0,48,0.8) 100%); 
+}
+
 .teaser-blur {
   width: 500px;
   height: 250px;
