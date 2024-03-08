@@ -1,5 +1,9 @@
+import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
 import { BadRequestError } from "@/src/domain/errors/Errors";
-import { DataSourceItemListReceivedPayload } from "@/src/domain/events/domain-event";
+import {
+  DataSourceItemListReceivedPayload,
+  DomainEvent,
+} from "@/src/domain/events/domain-event";
 import { ApifyWebhookEvent } from "@/src/domain/models/ApifyWebhookEvent";
 import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import { FileStorageService } from "@/src/domain/services/FileStorageService";
@@ -31,11 +35,18 @@ export class WebUrlsDataSourceAdapter
     data: any
   ): Promise<DataSourceItemList> {
     const input = data as WebUrlDataSourceInput;
+    let requestId = Math.random().toString(36).substring(2, 15);
+
     const result: DataSourceItemList = {
       items: [
         {
           name: input.url,
           uniqueId: input.url,
+          metadata: {
+            requestId,
+            rootUrl: input.url,
+            depth: 0,
+          } as WebUrlMetadata,
         },
       ],
     };
@@ -50,22 +61,24 @@ export class WebUrlsDataSourceAdapter
     data: any
   ): Promise<RetrieveContentAdapterResponse> {
     const input = data as WebUrlDataSourceInput;
-    const { url } = input;
+    const { url: rootUrl } = input;
+
+    const url = knowledge.name;
+    const depth = (knowledge.metadata as WebUrlMetadata).depth ?? 0;
 
     const page = await crawler.crawl(url);
-    console.log(page);
 
-    const filename = `${knowledge.name}.md`;
+    const filename = `${url}.md`;
     const contentBlobUrl = await FileStorageService.put(
       `${filename}.md`,
       page.content
     );
 
     const dataSourceItemList: DataSourceItemList = {
-      items: page.childUrls.map((url) => ({
-        name: url,
-        uniqueId: url,
-        metadata: { url } as WebUrlDataSourceInput,
+      items: page.childUrls.map((childUrl) => ({
+        name: childUrl,
+        uniqueId: childUrl,
+        metadata: { rootUrl, depth: depth + 1 } as WebUrlMetadata,
       })),
     };
 
@@ -76,6 +89,8 @@ export class WebUrlsDataSourceAdapter
       forceRefresh: false,
     };
 
+    await publishEvent(DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED, eventPayload);
+
     return {
       status: RetrieveContentResponseStatus.SUCCESS,
       originalContent: {
@@ -84,23 +99,6 @@ export class WebUrlsDataSourceAdapter
         mimeType: "text/markdown",
       },
     };
-
-    // const actorRunId = await apifyAdapter.startUrlIndexing(
-    //   orgId,
-    //   dataSourceId,
-    //   knowledge.id,
-    //   input.url
-    // );
-
-    // if (!actorRunId) {
-    //   return {
-    //     status: RetrieveContentResponseStatus.FAILED,
-    //   };
-    // }
-
-    // const metadata: WebUrlMetadata = {
-    //   indexingRunId: actorRunId,
-    // };
   }
 
   public shouldReindexKnowledge(

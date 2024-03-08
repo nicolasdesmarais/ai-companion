@@ -1,3 +1,6 @@
 export interface WebUrlMetadata {
-  indexingRunId: string;
+  indexingRunId?: string;
+  requestId?: string;
+  rootUrl?: string;
+  depth?: number;
 }

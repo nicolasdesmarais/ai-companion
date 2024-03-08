@@ -13,12 +13,9 @@ export class Crawler {
   public async crawl(url: string): Promise<Page> {
     const html = await this.fetchPage(url);
 
-    const $ = cheerio.load(html);
+    const content = this.parseHtml(html);
 
-    const content = this.parseHtml($);
-
-    const childUrls = this.extractChildUrls($, url);
-    console.log(childUrls);
+    const childUrls = this.extractChildUrls(html, url);
 
     return { url, content, childUrls };
   }
@@ -32,15 +29,17 @@ export class Crawler {
     }
   }
 
-  private parseHtml($: cheerio.CheerioAPI): string {
+  private parseHtml(html: string): string {
+    const $ = cheerio.load(html);
     $("a").removeAttr("href");
     return NodeHtmlMarkdown.translate($.html());
   }
 
-  private extractChildUrls($: cheerio.CheerioAPI, baseUrl: string): string[] {
+  private extractChildUrls(html: string, baseUrl: string): string[] {
     const originalUrlObj = new URL(baseUrl);
     const originalDomain = originalUrlObj.hostname;
 
+    const $ = cheerio.load(html);
     const urls: string[] = [];
     $("a").each((i, link) => {
       const href = $(link).attr("href");
