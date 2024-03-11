@@ -214,7 +214,9 @@ export class DataSourceManagementService {
         where: {
           type: dataSource.type,
           uniqueId: { in: uniqueIds },
-          indexStatus: KnowledgeIndexStatus.COMPLETED,
+          indexStatus: {
+            notIn: [KnowledgeIndexStatus.DELETED, KnowledgeIndexStatus.FAILED],
+          },
         },
       });
 

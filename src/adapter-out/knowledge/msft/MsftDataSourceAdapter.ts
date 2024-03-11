@@ -256,6 +256,7 @@ export class MsftDataSourceAdapter
     item: DataSourceItem
   ): boolean {
     return (
+      knowledge.indexStatus === KnowledgeIndexStatus.COMPLETED &&
       (knowledge.metadata as any)?.modifiedTime !== item.metadata.modifiedTime
     );
   }

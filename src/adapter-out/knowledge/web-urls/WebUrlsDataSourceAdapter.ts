@@ -75,22 +75,33 @@ export class WebUrlsDataSourceAdapter
       page.content
     );
 
-    const dataSourceItemList: DataSourceItemList = {
-      items: page.childUrls.map((childUrl) => ({
-        name: childUrl,
-        uniqueId: childUrl,
-        metadata: { requestId, rootUrl, depth: depth + 1 } as WebUrlMetadata,
-      })),
-    };
+    for (const childUrl of page.childUrls) {
+      const dataSourceItemList: DataSourceItemList = {
+        items: [
+          {
+            name: childUrl,
+            uniqueId: childUrl,
+            metadata: {
+              requestId,
+              rootUrl,
+              depth: depth + 1,
+            } as WebUrlMetadata,
+          },
+        ],
+      };
 
-    const eventPayload: DataSourceItemListReceivedPayload = {
-      dataSourceId,
-      dataSourceItemList,
-      forRefresh: false,
-      forceRefresh: false,
-    };
+      const eventPayload: DataSourceItemListReceivedPayload = {
+        dataSourceId,
+        dataSourceItemList,
+        forRefresh: false,
+        forceRefresh: false,
+      };
 
-    await publishEvent(DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED, eventPayload);
+      await publishEvent(
+        DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED,
+        eventPayload
+      );
+    }
 
     return {
       status: RetrieveContentResponseStatus.SUCCESS,
@@ -108,6 +119,13 @@ export class WebUrlsDataSourceAdapter
   ): boolean {
     if (knowledge.uniqueId !== item.uniqueId) {
       return true;
+    }
+
+    const knowledgeRequestId = (knowledge.metadata as WebUrlMetadata).requestId;
+    const itemRequestId = (item.metadata as WebUrlMetadata).requestId;
+    if (knowledgeRequestId === itemRequestId) {
+      // Avoid re-indexing the same URL if it's part of the same request
+      return false;
     }
 
     const oneWeekAgo = new Date();

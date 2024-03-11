@@ -46,7 +46,7 @@ export class Crawler {
       originalUrlObj.href.lastIndexOf("/") + 1
     );
 
-    const urls: string[] = [];
+    const urls = new Set<string>();
     $("a").each((i, link) => {
       const href = $(link).attr("href");
       if (href) {
@@ -60,13 +60,13 @@ export class Crawler {
         }
 
         const hrefObj = new URL(resolvedUrl);
-        if (hrefObj.hostname === originalDomain) {
-          urls.push(hrefObj.href);
+        if (hrefObj.hostname === originalDomain && hrefObj.href !== baseUrl) {
+          urls.add(hrefObj.href);
         }
       }
     });
 
-    return urls;
+    return Array.from(urls);
   }
 }
 
