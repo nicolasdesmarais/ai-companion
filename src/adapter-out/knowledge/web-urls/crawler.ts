@@ -10,12 +10,15 @@ interface Page {
 }
 
 export class Crawler {
-  public async crawl(url: string): Promise<Page> {
+  public async crawl(url: string, extractChildUrls: boolean): Promise<Page> {
     const html = await this.fetchPage(url);
 
     const content = this.parseHtml(html);
 
-    const childUrls = this.extractChildUrls(html, url);
+    let childUrls: string[] = [];
+    if (extractChildUrls) {
+      childUrls = this.extractChildUrls(html, url);
+    }
 
     return { url, content, childUrls };
   }

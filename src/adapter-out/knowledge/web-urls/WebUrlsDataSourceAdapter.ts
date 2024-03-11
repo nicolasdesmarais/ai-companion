@@ -25,6 +25,8 @@ import crawler from "./crawler";
 import { WebUrlDataSourceInput } from "./types/WebUrlDataSourceInput";
 import { WebUrlMetadata } from "./types/WebUrlMetadata";
 
+const maxDepth = process.env.WEB_URL_MAX_DEPTH;
+
 export class WebUrlsDataSourceAdapter
   implements DataSourceAdapter, ContentRetrievingDataSourceAdapter
 {
@@ -67,13 +69,15 @@ export class WebUrlsDataSourceAdapter
     const depth = (knowledge.metadata as WebUrlMetadata).depth ?? 0;
     const requestId = (knowledge.metadata as WebUrlMetadata).requestId;
 
-    const page = await crawler.crawl(url);
+    let extractChildUrls = true;
+    if (maxDepth && depth >= parseInt(maxDepth)) {
+      extractChildUrls = false;
+    }
+
+    const page = await crawler.crawl(url, extractChildUrls);
 
     const filename = `${url}.md`;
-    const contentBlobUrl = await FileStorageService.put(
-      `${filename}.md`,
-      page.content
-    );
+    const contentBlobUrl = await FileStorageService.put(filename, page.content);
 
     for (const childUrl of page.childUrls) {
       const dataSourceItemList: DataSourceItemList = {
