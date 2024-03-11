@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
+import https from "https";
 
 import { NodeHtmlMarkdown } from "node-html-markdown";
 
@@ -25,7 +26,11 @@ export class Crawler {
 
   private async fetchPage(url: string): Promise<string> {
     try {
-      const { data } = await axios.get(url);
+      const { data } = await axios.get(url, {
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false,
+        }),
+      });
       return data;
     } catch (error) {
       console.log("Error fetching HTML content.", error);
