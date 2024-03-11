@@ -21,9 +21,9 @@ const LandingFeatures = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-20">
+      <div className="flex flex-col items-center mt-20 mb-12">
         <div className="flex">
-          <div className="md:w-[460px] gap-8 flex flex-col ">
+          <div className="md:w-[460px] gap-8 flex flex-col">
             <div>Create</div>
             <div className="text-3xl font-extrabold md:w-[300px]">
               Custom AI apps, created in minutes
@@ -44,8 +44,8 @@ const LandingFeatures = () => {
                 data sets in a secure environment without worry.
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2">
-              Start Building
+            <Link href="/sign-up" className="py-2 text-ring">
+              Start building
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
           </div>
@@ -56,6 +56,121 @@ const LandingFeatures = () => {
               width="512"
               height="360"
             />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center mt-20 mb-12">
+        <div className="flex">
+          <div className="bg-cta-pattern p-20 md:w-[600px]">
+            <Image
+              src="/datasources_screenshot.jpg"
+              alt="AI Data Source Screenshot"
+              width="512"
+              height="360"
+            />
+          </div>
+          <div className="md:w-[460px] gap-8 flex flex-col ml-20">
+            <div>Use</div>
+            <div className="text-3xl font-extrabold md:w-[300px]">
+              Boost productivity-for everyone
+            </div>
+            <ul className="list-disc gap-4 flex flex-col ml-4">
+              <li>
+                <b>Thought partner:</b> Use your AI to help you get to the right
+                answer, faster. Ask for advice on blind spots, get help editing
+                a proposal, or learn how to align your calendar to your
+                priorities.
+              </li>
+              <li>
+                <b>Quickly pull insights:</b> Summarize large documents or data
+                sets, pull themes to help you build a business case, or quickly
+                cut through the noise to find answers.
+              </li>
+              <li>
+                <b>Gain new knowledge:</b> Upload data and pull inquiries
+                relevant to your specific needs to help you learn new skills,
+                gain new insights, or challenge your assumptions..
+              </li>
+            </ul>
+            <Link href="/sign-up" className="py-2 text-ring">
+              Start using
+              <ArrowRight className="inline-block w-4 h-4 ml-2" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center mt-20 mb-12">
+        <div className="flex">
+          <div className="md:w-[460px] gap-8 flex flex-col">
+            <div>Share</div>
+            <div className="text-3xl font-extrabold md:w-[300px]">
+              Share apps with confidence
+            </div>
+            <ul className="list-disc gap-4 flex flex-col ml-4">
+              <li>
+                <b>Privacy first:</b> Sharing your AI bot securely is paramount.
+                Whatever data you use to create your AI, rest assured that it
+                will stay in the app and will never be used to train LLMs
+                outside your organization.
+              </li>
+              <li>
+                <b>AI-powered collaboration:</b> App sharing with colleagues
+                gives teams a powerful tool to gain new insights, unlock
+                innovation, and increase productivity.
+              </li>
+              <li>
+                <b>Public sharing:</b> Sharing apps within your organization or
+                publicly is easy and secure.
+              </li>
+            </ul>
+            <Link href="/sign-up" className="py-2 text-ring">
+              Start creating
+              <ArrowRight className="inline-block w-4 h-4 ml-2" />
+            </Link>
+          </div>
+          <div className="bg-cta-pattern p-20 md:w-[600px] ml-20">
+            <Image
+              src="/datasources_screenshot.jpg"
+              alt="AI Data Source Screenshot"
+              width="512"
+              height="360"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center mt-20 mb-12">
+        <div className="flex">
+          <div className="bg-cta-pattern p-20 md:w-[600px]">
+            <Image
+              src="/datasources_screenshot.jpg"
+              alt="AI Data Source Screenshot"
+              width="512"
+              height="360"
+            />
+          </div>
+          <div className="md:w-[460px] gap-8 flex flex-col ml-20">
+            <div>Browse</div>
+            <div className="text-3xl font-extrabold md:w-[360px]">
+              Explore marketplace of built-for-purpose AIs
+            </div>
+            <ul className="list-disc gap-4 flex flex-col ml-4 mt-6">
+              <li>
+                <b>Out of the box AIs:</b> Explore the rich catalog of AIs ready
+                to use immediately.
+              </li>
+              <li>
+                <b>Search by category:</b> Everything from data analytics to
+                legal support to marketing content. You can also search for apps
+                based on keywords.
+              </li>
+            </ul>
+            <Link href="/sign-up" className="py-2 mt-20 text-ring">
+              Browse catalog
+              <ArrowRight className="inline-block w-4 h-4 ml-2" />
+            </Link>
           </div>
         </div>
       </div>
