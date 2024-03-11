@@ -28,7 +28,8 @@ export class Crawler {
       const { data } = await axios.get(url);
       return data;
     } catch (error) {
-      throw new Error("Error fetching HTML content", error);
+      console.log("Error fetching HTML content.", error);
+      throw new Error("Error fetching HTML content.", error);
     }
   }
 
