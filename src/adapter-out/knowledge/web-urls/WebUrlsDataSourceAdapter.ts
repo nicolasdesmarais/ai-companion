@@ -65,6 +65,7 @@ export class WebUrlsDataSourceAdapter
 
     const url = knowledge.name;
     const depth = (knowledge.metadata as WebUrlMetadata).depth ?? 0;
+    const requestId = (knowledge.metadata as WebUrlMetadata).requestId;
 
     const page = await crawler.crawl(url);
 
@@ -78,7 +79,7 @@ export class WebUrlsDataSourceAdapter
       items: page.childUrls.map((childUrl) => ({
         name: childUrl,
         uniqueId: childUrl,
-        metadata: { rootUrl, depth: depth + 1 } as WebUrlMetadata,
+        metadata: { requestId, rootUrl, depth: depth + 1 } as WebUrlMetadata,
       })),
     };
 
