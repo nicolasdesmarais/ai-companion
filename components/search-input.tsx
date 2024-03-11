@@ -38,7 +38,7 @@ export const SearchInput = () => {
 
   useEffect(() => {
     const query = {
-      search: debouncedValue ? `*${debouncedValue}*` : null,
+      search: debouncedValue,
       categoryId: categoryId,
       sort,
     };
