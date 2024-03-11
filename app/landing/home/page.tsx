@@ -150,7 +150,7 @@ const LandingHome = () => {
           AI apps ready to use today, purpose-built to help you solve business
           problems, gain insights, and manage workloads.
         </h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:w-[1100px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:w-[1140px]">
           <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
             <svg
               width="54"
