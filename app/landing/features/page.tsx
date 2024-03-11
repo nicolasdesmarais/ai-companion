@@ -175,6 +175,26 @@ const LandingFeatures = () => {
         </div>
       </div>
 
+      <div className="flex flex-col items-center mt-20 mb-12">
+        <h2 className="text-3xl font-extrabold">Choose your LLM</h2>
+        <div>
+          Choose the LLM provider most suitable for the task for each app you
+          create. You can also create your own model with the help from our
+          partner, Ivado Labs.
+        </div>
+        <div className="flex">
+          <Image
+            src="/anthropic.png"
+            alt="Anthropic Logo"
+            width="177"
+            height="21"
+          />
+          <Image src="/cohere.png" alt="Cohere Logo" width="162" height="28" />
+          <Image src="/openai.png" alt="OpenAI Logo" width="141" height="39" />
+          <Image src="/meta.png" alt="Meta Logo" width="131" height="51" />
+        </div>
+      </div>
+
       <LandingCTA />
 
       <LandingFooter />
