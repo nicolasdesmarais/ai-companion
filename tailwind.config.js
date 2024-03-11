@@ -94,6 +94,10 @@ module.exports = {
     boxShadow: {
       glow: "0 0 25px 10px rgba(255, 255, 255, 0.15)",
     },
+    fontFamily: {
+      sans: ["Inter", "sans-serif"],
+      serif: ["Roboto", "serif"],
+    },
   },
   plugins: [
     require("tailwindcss-animate"),

@@ -94,7 +94,7 @@ export class DataSourceViewingService {
     const canReadAi = AISecurityService.canReadAI(authorizationContext, ai);
     if (!canReadAi) {
       throw new ForbiddenError(
-        "User is not authorized to read AI with id=${aiId}"
+        `User is not authorized to read AI with id=${aiId}`
       );
     }
 
