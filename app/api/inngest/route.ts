@@ -1,7 +1,10 @@
 import { onApifyWebhookReceived } from "@/src/adapter-in/inngest/apify-workflows";
 import { clerkWebhookReceived } from "@/src/adapter-in/inngest/clerk-workflows";
 import {
+  deleteBlobStorage,
+  deleteRelatedKnowledgeInstances,
   deleteUnusedKnowledges,
+  deleteVectorDBStorage,
   onDataSourceDeleteRequested,
   onDataSourceInitialized,
   onDataSourceItemListReceived,
@@ -13,6 +16,7 @@ import {
   onKnowledgeInitialized,
   onKnowledgeRetryRequested,
   refreshDataSources,
+  retryFailedKnowledge,
 } from "@/src/adapter-in/inngest/datasource-workflows";
 import { googleDriveFolderScanInitiated } from "@/src/adapter-in/inngest/google-drive-workflows";
 import { onedriveFolderScanInitiated } from "@/src/adapter-in/inngest/onedrive-workflows";
@@ -42,5 +46,9 @@ export const { GET, POST, PUT } = serve({
     clerkWebhookReceived,
     deleteUnusedKnowledges,
     onApifyWebhookReceived,
+    deleteBlobStorage,
+    deleteRelatedKnowledgeInstances,
+    deleteVectorDBStorage,
+    retryFailedKnowledge,
   ],
 });
