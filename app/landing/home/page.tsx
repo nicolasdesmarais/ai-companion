@@ -151,7 +151,7 @@ const LandingHome = () => {
           problems, gain insights, and manage workloads.
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:w-[1140px]">
-          <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
+          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
             <svg
               width="54"
               height="54"
@@ -167,7 +167,7 @@ const LandingHome = () => {
             <div className="ml-4">Market Trend Analysis</div>
           </div>
 
-          <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
+          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
             <svg
               width="38"
               height="46"
@@ -184,7 +184,7 @@ const LandingHome = () => {
             <div className="ml-4">Candidate Ranking</div>
           </div>
 
-          <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
+          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
             <svg
               width="37"
               height="47"
@@ -201,7 +201,7 @@ const LandingHome = () => {
             <div className="ml-4">Blog Post Generator</div>
           </div>
 
-          <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
+          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
             <svg
               width="54"
               height="54"
@@ -226,7 +226,7 @@ const LandingHome = () => {
             <div className="ml-4">Support Ticket Ranking</div>
           </div>
 
-          <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
+          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
             <svg
               width="54"
               height="55"
@@ -246,7 +246,7 @@ const LandingHome = () => {
             <div className="ml-4">Benefits Admin</div>
           </div>
 
-          <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
+          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
             <svg
               width="54"
               height="54"
@@ -262,7 +262,7 @@ const LandingHome = () => {
             <div className="ml-4">Expense Management</div>
           </div>
 
-          <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
+          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
             <svg
               width="55"
               height="54"
@@ -279,7 +279,7 @@ const LandingHome = () => {
             <div className="ml-4">Training Sims</div>
           </div>
 
-          <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
+          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
             <svg
               width="54"
               height="54"
