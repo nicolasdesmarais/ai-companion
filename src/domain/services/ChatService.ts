@@ -541,6 +541,7 @@ export class ChatService {
     }
 
     const messages = chat.messages
+      .slice(Math.max(chat.messages.length - 10, 0))
       .map((message) => {
         if (message.role === Role.system) {
           return `${chat.ai.name}: ${message.content}\n`;
