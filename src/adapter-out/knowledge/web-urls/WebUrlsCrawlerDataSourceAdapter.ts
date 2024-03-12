@@ -1,13 +1,11 @@
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
-import { BadRequestError } from "@/src/domain/errors/Errors";
 import {
   DataSourceItemListReceivedPayload,
   DomainEvent,
 } from "@/src/domain/events/domain-event";
-import { ApifyWebhookEvent } from "@/src/domain/models/ApifyWebhookEvent";
 import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import { FileStorageService } from "@/src/domain/services/FileStorageService";
-import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
+import { Knowledge } from "@prisma/client";
 import {
   ContentRetrievingDataSourceAdapter,
   DataSourceAdapter,
@@ -19,15 +17,18 @@ import {
   RetrieveContentResponseStatus,
 } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
-import { KnowledgeIndexingResultStatus } from "../types/KnowlegeIndexingResult";
-import apifyAdapter from "./ApifyAdapter";
 import crawler from "./crawler";
 import { WebUrlDataSourceInput } from "./types/WebUrlDataSourceInput";
-import { WebUrlMetadata } from "./types/WebUrlMetadata";
 
 const maxDepth = process.env.WEB_URL_MAX_DEPTH;
 
-export class WebUrlsDataSourceAdapter
+export interface WebUrlCrawlerMetadata {
+  requestId: string;
+  rootUrl: string;
+  depth: number;
+}
+
+export class WebUrlsCrawlerDataSourceAdapter
   implements DataSourceAdapter, ContentRetrievingDataSourceAdapter
 {
   public async getDataSourceItemList(
@@ -48,7 +49,7 @@ export class WebUrlsDataSourceAdapter
             requestId,
             rootUrl: input.url,
             depth: 0,
-          } as WebUrlMetadata,
+          } as WebUrlCrawlerMetadata,
         },
       ],
     };
@@ -66,8 +67,8 @@ export class WebUrlsDataSourceAdapter
     const { url: rootUrl } = input;
 
     const url = knowledge.name;
-    const depth = (knowledge.metadata as WebUrlMetadata).depth ?? 0;
-    const requestId = (knowledge.metadata as WebUrlMetadata).requestId;
+    const depth = (knowledge.metadata as WebUrlCrawlerMetadata).depth ?? 0;
+    const requestId = (knowledge.metadata as WebUrlCrawlerMetadata).requestId;
 
     let extractChildUrls = true;
     if (maxDepth && depth >= parseInt(maxDepth)) {
@@ -89,7 +90,7 @@ export class WebUrlsDataSourceAdapter
               requestId,
               rootUrl,
               depth: depth + 1,
-            } as WebUrlMetadata,
+            } as WebUrlCrawlerMetadata,
           },
         ],
       };
@@ -125,8 +126,10 @@ export class WebUrlsDataSourceAdapter
       return true;
     }
 
-    const knowledgeRequestId = (knowledge.metadata as WebUrlMetadata).requestId;
-    const itemRequestId = (item.metadata as WebUrlMetadata).requestId;
+    const knowledgeRequestId = (
+      knowledge.metadata as unknown as WebUrlCrawlerMetadata
+    ).requestId;
+    const itemRequestId = (item.metadata as WebUrlCrawlerMetadata).requestId;
     if (knowledgeRequestId === itemRequestId) {
       // Avoid re-indexing the same URL if it's part of the same request
       return false;
@@ -137,62 +140,10 @@ export class WebUrlsDataSourceAdapter
     return !knowledge.lastIndexedAt || knowledge.lastIndexedAt < oneWeekAgo;
   }
 
-  public async retrieveContentFromEvent(
-    knowledge: KnowledgeDto,
-    data: ApifyWebhookEvent
-  ): Promise<RetrieveContentAdapterResponse> {
-    const { actorRunId } = data.eventData;
-    const metadata = knowledge.metadata as unknown as WebUrlMetadata;
-    if (actorRunId !== metadata.indexingRunId) {
-      throw new BadRequestError("Event actorRunId does not match metadata");
-    }
-
-    const result = await apifyAdapter.getActorRunResult(metadata.indexingRunId);
-
-    let status: RetrieveContentResponseStatus;
-    let originalContent;
-    if (
-      result.items &&
-      (result.status === KnowledgeIndexingResultStatus.PARTIAL ||
-        result.status === KnowledgeIndexingResultStatus.SUCCESSFUL)
-    ) {
-      const filename = `${knowledge.name}.json`;
-      const contentBlobUrl = await FileStorageService.put(
-        filename,
-        JSON.stringify(result)
-      );
-      status = RetrieveContentResponseStatus.SUCCESS;
-
-      originalContent = {
-        contentBlobUrl,
-        filename,
-        mimeType: "application/json",
-      };
-    } else {
-      status = RetrieveContentResponseStatus.FAILED;
-    }
-
-    return {
-      status,
-      originalContent,
-    };
-  }
-
   public async pollKnowledgeIndexingStatus(
     knowledge: Knowledge
   ): Promise<IndexKnowledgeResponse> {
-    const metadata = knowledge.metadata as unknown as WebUrlMetadata;
-    if (!metadata?.indexingRunId) {
-      return {
-        indexStatus: KnowledgeIndexStatus.FAILED,
-      };
-    }
-
-    // return this.getActorRunResult(knowledge, metadata);
-    //TODO: Re-implement
-    return {
-      indexStatus: KnowledgeIndexStatus.INDEXING,
-    };
+    throw new Error("Method not implemented.");
   }
 
   public async getRemovedKnowledgeIds(
@@ -202,5 +153,5 @@ export class WebUrlsDataSourceAdapter
   }
 }
 
-const webUrlsDataSourceAdapter = new WebUrlsDataSourceAdapter();
-export default webUrlsDataSourceAdapter;
+const webUrlsCrawlerDataSourceAdapter = new WebUrlsCrawlerDataSourceAdapter();
+export default webUrlsCrawlerDataSourceAdapter;

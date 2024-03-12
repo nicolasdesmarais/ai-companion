@@ -1,5 +1,5 @@
 import { RetrieveContentResponseStatus } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
-import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsCrawlerDataSourceAdapter";
+import webUrlsApifyDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsApifyDataSourceAdapter";
 import {
   DomainEvent,
   KnowledgeContentReceivedPayload,
@@ -30,7 +30,7 @@ export const onApifyWebhookReceived = inngest.createFunction(
     const retrieveContentResponse = await step.run(
       "retrieve-content-from-event",
       async () => {
-        return await webUrlsDataSourceAdapter.retrieveContentFromEvent(
+        return await webUrlsApifyDataSourceAdapter.retrieveContentFromEvent(
           knowledge,
           apifyEvent
         );
