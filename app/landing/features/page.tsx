@@ -10,10 +10,10 @@ const LandingFeatures = () => {
     <div className="bg-white flex flex-col text-navy">
       <LandingNav />
 
-      <div className="py-10 mt-10 flex flex-col items-center bg-[#F8F8F8] mx-4">
-        <div className="md:w-[1140px]">
+      <div className="py-10 mt-10 flex flex-col items-center bg-[#F8F8F8] ">
+        <div className="lg:w-[1140px] mx-4">
           <h2 className="text-5xl font-extrabold">How it works</h2>
-          <div className="md:w-[700px] mt-10 text-lg">
+          <div className="lg:w-[700px] mt-10 text-lg">
             Transform your AI app ideas into reality without needing any coding
             skills. Unlock innovation and productivity for you, your team, and
             your customers.
@@ -21,11 +21,11 @@ const LandingFeatures = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-20 mb-12 mx-4">
-        <div className="flex flex-col-reverse md:flex-row">
-          <div className="md:w-[460px] gap-8 flex flex-col mt-10 md:mt-0">
+      <div className="flex flex-col items-center mt-20 mb-12 mx-4 lg:mx-0">
+        <div className="flex flex-col-reverse lg:flex-row">
+          <div className="lg:w-[460px] gap-8 flex flex-col mt-10 lg:mt-0">
             <div>Create</div>
-            <div className="text-3xl font-extrabold md:w-[300px]">
+            <div className="text-3xl font-extrabold lg:w-[300px]">
               Custom AI apps, created in minutes
             </div>
             <ul className="list-disc gap-4 flex flex-col ml-4">
@@ -44,12 +44,12 @@ const LandingFeatures = () => {
                 data sets in a secure environment without worry.
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 text-ring">
+            <Link href="/sign-up" className="py-2 text-royal">
               Start building
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
           </div>
-          <div className="md:bg-gradient1 flex justify-center items-center md:p-16 md:w-[560px] md:w-[524px] md:ml-20">
+          <div className="lg:bg-gradient1 flex justify-center items-center lg:p-16 lg:w-[560px] lg:w-[524px] lg:ml-20">
             <Image
               src="/datasources_screenshot.jpg"
               alt="AI Data Source Screenshot"
@@ -61,8 +61,8 @@ const LandingFeatures = () => {
       </div>
 
       <div className="flex flex-col items-center mt-20 mb-12 mx-4">
-        <div className="flex flex-col md:flex-row">
-          <div className="md:bg-gradient2 flex items-center md:p-16 md:w-[560px] md:w-[524px] justify-center">
+        <div className="flex flex-col lg:flex-row">
+          <div className="lg:bg-gradient2 flex items-center lg:p-16 lg:w-[560px] lg:w-[524px] justify-center">
             <Image
               src="/chat-screenshot.png"
               alt="AI Chat Screenshot"
@@ -70,9 +70,9 @@ const LandingFeatures = () => {
               height="293"
             />
           </div>
-          <div className="md:w-[460px] gap-8 flex flex-col md:ml-20 mt-10 md:mt-0">
+          <div className="lg:w-[460px] gap-8 flex flex-col lg:ml-20 mt-10 lg:mt-0">
             <div>Use</div>
-            <div className="text-3xl font-extrabold md:w-[300px]">
+            <div className="text-3xl font-extrabold lg:w-[300px]">
               Boost productivity-for everyone
             </div>
             <ul className="list-disc gap-4 flex flex-col ml-4">
@@ -93,7 +93,7 @@ const LandingFeatures = () => {
                 gain new insights, or challenge your assumptions..
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 text-ring">
+            <Link href="/sign-up" className="py-2 text-royal">
               Start using
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
@@ -102,10 +102,10 @@ const LandingFeatures = () => {
       </div>
 
       <div className="flex flex-col items-center mt-20 mb-12 mx-4">
-        <div className="flex flex-col-reverse md:flex-row">
-          <div className="md:w-[460px] gap-8 flex flex-col mt-10 md:mt-0">
+        <div className="flex flex-col-reverse lg:flex-row">
+          <div className="lg:w-[460px] gap-8 flex flex-col mt-10 lg:mt-0">
             <div>Share</div>
-            <div className="text-3xl font-extrabold md:w-[300px]">
+            <div className="text-3xl font-extrabold lg:w-[300px]">
               Share apps with confidence
             </div>
             <ul className="list-disc gap-4 flex flex-col ml-4">
@@ -125,12 +125,12 @@ const LandingFeatures = () => {
                 publicly is easy and secure.
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 text-ring">
+            <Link href="/sign-up" className="py-2 text-royal">
               Start creating
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
           </div>
-          <div className="md:bg-gradient2 flex items-center md:p-16 md:w-[560px] md:w-[524px] md:ml-20 justify-center">
+          <div className="lg:bg-gradient2 flex items-center lg:p-16 lg:w-[560px] lg:w-[524px] lg:ml-20 justify-center">
             <Image
               src="/share-screenshot.png"
               alt="AI Share Screenshot"
@@ -142,8 +142,8 @@ const LandingFeatures = () => {
       </div>
 
       <div className="flex flex-col items-center mt-20 mb-12 mx-4">
-        <div className="flex flex-col md:flex-row">
-          <div className="md:bg-gradient1 flex items-center md:p-16 md:w-[560px] md:w-[524px] justify-center">
+        <div className="flex flex-col lg:flex-row">
+          <div className="lg:bg-gradient1 flex items-center lg:p-16 lg:w-[560px] lg:w-[524px] justify-center">
             <Image
               src="/browse_screenshot.jpg"
               alt="AI Browse Screenshot"
@@ -151,9 +151,9 @@ const LandingFeatures = () => {
               height="377"
             />
           </div>
-          <div className="md:w-[460px] gap-8 flex flex-col md:ml-20 mt-10 md:mt-0">
+          <div className="lg:w-[460px] gap-8 flex flex-col lg:ml-20 mt-10 lg:mt-0">
             <div>Browse</div>
-            <div className="text-3xl font-extrabold md:w-[360px]">
+            <div className="text-3xl font-extrabold lg:w-[360px]">
               Explore marketplace of built-for-purpose AIs
             </div>
             <ul className="list-disc gap-4 flex flex-col ml-4 mt-6">
@@ -167,7 +167,7 @@ const LandingFeatures = () => {
                 based on keywords.
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 mt-20 text-ring">
+            <Link href="/sign-up" className="py-2 mt-20 text-royal">
               Browse catalog
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
