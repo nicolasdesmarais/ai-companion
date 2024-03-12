@@ -30,6 +30,7 @@ export async function generateMetadata(
   if (ai) {
     return {
       title: `${ai.name} | AppDirect AI`,
+      metadataBase: new URL("https://appdirect.ai"),
       openGraph: {
         images: [
           {
