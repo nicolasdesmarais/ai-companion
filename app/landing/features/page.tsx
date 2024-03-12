@@ -10,8 +10,8 @@ const LandingFeatures = () => {
     <div className="bg-white flex flex-col text-navy">
       <LandingNav />
 
-      <div className="py-10 mt-10 flex flex-col items-center bg-[#F8F8F8]">
-        <div className="md:w-[1140px] ">
+      <div className="py-10 mt-10 flex flex-col items-center bg-[#F8F8F8] mx-4">
+        <div className="md:w-[1140px]">
           <h2 className="text-5xl font-extrabold">How it works</h2>
           <div className="md:w-[700px] mt-10 text-lg">
             Transform your AI app ideas into reality without needing any coding
@@ -21,8 +21,8 @@ const LandingFeatures = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-20 mb-12">
-        <div className="flex">
+      <div className="flex flex-col items-center mt-20 mb-12 mx-4">
+        <div className="flex flex-col md:flex-row">
           <div className="md:w-[460px] gap-8 flex flex-col">
             <div>Create</div>
             <div className="text-3xl font-extrabold md:w-[300px]">
@@ -49,7 +49,7 @@ const LandingFeatures = () => {
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
           </div>
-          <div className="bg-gradient1 flex items-center p-16 md:w-[560px] md:w-[524px] ml-20">
+          <div className="md:bg-gradient1 flex justify-center items-center md:p-16 md:w-[560px] md:w-[524px] md:ml-20 mt-10 md:mt-0">
             <Image
               src="/datasources_screenshot.jpg"
               alt="AI Data Source Screenshot"
@@ -60,9 +60,9 @@ const LandingFeatures = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-20 mb-12">
-        <div className="flex">
-          <div className="bg-gradient2 flex items-center p-16 md:w-[560px] md:w-[524px]">
+      <div className="flex flex-col items-center mt-20 mb-12 mx-4">
+        <div className="flex flex-col md:flex-row">
+          <div className="md:bg-gradient2 flex items-center md:p-16 md:w-[560px] md:w-[524px] justify-center">
             <Image
               src="/datasources_screenshot.jpg"
               alt="AI Data Source Screenshot"
@@ -70,7 +70,7 @@ const LandingFeatures = () => {
               height="360"
             />
           </div>
-          <div className="md:w-[460px] gap-8 flex flex-col ml-20">
+          <div className="md:w-[460px] gap-8 flex flex-col md:ml-20 mt-10 md:mt-0">
             <div>Use</div>
             <div className="text-3xl font-extrabold md:w-[300px]">
               Boost productivity-for everyone
@@ -101,8 +101,8 @@ const LandingFeatures = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-20 mb-12">
-        <div className="flex">
+      <div className="flex flex-col items-center mt-20 mb-12 mx-4">
+        <div className="flex flex-col md:flex-row">
           <div className="md:w-[460px] gap-8 flex flex-col">
             <div>Share</div>
             <div className="text-3xl font-extrabold md:w-[300px]">
@@ -130,7 +130,7 @@ const LandingFeatures = () => {
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
           </div>
-          <div className="bg-gradient2 flex items-center p-16 md:w-[560px] md:w-[524px] ml-20">
+          <div className="md:bg-gradient2 flex items-center md:p-16 md:w-[560px] md:w-[524px] md:ml-20 justify-center mt-10 md:mt-0">
             <Image
               src="/datasources_screenshot.jpg"
               alt="AI Data Source Screenshot"
@@ -141,9 +141,9 @@ const LandingFeatures = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-20 mb-12">
-        <div className="flex">
-          <div className="bg-gradient1 flex items-center p-16 md:w-[560px] md:w-[524px]">
+      <div className="flex flex-col items-center mt-20 mb-12 mx-4">
+        <div className="flex flex-col md:flex-row">
+          <div className="md:bg-gradient1 flex items-center md:p-16 md:w-[560px] md:w-[524px] justify-center">
             <Image
               src="/datasources_screenshot.jpg"
               alt="AI Data Source Screenshot"
@@ -151,7 +151,7 @@ const LandingFeatures = () => {
               height="360"
             />
           </div>
-          <div className="md:w-[460px] gap-8 flex flex-col ml-20">
+          <div className="md:w-[460px] gap-8 flex flex-col md:ml-20 mt-10 md:mt-0">
             <div>Browse</div>
             <div className="text-3xl font-extrabold md:w-[360px]">
               Explore marketplace of built-for-purpose AIs
@@ -175,7 +175,7 @@ const LandingFeatures = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-20 mb-12 gap-8">
+      <div className="flex flex-col items-center mt-20 mb-12 gap-8 mx-4">
         <h2 className="text-3xl font-extrabold">Choose your LLM</h2>
         <div className="md:w-[820px] text-center">
           Choose the LLM provider most suitable for the task for each app you
