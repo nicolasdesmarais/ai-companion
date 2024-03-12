@@ -64,10 +64,10 @@ const LandingFeatures = () => {
         <div className="flex flex-col md:flex-row">
           <div className="md:bg-gradient2 flex items-center md:p-16 md:w-[560px] md:w-[524px] justify-center">
             <Image
-              src="/datasources_screenshot.jpg"
-              alt="AI Data Source Screenshot"
-              width="512"
-              height="360"
+              src="/chat-screenshot.png"
+              alt="AI Chat Screenshot"
+              width="430"
+              height="293"
             />
           </div>
           <div className="md:w-[460px] gap-8 flex flex-col md:ml-20 mt-10 md:mt-0">
@@ -132,10 +132,10 @@ const LandingFeatures = () => {
           </div>
           <div className="md:bg-gradient2 flex items-center md:p-16 md:w-[560px] md:w-[524px] md:ml-20 justify-center">
             <Image
-              src="/datasources_screenshot.jpg"
-              alt="AI Data Source Screenshot"
-              width="512"
-              height="360"
+              src="/share-screenshot.png"
+              alt="AI Share Screenshot"
+              width="431"
+              height="283"
             />
           </div>
         </div>
@@ -145,10 +145,10 @@ const LandingFeatures = () => {
         <div className="flex flex-col md:flex-row">
           <div className="md:bg-gradient1 flex items-center md:p-16 md:w-[560px] md:w-[524px] justify-center">
             <Image
-              src="/datasources_screenshot.jpg"
-              alt="AI Data Source Screenshot"
+              src="/browse_screenshot.jpg"
+              alt="AI Browse Screenshot"
               width="512"
-              height="360"
+              height="377"
             />
           </div>
           <div className="md:w-[460px] gap-8 flex flex-col md:ml-20 mt-10 md:mt-0">
