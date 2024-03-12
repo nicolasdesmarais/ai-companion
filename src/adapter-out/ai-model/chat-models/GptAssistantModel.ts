@@ -2,6 +2,7 @@ import { AIModel } from "@/src/domain/models/AIModel";
 import aiModelService from "@/src/domain/services/AIModelService";
 import { AI } from "@prisma/client";
 import { OpenAIAssistantRunnable } from "langchain/experimental/openai_assistant";
+
 import OpenAI from "openai";
 import { ThreadMessage } from "openai/resources/beta/threads/messages/messages.mjs";
 import {
@@ -93,7 +94,8 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
       prompt,
       callbackContext,
       getKnowledgeCallback,
-      endChatCallback: endCallback,
+      startChatCallback,
+      endChatCallback,
     } = input;
     const { ai } = chat;
 
@@ -140,8 +142,8 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
       }
     }
 
-    console.log("Response from Chat GPT Assistant", responseText);
-    await endCallback(callbackContext, responseText, externalChatId);
+    await startChatCallback(callbackContext);
+    await endChatCallback(callbackContext, responseText, externalChatId);
 
     return {
       isStream: false,
