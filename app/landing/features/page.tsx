@@ -49,7 +49,7 @@ const LandingFeatures = () => {
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
           </div>
-          <div className="bg-cta-pattern p-20 md:w-[600px] ml-20">
+          <div className="bg-gradient1 flex items-center p-16 md:w-[560px] md:w-[524px] ml-20">
             <Image
               src="/datasources_screenshot.jpg"
               alt="AI Data Source Screenshot"
@@ -62,7 +62,7 @@ const LandingFeatures = () => {
 
       <div className="flex flex-col items-center mt-20 mb-12">
         <div className="flex">
-          <div className="bg-cta-pattern p-20 md:w-[600px]">
+          <div className="bg-gradient2 flex items-center p-16 md:w-[560px] md:w-[524px]">
             <Image
               src="/datasources_screenshot.jpg"
               alt="AI Data Source Screenshot"
@@ -130,7 +130,7 @@ const LandingFeatures = () => {
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
           </div>
-          <div className="bg-cta-pattern p-20 md:w-[600px] ml-20">
+          <div className="bg-gradient2 flex items-center p-16 md:w-[560px] md:w-[524px] ml-20">
             <Image
               src="/datasources_screenshot.jpg"
               alt="AI Data Source Screenshot"
@@ -143,7 +143,7 @@ const LandingFeatures = () => {
 
       <div className="flex flex-col items-center mt-20 mb-12">
         <div className="flex">
-          <div className="bg-cta-pattern p-20 md:w-[600px]">
+          <div className="bg-gradient1 flex items-center p-16 md:w-[560px] md:w-[524px]">
             <Image
               src="/datasources_screenshot.jpg"
               alt="AI Data Source Screenshot"
