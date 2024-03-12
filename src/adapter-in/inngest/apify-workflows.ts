@@ -1,5 +1,5 @@
 import { RetrieveContentResponseStatus } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
-import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
+import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsCrawlerDataSourceAdapter";
 import {
   DomainEvent,
   KnowledgeContentReceivedPayload,
