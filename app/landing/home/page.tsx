@@ -1,3 +1,4 @@
+import LandingCTA from "@/components/landing-cta";
 import LandingFooter from "@/components/landing-footer";
 import LandingNav from "@/components/landing-nav";
 import LandingStartChat from "@/components/landing-start-chat";
@@ -11,7 +12,7 @@ const LandingHome = () => {
       <LandingNav />
       <div className="max-h-[785px] h-screen mb-16 overflow-hidden flex flex-col mx-4">
         <div className="flex flex-col md:flex-row justify-center  items-center">
-          <div className="mt-24 md:mr-16 w-[440px] text-center lg:text-left">
+          <div className="mt-24 md:mr-16 md:w-[440px] text-center lg:text-left">
             <h2
               className="me-4 mb-8 font-extrabold leading-none tracking-tight text-4xl md:text-5xl lg:text-6xl"
               title="AI made simple"
@@ -43,11 +44,11 @@ const LandingHome = () => {
       <LandingStartChat />
 
       <div className="flex flex-col items-center mb-14 mt-20">
-        <div className="bg-unleash-pattern w-[1110px] px-20 py-16 flex flex-col items-center">
+        <div className="unleash-gradient lg:bg-unleash-pattern lg:bg-no-repeat lg:w-[1110px] px-8 md:px-20 py-16 flex flex-col items-center">
           <h3 className="text-3xl font-bold mb-16">
             Unleash productivity and innovation
           </h3>
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="bg-white px-8 py-16 drop-shadow-lg">
               <h4 className="text-xl font-bold mb-11">Low/no code</h4>
               <div>
@@ -129,9 +130,9 @@ const LandingHome = () => {
 
       <LandingTutorials />
 
-      <div className="flex flex-col items-center mb-14 mt-20 bg-navy">
-        <div className="w-[1000px] py-32 text-white">
-          <q className="text-4xl italic font-serif font-light leading-relaxed">
+      <div className="flex flex-col items-center mb-14 mt-20 bg-navy ">
+        <div className="lg:w-[1000px] py-32 text-white mx-10">
+          <q className="text-2xl md:text-4xl italic font-serif font-light leading-relaxed">
             At AppDirect, we&apos;re democratizing the AI space. Creating apps
             is quick and simple, anyone can get one up and running within
             minutes, no coding skills required.
@@ -141,16 +142,16 @@ const LandingHome = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mb-14 mt-24">
-        <h3 className="text-3xl font-bold mb-8">
+      <div className="flex flex-col items-center mb-14 mt-24 mx-4">
+        <h3 className="text-3xl font-bold mb-8 text-center">
           Explore the AppDirect AI Marketplace
         </h3>
-        <h4 className="text-xl mb-11 w-[710px] text-center">
+        <h4 className="text-xl mb-11 lg:w-[710px] text-center">
           AI apps ready to use today, purpose-built to help you solve business
           problems, gain insights, and manage workloads.
         </h4>
-        <div className="grid grid-cols-4 gap-8 w-[1100px]">
-          <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:w-[1140px]">
+          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
             <svg
               width="54"
               height="54"
@@ -166,7 +167,7 @@ const LandingHome = () => {
             <div className="ml-4">Market Trend Analysis</div>
           </div>
 
-          <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
+          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
             <svg
               width="38"
               height="46"
@@ -183,7 +184,7 @@ const LandingHome = () => {
             <div className="ml-4">Candidate Ranking</div>
           </div>
 
-          <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
+          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
             <svg
               width="37"
               height="47"
@@ -200,7 +201,7 @@ const LandingHome = () => {
             <div className="ml-4">Blog Post Generator</div>
           </div>
 
-          <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
+          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
             <svg
               width="54"
               height="54"
@@ -225,7 +226,7 @@ const LandingHome = () => {
             <div className="ml-4">Support Ticket Ranking</div>
           </div>
 
-          <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
+          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
             <svg
               width="54"
               height="55"
@@ -245,7 +246,7 @@ const LandingHome = () => {
             <div className="ml-4">Benefits Admin</div>
           </div>
 
-          <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
+          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
             <svg
               width="54"
               height="54"
@@ -261,7 +262,7 @@ const LandingHome = () => {
             <div className="ml-4">Expense Management</div>
           </div>
 
-          <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
+          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
             <svg
               width="55"
               height="54"
@@ -278,7 +279,7 @@ const LandingHome = () => {
             <div className="ml-4">Training Sims</div>
           </div>
 
-          <div className="bg-navylight px-8 py-4 drop-shadow-lg flex items-center">
+          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
             <svg
               width="54"
               height="54"
@@ -312,22 +313,7 @@ const LandingHome = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mb-14 mt-20">
-        <div className="bg-cta-pattern bg-center w-[1100px] py-28 px-32">
-          <div className="flex bg-white py-12 px-20 justify-evenly items-center">
-            <h3 className="text-3xl font-bold w-[400px]">
-              Start chatting with or creating AI apps today.
-            </h3>
-            <Link
-              href="/sign-up"
-              className="ml-10 px-8 py-2 bg-navy text-white flex items-center"
-            >
-              Get Started
-              <ArrowRight className="inline-block w-4 h-4 ml-2" />
-            </Link>
-          </div>
-        </div>
-      </div>
+      <LandingCTA />
 
       <LandingFooter />
     </div>

@@ -54,8 +54,8 @@ const LandingStartChat = () => {
   return (
     <div className="flex flex-col items-center mb-14 mx-4">
       <h3 className="text-3xl font-bold mb-8">Start chatting with AIs</h3>
-      <div className="flex">
-        <ul className="flex flex-col justify-evenly items-center lg:mr-8 my-10 border-l">
+      <div className="flex flex-col md:flex-row">
+        <ul className="flex flex-row md:flex-col justify-evenly items-center lg:mr-8 my-10 md:border-l">
           {ais.map((ai, index) => (
             <li
               key={`ai-button-${index}`}
@@ -76,14 +76,14 @@ const LandingStartChat = () => {
             </li>
           ))}
         </ul>
-        <div className="m-8 py-8 px-4 md:px-12 md:w-[500px] lg:w-[700px] xl:w-[900px] bg-white drop-shadow-lg">
+        <div className="m-2 md:m-8 py-8 px-4 md:px-12 md:w-[500px] lg:w-[700px] xl:w-[900px] bg-white drop-shadow-lg">
           <div>{selectedAi.header}</div>
           <div className="font-bold">{selectedAi.bold}</div>
-          <div className="flex flex-wrap justify-evenly md:m-8 min-h-96 lg:min-h-72">
+          <div className="flex flex-wrap justify-evenly m-2 md:m-8 min-h-96 lg:min-h-72">
             {selectedAi.questions?.map((question, index) => (
               <div
                 key={`card-${index}`}
-                className="bg-lime p-2 lg:p-4 m-2 rounded-lg font-mono whitespace-pre h-10 lg:h-14"
+                className="bg-lime p-2 lg:p-4 m-2 rounded-lg font-mono md:whitespace-pre md:h-10 lg:h-14"
               >
                 {question}
               </div>

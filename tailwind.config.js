@@ -92,7 +92,12 @@ module.exports = {
       },
     },
     boxShadow: {
+      lg: "0px 4px 10px 0px rgba(1, 27, 88, 0.15)",
       glow: "0 0 25px 10px rgba(255, 255, 255, 0.15)",
+    },
+    fontFamily: {
+      sans: ["Inter", "sans-serif"],
+      serif: ["Roboto", "serif"],
     },
   },
   plugins: [

@@ -12,6 +12,20 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "AppDirect AI",
   description: "Custom AI for your business.",
+  openGraph: {
+    images: [
+      {
+        url: "/browse_screenshot.jpg",
+        width: "512",
+        height: "377",
+      },
+    ],
+    description:
+      "Transform your AI app ideas into reality without needing any coding skills. Unlock innovation and productivity for you, your team, and your customers.",
+    siteName: "AppDirect AI Marketplace & Creation Studio",
+    locale: "en_US",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

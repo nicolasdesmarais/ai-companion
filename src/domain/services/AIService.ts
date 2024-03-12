@@ -771,16 +771,17 @@ export class AIService {
   }
 
   private getSearchCriteria(search: string) {
+    const wildSearch = `*${search}*`;
     return {
       OR: [
         {
           name: {
-            search: search,
+            search: wildSearch,
           },
         },
         {
           userName: {
-            search: search,
+            search: wildSearch,
           },
         },
       ],

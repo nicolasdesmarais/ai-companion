@@ -520,7 +520,7 @@ export const onKnowledgeDeleted = inngest.createFunction(
 
 export const deleteUnusedKnowledges = inngest.createFunction(
   { id: "delete-unused-knowledges" },
-  { cron: "0 * * * *" },
+  { cron: "0 0 * * *" },
   async ({ step }) => {
     const deletedKnowledgeIds = await step.run(
       "delete-unused-knowledges",
@@ -556,7 +556,7 @@ export const deleteBlobStorage = inngest.createFunction(
 
 export const deleteVectorDBStorage = inngest.createFunction(
   { id: "delete-vectordb-storage" },
-  { cron: "*/10 * * * *" },
+  { cron: "0 0 * * *" },
   async ({ step }) => {
     const numberOfIdsToFetch = 1000;
     const knowledgeIds = await step.run(

@@ -39,16 +39,17 @@ const steps = [
 const LandingTutorials = () => {
   const [selectedStep, setSelectedStep] = useState(steps[0]);
   return (
-    <div className="flex flex-col items-center mb-14 mt-20">
+    <div className="flex flex-col items-center mb-14 mt-20 mx-4">
       <h3 className="text-3xl font-bold mb-16">Create apps without code</h3>
-      <div className="flex min-h-[610px]">
-        <ul className="flex flex-col justify-evenly items-center mr-8 my-10 border-l w-80">
+      <div className="flex flex-col lg:flex-row min-h-[610px]">
+        <ul className="flex flex-row lg:flex-col justify-evenly md:items-center mr-8 my-10 lg:border-l lg:w-80">
           {steps.map((step, index) => (
             <li
               key={`step-button-${index}`}
               className={cn(
                 "cursor-pointer pl-6 font-bold",
-                selectedStep.name === step.name && "border-l-8 border-lime pl-4"
+                selectedStep.name === step.name &&
+                  "md:border-l-8 border-lime pl-4"
               )}
               onClick={() => setSelectedStep(step)}
             >
@@ -66,7 +67,7 @@ const LandingTutorials = () => {
           ))}
         </ul>
         <div className="m-8 py-8">
-          <ul className="flex justify-between">
+          <ul className="hidden lg:flex justify-between">
             {steps.map((step, index) => (
               <li
                 key={`tutorial-step-${index}`}
