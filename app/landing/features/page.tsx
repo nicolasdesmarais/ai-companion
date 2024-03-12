@@ -22,8 +22,8 @@ const LandingFeatures = () => {
       </div>
 
       <div className="flex flex-col items-center mt-20 mb-12 mx-4">
-        <div className="flex flex-col md:flex-row">
-          <div className="md:w-[460px] gap-8 flex flex-col">
+        <div className="flex flex-col-reverse md:flex-row">
+          <div className="md:w-[460px] gap-8 flex flex-col mt-10 md:mt-0">
             <div>Create</div>
             <div className="text-3xl font-extrabold md:w-[300px]">
               Custom AI apps, created in minutes
@@ -49,7 +49,7 @@ const LandingFeatures = () => {
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
           </div>
-          <div className="md:bg-gradient1 flex justify-center items-center md:p-16 md:w-[560px] md:w-[524px] md:ml-20 mt-10 md:mt-0">
+          <div className="md:bg-gradient1 flex justify-center items-center md:p-16 md:w-[560px] md:w-[524px] md:ml-20">
             <Image
               src="/datasources_screenshot.jpg"
               alt="AI Data Source Screenshot"
@@ -102,8 +102,8 @@ const LandingFeatures = () => {
       </div>
 
       <div className="flex flex-col items-center mt-20 mb-12 mx-4">
-        <div className="flex flex-col md:flex-row">
-          <div className="md:w-[460px] gap-8 flex flex-col">
+        <div className="flex flex-col-reverse md:flex-row">
+          <div className="md:w-[460px] gap-8 flex flex-col mt-10 md:mt-0">
             <div>Share</div>
             <div className="text-3xl font-extrabold md:w-[300px]">
               Share apps with confidence
@@ -130,7 +130,7 @@ const LandingFeatures = () => {
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
           </div>
-          <div className="md:bg-gradient2 flex items-center md:p-16 md:w-[560px] md:w-[524px] md:ml-20 justify-center mt-10 md:mt-0">
+          <div className="md:bg-gradient2 flex items-center md:p-16 md:w-[560px] md:w-[524px] md:ml-20 justify-center">
             <Image
               src="/datasources_screenshot.jpg"
               alt="AI Data Source Screenshot"
@@ -182,11 +182,11 @@ const LandingFeatures = () => {
           create. You can also create your own model with the help from our
           partner, Ivado Labs.
         </div>
-        <div className="flex gap-20">
-          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 flex-col md:flex-row">
+          <div className="bg-navylight shadow-lg flex items-center w-64 justify-center h-20">
             <Image src="/meta.png" alt="Meta Logo" width="131" height="51" />
           </div>
-          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
+          <div className="bg-navylight shadow-lg flex items-center w-64 justify-center h-20">
             <Image
               src="/anthropic.png"
               alt="Anthropic Logo"
@@ -194,7 +194,7 @@ const LandingFeatures = () => {
               height="21"
             />
           </div>
-          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
+          <div className="bg-navylight shadow-lg flex items-center w-64 justify-center h-20">
             <Image
               src="/openai.png"
               alt="OpenAI Logo"
@@ -202,7 +202,7 @@ const LandingFeatures = () => {
               height="39"
             />
           </div>
-          <div className="bg-navylight px-8 py-4 shadow-lg flex items-center">
+          <div className="bg-navylight shadow-lg flex items-center w-64 justify-center h-20">
             <Image
               src="/cohere.png"
               alt="Cohere Logo"
