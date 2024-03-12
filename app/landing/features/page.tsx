@@ -93,7 +93,7 @@ const LandingFeatures = () => {
                 gain new insights, or challenge your assumptions..
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 text-royal">
+            <Link href="/public" className="py-2 text-royal">
               Start using
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
@@ -167,7 +167,7 @@ const LandingFeatures = () => {
                 based on keywords.
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 mt-20 text-royal">
+            <Link href="/public" className="py-2 mt-20 text-royal">
               Browse catalog
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
