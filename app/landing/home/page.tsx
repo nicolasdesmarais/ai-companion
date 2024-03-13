@@ -92,7 +92,7 @@ const LandingHome = () => {
                 into your business.
               </div>
             </div>
-            <div className="bg-navy text-white px-8 py-16 drop-shadow-lg">
+            <div className="bg-navy text-white px-8 py-16 drop-shadow-lg relative">
               <div className="absolute top-0 right-0">
                 <svg
                   width="45"
