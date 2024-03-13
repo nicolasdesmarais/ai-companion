@@ -71,6 +71,9 @@ export class ApifyAdapter {
   }
 
   private getWebScraperInput(url: string) {
+    const urlObj = new URL(url);
+    const basePath = urlObj.href.substring(0, urlObj.href.lastIndexOf("/"));
+
     return {
       runMode: runMode,
       startUrls: [
@@ -79,6 +82,12 @@ export class ApifyAdapter {
         },
       ],
       keepUrlFragments: true,
+      linkSelector: "a[href]",
+      globs: [
+        {
+          glob: `${basePath}/**/*`,
+        },
+      ],
       excludes: [
         {
           glob: "/**/*.{png,jpg,jpeg,pdf}",
@@ -91,37 +100,6 @@ export class ApifyAdapter {
           const { $ } = context;
           const url = context.request.url;
           const html = $.html();
-
-          const originalUrlObj = new URL(url);
-          const originalDomain = originalUrlObj.hostname;
-
-          // Correctly resolve the base path for relative URLs
-          let basePath = originalUrlObj.href.substring(
-            0,
-            originalUrlObj.href.lastIndexOf("/") + 1
-          );
-
-          const hrefs = $("a[href]")
-            .map((_: any, el: any) => $(el).attr("href"))
-            .get();
-
-          for (const href of hrefs) {
-            if (href) {
-              let resolvedUrl;
-              if (href.startsWith("/")) {
-                // Root-relative URL
-                resolvedUrl = `${originalUrlObj.protocol}//${originalUrlObj.host}${href}`;
-              } else {
-                // Document-relative URL, resolve against the basePath
-                resolvedUrl = new URL(href, basePath).href;
-              }
-
-              const hrefObj = new URL(resolvedUrl);
-              if (hrefObj.hostname === originalDomain && hrefObj.href !== url) {
-                context.enqueueRequest({ url: hrefObj.href });
-              }
-            }
-          }
 
           return {
             url,
