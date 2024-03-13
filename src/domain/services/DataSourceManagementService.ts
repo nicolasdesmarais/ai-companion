@@ -1164,6 +1164,25 @@ export class DataSourceManagementService {
       );
     }
   }
+
+  public async updateDataSourceData(datasourceId: string, newData: any) {
+    const dataSource = await this.dataSourceRepository.getById(datasourceId);
+    const existingData = dataSource.data;
+
+    let updatedData;
+    if (existingData) {
+      updatedData = {
+        ...existingData,
+        ...newData,
+      };
+    } else {
+      updatedData = newData;
+    }
+
+    return this.dataSourceRepository.updateDataSource(datasourceId, {
+      data: updatedData,
+    });
+  }
 }
 
 const dataSourceRepository = new DataSourceRepositoryImpl();

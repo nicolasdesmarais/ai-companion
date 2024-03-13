@@ -1,5 +1,9 @@
-import { ActorStartOptions, ApifyClient } from "apify-client";
+import { FileStorageService } from "@/src/domain/services/FileStorageService";
+import { htmlToMarkdown } from "@/src/lib/htmlUtils";
+import { ActorRun, ActorStartOptions, ApifyClient } from "apify-client";
+import { DataSourceItem } from "../types/DataSourceTypes";
 import { KnowledgeIndexingResultStatus } from "../types/KnowlegeIndexingResult";
+import { WebUrlMetadata } from "./types/WebUrlMetadata";
 
 const client = new ApifyClient({
   token: process.env.APIFY_TOKEN,
@@ -12,14 +16,22 @@ const webhookSecret = process.env.APIFY_WEBHOOK_SECRET;
 
 const failedStatuses = ["FAILED", "ABORTING", "ABORTED"];
 const partialStatuses = ["TIMING-OUT", "TIMED-OUT"];
+const succeededStatus = ["SUCCEEDED"];
+
+export interface ActorRunResult {
+  status: ActorRunStatus;
+  items: DataSourceItem[];
+}
+
+export enum ActorRunStatus {
+  INDEXING,
+  PARTIALLY_COMPLETED,
+  COMPLETED,
+  FAILED,
+}
 
 export class ApifyAdapter {
-  async startUrlIndexing(
-    orgId: string,
-    dataSourceId: string,
-    knowledgeId: string,
-    url: string
-  ) {
+  async startUrlIndexing(orgId: string, dataSourceId: string, url: string) {
     if (!webScraperActorId) {
       throw new Error("APIFY_WEB_SCRAPER_ACTOR_ID is not set");
     }
@@ -32,7 +44,7 @@ export class ApifyAdapter {
       .actor(webScraperActorId)
       .start(
         this.getWebScraperInput(url),
-        this.getActorStartOptions(orgId, dataSourceId, knowledgeId)
+        this.getActorStartOptions(orgId, dataSourceId)
       );
 
     return actorRun.id;
@@ -40,8 +52,7 @@ export class ApifyAdapter {
 
   private getActorStartOptions(
     orgId: string,
-    dataSourceId: string,
-    knowledgeId: string
+    dataSourceId: string
   ): ActorStartOptions {
     return {
       timeout: this.getActorTimeout(),
@@ -62,8 +73,7 @@ export class ApifyAdapter {
             "eventType": {{eventType}},
             "eventData": {{eventData}},
             "orgId" : "${orgId}",
-            "dataSourceId": "${dataSourceId}",
-            "knowledgeId": "${knowledgeId}"
+            "dataSourceId": "${dataSourceId}"
         }`,
         },
       ],
@@ -124,6 +134,68 @@ export class ApifyAdapter {
     };
   }
 
+  public async getActorRunBatch(
+    actorRunId: string,
+    offset: number,
+    limit: number
+  ): Promise<ActorRunResult> {
+    const actorRun = await client.run(actorRunId).get();
+    if (!actorRun) {
+      return {
+        status: ActorRunStatus.INDEXING,
+        items: [],
+      };
+    }
+
+    const status = this.getActorRunStatus(actorRun);
+    const dataset = await client.run(actorRunId).dataset();
+    const listItems = await dataset.listItems({
+      offset,
+      limit,
+    });
+
+    const items: DataSourceItem[] = [];
+    for (const item of listItems.items) {
+      const { url, html } = item;
+      if (!url || !html) {
+        continue;
+      }
+      const urlString = url as string;
+      const markdown = htmlToMarkdown(item.html as string);
+      const filename = `${urlString}.md`;
+      const contentBlobUrl = await FileStorageService.put(filename, markdown);
+      const metadata = { indexingRunId: actorRunId } as WebUrlMetadata;
+      items.push({
+        name: urlString,
+        uniqueId: urlString,
+        originalContent: {
+          contentBlobUrl,
+          mimeType: "text/markdown",
+          filename,
+        },
+        metadata,
+      });
+    }
+
+    return {
+      status,
+      items,
+    };
+  }
+
+  private getActorRunStatus(actorRun: ActorRun) {
+    if (failedStatuses.includes(actorRun.status)) {
+      return ActorRunStatus.FAILED;
+    }
+    if (partialStatuses.includes(actorRun.status)) {
+      return ActorRunStatus.PARTIALLY_COMPLETED;
+    }
+    if (succeededStatus.includes(actorRun.status)) {
+      return ActorRunStatus.COMPLETED;
+    }
+    return ActorRunStatus.INDEXING;
+  }
+
   public async getActorRunResult(actorRunId: string) {
     let result: {
       status: KnowledgeIndexingResultStatus;
@@ -150,11 +222,12 @@ export class ApifyAdapter {
     }
 
     const dataset = await client.run(actorRunId).dataset();
+    client.run(actorRunId).requestQueue();
     const listItems = await dataset.listItems();
+
     const items = listItems.items.map((item) => {
       return {
-        pageTitle: item.pageTitle,
-        allText: item.allText,
+        html: item.html,
       };
     });
 

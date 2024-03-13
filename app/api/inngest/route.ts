@@ -1,4 +1,7 @@
-import { onApifyWebhookReceived } from "@/src/adapter-in/inngest/apify-workflows";
+import {
+  onApifyActorRunStarted,
+  onApifyWebhookReceived,
+} from "@/src/adapter-in/inngest/apify-workflows";
 import { clerkWebhookReceived } from "@/src/adapter-in/inngest/clerk-workflows";
 import {
   deleteBlobStorage,
@@ -45,6 +48,7 @@ export const { GET, POST, PUT } = serve({
     clerkWebhookReceived,
     deleteUnusedKnowledges,
     onApifyWebhookReceived,
+    onApifyActorRunStarted,
     deleteBlobStorage,
     deleteRelatedKnowledgeInstances,
     deleteVectorDBStorage,

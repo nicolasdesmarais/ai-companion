@@ -1,3 +1,8 @@
+import {
+  ApifyActorRunStartedPayload,
+  ApifyEvent,
+} from "@/src/adapter-in/inngest/apify-workflows";
+import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import { ApifyWebhookEvent } from "@/src/domain/models/ApifyWebhookEvent";
 import { KnowledgeDto } from "@/src/domain/models/DataSources";
@@ -29,15 +34,25 @@ export class WebUrlsDataSourceAdapter
     data: any
   ): Promise<DataSourceItemList> {
     const input = data as WebUrlDataSourceInput;
-    const result: DataSourceItemList = {
-      items: [
-        {
-          name: input.url,
-          uniqueId: input.url,
-        },
-      ],
+    const actorRunId = await apifyAdapter.startUrlIndexing(
+      orgId,
+      dataSourceId,
+      input.url
+    );
+    if (!actorRunId) {
+      throw new Error("Failed to start actor run");
+    }
+
+    const runStartedEventPayload: ApifyActorRunStartedPayload = {
+      actorRunId,
+      dataSourceId,
     };
-    return result;
+    await publishEvent(
+      ApifyEvent.APIFY_ACTOR_RUN_STARTED,
+      runStartedEventPayload
+    );
+
+    return { items: [] };
   }
 
   public async retrieveKnowledgeContent(
@@ -48,26 +63,27 @@ export class WebUrlsDataSourceAdapter
     data: any
   ): Promise<RetrieveContentAdapterResponse> {
     const input = data as WebUrlDataSourceInput;
-    const actorRunId = await apifyAdapter.startUrlIndexing(
-      orgId,
-      dataSourceId,
-      knowledge.id,
-      input.url
-    );
+    // const actorRunId = await apifyAdapter.startUrlIndexing(
+    //   orgId,
+    //   dataSourceId,
+    //   knowledge.id,
+    //   input.url
+    // );
 
-    if (!actorRunId) {
-      return {
-        status: RetrieveContentResponseStatus.FAILED,
-      };
-    }
+    // if (!actorRunId) {
+    //   return {
+    //     status: RetrieveContentResponseStatus.FAILED,
+    //   };
+    // }
 
-    const metadata: WebUrlMetadata = {
-      indexingRunId: actorRunId,
-    };
-    return {
-      status: RetrieveContentResponseStatus.PENDING,
-      metadata,
-    };
+    // const metadata: WebUrlMetadata = {
+    //   indexingRunId: actorRunId,
+    // };
+    // return {
+    //   status: RetrieveContentResponseStatus.PENDING,
+    //   metadata,
+    // };
+    return { status: RetrieveContentResponseStatus.PENDING, metadata: {} };
   }
 
   public shouldReindexKnowledge(

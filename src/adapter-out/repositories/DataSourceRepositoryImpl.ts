@@ -359,4 +359,24 @@ export class DataSourceRepositoryImpl implements DataSourceRepository {
 
     return dataSourceKnowledge?.dataSourceId ?? null;
   }
+
+  public async updateDataSourceData(
+    datasourceId: string,
+    newData: any
+  ): Promise<DataSourceDto> {
+    const dataSource = await this.getById(datasourceId);
+    const existingData = dataSource.data;
+
+    let updatedData;
+    if (existingData) {
+      updatedData = {
+        ...existingData,
+        ...newData,
+      };
+    } else {
+      updatedData = newData;
+    }
+
+    return this.updateDataSource(datasourceId, { data: updatedData });
+  }
 }
