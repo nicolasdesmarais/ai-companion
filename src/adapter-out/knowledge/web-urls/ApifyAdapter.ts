@@ -81,9 +81,6 @@ export class ApifyAdapter {
   }
 
   private getWebScraperInput(url: string) {
-    const urlObj = new URL(url);
-    const basePath = urlObj.href.substring(0, urlObj.href.lastIndexOf("/"));
-
     return {
       runMode: runMode,
       startUrls: [
@@ -92,12 +89,6 @@ export class ApifyAdapter {
         },
       ],
       keepUrlFragments: true,
-      linkSelector: "a[href]",
-      globs: [
-        {
-          glob: `${basePath}/**/*`,
-        },
-      ],
       excludes: [
         {
           glob: "/**/*.{png,jpg,jpeg,pdf}",
@@ -110,6 +101,45 @@ export class ApifyAdapter {
           const { $ } = context;
           const url = context.request.url;
           const html = $.html();
+
+          const originalUrlObj = new URL(url);
+
+          // Extract the base path without the query or hash
+          let basePath = originalUrlObj.href.substring(
+            0,
+            originalUrlObj.href.lastIndexOf("/") + 1
+          );
+
+          const hrefs = $("a[href]")
+            .map((_: any, el: any) => $(el).attr("href"))
+            .get();
+
+          for (const href of hrefs) {
+            if (href && !href.startsWith("#")) {
+              // Exclude anchor URLs
+              let resolvedUrl;
+              if (href.startsWith("/")) {
+                // Root-relative URL
+                resolvedUrl = `${originalUrlObj.protocol}//${originalUrlObj.host}${href}`;
+              } else {
+                // Document-relative URL, resolve against the basePath
+                resolvedUrl = new URL(
+                  href,
+                  `${originalUrlObj.origin}${basePath}`
+                ).href;
+              }
+
+              const resolvedUrlObj = new URL(resolvedUrl);
+
+              // Ensure same base path and exclude the exact same URL
+              if (
+                resolvedUrlObj.href.startsWith(basePath) &&
+                resolvedUrlObj.href !== url
+              ) {
+                context.enqueueRequest({ url: resolvedUrlObj.href });
+              }
+            }
+          }
 
           return {
             url,
