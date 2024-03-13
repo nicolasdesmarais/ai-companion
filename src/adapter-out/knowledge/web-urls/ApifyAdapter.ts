@@ -104,7 +104,6 @@ export class ApifyAdapter {
           const hrefs = $("a[href]")
             .map((_: any, el: any) => $(el).attr("href"))
             .get();
-          console.log("hrefs: " + hrefs);
 
           for (const href of hrefs) {
             if (href) {
