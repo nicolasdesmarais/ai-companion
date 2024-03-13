@@ -116,9 +116,18 @@ body,
 }
 
 
+
+
 .unleash-gradient {
   background: white;
-  background: linear-gradient(75deg, rgba(8,17,64,1) 0%, rgb(251, 252, 253) 35%, rgba(250,0,48,0.8) 100%); 
+  background-image: none;
+  background: linear-gradient(60deg, rgba(8,17,64,1) 0%, rgb(251, 252, 253) 35%, rgba(250,0,48,0.8) 100%); 
+}
+
+@media (min-width: 1024px) and (max-width: 1935px) {
+.unleash-gradient {
+  background-image: url(/unleash-bg.png);
+}
 }
 
 .teaser-blur {
