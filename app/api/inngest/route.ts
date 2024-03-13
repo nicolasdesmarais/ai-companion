@@ -16,7 +16,6 @@ import {
   onKnowledgeInitialized,
   onKnowledgeRetryRequested,
   refreshDataSources,
-  retryFailedKnowledge,
 } from "@/src/adapter-in/inngest/datasource-workflows";
 import { googleDriveFolderScanInitiated } from "@/src/adapter-in/inngest/google-drive-workflows";
 import { onedriveFolderScanInitiated } from "@/src/adapter-in/inngest/onedrive-workflows";
