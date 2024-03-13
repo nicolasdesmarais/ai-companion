@@ -48,6 +48,5 @@ export const { GET, POST, PUT } = serve({
     deleteBlobStorage,
     deleteRelatedKnowledgeInstances,
     deleteVectorDBStorage,
-    retryFailedKnowledge,
   ],
 });
