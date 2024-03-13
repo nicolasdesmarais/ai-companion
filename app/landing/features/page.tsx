@@ -60,7 +60,7 @@ const LandingFeatures = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-20 mb-12 mx-4">
+      <div className="flex flex-col items-center my-12 py-16 px-4 bg-[#F8F8F8]">
         <div className="flex flex-col lg:flex-row">
           <div className="lg:bg-gradient2 flex items-center lg:p-16 lg:w-[560px] lg:w-[524px] justify-center">
             <Image
@@ -141,7 +141,7 @@ const LandingFeatures = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-20 mb-12 mx-4">
+      <div className="flex flex-col items-center my-12 py-16 px-4 bg-[#F8F8F8]">
         <div className="flex flex-col lg:flex-row">
           <div className="lg:bg-gradient1 flex items-center lg:p-16 lg:w-[560px] lg:w-[524px] justify-center">
             <Image
