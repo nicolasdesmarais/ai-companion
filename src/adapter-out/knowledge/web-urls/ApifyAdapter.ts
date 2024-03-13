@@ -5,7 +5,7 @@ const client = new ApifyClient({
   token: process.env.APIFY_TOKEN,
 });
 
-const webScraperActorId = process.env.APIFY_WEB_SCRAPER_ACTOR_ID;
+const webScraperActorId = process.env.APIFY_CHEERIO_SCRAPER_ACTOR_ID;
 const runMode = process.env.APIFY_RUN_MODE;
 const webhookUrl = process.env.APIFY_WEBHOOK_URL;
 const webhookSecret = process.env.APIFY_WEBHOOK_SECRET;
@@ -79,12 +79,6 @@ export class ApifyAdapter {
         },
       ],
       keepUrlFragments: true,
-      linkSelector: "a[href]",
-      globs: [
-        {
-          glob: `${url}/**/*`,
-        },
-      ],
       excludes: [
         {
           glob: "/**/*.{png,jpg,jpeg,pdf}",
@@ -94,28 +88,45 @@ export class ApifyAdapter {
         // For a complete list of its properties and functions,
         // see https://apify.com/apify/web-scraper#page-function
         async function pageFunction(context: any) {
-          const $ = context.jQuery;
-          const pageTitle = $("title").first().text();
+          const { $ } = context;
+          const url = context.request.url;
+          const html = $.html();
 
-          // Get all text from meaningful elements
-          let allText = "";
-          $("h1, h2, h3, h4, h5, h6, p, a, li, span").each(
-            (_: any, element: HTMLElement) => {
-              allText += $(element).text() + "\n"; // Add a newline for separation
+          const originalUrlObj = new URL(url);
+          const originalDomain = originalUrlObj.hostname;
+
+          // Correctly resolve the base path for relative URLs
+          let basePath = originalUrlObj.href.substring(
+            0,
+            originalUrlObj.href.lastIndexOf("/") + 1
+          );
+
+          const hrefs = $("a[href]")
+            .map((_: any, el: any) => $(el).attr("href"))
+            .get();
+          console.log("hrefs: " + hrefs);
+
+          for (const href of hrefs) {
+            if (href) {
+              let resolvedUrl;
+              if (href.startsWith("/")) {
+                // Root-relative URL
+                resolvedUrl = `${originalUrlObj.protocol}//${originalUrlObj.host}${href}`;
+              } else {
+                // Document-relative URL, resolve against the basePath
+                resolvedUrl = new URL(href, basePath).href;
+              }
+
+              const hrefObj = new URL(resolvedUrl);
+              if (hrefObj.hostname === originalDomain && hrefObj.href !== url) {
+                context.enqueueRequest({ url: hrefObj.href });
+              }
             }
-          );
-
-          // Remove extra spaces and newlines
-          allText = allText.replace(/\s\s+/g, " ").trim();
-
-          context.log.info(
-            `URL: ${context.request.url}, TITLE: ${pageTitle}, allText: ${allText}`
-          );
+          }
 
           return {
-            url: context.request.url,
-            pageTitle,
-            allText,
+            url,
+            html,
           };
         },
       injectJQuery: true,
@@ -132,6 +143,7 @@ export class ApifyAdapter {
       pageFunctionTimeoutSecs: 15,
       closeCookieModals: true,
       maxScrollHeightPixels: 5000,
+      ignoreSslErrors: true,
     };
   }
 
