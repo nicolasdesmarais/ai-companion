@@ -574,7 +574,7 @@ export const deleteVectorDBStorage = inngest.createFunction(
 
 export const deleteRelatedKnowledgeInstances = inngest.createFunction(
   { id: "delete-related-knowledge-instances" },
-  { cron: "0 * * * *" },
+  { cron: "0 0 * * *" },
   async ({ step }) => {
     const knowledgeIds = await step.run(
       "find-knowledge-with-related-knowledge-instances",
@@ -597,7 +597,7 @@ export const deleteRelatedKnowledgeInstances = inngest.createFunction(
 
 export const retryFailedKnowledge = inngest.createFunction(
   { id: "retry-failed-knowledge" },
-  { cron: "0 * * * *" },
+  { cron: "0 0 * * *" },
   async ({ step }) => {
     const batchSize = 100;
     const knowledgeIds = await step.run("find-failed-knowledge", async () => {
