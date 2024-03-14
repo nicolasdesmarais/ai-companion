@@ -40,7 +40,7 @@ const LandingFeatures = () => {
       <div className="flex items-center justify-center my-16">
         <div className="lg:w-[1100px] mx-4">
           <h2 className="text-3xl font-bold text-center">User Guides</h2>
-          <div className="grid mt-16 gap-8 grid-cols-3">
+          <div className="grid mt-16 gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             <div className="bg-gradient3 bg-[20%_40%] flex flex-col w-80 px-8 py-16 shadow-lg gap-4 justify-between cursor-pointer">
               <AppdirectSvg className="h-5 w-5" />
               <div className="text-3xl font-bold">Best Practices</div>
@@ -101,7 +101,7 @@ const LandingFeatures = () => {
 
       <LandingFAQ />
 
-      <div className="flex flex-col items-center mt-20 mb-12 gap-8 mx-4">
+      <div className="flex flex-col items-center mt-20 mb-20 gap-8 mx-4 text-center">
         <h2 className="text-3xl font-bold">We&apos;re here to help.</h2>
         <div>
           Email us at{" "}

@@ -151,7 +151,7 @@ const LandingFAQ = ({ className }: Props) => {
         {faqs.map((faq, index) => (
           <div
             key={`faq-${index}`}
-            className="lg:w-[1140px] space-y-4 bg-[#FAF7F7] p-8 my-4"
+            className="w-full lg:w-[1140px] space-y-4 bg-[#FAF7F7] p-8 my-4"
           >
             <div
               className="flex justify-between cursor-pointer"
