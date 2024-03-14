@@ -96,7 +96,7 @@ export class DataSourceManagementService {
     const { dataSource, dataSourceAdapter } =
       await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
 
-    return await dataSourceAdapter.getDataSourceItemList(
+    const dataSourceItemList = await dataSourceAdapter.getDataSourceItemList(
       dataSource.orgId,
       dataSource.ownerUserId,
       dataSourceId,
@@ -104,6 +104,15 @@ export class DataSourceManagementService {
       forRefresh,
       forceRefresh
     );
+
+    if (dataSourceItemList.data) {
+      await this.dataSourceRepository.updateDataSourceData(
+        dataSourceId,
+        dataSourceItemList.data
+      );
+    }
+
+    return dataSourceItemList;
   }
 
   /**
@@ -173,6 +182,7 @@ export class DataSourceManagementService {
       name,
       type,
       uniqueId,
+      parentUniqueId,
       indexStatus,
       documentCount,
       tokenCount,
@@ -189,6 +199,7 @@ export class DataSourceManagementService {
       name,
       type,
       uniqueId,
+      parentUniqueId,
       indexStatus,
       documentCount,
       tokenCount,

@@ -50,6 +50,6 @@ export interface DataSourceRepository {
 
   updateDataSourceData(
     datasourceId: string,
-    metadata: any
+    newData: any
   ): Promise<DataSourceDto>;
 }

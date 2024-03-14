@@ -26,7 +26,10 @@ import {
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResultStatus } from "../types/KnowlegeIndexingResult";
 import apifyAdapter from "./ApifyAdapter";
-import { WebUrlDataSourceInput } from "./types/WebUrlDataSourceInput";
+import {
+  WebUrlDataSourceData,
+  WebUrlDataSourceInput,
+} from "./types/WebUrlDataSourceInput";
 import { WebUrlMetadata } from "./types/WebUrlMetadata";
 
 export class WebUrlsDataSourceAdapter
@@ -77,13 +80,19 @@ export class WebUrlsDataSourceAdapter
     const runStartedEventPayload: ApifyActorRunStartedPayload = {
       actorRunId,
       dataSourceId,
+      rootUrl: url,
     };
     await publishEvent(
       ApifyEvent.APIFY_ACTOR_RUN_STARTED,
       runStartedEventPayload
     );
 
-    return { items: [] };
+    const dataSourceData: WebUrlDataSourceData = {
+      indexingRunId: actorRunId,
+      ...input,
+    };
+
+    return { data: dataSourceData, items: [] };
   }
 
   public async retrieveKnowledgeContent(
@@ -103,6 +112,11 @@ export class WebUrlsDataSourceAdapter
   ): boolean {
     if (knowledge.uniqueId !== item.uniqueId) {
       return true;
+    }
+
+    if (knowledge.uniqueId !== knowledge.parentUniqueId) {
+      // Don't re-index child URLs
+      return false;
     }
 
     const oneWeekAgo = new Date();

@@ -1,4 +1,5 @@
 export interface DataSourceItemList {
+  data?: any;
   items: DataSourceItem[];
 }
 

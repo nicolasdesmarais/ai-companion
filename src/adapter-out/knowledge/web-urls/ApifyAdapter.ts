@@ -44,7 +44,7 @@ export class ApifyAdapter {
       .actor(webScraperActorId)
       .start(
         this.getWebScraperInput(url),
-        this.getActorStartOptions(orgId, dataSourceId)
+        this.getActorStartOptions(orgId, dataSourceId, url)
       );
 
     return actorRun.id;
@@ -52,7 +52,8 @@ export class ApifyAdapter {
 
   private getActorStartOptions(
     orgId: string,
-    dataSourceId: string
+    dataSourceId: string,
+    url: string
   ): ActorStartOptions {
     return {
       timeout: this.getActorTimeout(),
@@ -73,7 +74,8 @@ export class ApifyAdapter {
             "eventType": {{eventType}},
             "eventData": {{eventData}},
             "orgId" : "${orgId}",
-            "dataSourceId": "${dataSourceId}"
+            "dataSourceId": "${dataSourceId}",
+            "rootUrl": "${url}"
         }`,
         },
       ],
@@ -166,6 +168,7 @@ export class ApifyAdapter {
 
   public async getActorRunBatch(
     actorRunId: string,
+    rootUrl: string,
     offset: number,
     limit: number
   ): Promise<ActorRunResult> {
@@ -198,6 +201,7 @@ export class ApifyAdapter {
       items.push({
         name: urlString,
         uniqueId: urlString,
+        parentUniqueId: rootUrl,
         originalContent: {
           contentBlobUrl,
           mimeType: "text/markdown",
