@@ -162,6 +162,7 @@ export class DataSourceManagementService {
             name: item.name,
             type: dataSource.type,
             uniqueId: item.uniqueId,
+            parentUniqueId: item.parentUniqueId,
             indexStatus: KnowledgeIndexStatus.INITIALIZED,
             originalContent: item.originalContent as any,
             metadata: item.metadata,
