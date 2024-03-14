@@ -93,6 +93,19 @@ export class WebUrlsDataSourceAdapter
       return true;
     }
 
+    if (
+      (knowledge.metadata as unknown as WebUrlMetadata)?.indexingRunId ===
+      item.metadata?.indexingRunId
+    ) {
+      // Skip indexing if we have the same indexingRunId
+      return false;
+    }
+
+    if (item.uniqueId !== item.parentUniqueId) {
+      // Reindex if the item is not a root item
+      return true;
+    }
+
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     return !knowledge.lastIndexedAt || knowledge.lastIndexedAt < oneWeekAgo;

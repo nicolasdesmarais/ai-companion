@@ -675,11 +675,17 @@ export class DataSourceManagementService {
       indexStatus = KnowledgeIndexStatus.PARTIALLY_COMPLETED;
     }
 
+    let lastIndexedAt;
+    if (indexStatus) {
+      lastIndexedAt = new Date();
+    }
+
     const updatedKnowledge = await this.knowledgeRepository.update(
       knowledgeId,
       {
         indexPercentage,
         indexStatus,
+        lastIndexedAt
       }
     );
 
