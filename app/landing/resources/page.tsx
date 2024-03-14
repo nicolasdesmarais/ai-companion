@@ -1,3 +1,4 @@
+import LandingFAQ from "@/components/landing-faq";
 import LandingFooter from "@/components/landing-footer";
 import LandingLLM from "@/components/landing-llm";
 import LandingNav from "@/components/landing-nav";
@@ -95,7 +96,10 @@ const LandingFeatures = () => {
           </div>
         </div>
       </div>
+
       <LandingLLM className="bg-[#F8F8F8] py-14" />
+
+      <LandingFAQ />
 
       <LandingFooter />
     </div>
