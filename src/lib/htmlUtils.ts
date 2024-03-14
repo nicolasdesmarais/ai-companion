@@ -8,5 +8,6 @@ export function htmlToMarkdown(html: string): string {
   }
   const $ = cheerio.load(html);
   $("a").removeAttr("href");
+  $("*").removeAttr("src");
   return NodeHtmlMarkdown.translate($.html());
 }
