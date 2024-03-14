@@ -35,7 +35,7 @@ const LandingHome = () => {
           </div>
           <div className="mt-20 shadow-glow">
             <video width="640" height="420" preload="none" autoPlay loop muted>
-              <source src="/create-demo.mp4" type="video/mp4" />
+              <source src="/storyboard.mp4" type="video/mp4" />
             </video>
           </div>
         </div>
