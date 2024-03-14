@@ -10,7 +10,7 @@ const LandingHome = () => {
   return (
     <div className="bg-white flex flex-col text-navy">
       <LandingNav />
-      <div className="max-h-[785px] h-screen overflow-hidden flex flex-col mx-4">
+      <div className=" h-screen overflow-hidden flex flex-col mx-4">
         <div className="flex flex-col md:flex-row justify-center  items-center">
           <div className="mt-24 md:mr-16 md:w-[440px] text-center lg:text-left">
             <h2
@@ -34,7 +34,7 @@ const LandingHome = () => {
             </div>
           </div>
           <div className="mt-20 shadow-glow">
-            <video width="640" height="420" preload="none" autoPlay loop muted>
+            <video width="640" height="360" preload="none" autoPlay loop muted>
               <source src="/storyboard.mp4" type="video/mp4" />
             </video>
           </div>
