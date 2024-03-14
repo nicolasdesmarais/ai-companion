@@ -541,10 +541,10 @@ export class AIService {
       case ListAIsRequestScope.PRIVATE:
         baseWhereCondition = { AND: [{}] };
         baseWhereCondition.AND.push({ visibility: AIVisibility.PRIVATE });
-        baseWhereCondition.AND.push(this.getOwnedByUserCriteria(userId));
+        baseWhereCondition.AND.push(this.getOwnedByUserCriteria(orgId, userId));
         break;
       case ListAIsRequestScope.OWNED:
-        baseWhereCondition = this.getOwnedByUserCriteria(userId);
+        baseWhereCondition = this.getOwnedByUserCriteria(orgId, userId);
         break;
       case ListAIsRequestScope.GROUP:
         baseWhereCondition = this.getUserGroupCriteria(orgId, userId);
@@ -565,7 +565,7 @@ export class AIService {
         break;
       case ListAIsRequestScope.ALL:
         baseWhereCondition = { OR: [{}] };
-        baseWhereCondition.OR.push(this.getOwnedByUserCriteria(userId));
+        baseWhereCondition.OR.push(this.getOwnedByUserCriteria(orgId, userId));
         baseWhereCondition.OR.push(this.getUserGroupCriteria(orgId, userId));
         baseWhereCondition.OR.push(
           this.getSharedWithUserCriteria(orgId, userId)
@@ -581,7 +581,7 @@ export class AIService {
         break;
       case ListAIsRequestScope.INSTANCE_NOT_VISIBLE:
         baseWhereCondition = { OR: [{}] };
-        baseWhereCondition.OR.push(this.geOthersPrivateCriteria(userId));
+        baseWhereCondition.OR.push(this.geOthersPrivateCriteria(orgId, userId));
         baseWhereCondition.OR.push(this.geOthersOrganizationCriteria(orgId));
         baseWhereCondition.OR.push(this.geOthersGroupCriteria(orgId, userId));
         break;
@@ -605,7 +605,7 @@ export class AIService {
             {
               orgId,
               OR: [
-                this.geOthersPrivateCriteria(userId),
+                this.geOthersPrivateCriteria(orgId, userId),
                 this.geOthersOrganizationCriteria(orgId),
                 this.geOthersGroupCriteria(orgId, userId),
               ],
@@ -618,8 +618,8 @@ export class AIService {
     return baseWhereCondition;
   }
 
-  private getOwnedByUserCriteria(userId: string) {
-    return { userId: userId };
+  private getOwnedByUserCriteria(orgId: string, userId: string) {
+    return { orgId, userId };
   }
 
   private getUserGroupCriteria(orgId: string, userId: string) {
@@ -701,10 +701,10 @@ export class AIService {
     };
   }
 
-  private geOthersPrivateCriteria(userId: string) {
+  private geOthersPrivateCriteria(orgId: string, userId: string) {
     return {
       visibility: AIVisibility.PRIVATE,
-      NOT: this.getOwnedByUserCriteria(userId),
+      NOT: this.getOwnedByUserCriteria(orgId, userId),
     };
   }
 
