@@ -550,7 +550,7 @@ export class AIService {
         baseWhereCondition = this.getUserGroupCriteria(orgId, userId);
         break;
       case ListAIsRequestScope.SHARED:
-        baseWhereCondition = this.getSharedWithUserCriteria(userId);
+        baseWhereCondition = this.getSharedWithUserCriteria(orgId, userId);
         break;
       case ListAIsRequestScope.ORGANIZATION:
         baseWhereCondition = {
@@ -567,7 +567,9 @@ export class AIService {
         baseWhereCondition = { OR: [{}] };
         baseWhereCondition.OR.push(this.getOwnedByUserCriteria(userId));
         baseWhereCondition.OR.push(this.getUserGroupCriteria(orgId, userId));
-        baseWhereCondition.OR.push(this.getSharedWithUserCriteria(userId));
+        baseWhereCondition.OR.push(
+          this.getSharedWithUserCriteria(orgId, userId)
+        );
         baseWhereCondition.OR.push(this.getOrganizationCriteria(orgId));
         baseWhereCondition.OR.push(this.getPublicCriteria());
         break;
@@ -648,8 +650,9 @@ export class AIService {
     };
   }
 
-  private getSharedWithUserCriteria(userId: string) {
+  private getSharedWithUserCriteria(orgId: string, userId: string) {
     return {
+      orgId,
       permissions: {
         some: {
           userId: userId,
