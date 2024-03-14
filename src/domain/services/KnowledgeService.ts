@@ -1,4 +1,5 @@
 import { KnowledgeRepositoryImpl } from "@/src/adapter-out/repositories/KnowledgeRepositoryImpl";
+import { DataSourceType } from "@prisma/client";
 import { KnowledgeDto, KnowledgeSummary } from "../models/DataSources";
 import { KnowledgeRepository } from "../ports/outgoing/KnowledgeRepository";
 
@@ -26,6 +27,16 @@ export class KnowledgeService {
   ): Promise<string[]> {
     return await this.knowledgeRepository.findDeletedKnowledgeIdsWithVectorStorage(
       limit
+    );
+  }
+
+  public async findKnowledgeByTypeAndParent(
+    type: DataSourceType,
+    parentUniqueId: string
+  ): Promise<KnowledgeDto[]> {
+    return await this.knowledgeRepository.findByTypeAndParent(
+      type,
+      parentUniqueId
     );
   }
 

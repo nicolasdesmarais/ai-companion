@@ -5,6 +5,7 @@ export interface DataSourceItemList {
 export interface DataSourceItem {
   name: string;
   uniqueId?: string;
+  parentUniqueId?: string;
   originalContent?: KnowledgeOriginalContent;
   metadata?: any;
 }

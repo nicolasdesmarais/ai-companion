@@ -7,7 +7,12 @@ import { BadRequestError } from "@/src/domain/errors/Errors";
 import { ApifyWebhookEvent } from "@/src/domain/models/ApifyWebhookEvent";
 import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import { FileStorageService } from "@/src/domain/services/FileStorageService";
-import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
+import knowledgeService from "@/src/domain/services/KnowledgeService";
+import {
+  DataSourceType,
+  Knowledge,
+  KnowledgeIndexStatus,
+} from "@prisma/client";
 import {
   ContentRetrievingDataSourceAdapter,
   DataSourceAdapter,
@@ -34,10 +39,36 @@ export class WebUrlsDataSourceAdapter
     data: any
   ): Promise<DataSourceItemList> {
     const input = data as WebUrlDataSourceInput;
+    const url = new URL(input.url).href;
+
+    // Check if URL has already been indexed
+    // If it does, return the existing knowledge, along with all knowledge for child URLs
+    const existingKnowledge =
+      await knowledgeService.findKnowledgeByTypeAndParent(
+        DataSourceType.WEB_URL,
+        url
+      );
+
+    if (existingKnowledge.length > 0) {
+      const items: DataSourceItem[] = existingKnowledge.map((knowledge) => {
+        return {
+          name: knowledge.name,
+          uniqueId: knowledge.uniqueId ?? undefined,
+          parentUniqueId: knowledge.parentUniqueId ?? undefined,
+          originalContent: knowledge.originalContent ?? undefined,
+        };
+      });
+
+      return {
+        items,
+      };
+    }
+
+    // If URL has not been indexed, start indexing
     const actorRunId = await apifyAdapter.startUrlIndexing(
       orgId,
       dataSourceId,
-      input.url
+      url
     );
     if (!actorRunId) {
       throw new Error("Failed to start actor run");
@@ -62,28 +93,8 @@ export class WebUrlsDataSourceAdapter
     knowledge: KnowledgeDto,
     data: any
   ): Promise<RetrieveContentAdapterResponse> {
-    const input = data as WebUrlDataSourceInput;
-    // const actorRunId = await apifyAdapter.startUrlIndexing(
-    //   orgId,
-    //   dataSourceId,
-    //   knowledge.id,
-    //   input.url
-    // );
-
-    // if (!actorRunId) {
-    //   return {
-    //     status: RetrieveContentResponseStatus.FAILED,
-    //   };
-    // }
-
-    // const metadata: WebUrlMetadata = {
-    //   indexingRunId: actorRunId,
-    // };
-    // return {
-    //   status: RetrieveContentResponseStatus.PENDING,
-    //   metadata,
-    // };
-    return { status: RetrieveContentResponseStatus.PENDING, metadata: {} };
+    // Method not required for web URLs
+    throw new Error("Method not implemented.");
   }
 
   public shouldReindexKnowledge(
