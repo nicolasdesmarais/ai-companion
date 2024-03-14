@@ -3,10 +3,7 @@ import {
   ApifyEvent,
 } from "@/src/adapter-in/inngest/apify-workflows";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
-import { BadRequestError } from "@/src/domain/errors/Errors";
-import { ApifyWebhookEvent } from "@/src/domain/models/ApifyWebhookEvent";
 import { KnowledgeDto } from "@/src/domain/models/DataSources";
-import { FileStorageService } from "@/src/domain/services/FileStorageService";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import {
   ContentRetrievingDataSourceAdapter,
@@ -19,7 +16,6 @@ import {
   RetrieveContentResponseStatus,
 } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
-import { KnowledgeIndexingResultStatus } from "../types/KnowlegeIndexingResult";
 import apifyAdapter from "./ApifyAdapter";
 import { WebUrlDataSourceInput } from "./types/WebUrlDataSourceInput";
 import { WebUrlMetadata } from "./types/WebUrlMetadata";
@@ -102,47 +98,6 @@ export class WebUrlsDataSourceAdapter
     return !knowledge.lastIndexedAt || knowledge.lastIndexedAt < oneWeekAgo;
   }
 
-  public async retrieveContentFromEvent(
-    knowledge: KnowledgeDto,
-    data: ApifyWebhookEvent
-  ): Promise<RetrieveContentAdapterResponse> {
-    const { actorRunId } = data.eventData;
-    const metadata = knowledge.metadata as unknown as WebUrlMetadata;
-    if (actorRunId !== metadata.indexingRunId) {
-      throw new BadRequestError("Event actorRunId does not match metadata");
-    }
-
-    const result = await apifyAdapter.getActorRunResult(metadata.indexingRunId);
-
-    let status: RetrieveContentResponseStatus;
-    let originalContent;
-    if (
-      result.items &&
-      (result.status === KnowledgeIndexingResultStatus.PARTIAL ||
-        result.status === KnowledgeIndexingResultStatus.SUCCESSFUL)
-    ) {
-      const filename = `${knowledge.name}.json`;
-      const contentBlobUrl = await FileStorageService.put(
-        filename,
-        JSON.stringify(result)
-      );
-      status = RetrieveContentResponseStatus.SUCCESS;
-
-      originalContent = {
-        contentBlobUrl,
-        filename,
-        mimeType: "application/json",
-      };
-    } else {
-      status = RetrieveContentResponseStatus.FAILED;
-    }
-
-    return {
-      status,
-      originalContent,
-    };
-  }
-
   public async pollKnowledgeIndexingStatus(
     knowledge: Knowledge
   ): Promise<IndexKnowledgeResponse> {
@@ -153,7 +108,6 @@ export class WebUrlsDataSourceAdapter
       };
     }
 
-    // return this.getActorRunResult(knowledge, metadata);
     //TODO: Re-implement
     return {
       indexStatus: KnowledgeIndexStatus.INDEXING,

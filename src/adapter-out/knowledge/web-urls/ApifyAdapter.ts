@@ -1,7 +1,6 @@
 import { FileStorageService } from "@/src/domain/services/FileStorageService";
 import { htmlToMarkdown } from "@/src/lib/htmlUtils";
 import { ActorRun, ActorStartOptions, ApifyClient } from "apify-client";
-import { KnowledgeIndexingResultStatus } from "../types/KnowlegeIndexingResult";
 
 const client = new ApifyClient({
   token: process.env.APIFY_TOKEN,
@@ -29,10 +28,10 @@ export interface ActorRunItem {
 }
 
 export enum ActorRunStatus {
-  INDEXING,
-  PARTIALLY_COMPLETED,
-  COMPLETED,
-  FAILED,
+  INDEXING = "INDEXING",
+  PARTIALLY_COMPLETED = "PARTIALLY_COMPLETED",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
 }
 
 export class ApifyAdapter {
@@ -235,48 +234,6 @@ export class ApifyAdapter {
       return ActorRunStatus.COMPLETED;
     }
     return ActorRunStatus.INDEXING;
-  }
-
-  public async getActorRunResult(actorRunId: string) {
-    let result: {
-      status: KnowledgeIndexingResultStatus;
-      items: any[];
-    };
-
-    const actorRun = await client.run(actorRunId).get();
-    if (!actorRun) {
-      result = {
-        status: KnowledgeIndexingResultStatus.FAILED,
-        items: [],
-      };
-
-      return result;
-    }
-
-    let status;
-    if (failedStatuses.includes(actorRun.status)) {
-      status = KnowledgeIndexingResultStatus.FAILED;
-    } else if (partialStatuses.includes(actorRun.status)) {
-      status = KnowledgeIndexingResultStatus.PARTIAL;
-    } else {
-      status = KnowledgeIndexingResultStatus.SUCCESSFUL;
-    }
-
-    const dataset = await client.run(actorRunId).dataset();
-    client.run(actorRunId).requestQueue();
-    const listItems = await dataset.listItems();
-
-    const items = listItems.items.map((item) => {
-      return {
-        html: item.html,
-      };
-    });
-
-    result = {
-      status,
-      items,
-    };
-    return result;
   }
 
   private getMaxPagesPerCrawl(): number {
