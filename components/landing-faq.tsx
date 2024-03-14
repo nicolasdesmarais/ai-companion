@@ -1,4 +1,7 @@
+"use client";
 import { cn } from "@/src/lib/utils";
+import { Minus, Plus } from "lucide-react";
+import { useState } from "react";
 
 const faqs = [
   {
@@ -31,7 +34,7 @@ const faqs = [
         Model, such as GPT or Cohere) unlike other AI platforms. You choose your
         app&apos;s LLM based on what is most suited to your application needs,
         and you can modify it at any time. We currently support:
-        <ul>
+        <ul className="list-disc m-4">
           <li>GPT-4 (32K Context)</li>
           <li>GPT-3.5 (16K Context)</li>
           <li>GPT-4 Turbo w/Assistant API</li>
@@ -47,7 +50,7 @@ const faqs = [
     answer: (
       <div>
         It&apos;s as easy as 1, 2, 3.
-        <ol>
+        <ol className="list-decimal m-4">
           <li>
             Sign up to be a creator—Join an existing organization or create your
             own
@@ -96,7 +99,7 @@ const faqs = [
         Retrieval-augmented generation (RAG) is a technique that enhances the
         accuracy and reliability of generative AI models. Every AI you create
         with AppDirect incorporates RAG to ensure the integrity and relevance of
-        your app’s responses.
+        your app&apos;s responses.
       </div>
     ),
   },
@@ -128,6 +131,14 @@ interface Props {
 }
 
 const LandingFAQ = ({ className }: Props) => {
+  const [visible, setVisible] = useState([true]);
+  const toggle = (index: number) => {
+    setVisible((prev) => {
+      const newVisible = [...prev];
+      newVisible[index] = !newVisible[index];
+      return newVisible;
+    });
+  };
   return (
     <div
       className={cn(
@@ -142,8 +153,18 @@ const LandingFAQ = ({ className }: Props) => {
             key={`faq-${index}`}
             className="lg:w-[1140px] space-y-4 bg-[#FAF7F7] p-8 my-4"
           >
-            <h3 className="text-xl font-bold">{faq.question}</h3>
-            <div>{faq.answer}</div>
+            <div
+              className="flex justify-between cursor-pointer"
+              onClick={() => toggle(index)}
+            >
+              <h3 className="text-xl font-bold">{faq.question}</h3>
+              {visible[index] ? (
+                <Minus className="w-6 h-6" />
+              ) : (
+                <Plus className="w-6 h-6" />
+              )}
+            </div>
+            {visible[index] && <div>{faq.answer}</div>}
           </div>
         ))}
       </div>
