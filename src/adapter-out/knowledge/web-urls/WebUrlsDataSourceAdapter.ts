@@ -7,12 +7,7 @@ import { BadRequestError } from "@/src/domain/errors/Errors";
 import { ApifyWebhookEvent } from "@/src/domain/models/ApifyWebhookEvent";
 import { KnowledgeDto } from "@/src/domain/models/DataSources";
 import { FileStorageService } from "@/src/domain/services/FileStorageService";
-import knowledgeService from "@/src/domain/services/KnowledgeService";
-import {
-  DataSourceType,
-  Knowledge,
-  KnowledgeIndexStatus,
-} from "@prisma/client";
+import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import {
   ContentRetrievingDataSourceAdapter,
   DataSourceAdapter,
@@ -26,10 +21,7 @@ import {
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResultStatus } from "../types/KnowlegeIndexingResult";
 import apifyAdapter from "./ApifyAdapter";
-import {
-  WebUrlDataSourceData,
-  WebUrlDataSourceInput,
-} from "./types/WebUrlDataSourceInput";
+import { WebUrlDataSourceInput } from "./types/WebUrlDataSourceInput";
 import { WebUrlMetadata } from "./types/WebUrlMetadata";
 
 export class WebUrlsDataSourceAdapter
@@ -42,57 +34,16 @@ export class WebUrlsDataSourceAdapter
     data: any
   ): Promise<DataSourceItemList> {
     const input = data as WebUrlDataSourceInput;
-    const url = new URL(input.url).href;
-
-    // Check if URL has already been indexed
-    // If it does, return the existing knowledge, along with all knowledge for child URLs
-    const existingKnowledge =
-      await knowledgeService.findKnowledgeByTypeAndParent(
-        DataSourceType.WEB_URL,
-        url
-      );
-
-    if (existingKnowledge.length > 0) {
-      const items: DataSourceItem[] = existingKnowledge.map((knowledge) => {
-        return {
-          name: knowledge.name,
-          uniqueId: knowledge.uniqueId ?? undefined,
-          parentUniqueId: knowledge.parentUniqueId ?? undefined,
-          originalContent: knowledge.originalContent ?? undefined,
-        };
-      });
-
-      return {
-        items,
-      };
-    }
-
-    // If URL has not been indexed, start indexing
-    const actorRunId = await apifyAdapter.startUrlIndexing(
-      orgId,
-      dataSourceId,
-      url
-    );
-    if (!actorRunId) {
-      throw new Error("Failed to start actor run");
-    }
-
-    const runStartedEventPayload: ApifyActorRunStartedPayload = {
-      actorRunId,
-      dataSourceId,
-      rootUrl: url,
+    const result: DataSourceItemList = {
+      items: [
+        {
+          name: input.url,
+          uniqueId: input.url,
+          parentUniqueId: input.url,
+        },
+      ],
     };
-    await publishEvent(
-      ApifyEvent.APIFY_ACTOR_RUN_STARTED,
-      runStartedEventPayload
-    );
-
-    const dataSourceData: WebUrlDataSourceData = {
-      indexingRunId: actorRunId,
-      ...input,
-    };
-
-    return { data: dataSourceData, items: [] };
+    return result;
   }
 
   public async retrieveKnowledgeContent(
@@ -102,8 +53,40 @@ export class WebUrlsDataSourceAdapter
     knowledge: KnowledgeDto,
     data: any
   ): Promise<RetrieveContentAdapterResponse> {
-    // Method not required for web URLs
-    throw new Error("Method not implemented.");
+    const url = knowledge.name;
+    const knowledgeId = knowledge.id;
+
+    const actorRunId = await apifyAdapter.startUrlIndexing(
+      orgId,
+      dataSourceId,
+      knowledgeId,
+      url
+    );
+
+    if (!actorRunId) {
+      return {
+        status: RetrieveContentResponseStatus.FAILED,
+      };
+    }
+
+    const runStartedEventPayload: ApifyActorRunStartedPayload = {
+      actorRunId,
+      dataSourceId,
+      knowledgeId,
+      rootUrl: url,
+    };
+    await publishEvent(
+      ApifyEvent.APIFY_ACTOR_RUN_STARTED,
+      runStartedEventPayload
+    );
+
+    const metadata: WebUrlMetadata = {
+      indexingRunId: actorRunId,
+    };
+    return {
+      status: RetrieveContentResponseStatus.PENDING,
+      metadata,
+    };
   }
 
   public shouldReindexKnowledge(
@@ -112,11 +95,6 @@ export class WebUrlsDataSourceAdapter
   ): boolean {
     if (knowledge.uniqueId !== item.uniqueId) {
       return true;
-    }
-
-    if (knowledge.uniqueId !== knowledge.parentUniqueId) {
-      // Don't re-index child URLs
-      return false;
     }
 
     const oneWeekAgo = new Date();

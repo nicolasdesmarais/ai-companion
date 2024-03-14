@@ -1,9 +1,7 @@
 import { FileStorageService } from "@/src/domain/services/FileStorageService";
 import { htmlToMarkdown } from "@/src/lib/htmlUtils";
 import { ActorRun, ActorStartOptions, ApifyClient } from "apify-client";
-import { DataSourceItem } from "../types/DataSourceTypes";
 import { KnowledgeIndexingResultStatus } from "../types/KnowlegeIndexingResult";
-import { WebUrlMetadata } from "./types/WebUrlMetadata";
 
 const client = new ApifyClient({
   token: process.env.APIFY_TOKEN,
@@ -20,7 +18,14 @@ const succeededStatus = ["SUCCEEDED"];
 
 export interface ActorRunResult {
   status: ActorRunStatus;
-  items: DataSourceItem[];
+  items: ActorRunItem[];
+}
+
+export interface ActorRunItem {
+  url: string;
+  contentBlobUrl: string;
+  filename: string;
+  mimeType: string;
 }
 
 export enum ActorRunStatus {
@@ -31,7 +36,12 @@ export enum ActorRunStatus {
 }
 
 export class ApifyAdapter {
-  async startUrlIndexing(orgId: string, dataSourceId: string, url: string) {
+  async startUrlIndexing(
+    orgId: string,
+    dataSourceId: string,
+    knowledgeId: string,
+    url: string
+  ) {
     if (!webScraperActorId) {
       throw new Error("APIFY_WEB_SCRAPER_ACTOR_ID is not set");
     }
@@ -44,7 +54,7 @@ export class ApifyAdapter {
       .actor(webScraperActorId)
       .start(
         this.getWebScraperInput(url),
-        this.getActorStartOptions(orgId, dataSourceId, url)
+        this.getActorStartOptions(orgId, dataSourceId, knowledgeId, url)
       );
 
     return actorRun.id;
@@ -53,6 +63,7 @@ export class ApifyAdapter {
   private getActorStartOptions(
     orgId: string,
     dataSourceId: string,
+    knowledgeId: string,
     url: string
   ): ActorStartOptions {
     return {
@@ -75,6 +86,7 @@ export class ApifyAdapter {
             "eventData": {{eventData}},
             "orgId" : "${orgId}",
             "dataSourceId": "${dataSourceId}",
+            "knowledgeId": "${knowledgeId}",
             "rootUrl": "${url}"
         }`,
         },
@@ -187,7 +199,7 @@ export class ApifyAdapter {
       limit,
     });
 
-    const items: DataSourceItem[] = [];
+    const items: ActorRunItem[] = [];
     for (const item of listItems.items) {
       const { url, html } = item;
       if (!url || !html) {
@@ -197,17 +209,12 @@ export class ApifyAdapter {
       const markdown = htmlToMarkdown(item.html as string);
       const filename = `${urlString}.md`;
       const contentBlobUrl = await FileStorageService.put(filename, markdown);
-      const metadata = { indexingRunId: actorRunId } as WebUrlMetadata;
+
       items.push({
-        name: urlString,
-        uniqueId: urlString,
-        parentUniqueId: rootUrl,
-        originalContent: {
-          contentBlobUrl,
-          mimeType: "text/markdown",
-          filename,
-        },
-        metadata,
+        url: urlString,
+        contentBlobUrl,
+        filename,
+        mimeType: "text/markdown",
       });
     }
 

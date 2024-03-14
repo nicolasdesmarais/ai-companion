@@ -1,17 +1,21 @@
+import { DataSourceItem } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import apifyAdapter, {
+  ActorRunItem,
   ActorRunResult,
   ActorRunStatus,
 } from "@/src/adapter-out/knowledge/web-urls/ApifyAdapter";
+import { WebUrlMetadata } from "@/src/adapter-out/knowledge/web-urls/types/WebUrlMetadata";
 import {
   DataSourceItemListReceivedPayload,
   DomainEvent,
+  KnowledgeContentReceivedPayload,
 } from "@/src/domain/events/domain-event";
 import { ApifyWebhookEvent } from "@/src/domain/models/ApifyWebhookEvent";
 import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
 import dataSourceViewingService from "@/src/domain/services/DataSourceViewingService";
 import { inngest } from "./client";
 
-const LIST_RESULTS_BATCH_SIZE = 100;
+const LIST_RESULTS_BATCH_SIZE = 10;
 
 export enum ApifyEvent {
   APIFY_ACTOR_RUN_STARTED = "apify.actor.run.started",
@@ -21,6 +25,7 @@ export enum ApifyEvent {
 export interface ApifyActorRunStartedPayload {
   actorRunId: string;
   dataSourceId: string;
+  knowledgeId: string;
   rootUrl: string;
 }
 
@@ -32,13 +37,18 @@ export const onApifyActorRunStarted = inngest.createFunction(
   { id: "on-apify-actor-run-started" },
   { event: ApifyEvent.APIFY_ACTOR_RUN_STARTED },
   async ({ event, step }) => {
-    const { actorRunId, dataSourceId, rootUrl } =
+    const { actorRunId, dataSourceId, knowledgeId } =
       event.data as ApifyActorRunStartedPayload;
 
     while (true) {
       await step.sleep("sleep-for-1-minute", "1m");
 
-      const actorRunResult = await pollActorRun(dataSourceId, actorRunId, step);
+      const actorRunResult = await pollActorRun(
+        dataSourceId,
+        knowledgeId,
+        actorRunId,
+        step
+      );
 
       if (actorRunResult.status !== ActorRunStatus.INDEXING) {
         // We've reached a terminal state
@@ -53,14 +63,15 @@ export const onApifyWebhookReceived = inngest.createFunction(
   { event: ApifyEvent.APIFY_WEBHOOK_RECEIVED },
   async ({ event, step }) => {
     const { apifyEvent } = event.data as ApifyWebhookReceivedPayload;
-    const { dataSourceId, eventData } = apifyEvent;
+    const { dataSourceId, knowledgeId, eventData } = apifyEvent;
 
-    await pollActorRun(dataSourceId, eventData.actorRunId, step);
+    await pollActorRun(dataSourceId, knowledgeId, eventData.actorRunId, step);
   }
 );
 
 const pollActorRun = async (
   dataSourceId: string,
+  knowledgeId: string,
   actorRunId: string,
   step: any
 ) => {
@@ -84,25 +95,81 @@ const pollActorRun = async (
     if (batchResults > 0) {
       offset += actorRunResult.items.length;
 
-      const eventPayload: DataSourceItemListReceivedPayload = {
-        dataSourceId,
-        dataSourceItemList: { items: actorRunResult.items },
-        forRefresh: false,
-        forceRefresh: false,
-      };
-      await step.sendEvent("datasource-item-list-received", {
-        name: DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED,
-        data: eventPayload,
-      });
+      const dataSourceItems: DataSourceItem[] = [];
+      for (const item of actorRunResult.items) {
+        if (item.url === rootUrl) {
+          await publishRootUrlEvent(dataSourceId, knowledgeId, item, step);
+        } else {
+          dataSourceItems.push(
+            mapActorRunItemToDataSourceItem(actorRunId, rootUrl, item)
+          );
+        }
+      }
 
-      await step.run("update-data-source", async () => {
-        return await dataSourceManagementService.updateDataSourceData(
+      if (dataSourceItems.length > 0) {
+        const eventPayload: DataSourceItemListReceivedPayload = {
           dataSourceId,
-          { offset }
-        );
-      });
+          dataSourceItemList: { items: dataSourceItems },
+          forRefresh: false,
+          forceRefresh: true,
+        };
+        await step.sendEvent("datasource-item-list-received", {
+          name: DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED,
+          data: eventPayload,
+        });
+      }
     }
+
+    await step.run("update-data-source", async () => {
+      return await dataSourceManagementService.updateDataSourceData(
+        dataSourceId,
+        { offset }
+      );
+    });
   } while (batchResults >= LIST_RESULTS_BATCH_SIZE);
 
   return actorRunResult;
+};
+
+const publishRootUrlEvent = async (
+  dataSourceId: string,
+  knowledgeId: string,
+  item: ActorRunItem,
+  step: any
+) => {
+  const contentReceivedPayload: KnowledgeContentReceivedPayload = {
+    dataSourceId,
+    knowledgeId,
+    originalContent: {
+      contentBlobUrl: item.contentBlobUrl,
+      filename: item.filename,
+      mimeType: item.mimeType,
+    },
+  };
+
+  await step.sendEvent("root-url-content-received", {
+    name: DomainEvent.KNOWLEDGE_CONTENT_RETRIEVED,
+    data: contentReceivedPayload,
+  });
+};
+
+const mapActorRunItemToDataSourceItem = (
+  actorRunId: string,
+  rootUrl: string,
+  actorRunItem: ActorRunItem
+) => {
+  const metadata: WebUrlMetadata = {
+    indexingRunId: actorRunId,
+  };
+  return {
+    name: actorRunItem.url,
+    uniqueId: actorRunItem.url,
+    parentUniqueId: rootUrl,
+    originalContent: {
+      contentBlobUrl: actorRunItem.contentBlobUrl,
+      filename: actorRunItem.filename,
+      mimeType: actorRunItem.mimeType,
+    },
+    metadata,
+  };
 };
