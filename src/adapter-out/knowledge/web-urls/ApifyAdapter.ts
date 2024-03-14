@@ -128,6 +128,7 @@ export class ApifyAdapter {
             .get();
 
           for (const href of hrefs) {
+            console.log("href: " + href);
             if (href && !href.startsWith("#")) {
               // Exclude anchor URLs
               let resolvedUrl;
@@ -136,13 +137,11 @@ export class ApifyAdapter {
                 resolvedUrl = `${originalUrlObj.protocol}//${originalUrlObj.host}${href}`;
               } else {
                 // Document-relative URL, resolve against the basePath
-                resolvedUrl = new URL(
-                  href,
-                  `${originalUrlObj.origin}${basePath}`
-                ).href;
+                resolvedUrl = new URL(href, `${basePath}`).href;
               }
 
               const resolvedUrlObj = new URL(resolvedUrl);
+              console.log("resolvedUrl: " + resolvedUrlObj.href);
 
               // Ensure same base path and exclude the exact same URL
               if (
