@@ -6,7 +6,7 @@ import { AuthorizationContext } from "@/src/security/models/AuthorizationContext
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
-import { DataSourceRefreshPeriod, DataSourceType } from "@prisma/client";
+import { DataSourceType } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 async function postHandler(
@@ -23,14 +23,16 @@ async function postHandler(
 
   const dataSources = [];
   for (const url of urls) {
+    const resolvedUrl = new URL(url).href;
+
     const input: WebUrlDataSourceInput = {
-      url,
+      url: resolvedUrl,
     };
 
     const dataSource = await aiService.createDataSourceAndAddToAI(
       authorizationContext,
       params.aiId,
-      url,
+      resolvedUrl,
       DataSourceType.WEB_URL,
       dataRefreshPeriod,
       input
