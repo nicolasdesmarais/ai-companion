@@ -515,9 +515,11 @@ export class DataSourceManagementService {
 
     let indexStatus;
     let indexPercentage;
+    let lastIndexedAt;
     if (chunkCount === 0) {
       indexStatus = KnowledgeIndexStatus.COMPLETED;
       indexPercentage = 100;
+      lastIndexedAt = new Date();
     } else {
       indexStatus = KnowledgeIndexStatus.INDEXING;
     }
@@ -526,6 +528,7 @@ export class DataSourceManagementService {
       {
         indexStatus,
         indexPercentage,
+        lastIndexedAt,
         metadata: updatedMetadata,
       }
     );
@@ -685,7 +688,7 @@ export class DataSourceManagementService {
       {
         indexPercentage,
         indexStatus,
-        lastIndexedAt
+        lastIndexedAt,
       }
     );
 
