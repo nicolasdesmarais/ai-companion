@@ -13,7 +13,7 @@ const LandingLLM = ({ className }: Props) => {
         className
       )}
     >
-      <h2 className="text-3xl font-extrabold">Choose your LLM</h2>
+      <h2 className="text-3xl font-bold">Choose your LLM</h2>
       <div className="mx-8 sm:mx-0 sm:w-[410px] lg:w-[820px] text-center">
         Choose the LLM provider most suitable for the task for each app you
         create. You can also create your own model with the help from our
