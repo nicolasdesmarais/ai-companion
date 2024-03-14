@@ -83,7 +83,7 @@ const LandingStartChat = () => {
             {selectedAi.questions?.map((question, index) => (
               <div
                 key={`card-${index}`}
-                className="bg-lime p-2 lg:p-4 m-2 rounded-lg font-mono md:whitespace-pre md:h-10 lg:h-14"
+                className="bg-lime p-2 lg:p-4 m-2 rounded-lg font-mono md:whitespace-pre h-fit lg:h-14"
               >
                 {question}
               </div>

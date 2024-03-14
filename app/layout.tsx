@@ -12,6 +12,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "AppDirect AI",
   description: "Custom AI for your business.",
+  metadataBase: new URL("https://appdirect.ai"),
   openGraph: {
     images: [
       {

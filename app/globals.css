@@ -49,6 +49,7 @@ body,
     --navy-light: 222, 98%, 17%, 0.15;
     --sky: 197, 100%, 84%, 1;
     --lime: 135, 95%, 93%, 1;
+    --royal: 230, 94%, 43%, 1
   }
  
   .dark {
@@ -115,9 +116,18 @@ body,
 }
 
 
+
+
 .unleash-gradient {
   background: white;
-  background: linear-gradient(75deg, rgba(8,17,64,1) 0%, rgb(251, 252, 253) 35%, rgba(250,0,48,0.8) 100%); 
+  background-image: none;
+  background: linear-gradient(60deg, rgba(8,17,64,1) 0%, rgb(251, 252, 253) 35%, rgba(250,0,48,0.8) 100%); 
+}
+
+@media (min-width: 1024px) and (max-width: 1935px) {
+.unleash-gradient {
+  background-image: url(/unleash-bg.png);
+}
 }
 
 .teaser-blur {

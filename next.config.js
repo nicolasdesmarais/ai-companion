@@ -1,10 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: [
-      "res.cloudinary.com",
-      "oaidalleapiprodscus.blob.core.windows.net",
-      "img.clerk.com",
+    remotePatterns: [
+      { hostname: "res.cloudinary.com" },
+      { hostname: "oaidalleapiprodscus.blob.core.windows.net" },
+      { hostname: "img.clerk.com" },
     ],
   },
   webpack: (config, { webpack }) => {

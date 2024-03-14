@@ -30,6 +30,7 @@ module.exports = {
         navylight: "hsl(var(--navy-light))",
         sky: "hsl(var(--sky))",
         lime: "hsl(var(--lime))",
+        royal: "hsl(var(--royal))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -87,8 +88,9 @@ module.exports = {
         "7xs": "1rem",
       },
       backgroundImage: {
-        "unleash-pattern": "url('/unleash-bg.png')",
         "cta-pattern": "url('/cta-bg.png')",
+        gradient1: "url('/gradient1-bg.png')",
+        gradient2: "url('/gradient2-bg.png')",
       },
     },
     boxShadow: {
