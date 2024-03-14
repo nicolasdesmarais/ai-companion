@@ -4,7 +4,7 @@ import { AppdirectSvg } from "./svg/appdirect-svg";
 const LandingFooter = () => {
   const currentYear = new Date().getFullYear();
   return (
-    <div className="flex text-white bg-navy justify-center w-full mt-20 py-8">
+    <div className="flex text-white bg-navy justify-center w-full md:mt-20 py-8">
       <nav className="flex my-4 w-[1144px] justify-between">
         <div className="w-full mx-8">
           <div className="flex-col lg:flex-row flex">

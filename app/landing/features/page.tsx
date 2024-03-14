@@ -1,5 +1,6 @@
 import LandingCTA from "@/components/landing-cta";
 import LandingFooter from "@/components/landing-footer";
+import LandingLLM from "@/components/landing-llm";
 import LandingNav from "@/components/landing-nav";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
@@ -12,7 +13,7 @@ const LandingFeatures = () => {
 
       <div className="py-10 mt-10 flex flex-col items-center bg-[#F8F8F8] ">
         <div className="lg:w-[1140px] mx-4">
-          <h2 className="text-5xl font-extrabold">How it works</h2>
+          <h2 className="text-5xl font-bold">How it works</h2>
           <div className="lg:w-[700px] mt-10 text-lg">
             Transform your AI app ideas into reality without needing any coding
             skills. Unlock innovation and productivity for you, your team, and
@@ -175,43 +176,7 @@ const LandingFeatures = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-20 mb-12 gap-8 mx-4">
-        <h2 className="text-3xl font-extrabold">Choose your LLM</h2>
-        <div className="md:w-[820px] text-center">
-          Choose the LLM provider most suitable for the task for each app you
-          create. You can also create your own model with the help from our
-          partner, Ivado Labs.
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 flex-col md:flex-row">
-          <div className="bg-navylight shadow-lg flex items-center w-64 justify-center h-20">
-            <Image src="/meta.png" alt="Meta Logo" width="131" height="51" />
-          </div>
-          <div className="bg-navylight shadow-lg flex items-center w-64 justify-center h-20">
-            <Image
-              src="/anthropic.png"
-              alt="Anthropic Logo"
-              width="177"
-              height="21"
-            />
-          </div>
-          <div className="bg-navylight shadow-lg flex items-center w-64 justify-center h-20">
-            <Image
-              src="/openai.png"
-              alt="OpenAI Logo"
-              width="141"
-              height="39"
-            />
-          </div>
-          <div className="bg-navylight shadow-lg flex items-center w-64 justify-center h-20">
-            <Image
-              src="/cohere.png"
-              alt="Cohere Logo"
-              width="162"
-              height="28"
-            />
-          </div>
-        </div>
-      </div>
+      <LandingLLM />
 
       <LandingCTA />
 
