@@ -10,20 +10,21 @@ const LandingHome = () => {
   return (
     <div className="bg-white flex flex-col text-navy">
       <LandingNav />
-      <div className="h-screen overflow-hidden flex flex-col mx-4">
-        <div className="flex flex-col md:flex-row justify-center  items-center">
-          <div className="mt-24 md:mr-16 md:w-[440px] text-center lg:text-left">
+      <div className="md:h-screen overflow-hidden flex flex-col mx-4">
+        <div className="flex flex-col justify-center items-center">
+          <div className="mt-6 md:w-[740px] flex flex-col items-center lg:text-left">
             <h2
-              className="me-4 mb-8 font-bold leading-none tracking-tight text-4xl md:text-5xl lg:text-6xl"
+              className="me-4 mb-6 font-bold leading-none tracking-tight text-4xl md:text-5xl lg:text-6xl text-center"
               title="AI made simple"
             >
               AppDirect AI Marketplace & Creation Studio
             </h2>
-            <div className="mb-8">
-              Create custom AIs for yourself, your team, or your customers in
-              under 30 minutes. No coding required.
+            <div className="mb-6 text-center md:w-[570px]">
+              Transform your AI app ideas into reality without needing any
+              coding skills. Unlock innovation and productivity for you, your
+              team, and your customers.
             </div>
-            <div className="flex justify-evenly">
+            <div className="flex justify-evenly md:w-[440px]">
               <Link href="/sign-up" className="px-8 py-2 bg-sky">
                 Sign up
               </Link>
@@ -33,9 +34,17 @@ const LandingHome = () => {
               </Link>
             </div>
           </div>
-          <div className="mt-20 shadow-glow">
-            <video width="640" height="360" preload="none" autoPlay loop muted>
-              <source src="/storyboard.mp4" type="video/mp4" />
+          <div className="mb-12 mt-8 shadow-lg md:w-[800px]">
+            <video
+              width="1280"
+              height="720"
+              preload="none"
+              autoPlay
+              loop
+              muted
+              controls
+            >
+              <source src="/storyboard720.mp4" type="video/mp4" />
             </video>
           </div>
         </div>

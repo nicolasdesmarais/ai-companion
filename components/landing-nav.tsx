@@ -6,10 +6,13 @@ const LandingNav = () => {
     <div className="flex text-navy justify-center w-full">
       <nav className="flex m-4 w-[1144px] justify-between">
         <div className="flex">
-          <div className="flex items-center md:mr-10 lg:mr-20">
+          <Link
+            href="/landing/home"
+            className="flex items-center md:mr-10 lg:mr-20"
+          >
             <AppdirectSvg className="h-5 w-5" />
             AppDirect <span className="font-extrabold ml-2">AI</span>
-          </div>
+          </Link>
           <ul className="hidden md:flex justify-between md:gap-8 lg:gap-14 py-2">
             <li>
               <Link href="/landing/features">How it works</Link>
