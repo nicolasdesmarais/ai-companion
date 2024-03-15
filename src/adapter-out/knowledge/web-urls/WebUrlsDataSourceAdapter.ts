@@ -51,7 +51,32 @@ export class WebUrlsDataSourceAdapter
   ): Promise<RetrieveContentAdapterResponse> {
     const url = knowledge.name;
     const knowledgeId = knowledge.id;
+    const indexingRunId = (knowledge.metadata as WebUrlMetadata)?.indexingRunId;
 
+    if (indexingRunId) {
+      return await this.addUrlToExistingRun(indexingRunId, url, knowledgeId);
+    } else {
+      return await this.startIndexingRun(orgId, dataSourceId, knowledgeId, url);
+    }
+  }
+
+  private async addUrlToExistingRun(
+    indexingRunId: string,
+    url: string,
+    knowledgeId: string
+  ): Promise<RetrieveContentAdapterResponse> {
+    await apifyAdapter.addUrlToExistingRun(indexingRunId, url, knowledgeId);
+    return {
+      status: RetrieveContentResponseStatus.PENDING,
+    };
+  }
+
+  private async startIndexingRun(
+    orgId: string,
+    dataSourceId: string,
+    knowledgeId: string,
+    url: string
+  ): Promise<RetrieveContentAdapterResponse> {
     const actorRunId = await apifyAdapter.startUrlIndexing(
       orgId,
       dataSourceId,

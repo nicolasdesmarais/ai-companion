@@ -16,6 +16,7 @@ import dataSourceViewingService from "@/src/domain/services/DataSourceViewingSer
 import { inngest } from "./client";
 
 const LIST_RESULTS_BATCH_SIZE = 10;
+const MAX_EVENTS = 1000;
 
 export enum ApifyEvent {
   APIFY_ACTOR_RUN_STARTED = "apify.actor.run.started",
@@ -95,18 +96,38 @@ const pollActorRun = async (
     if (batchResults > 0) {
       offset += actorRunResult.items.length;
 
-      const dataSourceItems: DataSourceItem[] = [];
+      let contentReceivedEvents = [];
+      const childUrls: string[] = [];
       for (const item of actorRunResult.items) {
-        if (item.url === rootUrl) {
-          await publishRootUrlEvent(dataSourceId, knowledgeId, item, step);
-        } else {
-          dataSourceItems.push(
-            mapActorRunItemToDataSourceItem(actorRunId, rootUrl, item)
+        contentReceivedEvents.push(
+          createContentReceivedEvent(dataSourceId, knowledgeId, item, step)
+        );
+
+        if (contentReceivedEvents.length >= MAX_EVENTS) {
+          await step.sendEvent(
+            "publish-content-received-events",
+            contentReceivedEvents
           );
+          contentReceivedEvents = [];
         }
+
+        childUrls.push(...item.childUrls);
       }
 
-      if (dataSourceItems.length > 0) {
+      if (childUrls.length > 0) {
+        const dataSourceItems: DataSourceItem[] = childUrls.map((url) => {
+          const metadata: WebUrlMetadata = {
+            indexingRunId: actorRunId,
+          };
+
+          return {
+            name: url,
+            uniqueId: url,
+            parentUniqueId: rootUrl,
+            metadata,
+          };
+        });
+
         const eventPayload: DataSourceItemListReceivedPayload = {
           dataSourceId,
           dataSourceItemList: { items: dataSourceItems },
@@ -117,6 +138,13 @@ const pollActorRun = async (
           name: DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED,
           data: eventPayload,
         });
+      }
+
+      if (contentReceivedEvents.length > 0) {
+        await step.sendEvent(
+          "publish-content-received-events",
+          contentReceivedEvents
+        );
       }
     }
 
@@ -131,7 +159,7 @@ const pollActorRun = async (
   return actorRunResult;
 };
 
-const publishRootUrlEvent = async (
+const createContentReceivedEvent = async (
   dataSourceId: string,
   knowledgeId: string,
   item: ActorRunItem,
@@ -147,10 +175,10 @@ const publishRootUrlEvent = async (
     },
   };
 
-  await step.sendEvent("root-url-content-received", {
+  return {
     name: DomainEvent.KNOWLEDGE_CONTENT_RETRIEVED,
     data: contentReceivedPayload,
-  });
+  };
 };
 
 const mapActorRunItemToDataSourceItem = (

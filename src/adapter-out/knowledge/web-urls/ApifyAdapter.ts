@@ -22,6 +22,7 @@ export interface ActorRunResult {
 
 export interface ActorRunItem {
   url: string;
+  childUrls: string[];
   contentBlobUrl: string;
   filename: string;
   mimeType: string;
@@ -57,6 +58,17 @@ export class ApifyAdapter {
       );
 
     return actorRun.id;
+  }
+
+  async addUrlToExistingRun(
+    indexingRunId: string,
+    url: string,
+    knowledgeId: string
+  ) {
+    return await client.run(indexingRunId).requestQueue().addRequest({
+      url,
+      uniqueKey: knowledgeId,
+    });
   }
 
   private getActorStartOptions(
@@ -127,6 +139,7 @@ export class ApifyAdapter {
             .map((_: any, el: any) => $(el).attr("href"))
             .get();
 
+          const childUrls: string[] = [];
           for (const href of hrefs) {
             if (href && !href.startsWith("#")) {
               // Exclude anchor URLs
@@ -146,7 +159,8 @@ export class ApifyAdapter {
                 resolvedUrlObj.href.startsWith(basePath) &&
                 resolvedUrlObj.href !== url
               ) {
-                context.enqueueRequest({ url: resolvedUrlObj.href });
+                childUrls.push(resolvedUrlObj.href);
+                // context.enqueueRequest({ url: resolvedUrlObj.href });
               }
             }
           }
@@ -154,6 +168,7 @@ export class ApifyAdapter {
           return {
             url,
             html,
+            childUrls,
           };
         },
       injectJQuery: true,
@@ -190,6 +205,7 @@ export class ApifyAdapter {
 
     const status = this.getActorRunStatus(actorRun);
     const dataset = await client.run(actorRunId).dataset();
+
     const listItems = await dataset.listItems({
       offset,
       limit,
@@ -197,7 +213,7 @@ export class ApifyAdapter {
 
     const items: ActorRunItem[] = [];
     for (const item of listItems.items) {
-      const { url, html } = item;
+      const { url, html, childUrls } = item;
       if (!url || !html) {
         continue;
       }
@@ -208,6 +224,7 @@ export class ApifyAdapter {
 
       items.push({
         url: urlString,
+        childUrls: childUrls as string[],
         contentBlobUrl,
         filename,
         mimeType: "text/markdown",
