@@ -58,13 +58,13 @@ export const AIs = ({
                     className="rounded-xl object-cover group-hover:opacity-75 transition"
                     alt="Character"
                   />
-                  {item.chats?.length && (
+                  {item.chats?.length ? (
                     <div className="absolute top-2 left-2">
                       <Tooltip content="Active Chat">
                         <MessageSquareText className="w-6 h-6 bg-ring px-1 rounded-md text-white" />
                       </Tooltip>
                     </div>
-                  )}
+                  ) : null}
                   {(item.visibility === "PRIVATE" &&
                     !item.isShared &&
                     item.userId !== authorizationContext.userId) ||
@@ -84,27 +84,27 @@ export const AIs = ({
                       </Tooltip>
                     </div>
                   ) : null}
-                  {item.visibility === "PRIVATE" && (
+                  {item.visibility === "PRIVATE" ? (
                     <div className="absolute top-2 right-2">
                       <Tooltip content="Private">
                         <LockKeyhole className="w-6 h-6 bg-orange px-1 rounded-md text-white" />
                       </Tooltip>
                     </div>
-                  )}
-                  {item.visibility === "ORGANIZATION" && (
+                  ) : null}
+                  {item.visibility === "ORGANIZATION" ? (
                     <div className="absolute top-2 right-2">
                       <Tooltip content="In My Organization">
                         <Building className="w-6 h-6 bg-green px-1 rounded-md text-white" />
                       </Tooltip>
                     </div>
-                  )}
-                  {item.visibility === "GROUP" && (
+                  ) : null}
+                  {item.visibility === "GROUP" ? (
                     <div className="absolute top-2 right-2">
                       <Tooltip content="Shared">
                         <Users className="w-6 h-6 bg-green px-1 rounded-md text-white" />
                       </Tooltip>
                     </div>
-                  )}
+                  ) : null}
                 </div>
                 <div className="flex items-center m-2 leading-5">
                   {item.isApprovedByOrg ? (
