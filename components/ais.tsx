@@ -112,7 +112,7 @@ export const AIs = ({
                   ) : null}
                   <p className="font-bold">{item.name}</p>
                 </div>
-                <p className="text-xs mx-2">{item.description}</p>
+                <p className="text-xs mx-2 line-clamp-3">{item.description}</p>
               </CardHeader>
               <CardFooter className="flex flex-col mx-2 mb-2">
                 <StarRating
