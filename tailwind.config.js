@@ -92,6 +92,8 @@ module.exports = {
         gradient1: "url('/gradient1-bg.png')",
         gradient2: "url('/gradient2-bg.png')",
         gradient3: "url('/gradient3-bg.png')",
+        gradient4:
+          "linear-gradient(180deg, #F0F0F0 0%, rgba(240, 240, 240, 0.1) 100%)",
       },
     },
     boxShadow: {
