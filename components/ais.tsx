@@ -106,15 +106,15 @@ export const AIs = ({
                     </div>
                   )}
                 </div>
-                <div className="flex items-center mt-2 leading-5">
+                <div className="flex items-center m-2 leading-5">
                   {item.isApprovedByOrg ? (
                     <BadgeCheck className="w-4 h-4 mr-1 text-ring" />
                   ) : null}
                   <p className="font-bold">{item.name}</p>
                 </div>
-                <p className="text-xs">{item.description}</p>
+                <p className="text-xs mx-2">{item.description}</p>
               </CardHeader>
-              <CardFooter className="flex flex-col">
+              <CardFooter className="flex flex-col mx-2 mb-2">
                 <StarRating
                   value={Math.round(item.rating)}
                   count={item.ratingCount}
