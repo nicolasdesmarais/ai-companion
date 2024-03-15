@@ -3,7 +3,7 @@ import { AppdirectSvg } from "./svg/appdirect-svg";
 
 const LandingNav = () => {
   return (
-    <div className="flex text-navy justify-center w-full">
+    <div className="flex text-navy justify-center w-full z-10 bg-white">
       <nav className="flex m-4 w-[1144px] justify-between">
         <div className="flex">
           <Link
@@ -29,7 +29,7 @@ const LandingNav = () => {
           </ul>
         </div>
         <div className="flex">
-          <Link href="/sign-in" className="py-2">
+          <Link href="/landing/login" className="py-2">
             Login
           </Link>
           <Link href="/sign-up" className="ml-4 lg:ml-10 px-4 py-2 bg-sky">

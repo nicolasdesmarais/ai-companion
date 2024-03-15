@@ -10,8 +10,8 @@ const LandingHome = () => {
   return (
     <div className="bg-white flex flex-col text-navy">
       <LandingNav />
-      <div className="md:h-screen overflow-hidden flex flex-col mx-4">
-        <div className="flex flex-col justify-center items-center">
+      <div className="md:h-screen overflow-hidden flex flex-col  bg-[#F8F8F8] mb-8 -mt-20 pt-20">
+        <div className="flex flex-col justify-center items-center mx-4">
           <div className="mt-6 md:w-[740px] flex flex-col items-center lg:text-left">
             <h2
               className="me-4 mb-6 font-bold leading-none tracking-tight text-4xl md:text-5xl lg:text-6xl text-center"
@@ -34,7 +34,7 @@ const LandingHome = () => {
               </Link>
             </div>
           </div>
-          <div className="mb-12 mt-8 shadow-lg md:w-[800px]">
+          <div className="my-8 shadow-lg md:w-[800px]">
             <video
               width="1280"
               height="720"
