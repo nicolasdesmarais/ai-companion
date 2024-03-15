@@ -10,7 +10,7 @@ const LandingHome = () => {
   return (
     <div className="bg-white flex flex-col text-navy">
       <LandingNav />
-      <div className="md:h-screen overflow-hidden flex flex-col  bg-[#F8F8F8] mb-8 -mt-20 pt-20">
+      <div className="md:h-screen overflow-hidden flex flex-col bg-[#F8F8F8] mb-8 -mt-20 pt-20 min-h-[930px] justify-center">
         <div className="flex flex-col justify-center items-center mx-4">
           <div className="mt-6 md:w-[740px] flex flex-col items-center lg:text-left">
             <h2
