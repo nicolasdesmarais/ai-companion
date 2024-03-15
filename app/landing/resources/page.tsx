@@ -2,6 +2,7 @@ import LandingFAQ from "@/components/landing-faq";
 import LandingFooter from "@/components/landing-footer";
 import LandingLLM from "@/components/landing-llm";
 import LandingNav from "@/components/landing-nav";
+import LandingSupport from "@/components/landing-support";
 import { AppdirectSvg } from "@/components/svg/appdirect-svg";
 import { ArrowRight } from "lucide-react";
 
@@ -101,16 +102,7 @@ const LandingFeatures = () => {
 
       <LandingFAQ />
 
-      <div className="flex flex-col items-center mt-20 mb-20 gap-8 mx-4 text-center">
-        <h2 className="text-3xl font-bold">We&apos;re here to help.</h2>
-        <div>
-          Email us at{" "}
-          <a className="underline" href="mailto:support@appdirectai.com">
-            support@appdirectai.com
-          </a>{" "}
-          if you have any questions.
-        </div>
-      </div>
+      <LandingSupport />
 
       <LandingFooter />
     </div>
