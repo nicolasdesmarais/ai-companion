@@ -440,7 +440,7 @@ export const onKnowledgeIndexingCompletedSuccessfully = inngest.createFunction(
 );
 
 export const refreshDataSources = inngest.createFunction(
-  { id: "refresh-datasources" },
+  { id: "refresh-datasources", retries: 0 },
   { cron: "0 0 * * *" },
   async ({ step }) => {
     const dataSourceIds = await step.run(
@@ -525,7 +525,7 @@ export const onKnowledgeDeleted = inngest.createFunction(
 );
 
 export const deleteUnusedKnowledges = inngest.createFunction(
-  { id: "delete-unused-knowledges" },
+  { id: "delete-unused-knowledges", retries: 0 },
   { cron: "0 0 * * *" },
   async ({ step }) => {
     const deletedKnowledgeIds = await step.run(
@@ -540,7 +540,7 @@ export const deleteUnusedKnowledges = inngest.createFunction(
 );
 
 export const deleteBlobStorage = inngest.createFunction(
-  { id: "delete-blob-storage" },
+  { id: "delete-blob-storage", retries: 0 },
   { cron: "0 0 * * *" },
   async ({ step }) => {
     const knowledgeIds = await step.run(
@@ -561,7 +561,7 @@ export const deleteBlobStorage = inngest.createFunction(
 );
 
 export const deleteVectorDBStorage = inngest.createFunction(
-  { id: "delete-vectordb-storage" },
+  { id: "delete-vectordb-storage", retries: 0 },
   { cron: "0 0 * * *" },
   async ({ step }) => {
     const numberOfIdsToFetch = 1000;
