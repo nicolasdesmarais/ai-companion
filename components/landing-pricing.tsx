@@ -169,14 +169,24 @@ const LandingPricing = ({ className }: Props) => {
               </div>
             </div>
 
-            <div className="lg:hidden mt-16 w-full">
+            <div className="lg:hidden mt-16 w-full shadow-lg">
               {allPlans.map((plan, index) => (
                 <div
                   key={`mobile-plan-${index}`}
-                  className="w-full space-y-4 bg-[#FAF7F7] p-8 my-4"
+                  className={cn(
+                    "w-full space-y-4 px-8 pt-8",
+                    visible[index] ? "bg-[#FAF7F7] pb-8" : ""
+                  )}
                 >
                   <div
-                    className="flex justify-between cursor-pointer"
+                    className={cn(
+                      "flex justify-between cursor-pointer pb-8",
+                      visible[index] ||
+                        allPlans.length - 1 === index ||
+                        visible[index + 1]
+                        ? ""
+                        : "border-b border-[#DDDDDD]"
+                    )}
                     onClick={() => toggle(index)}
                   >
                     <div>
@@ -190,24 +200,32 @@ const LandingPricing = ({ className }: Props) => {
                     )}
                   </div>
                   {visible[index] && (
-                    <div className="px-2 gap-4 flex flex-col">
+                    <div className="px-2 gap-4 flex flex-col  ">
                       <div className="flex gap-4">
-                        <Check className="h-6 w-6" />
+                        <div className="h-6 w-6">
+                          <Check className="h-6 w-6" />
+                        </div>
                         <div>Use and create unlimited AIs</div>
                       </div>
 
                       <div className="flex gap-4">
-                        <Check className="h-6 w-6" />
+                        <div className="h-6 w-6">
+                          <Check className="h-6 w-6" />
+                        </div>
                         <div>Share AIs easily via email or generated link</div>
                       </div>
 
                       <div className="flex gap-4">
-                        <Check className="h-6 w-6" />
+                        <div className="h-6 w-6">
+                          <Check className="h-6 w-6" />
+                        </div>
                         <div>Multiple LLMs to choose from for each AI</div>
                       </div>
 
                       <div className="flex gap-4">
-                        <Check className="h-6 w-6" />
+                        <div className="h-6 w-6">
+                          <Check className="h-6 w-6" />
+                        </div>
                         <div>
                           All proprietary data is kept secure and private
                         </div>
@@ -215,18 +233,22 @@ const LandingPricing = ({ className }: Props) => {
 
                       <div className="flex gap-4">
                         {plan.custom ? (
-                          <Check className="h-6 w-6" />
+                          <div className="h-6 w-6">
+                            <Check className="h-6 w-6" />
+                          </div>
                         ) : (
-                          <div className="h-6 w-6"></div>
+                          <div className="h-6 w-8"></div>
                         )}
                         <div>AI evaluation and custom configuration</div>
                       </div>
 
                       <div className="flex gap-4">
                         {plan.tuning ? (
-                          <Check className="h-6 w-6" />
+                          <div className="h-6 w-6">
+                            <Check className="h-6 w-6" />
+                          </div>
                         ) : (
-                          <div className="h-6 w-6"></div>
+                          <div className="h-6 w-14"></div>
                         )}
                         <div>
                           Advanced integrations, i.e. LLM fine tuning and
