@@ -21,13 +21,7 @@ const LandingLLM = ({ className }: Props) => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 flex-col md:flex-row">
         <div className="bg-[#F0F0F0] shadow-lg flex items-center w-64 justify-center h-20">
-          <Image
-            src="/meta.png"
-            alt="Meta Logo"
-            width="131"
-            height="51"
-            className="w-32"
-          />
+          <Image src="/openai.png" alt="OpenAI Logo" width="141" height="39" />
         </div>
         <div className="bg-[#F0F0F0] shadow-lg flex items-center w-64 justify-center h-20">
           <Image
@@ -38,7 +32,13 @@ const LandingLLM = ({ className }: Props) => {
           />
         </div>
         <div className="bg-[#F0F0F0] shadow-lg flex items-center w-64 justify-center h-20">
-          <Image src="/openai.png" alt="OpenAI Logo" width="141" height="39" />
+          <Image
+            src="/meta.png"
+            alt="Meta Logo"
+            width="131"
+            height="51"
+            className="w-32"
+          />
         </div>
         <div className="bg-[#F0F0F0] shadow-lg flex items-center w-64 justify-center h-20">
           <Image src="/cohere.png" alt="Cohere Logo" width="162" height="28" />
