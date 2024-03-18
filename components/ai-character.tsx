@@ -259,9 +259,9 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
     <div className="h-full p-4 space-y-8 max-w-3xl mx-auto ">
       <div className="space-y-2 w-full col-span-2">
         <div>
-          <h3 className="text-lg font-medium">General Information</h3>
+          <h3 className="text-lg font-medium">Character creation</h3>
           <p className="text-sm text-muted-foreground">
-            General information about your AI
+            Craft how you want your AI to perform and feel to users.
           </p>
         </div>
         <Separator className="bg-primary/10" />
