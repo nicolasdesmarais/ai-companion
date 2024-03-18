@@ -189,7 +189,52 @@ const LandingPricing = ({ className }: Props) => {
                       <Plus className="w-6 h-6" />
                     )}
                   </div>
-                  {visible[index] && <div>haha</div>}
+                  {visible[index] && (
+                    <div className="px-2 gap-4 flex flex-col">
+                      <div className="flex gap-4">
+                        <Check className="h-6 w-6" />
+                        <div>Use and create unlimited AIs</div>
+                      </div>
+
+                      <div className="flex gap-4">
+                        <Check className="h-6 w-6" />
+                        <div>Share AIs easily via email or generated link</div>
+                      </div>
+
+                      <div className="flex gap-4">
+                        <Check className="h-6 w-6" />
+                        <div>Multiple LLMs to choose from for each AI</div>
+                      </div>
+
+                      <div className="flex gap-4">
+                        <Check className="h-6 w-6" />
+                        <div>
+                          All proprietary data is kept secure and private
+                        </div>
+                      </div>
+
+                      <div className="flex gap-4">
+                        {plan.custom ? (
+                          <Check className="h-6 w-6" />
+                        ) : (
+                          <div className="h-6 w-6"></div>
+                        )}
+                        <div>AI evaluation and custom configuration</div>
+                      </div>
+
+                      <div className="flex gap-4">
+                        {plan.tuning ? (
+                          <Check className="h-6 w-6" />
+                        ) : (
+                          <div className="h-6 w-6"></div>
+                        )}
+                        <div>
+                          Advanced integrations, i.e. LLM fine tuning and
+                          private deployment
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
