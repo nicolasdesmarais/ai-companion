@@ -45,76 +45,107 @@ const LandingFeatures = () => {
             Sign up
           </Link>
           <div className="flex mt-16 justify-center">
-            <div className="grid grid-cols-2 w-1/3">
-              <div></div>
-              <div className="font-bold border-b p-8 h-20">Free</div>
-              <div>Data usage</div>
-              <div className="font-bold p-8 h-20">200MB/mo</div>
-              <div>Use and create unlimited AIs</div>
-              <div className="font-bold">
+            <div className="grid grid-cols-2 w-1/3 bg-[#F8F8F8] pl-4">
+              <div className="border-b border-[#DDDDDD] p-8 h-20"></div>
+              <div className="font-bold border-b border-[#DDDDDD] p-8 h-20 text-center">
+                Free
+              </div>
+              <div className="border-b border-[#DDDDDD]">Data usage</div>
+              <div className="font-bold p-4 h-20 text-center border-b border-[#DDDDDD]">
+                200MB/mo
+              </div>
+              <div className="border-b border-[#DDDDDD]">
+                Use and create unlimited AIs
+              </div>
+              <div className="font-bold h-28 text-center border-b border-[#DDDDDD]">
+                <Check className="" />
+              </div>
+              <div className="border-b border-[#DDDDDD]">
+                Share AIs easily via email or generated link
+              </div>
+              <div className="font-bold h-28 border-b border-[#DDDDDD]">
                 <Check />
               </div>
-              <div>Share AIs easily via email or generated link</div>
-              <div className="font-bold">
+              <div className="border-b h-28 border-[#DDDDDD]">
+                Multiple LLMs to choose from for each AI
+              </div>
+              <div className="font-bold h-28 border-b border-[#DDDDDD]">
                 <Check />
               </div>
-              <div>Multiple LLMs to choose from for each AI</div>
-              <div className="font-bold">
+              <div className=" border-b h-28 border-[#DDDDDD]">
+                All proprietary data is kept secure and private
+              </div>
+              <div className="font-bold h-28 border-b border-[#DDDDDD]">
                 <Check />
               </div>
-              <div>All proprietary data is kept secure and private</div>
-              <div className="font-bold">
-                <Check />
+              <div className="border-b h-28 border-[#DDDDDD]">
+                AI evaluation and custom configuration
               </div>
-              <div>AI evaluation and custom configuration</div>
-              <div></div>
-              <div>
+              <div className="border-b h-28 border-[#DDDDDD]"></div>
+              <div className="h-28">
                 Advanced integrations, i.e. LLM fine tuning and private
                 deployment
               </div>
-              <div></div>
             </div>
-            <div className="grid grid-cols-3 shadow-lg">
+            <div className="grid grid-cols-3 shadow-lg text-center pr-4">
               {plans.map((plan) => (
                 <div
                   key={`plan-${plan.name}`}
-                  className="font-bold border-b p-8 h-20"
+                  className="font-bold border-b border-[#DDDDDD] p-8 h-20"
                 >
                   {plan.name}
                 </div>
               ))}
               {plans.map((plan) => (
-                <div key={`data-${plan.name}`} className="font-bold p-8 h-20">
+                <div
+                  key={`data-${plan.name}`}
+                  className="font-bold border-b border-[#DDDDDD] p-4 h-20"
+                >
                   {plan.data}
                 </div>
               ))}
               {plans.map((plan) => (
-                <div key={`create-${plan.name}`} className="font-bold">
+                <div
+                  key={`create-${plan.name}`}
+                  className="font-bold border-b border-[#DDDDDD] h-28"
+                >
                   <Check />
                 </div>
               ))}
               {plans.map((plan) => (
-                <div key={`share-${plan.name}`} className="font-bold">
+                <div
+                  key={`share-${plan.name}`}
+                  className="font-bold border-b border-[#DDDDDD] h-28"
+                >
                   <Check />
                 </div>
               ))}
               {plans.map((plan) => (
-                <div key={`llms-${plan.name}`} className="font-bold">
+                <div
+                  key={`llms-${plan.name}`}
+                  className="font-bold border-b border-[#DDDDDD] h-28"
+                >
                   <Check />
                 </div>
               ))}
               {plans.map((plan) => (
-                <div key={`secure-${plan.name}`} className="font-bold">
+                <div
+                  key={`secure-${plan.name}`}
+                  className="font-bold border-b border-[#DDDDDD] h-28"
+                >
                   <Check />
                 </div>
               ))}
               {plans.map((plan) => (
-                <div key={`custom-${plan.name}`} className="font-bold">
+                <div
+                  key={`custom-${plan.name}`}
+                  className="font-bold border-b border-[#DDDDDD] h-28"
+                >
                   {plan.custom ? <Check /> : null}
                 </div>
               ))}
               {plans.map((plan) => (
-                <div key={`tuning-${plan.name}`} className="font-bold">
+                <div key={`tuning-${plan.name}`} className="font-bold h-28">
                   {plan.tuning ? <Check /> : null}
                 </div>
               ))}
