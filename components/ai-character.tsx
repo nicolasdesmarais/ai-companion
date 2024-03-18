@@ -210,8 +210,7 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
     } else {
       toast({
         variant: "destructive",
-        description:
-          "Fill out the name and description to generate training materials.",
+        description: "Fill out the name and description to generate your AI.",
         duration: 3000,
       });
     }
@@ -251,308 +250,46 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
   };
 
   const generateAll = async () => {
+    const defaultCat = categories[0];
+    form.setValue("categoryId", defaultCat.id, { shouldDirty: true });
     await generateInstruction();
-    await generateConversation();
+    await generateAvatar();
   };
 
   return (
     <div className="h-full p-4 space-y-8 max-w-3xl mx-auto ">
-      <div className="space-y-2 w-full col-span-2">
+      <div className="space-y-2 w-full">
         <div>
-          <h3 className="text-lg font-medium">Character creation</h3>
+          <h3 className="text-lg font-medium">
+            Create an AI app in 1 easy step
+          </h3>
           <p className="text-sm text-muted-foreground">
-            Craft how you want your AI to perform and feel to users.
+            Auto generate your app, then tweak the information for better
+            results.
           </p>
         </div>
         <Separator className="bg-primary/10" />
       </div>
       <FormField
-        name="src"
+        name="name"
+        control={form.control}
         render={({ field }) => (
-          <FormItem className="flex flex-col items-center justify-center space-y-4 col-span-2">
+          <FormItem className="">
+            <FormLabel>
+              Create a name that helps to represent your AIs purpose.
+            </FormLabel>
             <FormControl>
-              <ImageUpload
+              <Input
                 disabled={isLoading}
-                onChange={field.onChange}
-                value={field.value}
+                placeholder="ex: Support Specialist"
+                {...field}
               />
             </FormControl>
-            {advancedImage && (
-              <div>
-                <Textarea
-                  disabled={isLoading || generatingImage}
-                  rows={2}
-                  placeholder="Image generation prompt"
-                  className="bg-background resize-none mb-2"
-                  value={imagePrompt}
-                  onChange={(e) => setImagePrompt(e.target.value)}
-                />
-                <Select
-                  disabled={isLoading || generatingImage}
-                  onValueChange={(val) => setImageModel(val)}
-                  value={imageModel}
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Select a model" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {imageModels.map((model) => (
-                      <SelectItem key={model.id} value={model.id}>
-                        {model.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            <div className="flex space-x-1">
-              <Button
-                type="button"
-                disabled={isLoading || generatingImage}
-                variant="outline"
-                onClick={() => generateAvatar()}
-              >
-                Generate Avatar Image
-                {generatingImage ? (
-                  <Loader className="w-4 h-4 ml-2 spinner" />
-                ) : (
-                  <Wand2 className="w-4 h-4 ml-2" />
-                )}
-              </Button>
-              {!advancedImage && (
-                <Button
-                  type="button"
-                  disabled={isLoading || generatingImage}
-                  variant="ghost"
-                  onClick={() => setAdvancedImage(true)}
-                >
-                  <Settings className="w-4 h-4" />
-                </Button>
-              )}
-            </div>
-
+            <FormDescription>This is the name of your AI.</FormDescription>
             <FormMessage />
           </FormItem>
         )}
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          name="name"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem className="col-span-2 md:col-span-1">
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input
-                  disabled={isLoading}
-                  placeholder="Support Specialist"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>This is the name of your AI.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="introduction"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem className="col-span-2 md:col-span-1">
-              <FormLabel>Introduction</FormLabel>
-              <FormControl>
-                <Input
-                  disabled={isLoading}
-                  placeholder="How may I be of assistance today?"
-                  {...field}
-                  value={field.value || ""}
-                />
-              </FormControl>
-              <FormDescription>
-                This is the first thing your AI will say.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="categoryId"
-          render={({ field }) => (
-            <FormItem className="col-span-2 md:col-span-1">
-              <FormLabel>Category</FormLabel>
-              <Select
-                disabled={isLoading}
-                onValueChange={field.onChange}
-                value={field.value}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger className="bg-background">
-                    <SelectValue
-                      defaultValue={field.value}
-                      placeholder="Select a category"
-                    />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Select the public category for your AI
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="visibility"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Visibility</FormLabel>
-              <Select
-                disabled={isLoading}
-                onValueChange={field.onChange}
-                value={field.value}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger className="bg-background">
-                    <SelectValue
-                      defaultValue={field.value}
-                      placeholder="Select one"
-                    />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem key="PRIVATE" value="PRIVATE">
-                    Private
-                  </SelectItem>
-                  <SelectItem key="GROUP" value="GROUP">
-                    Group
-                  </SelectItem>
-                  <SelectItem key="ORGANIZATION" value="ORGANIZATION">
-                    Organization
-                  </SelectItem>
-                  {hasInstanceAccess && (
-                    <SelectItem key="PUBLIC" value="PUBLIC">
-                      Public
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-              <FormDescription>Control who can see your AI</FormDescription>
-              <FormMessage />
-              {field.value === "GROUP" ? (
-                <FormField
-                  name="groups"
-                  control={form.control}
-                  render={({ field }) => (
-                    <div className="border-l border-ring pl-4 mt-4">
-                      {groupList.map((group) => (
-                        <div key={group.id}>
-                          <Checkbox
-                            id={group.id}
-                            checked={(field.value || []).includes(group.id)}
-                            onCheckedChange={(val) =>
-                              val
-                                ? field.onChange([
-                                    group.id,
-                                    ...(field.value || []),
-                                  ])
-                                : field.onChange(
-                                    field.value?.filter(
-                                      (v: string) => v !== group.id
-                                    )
-                                  )
-                            }
-                          >
-                            {group.name}
-                          </Checkbox>
-                        </div>
-                      ))}
-                      <Button
-                        type="button"
-                        disabled={isLoading}
-                        variant="ring"
-                        onClick={() => groupModal.onOpen()}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Group
-                      </Button>
-                    </div>
-                  )}
-                />
-              ) : null}
-            </FormItem>
-          )}
-        />
-        {voiceEnabled && (
-          <FormField
-            name="talk"
-            control={form.control}
-            render={({ field }) =>
-              field.value && (
-                <FormItem>
-                  <FormLabel>Voice</FormLabel>
-                  <div className="flex">
-                    <Select
-                      disabled={isLoading}
-                      value="en-US-JennyNeural"
-                      defaultValue="en-US-JennyNeural"
-                    >
-                      <FormControl>
-                        <SelectTrigger className="bg-background">
-                          <SelectValue
-                            defaultValue={field.value}
-                            placeholder="Select a voice"
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {voices.map((model) => (
-                          <SelectItem key={model.id} value={model.id}>
-                            {model.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      type="button"
-                      disabled={isLoading || generatingImage}
-                      variant="ghost"
-                      className="ml-2"
-                      onClick={() => playTalk()}
-                    >
-                      <Play className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  <FormDescription>Select a voice for your AI</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )
-            }
-          />
-        )}
-      </div>
-      <div className="space-y-2 w-full">
-        <div>
-          <h3 className="text-lg font-medium">Training</h3>
-          <p className="text-sm text-muted-foreground">
-            Training information is used by your AI to understand its purpose.
-            The more you refine this the more accurate your results will get,
-            however to get started you can use the AI generation tools to test
-            things out.
-          </p>
-        </div>
-        <Separator className="bg-primary/10" />
-      </div>
       <FormField
         name="description"
         control={form.control}
@@ -560,9 +297,11 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
           <FormItem>
             <FormLabel>Description</FormLabel>
             <FormControl>
-              <Input
+              <Textarea
                 disabled={isLoading}
-                placeholder="An AI designed to help answer any questions about AppDirect's help center and knowledge base."
+                placeholder="ex: An AI designed to help answer any questions about AppDirect's help center and knowledge base."
+                rows={2}
+                className="bg-background resize-none"
                 {...field}
               />
             </FormControl>
@@ -571,101 +310,385 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
               AI and generate the training material below.
             </FormDescription>
             <FormMessage />
-            <Button
-              type="button"
-              disabled={
-                isLoading || generatingConversation || generatingInstruction
-              }
-              variant="outline"
-              onClick={() => generateAll()}
-            >
-              Generate Training Information
-              {generatingConversation || generatingInstruction ? (
-                <Loader className="w-4 h-4 ml-2 spinner" />
-              ) : (
-                <Wand2 className="w-4 h-4 ml-2" />
-              )}
-            </Button>
           </FormItem>
         )}
       />
-      <FormField
-        name="instructions"
-        control={form.control}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Instructions for your AI</FormLabel>
-            <FormControl>
-              <Textarea
-                disabled={isLoading}
-                rows={7}
-                className="bg-background resize-none"
-                placeholder={PREAMBLE}
-                {...field}
+      <Button
+        type="button"
+        disabled={isLoading || generatingConversation || generatingInstruction}
+        variant="outline"
+        onClick={() => generateAll()}
+      >
+        {form.getValues("instructions") ? "Regenerate My AI" : "Create My AI"}
+        {generatingConversation || generatingInstruction ? (
+          <Loader className="w-4 h-4 ml-2 spinner" />
+        ) : (
+          <Wand2 className="w-4 h-4 ml-2" />
+        )}
+      </Button>
+      {form.getValues("instructions") ? (
+        <>
+          <div className="space-y-2 w-full col-span-2">
+            <div>
+              <h3 className="text-lg font-medium">Character creation</h3>
+              <p className="text-sm text-muted-foreground">
+                Craft how you want your AI to perform and feel to users.
+              </p>
+            </div>
+            <Separator className="bg-primary/10" />
+          </div>
+          <FormField
+            name="src"
+            render={({ field }) => (
+              <FormItem className="flex flex-col items-center justify-center space-y-4 col-span-2">
+                <FormControl>
+                  <ImageUpload
+                    disabled={isLoading}
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                {advancedImage && (
+                  <div>
+                    <Textarea
+                      disabled={isLoading || generatingImage}
+                      rows={2}
+                      placeholder="Image generation prompt"
+                      className="bg-background resize-none mb-2"
+                      value={imagePrompt}
+                      onChange={(e) => setImagePrompt(e.target.value)}
+                    />
+                    <Select
+                      disabled={isLoading || generatingImage}
+                      onValueChange={(val) => setImageModel(val)}
+                      value={imageModel}
+                    >
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="Select a model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {imageModels.map((model) => (
+                          <SelectItem key={model.id} value={model.id}>
+                            {model.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                <div className="flex space-x-1">
+                  <Button
+                    type="button"
+                    disabled={isLoading || generatingImage}
+                    variant="outline"
+                    onClick={() => generateAvatar()}
+                  >
+                    Generate Avatar Image
+                    {generatingImage ? (
+                      <Loader className="w-4 h-4 ml-2 spinner" />
+                    ) : (
+                      <Wand2 className="w-4 h-4 ml-2" />
+                    )}
+                  </Button>
+                  {!advancedImage && (
+                    <Button
+                      type="button"
+                      disabled={isLoading || generatingImage}
+                      variant="ghost"
+                      onClick={() => setAdvancedImage(true)}
+                    >
+                      <Settings className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              name="introduction"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem className="col-span-2 md:col-span-1">
+                  <FormLabel>Introduction</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={isLoading}
+                      placeholder="How may I be of assistance today?"
+                      {...field}
+                      value={field.value || ""}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    This is the first thing your AI will say.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <FormItem className="col-span-2 md:col-span-1">
+                  <FormLabel>Category</FormLabel>
+                  <Select
+                    disabled={isLoading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Select a category"
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Select the public category for your AI
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="visibility"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Visibility</FormLabel>
+                  <Select
+                    disabled={isLoading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Select one"
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem key="PRIVATE" value="PRIVATE">
+                        Private
+                      </SelectItem>
+                      <SelectItem key="GROUP" value="GROUP">
+                        Group
+                      </SelectItem>
+                      <SelectItem key="ORGANIZATION" value="ORGANIZATION">
+                        Organization
+                      </SelectItem>
+                      {hasInstanceAccess && (
+                        <SelectItem key="PUBLIC" value="PUBLIC">
+                          Public
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>Control who can see your AI</FormDescription>
+                  <FormMessage />
+                  {field.value === "GROUP" ? (
+                    <FormField
+                      name="groups"
+                      control={form.control}
+                      render={({ field }) => (
+                        <div className="border-l border-ring pl-4 mt-4">
+                          {groupList.map((group) => (
+                            <div key={group.id}>
+                              <Checkbox
+                                id={group.id}
+                                checked={(field.value || []).includes(group.id)}
+                                onCheckedChange={(val) =>
+                                  val
+                                    ? field.onChange([
+                                        group.id,
+                                        ...(field.value || []),
+                                      ])
+                                    : field.onChange(
+                                        field.value?.filter(
+                                          (v: string) => v !== group.id
+                                        )
+                                      )
+                                }
+                              >
+                                {group.name}
+                              </Checkbox>
+                            </div>
+                          ))}
+                          <Button
+                            type="button"
+                            disabled={isLoading}
+                            variant="ring"
+                            onClick={() => groupModal.onOpen()}
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Group
+                          </Button>
+                        </div>
+                      )}
+                    />
+                  ) : null}
+                </FormItem>
+              )}
+            />
+            {voiceEnabled && (
+              <FormField
+                name="talk"
+                control={form.control}
+                render={({ field }) =>
+                  field.value && (
+                    <FormItem>
+                      <FormLabel>Voice</FormLabel>
+                      <div className="flex">
+                        <Select
+                          disabled={isLoading}
+                          value="en-US-JennyNeural"
+                          defaultValue="en-US-JennyNeural"
+                        >
+                          <FormControl>
+                            <SelectTrigger className="bg-background">
+                              <SelectValue
+                                defaultValue={field.value}
+                                placeholder="Select a voice"
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {voices.map((model) => (
+                              <SelectItem key={model.id} value={model.id}>
+                                {model.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          type="button"
+                          disabled={isLoading || generatingImage}
+                          variant="ghost"
+                          className="ml-2"
+                          onClick={() => playTalk()}
+                        >
+                          <Play className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <FormDescription>
+                        Select a voice for your AI
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )
+                }
               />
-            </FormControl>
-            <FormDescription>
-              This information will be used to determine the behavior of your
-              AI. You may give it instructions as you would an employee. This
-              helps teach the AI how it should behave and what it should say.
-              Provide specific and general instructions that cover both what to
-              say and how to talk to get a better result.
-            </FormDescription>
-            <Button
-              type="button"
-              disabled={isLoading || generatingInstruction}
-              variant="outline"
-              onClick={() => generateInstruction()}
-            >
-              Generate Instruction
-              {generatingInstruction ? (
-                <Loader className="w-4 h-4 ml-2 spinner" />
-              ) : (
-                <Wand2 className="w-4 h-4 ml-2" />
-              )}
-            </Button>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        name="seed"
-        control={form.control}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Example Conversation</FormLabel>
-            <FormControl>
-              <Textarea
-                disabled={isLoading}
-                rows={7}
-                className="bg-background resize-none"
-                placeholder={SEED_CHAT}
-                {...field}
-              />
-            </FormControl>
-            <FormDescription>
-              Create an example conversation between a user and your AI. This
-              will teach the AI more about the type of response it should
-              provide to questions and better help it understand your
-              expectations.
-            </FormDescription>
-            <Button
-              type="button"
-              disabled={isLoading || generatingConversation}
-              variant="outline"
-              onClick={() => generateConversation()}
-            >
-              Generate Conversation
-              {generatingConversation ? (
-                <Loader className="w-4 h-4 ml-2 spinner" />
-              ) : (
-                <Wand2 className="w-4 h-4 ml-2" />
-              )}
-            </Button>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+            )}
+          </div>
+          <div className="space-y-2 w-full">
+            <div>
+              <h3 className="text-lg font-medium">Training</h3>
+              <p className="text-sm text-muted-foreground">
+                Training information is used by your AI to understand its
+                purpose. The more you refine this the more accurate your results
+                will get, however to get started you can use the AI generation
+                tools to test things out.
+              </p>
+            </div>
+            <Separator className="bg-primary/10" />
+          </div>
+
+          <FormField
+            name="instructions"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Instructions for your AI</FormLabel>
+                <FormControl>
+                  <Textarea
+                    disabled={isLoading}
+                    rows={7}
+                    className="bg-background resize-none"
+                    placeholder={PREAMBLE}
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  This information will be used to determine the behavior of
+                  your AI. You may give it instructions as you would an
+                  employee. This helps teach the AI how it should behave and
+                  what it should say. Provide specific and general instructions
+                  that cover both what to say and how to talk to get a better
+                  result.
+                </FormDescription>
+                <Button
+                  type="button"
+                  disabled={isLoading || generatingInstruction}
+                  variant="outline"
+                  onClick={() => generateInstruction()}
+                >
+                  Generate Instruction
+                  {generatingInstruction ? (
+                    <Loader className="w-4 h-4 ml-2 spinner" />
+                  ) : (
+                    <Wand2 className="w-4 h-4 ml-2" />
+                  )}
+                </Button>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="seed"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Example Conversation</FormLabel>
+                <FormControl>
+                  <Textarea
+                    disabled={isLoading}
+                    rows={7}
+                    className="bg-background resize-none"
+                    placeholder={SEED_CHAT}
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Create an example conversation between a user and your AI.
+                  This will teach the AI more about the type of response it
+                  should provide to questions and better help it understand your
+                  expectations.
+                </FormDescription>
+                <Button
+                  type="button"
+                  disabled={isLoading || generatingConversation}
+                  variant="outline"
+                  onClick={() => generateConversation()}
+                >
+                  Generate Conversation
+                  {generatingConversation ? (
+                    <Loader className="w-4 h-4 ml-2 spinner" />
+                  ) : (
+                    <Wand2 className="w-4 h-4 ml-2" />
+                  )}
+                </Button>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </>
+      ) : null}
 
       <TalkModal />
     </div>
