@@ -264,7 +264,7 @@ body,
   left: calc(50% - var(--circle-size) / 2);
 
   transform-origin: center center;
-  animation: moveVertical 30s ease infinite; 
+  animation: moveVertical 110s ease infinite; 
 
   opacity: 1;
 }
@@ -280,7 +280,7 @@ body,
   left: calc(50% - var(--circle-size) / 2);
 
   transform-origin: calc(50% - 400px);
-  animation: moveInCircle 20s reverse infinite;
+  animation: moveInCircle 100s reverse infinite;
 
   opacity: 1;
 }
@@ -296,7 +296,7 @@ body,
   left: calc(50% - var(--circle-size) / 2 - 500px);
 
   transform-origin: calc(50% + 400px);
-  animation: moveInCircle 40s linear infinite;
+  animation: moveInCircle 120s linear infinite;
 
   opacity: 1;
 }
@@ -312,7 +312,7 @@ body,
     left: calc(50% - var(--circle-size) / 2);
 
     transform-origin: calc(50% - 200px);
-    animation: moveHorizontal 40s ease infinite;
+    animation: moveHorizontal 120s ease infinite;
 
     opacity: 1;
 }
@@ -328,7 +328,7 @@ body,
   left: calc(50% - var(--circle-size));
 
   transform-origin: calc(50% - 800px) calc(50% + 200px);
-  animation: moveInCircle 20s ease infinite;
+  animation: moveInCircle 120s ease infinite;
 
   opacity: 1;
 }
