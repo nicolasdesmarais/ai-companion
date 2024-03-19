@@ -514,7 +514,10 @@ export const AIEditor = ({
           </div>
           <div>{activeTab?.content}</div>
           <div className="w-full flex flex-col md:flex-row items-center justify-between max-w-3xl mx-auto mt-8">
-            {form.getValues("instructions") ? activeTab?.buttons : null}
+            {form.getValues("id") ||
+            (form.getValues("instructions") && form.getValues("src"))
+              ? activeTab?.buttons
+              : null}
           </div>
         </form>
       </Form>

@@ -34,9 +34,11 @@ import { imageModels, voices } from "./ai-models";
 import { TalkModal } from "./talk-modal";
 
 const PREAMBLE =
-  "As a Support Specialist AI, your role is to provide solutions to user inquiries. This involves understanding the nature of the questions, interpreting their context, and yielding the correct responses. The effectiveness of your position is evaluated based on the accuracy of your responses and the satisfaction of users. Precision in answering and user satisfaction are your primary goals.";
+  "ex: As a Support Specialist AI, your role is to provide solutions to user inquiries. This involves understanding the nature of the questions, interpreting their context, and yielding the correct responses. The effectiveness of your position is evaluated based on the accuracy of your responses and the satisfaction of users. Precision in answering and user satisfaction are your primary goals.";
 
-const SEED_CHAT = `Human: Hello, I'm having some difficulty navigating AppDirect's marketplace, can you assist me?
+const SEED_CHAT = `example:
+
+Human: Hello, I'm having some difficulty navigating AppDirect's marketplace, can you assist me?
 
 Support Specialist AI: Of course, I'd be happy to assist. Could you please tell me specifically what you're having trouble with on the marketplace?
 
@@ -75,6 +77,7 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
   const [imageModel, setImageModel] = useState("dalle-3");
   const [diversityString, setDiversityString] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
+  const [generatingAll, setGeneratingAll] = useState(false);
 
   const isLoading = form.formState.isSubmitting;
   const voiceEnabled = false && window.location.hostname !== "appdirect.ai";
@@ -250,14 +253,15 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
   };
 
   const generateAll = async () => {
+    setGeneratingAll(true);
     const defaultCat = categories[0];
     form.setValue("categoryId", defaultCat.id, { shouldDirty: true });
-    await generateInstruction();
-    await generateAvatar();
+    await Promise.all([generateAvatar(), generateInstruction()]);
+    setGeneratingAll(false);
   };
 
   return (
-    <div className="h-full p-4 space-y-8 max-w-3xl mx-auto ">
+    <div className="h-full p-4 space-y-8 max-w-3xl mx-auto">
       <div className="space-y-2 w-full">
         <div>
           <h3 className="text-lg font-medium">
@@ -326,9 +330,10 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
           <Wand2 className="w-4 h-4 ml-2" />
         )}
       </Button>
-      {form.getValues("instructions") ? (
+      {form.getValues("id") ||
+      (form.getValues("instructions") && form.getValues("src")) ? (
         <>
-          <div className="space-y-2 w-full col-span-2">
+          <div className="space-y-2 w-full">
             <div>
               <h3 className="text-lg font-medium">Character creation</h3>
               <p className="text-sm text-muted-foreground">
@@ -340,7 +345,7 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
           <FormField
             name="src"
             render={({ field }) => (
-              <FormItem className="flex flex-col items-center justify-center space-y-4 col-span-2">
+              <FormItem className="flex flex-col items-center justify-center space-y-4">
                 <FormControl>
                   <ImageUpload
                     disabled={isLoading}
