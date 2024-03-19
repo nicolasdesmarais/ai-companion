@@ -256,6 +256,9 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
     setGeneratingAll(true);
     const defaultCat = categories[0];
     form.setValue("categoryId", defaultCat.id, { shouldDirty: true });
+    form.setValue("introduction", `How may I be of assistance today?`, {
+      shouldDirty: true,
+    });
     await Promise.all([generateAvatar(), generateInstruction()]);
     setGeneratingAll(false);
   };
@@ -421,7 +424,7 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
                   <FormControl>
                     <Input
                       disabled={isLoading}
-                      placeholder="How may I be of assistance today?"
+                      placeholder="ex: How may I be of assistance today?"
                       {...field}
                       value={field.value || ""}
                     />
