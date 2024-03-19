@@ -78,7 +78,9 @@ export const AIProfile = ({ ai }: Props) => {
     ai.profile?.trainingDescription;
 
   const showFeatures =
-    ai.profile?.features.length > 0 && ai.profile?.features[0].title;
+    ai.profile?.features &&
+    ai.profile?.features.length > 0 &&
+    ai.profile?.features[0].title;
   return (
     <ResizePanel
       name="profile-resize-panel"
@@ -169,12 +171,13 @@ export const AIProfile = ({ ai }: Props) => {
             <span className="border-b border-ring pb-1 pr-4">Features</span>
           </div>
         ) : null}
-        {ai.profile?.features.map((feature: any, index: number) => (
-          <div key={`feature-${index}`}>
-            <div className="text-xl font-bold mb-2">{feature.title}</div>
-            <div className="text-sm">{feature.description}</div>
-          </div>
-        ))}
+        {ai.profile?.features &&
+          ai.profile?.features.map((feature: any, index: number) => (
+            <div key={`feature-${index}`}>
+              <div className="text-xl font-bold mb-2">{feature.title}</div>
+              <div className="text-sm">{feature.description}</div>
+            </div>
+          ))}
         {showTraining && (
           <div className="text-2xl font-bold" id="specifications">
             <span className="border-b border-ring pb-1 pr-4">
