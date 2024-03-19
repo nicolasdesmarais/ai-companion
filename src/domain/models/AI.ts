@@ -40,11 +40,12 @@ export interface AIProfileFeature {
   description: string;
 }
 export interface AIProfile {
-  headline: string;
-  description: string;
-  features: AIProfileFeature[];
-  showCharacter: boolean;
-  showTraining: boolean;
-  showPersonality: boolean;
-  trainingDescription: string;
+  headline?: string;
+  description?: string;
+  features?: AIProfileFeature[];
+  showCharacter?: boolean;
+  showTraining?: boolean;
+  showPersonality?: boolean;
+  trainingDescription?: string;
+  conversations?: any[];
 }

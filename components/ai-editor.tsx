@@ -138,6 +138,21 @@ export const AIEditor = ({
       } else {
         initialAi.options = options;
       }
+      const defaultProfile = {
+        headline: undefined,
+        description: undefined,
+        features: [],
+        showCharacter: undefined,
+        showTraining: undefined,
+        showPersonality: undefined,
+        trainingDescription: undefined,
+        conversations: undefined,
+      };
+      if (initialAi.profile) {
+        initialAi.profile = { ...defaultProfile, ...initialAi.profile };
+      } else {
+        initialAi.profile = defaultProfile;
+      }
     }
   }
 
