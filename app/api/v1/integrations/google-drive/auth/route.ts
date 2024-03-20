@@ -4,6 +4,8 @@ import { OAuthTokenProvider } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest, res: NextResponse) {
   const { orgId } = auth();
   if (!orgId) {
