@@ -112,7 +112,7 @@ const LandingFeatures = () => {
         </div>
       </div>
 
-      <div className="my-16 flex items-center relative">
+      <div className="mt-16 flex items-center relative">
         <div className="absolute top-0 w-full flex justify-center">
           <div className="lg:w-[700px] mt-10 text-lg gap-4 flex flex-col text-center">
             <h2 className="text-4xl font-bold mt-4">Our process</h2>
@@ -121,9 +121,9 @@ const LandingFeatures = () => {
             impactful.
           </div>
         </div>
-        <div className="pt-56 bg-[#F8F8F8] flex w-1/2 justify-end">
-          <div className="w-56">
-            <div className="p-8 flex flex-col gap-4">
+        <div className="pt-56 pb-16 bg-[#F8F8F8] flex w-1/2 justify-end">
+          <div className="w-56 mx-24">
+            <div className="py-8 flex flex-col gap-4">
               <div className="text-6xl font-bold text-[#F2555A80]">1</div>
               <div className="text-lg font-bold">
                 Advisory: Explore the possibilities
@@ -133,7 +133,7 @@ const LandingFeatures = () => {
                 outcomes.
               </div>
             </div>
-            <div className="p-8 flex flex-col gap-4">
+            <div className="py-8 flex flex-col gap-4">
               <div className="text-6xl font-bold text-[#F2555A80]">3</div>
               <div className="text-lg font-bold">MVP: Test & measure</div>
               <div className="text-sm">
@@ -143,8 +143,8 @@ const LandingFeatures = () => {
             </div>
           </div>
         </div>
-        <div className="pt-56 w-1/2">
-          <div className="w-56 p-8 flex flex-col gap-4">
+        <div className="pt-56 pb-16 w-1/2">
+          <div className="w-56 py-8 flex flex-col gap-4 mx-24">
             <div className="text-6xl font-bold text-[#F2555A80]">2</div>
             <div className="text-lg font-bold">
               Advisory: Explore the possibilities
@@ -154,13 +154,61 @@ const LandingFeatures = () => {
               outcomes.
             </div>
           </div>
-          <div className="w-56 p-8 flex flex-col gap-4">
+          <div className="w-56 py-8 flex flex-col gap-4 mx-24">
             <div className="text-6xl font-bold text-[#F2555A80]">4</div>
             <div className="text-lg font-bold">MVP: Test & measure</div>
             <div className="text-sm">
               We work closely with you to develop a minimum viable product (MVP)
               within 3-6 months and prove out the concept.
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="py-16 flex flex-col items-center bg-[#F8F8F8]">
+        <div className="lg:w-[1100px] mx-4">
+          <svg
+            width="70"
+            height="73"
+            viewBox="0 0 70 73"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M61.2497 27.9111H49.583V63.9111H61.2497V27.9111Z"
+              fill="#ABE7FF"
+            />
+            <path
+              d="M43.7497 12.9111H32.083V63.9111H43.7497V12.9111Z"
+              fill="#ABE7FF"
+            />
+            <path
+              d="M26.2497 42.9111H14.583V63.9111H26.2497V42.9111Z"
+              fill="#ABE7FF"
+            />
+            <path
+              d="M58.3333 21.9111H43.75V60.9111H58.3333V21.9111ZM55.4167 57.9111H46.6667V24.9111H55.4167V57.9111Z"
+              fill="#011B58"
+            />
+            <path
+              d="M40.8333 6.91113H26.25V60.9111H40.8333V6.91113ZM37.9167 57.9111H29.1667V9.91113H37.9167V57.9111Z"
+              fill="#011B58"
+            />
+            <path
+              d="M23.3333 36.9111H8.75V60.9111H23.3333V36.9111ZM20.4167 57.9111H11.6667V39.9111H20.4167V57.9111Z"
+              fill="#011B58"
+            />
+          </svg>
+
+          <h2 className="text-4xl font-bold mt-4">
+            We create AI solutions that blend advanced predictive, prescriptive,
+            and generative capabilities
+          </h2>
+          <div className="lg:w-[900px] mt-10 text-lg">
+            Our solutions cater to a wide range of industries focusing on
+            critical areas like retail space optimization, merchandising and
+            assortment, pricing and promotions strategies, and demand
+            forecasting.
           </div>
         </div>
       </div>
