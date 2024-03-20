@@ -111,6 +111,59 @@ const LandingFeatures = () => {
           </div>
         </div>
       </div>
+
+      <div className="my-16 flex items-center relative">
+        <div className="absolute top-0 w-full flex justify-center">
+          <div className="lg:w-[700px] mt-10 text-lg gap-4 flex flex-col text-center">
+            <h2 className="text-4xl font-bold mt-4">Our process</h2>
+            We are ready to help you with your own business transformation. It
+            all starts with developing solutions that are measurable and
+            impactful.
+          </div>
+        </div>
+        <div className="pt-56 bg-[#F8F8F8] flex w-1/2 justify-end">
+          <div className="w-56">
+            <div className="p-8 flex flex-col gap-4">
+              <div className="text-6xl font-bold text-[#F2555A80]">1</div>
+              <div className="text-lg font-bold">
+                Advisory: Explore the possibilities
+              </div>
+              <div className="text-sm">
+                We&apos;ll help you find the right opportunity for meaningful
+                outcomes.
+              </div>
+            </div>
+            <div className="p-8 flex flex-col gap-4">
+              <div className="text-6xl font-bold text-[#F2555A80]">3</div>
+              <div className="text-lg font-bold">MVP: Test & measure</div>
+              <div className="text-sm">
+                We work closely with you to develop a minimum viable product
+                (MVP) within 3-6 months and prove out the concept.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="pt-56 w-1/2">
+          <div className="w-56 p-8 flex flex-col gap-4">
+            <div className="text-6xl font-bold text-[#F2555A80]">2</div>
+            <div className="text-lg font-bold">
+              Advisory: Explore the possibilities
+            </div>
+            <div className="text-sm">
+              We&apos;ll help you find the right opportunity for meaningful
+              outcomes.
+            </div>
+          </div>
+          <div className="w-56 p-8 flex flex-col gap-4">
+            <div className="text-6xl font-bold text-[#F2555A80]">4</div>
+            <div className="text-lg font-bold">MVP: Test & measure</div>
+            <div className="text-sm">
+              We work closely with you to develop a minimum viable product (MVP)
+              within 3-6 months and prove out the concept.
+            </div>
+          </div>
+        </div>
+      </div>
       <LandingFooter />
     </div>
   );
