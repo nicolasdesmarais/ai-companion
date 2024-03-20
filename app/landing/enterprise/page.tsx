@@ -1,6 +1,8 @@
 import LandingFooter from "@/components/landing-footer";
 import LandingNav from "@/components/landing-nav";
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 const LandingFeatures = () => {
   return (
@@ -114,14 +116,14 @@ const LandingFeatures = () => {
 
       <div className="mt-16 flex items-center relative">
         <div className="absolute top-0 w-full flex justify-center">
-          <div className="lg:w-[700px] mt-10 text-lg gap-4 flex flex-col text-center">
+          <div className="lg:w-[700px] mt-20 text-lg gap-4 flex flex-col text-center">
             <h2 className="text-4xl font-bold mt-4">Our process</h2>
             We are ready to help you with your own business transformation. It
             all starts with developing solutions that are measurable and
             impactful.
           </div>
         </div>
-        <div className="pt-56 pb-16 bg-[#F8F8F8] flex w-1/2 justify-end">
+        <div className="pt-64 pb-16 bg-[#F8F8F8] flex w-1/2 justify-end">
           <div className="w-56 mx-24">
             <div className="py-8 flex flex-col gap-4">
               <div className="text-6xl font-bold text-[#F2555A80]">1</div>
@@ -143,7 +145,7 @@ const LandingFeatures = () => {
             </div>
           </div>
         </div>
-        <div className="pt-56 pb-16 w-1/2">
+        <div className="pt-64 pb-16 w-1/2">
           <div className="w-56 py-8 flex flex-col gap-4 mx-24">
             <div className="text-6xl font-bold text-[#F2555A80]">2</div>
             <div className="text-lg font-bold">
@@ -212,6 +214,22 @@ const LandingFeatures = () => {
           </div>
         </div>
       </div>
+
+      <div className="flex flex-col items-center md:mb-14 mt-24">
+        <div className="flex flex-col lg:flex-row py-12 px-10 lg:px-20 justify-evenly items-center bg-navy text-white">
+          <h3 className="text-3xl font-bold lg:w-[700px]">
+            Connect with our Enterprise team today.
+          </h3>
+          <Link
+            href="/landing/contact"
+            className="mt-8 lg:mt-0 lg:ml-10 px-8 py-2 text-navy bg-white flex items-center"
+          >
+            Contact us
+            <ArrowRight className="inline-block w-4 h-4 ml-2" />
+          </Link>
+        </div>
+      </div>
+
       <LandingFooter />
     </div>
   );
