@@ -3,6 +3,7 @@
 import { ImageUpload } from "@/components/image-upload";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   FormControl,
   FormDescription,
@@ -29,6 +30,7 @@ import { getDiversityString } from "@/src/lib/diversity";
 import { Category } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { Loader, Play, Plus, Settings, Wand2 } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { imageModels, voices } from "./ai-models";
 import { TalkModal } from "./talk-modal";
@@ -59,6 +61,18 @@ const INSTRUCTION_PROMPT = `Create a single short paragraph description of an AI
 Write it as if you are explaining to them their job, role and responsibilities. Write it simply and direct without excessive adjectives or niceties. 
 Do not mention continuous learning. Write the paragraph based on the following information about them: `;
 
+const loadingMessages = [
+  "Building the AI...",
+  "Adding the brain...",
+  "Inserting electrodes...",
+  "Turning on the power...",
+  "Training the AI...",
+  "Adding the three laws of robotics...",
+  "Creating an avatar...",
+  "Generating the personality...",
+  "Setting the honesty parameters...",
+];
+
 interface AIFormProps {
   form: any;
   hasInstanceAccess: boolean;
@@ -69,6 +83,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const { toast } = useToast();
   const groupModal = useGroupModal();
   const talkModal = useTalkModal();
+  const pathname = usePathname();
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatingInstruction, setGeneratingInstruction] = useState(false);
   const [generatingConversation, setGeneratingConversation] = useState(false);
@@ -79,6 +94,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const [diversityString, setDiversityString] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
   const [generatingAll, setGeneratingAll] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0]);
 
   const isLoading = form.formState.isSubmitting;
   const voiceEnabled = false && window.location.hostname !== "appdirect.ai";
@@ -100,7 +116,23 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   useEffect(() => {
     fetchGroups();
     fetchCategories();
+    const interval = setInterval(() => {
+      setLoadingMessage((msg) => {
+        const thisIndex = loadingMessages.indexOf(msg);
+        return loadingMessages[
+          thisIndex + 1 === loadingMessages.length ? 0 : thisIndex + 1
+        ];
+      });
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (generatingAll && !pathname.endsWith("/new/edit")) {
+      setGeneratingAll(false);
+    }
+  }, [pathname, generatingAll]);
 
   useEffect(() => {
     if (groupModal.areGroupsUpdated) {
@@ -261,7 +293,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
       shouldDirty: true,
     });
     await Promise.all([generateAvatar(), generateInstruction()]);
-    setGeneratingAll(false);
     save();
   };
 
@@ -699,6 +730,15 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
           />
         </>
       ) : null}
+
+      <Dialog open={generatingAll}>
+        <DialogContent noClose>
+          <div className="flex justify-center items-center h-32">
+            <Loader className="w-16 h-16 spinner" />
+          </div>
+          <div className="ml-4 text-center">{loadingMessage}</div>
+        </DialogContent>
+      </Dialog>
 
       <TalkModal />
     </div>
