@@ -18,6 +18,9 @@ const LandingNav = () => {
               <Link href="/landing/features">How it works</Link>
             </li>
             <li>
+              <Link href="/landing/solutions">Solutions</Link>
+            </li>
+            <li>
               <Link href="/landing/pricing">Pricing</Link>
             </li>
             <li>
