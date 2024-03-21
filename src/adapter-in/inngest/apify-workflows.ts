@@ -1,9 +1,13 @@
-import { DataSourceItem } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
+import {
+  DataSourceItem,
+  RetrieveContentResponseStatus,
+} from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import apifyCheerioAdapter, {
   ActorRunItem,
   ActorRunResult,
   ActorRunStatus,
 } from "@/src/adapter-out/knowledge/web-urls/ApifyCheerioAdapter";
+import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
 import { WebUrlMetadata } from "@/src/adapter-out/knowledge/web-urls/types/WebUrlMetadata";
 import {
   DataSourceItemListReceivedPayload,
@@ -13,10 +17,12 @@ import {
 import { ApifyWebhookEvent } from "@/src/domain/models/ApifyWebhookEvent";
 import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
 import dataSourceViewingService from "@/src/domain/services/DataSourceViewingService";
+import knowledgeService from "@/src/domain/services/KnowledgeService";
 import { inngest } from "./client";
 
 const LIST_RESULTS_BATCH_SIZE = 10;
 const MAX_EVENTS = 1000;
+const useCheerioScraper = process.env.USE_CHEERIO_SCRAPER === "true";
 
 export enum ApifyEvent {
   APIFY_ACTOR_RUN_STARTED = "apify.actor.run.started",
@@ -66,7 +72,11 @@ export const onApifyWebhookReceived = inngest.createFunction(
     const { apifyEvent } = event.data as ApifyWebhookReceivedPayload;
     const { dataSourceId, knowledgeId, eventData } = apifyEvent;
 
-    await pollActorRun(dataSourceId, knowledgeId, eventData.actorRunId, step);
+    if (useCheerioScraper) {
+      await pollActorRun(dataSourceId, knowledgeId, eventData.actorRunId, step);
+    } else {
+      await processWebScraperWebhook(apifyEvent, step);
+    }
   }
 );
 
@@ -180,23 +190,40 @@ const createContentReceivedEvent = (
   };
 };
 
-const mapActorRunItemToDataSourceItem = (
-  actorRunId: string,
-  rootUrl: string,
-  actorRunItem: ActorRunItem
+const processWebScraperWebhook = async (
+  apifyEvent: ApifyWebhookEvent,
+  step: any
 ) => {
-  const metadata: WebUrlMetadata = {
-    indexingRunId: actorRunId,
-  };
-  return {
-    name: actorRunItem.url,
-    uniqueId: actorRunItem.url,
-    parentUniqueId: rootUrl,
-    originalContent: {
-      contentBlobUrl: actorRunItem.contentBlobUrl,
-      filename: actorRunItem.filename,
-      mimeType: actorRunItem.mimeType,
-    },
-    metadata,
-  };
+  const { dataSourceId, knowledgeId } = apifyEvent;
+
+  const knowledge = await step.run("fetch-knowledge", async () => {
+    return await knowledgeService.getKnowledge(knowledgeId);
+  });
+
+  const retrieveContentResponse = await step.run(
+    "retrieve-content-from-event",
+    async () => {
+      return await webUrlsDataSourceAdapter.retrieveContentFromEvent(
+        knowledge,
+        apifyEvent
+      );
+    }
+  );
+
+  const { originalContent } = retrieveContentResponse;
+  if (
+    retrieveContentResponse.status === RetrieveContentResponseStatus.SUCCESS &&
+    originalContent
+  ) {
+    const knowledgeContentRetrievedEventPayload: KnowledgeContentReceivedPayload =
+      {
+        dataSourceId,
+        knowledgeId,
+        originalContent,
+      };
+    await step.sendEvent("knowledge-content-received-event", {
+      name: DomainEvent.KNOWLEDGE_CONTENT_RETRIEVED,
+      data: knowledgeContentRetrievedEventPayload,
+    });
+  }
 };
