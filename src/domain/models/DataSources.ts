@@ -50,6 +50,7 @@ export interface KnowledgeDto {
   name: string;
   type: DataSourceType;
   uniqueId: string | null;
+  parentUniqueId: string | null;
   indexStatus: KnowledgeIndexStatus;
   documentCount: number | null;
   tokenCount: number | null;

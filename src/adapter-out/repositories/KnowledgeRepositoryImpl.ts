@@ -9,6 +9,7 @@ import {
 import { KnowledgeRepository } from "@/src/domain/ports/outgoing/KnowledgeRepository";
 import prismadb from "@/src/lib/prismadb";
 import {
+  DataSourceType,
   Knowledge,
   KnowledgeChunkStatus,
   KnowledgeIndexStatus,
@@ -26,6 +27,7 @@ const mapKnowledgeToDto = (knowledge: Knowledge): KnowledgeDto => {
     name,
     type,
     uniqueId,
+    parentUniqueId,
     indexStatus,
     documentCount,
     tokenCount,
@@ -42,6 +44,7 @@ const mapKnowledgeToDto = (knowledge: Knowledge): KnowledgeDto => {
     name,
     type,
     uniqueId,
+    parentUniqueId,
     indexStatus,
     documentCount,
     tokenCount,
@@ -336,6 +339,21 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
     });
 
     return result.map((knowledge) => knowledge.id);
+  }
+
+  public async findByTypeAndParent(
+    type: DataSourceType,
+    parentUniqueId: string
+  ): Promise<KnowledgeDto[]> {
+    const result = await prismadb.knowledge.findMany({
+      where: {
+        type,
+        parentUniqueId,
+        indexStatus: KnowledgeIndexStatus.COMPLETED,
+      },
+    });
+
+    return result.map(mapKnowledgeToDto);
   }
 
   public async getAiKnowledgeSummary(aiId: string): Promise<KnowledgeSummary> {

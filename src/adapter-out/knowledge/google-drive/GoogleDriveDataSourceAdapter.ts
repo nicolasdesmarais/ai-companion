@@ -408,7 +408,10 @@ export class GoogleDriveDataSourceAdapter
   ): boolean {
     const { modifiedTime } =
       knowledge.metadata as unknown as GoogleDriveFileMetadata;
-    return modifiedTime !== item.metadata.modifiedTime;
+    return (
+      modifiedTime !== item.metadata.modifiedTime ||
+      knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED
+    );
   }
 
   private async getFileContent(

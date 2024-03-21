@@ -14,6 +14,10 @@ import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
 export class DataSourceViewingService {
   constructor(private dataSourceRepository: DataSourceRepository) {}
 
+  public async getById(dataSourceId: string): Promise<DataSourceDto> {
+    return await this.dataSourceRepository.getById(dataSourceId);
+  }
+
   /**
    * Returns a list of all data sources the user has access to.
    * @param authorizationContext

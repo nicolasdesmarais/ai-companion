@@ -1,5 +1,5 @@
 import { KnowledgeChunkIndexes } from "@/src/adapter-out/knowledge/types/KnowledgeChunkTypes";
-import { KnowledgeChunkStatus, Prisma } from "@prisma/client";
+import { DataSourceType, KnowledgeChunkStatus, Prisma } from "@prisma/client";
 import {
   KnowledgeChunkCounts,
   KnowledgeChunkDto,
@@ -46,6 +46,11 @@ export interface KnowledgeRepository {
   findCompletedKnowledgeWithRelatedInstances(): Promise<string[]>;
 
   findFailedKnowledge(limit?: number): Promise<string[]>;
+
+  findByTypeAndParent(
+    type: DataSourceType,
+    parentUniqueId: string
+  ): Promise<KnowledgeDto[]>;
 
   getAiKnowledgeSummary(aiId: string): Promise<KnowledgeSummary>;
 
