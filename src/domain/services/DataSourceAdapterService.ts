@@ -41,7 +41,9 @@ export class DataSourceAdapterService {
       case DataSourceType.GOOGLE_DRIVE:
         return googleDriveDataSourceAdapter;
       case DataSourceType.WEB_URL:
-        return webUrlsCheerioDataSourceAdapter;
+        return useCheerioAdapter
+          ? webUrlsCheerioDataSourceAdapter
+          : webUrlsDataSourceAdapter;
       case DataSourceType.FILE_UPLOAD:
         return fileUploadDataSourceAdapter;
       case DataSourceType.API:
