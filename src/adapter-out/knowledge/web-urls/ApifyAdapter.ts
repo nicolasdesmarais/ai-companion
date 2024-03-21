@@ -160,7 +160,6 @@ export class ApifyAdapter {
                 resolvedUrlObj.href !== url
               ) {
                 childUrls.push(resolvedUrlObj.href);
-                // context.enqueueRequest({ url: resolvedUrlObj.href });
               }
             }
           }
