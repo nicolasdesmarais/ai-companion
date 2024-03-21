@@ -16,7 +16,7 @@ import {
   RetrieveContentResponseStatus,
 } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
-import apifyAdapter from "./ApifyAdapter";
+import apifyCheerioAdapter from "./ApifyCheerioAdapter";
 import { WebUrlDataSourceInput } from "./types/WebUrlDataSourceInput";
 import { WebUrlMetadata } from "./types/WebUrlMetadata";
 
@@ -71,11 +71,12 @@ export class WebUrlsDataSourceAdapter
     dataSourceId: string,
     knowledgeId: string
   ): Promise<RetrieveContentAdapterResponse> {
-    const indexingRunResurrected = await apifyAdapter.addUrlToExistingRun(
-      actorRunId,
-      url,
-      knowledgeId
-    );
+    const indexingRunResurrected =
+      await apifyCheerioAdapter.addUrlToExistingRun(
+        actorRunId,
+        url,
+        knowledgeId
+      );
 
     if (indexingRunResurrected) {
       const runStartedEventPayload: ApifyActorRunStartedPayload = {
@@ -101,7 +102,7 @@ export class WebUrlsDataSourceAdapter
     knowledgeId: string,
     url: string
   ): Promise<RetrieveContentAdapterResponse> {
-    const actorRunId = await apifyAdapter.startUrlIndexing(
+    const actorRunId = await apifyCheerioAdapter.startUrlIndexing(
       orgId,
       dataSourceId,
       knowledgeId,
@@ -181,5 +182,5 @@ export class WebUrlsDataSourceAdapter
   }
 }
 
-const webUrlsDataSourceAdapter = new WebUrlsDataSourceAdapter();
-export default webUrlsDataSourceAdapter;
+const webUrlsCheerioDataSourceAdapter = new WebUrlsDataSourceAdapter();
+export default webUrlsCheerioDataSourceAdapter;

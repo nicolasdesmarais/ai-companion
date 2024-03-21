@@ -1,9 +1,9 @@
 import { DataSourceItem } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
-import apifyAdapter, {
+import apifyCheerioAdapter, {
   ActorRunItem,
   ActorRunResult,
   ActorRunStatus,
-} from "@/src/adapter-out/knowledge/web-urls/ApifyAdapter";
+} from "@/src/adapter-out/knowledge/web-urls/ApifyCheerioAdapter";
 import { WebUrlMetadata } from "@/src/adapter-out/knowledge/web-urls/types/WebUrlMetadata";
 import {
   DataSourceItemListReceivedPayload,
@@ -84,7 +84,7 @@ const pollActorRun = async (
   let actorRunResult: ActorRunResult;
   do {
     actorRunResult = await step.run("get-actor-run-batch", async () => {
-      return await apifyAdapter.getActorRunBatch(
+      return await apifyCheerioAdapter.getActorRunBatch(
         actorRunId,
         offset,
         LIST_RESULTS_BATCH_SIZE

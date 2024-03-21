@@ -295,5 +295,5 @@ export class ApifyAdapter {
   }
 }
 
-const apifyAdapter = new ApifyAdapter();
-export default apifyAdapter;
+const apifyCheerioAdapter = new ApifyAdapter();
+export default apifyCheerioAdapter;

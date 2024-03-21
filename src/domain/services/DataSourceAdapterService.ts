@@ -6,7 +6,7 @@ import {
   ContentRetrievingDataSourceAdapter,
   DataSourceAdapter,
 } from "@/src/adapter-out/knowledge/types/DataSourceAdapter";
-import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
+import webUrlsCheerioDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsCheerioDataSourceAdapter";
 import prismadb from "@/src/lib/prismadb";
 import { DataSource, DataSourceType } from "@prisma/client";
 import { EntityNotFoundError } from "../errors/Errors";
@@ -38,7 +38,7 @@ export class DataSourceAdapterService {
       case DataSourceType.GOOGLE_DRIVE:
         return googleDriveDataSourceAdapter;
       case DataSourceType.WEB_URL:
-        return webUrlsDataSourceAdapter;
+        return webUrlsCheerioDataSourceAdapter;
       case DataSourceType.FILE_UPLOAD:
         return fileUploadDataSourceAdapter;
       case DataSourceType.API:
@@ -57,7 +57,7 @@ export class DataSourceAdapterService {
       case DataSourceType.GOOGLE_DRIVE:
         return googleDriveDataSourceAdapter;
       case DataSourceType.WEB_URL:
-        return webUrlsDataSourceAdapter;
+        return webUrlsCheerioDataSourceAdapter;
       case DataSourceType.ONEDRIVE:
         return msftDataSourceAdapter;
       default:
