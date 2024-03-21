@@ -159,7 +159,7 @@ const pollActorRun = async (
   return actorRunResult;
 };
 
-const createContentReceivedEvent = async (
+const createContentReceivedEvent = (
   dataSourceId: string,
   knowledgeId: string,
   item: ActorRunItem,

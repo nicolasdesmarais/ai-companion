@@ -38,7 +38,10 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
     knowledge: Knowledge,
     item: DataSourceItem
   ): boolean {
-    return knowledge.uniqueId !== item.uniqueId;
+    return (
+      knowledge.uniqueId !== item.uniqueId ||
+      knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED
+    );
   }
 
   public async pollKnowledgeIndexingStatus(

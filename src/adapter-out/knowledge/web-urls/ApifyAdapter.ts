@@ -61,14 +61,24 @@ export class ApifyAdapter {
   }
 
   async addUrlToExistingRun(
-    indexingRunId: string,
+    actorRunId: string,
     url: string,
     knowledgeId: string
   ) {
-    return await client.run(indexingRunId).requestQueue().addRequest({
+    await client.run(actorRunId).requestQueue().addRequest({
       url,
       uniqueKey: knowledgeId,
     });
+
+    const actorRun = await client.run(actorRunId).get();
+    if (!actorRun) {
+      throw new Error(`Actor run ${actorRunId} not found`);
+    }
+    const actorRunStatus = this.getActorRunStatus(actorRun);
+    if (actorRunStatus !== ActorRunStatus.INDEXING) {
+      // After adding new URLs to requests queue, resurrect the actor run if it's not currently running
+      await client.run(actorRunId).resurrect();
+    }
   }
 
   private getActorStartOptions(
@@ -139,7 +149,7 @@ export class ApifyAdapter {
             .map((_: any, el: any) => $(el).attr("href"))
             .get();
 
-          const childUrls: string[] = [];
+          const childUrlsSet: Set<string> = new Set();
           for (const href of hrefs) {
             if (href && !href.startsWith("#")) {
               // Exclude anchor URLs
@@ -159,10 +169,12 @@ export class ApifyAdapter {
                 resolvedUrlObj.href.startsWith(basePath) &&
                 resolvedUrlObj.href !== url
               ) {
-                childUrls.push(resolvedUrlObj.href);
+                childUrlsSet.add(resolvedUrlObj.href);
               }
             }
           }
+
+          const childUrls = Array.from(childUrlsSet);
 
           return {
             url,

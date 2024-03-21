@@ -126,8 +126,7 @@ export class WebUrlsDataSourceAdapter
       return false;
     }
 
-    if (item.uniqueId !== item.parentUniqueId) {
-      // Reindex if the item is not a root item
+    if (knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED) {
       return true;
     }
 
