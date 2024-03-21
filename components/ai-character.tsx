@@ -62,9 +62,10 @@ Do not mention continuous learning. Write the paragraph based on the following i
 interface AIFormProps {
   form: any;
   hasInstanceAccess: boolean;
+  save: () => void;
 }
 
-export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
+export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const { toast } = useToast();
   const groupModal = useGroupModal();
   const talkModal = useTalkModal();
@@ -261,6 +262,7 @@ export const AICharacter = ({ form, hasInstanceAccess }: AIFormProps) => {
     });
     await Promise.all([generateAvatar(), generateInstruction()]);
     setGeneratingAll(false);
+    save();
   };
 
   return (
