@@ -114,16 +114,56 @@ const LandingFeatures = () => {
         </div>
       </div>
 
-      <div className="mt-16 flex items-center relative">
-        <div className="absolute top-0 w-full flex justify-center">
-          <div className="lg:w-[700px] mt-20 text-lg gap-4 flex flex-col text-center">
+      <div className="mt-8 md:mt-16 flex flex-col md:flex-row items-center relative">
+        <div className="md:absolute top-0 w-full flex justify-center">
+          <div className="lg:w-[700px] mt-20 text-lg gap-4 flex flex-col text-center mx-8">
             <h2 className="text-4xl font-bold mt-4">Our process</h2>
             We are ready to help you with your own business transformation. It
             all starts with developing solutions that are measurable and
             impactful.
           </div>
         </div>
-        <div className="pt-64 pb-16 bg-[#F8F8F8] flex w-1/2 justify-end">
+        <div className="flex flex-col md:hidden mt-8 text-center mb-36">
+          <div className="py-8 flex flex-col gap-4 mx-8 ">
+            <div className="text-6xl font-bold text-[#F2555A80]">1</div>
+            <div className="text-lg font-bold">
+              Advisory: Explore the possibilities
+            </div>
+            <div className="text-sm">
+              We&apos;ll help you find the right opportunity for meaningful
+              outcomes.
+            </div>
+          </div>
+          <div className="py-8 flex flex-col gap-4 mx-8">
+            <div className="text-6xl font-bold text-[#F2555A80]">2</div>
+            <div className="text-lg font-bold">
+              Blueprint: Develop the hypothesis
+            </div>
+            <div className="text-sm">
+              Develop by identifying the right scientific approach to solve your
+              specific business challenge.
+            </div>
+          </div>
+          <div className="py-8 flex flex-col gap-4 mx-8">
+            <div className="text-6xl font-bold text-[#F2555A80]">3</div>
+            <div className="text-lg font-bold">MVP: Test & measure</div>
+            <div className="text-sm">
+              We work closely with you to develop a minimum viable product (MVP)
+              within 3-6 months and prove out the concept.
+            </div>
+          </div>
+          <div className="py-8 flex flex-col gap-4 mx-8">
+            <div className="text-6xl font-bold text-[#F2555A80]">4</div>
+            <div className="text-lg font-bold">
+              Amplify: Scale up & fine tune
+            </div>
+            <div className="text-sm">
+              Once proven, IVADO Labs will industrialize the solution and deploy
+              it at scale so you can realize its full potential.
+            </div>
+          </div>
+        </div>
+        <div className="pt-64 pb-16 bg-[#F8F8F8] hidden md:flex w-1/2 justify-end">
           <div className="w-56 mx-24">
             <div className="py-8 flex flex-col gap-4">
               <div className="text-6xl font-bold text-[#F2555A80]">1</div>
@@ -145,23 +185,25 @@ const LandingFeatures = () => {
             </div>
           </div>
         </div>
-        <div className="pt-64 pb-16 w-1/2">
+        <div className="pt-64 pb-16 w-1/2 hidden md:block">
           <div className="w-56 py-8 flex flex-col gap-4 mx-24">
             <div className="text-6xl font-bold text-[#F2555A80]">2</div>
             <div className="text-lg font-bold">
-              Advisory: Explore the possibilities
+              Blueprint: Develop the hypothesis
             </div>
             <div className="text-sm">
-              We&apos;ll help you find the right opportunity for meaningful
-              outcomes.
+              Develop by identifying the right scientific approach to solve your
+              specific business challenge.
             </div>
           </div>
           <div className="w-56 py-8 flex flex-col gap-4 mx-24">
             <div className="text-6xl font-bold text-[#F2555A80]">4</div>
-            <div className="text-lg font-bold">MVP: Test & measure</div>
+            <div className="text-lg font-bold">
+              Amplify: Scale up & fine tune
+            </div>
             <div className="text-sm">
-              We work closely with you to develop a minimum viable product (MVP)
-              within 3-6 months and prove out the concept.
+              Once proven, IVADO Labs will industrialize the solution and deploy
+              it at scale so you can realize its full potential.
             </div>
           </div>
         </div>
