@@ -234,6 +234,8 @@ export const AIEditor = ({
       router.push(`/ai/${aiId}${continueRequested}`);
     } else {
       if (pathname.endsWith("/new/edit")) {
+        router.push(`/ai/${aiId}/edit`);
+      } else {
         router.push(pathname);
       }
     }
