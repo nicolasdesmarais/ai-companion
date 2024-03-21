@@ -233,7 +233,11 @@ export const AIEditor = ({
       setContinueRequested("");
       router.push(`/ai/${aiId}${continueRequested}`);
     } else {
-      router.push(pathname);
+      if (pathname.endsWith("/new/edit")) {
+        router.push(`/ai/${aiId}/edit`);
+      } else {
+        router.push(pathname);
+      }
     }
   };
 
@@ -316,7 +320,11 @@ export const AIEditor = ({
       index: 1,
       route: "edit",
       content: (
-        <AICharacter form={form} hasInstanceAccess={hasInstanceAccess} />
+        <AICharacter
+          form={form}
+          hasInstanceAccess={hasInstanceAccess}
+          save={form.handleSubmit(onSubmit)}
+        />
       ),
       buttons: (
         <>
