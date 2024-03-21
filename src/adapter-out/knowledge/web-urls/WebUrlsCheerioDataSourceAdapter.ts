@@ -150,13 +150,15 @@ export class WebUrlsDataSourceAdapter
       return false;
     }
 
-    if (knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED) {
-      return true;
-    }
+    return true;
+    //  TODO: Temporarily force reindexing, until we implement association of child URLs
+    // if (knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED) {
+    //   return true;
+    // }
 
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    return !knowledge.lastIndexedAt || knowledge.lastIndexedAt < oneWeekAgo;
+    // const oneWeekAgo = new Date();
+    // oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    // return !knowledge.lastIndexedAt || knowledge.lastIndexedAt < oneWeekAgo;
   }
 
   public async pollKnowledgeIndexingStatus(
