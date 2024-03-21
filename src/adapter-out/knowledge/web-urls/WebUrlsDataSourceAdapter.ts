@@ -54,18 +54,42 @@ export class WebUrlsDataSourceAdapter
     const indexingRunId = (knowledge.metadata as WebUrlMetadata)?.indexingRunId;
 
     if (indexingRunId) {
-      return await this.addUrlToExistingRun(indexingRunId, url, knowledgeId);
+      return await this.addUrlToExistingRun(
+        indexingRunId,
+        url,
+        dataSourceId,
+        knowledgeId
+      );
     } else {
       return await this.startIndexingRun(orgId, dataSourceId, knowledgeId, url);
     }
   }
 
   private async addUrlToExistingRun(
-    indexingRunId: string,
+    actorRunId: string,
     url: string,
+    dataSourceId: string,
     knowledgeId: string
   ): Promise<RetrieveContentAdapterResponse> {
-    await apifyAdapter.addUrlToExistingRun(indexingRunId, url, knowledgeId);
+    const indexingRunResurrected = await apifyAdapter.addUrlToExistingRun(
+      actorRunId,
+      url,
+      knowledgeId
+    );
+
+    if (indexingRunResurrected) {
+      const runStartedEventPayload: ApifyActorRunStartedPayload = {
+        actorRunId,
+        dataSourceId,
+        knowledgeId,
+        rootUrl: url,
+      };
+      await publishEvent(
+        ApifyEvent.APIFY_ACTOR_RUN_STARTED,
+        runStartedEventPayload
+      );
+    }
+
     return {
       status: RetrieveContentResponseStatus.PENDING,
     };
@@ -122,7 +146,6 @@ export class WebUrlsDataSourceAdapter
       (knowledge.metadata as unknown as WebUrlMetadata)?.indexingRunId ===
       item.metadata?.indexingRunId
     ) {
-      // Skip indexing if we have the same indexingRunId
       return false;
     }
 

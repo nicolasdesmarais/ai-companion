@@ -36,7 +36,7 @@ export enum ActorRunStatus {
 }
 
 export class ApifyAdapter {
-  async startUrlIndexing(
+  public async startUrlIndexing(
     orgId: string,
     dataSourceId: string,
     knowledgeId: string,
@@ -60,11 +60,11 @@ export class ApifyAdapter {
     return actorRun.id;
   }
 
-  async addUrlToExistingRun(
+  public async addUrlToExistingRun(
     actorRunId: string,
     url: string,
     knowledgeId: string
-  ) {
+  ): Promise<boolean> {
     await client.run(actorRunId).requestQueue().addRequest({
       url,
       uniqueKey: knowledgeId,
@@ -78,7 +78,10 @@ export class ApifyAdapter {
     if (actorRunStatus !== ActorRunStatus.INDEXING) {
       // After adding new URLs to requests queue, resurrect the actor run if it's not currently running
       await client.run(actorRunId).resurrect();
+      return true;
     }
+
+    return false;
   }
 
   private getActorStartOptions(
@@ -202,7 +205,6 @@ export class ApifyAdapter {
 
   public async getActorRunBatch(
     actorRunId: string,
-    rootUrl: string,
     offset: number,
     limit: number
   ): Promise<ActorRunResult> {

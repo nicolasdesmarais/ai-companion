@@ -86,7 +86,6 @@ const pollActorRun = async (
     actorRunResult = await step.run("get-actor-run-batch", async () => {
       return await apifyAdapter.getActorRunBatch(
         actorRunId,
-        rootUrl,
         offset,
         LIST_RESULTS_BATCH_SIZE
       );
