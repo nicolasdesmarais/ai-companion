@@ -103,7 +103,7 @@ export class FileLoader {
         },
       };
     } catch (e) {
-      console.error("[FILE LOADER]", e, e.response?.data?.error);
+      console.error("[FILE LOADER]", knowledgeId, e.response?.data?.error);
       throw new Error(`Error loading file ${filename}`);
     }
   }

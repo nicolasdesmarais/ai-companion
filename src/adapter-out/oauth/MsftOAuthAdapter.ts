@@ -69,7 +69,9 @@ export class MsftOAuthAdapter implements OAuthAdapter {
     exp.setSeconds(exp.getSeconds() + expires_in);
 
     if (error) {
-      throw new Error(`MSFT Error: ${error} - ${error_description}`);
+      throw new Error(
+        `MSFT Error refreshing token: ${error} - ${error_description}`
+      );
     }
     return { access_token, refresh_token, exp };
   }
