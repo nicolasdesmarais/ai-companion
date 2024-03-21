@@ -47,4 +47,9 @@ export interface DataSourceRepository {
   getOriginalDataSourceIdForKnowledge(
     knowledgeId: string
   ): Promise<string | null>;
+
+  updateDataSourceData(
+    datasourceId: string,
+    newData: any
+  ): Promise<DataSourceDto>;
 }

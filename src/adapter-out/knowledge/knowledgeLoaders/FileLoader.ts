@@ -9,7 +9,10 @@ import { EPubLoader } from "langchain/document_loaders/fs/epub";
 import { JSONLoader } from "langchain/document_loaders/fs/json";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import {
+  MarkdownTextSplitter,
+  RecursiveCharacterTextSplitter,
+} from "langchain/text_splitter";
 
 import mime from "mime-types";
 import { DocxLoader } from "./DocxLoader";
@@ -70,10 +73,16 @@ export class FileLoader {
         throw new BadRequestError(`Unsupported file type ${mimeType}`);
       }
 
-      const splitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 4000,
-        chunkOverlap: 600,
-      });
+      let splitter;
+      if (mimeType === "text/markdown") {
+        splitter = new MarkdownTextSplitter();
+      } else {
+        splitter = new RecursiveCharacterTextSplitter({
+          chunkSize: 4000,
+          chunkOverlap: 600,
+        });
+      }
+
       const docOutput = await splitter.splitDocuments(docs);
 
       let totalTokenCount = 0;

@@ -96,7 +96,7 @@ export class DataSourceManagementService {
     const { dataSource, dataSourceAdapter } =
       await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
 
-    return await dataSourceAdapter.getDataSourceItemList(
+    const dataSourceItemList = await dataSourceAdapter.getDataSourceItemList(
       dataSource.orgId,
       dataSource.ownerUserId,
       dataSourceId,
@@ -104,6 +104,15 @@ export class DataSourceManagementService {
       forRefresh,
       forceRefresh
     );
+
+    if (dataSourceItemList.data) {
+      await this.dataSourceRepository.updateDataSourceData(
+        dataSourceId,
+        dataSourceItemList.data
+      );
+    }
+
+    return dataSourceItemList;
   }
 
   /**
@@ -153,6 +162,7 @@ export class DataSourceManagementService {
             name: item.name,
             type: dataSource.type,
             uniqueId: item.uniqueId,
+            parentUniqueId: item.parentUniqueId,
             indexStatus: KnowledgeIndexStatus.INITIALIZED,
             originalContent: item.originalContent as any,
             metadata: item.metadata,
@@ -173,6 +183,7 @@ export class DataSourceManagementService {
       name,
       type,
       uniqueId,
+      parentUniqueId,
       indexStatus,
       documentCount,
       tokenCount,
@@ -189,6 +200,7 @@ export class DataSourceManagementService {
       name,
       type,
       uniqueId,
+      parentUniqueId,
       indexStatus,
       documentCount,
       tokenCount,
@@ -214,7 +226,9 @@ export class DataSourceManagementService {
         where: {
           type: dataSource.type,
           uniqueId: { in: uniqueIds },
-          indexStatus: KnowledgeIndexStatus.COMPLETED,
+          indexStatus: {
+            notIn: [KnowledgeIndexStatus.DELETED, KnowledgeIndexStatus.FAILED],
+          },
         },
       });
 
@@ -503,9 +517,11 @@ export class DataSourceManagementService {
 
     let indexStatus;
     let indexPercentage;
+    let lastIndexedAt;
     if (chunkCount === 0) {
       indexStatus = KnowledgeIndexStatus.COMPLETED;
       indexPercentage = 100;
+      lastIndexedAt = new Date();
     } else {
       indexStatus = KnowledgeIndexStatus.INDEXING;
     }
@@ -514,6 +530,7 @@ export class DataSourceManagementService {
       {
         indexStatus,
         indexPercentage,
+        lastIndexedAt,
         metadata: updatedMetadata,
       }
     );
@@ -663,11 +680,17 @@ export class DataSourceManagementService {
       indexStatus = KnowledgeIndexStatus.PARTIALLY_COMPLETED;
     }
 
+    let lastIndexedAt;
+    if (indexStatus) {
+      lastIndexedAt = new Date();
+    }
+
     const updatedKnowledge = await this.knowledgeRepository.update(
       knowledgeId,
       {
         indexPercentage,
         indexStatus,
+        lastIndexedAt,
       }
     );
 
@@ -1163,6 +1186,25 @@ export class DataSourceManagementService {
         e
       );
     }
+  }
+
+  public async updateDataSourceData(datasourceId: string, newData: any) {
+    const dataSource = await this.dataSourceRepository.getById(datasourceId);
+    const existingData = dataSource.data;
+
+    let updatedData;
+    if (existingData) {
+      updatedData = {
+        ...existingData,
+        ...newData,
+      };
+    } else {
+      updatedData = newData;
+    }
+
+    return this.dataSourceRepository.updateDataSource(datasourceId, {
+      data: updatedData,
+    });
   }
 }
 
