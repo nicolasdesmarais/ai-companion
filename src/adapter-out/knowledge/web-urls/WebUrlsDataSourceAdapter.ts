@@ -78,6 +78,10 @@ export class WebUrlsDataSourceAdapter
       return true;
     }
 
+    if (knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED) {
+      return true;
+    }
+
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     return !knowledge.lastIndexedAt || knowledge.lastIndexedAt < oneWeekAgo;
