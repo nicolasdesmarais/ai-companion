@@ -35,7 +35,7 @@ export enum ActorRunStatus {
   FAILED = "FAILED",
 }
 
-export class ApifyAdapter {
+export class ApifyCheerioAdapter {
   public async startUrlIndexing(
     orgId: string,
     dataSourceId: string,
@@ -295,5 +295,5 @@ export class ApifyAdapter {
   }
 }
 
-const apifyCheerioAdapter = new ApifyAdapter();
+const apifyCheerioAdapter = new ApifyCheerioAdapter();
 export default apifyCheerioAdapter;
