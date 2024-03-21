@@ -26,7 +26,7 @@ const LandingFeatures = () => {
         <div className="flex flex-col-reverse lg:flex-row">
           <div className="lg:w-[460px] gap-8 flex flex-col mt-10 lg:mt-0">
             <div>Create</div>
-            <div className="text-3xl font-extrabold lg:w-[300px]">
+            <div className="text-3xl font-bold lg:w-[300px]">
               Custom AI apps, created in minutes
             </div>
             <ul className="list-disc gap-4 flex flex-col ml-4">
@@ -63,7 +63,7 @@ const LandingFeatures = () => {
 
       <div className="flex flex-col items-center my-12 py-16 px-4 bg-[#F8F8F8]">
         <div className="flex flex-col lg:flex-row">
-          <div className="lg:bg-gradient2 flex items-center lg:p-16 lg:w-[560px] lg:w-[524px] justify-center">
+          <div className="lg:bg-gradient2 bg-left-top flex items-center lg:p-16 lg:w-[560px] lg:w-[524px] justify-center">
             <Image
               src="/chat-screenshot.png"
               alt="AI Chat Screenshot"
@@ -73,7 +73,7 @@ const LandingFeatures = () => {
           </div>
           <div className="lg:w-[460px] gap-8 flex flex-col lg:ml-20 mt-10 lg:mt-0">
             <div>Use</div>
-            <div className="text-3xl font-extrabold lg:w-[300px]">
+            <div className="text-3xl font-bold lg:w-[300px]">
               Boost productivity-for everyone
             </div>
             <ul className="list-disc gap-4 flex flex-col ml-4">
@@ -106,7 +106,7 @@ const LandingFeatures = () => {
         <div className="flex flex-col-reverse lg:flex-row">
           <div className="lg:w-[460px] gap-8 flex flex-col mt-10 lg:mt-0">
             <div>Share</div>
-            <div className="text-3xl font-extrabold lg:w-[300px]">
+            <div className="text-3xl font-bold lg:w-[300px]">
               Share apps with confidence
             </div>
             <ul className="list-disc gap-4 flex flex-col ml-4">
@@ -154,7 +154,7 @@ const LandingFeatures = () => {
           </div>
           <div className="lg:w-[460px] gap-8 flex flex-col lg:ml-20 mt-10 lg:mt-0">
             <div>Browse</div>
-            <div className="text-3xl font-extrabold lg:w-[360px]">
+            <div className="text-3xl font-bold lg:w-[360px]">
               Explore marketplace of built-for-purpose AIs
             </div>
             <ul className="list-disc gap-4 flex flex-col ml-4 mt-6">

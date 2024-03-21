@@ -125,10 +125,19 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
       externalChatId = await this.createChat();
     }
 
-    const response = (await assistant.invoke({
+    let response = (await assistant.invoke({
       threadId: externalChatId,
       content: promptWithKnowledge,
     })) as ThreadMessage[];
+
+    if (response.length === 0) {
+      // thread expired?
+      externalChatId = await this.createChat();
+      response = (await assistant.invoke({
+        threadId: externalChatId,
+        content: promptWithKnowledge,
+      })) as ThreadMessage[];
+    }
 
     let responseText = "";
     if (response.length > 0) {
