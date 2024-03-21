@@ -18,7 +18,7 @@ const LandingFeatures = () => {
               complex supply chain problems.
             </div>
           </div>
-          <div className="lg:bg-gradient1 lg:w-[572px] lg:h-[544px] flex items-center">
+          <div className="lg:bg-gradient1 lg:w-[572px] lg:h-[544px] hidden md:flex items-center ml-16">
             <Image
               src="/ship.png"
               alt="Container Ship"
@@ -215,7 +215,7 @@ const LandingFeatures = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center md:mb-14 mt-24">
+      <div className="flex flex-col items-center mb-14 mt-24">
         <div className="flex flex-col lg:flex-row py-12 px-10 lg:px-20 justify-evenly items-center bg-navy text-white">
           <h3 className="text-3xl font-bold lg:w-[700px]">
             Connect with our Enterprise team today.
