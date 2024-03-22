@@ -8,7 +8,7 @@ import apifyWebsiteContentCrawler, {
   ActorRunResult,
   ActorRunStatus,
 } from "@/src/adapter-out/knowledge/web-urls/ApifyWebsiteContentCrawler";
-import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsWebScraperAdapter";
+import webUrlsWebScraperAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsWebScraperAdapter";
 import { WebUrlMetadata } from "@/src/adapter-out/knowledge/web-urls/types/WebUrlMetadata";
 import {
   DataSourceItemListReceivedPayload,
@@ -202,7 +202,7 @@ const processWebScraperWebhook = async (
   const retrieveContentResponse = await step.run(
     "retrieve-content-from-event",
     async () => {
-      return await webUrlsDataSourceAdapter.retrieveContentFromEvent(
+      return await webUrlsWebScraperAdapter.retrieveContentFromEvent(
         knowledge,
         apifyEvent
       );

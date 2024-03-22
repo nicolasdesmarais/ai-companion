@@ -157,5 +157,5 @@ export class WebUrlsWebScraperAdapter
   }
 }
 
-const webUrlsDataSourceAdapter = new WebUrlsWebScraperAdapter();
-export default webUrlsDataSourceAdapter;
+const webUrlsWebScraperAdapter = new WebUrlsWebScraperAdapter();
+export default webUrlsWebScraperAdapter;
