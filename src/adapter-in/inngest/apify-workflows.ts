@@ -63,6 +63,21 @@ export const onApifyActorRunRequested = inngest.createFunction(
     while (true) {
       await step.sleep("sleep-for-1-minute", "1m");
 
+      const webhookReceived = await step.waitForEvent(
+        "wait-for-apify-webhook",
+        {
+          event: ApifyEvent.APIFY_WEBHOOK_RECEIVED,
+          timeout: "1m",
+          match: "data.userId",
+        }
+      );
+
+      if (webhookReceived) {
+        // Stop polling when webhook is received
+        break;
+      }
+
+      // No webhook received yet, continue polling
       const actorRunResult = await pollActorRun(
         dataSourceId,
         knowledgeId,
