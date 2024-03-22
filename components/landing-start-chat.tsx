@@ -86,8 +86,8 @@ const LandingStartChat = () => {
         </ul>
         <div className="m-2 md:m-8 py-8 px-4 md:px-12 md:w-[500px] lg:w-[700px] xl:w-[900px] bg-white drop-shadow-lg">
           <div>{selectedAi.header}</div>
-          <div className="font-bold">{selectedAi.bold}</div>
-          <div className="flex flex-wrap justify-evenly m-2 md:m-8 min-h-[435px]">
+          <div className="font-bold my-2">{selectedAi.bold}</div>
+          <div className="flex flex-wrap justify-evenly m-2 md:m-4 min-h-[360px]">
             {selectedAi.questions?.map((question, index) => (
               <div
                 key={`card-${index}`}
