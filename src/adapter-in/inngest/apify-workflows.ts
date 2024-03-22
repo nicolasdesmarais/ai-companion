@@ -151,7 +151,7 @@ const pollActorRun = async (
     await step.run("update-data-source", async () => {
       return await dataSourceManagementService.updateDataSourceData(
         dataSourceId,
-        { offset }
+        { indexingRunId: actorRunId, offset }
       );
     });
   } while (batchResults >= LIST_RESULTS_BATCH_SIZE);
