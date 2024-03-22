@@ -8,8 +8,8 @@ const LandingSupport = ({ className }: Props) => {
       <h2 className="text-3xl font-bold">We&apos;re here to help.</h2>
       <div>
         Email us at{" "}
-        <a className="underline" href="mailto:support@appdirectai.com">
-          support@appdirectai.com
+        <a className="underline" href="mailto:aisupport@appdirect.com">
+          aisupport@appdirect.com
         </a>{" "}
         if you have any questions.
       </div>
