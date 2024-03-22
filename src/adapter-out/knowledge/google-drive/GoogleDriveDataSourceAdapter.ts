@@ -24,7 +24,10 @@ import {
   googleDriveClient,
   googleDriveOauth2Client,
 } from "../../oauth/GoogleDriveClient";
-import { ContentRetrievingDataSourceAdapter } from "../types/DataSourceAdapter";
+import {
+  ContentRetrievingDataSourceAdapter,
+  ShouldReindexKnowledgeResponse,
+} from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
   DataSourceItemList,
@@ -405,13 +408,13 @@ export class GoogleDriveDataSourceAdapter
   public shouldReindexKnowledge(
     knowledge: Knowledge,
     item: DataSourceItem
-  ): boolean {
+  ): ShouldReindexKnowledgeResponse {
     const { modifiedTime } =
       knowledge.metadata as unknown as GoogleDriveFileMetadata;
-    return (
+    const shouldReindex =
       modifiedTime !== item.metadata.modifiedTime ||
-      knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED
-    );
+      knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED;
+    return { shouldReindex };
   }
 
   private async getFileContent(

@@ -1,5 +1,8 @@
 import { Knowledge } from "@prisma/client";
-import { DataSourceAdapter } from "../types/DataSourceAdapter";
+import {
+  DataSourceAdapter,
+  ShouldReindexKnowledgeResponse,
+} from "../types/DataSourceAdapter";
 import { DataSourceItem, DataSourceItemList } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { ApiDataSourceInput } from "./ApiDataSourceInput";
@@ -32,8 +35,8 @@ export class ApiDataSourceAdapter implements DataSourceAdapter {
   public shouldReindexKnowledge(
     knowledge: Knowledge,
     item: DataSourceItem
-  ): boolean {
-    return true;
+  ): ShouldReindexKnowledgeResponse {
+    return { shouldReindex: true };
   }
 
   pollKnowledgeIndexingStatus(

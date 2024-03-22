@@ -1,7 +1,9 @@
-import { BadRequestError } from "@/src/domain/errors/Errors";
-import { ApifyWebhookEvent } from "@/src/domain/models/ApifyWebhookEvent";
+import {
+  ApifyActorRunStartedPayload,
+  ApifyEvent,
+} from "@/src/adapter-in/inngest/apify-workflows";
+import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
 import { KnowledgeDto } from "@/src/domain/models/DataSources";
-import { FileStorageService } from "@/src/domain/services/FileStorageService";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import {
   ContentRetrievingDataSourceAdapter,
@@ -15,12 +17,11 @@ import {
   RetrieveContentResponseStatus,
 } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
-import { KnowledgeIndexingResultStatus } from "../types/KnowlegeIndexingResult";
-import apifyAdapter from "./ApifyAdapter";
+import apifyWebsiteContentCrawler from "./ApifyWebsiteContentCrawler";
 import { WebUrlDataSourceInput } from "./types/WebUrlDataSourceInput";
 import { WebUrlMetadata } from "./types/WebUrlMetadata";
 
-export class WebUrlsDataSourceAdapter
+export class WebUrlsWebsiteContentCrawlerAdapter
   implements DataSourceAdapter, ContentRetrievingDataSourceAdapter
 {
   public async getDataSourceItemList(
@@ -35,6 +36,7 @@ export class WebUrlsDataSourceAdapter
         {
           name: input.url,
           uniqueId: input.url,
+          parentUniqueId: input.url,
         },
       ],
     };
@@ -48,12 +50,14 @@ export class WebUrlsDataSourceAdapter
     knowledge: KnowledgeDto,
     data: any
   ): Promise<RetrieveContentAdapterResponse> {
-    const input = data as WebUrlDataSourceInput;
-    const actorRunId = await apifyAdapter.startUrlIndexing(
+    const url = knowledge.name;
+    const knowledgeId = knowledge.id;
+
+    const actorRunId = await apifyWebsiteContentCrawler.startUrlIndexing(
       orgId,
       dataSourceId,
-      knowledge.id,
-      input.url
+      knowledgeId,
+      url
     );
 
     if (!actorRunId) {
@@ -61,6 +65,17 @@ export class WebUrlsDataSourceAdapter
         status: RetrieveContentResponseStatus.FAILED,
       };
     }
+
+    const runStartedEventPayload: ApifyActorRunStartedPayload = {
+      actorRunId,
+      dataSourceId,
+      knowledgeId,
+      rootUrl: url,
+    };
+    await publishEvent(
+      ApifyEvent.APIFY_ACTOR_RUN_STARTED,
+      runStartedEventPayload
+    );
 
     const metadata: WebUrlMetadata = {
       indexingRunId: actorRunId,
@@ -79,56 +94,29 @@ export class WebUrlsDataSourceAdapter
       return { shouldReindex: true };
     }
 
+    if (
+      (knowledge.metadata as unknown as WebUrlMetadata)?.indexingRunId ===
+      item.metadata?.indexingRunId
+    ) {
+      return { shouldReindex: false, includeChildren: false };
+    }
+
+    if (item.uniqueId !== item.parentUniqueId) {
+      // Reindex if the item is not a root item
+      return { shouldReindex: true };
+    }
+
     if (knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED) {
       return { shouldReindex: true };
     }
 
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    const shouldReindex =
-      !knowledge.lastIndexedAt || knowledge.lastIndexedAt < oneWeekAgo;
-    return { shouldReindex };
-  }
-
-  public async retrieveContentFromEvent(
-    knowledge: KnowledgeDto,
-    data: ApifyWebhookEvent
-  ): Promise<RetrieveContentAdapterResponse> {
-    const { actorRunId } = data.eventData;
-    const metadata = knowledge.metadata as unknown as WebUrlMetadata;
-    if (actorRunId !== metadata.indexingRunId) {
-      throw new BadRequestError("Event actorRunId does not match metadata");
-    }
-
-    const result = await apifyAdapter.getActorRunResult(metadata.indexingRunId);
-
-    let status: RetrieveContentResponseStatus;
-    let originalContent;
-    if (
-      result.items &&
-      (result.status === KnowledgeIndexingResultStatus.PARTIAL ||
-        result.status === KnowledgeIndexingResultStatus.SUCCESSFUL)
-    ) {
-      const filename = `${knowledge.name}.json`;
-      const contentBlobUrl = await FileStorageService.put(
-        filename,
-        JSON.stringify(result)
-      );
-      status = RetrieveContentResponseStatus.SUCCESS;
-
-      originalContent = {
-        contentBlobUrl,
-        filename,
-        mimeType: "application/json",
-      };
+    if (!knowledge.lastIndexedAt || knowledge.lastIndexedAt < oneWeekAgo) {
+      return { shouldReindex: true };
     } else {
-      status = RetrieveContentResponseStatus.FAILED;
+      return { shouldReindex: false, includeChildren: true };
     }
-
-    return {
-      status,
-      originalContent,
-    };
   }
 
   public async pollKnowledgeIndexingStatus(
@@ -141,7 +129,6 @@ export class WebUrlsDataSourceAdapter
       };
     }
 
-    // return this.getActorRunResult(knowledge, metadata);
     //TODO: Re-implement
     return {
       indexStatus: KnowledgeIndexStatus.INDEXING,
@@ -155,5 +142,6 @@ export class WebUrlsDataSourceAdapter
   }
 }
 
-const webUrlsDataSourceAdapter = new WebUrlsDataSourceAdapter();
-export default webUrlsDataSourceAdapter;
+const webUrlsWebsiteContentCrawlerAdapter =
+  new WebUrlsWebsiteContentCrawlerAdapter();
+export default webUrlsWebsiteContentCrawlerAdapter;

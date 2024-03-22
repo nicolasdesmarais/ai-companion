@@ -2,11 +2,12 @@ import {
   DataSourceItem,
   RetrieveContentResponseStatus,
 } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
-import apifyCheerioAdapter, {
+
+import apifyWebsiteContentCrawler, {
   ActorRunItem,
   ActorRunResult,
   ActorRunStatus,
-} from "@/src/adapter-out/knowledge/web-urls/ApifyCheerioAdapter";
+} from "@/src/adapter-out/knowledge/web-urls/ApifyWebsiteContentCrawler";
 import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
 import { WebUrlMetadata } from "@/src/adapter-out/knowledge/web-urls/types/WebUrlMetadata";
 import {
@@ -94,7 +95,7 @@ const pollActorRun = async (
   let actorRunResult: ActorRunResult;
   do {
     actorRunResult = await step.run("get-actor-run-batch", async () => {
-      return await apifyCheerioAdapter.getActorRunBatch(
+      return await apifyWebsiteContentCrawler.getActorRunBatch(
         actorRunId,
         offset,
         LIST_RESULTS_BATCH_SIZE
@@ -105,38 +106,18 @@ const pollActorRun = async (
     if (batchResults > 0) {
       offset += actorRunResult.items.length;
 
-      let contentReceivedEvents = [];
-      const childUrls: string[] = [];
+      const dataSourceItems: DataSourceItem[] = [];
       for (const item of actorRunResult.items) {
-        contentReceivedEvents.push(
-          createContentReceivedEvent(dataSourceId, knowledgeId, item, step)
-        );
-
-        if (contentReceivedEvents.length >= MAX_EVENTS) {
-          await step.sendEvent(
-            "publish-content-received-events",
-            contentReceivedEvents
+        if (item.url === rootUrl) {
+          await publishRootUrlEvent(dataSourceId, knowledgeId, item, step);
+        } else {
+          dataSourceItems.push(
+            mapActorRunItemToDataSourceItem(actorRunId, rootUrl, item)
           );
-          contentReceivedEvents = [];
         }
-
-        childUrls.push(...item.childUrls);
       }
 
-      if (childUrls.length > 0) {
-        const dataSourceItems: DataSourceItem[] = childUrls.map((url) => {
-          const metadata: WebUrlMetadata = {
-            indexingRunId: actorRunId,
-          };
-
-          return {
-            name: url,
-            uniqueId: url,
-            parentUniqueId: rootUrl,
-            metadata,
-          };
-        });
-
+      if (dataSourceItems.length > 0) {
         const eventPayload: DataSourceItemListReceivedPayload = {
           dataSourceId,
           dataSourceItemList: { items: dataSourceItems },
@@ -147,13 +128,6 @@ const pollActorRun = async (
           name: DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED,
           data: eventPayload,
         });
-      }
-
-      if (contentReceivedEvents.length > 0) {
-        await step.sendEvent(
-          "publish-content-received-events",
-          contentReceivedEvents
-        );
       }
     }
 
@@ -168,7 +142,7 @@ const pollActorRun = async (
   return actorRunResult;
 };
 
-const createContentReceivedEvent = (
+const publishRootUrlEvent = async (
   dataSourceId: string,
   knowledgeId: string,
   item: ActorRunItem,
@@ -184,9 +158,30 @@ const createContentReceivedEvent = (
     },
   };
 
-  return {
+  await step.sendEvent("root-url-content-received", {
     name: DomainEvent.KNOWLEDGE_CONTENT_RETRIEVED,
     data: contentReceivedPayload,
+  });
+};
+
+const mapActorRunItemToDataSourceItem = (
+  actorRunId: string,
+  rootUrl: string,
+  actorRunItem: ActorRunItem
+) => {
+  const metadata: WebUrlMetadata = {
+    indexingRunId: actorRunId,
+  };
+  return {
+    name: actorRunItem.url,
+    uniqueId: actorRunItem.url,
+    parentUniqueId: rootUrl,
+    originalContent: {
+      contentBlobUrl: actorRunItem.contentBlobUrl,
+      filename: actorRunItem.filename,
+      mimeType: actorRunItem.mimeType,
+    },
+    metadata,
   };
 };
 

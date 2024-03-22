@@ -8,6 +8,7 @@ import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import {
   ContentRetrievingDataSourceAdapter,
   DataSourceAdapter,
+  ShouldReindexKnowledgeResponse,
 } from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
@@ -138,19 +139,19 @@ export class WebUrlsDataSourceAdapter
   public shouldReindexKnowledge(
     knowledge: Knowledge,
     item: DataSourceItem
-  ): boolean {
+  ): ShouldReindexKnowledgeResponse {
     if (knowledge.uniqueId !== item.uniqueId) {
-      return true;
+      return { shouldReindex: true };
     }
 
     if (
       (knowledge.metadata as unknown as WebUrlMetadata)?.indexingRunId ===
       item.metadata?.indexingRunId
     ) {
-      return false;
+      return { shouldReindex: false };
     }
 
-    return true;
+    return { shouldReindex: true };
     //  TODO: Temporarily force reindexing, until we implement association of child URLs
     // if (knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED) {
     //   return true;

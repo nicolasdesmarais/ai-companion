@@ -341,11 +341,14 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
     return result.map((knowledge) => knowledge.id);
   }
 
-  public async findByTypeAndParent(
+  public async findIdsByTypeAndParent(
     type: DataSourceType,
     parentUniqueId: string
-  ): Promise<KnowledgeDto[]> {
+  ): Promise<string[]> {
     const result = await prismadb.knowledge.findMany({
+      select: {
+        id: true,
+      },
       where: {
         type,
         parentUniqueId,
@@ -353,7 +356,7 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
       },
     });
 
-    return result.map(mapKnowledgeToDto);
+    return result.map((knowledge) => knowledge.id);
   }
 
   public async getAiKnowledgeSummary(aiId: string): Promise<KnowledgeSummary> {
