@@ -17,7 +17,10 @@ export interface DataSourceAdapter {
     forceRefresh?: boolean
   ): Promise<DataSourceItemList>;
 
-  shouldReindexKnowledge(knowledge: Knowledge, item: DataSourceItem): boolean;
+  shouldReindexKnowledge(
+    knowledge: Knowledge,
+    item: DataSourceItem
+  ): ShouldReindexKnowledgeResponse;
 
   pollKnowledgeIndexingStatus(
     knowledge: Knowledge
@@ -36,4 +39,9 @@ export interface ContentRetrievingDataSourceAdapter extends DataSourceAdapter {
     knowledge: KnowledgeDto,
     data: any
   ): Promise<RetrieveContentAdapterResponse>;
+}
+
+export interface ShouldReindexKnowledgeResponse {
+  shouldReindex: boolean;
+  includeChildren?: boolean;
 }

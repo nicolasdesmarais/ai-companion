@@ -6,6 +6,7 @@ import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import {
   ContentRetrievingDataSourceAdapter,
   DataSourceAdapter,
+  ShouldReindexKnowledgeResponse,
 } from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
@@ -73,18 +74,20 @@ export class WebUrlsDataSourceAdapter
   public shouldReindexKnowledge(
     knowledge: Knowledge,
     item: DataSourceItem
-  ): boolean {
+  ): ShouldReindexKnowledgeResponse {
     if (knowledge.uniqueId !== item.uniqueId) {
-      return true;
+      return { shouldReindex: true };
     }
 
     if (knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED) {
-      return true;
+      return { shouldReindex: true };
     }
 
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    return !knowledge.lastIndexedAt || knowledge.lastIndexedAt < oneWeekAgo;
+    const shouldReindex =
+      !knowledge.lastIndexedAt || knowledge.lastIndexedAt < oneWeekAgo;
+    return { shouldReindex };
   }
 
   public async retrieveContentFromEvent(

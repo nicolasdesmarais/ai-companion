@@ -136,7 +136,7 @@ export const onDataSourceItemListReceived = inngest.createFunction(
     const { dataSourceId, dataSourceItemList, forRefresh, forceRefresh } =
       payload;
 
-    const knowledgeList: KnowledgeDto[] = await step.run(
+    const { knowledgeListToUpdate, knowledgeIdsToAssociate } = await step.run(
       "upsert-knowledge-list",
       async () => {
         return await dataSourceManagementService.upsertKnowledgeList(
@@ -146,28 +146,23 @@ export const onDataSourceItemListReceived = inngest.createFunction(
         );
       }
     );
-    const knowledgeIds = knowledgeList.map((k) => k.id);
 
     if (forRefresh) {
       await step.run("update-datasource-knowledge-associations", async () => {
         await dataSourceManagementService.updateDataSourceKnowledgeAssociations(
           dataSourceId,
           dataSourceItemList,
-          knowledgeList
+          knowledgeIdsToAssociate
         );
       });
     } else {
       await step.run("create-datasource-knowledge-associations", async () => {
         await dataSourceManagementService.createDataSourceKnowledgeAssociations(
           dataSourceId,
-          knowledgeIds
+          knowledgeIdsToAssociate
         );
       });
     }
-
-    const knowledgeListToUpdate = knowledgeList.filter(
-      (knowledge) => knowledge.indexStatus === KnowledgeIndexStatus.INITIALIZED
-    );
 
     await step.run("update-datasource-status", async () => {
       await dataSourceManagementService.updateDataSourceStatus(dataSourceId);

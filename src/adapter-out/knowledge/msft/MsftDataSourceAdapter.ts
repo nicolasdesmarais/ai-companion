@@ -11,7 +11,10 @@ import prismadb from "@/src/lib/prismadb";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import axios from "axios";
 import msftOAuthAdapter from "../../oauth/MsftOAuthAdapter";
-import { ContentRetrievingDataSourceAdapter } from "../types/DataSourceAdapter";
+import {
+  ContentRetrievingDataSourceAdapter,
+  ShouldReindexKnowledgeResponse,
+} from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
   DataSourceItemList,
@@ -254,12 +257,12 @@ export class MsftDataSourceAdapter
   public shouldReindexKnowledge(
     knowledge: Knowledge,
     item: DataSourceItem
-  ): boolean {
-    return (
+  ): ShouldReindexKnowledgeResponse {
+    const shouldReindex =
       (knowledge.metadata as any)?.modifiedTime !==
         item.metadata.modifiedTime ||
-      knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED
-    );
+      knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED;
+    return { shouldReindex };
   }
 
   public async pollKnowledgeIndexingStatus(

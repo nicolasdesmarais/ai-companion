@@ -47,10 +47,10 @@ export interface KnowledgeRepository {
 
   findFailedKnowledge(limit?: number): Promise<string[]>;
 
-  findByTypeAndParent(
+  findIdsByTypeAndParent(
     type: DataSourceType,
     parentUniqueId: string
-  ): Promise<KnowledgeDto[]>;
+  ): Promise<string[]>;
 
   getAiKnowledgeSummary(aiId: string): Promise<KnowledgeSummary>;
 

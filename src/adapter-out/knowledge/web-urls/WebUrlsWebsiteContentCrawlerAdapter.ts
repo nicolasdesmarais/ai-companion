@@ -8,6 +8,7 @@ import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import {
   ContentRetrievingDataSourceAdapter,
   DataSourceAdapter,
+  ShouldReindexKnowledgeResponse,
 } from "../types/DataSourceAdapter";
 import {
   DataSourceItem,
@@ -88,30 +89,34 @@ export class WebUrlsWebsiteContentCrawlerAdapter
   public shouldReindexKnowledge(
     knowledge: Knowledge,
     item: DataSourceItem
-  ): boolean {
+  ): ShouldReindexKnowledgeResponse {
     if (knowledge.uniqueId !== item.uniqueId) {
-      return true;
+      return { shouldReindex: true };
     }
 
     if (
       (knowledge.metadata as unknown as WebUrlMetadata)?.indexingRunId ===
       item.metadata?.indexingRunId
     ) {
-      return false;
+      return { shouldReindex: false, includeChildren: false };
     }
 
     if (item.uniqueId !== item.parentUniqueId) {
       // Reindex if the item is not a root item
-      return true;
+      return { shouldReindex: true };
     }
 
     if (knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED) {
-      return true;
+      return { shouldReindex: true };
     }
 
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    return !knowledge.lastIndexedAt || knowledge.lastIndexedAt < oneWeekAgo;
+    if (!knowledge.lastIndexedAt || knowledge.lastIndexedAt < oneWeekAgo) {
+      return { shouldReindex: true };
+    } else {
+      return { shouldReindex: false, includeChildren: true };
+    }
   }
 
   public async pollKnowledgeIndexingStatus(

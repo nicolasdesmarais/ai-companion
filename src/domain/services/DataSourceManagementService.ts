@@ -37,9 +37,15 @@ import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
 import { KnowledgeRepository } from "../ports/outgoing/KnowledgeRepository";
 import dataSourceAdapterService from "./DataSourceAdapterService";
 import { FileStorageService } from "./FileStorageService";
+import knowledgeService from "./KnowledgeService";
 import usageService from "./UsageService";
 
 const KNOWLEDGE_CHUNK_TOKEN_COUNT = 20000;
+
+export interface UpsertKnowledgeListResponse {
+  knowledgeListToUpdate: KnowledgeDto[];
+  knowledgeIdsToAssociate: string[];
+}
 
 export class DataSourceManagementService {
   constructor(
@@ -132,14 +138,16 @@ export class DataSourceManagementService {
     dataSourceId: string,
     itemList: DataSourceItemList,
     forceRefresh: boolean
-  ): Promise<KnowledgeDto[]> {
+  ): Promise<UpsertKnowledgeListResponse> {
+    const knowledgeListToUpdate: KnowledgeDto[] = [];
+    const knowledgeIdsToAssociate: string[] = [];
+
     if (itemList.items.length === 0) {
-      return [];
+      return { knowledgeListToUpdate, knowledgeIdsToAssociate };
     }
     const { dataSource, dataSourceAdapter } =
       await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
 
-    const knowledgeList = [];
     const existingKnowledgeMap = await this.getExistingKnowledgeMap(
       dataSource,
       itemList
@@ -148,12 +156,19 @@ export class DataSourceManagementService {
     for (const item of itemList.items) {
       let knowledge = existingKnowledgeMap.get(item.uniqueId!);
 
-      if (
-        knowledge &&
-        (forceRefresh ||
-          dataSourceAdapter.shouldReindexKnowledge(knowledge, item))
-      ) {
-        knowledge = undefined;
+      if (knowledge) {
+        const { shouldReindex, includeChildren } =
+          dataSourceAdapter.shouldReindexKnowledge(knowledge, item);
+        if (forceRefresh || shouldReindex) {
+          knowledge = undefined;
+        } else if (includeChildren && knowledge.uniqueId) {
+          const childKnowledgeIds =
+            await knowledgeService.findKnowledgeIdsByTypeAndParent(
+              dataSource.type,
+              knowledge.uniqueId
+            );
+          knowledgeIdsToAssociate.push(...childKnowledgeIds);
+        }
       }
 
       if (!knowledge) {
@@ -169,12 +184,13 @@ export class DataSourceManagementService {
             isMigrated: true,
           },
         });
+        knowledgeListToUpdate.push(this.mapKnowledgeToDto(knowledge));
       }
 
-      knowledgeList.push(knowledge);
+      knowledgeIdsToAssociate.push(knowledge.id);
     }
 
-    return knowledgeList.map((knowledge) => this.mapKnowledgeToDto(knowledge));
+    return { knowledgeListToUpdate, knowledgeIdsToAssociate };
   }
 
   private mapKnowledgeToDto(knowledge: Knowledge): KnowledgeDto {
@@ -272,11 +288,10 @@ export class DataSourceManagementService {
   public async updateDataSourceKnowledgeAssociations(
     dataSourceId: string,
     itemList: DataSourceItemList,
-    knowledgeList: KnowledgeDto[]
+    knowledgeIds: string[]
   ) {
     const { dataSourceAdapter } =
       await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
-    const knowledgeIds = knowledgeList.map((knowledge) => knowledge.id);
 
     // Find existing associations
     const existingAssociations = await prismadb.dataSourceKnowledge.findMany({

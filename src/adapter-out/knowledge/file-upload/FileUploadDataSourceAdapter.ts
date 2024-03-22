@@ -1,5 +1,8 @@
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
-import { DataSourceAdapter } from "../types/DataSourceAdapter";
+import {
+  DataSourceAdapter,
+  ShouldReindexKnowledgeResponse,
+} from "../types/DataSourceAdapter";
 import { DataSourceItem, DataSourceItemList } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { FileUploadDataSourceInput } from "./types/FileUploadDataSourceInput";
@@ -37,11 +40,11 @@ export class FileUploadDataSourceAdapter implements DataSourceAdapter {
   public shouldReindexKnowledge(
     knowledge: Knowledge,
     item: DataSourceItem
-  ): boolean {
-    return (
+  ): ShouldReindexKnowledgeResponse {
+    const shouldReindex =
       knowledge.uniqueId !== item.uniqueId ||
-      knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED
-    );
+      knowledge.indexStatus !== KnowledgeIndexStatus.COMPLETED;
+    return { shouldReindex };
   }
 
   public async pollKnowledgeIndexingStatus(

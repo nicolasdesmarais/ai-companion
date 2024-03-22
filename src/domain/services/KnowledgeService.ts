@@ -30,11 +30,11 @@ export class KnowledgeService {
     );
   }
 
-  public async findKnowledgeByTypeAndParent(
+  public async findKnowledgeIdsByTypeAndParent(
     type: DataSourceType,
     parentUniqueId: string
-  ): Promise<KnowledgeDto[]> {
-    return await this.knowledgeRepository.findByTypeAndParent(
+  ): Promise<string[]> {
+    return await this.knowledgeRepository.findIdsByTypeAndParent(
       type,
       parentUniqueId
     );
