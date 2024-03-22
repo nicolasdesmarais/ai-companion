@@ -46,8 +46,9 @@ const LandingHome = () => {
 
       <div className="flex flex-col items-center mb-14 mt-20 unleash-gradient">
         <div className=" lg:w-[1110px] px-8 md:px-20 py-16 flex flex-col items-center">
-          <h3 className="text-3xl font-bold mb-16">
-            Unleash productivity and innovation
+          <h3 className="text-3xl font-bold mb-16 text-center md:w-[700px]">
+            Create purpose-built, secure AI apps in minutes-using your data and
+            choice of LLM
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="bg-white px-8 py-16 drop-shadow-lg">
