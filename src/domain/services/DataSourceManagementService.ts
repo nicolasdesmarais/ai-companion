@@ -808,9 +808,12 @@ export class DataSourceManagementService {
       return response;
     }
 
+    const parentUniqueId = knowledge.parentUniqueId || undefined;
+
     const relatedKnowledgeInstances = await prismadb.knowledge.findMany({
       where: {
         uniqueId: knowledge.uniqueId,
+        parentUniqueId,
         type: knowledge.type,
         id: { not: knowledgeId },
       },
