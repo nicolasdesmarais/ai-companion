@@ -142,10 +142,10 @@ export class DataSourceManagementService {
     forceRefresh: boolean
   ): Promise<UpsertKnowledgeListResponse> {
     const knowledgeListToUpdate: KnowledgeDto[] = [];
-    const knowledgeIdsToAssociate: string[] = [];
+    const knowledgeIdsToAssociateSet = new Set<string>();
 
     if (itemList.items.length === 0) {
-      return { knowledgeListToUpdate, knowledgeIdsToAssociate };
+      return { knowledgeListToUpdate, knowledgeIdsToAssociate: [] };
     }
     const { dataSource, dataSourceAdapter } =
       await dataSourceAdapterService.getDataSourceAndAdapter(dataSourceId);
@@ -169,7 +169,9 @@ export class DataSourceManagementService {
               dataSource.type,
               knowledge.uniqueId
             );
-          knowledgeIdsToAssociate.push(...childKnowledgeIds);
+          childKnowledgeIds.forEach((childKnowledgeId) =>
+            knowledgeIdsToAssociateSet.add(childKnowledgeId)
+          );
         }
       }
 
@@ -189,10 +191,13 @@ export class DataSourceManagementService {
         knowledgeListToUpdate.push(this.mapKnowledgeToDto(knowledge));
       }
 
-      knowledgeIdsToAssociate.push(knowledge.id);
+      knowledgeIdsToAssociateSet.add(knowledge.id);
     }
 
-    return { knowledgeListToUpdate, knowledgeIdsToAssociate };
+    return {
+      knowledgeListToUpdate,
+      knowledgeIdsToAssociate: Array.from(knowledgeIdsToAssociateSet),
+    };
   }
 
   private mapKnowledgeToDto(knowledge: Knowledge): KnowledgeDto {
