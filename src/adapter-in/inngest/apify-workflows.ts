@@ -66,7 +66,7 @@ export const onApifyActorRunRequested = inngest.createFunction(
         {
           event: ApifyEvent.APIFY_WEBHOOK_RECEIVED,
           timeout: "1m",
-          match: "data.userId",
+          match: `data.apifyEvent.eventData.actorRunId == ${actorRunId}`,
         }
       );
 
