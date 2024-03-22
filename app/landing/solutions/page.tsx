@@ -19,9 +19,9 @@ const Solutions = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-20 mb-12 mx-4 lg:mx-0">
-        <div className="flex flex-col-reverse lg:flex-row justify-between">
-          <div className="lg:w-[400px] gap-8 flex flex-col mt-10 lg:mt-0">
+      <div className="flex flex-col items-center lg:mt-20 lg:mb-12 mx-4 lg:mx-0">
+        <div className="flex flex-col lg:flex-row justify-between">
+          <div className="lg:w-[400px] gap-8 flex flex-col ">
             <svg
               width="72"
               height="72"
@@ -91,13 +91,14 @@ const Solutions = () => {
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
           </div>
-          <div className="pl-16">
+          <div className="lg:pl-16">
             <svg
               width="663"
               height="627"
               viewBox="0 0 663 627"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              className="w-full"
             >
               <g filter="url(#filter0_d_1538_2601)">
                 <rect
@@ -218,8 +219,8 @@ const Solutions = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center my-12 py-16 px-4 bg-[#F8F8F8]">
-        <div className="flex flex-col lg:flex-row">
+      <div className="flex flex-col items-center lg:my-12 lg:py-16 px-4 bg-[#F8F8F8]">
+        <div className="flex flex-col-reverse lg:flex-row">
           <div className="">
             <svg
               width="663"
@@ -227,6 +228,7 @@ const Solutions = () => {
               viewBox="0 0 663 626"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              className="w-full"
             >
               <g filter="url(#filter0_d_1538_2460)">
                 <rect
@@ -352,13 +354,14 @@ const Solutions = () => {
               </defs>
             </svg>
           </div>
-          <div className="lg:w-[460px] gap-8 flex flex-col lg:ml-20 mt-10 lg:mt-0">
+          <div className="lg:w-[460px] gap-8 flex flex-col lg:ml-20 ">
             <svg
               width="80"
               height="73"
               viewBox="0 0 80 73"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              className="w-full"
             >
               <path
                 d="M63.205 15.571L39.7549 31.651V42.031L63.205 57.991C75.8017 46.291 75.8017 27.301 63.205 15.601V15.571Z"
@@ -401,9 +404,9 @@ const Solutions = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-20 mb-12 mx-4">
-        <div className="flex flex-col-reverse lg:flex-row">
-          <div className="lg:w-[460px] gap-8 flex flex-col mt-10 lg:mt-0">
+      <div className="flex flex-col items-center lg:mt-20 lg:mb-12 mx-4">
+        <div className="flex flex-col lg:flex-row">
+          <div className="lg:w-[460px] gap-8 flex flex-col ">
             <svg
               width="72"
               height="73"
@@ -452,6 +455,7 @@ const Solutions = () => {
               viewBox="0 0 663 627"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              className="w-full"
             >
               <g filter="url(#filter0_d_1538_2531)">
                 <rect
@@ -576,8 +580,8 @@ const Solutions = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center my-12 py-16 px-4 bg-[#F8F8F8]">
-        <div className="flex flex-col lg:flex-row">
+      <div className="flex flex-col items-center lg:my-12 lg:py-16 px-4 bg-[#F8F8F8]">
+        <div className="flex flex-col-reverse lg:flex-row">
           <div className="">
             <svg
               width="662"
@@ -585,6 +589,7 @@ const Solutions = () => {
               viewBox="0 0 662 627"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              className="w-full"
             >
               <g filter="url(#filter0_d_1538_2488)">
                 <rect
@@ -706,7 +711,7 @@ const Solutions = () => {
               </defs>
             </svg>
           </div>
-          <div className="lg:w-[460px] gap-8 flex flex-col lg:ml-20 mt-10 lg:mt-0">
+          <div className="lg:w-[460px] gap-8 flex flex-col lg:ml-20 ">
             <svg
               width="72"
               height="73"
@@ -767,9 +772,9 @@ const Solutions = () => {
           </div>
         </div>
       </div>
-      <div className="flex flex-col items-center mt-20 mb-12 mx-4">
-        <div className="flex flex-col-reverse lg:flex-row">
-          <div className="lg:w-[460px] gap-8 flex flex-col mt-10 lg:mt-0">
+      <div className="flex flex-col items-center lg:mt-20 lg:mb-12 mx-4">
+        <div className="flex flex-col lg:flex-row">
+          <div className="lg:w-[460px] gap-8 flex flex-col ">
             <svg
               width="73"
               height="72"
@@ -833,6 +838,7 @@ const Solutions = () => {
               viewBox="0 0 663 627"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              className="w-full"
             >
               <g filter="url(#filter0_d_1538_2566)">
                 <rect
