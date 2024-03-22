@@ -17,6 +17,12 @@ const LandingFeatures = () => {
               For companies looking to build AI-driven solutions that solve
               complex supply chain problems.
             </div>
+            <Link
+              href="/landing/contact"
+              className="px-8 py-2 bg-sky w-40 text-navy mt-10"
+            >
+              Contact us
+            </Link>
           </div>
           <div className="lg:bg-gradient1 lg:w-[572px] lg:h-[544px] hidden md:flex items-center ml-16">
             <Image
