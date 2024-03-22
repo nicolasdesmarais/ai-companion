@@ -2,48 +2,56 @@
 import { cn } from "@/src/lib/utils";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
 const ais = [
   {
-    name: "Andrea",
-    src: "/andrea.png",
-    header: "Introducing Andrea, an AI specializing in sales enablement.",
-    bold: "Ask her anything, such as...",
+    name: "Writing Assistant",
+    src: "/writing-ai.png",
+    link: "https://appdirect.ai/public/ai/f55e4fc8-2d7b-47b0-b077-7ab6627b9ac3",
+    header:
+      "Introducing the Writing Assistant, an AI created to help edit your writing or provide information on proper grammar and spelling.",
+    bold: "Ask it anything, such as...",
     questions: [
-      "Quiz me on product features.",
-      "Summarize this agenda.",
-      "Rank my sales team based on annual revenue.",
-      "Who are my top competitors?",
-      "Improve the language on this blurb.",
-      "Write a short description for a website.",
+      "Can you proofread my essay?",
+      "Can you check this report for errors?",
+      "Refine this sentence.",
+      "Can this story ending be improved, and how?",
+      "Can you help write a supplier inquiry email?",
+      "Please reduce this to 50 characters.",
     ],
   },
   {
-    name: "Michael",
-    src: "/michael.png",
-    header: "Introducing Michael, an AI specializing in Legal support.",
-    bold: "Ask him anything, such as...",
+    name: "Spanish Tutor",
+    src: "/spanish-ai.png",
+    link: "https://appdirect.ai/public/ai/1cd5ae8e-81a5-4f81-b9df-f005ab67f260",
+    header:
+      "Introducing the Spanish Tutor, an AI created to help people to speak Spanish if it's not their native language.",
+    bold: "Ask it anything, such as...",
     questions: [
-      "Draft an employee contract.",
-      "What I should include in an NDA?",
-      "What is in an acquisition contract?",
-      "LLC setup requirements?",
-      "Compare these supplier SOWs according to ROI.",
+      `Can you provide common adjectives in Spanish for "happily"?`,
+      `What is the difference between "ser" and "estar"?`,
+      "How do I form the past tense in Spanish?",
+      `How do I use "estar" in a sentence?`,
+      "How is the subjunctive used in Spanish?",
+      "How do you pronounce hello?",
     ],
   },
   {
-    name: "Yvonne",
-    src: "/yvonne.png",
-    header: "Introducing Yvonne, an AI specializing in HR support.",
-    bold: "Ask her anything, such as...",
+    name: "HR Specialist",
+    src: "/hr-ai.png",
+    link: "https://appdirect.ai/public/ai/f55e4fc8-2d7b-47b0-b077-7ab6627b9ac3",
+    header:
+      "Introducing the HR Specialist, an AI created to represent general guidelines for United States HR policies and expectations.",
+    bold: "Ask it anything, such as...",
     questions: [
-      "How do I apply for parental leave?",
-      "What holidays do we have off in the US?",
-      "Where can I submit my travel expenses?",
-      "When is open enrollment?",
-      "Can you explain my stock options?",
-      "How do I request time off?",
+      "Who is eligible under the FMLA and what are their rights?",
+      "What are the standards for a legal interview process?",
+      "What benefits are employers required to provide?",
+      "What are wage and overtime guidelines?",
+      "What laws apply for different states' employees?",
+      "How should harassment complaints be handled?",
     ],
   },
 ];
@@ -55,7 +63,7 @@ const LandingStartChat = () => {
     <div className="flex flex-col items-center mb-14 mx-4">
       <h3 className="text-3xl font-bold mb-8">Start chatting with AIs</h3>
       <div className="flex flex-col md:flex-row">
-        <ul className="flex flex-row md:flex-col justify-evenly items-center lg:mr-8 my-10 md:border-l">
+        <ul className="flex flex-row md:flex-col justify-evenly lg:mr-8 my-10 md:border-l">
           {ais.map((ai, index) => (
             <li
               key={`ai-button-${index}`}
@@ -72,14 +80,14 @@ const LandingStartChat = () => {
                 height="75"
                 className={cn("mb-2 rounded-md")}
               />
-              Meet {ai.name}
+              {ai.name}
             </li>
           ))}
         </ul>
         <div className="m-2 md:m-8 py-8 px-4 md:px-12 md:w-[500px] lg:w-[700px] xl:w-[900px] bg-white drop-shadow-lg">
           <div>{selectedAi.header}</div>
           <div className="font-bold">{selectedAi.bold}</div>
-          <div className="flex flex-wrap justify-evenly m-2 md:m-8 min-h-96 lg:min-h-72">
+          <div className="flex flex-wrap justify-evenly m-2 md:m-8 min-h-[435px]">
             {selectedAi.questions?.map((question, index) => (
               <div
                 key={`card-${index}`}
@@ -89,10 +97,12 @@ const LandingStartChat = () => {
               </div>
             ))}
           </div>
-          <div className="text-ring cursor-pointer">
-            Start chatting with {selectedAi.name}
-            <ArrowRight className="inline-block w-4 h-4 ml-2" />
-          </div>
+          <Link href={selectedAi.link}>
+            <div className="text-ring cursor-pointer">
+              Start chatting with {selectedAi.name}
+              <ArrowRight className="inline-block w-4 h-4 ml-2" />
+            </div>
+          </Link>
         </div>
       </div>
     </div>
