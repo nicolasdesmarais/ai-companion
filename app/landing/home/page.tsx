@@ -135,8 +135,8 @@ const LandingHome = () => {
       <div className="flex flex-col items-center mb-14 mt-20 bg-navy ">
         <div className="lg:w-[1000px] py-32 text-white mx-10">
           <q className="text-2xl md:text-4xl italic font-serif font-light leading-relaxed">
-            At AppDirect, we&apos;re democratizing the AI space. Creating apps
-            is quick and simple, anyone can get one up and running within
+            At AppDirect, we&apos;re democratizing the AI space. Creating Gen AI
+            apps is quick and simple, anyone can get one up and running within
             minutes, no coding skills required.
           </q>
           <h4 className="text-xl font-bold mt-16">Peush Patel</h4>

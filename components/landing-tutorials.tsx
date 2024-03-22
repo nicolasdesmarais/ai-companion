@@ -31,7 +31,7 @@ const LandingTutorials = () => {
   return (
     <div className="flex flex-col items-center mb-14 mt-20 mx-4">
       <h3 className="text-3xl font-bold mb-4 lg:mb-16">
-        Create apps without code
+        Create apps without using code
       </h3>
       <div className="flex flex-col lg:flex-row min-h-[610px]">
         <ul className="flex flex-col justify-evenly md:items-center mr-8 my-10 lg:border-l lg:w-80">
