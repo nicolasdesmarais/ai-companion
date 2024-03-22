@@ -16,11 +16,11 @@ import {
 } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 import { KnowledgeIndexingResultStatus } from "../types/KnowlegeIndexingResult";
-import apifyAdapter from "./ApifyAdapter";
+import apifyWebScraper from "./ApifyWebScraper";
 import { WebUrlDataSourceInput } from "./types/WebUrlDataSourceInput";
 import { WebUrlMetadata } from "./types/WebUrlMetadata";
 
-export class WebUrlsDataSourceAdapter
+export class WebUrlsWebScraperAdapter
   implements DataSourceAdapter, ContentRetrievingDataSourceAdapter
 {
   public async getDataSourceItemList(
@@ -49,7 +49,7 @@ export class WebUrlsDataSourceAdapter
     data: any
   ): Promise<RetrieveContentAdapterResponse> {
     const input = data as WebUrlDataSourceInput;
-    const actorRunId = await apifyAdapter.startUrlIndexing(
+    const actorRunId = await apifyWebScraper.startUrlIndexing(
       orgId,
       dataSourceId,
       knowledge.id,
@@ -100,7 +100,9 @@ export class WebUrlsDataSourceAdapter
       throw new BadRequestError("Event actorRunId does not match metadata");
     }
 
-    const result = await apifyAdapter.getActorRunResult(metadata.indexingRunId);
+    const result = await apifyWebScraper.getActorRunResult(
+      metadata.indexingRunId
+    );
 
     let status: RetrieveContentResponseStatus;
     let originalContent;
@@ -155,5 +157,5 @@ export class WebUrlsDataSourceAdapter
   }
 }
 
-const webUrlsDataSourceAdapter = new WebUrlsDataSourceAdapter();
+const webUrlsDataSourceAdapter = new WebUrlsWebScraperAdapter();
 export default webUrlsDataSourceAdapter;

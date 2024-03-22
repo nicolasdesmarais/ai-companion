@@ -6,7 +6,7 @@ import {
   ContentRetrievingDataSourceAdapter,
   DataSourceAdapter,
 } from "@/src/adapter-out/knowledge/types/DataSourceAdapter";
-import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
+import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsWebScraperAdapter";
 import webUrlsWebsiteContentCrawlerAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsWebsiteContentCrawlerAdapter";
 import prismadb from "@/src/lib/prismadb";
 import { DataSource, DataSourceType } from "@prisma/client";

@@ -8,7 +8,7 @@ import apifyWebsiteContentCrawler, {
   ActorRunResult,
   ActorRunStatus,
 } from "@/src/adapter-out/knowledge/web-urls/ApifyWebsiteContentCrawler";
-import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
+import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsWebScraperAdapter";
 import { WebUrlMetadata } from "@/src/adapter-out/knowledge/web-urls/types/WebUrlMetadata";
 import {
   DataSourceItemListReceivedPayload,

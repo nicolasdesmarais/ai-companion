@@ -112,9 +112,7 @@ export class ApifyWebsiteContentCrawler {
       },
       proxyRotation: "RECOMMENDED",
       maxRequestRetries: 2,
-      maxPagesPerCrawl: this.getMaxPagesPerCrawl(),
-      maxResultsPerCrawl: 0,
-      maxCrawlingDepth: 0,
+      maxCrawlPages: this.getMaxPagesPerCrawl(),
       maxConcurrency: 50,
       requestTimeoutSecs: 15,
     };
