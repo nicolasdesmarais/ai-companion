@@ -184,7 +184,7 @@ export class MsftDataSourceAdapter
       };
     }
 
-    const { fileId } = knowledge.metadata as any;
+    const { fileId, fileName } = knowledge.metadata as any;
 
     if (!fileId) {
       console.error("Missing fileId");
@@ -245,7 +245,7 @@ export class MsftDataSourceAdapter
       status: RetrieveContentResponseStatus.SUCCESS,
       originalContent: {
         contentBlobUrl,
-        filename: fileId,
+        filename: fileName,
         mimeType: "",
       },
     };
