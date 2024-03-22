@@ -129,7 +129,9 @@ export class DataSourceManagementService {
    *   - A knowledge with the same uniqueId exists but should be reindexed (based on the adapter's shouldReindexKnowledge method)
    * - A new knowledge is not created if a knowledge with the same uniqueId exists and should not be reindexed
    *
-   * The method returns a list of all knowledges, including both new and existing knowledges.
+   * The method returns:
+   *  - a list of all knowledges which need are newly created and need to be updated
+   *  - a list of knowledge ids, including both new and existing, which need to be associated with the data source,
    * @param dataSourceId
    * @param itemList
    * @returns
