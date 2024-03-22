@@ -61,8 +61,6 @@ export const onApifyActorRunRequested = inngest.createFunction(
     }
 
     while (true) {
-      await step.sleep("sleep-for-1-minute", "1m");
-
       const webhookReceived = await step.waitForEvent(
         "wait-for-apify-webhook",
         {
