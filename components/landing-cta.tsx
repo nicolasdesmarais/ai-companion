@@ -7,7 +7,7 @@ const LandingCTA = () => {
       <div className="bg-cta-pattern bg-center lg:w-[1140px] py-28 px-10 lg:px-32">
         <div className="flex flex-col lg:flex-row bg-white py-12 px-10 lg:px-20 justify-evenly items-center">
           <h3 className="text-3xl font-bold lg:w-[400px]">
-            Start chatting with or creating AI apps today.
+            Start creating AI apps today.
           </h3>
           <Link
             href="/sign-up"
