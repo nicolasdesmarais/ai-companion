@@ -41,7 +41,7 @@ const ais = [
   {
     name: "HR Specialist",
     src: "/hr-ai.png",
-    link: "https://appdirect.ai/public/ai/f55e4fc8-2d7b-47b0-b077-7ab6627b9ac3",
+    link: "https://appdirect.ai/public/ai/14112ef6-dd35-4b7a-b6ac-b71042a5416c",
     header:
       "Introducing the HR Specialist, an AI created to represent general guidelines for United States HR policies and expectations.",
     bold: "Ask it anything, such as...",
