@@ -107,9 +107,10 @@ const pollActorRun = async (
       offset += actorRunResult.items.length;
 
       const dataSourceItems: DataSourceItem[] = [];
+      const rootItems: ActorRunItem[] = [];
       for (const item of actorRunResult.items) {
         if (item.url === rootUrl) {
-          await publishRootUrlEvent(dataSourceId, knowledgeId, item, step);
+          rootItems.push(item);
         } else {
           dataSourceItems.push(
             mapActorRunItemToDataSourceItem(actorRunId, rootUrl, item)
@@ -128,6 +129,10 @@ const pollActorRun = async (
           name: DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED,
           data: eventPayload,
         });
+      }
+
+      for (const item of rootItems) {
+        await publishRootUrlEvent(dataSourceId, knowledgeId, item, step);
       }
     }
 
