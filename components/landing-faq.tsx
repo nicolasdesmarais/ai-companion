@@ -141,6 +141,7 @@ const LandingFAQ = ({ className }: Props) => {
   };
   return (
     <div
+      id="faq"
       className={cn(
         "flex flex-col items-center mt-20 mb-12 gap-8 mx-4",
         className
