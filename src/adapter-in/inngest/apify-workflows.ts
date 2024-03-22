@@ -25,27 +25,40 @@ const LIST_RESULTS_BATCH_SIZE = 10;
 const useCheerioScraper = process.env.USE_CHEERIO_SCRAPER === "true";
 
 export enum ApifyEvent {
-  APIFY_ACTOR_RUN_STARTED = "apify.actor.run.started",
+  APIFY_ACTOR_RUN_REQUESTED = "apify.actor.run.requested",
   APIFY_WEBHOOK_RECEIVED = "apify.webhook.received",
 }
 
-export interface ApifyActorRunStartedPayload {
-  actorRunId: string;
+export interface ApifyActorRunRequestedPayload {
+  orgId: string;
   dataSourceId: string;
   knowledgeId: string;
-  rootUrl: string;
+  url: string;
 }
 
 export interface ApifyWebhookReceivedPayload {
   apifyEvent: ApifyWebhookEvent;
 }
 
-export const onApifyActorRunStarted = inngest.createFunction(
-  { id: "on-apify-actor-run-started" },
-  { event: ApifyEvent.APIFY_ACTOR_RUN_STARTED },
+export const onApifyActorRunRequested = inngest.createFunction(
+  { id: "on-apify-actor-run-requested", concurrency: 15 },
+  { event: ApifyEvent.APIFY_ACTOR_RUN_REQUESTED },
   async ({ event, step }) => {
-    const { actorRunId, dataSourceId, knowledgeId } =
-      event.data as ApifyActorRunStartedPayload;
+    const { orgId, dataSourceId, knowledgeId, url } =
+      event.data as ApifyActorRunRequestedPayload;
+
+    const actorRunId = await step.run("start-url-indexing", async () => {
+      return await apifyWebsiteContentCrawler.startUrlIndexing(
+        orgId,
+        dataSourceId,
+        knowledgeId,
+        url
+      );
+    });
+
+    if (!actorRunId) {
+      throw new Error("Failed to start actor run");
+    }
 
     while (true) {
       await step.sleep("sleep-for-1-minute", "1m");
