@@ -22,7 +22,6 @@ import knowledgeService from "@/src/domain/services/KnowledgeService";
 import { inngest } from "./client";
 
 const LIST_RESULTS_BATCH_SIZE = 10;
-const MAX_EVENTS = 1000;
 const useCheerioScraper = process.env.USE_CHEERIO_SCRAPER === "true";
 
 export enum ApifyEvent {
