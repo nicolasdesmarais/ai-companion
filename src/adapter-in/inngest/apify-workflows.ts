@@ -8,7 +8,7 @@ import apifyWebsiteContentCrawler, {
   ActorRunResult,
   ActorRunStatus,
 } from "@/src/adapter-out/knowledge/web-urls/ApifyWebsiteContentCrawler";
-import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
+import webUrlsWebScraperAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsWebScraperAdapter";
 import { WebUrlMetadata } from "@/src/adapter-out/knowledge/web-urls/types/WebUrlMetadata";
 import {
   DataSourceItemListReceivedPayload,
@@ -22,7 +22,6 @@ import knowledgeService from "@/src/domain/services/KnowledgeService";
 import { inngest } from "./client";
 
 const LIST_RESULTS_BATCH_SIZE = 10;
-const MAX_EVENTS = 1000;
 const useCheerioScraper = process.env.USE_CHEERIO_SCRAPER === "true";
 
 export enum ApifyEvent {
@@ -203,7 +202,7 @@ const processWebScraperWebhook = async (
   const retrieveContentResponse = await step.run(
     "retrieve-content-from-event",
     async () => {
-      return await webUrlsDataSourceAdapter.retrieveContentFromEvent(
+      return await webUrlsWebScraperAdapter.retrieveContentFromEvent(
         knowledge,
         apifyEvent
       );

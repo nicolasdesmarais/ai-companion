@@ -6,7 +6,7 @@ import {
   ContentRetrievingDataSourceAdapter,
   DataSourceAdapter,
 } from "@/src/adapter-out/knowledge/types/DataSourceAdapter";
-import webUrlsDataSourceAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsDataSourceAdapter";
+import webUrlsWebScraperAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsWebScraperAdapter";
 import webUrlsWebsiteContentCrawlerAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsWebsiteContentCrawlerAdapter";
 import prismadb from "@/src/lib/prismadb";
 import { DataSource, DataSourceType } from "@prisma/client";
@@ -43,7 +43,7 @@ export class DataSourceAdapterService {
       case DataSourceType.WEB_URL:
         return useCheerioAdapter
           ? webUrlsWebsiteContentCrawlerAdapter
-          : webUrlsDataSourceAdapter;
+          : webUrlsWebScraperAdapter;
       case DataSourceType.FILE_UPLOAD:
         return fileUploadDataSourceAdapter;
       case DataSourceType.API:
@@ -64,7 +64,7 @@ export class DataSourceAdapterService {
       case DataSourceType.WEB_URL:
         return useCheerioAdapter
           ? webUrlsWebsiteContentCrawlerAdapter
-          : webUrlsDataSourceAdapter;
+          : webUrlsWebScraperAdapter;
       case DataSourceType.ONEDRIVE:
         return msftDataSourceAdapter;
       default:

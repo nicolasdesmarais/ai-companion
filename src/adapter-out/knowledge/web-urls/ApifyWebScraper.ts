@@ -13,7 +13,7 @@ const webhookSecret = process.env.APIFY_WEBHOOK_SECRET;
 const failedStatuses = ["FAILED", "ABORTING", "ABORTED"];
 const partialStatuses = ["TIMING-OUT", "TIMED-OUT"];
 
-export class ApifyAdapter {
+export class ApifyWebScraper {
   async startUrlIndexing(
     orgId: string,
     dataSourceId: string,
@@ -208,5 +208,5 @@ export class ApifyAdapter {
   }
 }
 
-const apifyAdapter = new ApifyAdapter();
-export default apifyAdapter;
+const apifyWebScraper = new ApifyWebScraper();
+export default apifyWebScraper;
