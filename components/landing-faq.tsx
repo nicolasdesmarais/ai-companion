@@ -45,6 +45,8 @@ const faqs = [
           <li>LLAMA2 13B Chat (4K Context)</li>
           <li>LLAMA2 70B Chat (4K Context)</li>
           <li>LLAVA 13B</li>
+          <li>Cohere</li>
+          <li>Anthropic Claude</li>
         </ul>
       </div>
     ),
