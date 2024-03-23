@@ -21,8 +21,12 @@ const faqs = [
       <div>
         The proprietary datasets you upload to your AI app are stored on
         completely private, secure servers and will never be shared outside of
-        your AI, so you can fearlessly upload and build apps with your data
-        without worry.
+        your AI, so you can fearlessly upload and augment apps with your data
+        without worry. Your rich data sets are stored on our private servers and
+        won&apos;t be used to train the LLMs or accessed by anyone but you.
+        Questions and queries you post to LLMs will also be private unless you
+        select a model that does not support private deployment, at which point
+        you will be notified.
       </div>
     ),
   },
@@ -119,7 +123,7 @@ const faqs = [
     question: "I have another question",
     answer: (
       <div>
-        We&apos;re happy to help! Email us at support@appdirectai.com if you
+        We&apos;re happy to help! Email us at aisupport@appdirect.com if you
         have any questions.
       </div>
     ),
