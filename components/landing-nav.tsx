@@ -1,5 +1,6 @@
 import { cn } from "@/src/lib/utils";
 import Link from "next/link";
+import { MobileNav } from "./landing-mobile-nav";
 import { AppdirectSvg } from "./svg/appdirect-svg";
 
 interface Props {
@@ -17,6 +18,7 @@ const LandingNav = ({ transparent }: Props) => {
       >
         <nav className="flex m-4 w-[1144px] justify-between ">
           <div className="flex">
+            <MobileNav />
             <Link
               href="/landing/home"
               className="flex items-center md:mr-10 lg:mr-20"
