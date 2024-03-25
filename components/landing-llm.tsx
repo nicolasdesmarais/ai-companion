@@ -17,7 +17,7 @@ const LandingLLM = ({ className }: Props) => {
       <div className="mx-8 sm:mx-0 sm:w-[410px] lg:w-[820px] text-center">
         Choose the LLM provider most suitable for the task for each app you
         create. You can also create your own model with the help from our
-        partner, Ivado Labs.
+        partner, IVADO Labs.
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 flex-col md:flex-row">
         <div className="bg-[#F0F0F0] shadow-lg flex items-center w-64 justify-center h-20">

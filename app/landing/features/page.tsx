@@ -50,12 +50,12 @@ const LandingFeatures = () => {
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
           </div>
-          <div className="lg:bg-gradient1 flex justify-center items-center lg:p-16 lg:w-[560px] lg:w-[524px] lg:ml-20">
+          <div className="lg:bg-gradient1 flex justify-center items-center lg:p-14 lg:ml-20">
             <Image
-              src="/datasources_screenshot.jpg"
+              src="/knowledge-screenshot.png"
               alt="AI Data Source Screenshot"
-              width="512"
-              height="360"
+              width="456"
+              height="363"
             />
           </div>
         </div>
@@ -63,15 +63,15 @@ const LandingFeatures = () => {
 
       <div className="flex flex-col items-center my-12 py-16 px-4 bg-[#F8F8F8]">
         <div className="flex flex-col lg:flex-row">
-          <div className="lg:bg-gradient2 bg-left-top flex items-center lg:p-16 lg:w-[560px] lg:w-[524px] justify-center">
+          <div className="lg:bg-gradient2 bg-left-top flex items-center lg:p-12 justify-center">
             <Image
               src="/chat-screenshot.png"
               alt="AI Chat Screenshot"
-              width="430"
-              height="293"
+              width="456"
+              height="362"
             />
           </div>
-          <div className="lg:w-[460px] gap-8 flex flex-col lg:ml-20 mt-10 lg:mt-0">
+          <div className="lg:w-[460px] gap-8 flex flex-col lg:ml-24 mt-10 lg:mt-0">
             <div>Use</div>
             <div className="text-3xl font-bold lg:w-[300px]">
               Boost productivity-for everyone
@@ -94,7 +94,7 @@ const LandingFeatures = () => {
                 gain new insights, or challenge your assumptions..
               </li>
             </ul>
-            <Link href="/public" className="py-2 text-royal">
+            <Link href="/sign-up" className="py-2 text-royal">
               Start using
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
@@ -135,8 +135,8 @@ const LandingFeatures = () => {
             <Image
               src="/share-screenshot.png"
               alt="AI Share Screenshot"
-              width="431"
-              height="283"
+              width="430"
+              height="342"
             />
           </div>
         </div>
@@ -146,10 +146,10 @@ const LandingFeatures = () => {
         <div className="flex flex-col lg:flex-row">
           <div className="lg:bg-gradient1 flex items-center lg:p-16 lg:w-[560px] lg:w-[524px] justify-center">
             <Image
-              src="/browse_screenshot.jpg"
+              src="/browse-screenshot.png"
               alt="AI Browse Screenshot"
-              width="512"
-              height="377"
+              width="430"
+              height="342"
             />
           </div>
           <div className="lg:w-[460px] gap-8 flex flex-col lg:ml-20 mt-10 lg:mt-0">
@@ -168,7 +168,7 @@ const LandingFeatures = () => {
                 based on keywords.
               </li>
             </ul>
-            <Link href="/public" className="py-2 mt-20 text-royal">
+            <Link href="/sign-up" className="py-2 mt-20 text-royal">
               Browse catalog
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>

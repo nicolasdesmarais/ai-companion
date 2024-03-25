@@ -8,16 +8,19 @@ const LandingFooter = () => {
       <nav className="flex my-4 w-[1144px] justify-between">
         <div className="w-full mx-8">
           <div className="flex-col lg:flex-row flex">
-            <div className="flex mr-40 mb-8">
+            <div className="flex mr-44 mb-8">
               <AppdirectSvg className="h-5 w-5" fill="white" />
               AppDirect <span className="font-extrabold ml-2">AI</span>
             </div>
             <div className="flex flex-wrap gap-6 lg:gap-8">
-              <div className="w-36">
+              <div className="w-32">
                 <div className="font-bold">PRODUCT</div>
                 <ul className="flex flex-col justify-between gap-4 py-2 font-light">
                   <li>
-                    <Link href="/landing/features">Features</Link>
+                    <Link href="/landing/features">How it works</Link>
+                  </li>
+                  <li>
+                    <Link href="/landing/solutions">Solutions</Link>
                   </li>
                   <li>
                     <Link href="/landing/pricing">Pricing</Link>
@@ -25,29 +28,23 @@ const LandingFooter = () => {
                   <li>
                     <Link href="/landing/enterprise">Enterprise</Link>
                   </li>
-                  <li>
-                    <Link href="/landing/resources">Resources</Link>
-                  </li>
                 </ul>
               </div>
-              <div className="w-36">
+              <div className="w-32">
                 <div className="font-bold">RESOURCES</div>
                 <ul className="flex flex-col justify-between gap-4 py-2 font-light">
                   <li>
-                    <Link href="/landing/home">Tutorials</Link>
+                    <Link href="/landing/resources#tour">Tutorials</Link>
                   </li>
                   <li>
-                    <Link href="/landing/home">User Guides</Link>
+                    <Link href="/landing/resources#guides">References</Link>
                   </li>
                   <li>
-                    <Link href="/landing/home">API Guides</Link>
-                  </li>
-                  <li>
-                    <Link href="/landing/home">FAQ</Link>
+                    <Link href="/landing/resources#faq">FAQ</Link>
                   </li>
                 </ul>
               </div>
-              <div className="w-36">
+              <div className="w-32">
                 <div className="font-bold">LEGAL</div>
                 <ul className="flex flex-col justify-between gap-4 py-2 font-light">
                   <li>
@@ -58,19 +55,28 @@ const LandingFooter = () => {
                   </li>
                 </ul>
               </div>
-              <div className="w-36">
+              <div className="w-32">
                 <div className="font-bold">SOCIAL</div>
                 <ul className="flex flex-col justify-between gap-4 py-2 font-light">
                   <li>
-                    <Link href="/landing/home">LinkedIn</Link>
+                    <Link href="https://www.linkedin.com/company/appdirect">
+                      LinkedIn
+                    </Link>
                   </li>
                   <li>
-                    <Link href="/landing/home">YouTube</Link>
-                  </li>
-                  <li>
-                    <Link href="/landing/home">Instagram</Link>
+                    <Link href="https://www.instagram.com/appdirect/">
+                      Instagram
+                    </Link>
                   </li>
                 </ul>
+              </div>
+              <div className="w-32">
+                <Link
+                  href="https://www.appdirect.com/about"
+                  className="font-bold"
+                >
+                  COMPANY
+                </Link>
               </div>
             </div>
           </div>

@@ -21,7 +21,10 @@ const LandingFeatures = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-8 mb-12 lg:mx-0 bg-[#F8F8F8] px-4 lg:px-0 lg:py-14">
+      <div
+        className="flex flex-col items-center mt-8 mb-12 lg:mx-0 bg-[#F8F8F8] px-4 lg:px-0 lg:py-14"
+        id="tour"
+      >
         <div className="flex flex-col-reverse lg:flex-row">
           <div className="flex justify-center items-center lg:w-[560px] lg:w-[524px] mt-8 lg:mt-0">
             <video width="640" height="420" preload="none" autoPlay loop muted>
@@ -38,7 +41,7 @@ const LandingFeatures = () => {
         </div>
       </div>
 
-      <div className="flex items-center justify-center my-16">
+      <div className="flex items-center justify-center my-16" id="guides">
         <div className="lg:w-[1100px] mx-4">
           <h2 className="text-3xl font-bold text-center">User Guides</h2>
           <div className="grid mt-16 gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">

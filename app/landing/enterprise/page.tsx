@@ -17,6 +17,12 @@ const LandingFeatures = () => {
               For companies looking to build AI-driven solutions that solve
               complex supply chain problems.
             </div>
+            <Link
+              href="/landing/contact"
+              className="px-8 py-2 bg-sky w-40 text-navy mt-10"
+            >
+              Contact us
+            </Link>
           </div>
           <div className="lg:bg-gradient1 lg:w-[572px] lg:h-[544px] hidden md:flex items-center ml-16">
             <Image
@@ -71,20 +77,26 @@ const LandingFeatures = () => {
       <div className="py-16 flex flex-col items-center">
         <div className="lg:w-[1140px] mx-4">
           <svg
-            width="71"
-            height="66"
-            viewBox="0 0 71 66"
+            width="73"
+            height="73"
+            viewBox="0 0 73 73"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M65.1507 25.6545V22.8208H59.0104V12.9027C59.0104 12.1093 58.3349 11.4858 57.4753 11.4858H46.7297V5.81836H43.6595V11.4858H28.3086V5.81836H25.2384V11.4858H14.4928C13.6332 11.4858 12.9577 12.1093 12.9577 12.9027V22.8208H6.81738V25.6545H12.9577V39.8232H6.81738V42.657H12.9577V52.5751C12.9577 53.3685 13.6332 53.9919 14.4928 53.9919H25.2384V59.6594H28.3086V53.9919H43.6595V59.6594H46.7297V53.9919H57.4753C58.3349 53.9919 59.0104 53.3685 59.0104 52.5751V42.657H65.1507V39.8232H59.0104V25.6545H65.1507ZM55.9402 51.1582H16.0279V14.3196H55.9402V51.1582Z"
+              d="M17.8744 59.6942C20.2744 62.0942 23.4244 63.3842 26.8144 63.3842C30.2044 63.3842 33.3544 62.0642 35.7544 59.6942C39.6844 55.7642 40.5844 49.8242 38.0344 44.9042L36.9844 42.8642L50.2444 29.6342L56.9344 36.3242L63.6844 29.5742L56.9944 22.8842L61.4644 18.4142L59.1844 16.1342L34.7344 40.5842L32.6944 39.5342C30.8944 38.6042 28.8544 38.0942 26.8444 38.0942C23.4844 38.0942 20.3044 39.4142 17.9044 41.8142C12.9844 46.7342 12.9844 54.7742 17.9044 59.6942H17.8744ZM26.8144 41.4242C29.3344 41.4242 31.7644 42.4142 33.4744 44.0942C37.1344 47.7542 37.1344 53.7542 33.4744 57.4142C31.7044 59.1842 29.3344 60.1742 26.8144 60.1742C24.2944 60.1742 21.9244 59.1842 20.1544 57.4142C16.4944 53.7542 16.4944 47.7542 20.1544 44.0942C21.8644 42.3842 24.2944 41.4242 26.8144 41.4242Z"
               fill="#011B58"
             />
             <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M51.3357 18.5698H20.6338V46.9072H51.3357V18.5698ZM29.5717 39.9734H26.2076L31.3335 26.2684H35.3791L40.4978 39.9734H37.1337L36.0343 36.8483H30.6732L29.5717 39.9734ZM33.4143 29.4002L35.2387 34.5864H31.4704L33.2983 29.4002H33.4143ZM44.8118 26.2684V39.9734H41.6725V26.2684H44.8118Z"
+              d="M39.3243 17.3342L40.7043 14.7242L43.3143 13.3442L40.7043 11.9642L39.3243 9.38416L37.9443 11.9642L35.3643 13.3442L37.9443 14.7242L39.3243 17.3342Z"
+              fill="#ABE7FF"
+            />
+            <path
+              d="M20.5145 34.9142L24.0845 28.2542L30.7145 24.7142L24.0845 21.1742L20.5145 14.5142L16.9745 21.1742L10.3145 24.7142L16.9745 28.2542L20.5145 34.9142Z"
+              fill="#ABE7FF"
+            />
+            <path
+              d="M53.2443 53.3641L55.1943 56.9941L57.1443 53.3641L60.7743 51.4141L57.1443 49.4641L55.1943 45.8341L53.2443 49.4641L49.6143 51.4141L53.2443 53.3641Z"
               fill="#ABE7FF"
             />
           </svg>
@@ -185,7 +197,7 @@ const LandingFeatures = () => {
             </div>
           </div>
         </div>
-        <div className="pt-64 pb-16 w-1/2 hidden md:block">
+        <div className="pt-64 w-1/2 hidden md:block">
           <div className="w-56 py-8 flex flex-col gap-4 mx-24">
             <div className="text-6xl font-bold text-[#F2555A80]">2</div>
             <div className="text-lg font-bold">
@@ -196,7 +208,7 @@ const LandingFeatures = () => {
               specific business challenge.
             </div>
           </div>
-          <div className="w-56 py-8 flex flex-col gap-4 mx-24">
+          <div className="w-56 pt-8 pb-16  flex flex-col gap-4 mx-24">
             <div className="text-6xl font-bold text-[#F2555A80]">4</div>
             <div className="text-lg font-bold">
               Amplify: Scale up & fine tune

@@ -9,9 +9,13 @@ const LandingFeatures = () => {
     <div className="bg-white flex flex-col text-navy">
       <LandingNav />
 
-      <div className="py-10 mt-10 flex flex-col items-center bg-[#F8F8F8]">
-        <div className="lg:w-[840px] mx-4">
+      <div className="py-10 mt-10 flex flex-col items-center bg-[#F8F8F8] ">
+        <div className="lg:w-[1140px] mx-4">
           <h2 className="text-5xl font-bold">Pricing</h2>
+          <div className="lg:w-[700px] mt-10 text-lg">
+            Our pricing plans are based on data usage, starting with a free plan
+            to get you started right away.
+          </div>
         </div>
       </div>
 
