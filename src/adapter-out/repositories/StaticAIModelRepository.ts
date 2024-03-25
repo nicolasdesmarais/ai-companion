@@ -65,8 +65,8 @@ export class StaticAIModelRepository implements AIModelRepository {
     },
     {
       id: "anthropic",
-      name: "Anthropic Claude",
-      externalModelId: "anthropic",
+      name: "Anthropic Claude 2.1",
+      externalModelId: "claude-2.1",
       contextSize: 16384,
       options: commonOptions,
       provider: AIModelProvider.ANTHROPIC,
@@ -132,8 +132,8 @@ export class StaticAIModelRepository implements AIModelRepository {
     },
     {
       id: "cohere",
-      name: "Cohere",
-      externalModelId: "cohere",
+      name: "Cohere command",
+      externalModelId: "command",
       contextSize: 4096,
       options: {
         ...commonOptions,
