@@ -73,9 +73,13 @@ export class WebUrlsWebsiteContentCrawlerAdapter
       return { shouldReindex: true };
     }
 
+    const knowledgeIndexingRunId = (
+      knowledge.metadata as unknown as WebUrlMetadata
+    )?.indexingRunId;
+
     if (
-      (knowledge.metadata as unknown as WebUrlMetadata)?.indexingRunId ===
-      item.metadata?.indexingRunId
+      knowledgeIndexingRunId &&
+      knowledgeIndexingRunId === item.metadata?.indexingRunId
     ) {
       return { shouldReindex: false, includeChildren: false };
     }
