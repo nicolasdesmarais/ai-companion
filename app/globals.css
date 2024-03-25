@@ -337,3 +337,13 @@ body,
 .blob-background {
   filter: url(#goo) blur(40px);
 }
+
+.svg-filter {
+  display: none;
+}
+
+@-moz-document url-prefix() {
+  .svg-filter {
+      display: block;
+  }
+}
