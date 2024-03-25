@@ -1,7 +1,21 @@
+"use client";
 import LandingNav from "@/components/landing-nav";
+import { useSignIn } from "@clerk/clerk-react";
+import { OAuthStrategy } from "@clerk/types";
 import Link from "next/link";
 
 const Login = () => {
+  const { signIn } = useSignIn();
+  const signInWith = (strategy: OAuthStrategy) => {
+    if (signIn) {
+      return signIn.authenticateWithRedirect({
+        strategy,
+        redirectUrl: "/sso-callback",
+        redirectUrlComplete: "/",
+      });
+    }
+  };
+
   return (
     <div className="bg-white flex flex-col text-navy h-screen">
       <LandingNav transparent />
@@ -9,7 +23,10 @@ const Login = () => {
       <div className="h-full w-full flex items-center justify-center">
         <div className="bg-gradient4 absolute z-10 rounded-lg flex flex-col items-center p-16">
           <h1 className="text-3xl mb-12 font-bold">Log in</h1>
-          <div className="bg-white rounded-md px-16 py-2">
+          <div
+            className="bg-white rounded-md px-16 py-2 cursor-pointer"
+            onClick={() => signInWith("oauth_google")}
+          >
             Continue with Google
           </div>
           <div className="mt-8 flex text-white text-sm justify-stretch w-full items-center">
