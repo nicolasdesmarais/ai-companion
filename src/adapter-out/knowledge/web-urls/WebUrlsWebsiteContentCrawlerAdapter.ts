@@ -1,5 +1,5 @@
 import {
-  ApifyActorRunStartedPayload,
+  ApifyActorRunRequestedPayload,
   ApifyEvent,
 } from "@/src/adapter-in/inngest/apify-workflows";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
@@ -17,7 +17,6 @@ import {
   RetrieveContentResponseStatus,
 } from "../types/DataSourceTypes";
 import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
-import apifyWebsiteContentCrawler from "./ApifyWebsiteContentCrawler";
 import { WebUrlDataSourceInput } from "./types/WebUrlDataSourceInput";
 import { WebUrlMetadata } from "./types/WebUrlMetadata";
 
@@ -50,39 +49,19 @@ export class WebUrlsWebsiteContentCrawlerAdapter
     knowledge: KnowledgeDto,
     data: any
   ): Promise<RetrieveContentAdapterResponse> {
-    const url = knowledge.name;
-    const knowledgeId = knowledge.id;
-
-    const actorRunId = await apifyWebsiteContentCrawler.startUrlIndexing(
+    const actorRunRequestedPayload: ApifyActorRunRequestedPayload = {
       orgId,
       dataSourceId,
-      knowledgeId,
-      url
-    );
-
-    if (!actorRunId) {
-      return {
-        status: RetrieveContentResponseStatus.FAILED,
-      };
-    }
-
-    const runStartedEventPayload: ApifyActorRunStartedPayload = {
-      actorRunId,
-      dataSourceId,
-      knowledgeId,
-      rootUrl: url,
+      knowledgeId: knowledge.id,
+      url: knowledge.name,
     };
     await publishEvent(
-      ApifyEvent.APIFY_ACTOR_RUN_STARTED,
-      runStartedEventPayload
+      ApifyEvent.APIFY_ACTOR_RUN_REQUESTED,
+      actorRunRequestedPayload
     );
 
-    const metadata: WebUrlMetadata = {
-      indexingRunId: actorRunId,
-    };
     return {
       status: RetrieveContentResponseStatus.PENDING,
-      metadata,
     };
   }
 
@@ -94,9 +73,13 @@ export class WebUrlsWebsiteContentCrawlerAdapter
       return { shouldReindex: true };
     }
 
+    const knowledgeIndexingRunId = (
+      knowledge.metadata as unknown as WebUrlMetadata
+    )?.indexingRunId;
+
     if (
-      (knowledge.metadata as unknown as WebUrlMetadata)?.indexingRunId ===
-      item.metadata?.indexingRunId
+      knowledgeIndexingRunId &&
+      knowledgeIndexingRunId === item.metadata?.indexingRunId
     ) {
       return { shouldReindex: false, includeChildren: false };
     }

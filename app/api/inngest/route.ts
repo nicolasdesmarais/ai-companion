@@ -1,5 +1,5 @@
 import {
-  onApifyActorRunStarted,
+  onApifyActorRunRequested,
   onApifyWebhookReceived,
 } from "@/src/adapter-in/inngest/apify-workflows";
 import { clerkWebhookReceived } from "@/src/adapter-in/inngest/clerk-workflows";
@@ -47,8 +47,8 @@ export const { GET, POST, PUT } = serve({
     stripeWebhookReceived,
     clerkWebhookReceived,
     deleteUnusedKnowledges,
+    onApifyActorRunRequested,
     onApifyWebhookReceived,
-    onApifyActorRunStarted,
     deleteBlobStorage,
     deleteRelatedKnowledgeInstances,
     deleteVectorDBStorage,
