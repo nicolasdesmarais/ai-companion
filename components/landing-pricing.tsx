@@ -102,7 +102,7 @@ const LandingPricing = ({ className }: Props) => {
                   Advanced integrations, i.e. LLM fine tuning and private
                   deployment
                 </div>
-                <div className="border-b h-28 border-[#DDDDDD] flex items-center justify-center">
+                <div className="h-28 flex items-center justify-center">
                   <X className="h-10 w-10" />
                 </div>
               </div>
