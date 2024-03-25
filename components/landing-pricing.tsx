@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/src/lib/utils";
-import { Check, Minus, Plus } from "lucide-react";
+import { Check, Minus, Plus, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -95,10 +95,15 @@ const LandingPricing = ({ className }: Props) => {
                 <div className="border-b h-28 border-[#DDDDDD] flex items-center">
                   AI evaluation and custom configuration
                 </div>
-                <div className="border-b h-28 border-[#DDDDDD]"></div>
+                <div className="border-b h-28 border-[#DDDDDD] flex items-center justify-center">
+                  <X className="h-10 w-10" />
+                </div>
                 <div className="h-28 flex items-center">
                   Advanced integrations, i.e. LLM fine tuning and private
                   deployment
+                </div>
+                <div className="border-b h-28 border-[#DDDDDD] flex items-center justify-center">
+                  <X className="h-10 w-10" />
                 </div>
               </div>
               <div className="grid grid-cols-3 shadow-lg text-center pr-4">
@@ -155,7 +160,11 @@ const LandingPricing = ({ className }: Props) => {
                     key={`custom-${plan.name}`}
                     className="font-bold border-b border-[#DDDDDD] h-28 flex items-center justify-center"
                   >
-                    {plan.custom ? <Check className="h-10 w-10" /> : null}
+                    {plan.custom ? (
+                      <Check className="h-10 w-10" />
+                    ) : (
+                      <X className="h-10 w-10" />
+                    )}
                   </div>
                 ))}
                 {plans.map((plan) => (
@@ -163,7 +172,11 @@ const LandingPricing = ({ className }: Props) => {
                     key={`tuning-${plan.name}`}
                     className="font-bold h-28 flex items-center justify-center"
                   >
-                    {plan.tuning ? <Check className="h-10 w-10" /> : null}
+                    {plan.tuning ? (
+                      <Check className="h-10 w-10" />
+                    ) : (
+                      <X className="h-10 w-10" />
+                    )}
                   </div>
                 ))}
               </div>
@@ -232,24 +245,24 @@ const LandingPricing = ({ className }: Props) => {
                       </div>
 
                       <div className="flex gap-4">
-                        {plan.custom ? (
-                          <div className="h-6 w-6">
+                        <div className="h-6 w-6">
+                          {plan.custom ? (
                             <Check className="h-6 w-6" />
-                          </div>
-                        ) : (
-                          <div className="h-6 w-8"></div>
-                        )}
+                          ) : (
+                            <X className="h-6 w-6" />
+                          )}
+                        </div>
                         <div>AI evaluation and custom configuration</div>
                       </div>
 
                       <div className="flex gap-4">
-                        {plan.tuning ? (
-                          <div className="h-6 w-6">
+                        <div className="h-6 w-6">
+                          {plan.tuning ? (
                             <Check className="h-6 w-6" />
-                          </div>
-                        ) : (
-                          <div className="h-6 w-14"></div>
-                        )}
+                          ) : (
+                            <X className="h-6 w-6" />
+                          )}
+                        </div>
                         <div>
                           Advanced integrations, i.e. LLM fine tuning and
                           private deployment
