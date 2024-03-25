@@ -43,11 +43,13 @@ const LandingFeatures = () => {
 
       <div className="flex items-center justify-center my-16" id="guides">
         <div className="lg:w-[1100px] mx-4">
-          <h2 className="text-3xl font-bold text-center">User Guides</h2>
+          <h2 className="text-3xl font-bold text-center">References</h2>
           <div className="grid mt-16 gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             <div className="bg-gradient3 bg-[20%_40%] flex flex-col w-80 px-8 py-16 shadow-lg gap-4 justify-between cursor-pointer">
               <AppdirectSvg className="h-5 w-5" />
-              <div className="text-3xl font-bold">Best Practices</div>
+              <div className="text-3xl font-bold">
+                Best Practices User Guide
+              </div>
               <div className="mt-8">
                 Open
                 <ArrowRight className="inline-block w-4 h-4 ml-2" />
@@ -55,7 +57,9 @@ const LandingFeatures = () => {
             </div>
             <div className="bg-gradient3 bg-[75%_35%] flex flex-col w-80 px-8 py-16 shadow-lg gap-4 justify-between cursor-pointer">
               <AppdirectSvg className="h-5 w-5" />
-              <div className="text-3xl font-bold">Prompt Engineering</div>
+              <div className="text-3xl font-bold">
+                Prompt Engineering User Guide
+              </div>
               <div className="mt-8">
                 Open
                 <ArrowRight className="inline-block w-4 h-4 ml-2" />
@@ -63,7 +67,7 @@ const LandingFeatures = () => {
             </div>
             <div className="bg-gradient3 bg-[30%_40%] flex flex-col w-80 px-8 py-16 shadow-lg gap-4 justify-between cursor-pointer">
               <AppdirectSvg className="h-5 w-5" />
-              <div className="text-3xl font-bold">Data Sets</div>
+              <div className="text-3xl font-bold">Data Sets User Guide</div>
               <div className="mt-8">
                 Open
                 <ArrowRight className="inline-block w-4 h-4 ml-2" />
@@ -79,9 +83,7 @@ const LandingFeatures = () => {
             </div>
             <div className="bg-gradient3 bg-[30%_70%] flex flex-col w-80 px-8 py-16 shadow-lg gap-4 justify-between cursor-pointer">
               <AppdirectSvg className="h-5 w-5" />
-              <div className="text-3xl font-bold">
-                Blog article or other guide
-              </div>
+              <div className="text-3xl font-bold">Welcome to AppDirect AI</div>
               <div className="mt-8">
                 Open
                 <ArrowRight className="inline-block w-4 h-4 ml-2" />
@@ -89,9 +91,7 @@ const LandingFeatures = () => {
             </div>
             <div className="bg-gradient3 bg-[40%_50%] flex flex-col w-80 px-8 py-16 shadow-lg gap-4 justify-between cursor-pointer">
               <AppdirectSvg className="h-5 w-5" />
-              <div className="text-3xl font-bold">
-                Blog article or other guide
-              </div>
+              <div className="text-3xl font-bold">Choosing the Right LLM</div>
               <div className="mt-8">
                 Open
                 <ArrowRight className="inline-block w-4 h-4 ml-2" />
