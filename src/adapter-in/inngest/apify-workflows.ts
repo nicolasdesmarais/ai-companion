@@ -22,7 +22,7 @@ import knowledgeService from "@/src/domain/services/KnowledgeService";
 import { inngest } from "./client";
 
 const LIST_RESULTS_BATCH_SIZE = 10;
-const useCheerioScraper = process.env.USE_CHEERIO_SCRAPER === "true";
+const useCheerioAdapter = process.env.USE_CHEERIO_ADAPTER === "true";
 
 export enum ApifyEvent {
   APIFY_ACTOR_RUN_REQUESTED = "apify.actor.run.requested",
@@ -98,7 +98,7 @@ export const onApifyWebhookReceived = inngest.createFunction(
     const { apifyEvent } = event.data as ApifyWebhookReceivedPayload;
     const { dataSourceId, knowledgeId, eventData } = apifyEvent;
 
-    if (useCheerioScraper) {
+    if (useCheerioAdapter) {
       await pollActorRun(dataSourceId, knowledgeId, eventData.actorRunId, step);
     } else {
       await processWebScraperWebhook(apifyEvent, step);
