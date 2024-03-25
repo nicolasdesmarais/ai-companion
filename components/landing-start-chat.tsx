@@ -68,8 +68,9 @@ const LandingStartChat = () => {
             <li
               key={`ai-button-${index}`}
               className={cn(
-                "cursor-pointer pl-4 font-bold",
-                ai.name === selectedAi.name && "border-l-8 border-lime pl-2"
+                "cursor-pointer md:pl-4 font-bold w-20",
+                ai.name === selectedAi.name &&
+                  "border-b-8 md:border-b-0 md:border-l-8 border-lime md:pl-2"
               )}
               onClick={() => setSelectedAi(ai)}
             >
