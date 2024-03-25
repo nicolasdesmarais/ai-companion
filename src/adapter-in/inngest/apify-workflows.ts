@@ -60,6 +60,7 @@ export const onApifyActorRunRequested = inngest.createFunction(
       throw new Error("Failed to start actor run");
     }
 
+    let rootItems: ActorRunItem[] = [];
     while (true) {
       const webhookReceived = await step.waitForEvent(
         "wait-for-apify-webhook",
@@ -76,17 +77,21 @@ export const onApifyActorRunRequested = inngest.createFunction(
       }
 
       // No webhook received yet, continue polling
-      const actorRunResult = await pollActorRun(
+      const { actorRunResult, rootItems: batchRootItems } = await pollActorRun(
         dataSourceId,
-        knowledgeId,
         actorRunId,
         step
       );
+      rootItems.push(...batchRootItems);
 
       if (actorRunResult.status !== ActorRunStatus.INDEXING) {
         // We've reached a terminal state
         break;
       }
+    }
+
+    for (const item of rootItems) {
+      await publishRootUrlEvent(dataSourceId, knowledgeId, item, step);
     }
   }
 );
@@ -99,7 +104,15 @@ export const onApifyWebhookReceived = inngest.createFunction(
     const { dataSourceId, knowledgeId, eventData } = apifyEvent;
 
     if (useCheerioAdapter) {
-      await pollActorRun(dataSourceId, knowledgeId, eventData.actorRunId, step);
+      const { rootItems } = await pollActorRun(
+        dataSourceId,
+        eventData.actorRunId,
+        step
+      );
+
+      for (const item of rootItems) {
+        await publishRootUrlEvent(dataSourceId, knowledgeId, item, step);
+      }
     } else {
       await processWebScraperWebhook(apifyEvent, step);
     }
@@ -108,7 +121,6 @@ export const onApifyWebhookReceived = inngest.createFunction(
 
 const pollActorRun = async (
   dataSourceId: string,
-  knowledgeId: string,
   actorRunId: string,
   step: any
 ) => {
@@ -118,6 +130,7 @@ const pollActorRun = async (
   let offset = dataSource.data.offset || 0;
   let batchResults = 0;
   let actorRunResult: ActorRunResult;
+  const rootItems: ActorRunItem[] = [];
   do {
     actorRunResult = await step.run("get-actor-run-batch", async () => {
       return await apifyWebsiteContentCrawler.getActorRunBatch(
@@ -132,7 +145,7 @@ const pollActorRun = async (
       offset += actorRunResult.items.length;
 
       const dataSourceItems: DataSourceItem[] = [];
-      const rootItems: ActorRunItem[] = [];
+
       for (const item of actorRunResult.items) {
         if (item.url === rootUrl) {
           rootItems.push(item);
@@ -155,10 +168,6 @@ const pollActorRun = async (
           data: eventPayload,
         });
       }
-
-      for (const item of rootItems) {
-        await publishRootUrlEvent(dataSourceId, knowledgeId, item, step);
-      }
     }
 
     await step.run("update-data-source", async () => {
@@ -169,7 +178,7 @@ const pollActorRun = async (
     });
   } while (batchResults >= LIST_RESULTS_BATCH_SIZE);
 
-  return actorRunResult;
+  return { actorRunResult, rootItems };
 };
 
 const publishRootUrlEvent = async (
