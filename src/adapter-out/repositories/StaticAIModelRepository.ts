@@ -91,15 +91,6 @@ export class StaticAIModelRepository implements AIModelRepository {
       isVisible: false,
     },
     {
-      id: "anthropic-claude-3-haiku",
-      name: "Anthropic Claude 3 Haiku",
-      externalModelId: "claude-3-haiku-20240229",
-      contextSize: 200000,
-      options: commonOptions,
-      provider: AIModelProvider.ANTHROPIC,
-      isVisible: false,
-    },
-    {
       id: "llama-2-13b-chat",
       name: "LLAMA2 13B Chat (4K Context)",
       externalModelId: "llama-2-13b-chat",
