@@ -1,7 +1,6 @@
 import LandingCTA from "@/components/landing-cta";
 import LandingFooter from "@/components/landing-footer";
 import LandingLLM from "@/components/landing-llm";
-import LandingNav from "@/components/landing-nav";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,8 +8,6 @@ import Link from "next/link";
 const LandingFeatures = () => {
   return (
     <div className="bg-white flex flex-col text-navy">
-      <LandingNav />
-
       <div className="py-10 mt-10 flex flex-col items-center bg-[#F8F8F8] ">
         <div className="lg:w-[1140px] mx-4">
           <h2 className="text-5xl font-bold">How it works</h2>

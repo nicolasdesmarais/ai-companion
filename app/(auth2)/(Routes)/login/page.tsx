@@ -4,7 +4,7 @@ import Link from "next/link";
 const Login = () => {
   return (
     <div className="bg-white flex flex-col text-navy h-screen">
-      <LandingNav />
+      <LandingNav transparent />
 
       <div className="h-full w-full flex items-center justify-center">
         <div className="bg-gradient4 absolute z-10 rounded-lg flex flex-col items-center p-16">

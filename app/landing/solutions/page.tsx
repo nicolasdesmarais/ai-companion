@@ -1,13 +1,10 @@
 import LandingFooter from "@/components/landing-footer";
-import LandingNav from "@/components/landing-nav";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 const Solutions = () => {
   return (
     <div className="bg-white flex flex-col text-navy">
-      <LandingNav />
-
       <div className="py-10 mt-10 flex flex-col items-center bg-[#F8F8F8] ">
         <div className="lg:w-[1140px] mx-4">
           <h2 className="text-5xl font-bold">Solutions</h2>

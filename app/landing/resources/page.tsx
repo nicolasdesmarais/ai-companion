@@ -1,7 +1,6 @@
 import LandingFAQ from "@/components/landing-faq";
 import LandingFooter from "@/components/landing-footer";
 import LandingLLM from "@/components/landing-llm";
-import LandingNav from "@/components/landing-nav";
 import LandingSupport from "@/components/landing-support";
 import { AppdirectSvg } from "@/components/svg/appdirect-svg";
 import { ArrowRight } from "lucide-react";
@@ -9,8 +8,6 @@ import { ArrowRight } from "lucide-react";
 const LandingFeatures = () => {
   return (
     <div className="bg-white flex flex-col text-navy">
-      <LandingNav />
-
       <div className="py-10 mt-10 flex flex-col items-center ">
         <div className="lg:w-[1140px] mx-4">
           <h2 className="text-5xl font-bold">Resources</h2>

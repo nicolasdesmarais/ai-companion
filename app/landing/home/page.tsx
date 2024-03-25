@@ -1,6 +1,5 @@
 import LandingCTA from "@/components/landing-cta";
 import LandingFooter from "@/components/landing-footer";
-import LandingNav from "@/components/landing-nav";
 import LandingStartChat from "@/components/landing-start-chat";
 import LandingTutorials from "@/components/landing-tutorials";
 import { ArrowRight } from "lucide-react";
@@ -9,7 +8,6 @@ import Link from "next/link";
 const LandingHome = () => {
   return (
     <div className="bg-white flex flex-col text-navy">
-      <LandingNav />
       <div className="md:h-screen overflow-hidden flex flex-col bg-[#F8F8F8] mb-8 -mt-20 pt-20 min-h-[930px] justify-center">
         <div className="flex flex-col justify-center items-center mx-4">
           <div className="mt-6 md:w-[740px] flex flex-col items-center lg:text-left">
@@ -29,7 +27,7 @@ const LandingHome = () => {
                 Sign up
               </Link>
               <Link href="/sign-up" className="px-4 py-2">
-                Take tour
+                Take a tour
                 <ArrowRight className="inline-block w-4 h-4 ml-2" />
               </Link>
             </div>
