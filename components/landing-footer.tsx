@@ -17,16 +17,16 @@ const LandingFooter = () => {
                 <div className="font-bold">PRODUCT</div>
                 <ul className="flex flex-col justify-between gap-4 py-2 font-light">
                   <li>
-                    <Link href="/landing/features">How it works</Link>
+                    <Link href="/landing2/features">How it works</Link>
                   </li>
                   <li>
-                    <Link href="/landing/solutions">Solutions</Link>
+                    <Link href="/landing2/solutions">Solutions</Link>
                   </li>
                   <li>
-                    <Link href="/landing/pricing">Pricing</Link>
+                    <Link href="/landing2/pricing">Pricing</Link>
                   </li>
                   <li>
-                    <Link href="/landing/enterprise">Enterprise</Link>
+                    <Link href="/landing2/enterprise">Enterprise</Link>
                   </li>
                 </ul>
               </div>
@@ -34,13 +34,13 @@ const LandingFooter = () => {
                 <div className="font-bold">RESOURCES</div>
                 <ul className="flex flex-col justify-between gap-4 py-2 font-light">
                   <li>
-                    <Link href="/landing/resources#tour">Tutorials</Link>
+                    <Link href="/landing2/resources#tour">Tutorials</Link>
                   </li>
                   <li>
-                    <Link href="/landing/resources#guides">References</Link>
+                    <Link href="/landing2/resources#guides">References</Link>
                   </li>
                   <li>
-                    <Link href="/landing/resources#faq">FAQ</Link>
+                    <Link href="/landing2/resources#faq">FAQ</Link>
                   </li>
                 </ul>
               </div>
@@ -48,10 +48,10 @@ const LandingFooter = () => {
                 <div className="font-bold">LEGAL</div>
                 <ul className="flex flex-col justify-between gap-4 py-2 font-light">
                   <li>
-                    <Link href="/landing/home">Privacy Notice</Link>
+                    <Link href="/landing2/home">Privacy Notice</Link>
                   </li>
                   <li>
-                    <Link href="/landing/home">Terms of Use</Link>
+                    <Link href="/landing2/home">Terms of Use</Link>
                   </li>
                 </ul>
               </div>
