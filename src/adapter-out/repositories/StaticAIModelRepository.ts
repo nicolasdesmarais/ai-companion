@@ -147,6 +147,32 @@ export class StaticAIModelRepository implements AIModelRepository {
       provider: AIModelProvider.COHERE,
       isVisible: false,
     },
+    {
+      id: "cohere-command-light",
+      name: "Cohere command-light",
+      externalModelId: "command-light",
+      contextSize: 4096,
+      options: {
+        ...commonOptions,
+        maxTokens: {
+          default: 1000,
+          max: 3500,
+          min: 1,
+          step: 1,
+        },
+      },
+      provider: AIModelProvider.COHERE,
+      isVisible: false,
+    },
+    {
+      id: "cohere-command-r",
+      name: "Cohere command-r",
+      externalModelId: "command-r",
+      contextSize: 128000,
+      options: commonOptions,
+      provider: AIModelProvider.COHERE,
+      isVisible: false,
+    },
   ];
 
   public async findAll(): Promise<AIModel[]> {

@@ -1,4 +1,4 @@
-import { AIModel } from "@/src/domain/models/AIModel";
+import { AIModel, AIModelProvider } from "@/src/domain/models/AIModel";
 import { ChatCohere } from "@langchain/cohere";
 import { HumanMessage } from "@langchain/core/messages";
 import { HttpResponseOutputParser } from "langchain/output_parsers";
@@ -9,13 +9,13 @@ const MODEL_ID = "cohere";
 
 export class CohereModel extends AbstractBaseChatModel implements ChatModel {
   public supports(model: AIModel): boolean {
-    return model.id === MODEL_ID;
+    return model.provider === AIModelProvider.COHERE;
   }
 
   protected getChatModelInstance(model: AIModel, options: any, callbacks: any) {
     return new ChatCohere({
       apiKey: process.env.COHERE_API_KEY,
-      model: "command",
+      model: model.externalModelId,
       callbacks,
       ...options,
     });
