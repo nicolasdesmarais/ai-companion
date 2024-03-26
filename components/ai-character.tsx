@@ -90,7 +90,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const [groupList, setGroupList] = useState<GroupSummaryDto[]>([]);
   const [advancedImage, setAdvancedImage] = useState(false);
   const [imagePrompt, setImagePrompt] = useState("");
-  const [imageModel, setImageModel] = useState("dalle-3");
+  const [imageModel, setImageModel] = useState("latent-consistency");
   const [diversityString, setDiversityString] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
   const [generatingAll, setGeneratingAll] = useState(false);
