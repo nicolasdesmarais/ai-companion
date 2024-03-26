@@ -254,8 +254,7 @@ body,
   }
 }
 
-.blob-one {
-  position: absolute;
+.blob1 {
   background: radial-gradient(circle at center, rgba(var(--color1), 0.8) 0, rgba(var(--color1), 0) 50%) no-repeat;
   mix-blend-mode: hard-light;
 
@@ -270,8 +269,7 @@ body,
   opacity: 1;
 }
 
-.blob-two {
-  position: absolute;
+.blob2 {
   background: radial-gradient(circle at center, rgba(var(--color2), 0.8) 0, rgba(var(--color2), 0) 50%) no-repeat;
   mix-blend-mode: var(--blending);
 
@@ -286,8 +284,7 @@ body,
   opacity: 1;
 }
 
-.blob-three {
-  position: absolute;
+.blob3 {
   background: radial-gradient(circle at center, rgba(var(--color3), 0.8) 0, rgba(var(--color3), 0) 50%) no-repeat;
   mix-blend-mode: var(--blending);
 
@@ -303,23 +300,21 @@ body,
 }
 
 .blob4 {
-  position: absolute;
-    background: radial-gradient(circle at center, rgba(var(--color1), 0.8) 0, rgba(var(--color1), 0) 50%) no-repeat;
-    mix-blend-mode: var(--blending);
+  background: radial-gradient(circle at center, rgba(var(--color1), 0.8) 0, rgba(var(--color1), 0) 50%) no-repeat;
+  mix-blend-mode: var(--blending);
 
-    width: var(--circle-size);
-    height: var(--circle-size);
-    top: calc(50% - var(--circle-size) / 2);
-    left: calc(50% - var(--circle-size) / 2);
+  width: var(--circle-size);
+  height: var(--circle-size);
+  top: calc(50% - var(--circle-size) / 2);
+  left: calc(50% - var(--circle-size) / 2);
 
-    transform-origin: calc(50% - 200px);
-    animation: moveHorizontal 80s ease infinite;
+  transform-origin: calc(50% - 200px);
+  animation: moveHorizontal 80s ease infinite;
 
-    opacity: 1;
+  opacity: 1;
 }
 
 .blob5 {
-  position: absolute;
   background: radial-gradient(circle at center, rgba(var(--color2), 0.8) 0, rgba(var(--color2), 0) 50%) no-repeat;
   mix-blend-mode: var(--blending);
 

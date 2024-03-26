@@ -1,4 +1,7 @@
+import { cn } from "@/src/lib/utils";
+
 const BlobAnimation = () => {
+  const fullScreen = true;
   return (
     <>
       <svg xmlns="http://www.w3.org/2000/svg" className="svg-filter">
@@ -20,11 +23,21 @@ const BlobAnimation = () => {
         </defs>
       </svg>
       <div className="h-full w-full blob-background overflow-hidden">
-        <div className="blob-one"></div>
-        <div className="blob-two"></div>
-        <div className="blob-three"></div>
-        <div className="blob4"></div>
-        <div className="blob5"></div>
+        <div
+          className={cn("blob1", fullScreen ? "absolute" : "relative")}
+        ></div>
+        <div
+          className={cn("blob2", fullScreen ? "absolute" : "relative")}
+        ></div>
+        <div
+          className={cn("blob3", fullScreen ? "absolute" : "relative")}
+        ></div>
+        <div
+          className={cn("blob4", fullScreen ? "absolute" : "relative")}
+        ></div>
+        <div
+          className={cn("blob5", fullScreen ? "absolute" : "relative")}
+        ></div>
       </div>
     </>
   );
