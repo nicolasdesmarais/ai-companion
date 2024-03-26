@@ -208,7 +208,6 @@ export const Filters = () => {
           Private
         </button>
       </div>
-      &nbsp;
       <button
         onClick={() => onClickCompanyApproved()}
         className={cn(
