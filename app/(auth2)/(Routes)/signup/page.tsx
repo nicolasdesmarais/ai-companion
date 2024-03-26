@@ -87,16 +87,23 @@ const Login = () => {
         <div className="bg-gradient4 absolute z-10 rounded-lg flex flex-col items-center p-16">
           <h1 className="text-3xl mb-12 font-bold">Create your Account</h1>
           {pendingVerification ? (
-            <div>
-              <form>
+            <>
+              <div>Check your email for a verification code</div>
+              <div className="flex flex-col gap-8 mt-8">
                 <input
                   value={code}
-                  placeholder="Code..."
+                  className="rounded-md w-80 h-12 px-4 bg-white"
+                  placeholder="Verification Code"
                   onChange={(e) => setCode(e.target.value)}
                 />
-                <button onClick={onPressVerify}>Verify Email</button>
-              </form>
-            </div>
+                <Button
+                  className="bg-white rounded-md px-16 py-2 text-center text-navy"
+                  onClick={onPressVerify}
+                >
+                  Verify Email
+                </Button>
+              </div>
+            </>
           ) : (
             <>
               <Button
