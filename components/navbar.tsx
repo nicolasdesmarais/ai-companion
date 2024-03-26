@@ -43,7 +43,7 @@ export const Navbar = ({ isPro, userPermissions, orgId }: NavbarProps) => {
   }
 
   return (
-    <div className="fixed w-full z-30 flex justify-between items-center py-2 px-4 border-primary/10 bg-secondary md:hidden">
+    <div className="fixed w-full z-30 flex justify-between items-center py-2 px-4 border-primary/10 bg-secondary md:hidden top-0">
       <div className="flex">
         <MobileSidebar
           isPro={isPro}
