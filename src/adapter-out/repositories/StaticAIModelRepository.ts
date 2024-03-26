@@ -70,7 +70,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       contextSize: 200000,
       options: commonOptions,
       provider: AIModelProvider.ANTHROPIC,
-      isVisible: false,
+      isVisible: true,
     },
     {
       id: "anthropic-claude-3-opus",
@@ -79,7 +79,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       contextSize: 200000,
       options: commonOptions,
       provider: AIModelProvider.ANTHROPIC,
-      isVisible: false,
+      isVisible: true,
     },
     {
       id: "anthropic-claude-3-sonnet",
@@ -88,7 +88,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       contextSize: 200000,
       options: commonOptions,
       provider: AIModelProvider.ANTHROPIC,
-      isVisible: false,
+      isVisible: true,
     },
     {
       id: "llama-2-13b-chat",
