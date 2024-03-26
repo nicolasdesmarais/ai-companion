@@ -48,7 +48,7 @@ const LandingNav = ({ transparent }: Props) => {
             <Link href="/login" className="py-2">
               Login
             </Link>
-            <Link href="/sign-up" className="ml-4 lg:ml-10 px-4 py-2 bg-sky">
+            <Link href="/signup" className="ml-4 lg:ml-10 px-4 py-2 bg-sky">
               Sign up
             </Link>
           </div>
