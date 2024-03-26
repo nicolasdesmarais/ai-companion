@@ -149,8 +149,8 @@ export class StaticAIModelRepository implements AIModelRepository {
       },
     },
     {
-      id: "cohere",
-      name: "Cohere command",
+      id: "cohere-command",
+      name: "Cohere Command",
       externalModelId: "command",
       contextSize: 4096,
       options: {
