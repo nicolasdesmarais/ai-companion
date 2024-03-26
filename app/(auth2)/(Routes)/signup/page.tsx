@@ -19,8 +19,6 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  console.log(signUp?.status);
-
   useEffect(() => {
     if (isSignedIn) {
       router.push("/");
@@ -29,11 +27,11 @@ const Login = () => {
 
   const signInWith = (strategy: OAuthStrategy) => {
     if (signUp) {
-      // return signIn.authenticateWithRedirect({
-      //   strategy,
-      //   redirectUrl: "/sso-callback",
-      //   redirectUrlComplete: "/",
-      // });
+      return signUp.authenticateWithRedirect({
+        strategy,
+        redirectUrl: "/",
+        redirectUrlComplete: "/",
+      });
     }
   };
 

@@ -27,7 +27,7 @@ const Login = () => {
     if (signIn) {
       return signIn.authenticateWithRedirect({
         strategy,
-        redirectUrl: "/sso-callback",
+        redirectUrl: "/",
         redirectUrlComplete: "/",
       });
     }
