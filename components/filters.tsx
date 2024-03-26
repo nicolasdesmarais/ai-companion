@@ -170,11 +170,20 @@ export const Filters = () => {
     <div className="w-full overflow-x-auto space-x-0.5 flex p-1">
       <div className="flex space-x-0.5">
         <button
-          onClick={() => onClick("ORGANIZATION")}
+          onClick={() => onClick("All")}
           className={cn(
             btnClassNames,
             scope == "ORGANIZATION" ? "bg-accent" : "bg-primary/10",
             "rounded-l-md"
+          )}
+        >
+          All
+        </button>
+        <button
+          onClick={() => onClick("ORGANIZATION")}
+          className={cn(
+            btnClassNames,
+            scope == "ORGANIZATION" ? "bg-accent" : "bg-primary/10",
           )}
         >
           My Organization
