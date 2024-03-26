@@ -163,11 +163,11 @@ export class StaticAIModelRepository implements AIModelRepository {
         },
       },
       provider: AIModelProvider.COHERE,
-      isVisible: false,
+      isVisible: true,
     },
     {
       id: "cohere-command-light",
-      name: "Cohere command-light",
+      name: "Cohere Command Light",
       externalModelId: "command-light",
       contextSize: 4096,
       options: {
@@ -180,16 +180,16 @@ export class StaticAIModelRepository implements AIModelRepository {
         },
       },
       provider: AIModelProvider.COHERE,
-      isVisible: false,
+      isVisible: true,
     },
     {
       id: "cohere-command-r",
-      name: "Cohere command-r",
+      name: "Cohere Command-R",
       externalModelId: "command-r",
       contextSize: 128000,
       options: commonOptions,
       provider: AIModelProvider.COHERE,
-      isVisible: false,
+      isVisible: true,
     },
   ];
 
