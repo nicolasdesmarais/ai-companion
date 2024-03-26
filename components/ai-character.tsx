@@ -148,7 +148,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
         setImagePrompt(
           `${name}, ${description}: ${
             diversityString || getDiversityString()
-          }. photorealistic portrait. shot of the sony a7rv 35mm f1.8. HDR. 4k.`
+          }. photorealistic portrait. family friendly. shot of the sony a7rv 35mm f1.8. HDR. 4k.`
         );
       }
     }
