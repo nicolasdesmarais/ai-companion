@@ -9,7 +9,7 @@ interface Props {
 
 const LandingNav = ({ transparent }: Props) => {
   return (
-    <div className="fixed w-full pr-4 z-10">
+    <div className="fixed w-full pr-4 z-20">
       <div
         className={cn(
           "flex text-navy justify-center w-full",
