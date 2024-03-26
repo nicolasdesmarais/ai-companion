@@ -70,7 +70,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       contextSize: 200000,
       options: commonOptions,
       provider: AIModelProvider.ANTHROPIC,
-      isVisible: false,
+      isVisible: true,
     },
     {
       id: "anthropic-claude-3-opus",
@@ -79,7 +79,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       contextSize: 200000,
       options: commonOptions,
       provider: AIModelProvider.ANTHROPIC,
-      isVisible: false,
+      isVisible: true,
     },
     {
       id: "anthropic-claude-3-sonnet",
@@ -88,7 +88,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       contextSize: 200000,
       options: commonOptions,
       provider: AIModelProvider.ANTHROPIC,
-      isVisible: false,
+      isVisible: true,
     },
     {
       id: "llama-2-13b-chat",
@@ -163,11 +163,11 @@ export class StaticAIModelRepository implements AIModelRepository {
         },
       },
       provider: AIModelProvider.COHERE,
-      isVisible: false,
+      isVisible: true,
     },
     {
       id: "cohere-command-light",
-      name: "Cohere command-light",
+      name: "Cohere Command Light",
       externalModelId: "command-light",
       contextSize: 4096,
       options: {
@@ -180,16 +180,16 @@ export class StaticAIModelRepository implements AIModelRepository {
         },
       },
       provider: AIModelProvider.COHERE,
-      isVisible: false,
+      isVisible: true,
     },
     {
       id: "cohere-command-r",
-      name: "Cohere command-r",
+      name: "Cohere Command-R",
       externalModelId: "command-r",
       contextSize: 128000,
       options: commonOptions,
       provider: AIModelProvider.COHERE,
-      isVisible: false,
+      isVisible: true,
     },
   ];
 
