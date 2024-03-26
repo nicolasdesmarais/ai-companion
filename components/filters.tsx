@@ -170,10 +170,10 @@ export const Filters = () => {
     <div className="w-full overflow-x-auto space-x-2 flex p-1">
       <div className="flex space-x-0.5">
         <button
-          onClick={() => onClick("All")}
+          onClick={() => router.push("/")}
           className={cn(
             btnClassNames,
-            scope == "ALL" ? "bg-accent" : "bg-primary/10",
+            scope == "" ? "bg-accent" : "bg-primary/10",
             "rounded-l-md"
           )}
         >
@@ -183,7 +183,7 @@ export const Filters = () => {
           onClick={() => onClick("ORGANIZATION")}
           className={cn(
             btnClassNames,
-            scope == "ORGANIZATION" ? "bg-accent" : "bg-primary/10",
+            scope == "ORGANIZATION" ? "bg-accent" : "bg-primary/10"
           )}
         >
           My Organization
