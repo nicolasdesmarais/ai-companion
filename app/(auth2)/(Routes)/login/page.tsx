@@ -1,20 +1,27 @@
 "use client";
 import LandingNav from "@/components/landing-nav";
 import { Button } from "@/components/ui/button";
-import { useSignIn } from "@clerk/clerk-react";
+import { useSignIn, useUser } from "@clerk/clerk-react";
 import { OAuthStrategy } from "@clerk/types";
 import { Loader } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Login = () => {
+  const { isSignedIn } = useUser();
   const { isLoaded, signIn, setActive } = useSignIn();
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (isSignedIn) {
+      router.push("/");
+    }
+  }, [isSignedIn]);
 
   const signInWith = (strategy: OAuthStrategy) => {
     if (signIn) {
@@ -91,7 +98,9 @@ const Login = () => {
               onClick={handleSubmit}
             >
               Continue
-              {loading ? <Loader className="w-4 h-4 ml-2 spinner" /> : null}
+              {loading || isSignedIn ? (
+                <Loader className="w-4 h-4 ml-2 spinner" />
+              ) : null}
             </Button>
           </div>
           <div className="text-xs mt-14">
