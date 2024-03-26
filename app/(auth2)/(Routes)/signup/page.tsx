@@ -3,7 +3,7 @@ import LandingNav from "@/components/landing-nav";
 import { Button } from "@/components/ui/button";
 import { useSignUp, useUser } from "@clerk/clerk-react";
 import { OAuthStrategy } from "@clerk/types";
-import { Loader } from "lucide-react";
+import { Eye, EyeOff, Loader } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -17,6 +17,7 @@ const Login = () => {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [type, setType] = useState("password");
   const router = useRouter();
 
   useEffect(() => {
@@ -79,6 +80,14 @@ const Login = () => {
     }
   };
 
+  const handleToggle = () => {
+    if (type === "password") {
+      setType("text");
+    } else {
+      setType("password");
+    }
+  };
+
   return (
     <div className="bg-white flex flex-col text-navy h-screen">
       <LandingNav transparent />
@@ -127,14 +136,27 @@ const Login = () => {
                   id="email"
                   name="email"
                 />
-                <input
-                  type="password"
-                  placeholder="Password"
-                  className="rounded-md w-80 h-12 px-4 bg-white"
-                  onChange={(e) => setPassword(e.target.value)}
-                  id="password"
-                  name="password"
-                />
+                <div className="relative">
+                  <input
+                    type={type}
+                    placeholder="Password"
+                    className="rounded-md w-80 h-12 px-4 bg-white"
+                    onChange={(e) => setPassword(e.target.value)}
+                    id="password"
+                    name="password"
+                  />
+                  <span
+                    className="absolute top-3 right-10 cursor-pointer"
+                    onClick={handleToggle}
+                  >
+                    {type === "password" ? (
+                      <Eye className="absolute" />
+                    ) : (
+                      <EyeOff className="absolute" />
+                    )}
+                  </span>
+                </div>
+
                 <Button
                   className="bg-white rounded-md px-16 py-2 text-center text-navy"
                   onClick={handleSubmit}
