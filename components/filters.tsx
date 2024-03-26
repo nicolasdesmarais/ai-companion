@@ -66,7 +66,7 @@ export const Filters = () => {
 
   if (scope && SuperuserScopes.includes(scope as ListAIsRequestScope)) {
     return (
-      <div className="w-full overflow-x-auto space-x-0.5 flex p-1">
+      <div className="w-full overflow-x-auto space-x-2 flex p-1">
         <div className="flex space-x-0.5">
           <button
             onClick={() => onClick("INSTANCE_ORGANIZATION")}
@@ -117,7 +117,7 @@ export const Filters = () => {
 
   if (scope && AdminScopes.includes(scope as ListAIsRequestScope)) {
     return (
-      <div className="w-full overflow-x-auto space-x-0.5 flex p-1">
+      <div className="w-full overflow-x-auto space-x-2 flex p-1">
         <div className="flex space-x-0.5">
           <button
             onClick={() => onClick("ADMIN_ORGANIZATION")}
@@ -167,7 +167,7 @@ export const Filters = () => {
   }
 
   return (
-    <div className="w-full overflow-x-auto space-x-0.5 flex p-1">
+    <div className="w-full overflow-x-auto space-x-2 flex p-1">
       <div className="flex space-x-0.5">
         <button
           onClick={() => onClick("All")}
