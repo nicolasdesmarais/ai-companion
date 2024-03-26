@@ -166,7 +166,7 @@ model Knowledge {
   isBlobStorageDeleted   Boolean               @default(false) @map(name: "is_blob_storage_deleted")
   isVectorStorageDeleted Boolean               @default(false) @map(name: "is_vector_storage_deleted")
 
-  @@index([uniqueId])
+  @@index([uniqueId(length: 100)])
   @@index([indexStatus, isVectorStorageDeleted])
   @@index([indexStatus, isBlobStorageDeleted])
   @@map("knowledge")
