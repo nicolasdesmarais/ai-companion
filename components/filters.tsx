@@ -173,7 +173,7 @@ export const Filters = () => {
           onClick={() => onClick("All")}
           className={cn(
             btnClassNames,
-            scope == "ORGANIZATION" ? "bg-accent" : "bg-primary/10",
+            scope == "ALL" ? "bg-accent" : "bg-primary/10",
             "rounded-l-md"
           )}
         >
@@ -208,6 +208,7 @@ export const Filters = () => {
           Private
         </button>
       </div>
+      &nbsp;
       <button
         onClick={() => onClickCompanyApproved()}
         className={cn(
