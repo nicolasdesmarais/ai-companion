@@ -45,6 +45,7 @@ const groupFormSchema = z.object({
     AIVisibility.GROUP,
     AIVisibility.PUBLIC,
     AIVisibility.ORGANIZATION,
+    AIVisibility.UNLISTED,
   ]),
   teammates: z.string(),
 });
