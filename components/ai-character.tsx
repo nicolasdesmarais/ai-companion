@@ -543,30 +543,44 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
             />
             <div className="mt-4 text-sm">
               {form.watch("visibility") === "ORGANIZATION" && (
-                <FormItem>
-                  <Checkbox
-                    id="listInOrgCatalog"
-                    checked={form.getValues("listInOrgCatalog")}
-                    onCheckedChange={(val) =>
-                      form.setValue("listInOrgCatalog", val)
-                    }
-                  >
-                    List in Organization Catalog
-                  </Checkbox>
-                </FormItem>
+                <FormField
+                  name="listInOrgCatalog"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Checkbox
+                          id="listInOrgCatalog"
+                          checked={field.value}
+                          onCheckedChange={(val) => {
+                            field.onChange(val);
+                          }}
+                        >
+                          List in Organization Catalog
+                        </Checkbox>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               )}
               {hasInstanceAccess && (
-                <FormItem>
-                  <Checkbox
-                    id="listInPublicCatalog"
-                    checked={form.getValues("listInPublicCatalog")}
-                    onCheckedChange={(val) =>
-                      form.setValue("listInPublicCatalog", val)
-                    }
-                  >
-                    List in Public Catalog
-                  </Checkbox>
-                </FormItem>
+                <FormField
+                  name="listInPublicCatalog"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <Checkbox
+                        id="listInPublicCatalog"
+                        checked={field.value}
+                        onCheckedChange={(val) => {
+                          field.onChange(val);
+                        }}
+                      >
+                        List in Public Catalog
+                      </Checkbox>
+                    </FormItem>
+                  )}
+                />
               )}
             </div>
             {voiceEnabled && (

@@ -59,6 +59,8 @@ const listAIResponseSelect = (): Prisma.AISelect => ({
   userName: true,
   categoryId: true,
   visibility: true,
+  listInOrgCatalog: true,
+  listInPublicCatalog: true,
   modelId: true,
   options: true,
   instructions: true,
