@@ -61,7 +61,12 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
   if (typeof window !== "undefined") {
     host = window.location.origin;
   }
-  const aiLink = `${host}/public/ai/${ai.id}`;
+  let aiLink: string;
+  if (ai.visibility === AIVisibility.PUBLIC) {
+    aiLink = `${host}/public/ai/${ai.id}`;
+  } else {
+    aiLink = `${host}/ai/${ai.id}`;
+  }
   const form = useForm<z.infer<typeof groupFormSchema>>({
     resolver: zodResolver(groupFormSchema),
     defaultValues: {
