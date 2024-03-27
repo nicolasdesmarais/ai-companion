@@ -33,6 +33,8 @@ export interface AIDetailDto extends AISummaryDto {
   groups?: string[];
   options?: AIModelOptions;
   visibility?: AIVisibility;
+  listInOrgCatalog?: boolean;
+  listInPublicCatalog?: boolean;
 }
 
 export interface AIProfileFeature {

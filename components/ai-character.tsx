@@ -29,7 +29,7 @@ import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { getDiversityString } from "@/src/lib/diversity";
 import { Category } from "@prisma/client";
 import axios, { AxiosError } from "axios";
-import { Loader, Play, Plus, Settings, Wand2 } from "lucide-react";
+import { Loader, Play, Settings, Wand2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { imageModels, voices } from "./ai-models";
@@ -504,84 +504,71 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                 </FormItem>
               )}
             />
-            <FormField
-              name="visibility"
-              control={form.control}
-              render={({ field }) => (
+            <div className="flex justify-between items-end">
+              <FormField
+                name="visibility"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Visibility</FormLabel>
+                    <Select
+                      disabled={isLoading}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="bg-background">
+                          <SelectValue
+                            defaultValue={field.value}
+                            placeholder="Select one"
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem key="PRIVATE" value="PRIVATE">
+                          Restricted
+                        </SelectItem>
+                        <SelectItem key="ORGANIZATION" value="ORGANIZATION">
+                          My Organization
+                        </SelectItem>
+                        <SelectItem key="UNLISTED" value="UNLISTED">
+                          Anyone with the link
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Control who can see your AI
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="space-y-4 ml-4">
                 <FormItem>
-                  <FormLabel>Visibility</FormLabel>
-                  <Select
-                    disabled={isLoading}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    defaultValue={field.value}
+                  <Checkbox
+                    id="listInOrgCatalog"
+                    checked={form.getValues("listInOrgCatalog")}
+                    onCheckedChange={(val) =>
+                      form.setValue("listInOrgCatalog", val)
+                    }
                   >
-                    <FormControl>
-                      <SelectTrigger className="bg-background">
-                        <SelectValue
-                          defaultValue={field.value}
-                          placeholder="Select one"
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem key="PRIVATE" value="PRIVATE">
-                        Restricted
-                      </SelectItem>
-                      <SelectItem key="ORGANIZATION" value="ORGANIZATION">
-                        My Organization
-                      </SelectItem>
-                      <SelectItem key="UNLISTED" value="UNLISTED">
-                        Anyone with the link
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>Control who can see your AI</FormDescription>
-                  <FormMessage />
-                  {field.value === "GROUP" ? (
-                    <FormField
-                      name="groups"
-                      control={form.control}
-                      render={({ field }) => (
-                        <div className="border-l border-ring pl-4 mt-4">
-                          {groupList.map((group) => (
-                            <div key={group.id}>
-                              <Checkbox
-                                id={group.id}
-                                checked={(field.value || []).includes(group.id)}
-                                onCheckedChange={(val) =>
-                                  val
-                                    ? field.onChange([
-                                        group.id,
-                                        ...(field.value || []),
-                                      ])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (v: string) => v !== group.id
-                                        )
-                                      )
-                                }
-                              >
-                                {group.name}
-                              </Checkbox>
-                            </div>
-                          ))}
-                          <Button
-                            type="button"
-                            disabled={isLoading}
-                            variant="ring"
-                            onClick={() => groupModal.onOpen()}
-                          >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add Group
-                          </Button>
-                        </div>
-                      )}
-                    />
-                  ) : null}
+                    List in Organization Catalog
+                  </Checkbox>
                 </FormItem>
-              )}
-            />
+                <FormItem>
+                  <Checkbox
+                    id="listInPublicCatalog"
+                    checked={form.getValues("listInPublicCatalog")}
+                    onCheckedChange={(val) =>
+                      form.setValue("listInPublicCatalog", val)
+                    }
+                  >
+                    List in Public Catalog
+                  </Checkbox>
+                </FormItem>
+              </div>
+            </div>
             {voiceEnabled && (
               <FormField
                 name="talk"
