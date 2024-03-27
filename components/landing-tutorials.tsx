@@ -67,7 +67,7 @@ const LandingTutorials = () => {
                 </div>
               </div>
               <div className="flex lg:hidden mt-8 mb-16">
-                <video width="640" height="420" autoPlay loop muted>
+                <video width="640" height="420" autoPlay loop muted playsInline>
                   <source src={step.src} type="video/mp4" />
                 </video>
               </div>
@@ -97,6 +97,7 @@ const LandingTutorials = () => {
               autoPlay
               loop
               muted
+              playsInline
             >
               <source src={selectedStep.src} type="video/mp4" />
             </video>

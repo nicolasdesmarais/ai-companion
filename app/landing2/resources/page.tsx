@@ -24,7 +24,7 @@ const LandingFeatures = () => {
       >
         <div className="flex flex-col-reverse lg:flex-row">
           <div className="flex justify-center items-center lg:w-[560px] lg:w-[524px] mt-8 lg:mt-0">
-            <video width="640" height="420" autoPlay loop muted>
+            <video width="640" height="420" autoPlay loop muted playsInline>
               <source src="/create-demo.mp4" type="video/mp4" />
             </video>
           </div>

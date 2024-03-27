@@ -34,7 +34,7 @@ const LandingHome = () => {
             </div>
           </div>
           <div className="my-8 shadow-lg md:w-[800px]">
-            <video width="1280" height="720" autoPlay loop muted>
+            <video width="1280" height="720" autoPlay loop muted playsInline>
               <source src="/storyboard720.mp4" type="video/mp4" />
             </video>
           </div>
