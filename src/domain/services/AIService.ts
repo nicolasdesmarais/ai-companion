@@ -970,6 +970,8 @@ export class AIService {
       categoryId,
       modelId,
       visibility,
+      listInOrgCatalog,
+      listInPublicCatalog,
       options,
       groups,
     } = request;
@@ -994,6 +996,8 @@ export class AIService {
         seed: seed ?? "",
         modelId,
         visibility,
+        listInOrgCatalog,
+        listInPublicCatalog,
         options: options as any,
       },
       include: {
@@ -1047,6 +1051,8 @@ export class AIService {
       modelId,
       groups,
       visibility,
+      listInOrgCatalog,
+      listInPublicCatalog,
       options,
       profile,
     } = request;
@@ -1077,6 +1083,8 @@ export class AIService {
         seed,
         modelId,
         visibility,
+        listInOrgCatalog,
+        listInPublicCatalog,
         options: options as any,
         profile: profile as any,
       },
