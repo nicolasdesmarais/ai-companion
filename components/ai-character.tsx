@@ -504,70 +504,66 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                 </FormItem>
               )}
             />
-            <div className="flex justify-between items-end">
-              <FormField
-                name="visibility"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Visibility</FormLabel>
-                    <Select
-                      disabled={isLoading}
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="bg-background">
-                          <SelectValue
-                            defaultValue={field.value}
-                            placeholder="Select one"
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem key="PRIVATE" value="PRIVATE">
-                          Restricted
-                        </SelectItem>
-                        <SelectItem key="ORGANIZATION" value="ORGANIZATION">
-                          My Organization
-                        </SelectItem>
-                        <SelectItem key="UNLISTED" value="UNLISTED">
-                          Anyone with the link
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Control who can see your AI
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="space-y-4 ml-4">
+            <FormField
+              name="visibility"
+              control={form.control}
+              render={({ field }) => (
                 <FormItem>
-                  <Checkbox
-                    id="listInOrgCatalog"
-                    checked={form.getValues("listInOrgCatalog")}
-                    onCheckedChange={(val) =>
-                      form.setValue("listInOrgCatalog", val)
-                    }
+                  <FormLabel>Visibility</FormLabel>
+                  <Select
+                    disabled={isLoading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
                   >
-                    List in Organization Catalog
-                  </Checkbox>
+                    <FormControl>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Select one"
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem key="PRIVATE" value="PRIVATE">
+                        Restricted
+                      </SelectItem>
+                      <SelectItem key="ORGANIZATION" value="ORGANIZATION">
+                        My Organization
+                      </SelectItem>
+                      <SelectItem key="UNLISTED" value="UNLISTED">
+                        Anyone with the link
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>Control who can see your AI</FormDescription>
+                  <FormMessage />
                 </FormItem>
-                <FormItem>
-                  <Checkbox
-                    id="listInPublicCatalog"
-                    checked={form.getValues("listInPublicCatalog")}
-                    onCheckedChange={(val) =>
-                      form.setValue("listInPublicCatalog", val)
-                    }
-                  >
-                    List in Public Catalog
-                  </Checkbox>
-                </FormItem>
-              </div>
+              )}
+            />
+            <div className="border-l border-ring pl-4 mt-4">
+              <FormItem>
+                <Checkbox
+                  id="listInOrgCatalog"
+                  checked={form.getValues("listInOrgCatalog")}
+                  onCheckedChange={(val) =>
+                    form.setValue("listInOrgCatalog", val)
+                  }
+                >
+                  List in Organization Catalog
+                </Checkbox>
+              </FormItem>
+              <FormItem>
+                <Checkbox
+                  id="listInPublicCatalog"
+                  checked={form.getValues("listInPublicCatalog")}
+                  onCheckedChange={(val) =>
+                    form.setValue("listInPublicCatalog", val)
+                  }
+                >
+                  List in Public Catalog
+                </Checkbox>
+              </FormItem>
             </div>
             {voiceEnabled && (
               <FormField
