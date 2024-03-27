@@ -749,6 +749,7 @@ export class AIService {
   private getOrganizationCriteria(orgId: string) {
     return {
       orgId,
+      listInOrgCatalog: true,
       visibility: {
         in: [AIVisibility.ORGANIZATION],
       },
@@ -779,7 +780,7 @@ export class AIService {
   }
 
   private getPublicCriteria() {
-    return { visibility: AIVisibility.PUBLIC };
+    return { listInPublicCatalog: true, visibility: AIVisibility.PUBLIC };
   }
 
   private getGroupCriteria(orgId: string, groupId: string) {
