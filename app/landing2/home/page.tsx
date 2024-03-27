@@ -43,7 +43,7 @@ const LandingHome = () => {
 
       <LandingStartChat />
 
-      <div className="flex flex-col items-center mb-14 mt-20 relative overflow-hidden">
+      <div className="flex flex-col items-center mb-14 mt-20 relative overflow-hidden blob-container">
         <div className=" lg:w-[1110px] px-8 md:px-20 py-16 flex flex-col items-center z-10">
           <h3 className="text-3xl font-bold mb-16 text-center md:w-[700px]">
             Create purpose-built, secure AI apps in minutes-using your data and
