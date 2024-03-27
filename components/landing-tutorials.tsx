@@ -22,7 +22,7 @@ const steps = [
     src: "/share-demo.mp4",
     title: "Share",
     description:
-      "with with coworkers, friends and family and create a profile to help others know how to interact with your AI.",
+      "with coworkers, friends and family and create a profile to help others know how to interact with your AI.",
   },
 ];
 
