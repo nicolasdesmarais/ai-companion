@@ -24,7 +24,8 @@ const LandingNav = ({ transparent }: Props) => {
               className="flex items-center md:mr-10 lg:mr-20"
             >
               <AppdirectSvg className="h-5 w-5" />
-              AppDirect <span className="font-extrabold ml-2">AI</span>
+              <span className="hidden md:static">AppDirect </span>
+              <span className="font-extrabold ml-2">AI</span>
             </Link>
             <ul className="hidden md:flex justify-between md:gap-8 lg:gap-14 py-2">
               <li>
