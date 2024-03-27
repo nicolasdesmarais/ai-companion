@@ -534,11 +534,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                       <SelectItem key="UNLISTED" value="UNLISTED">
                         Anyone with the link
                       </SelectItem>
-                      {hasInstanceAccess && (
-                        <SelectItem key="PUBLIC" value="PUBLIC">
-                          Public
-                        </SelectItem>
-                      )}
                     </SelectContent>
                   </Select>
                   <FormDescription>Control who can see your AI</FormDescription>
