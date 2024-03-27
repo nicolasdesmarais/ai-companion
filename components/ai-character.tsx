@@ -57,8 +57,8 @@ Human: Got it. Thanks for your assistance.
 Support Specialist AI: You're welcome! Feel free to ask if you have any further questions. I'm here to help!
 `;
 
-const INSTRUCTION_PROMPT = `Create a single short paragraph description of an AI you are training to answer questions from users. 
-Write it as if you are explaining to them their job, role and responsibilities. Write it simply and direct without excessive adjectives or niceties. 
+const INSTRUCTION_PROMPT = `Create a single short paragraph description of an AI you are training to answer questions from users.
+Write it as if you are explaining to them their job, role and responsibilities. Write it simply and direct without excessive adjectives or niceties.
 Do not mention continuous learning. Write the paragraph based on the following information about them: `;
 
 const loadingMessages = [
@@ -261,7 +261,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
     if (name && description) {
       try {
         const response = await axios.post("/api/v1/generate", {
-          prompt: `Create an example conversation between a Human and ${name} where the Human is asking questions of the AI named ${name}. 
+          prompt: `Create an example conversation between a Human and ${name} where the Human is asking questions of the AI named ${name}.
           Create the conversation based on what a user would ask an AI who is trained on the following information: ${instructions}`,
         });
         form.setValue("seed", response.data, { shouldDirty: true });
@@ -526,19 +526,14 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                     </FormControl>
                     <SelectContent>
                       <SelectItem key="PRIVATE" value="PRIVATE">
-                        Private
-                      </SelectItem>
-                      <SelectItem key="GROUP" value="GROUP">
-                        Group
+                        Restricted
                       </SelectItem>
                       <SelectItem key="ORGANIZATION" value="ORGANIZATION">
-                        Organization
+                        My Organization
                       </SelectItem>
-                      {hasInstanceAccess && (
-                        <SelectItem key="PUBLIC" value="PUBLIC">
-                          Public
-                        </SelectItem>
-                      )}
+                      <SelectItem key="UNLISTED" value="UNLISTED">
+                        Anyone with the link
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>Control who can see your AI</FormDescription>
