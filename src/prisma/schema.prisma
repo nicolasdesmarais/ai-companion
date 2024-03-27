@@ -72,6 +72,7 @@ enum AIVisibility {
   GROUP
   ORGANIZATION
   PUBLIC
+  UNLISTED
 }
 
 model Message {
