@@ -128,11 +128,11 @@ const Login = () => {
                 <div className="border-b border-white grow h-1"></div>
               </div>
               <div className="text-red-500 text-sm pt-4">{error}</div>
-              <div className="flex flex-col gap-8 mt-8 w-full">
+              <div className="flex flex-col gap-8 mt-8 w-full md:w-80">
                 <input
                   type="email"
                   placeholder="Email"
-                  className="rounded-md md:w-80 h-12 px-4 bg-white"
+                  className="rounded-md w-full h-12 px-4 bg-white"
                   onChange={(e) => setEmailAddress(e.target.value)}
                   id="email"
                   name="email"
@@ -141,7 +141,7 @@ const Login = () => {
                   <input
                     type={type}
                     placeholder="Password"
-                    className="rounded-md w-full md:w-80 h-12 px-4 bg-white"
+                    className="rounded-md w-full h-12 px-4 bg-white"
                     onChange={(e) => setPassword(e.target.value)}
                     id="password"
                     name="password"

@@ -15,7 +15,7 @@ const LandingFeatures = () => {
               complex supply chain problems.
             </div>
             <Link
-              href="/landing2/contact"
+              href="/contact"
               className="px-8 py-2 bg-sky w-40 text-navy mt-10"
             >
               Contact us
@@ -272,7 +272,7 @@ const LandingFeatures = () => {
             Connect with our Enterprise team today.
           </h3>
           <Link
-            href="/landing2/contact"
+            href="/contact"
             className="mt-8 lg:mt-0 lg:ml-10 px-8 py-2 text-navy bg-white flex items-center"
           >
             Contact us
