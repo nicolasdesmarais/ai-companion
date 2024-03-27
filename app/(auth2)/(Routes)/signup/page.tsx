@@ -94,7 +94,7 @@ const Login = () => {
       <LandingNav transparent />
 
       <div className="h-full w-full flex items-center justify-center">
-        <div className="bg-gradient4 absolute z-10 rounded-lg flex flex-col items-center p-16">
+        <div className="bg-navylight md:bg-gradient4 z-10 rounded-lg flex flex-col items-center p-8 md:p-16 mx-2">
           <h1 className="text-3xl mb-12 font-bold">Create your Account</h1>
           {pendingVerification ? (
             <>
@@ -128,11 +128,11 @@ const Login = () => {
                 <div className="border-b border-white grow h-1"></div>
               </div>
               <div className="text-red-500 text-sm pt-4">{error}</div>
-              <div className="flex flex-col gap-8 mt-8">
+              <div className="flex flex-col gap-8 mt-8 w-full">
                 <input
                   type="email"
                   placeholder="Email"
-                  className="rounded-md w-80 h-12 px-4 bg-white"
+                  className="rounded-md md:w-80 h-12 px-4 bg-white"
                   onChange={(e) => setEmailAddress(e.target.value)}
                   id="email"
                   name="email"
@@ -141,7 +141,7 @@ const Login = () => {
                   <input
                     type={type}
                     placeholder="Password"
-                    className="rounded-md w-80 h-12 px-4 bg-white"
+                    className="rounded-md w-full md:w-80 h-12 px-4 bg-white"
                     onChange={(e) => setPassword(e.target.value)}
                     id="password"
                     name="password"
