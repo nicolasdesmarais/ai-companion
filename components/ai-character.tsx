@@ -541,29 +541,33 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                 </FormItem>
               )}
             />
-            <div className="border-l border-ring pl-4 mt-4">
-              <FormItem>
-                <Checkbox
-                  id="listInOrgCatalog"
-                  checked={form.getValues("listInOrgCatalog")}
-                  onCheckedChange={(val) =>
-                    form.setValue("listInOrgCatalog", val)
-                  }
-                >
-                  List in Organization Catalog
-                </Checkbox>
-              </FormItem>
-              <FormItem>
-                <Checkbox
-                  id="listInPublicCatalog"
-                  checked={form.getValues("listInPublicCatalog")}
-                  onCheckedChange={(val) =>
-                    form.setValue("listInPublicCatalog", val)
-                  }
-                >
-                  List in Public Catalog
-                </Checkbox>
-              </FormItem>
+            <div className="mt-4 text-sm">
+              {form.watch("visibility") === "ORGANIZATION" && (
+                <FormItem>
+                  <Checkbox
+                    id="listInOrgCatalog"
+                    checked={form.getValues("listInOrgCatalog")}
+                    onCheckedChange={(val) =>
+                      form.setValue("listInOrgCatalog", val)
+                    }
+                  >
+                    List in Organization Catalog
+                  </Checkbox>
+                </FormItem>
+              )}
+              {hasInstanceAccess && (
+                <FormItem>
+                  <Checkbox
+                    id="listInPublicCatalog"
+                    checked={form.getValues("listInPublicCatalog")}
+                    onCheckedChange={(val) =>
+                      form.setValue("listInPublicCatalog", val)
+                    }
+                  >
+                    List in Public Catalog
+                  </Checkbox>
+                </FormItem>
+              )}
             </div>
             {voiceEnabled && (
               <FormField
