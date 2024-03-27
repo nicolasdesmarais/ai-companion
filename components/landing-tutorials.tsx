@@ -67,14 +67,7 @@ const LandingTutorials = () => {
                 </div>
               </div>
               <div className="flex lg:hidden mt-8 mb-16">
-                <video
-                  width="640"
-                  height="420"
-                  preload="none"
-                  autoPlay
-                  loop
-                  muted
-                >
+                <video width="640" height="420" autoPlay loop muted>
                   <source src={step.src} type="video/mp4" />
                 </video>
               </div>
@@ -101,7 +94,6 @@ const LandingTutorials = () => {
               key={selectedStep.src}
               width="640"
               height="420"
-              preload="none"
               autoPlay
               loop
               muted
