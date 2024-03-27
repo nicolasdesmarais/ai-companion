@@ -1,5 +1,5 @@
 import { AISummaryDto } from "@/src/domain/models/AI";
-import { AI } from "@prisma/client";
+import { AI, AIVisibility } from "@prisma/client";
 import { AuthorizationContext } from "../models/AuthorizationContext";
 import { SecuredAction } from "../models/SecuredAction";
 import { SecuredResourceAccessLevel } from "../models/SecuredResourceAccessLevel";
@@ -11,11 +11,33 @@ export class AISecurityService {
     authorizationContext: AuthorizationContext,
     ai: AISummaryDto
   ) {
-    return BaseEntitySecurityService.hasPermissionOnEntity(
+    const highestAccessLevel = BaseEntitySecurityService.getHighestAccessLevel(
       authorizationContext,
-      ai,
       SecuredResourceType.AI,
       SecuredAction.READ
+    );
+    if (!highestAccessLevel) {
+      return false;
+    }
+
+    if (
+      highestAccessLevel === SecuredResourceAccessLevel.INSTANCE ||
+      ai.visibility === AIVisibility.PUBLIC ||
+      ai.visibility === AIVisibility.UNLISTED
+    ) {
+      // Public & Unlisted AIs are always readable
+      return true;
+    }
+
+    const { orgId, userId } = authorizationContext;
+    if (ai.orgId !== orgId) {
+      return false;
+    }
+
+    return (
+      highestAccessLevel === SecuredResourceAccessLevel.ORGANIZATION ||
+      ai.visibility === AIVisibility.ORGANIZATION ||
+      ai.userId === userId
     );
   }
 

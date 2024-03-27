@@ -224,6 +224,42 @@ export class AIService {
     return aiDto;
   }
 
+  public async getAi(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ): Promise<AIDetailDto> {
+    const { userId } = authorizationContext;
+    const ai = await prismadb.aI.findFirst({
+      select: listAIResponseSelect(),
+      where: {
+        id: aiId,
+      },
+    });
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    if (!AISecurityService.canReadAI(authorizationContext, ai)) {
+      throw new ForbiddenError(
+        `User is not authorized to read AI with id=${aiId}`
+      );
+    }
+
+    const canUpdateAI = AISecurityService.canUpdateAI(authorizationContext, ai);
+    const aiShare = await this.getAIShareForAIAndUser(ai.id, userId);
+    const messageCountPerAi: any[] = await this.getMessageCountPerAi([ai.id]);
+    const ratingPerAi: any[] = await this.getRatingPerAi([ai.id]);
+
+    const aiDto = this.mapToAIDto(
+      ai,
+      messageCountPerAi,
+      ratingPerAi,
+      aiShare,
+      canUpdateAI
+    );
+    return aiDto;
+  }
+
   /**
    * Returns an AI by ID, only if it's visible to the given user and organization.
    * @param orgId
