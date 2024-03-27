@@ -21,9 +21,8 @@ import { SystemMessage } from "@langchain/core/messages";
 import { Prisma, Role } from "@prisma/client";
 import { ChatSecurityService } from "../../security/services/ChatSecurityService";
 import {
-  BadRequestError,
   EntityNotFoundError,
-  ForbiddenError,
+  ForbiddenError
 } from "../errors/Errors";
 import { ChatRepository } from "../ports/outgoing/ChatRepository";
 import aiModelService from "./AIModelService";
@@ -185,7 +184,7 @@ export class ChatService {
   ) {
     const ai = await aiService.findAIForUser(authorizationContext, aiId);
     if (!ai) {
-      throw new BadRequestError(`AI with id ${aiId} not found`);
+      throw new EntityNotFoundError(`AI with id ${aiId} not found`);
     }
 
     const { orgId, userId } = authorizationContext;
