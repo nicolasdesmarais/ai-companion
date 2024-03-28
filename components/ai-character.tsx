@@ -531,7 +531,10 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                       <SelectItem key="ORGANIZATION" value="ORGANIZATION">
                         My Organization
                       </SelectItem>
-                      <SelectItem key="UNLISTED" value="UNLISTED">
+                      <SelectItem
+                        key="ANYONE_WITH_LINK"
+                        value="ANYONE_WITH_LINK"
+                      >
                         Anyone with the link
                       </SelectItem>
                     </SelectContent>
