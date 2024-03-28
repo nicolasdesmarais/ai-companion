@@ -12,11 +12,8 @@ export class AISecurityService {
     ai: AISummaryDto,
     hasPermission: boolean | ((ai: string, userId: string) => Promise<boolean>)
   ) {
-    if (
-      ai.listInPublicCatalog ||
-      ai.visibility === AIVisibility.ANYONE_WITH_LINK
-    ) {
-      // Public & AIs with "Anyone with link" visibility  are always readable
+    if (ai.visibility === AIVisibility.ANYONE_WITH_LINK) {
+      //AIs with "Anyone with link" visibility  are always readable
       return true;
     }
 
