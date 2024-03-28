@@ -45,7 +45,7 @@ const groupFormSchema = z.object({
     AIVisibility.GROUP,
     AIVisibility.PUBLIC,
     AIVisibility.ORGANIZATION,
-    AIVisibility.UNLISTED,
+    AIVisibility.ANYONE_WITH_LINK,
   ]),
   teammates: z.string(),
 });
@@ -62,7 +62,10 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
     host = window.location.origin;
   }
   let aiLink: string;
-  if (ai.visibility === AIVisibility.UNLISTED || ai.listInPublicCatalog) {
+  if (
+    ai.visibility === AIVisibility.ANYONE_WITH_LINK ||
+    ai.listInPublicCatalog
+  ) {
     aiLink = `${host}/public/ai/${ai.id}`;
   } else {
     aiLink = `${host}/ai/${ai.id}`;
@@ -114,7 +117,7 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
           <h3 className="text-lg font-medium">Share {ai.name}</h3>
           {(ai.listInPublicCatalog ||
             ai.visibility === AIVisibility.ORGANIZATION ||
-            ai.visibility === AIVisibility.UNLISTED) && (
+            ai.visibility === AIVisibility.ANYONE_WITH_LINK) && (
             <div>
               <div className="flex justify-between mb-2">
                 <div className="mb-4">

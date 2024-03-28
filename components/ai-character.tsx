@@ -543,7 +543,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
             />
             <div className="mt-4 text-sm">
               {(form.watch("visibility") === AIVisibility.ORGANIZATION ||
-                form.watch("visibility") === AIVisibility.UNLISTED) && (
+                form.watch("visibility") === AIVisibility.ANYONE_WITH_LINK) && (
                 <FormField
                   name="listInOrgCatalog"
                   control={form.control}
@@ -564,7 +564,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                   )}
                 />
               )}
-              {form.watch("visibility") === AIVisibility.UNLISTED &&
+              {form.watch("visibility") === AIVisibility.ANYONE_WITH_LINK &&
                 hasInstanceAccess && (
                   <FormField
                     name="listInPublicCatalog"
