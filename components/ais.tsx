@@ -67,9 +67,11 @@ export const AIs = ({
                   ) : null}
                   {(item.visibility === "PRIVATE" &&
                     !item.isShared &&
-                    item.userId !== authorizationContext.userId) ||
+                    item.userId !== authorizationContext.userId &&
+                    !item.listInPublicCatalog) ||
                   (item.visibility === "ORGANIZATION" &&
-                    item.orgId !== authorizationContext.orgId) ||
+                    item.orgId !== authorizationContext.orgId &&
+                    !item.listInPublicCatalog) ||
                   (item.visibility === "GROUP" &&
                     (item.groups?.length ||
                       item.userId !== authorizationContext.userId) &&
