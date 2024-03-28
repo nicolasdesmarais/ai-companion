@@ -564,25 +564,26 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                   )}
                 />
               )}
-              {hasInstanceAccess && (
-                <FormField
-                  name="listInPublicCatalog"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <Checkbox
-                        id="listInPublicCatalog"
-                        checked={field.value}
-                        onCheckedChange={(val) => {
-                          field.onChange(val);
-                        }}
-                      >
-                        List in Public Catalog
-                      </Checkbox>
-                    </FormItem>
-                  )}
-                />
-              )}
+              {form.watch("visibility") === AIVisibility.UNLISTED &&
+                hasInstanceAccess && (
+                  <FormField
+                    name="listInPublicCatalog"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <Checkbox
+                          id="listInPublicCatalog"
+                          checked={field.value}
+                          onCheckedChange={(val) => {
+                            field.onChange(val);
+                          }}
+                        >
+                          List in Public Catalog
+                        </Checkbox>
+                      </FormItem>
+                    )}
+                  />
+                )}
             </div>
             {voiceEnabled && (
               <FormField
