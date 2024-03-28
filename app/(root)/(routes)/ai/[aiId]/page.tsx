@@ -20,11 +20,15 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     params.aiId
   );
   if (aiChats.data.length === 0) {
-    const chat = await chatService.createChat(
-      authorizationContext,
-      params.aiId
-    );
-    return redirect(`/chat/${chat.id}?new=true`);
+    try {
+      const chat = await chatService.createChat(
+        authorizationContext,
+        params.aiId
+      );
+      return redirect(`/chat/${chat.id}?new=true`);
+    } catch (e) {
+      return redirect("/");
+    }
   } else {
     return redirect(`/chat/${aiChats.data[0].id}`);
   }

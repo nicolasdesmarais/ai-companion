@@ -45,6 +45,8 @@ const formSchema = z.object({
   visibility: z.string().min(1, {
     message: "Visibility is required",
   }),
+  listInOrgCatalog: z.boolean().optional(),
+  listInPublicCatalog: z.boolean().optional(),
   options: z
     .object({
       maxTokens: z.array(z.number()).optional(),
@@ -171,6 +173,8 @@ export const AIEditor = ({
           categoryId: undefined,
           modelId: "gpt-4",
           visibility: "ORGANIZATION",
+          listInOrgCatalog: false,
+          listInPublicCatalog: false,
           knowledge: [],
           options: {},
           groups: [],

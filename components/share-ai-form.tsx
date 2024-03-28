@@ -61,7 +61,12 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
   if (typeof window !== "undefined") {
     host = window.location.origin;
   }
-  const aiLink = `${host}/public/ai/${ai.id}`;
+  let aiLink: string;
+  if (ai.visibility === AIVisibility.ANYONE_WITH_LINK) {
+    aiLink = `${host}/public/ai/${ai.id}`;
+  } else {
+    aiLink = `${host}/ai/${ai.id}`;
+  }
   const form = useForm<z.infer<typeof groupFormSchema>>({
     resolver: zodResolver(groupFormSchema),
     defaultValues: {
@@ -106,8 +111,9 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
     <div className="h-full p-4 space-y-2 max-w-3xl">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <h3 className="text-lg font-medium">Share AI - {ai.name}</h3>
-          {ai.visibility === AIVisibility.PUBLIC ? (
+          <h3 className="text-lg font-medium">Share {ai.name}</h3>
+          {(ai.visibility === AIVisibility.ORGANIZATION ||
+            ai.visibility === AIVisibility.ANYONE_WITH_LINK) && (
             <div>
               <div className="flex justify-between mb-2">
                 <div className="mb-4">
@@ -195,31 +201,30 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
                 </Button>
               </div>
             </div>
-          ) : (
-            <>
-              <FormField
-                name="teammates"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Add teammates</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Ex: jennifer.wallace@acme.com, joe.hamm@acme.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="w-full flex flex-row-reverse">
-                <Button size="lg" variant="ring">
-                  Share
-                </Button>
-              </div>
-            </>
           )}
+          <>
+            <FormField
+              name="teammates"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Share with teammates</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Ex: jennifer.wallace@acme.com, joe.hamm@acme.com"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="w-full flex flex-row-reverse">
+              <Button size="lg" variant="ring">
+                Share
+              </Button>
+            </div>
+          </>
         </form>
       </Form>
     </div>

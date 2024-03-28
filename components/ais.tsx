@@ -65,19 +65,20 @@ export const AIs = ({
                       </Tooltip>
                     </div>
                   ) : null}
-                  {(item.visibility === "PRIVATE" &&
-                    !item.isShared &&
-                    item.userId !== authorizationContext.userId) ||
-                  (item.visibility === "ORGANIZATION" &&
-                    item.orgId !== authorizationContext.orgId) ||
-                  (item.visibility === "GROUP" &&
-                    (item.groups?.length ||
-                      item.userId !== authorizationContext.userId) &&
-                    !item.groups?.some((groupId) =>
-                      groups.some(
-                        (group) => !group.notVisibleToMe && group.id === groupId
-                      )
-                    )) ? (
+                  {!item.listInPublicCatalog &&
+                  (item.orgId !== authorizationContext.orgId ||
+                    (item.visibility === "PRIVATE" &&
+                      !item.isShared &&
+                      item.userId !== authorizationContext.userId) ||
+                    (item.visibility === "GROUP" &&
+                      (item.groups?.length ||
+                        item.userId !== authorizationContext.userId) &&
+                      !item.groups?.some((groupId) =>
+                        groups.some(
+                          (group) =>
+                            !group.notVisibleToMe && group.id === groupId
+                        )
+                      ))) ? (
                     <div className="absolute top-2 left-2">
                       <Tooltip content="Not Visible to Me">
                         <EyeOff className="w-6 h-6 bg-destructive px-1 rounded-md text-white" />

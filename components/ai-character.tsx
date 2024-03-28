@@ -27,9 +27,9 @@ import { useGroupModal } from "@/hooks/use-group-modal";
 import { useTalkModal } from "@/hooks/use-talk-modal";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { getDiversityString } from "@/src/lib/diversity";
-import { Category } from "@prisma/client";
+import { AIVisibility, Category } from "@prisma/client";
 import axios, { AxiosError } from "axios";
-import { Loader, Play, Plus, Settings, Wand2 } from "lucide-react";
+import { Loader, Play, Settings, Wand2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { imageModels, voices } from "./ai-models";
@@ -57,8 +57,8 @@ Human: Got it. Thanks for your assistance.
 Support Specialist AI: You're welcome! Feel free to ask if you have any further questions. I'm here to help!
 `;
 
-const INSTRUCTION_PROMPT = `Create a single short paragraph description of an AI you are training to answer questions from users. 
-Write it as if you are explaining to them their job, role and responsibilities. Write it simply and direct without excessive adjectives or niceties. 
+const INSTRUCTION_PROMPT = `Create a single short paragraph description of an AI you are training to answer questions from users.
+Write it as if you are explaining to them their job, role and responsibilities. Write it simply and direct without excessive adjectives or niceties.
 Do not mention continuous learning. Write the paragraph based on the following information about them: `;
 
 const loadingMessages = [
@@ -261,7 +261,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
     if (name && description) {
       try {
         const response = await axios.post("/api/v1/generate", {
-          prompt: `Create an example conversation between a Human and ${name} where the Human is asking questions of the AI named ${name}. 
+          prompt: `Create an example conversation between a Human and ${name} where the Human is asking questions of the AI named ${name}.
           Create the conversation based on what a user would ask an AI who is trained on the following information: ${instructions}`,
         });
         form.setValue("seed", response.data, { shouldDirty: true });
@@ -526,67 +526,68 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                     </FormControl>
                     <SelectContent>
                       <SelectItem key="PRIVATE" value="PRIVATE">
-                        Private
-                      </SelectItem>
-                      <SelectItem key="GROUP" value="GROUP">
-                        Group
+                        Restricted
                       </SelectItem>
                       <SelectItem key="ORGANIZATION" value="ORGANIZATION">
-                        Organization
+                        My Organization
                       </SelectItem>
-                      {hasInstanceAccess && (
-                        <SelectItem key="PUBLIC" value="PUBLIC">
-                          Public
-                        </SelectItem>
-                      )}
+                      <SelectItem
+                        key="ANYONE_WITH_LINK"
+                        value="ANYONE_WITH_LINK"
+                      >
+                        Anyone with the link
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>Control who can see your AI</FormDescription>
                   <FormMessage />
-                  {field.value === "GROUP" ? (
-                    <FormField
-                      name="groups"
-                      control={form.control}
-                      render={({ field }) => (
-                        <div className="border-l border-ring pl-4 mt-4">
-                          {groupList.map((group) => (
-                            <div key={group.id}>
-                              <Checkbox
-                                id={group.id}
-                                checked={(field.value || []).includes(group.id)}
-                                onCheckedChange={(val) =>
-                                  val
-                                    ? field.onChange([
-                                        group.id,
-                                        ...(field.value || []),
-                                      ])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (v: string) => v !== group.id
-                                        )
-                                      )
-                                }
-                              >
-                                {group.name}
-                              </Checkbox>
-                            </div>
-                          ))}
-                          <Button
-                            type="button"
-                            disabled={isLoading}
-                            variant="ring"
-                            onClick={() => groupModal.onOpen()}
-                          >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add Group
-                          </Button>
-                        </div>
-                      )}
-                    />
-                  ) : null}
                 </FormItem>
               )}
             />
+            <div className="mt-4 text-sm">
+              {(form.watch("visibility") === AIVisibility.ORGANIZATION ||
+                form.watch("visibility") === AIVisibility.ANYONE_WITH_LINK) && (
+                <FormField
+                  name="listInOrgCatalog"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Checkbox
+                          id="listInOrgCatalog"
+                          checked={field.value}
+                          onCheckedChange={(val) => {
+                            field.onChange(val);
+                          }}
+                        >
+                          List in Organization Catalog
+                        </Checkbox>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              )}
+              {form.watch("visibility") === AIVisibility.ANYONE_WITH_LINK &&
+                hasInstanceAccess && (
+                  <FormField
+                    name="listInPublicCatalog"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <Checkbox
+                          id="listInPublicCatalog"
+                          checked={field.value}
+                          onCheckedChange={(val) => {
+                            field.onChange(val);
+                          }}
+                        >
+                          List in Public Catalog
+                        </Checkbox>
+                      </FormItem>
+                    )}
+                  />
+                )}
+            </div>
             {voiceEnabled && (
               <FormField
                 name="talk"
