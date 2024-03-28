@@ -663,7 +663,7 @@ export class AIService {
   private getUserGroupCriteria(orgId: string, userId: string) {
     return {
       visibility: {
-        in: [AIVisibility.GROUP, AIVisibility.PUBLIC],
+        in: [AIVisibility.GROUP],
       },
       groups: {
         some: {
@@ -780,7 +780,7 @@ export class AIService {
   }
 
   private getPublicCriteria() {
-    return { listInPublicCatalog: true, visibility: AIVisibility.PUBLIC };
+    return { listInPublicCatalog: true };
   }
 
   private getGroupCriteria(orgId: string, groupId: string) {

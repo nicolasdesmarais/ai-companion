@@ -62,10 +62,10 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
     host = window.location.origin;
   }
   let aiLink: string;
-  if (ai.visibility === AIVisibility.PUBLIC) {
-    aiLink = `${host}/public/ai/${ai.id}`;
-  } else {
+  if (ai.visibility === AIVisibility.ORGANIZATION) {
     aiLink = `${host}/ai/${ai.id}`;
+  } else {
+    aiLink = `${host}/public/ai/${ai.id}`;
   }
   const form = useForm<z.infer<typeof groupFormSchema>>({
     resolver: zodResolver(groupFormSchema),
@@ -113,6 +113,7 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <h3 className="text-lg font-medium">Share {ai.name}</h3>
           {(ai.visibility === AIVisibility.PUBLIC ||
+            ai.visibility === AIVisibility.ORGANIZATION ||
             ai.visibility === AIVisibility.UNLISTED) && (
             <div>
               <div className="flex justify-between mb-2">
