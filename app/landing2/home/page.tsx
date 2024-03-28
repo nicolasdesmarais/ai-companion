@@ -119,10 +119,11 @@ const LandingHome = () => {
                 Custom deployment options
               </h4>
               <div>
-                For companies ready to build a fully custom, enterprise-ready AI
-                solution, AppDirect partner Ivado labs provides professional
-                services to help develop your vision, strategy, and
-                implementation.
+                For companies looking to build AI-driven solutions that solve
+                complex supply chain problems, AppDirect has partnered with
+                IVADO Labs, a leading AI solution provider with a mission to
+                take advanced AI technologies out of the lab and apply them in
+                the real world.
               </div>
             </div>
           </div>
