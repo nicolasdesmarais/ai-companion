@@ -72,7 +72,7 @@ enum AIVisibility {
   GROUP
   ORGANIZATION
   PUBLIC
-  UNLISTED
+  ANYONE_WITH_LINK
 }
 
 model Message {
