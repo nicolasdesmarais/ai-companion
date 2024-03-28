@@ -112,8 +112,7 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <h3 className="text-lg font-medium">Share {ai.name}</h3>
-          {(ai.listInPublicCatalog ||
-            ai.visibility === AIVisibility.ORGANIZATION ||
+          {(ai.visibility === AIVisibility.ORGANIZATION ||
             ai.visibility === AIVisibility.ANYONE_WITH_LINK) && (
             <div>
               <div className="flex justify-between mb-2">
