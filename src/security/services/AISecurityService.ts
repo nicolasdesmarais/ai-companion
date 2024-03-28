@@ -7,9 +7,10 @@ import { SecuredResourceType } from "../models/SecuredResourceType";
 import { BaseEntitySecurityService } from "./BaseEntitySecurityService";
 
 export class AISecurityService {
-  public static canReadAI(
+  public static async canReadAI(
     authorizationContext: AuthorizationContext,
-    ai: AISummaryDto
+    ai: AISummaryDto,
+    hasPermission: boolean | ((ai: string, userId: string) => Promise<boolean>)
   ) {
     if (ai.listInPublicCatalog) {
       return true;
@@ -32,16 +33,27 @@ export class AISecurityService {
       return true;
     }
 
+    // Authorization context org must match AI org for remaining scenarios
     const { orgId, userId } = authorizationContext;
     if (ai.orgId !== orgId) {
       return false;
     }
 
-    return (
+    // User has org admin permission, or AI is org-visible, or user is AI owner
+    if (
       highestAccessLevel === SecuredResourceAccessLevel.ORGANIZATION ||
       ai.visibility === AIVisibility.ORGANIZATION ||
       ai.userId === userId
-    );
+    ) {
+      return true;
+    }
+
+    // Check if user has explicit permission to view AI
+    if (typeof hasPermission === "boolean") {
+      return hasPermission;
+    } else {
+      return await hasPermission(ai.id, userId);
+    }
   }
 
   public static canUpdateAI(

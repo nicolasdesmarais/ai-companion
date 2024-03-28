@@ -218,7 +218,7 @@ export class AIService {
       ai,
       messageCountPerAi,
       ratingPerAi,
-      [],
+      false,
       false
     );
     return aiDto;
@@ -239,14 +239,15 @@ export class AIService {
       throw new EntityNotFoundError(`AI with id=${aiId} not found`);
     }
 
-    if (!AISecurityService.canReadAI(authorizationContext, ai)) {
+    const isShared = await this.aiRepository.hasPermissionOnAI(aiId, userId);
+
+    if (!AISecurityService.canReadAI(authorizationContext, ai, isShared)) {
       throw new ForbiddenError(
         `User is not authorized to read AI with id=${aiId}`
       );
     }
 
     const canUpdateAI = AISecurityService.canUpdateAI(authorizationContext, ai);
-    const aiShare = await this.getAIShareForAIAndUser(ai.id, userId);
     const messageCountPerAi: any[] = await this.getMessageCountPerAi([ai.id]);
     const ratingPerAi: any[] = await this.getRatingPerAi([ai.id]);
 
@@ -254,66 +255,7 @@ export class AIService {
       ai,
       messageCountPerAi,
       ratingPerAi,
-      aiShare,
-      canUpdateAI
-    );
-    return aiDto;
-  }
-
-  /**
-   * Returns an AI by ID, only if it's visible to the given user and organization.
-   * @param orgId
-   * @param userId
-   * @param aiId
-   * @returns
-   */
-  public async findAIForUser(
-    authorizationContext: AuthorizationContext,
-    aiId: string
-  ): Promise<AIDetailDto | null> {
-    const { orgId, userId } = authorizationContext;
-
-    const highestAccessLevel = BaseEntitySecurityService.getHighestAccessLevel(
-      authorizationContext,
-      SecuredResourceType.AI,
-      SecuredAction.READ
-    );
-    if (!highestAccessLevel) {
-      throw new ForbiddenError("Forbidden");
-    }
-
-    let scope;
-    if (highestAccessLevel === SecuredResourceAccessLevel.INSTANCE) {
-      scope = ListAIsRequestScope.INSTANCE;
-    } else if (highestAccessLevel === SecuredResourceAccessLevel.ORGANIZATION) {
-      scope = ListAIsRequestScope.ADMIN;
-    } else {
-      scope = ListAIsRequestScope.ALL;
-    }
-
-    const whereCondition = { AND: [{}] };
-    whereCondition.AND.push(this.getBaseWhereCondition(orgId, userId, scope));
-    whereCondition.AND.push({ id: aiId });
-
-    const ai = await prismadb.aI.findFirst({
-      select: listAIResponseSelect(),
-      where: whereCondition,
-    });
-    if (!ai) {
-      return null;
-    }
-
-    const canUpdateAI = AISecurityService.canUpdateAI(authorizationContext, ai);
-
-    const aiShare = await this.getAIShareForAIAndUser(ai.id, userId);
-    const messageCountPerAi: any[] = await this.getMessageCountPerAi([ai.id]);
-    const ratingPerAi: any[] = await this.getRatingPerAi([ai.id]);
-
-    const aiDto = this.mapToAIDto(
-      ai,
-      messageCountPerAi,
-      ratingPerAi,
-      aiShare,
+      isShared,
       canUpdateAI
     );
     return aiDto;
@@ -360,7 +302,7 @@ export class AIService {
     const ratingPerAi: any[] = await this.getRatingPerAi(aiIds);
 
     const result = ais.map((ai) => {
-      return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi, []);
+      return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi, false);
     });
 
     if (request.sort === "newest") {
@@ -441,7 +383,8 @@ export class AIService {
     const ratingPerAi: any[] = await this.getRatingPerAi(aiIds);
 
     const result = ais.map((ai) => {
-      return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi, aiShares);
+      const isShared = !!aiShares.find((a) => a.aiId === ai.id);
+      return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi, isShared);
     });
 
     if (request.sort === "newest") {
@@ -513,7 +456,7 @@ export class AIService {
     ai: AI & { groups: GroupAI[] } & { orgApprovals: { id: number }[] },
     messageCountPerAi: any[],
     ratingPerAi: any[],
-    aiShares: any[],
+    isShared: boolean,
     forUpdate: boolean = false
   ): AIDetailDto {
     const aiCountRow = messageCountPerAi.find((m) => m.aiId === ai.id);
@@ -522,8 +465,6 @@ export class AIService {
     const ratingRow = ratingPerAi.find((r) => r.aiId === ai.id);
     const rating = ratingRow ? Number(ratingRow.averageRating) : 0;
     const ratingCount = ratingRow ? Number(ratingRow.ratingCount) : 0;
-
-    const isShared = !!aiShares.find((a) => a.aiId === ai.id);
 
     const isApprovedByOrg = ai.orgApprovals.length > 0;
 
