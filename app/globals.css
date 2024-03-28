@@ -120,21 +120,6 @@ body,
   background: linear-gradient(349deg, rgba(16,16,59,1) 0%, rgba(28,39,88,1) 65%, rgba(155,217,249,1) 126%);
 }
 
-
-
-
-.unleash-gradient {
-  background: white;
-  background-image: none;
-  background: linear-gradient(60deg, rgba(8,17,64,1) 0%, rgb(251, 252, 253) 35%, rgba(250,0,48,0.8) 100%); 
-}
-
-@media (min-width: 1024px) and (max-width: 1935px) {
-.unleash-gradient {
-  background-image: url(/unleash-bg.png);
-}
-}
-
 .teaser-blur {
   width: 500px;
   height: 250px;
@@ -331,6 +316,17 @@ body,
 
 .blob-background {
   filter: url(#goo) blur(40px);
+}
+
+
+@media (max-width: 1024px) {
+  .blob-background {
+    display: none;
+  }
+  .blob-container {
+    background: white;
+    background: linear-gradient(60deg, rgba(8,17,64,1) 0%, rgb(251, 252, 253) 35%, rgba(250,0,48,0.8) 100%); 
+  }
 }
 
 .svg-filter {

@@ -22,7 +22,7 @@ const steps = [
     src: "/share-demo.mp4",
     title: "Share",
     description:
-      "with with coworkers, friends and family and create a profile to help others know how to interact with your AI.",
+      "with coworkers, friends and family and create a profile to help others know how to interact with your AI.",
   },
 ];
 
@@ -67,14 +67,7 @@ const LandingTutorials = () => {
                 </div>
               </div>
               <div className="flex lg:hidden mt-8 mb-16">
-                <video
-                  width="640"
-                  height="420"
-                  preload="none"
-                  autoPlay
-                  loop
-                  muted
-                >
+                <video width="640" height="420" autoPlay loop muted playsInline>
                   <source src={step.src} type="video/mp4" />
                 </video>
               </div>
@@ -101,10 +94,10 @@ const LandingTutorials = () => {
               key={selectedStep.src}
               width="640"
               height="420"
-              preload="none"
               autoPlay
               loop
               muted
+              playsInline
             >
               <source src={selectedStep.src} type="video/mp4" />
             </video>

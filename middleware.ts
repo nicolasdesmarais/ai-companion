@@ -13,6 +13,7 @@ export default authMiddleware({
     "/landing(.*)",
     "/login",
     "/signup",
+    "/contact",
     "/api/v1/waitlist/export",
     "/api/v1/waitlist",
     "/api/v1/warm",

@@ -63,6 +63,8 @@ export interface AIRequest {
   seed: string;
   modelId: string;
   visibility: AIVisibility;
+  listInOrgCatalog: boolean;
+  listInPublicCatalog: boolean;
   options: AIModelOptions;
   groups: string[];
   profile: AIProfile;

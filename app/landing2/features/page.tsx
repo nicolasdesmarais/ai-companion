@@ -30,7 +30,7 @@ const LandingFeatures = () => {
               <li>
                 <b>Advanced data ingestion options:</b> AppDirect AI provides
                 more built-in choices than any other solution to define your
-                app&nbsp;s data sources (files, drive folders, and websites) and
+                app&apos;s data sources (files, drive folders, and websites) and
                 schedule automated data updates.
               </li>
               <li>

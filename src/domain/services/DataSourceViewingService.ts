@@ -1,3 +1,4 @@
+import { AIRepositoryImpl } from "@/src/adapter-out/repositories/AIRepositoryImpl";
 import { DataSourceRepositoryImpl } from "@/src/adapter-out/repositories/DataSourceRepositoryImpl";
 import prismadb from "@/src/lib/prismadb";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
@@ -7,12 +8,16 @@ import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { AISecurityService } from "@/src/security/services/AISecurityService";
 import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
 import { KnowledgeIndexStatus } from "@prisma/client";
-import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
+import { ForbiddenError } from "../errors/Errors";
 import { DataSourceDto, DataSourceFilter } from "../models/DataSources";
+import { AIRepository } from "../ports/outgoing/AIRepository";
 import { DataSourceRepository } from "../ports/outgoing/DataSourceRepository";
 
 export class DataSourceViewingService {
-  constructor(private dataSourceRepository: DataSourceRepository) {}
+  constructor(
+    private aiRepository: AIRepository,
+    private dataSourceRepository: DataSourceRepository
+  ) {}
 
   public async getById(dataSourceId: string): Promise<DataSourceDto> {
     return await this.dataSourceRepository.getById(dataSourceId);
@@ -87,15 +92,13 @@ export class DataSourceViewingService {
     authorizationContext: AuthorizationContext,
     aiId: string
   ): Promise<DataSourceDto[]> {
-    const ai = await prismadb.aI.findUnique({
-      where: { id: aiId },
-    });
+    const ai = await this.aiRepository.getById(aiId);
 
-    if (!ai) {
-      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
-    }
-
-    const canReadAi = AISecurityService.canReadAI(authorizationContext, ai);
+    const canReadAi = AISecurityService.canReadAI(
+      authorizationContext,
+      ai,
+      this.aiRepository.hasPermissionOnAI
+    );
     if (!canReadAi) {
       throw new ForbiddenError(
         `User is not authorized to read AI with id=${aiId}`
@@ -133,8 +136,10 @@ export class DataSourceViewingService {
   }
 }
 
+const aiRepository = new AIRepositoryImpl();
 const dataSourceRepository = new DataSourceRepositoryImpl();
 const dataSourceViewingService = new DataSourceViewingService(
+  aiRepository,
   dataSourceRepository
 );
 export default dataSourceViewingService;

@@ -27,14 +27,14 @@ const LandingHome = () => {
               <Link href="/sign-up" className="px-8 py-2 bg-sky">
                 Sign up
               </Link>
-              <Link href="/sign-up" className="px-4 py-2">
+              <Link href="/landing2/resources#tour" className="px-4 py-2">
                 Take a tour
                 <ArrowRight className="inline-block w-4 h-4 ml-2" />
               </Link>
             </div>
           </div>
           <div className="my-8 shadow-lg md:w-[800px]">
-            <video width="1280" height="720" preload="none" autoPlay loop muted>
+            <video width="1280" height="720" autoPlay loop muted playsInline>
               <source src="/storyboard720.mp4" type="video/mp4" />
             </video>
           </div>
@@ -43,10 +43,10 @@ const LandingHome = () => {
 
       <LandingStartChat />
 
-      <div className="flex flex-col items-center mb-14 mt-20 relative overflow-hidden">
+      <div className="flex flex-col items-center mb-14 mt-20 relative overflow-hidden blob-container">
         <div className=" lg:w-[1110px] px-8 md:px-20 py-16 flex flex-col items-center z-10">
-          <h3 className="text-3xl font-bold mb-16 text-center md:w-[700px]">
-            Create purpose-built, secure AI apps in minutes-using your data and
+          <h3 className="text-3xl font-bold mb-16 text-center md:w-[680px]">
+            Create purpose-built, secure AI apps in minutes—using your data and
             choice of LLM
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -119,10 +119,11 @@ const LandingHome = () => {
                 Custom deployment options
               </h4>
               <div>
-                For companies ready to build a fully custom, enterprise-ready AI
-                solution, AppDirect partner Ivado labs provides professional
-                services to help develop your vision, strategy, and
-                implementation.
+                For companies looking to build AI-driven solutions that solve
+                complex supply chain problems, AppDirect has partnered with
+                IVADO Labs, a leading AI solution provider with a mission to
+                take advanced AI technologies out of the lab and apply them in
+                the real world.
               </div>
             </div>
           </div>

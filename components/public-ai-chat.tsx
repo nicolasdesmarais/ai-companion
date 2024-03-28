@@ -12,7 +12,7 @@ interface Props {
 export const PublicAiChat = async ({ aiId }: Props) => {
   try {
     const ais = await aiService.findPublicAIs();
-    const ai = ais.find((ai) => ai.id === aiId);
+    const ai = await aiService.findPublicAIById(aiId);
     if (!ai) {
       throw new Error("AI not found");
     }

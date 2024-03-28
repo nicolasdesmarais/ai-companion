@@ -16,6 +16,19 @@ export class AIRepositoryImpl implements AIRepository {
     return ai;
   }
 
+  public async hasPermissionOnAI(
+    aiId: string,
+    userId: string
+  ): Promise<boolean> {
+    const count = await prismadb.aIPermissions.count({
+      where: {
+        aiId,
+        userId,
+      },
+    });
+    return count > 0;
+  }
+
   public async approveAIForOrg(aiId: string, orgId: string): Promise<void> {
     await prismadb.aIOrgApproval.upsert({
       where: {

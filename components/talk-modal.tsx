@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { X } from "lucide-react";
 import { useTalkModal } from "@/hooks/use-talk-modal";
+import { X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import Draggable from "react-draggable";
 
 export const TalkModal = () => {
@@ -43,6 +43,7 @@ export const TalkModal = () => {
           ref={ref}
           src={talkModal.src}
           autoPlay
+          playsInline
           onClick={() => ref.current?.play()}
           className="rounded-lg object-cover"
         >
