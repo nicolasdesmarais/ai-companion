@@ -24,8 +24,7 @@ export async function generateMetadata(
     return redirect(`/ai/${params.aiId}`);
   }
 
-  const ais = await aiService.findPublicAIs();
-  const ai = ais.find((ai) => ai.id === params.aiId);
+  const ai = await aiService.findPublicAIById(params.aiId);
 
   if (ai) {
     return {

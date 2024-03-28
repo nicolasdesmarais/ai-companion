@@ -8,13 +8,17 @@ import { BaseEntitySecurityService } from "./BaseEntitySecurityService";
 
 export class AISecurityService {
   public static async canReadAI(
-    authorizationContext: AuthorizationContext,
+    authorizationContext: AuthorizationContext | null,
     ai: AISummaryDto,
     hasPermission: boolean | ((ai: string, userId: string) => Promise<boolean>)
   ) {
     if (ai.listInPublicCatalog || ai.visibility === AIVisibility.UNLISTED) {
       // Public & Unlisted AIs are always readable
       return true;
+    }
+
+    if (!authorizationContext) {
+      return false;
     }
 
     const highestAccessLevel = BaseEntitySecurityService.getHighestAccessLevel(

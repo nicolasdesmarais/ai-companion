@@ -193,42 +193,10 @@ export class AIService {
     }
   }
 
-  /**
-   * Returns an AI by ID, only if it's a public AI.
-   * @param aiId
-   * @returns
-   */
-  public async findPublicAI(aiId: string): Promise<AIDetailDto | null> {
-    const whereCondition = { AND: [{}] };
-    whereCondition.AND.push(this.getPublicCriteria());
-    whereCondition.AND.push({ id: aiId });
-
-    const ai = await prismadb.aI.findFirst({
-      select: listAIResponseSelect(),
-      where: whereCondition,
-    });
-    if (!ai) {
-      return null;
-    }
-
-    const messageCountPerAi: any[] = await this.getMessageCountPerAi([ai.id]);
-    const ratingPerAi: any[] = await this.getRatingPerAi([ai.id]);
-
-    const aiDto = this.mapToAIDto(
-      ai,
-      messageCountPerAi,
-      ratingPerAi,
-      false,
-      false
-    );
-    return aiDto;
-  }
-
   public async getById(
     authorizationContext: AuthorizationContext,
     aiId: string
   ): Promise<AIDetailDto> {
-    const { userId } = authorizationContext;
     const ai = await prismadb.aI.findFirst({
       select: listAIResponseSelect(),
       where: {
@@ -238,10 +206,12 @@ export class AIService {
     if (!ai) {
       throw new EntityNotFoundError(`AI with id=${aiId} not found`);
     }
+    const { userId } = authorizationContext;
 
     const isShared = await this.aiRepository.hasPermissionOnAI(aiId, userId);
-
-    if (!AISecurityService.canReadAI(authorizationContext, ai, isShared)) {
+    if (
+      !(await AISecurityService.canReadAI(authorizationContext, ai, isShared))
+    ) {
       throw new ForbiddenError(
         `User is not authorized to read AI with id=${aiId}`
       );
@@ -257,6 +227,39 @@ export class AIService {
       ratingPerAi,
       isShared,
       canUpdateAI
+    );
+    return aiDto;
+  }
+
+  /**
+   * Returns an AI by id if it is public.
+   * @param aiId
+   * @returns
+   */
+  public async findPublicAIById(aiId: string): Promise<AIDetailDto | null> {
+    const ai = await prismadb.aI.findFirst({
+      select: listAIResponseSelect(),
+      where: {
+        id: aiId,
+      },
+    });
+    if (!ai) {
+      return null;
+    }
+
+    if (!(await AISecurityService.canReadAI(null, ai, false))) {
+      return null;
+    }
+
+    const messageCountPerAi: any[] = await this.getMessageCountPerAi([ai.id]);
+    const ratingPerAi: any[] = await this.getRatingPerAi([ai.id]);
+
+    const aiDto = this.mapToAIDto(
+      ai,
+      messageCountPerAi,
+      ratingPerAi,
+      false,
+      false
     );
     return aiDto;
   }
