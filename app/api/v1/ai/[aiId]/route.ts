@@ -23,7 +23,7 @@ async function getHandler(
     return new NextResponse("AI ID required", { status: 400 });
   }
 
-  const ai: AIDetailDto = await aiService.getAi(
+  const ai: AIDetailDto = await aiService.getById(
     authorizationContext,
     params.aiId
   );

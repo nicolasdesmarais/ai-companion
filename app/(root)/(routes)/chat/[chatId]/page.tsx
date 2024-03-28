@@ -24,7 +24,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
 
   try {
     const chat = await chatService.getChat(authorizationContext, params.chatId);
-    const ai = await aiService.getAi(authorizationContext, chat.ai.id);
+    const ai = await aiService.getById(authorizationContext, chat.ai.id);
     const canEditAi =
       ai !== null && AISecurityService.canUpdateAI(authorizationContext, ai);
 

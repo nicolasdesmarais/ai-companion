@@ -179,7 +179,7 @@ export class ChatService {
     authorizationContext: AuthorizationContext,
     aiId: string
   ) {
-    const ai = await aiService.getAi(authorizationContext, aiId);
+    const ai = await aiService.getById(authorizationContext, aiId);
     if (!ai) {
       throw new EntityNotFoundError(`AI with id ${aiId} not found`);
     }

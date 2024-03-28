@@ -224,7 +224,7 @@ export class AIService {
     return aiDto;
   }
 
-  public async getAi(
+  public async getById(
     authorizationContext: AuthorizationContext,
     aiId: string
   ): Promise<AIDetailDto> {
