@@ -694,9 +694,6 @@ export class AIService {
     return {
       orgId,
       listInOrgCatalog: true,
-      visibility: {
-        in: [AIVisibility.ORGANIZATION],
-      },
     };
   }
 
