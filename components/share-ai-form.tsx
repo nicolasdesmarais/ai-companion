@@ -62,10 +62,7 @@ export const ShareAIForm = ({ ai, onSuccess }: ShareAIFormProps) => {
     host = window.location.origin;
   }
   let aiLink: string;
-  if (
-    ai.visibility === AIVisibility.ANYONE_WITH_LINK ||
-    ai.listInPublicCatalog
-  ) {
+  if (ai.visibility === AIVisibility.ANYONE_WITH_LINK) {
     aiLink = `${host}/public/ai/${ai.id}`;
   } else {
     aiLink = `${host}/ai/${ai.id}`;
