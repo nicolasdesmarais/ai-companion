@@ -1,6 +1,7 @@
 "use client";
 import BlobAnimation from "@/components/blob-animation";
 import LandingNav from "@/components/landing-nav";
+import { AppdirectSvg } from "@/components/svg/appdirect-svg";
 import { Button } from "@/components/ui/button";
 import { useSignIn, useUser } from "@clerk/clerk-react";
 import { OAuthStrategy } from "@clerk/types";
@@ -62,8 +63,8 @@ const Login = () => {
     <div className="bg-white flex flex-col text-navy h-screen">
       <LandingNav transparent />
 
-      <div className="h-full w-full flex items-center justify-center">
-        <div className="bg-navylight md:bg-gradient4 z-10 rounded-lg flex flex-col items-center p-8 md:p-16 mx-2">
+      <div className="h-full w-full flex flex-col items-center justify-center">
+        <div className="bg-navylight md:bg-gradient4 z-10 rounded-lg flex flex-col items-center p-8 md:p-16 mx-2 mt-16">
           <h1 className="text-3xl mb-12 font-bold">Log in</h1>
           <Button
             className="bg-white rounded-md px-16 py-2 text-navy"
@@ -77,11 +78,11 @@ const Login = () => {
             <div className="border-b border-white grow h-1"></div>
           </div>
           <div className="text-red-500 text-sm pt-4">{error}</div>
-          <div className="flex flex-col gap-8 mt-8 w-full">
+          <div className="flex flex-col gap-8 mt-8 w-full md:w-80">
             <input
               type="email"
               placeholder="Email"
-              className="rounded-md md:w-80 h-12 px-4 bg-white"
+              className="rounded-md w-full h-12 px-4 bg-white"
               onChange={(e) => setEmailAddress(e.target.value)}
               id="email"
               name="email"
@@ -89,7 +90,7 @@ const Login = () => {
             <input
               type="password"
               placeholder="Password"
-              className="rounded-md md:w-80 h-12 px-4 bg-white"
+              className="rounded-md w-full h-12 px-4 bg-white"
               onChange={(e) => setPassword(e.target.value)}
               id="password"
               name="password"
@@ -116,7 +117,16 @@ const Login = () => {
             .
           </div>
         </div>
-
+        <div className="w-full flex flex-col items-center gap-4 z-10 md:text-white">
+          <div className="text-xs mt-8">
+            Don&apos;t have an account?{" "}
+            <Link href="/signup" className="underline">
+              Sign up
+            </Link>
+          </div>
+          <AppdirectSvg className="h-10 w-10 hidden md:block" fill="white" />
+          <AppdirectSvg className="h-10 w-10 md:hidden" />
+        </div>
         <BlobAnimation />
       </div>
     </div>

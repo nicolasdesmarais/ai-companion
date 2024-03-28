@@ -16,7 +16,7 @@ const LandingNav = ({ transparent }: Props) => {
           transparent ? "" : "bg-white"
         )}
       >
-        <nav className="flex m-4 w-[1144px] justify-between ">
+        <nav className="flex m-4 w-[1144px] justify-between">
           <div className="flex">
             <MobileNav />
             <Link
@@ -24,10 +24,10 @@ const LandingNav = ({ transparent }: Props) => {
               className="flex items-center md:mr-10 lg:mr-20"
             >
               <AppdirectSvg className="h-5 w-5" />
-              <span className="hidden md:static">AppDirect </span>
+              <span className="hidden md:inline">AppDirect </span>
               <span className="font-extrabold ml-2">AI</span>
             </Link>
-            <ul className="hidden md:flex justify-between md:gap-8 lg:gap-14 py-2">
+            <ul className="hidden md:flex justify-between md:gap-8 lg:gap-14 py-2 ">
               <li>
                 <Link href="/landing2/features">How it works</Link>
               </li>

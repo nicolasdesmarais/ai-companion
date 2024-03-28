@@ -12,10 +12,10 @@ const LandingFeatures = () => {
             <h2 className="text-5xl font-bold">AI for the Enterprise</h2>
             <div className="lg:w-[300px] mt-10 text-lg">
               For companies looking to build AI-driven solutions that solve
-              complex supply chain problems.
+              complex business problems.
             </div>
             <Link
-              href="/landing2/contact"
+              href="/contact"
               className="px-8 py-2 bg-sky w-40 text-navy mt-10"
             >
               Contact us
@@ -266,13 +266,13 @@ const LandingFeatures = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mb-14 mt-24">
+      <div className="flex flex-col items-center mb-14 md:mb-32 mt-24">
         <div className="flex flex-col lg:flex-row py-12 px-10 lg:px-20 justify-evenly items-center bg-navy text-white">
           <h3 className="text-3xl font-bold lg:w-[700px]">
             Connect with our Enterprise team today.
           </h3>
           <Link
-            href="/landing2/contact"
+            href="/contact"
             className="mt-8 lg:mt-0 lg:ml-10 px-8 py-2 text-navy bg-white flex items-center"
           >
             Contact us
