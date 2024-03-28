@@ -1,6 +1,6 @@
 "use client";
 
-import {useAuth, useClerk} from "@clerk/nextjs";
+import {useClerk} from "@clerk/nextjs";
 import { ImageUpload } from "@/components/image-upload";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
