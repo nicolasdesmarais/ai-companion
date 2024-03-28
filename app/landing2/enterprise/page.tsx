@@ -12,7 +12,7 @@ const LandingFeatures = () => {
             <h2 className="text-5xl font-bold">AI for the Enterprise</h2>
             <div className="lg:w-[300px] mt-10 text-lg">
               For companies looking to build AI-driven solutions that solve
-              complex supply chain problems.
+              complex business problems.
             </div>
             <Link
               href="/contact"

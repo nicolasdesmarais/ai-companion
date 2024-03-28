@@ -1,3 +1,4 @@
+import LandingCTA from "@/components/landing-cta";
 import LandingFooter from "@/components/landing-footer";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -958,6 +959,8 @@ const Solutions = () => {
           </div>
         </div>
       </div>
+
+      <LandingCTA />
 
       <LandingFooter />
     </div>
