@@ -27,7 +27,7 @@ import { useGroupModal } from "@/hooks/use-group-modal";
 import { useTalkModal } from "@/hooks/use-talk-modal";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { getDiversityString } from "@/src/lib/diversity";
-import { Category } from "@prisma/client";
+import { AIVisibility, Category } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { Loader, Play, Settings, Wand2 } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -542,7 +542,8 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
               )}
             />
             <div className="mt-4 text-sm">
-              {form.watch("visibility") === "ORGANIZATION" && (
+              {(form.watch("visibility") === AIVisibility.ORGANIZATION ||
+                form.watch("visibility") === AIVisibility.UNLISTED) && (
                 <FormField
                   name="listInOrgCatalog"
                   control={form.control}
