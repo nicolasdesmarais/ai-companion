@@ -93,6 +93,17 @@ const formSchema = z.object({
     .nullable(),
 });
 
+const defaultProfile = {
+  headline: undefined,
+  description: undefined,
+  features: [],
+  showCharacter: undefined,
+  showTraining: undefined,
+  showPersonality: undefined,
+  trainingDescription: undefined,
+  conversations: undefined,
+};
+
 interface AIFormProps {
   aiModels: AIModel[];
   initialAi: AIDetailDto | null;
@@ -138,16 +149,6 @@ export const AIEditor = ({
       } else {
         initialAi.options = options;
       }
-      const defaultProfile = {
-        headline: undefined,
-        description: undefined,
-        features: [],
-        showCharacter: undefined,
-        showTraining: undefined,
-        showPersonality: undefined,
-        trainingDescription: undefined,
-        conversations: undefined,
-      };
       if (initialAi.profile) {
         initialAi.profile = { ...defaultProfile, ...initialAi.profile };
       } else {
@@ -182,7 +183,6 @@ export const AIEditor = ({
 
   useEffect(() => {
     if (Object.keys(form.formState.errors).length) {
-      console.log(form.formState.errors);
       toast({
         variant: "destructive",
         description: "Form is not valid. Please check the errors.",
@@ -216,6 +216,14 @@ export const AIEditor = ({
           response = await axios.post("/api/v1/ai", values);
         }
         aiId = response.data.id;
+        if (response.data.profile) {
+          response.data.profile = {
+            ...defaultProfile,
+            ...response.data.profile,
+          };
+        } else {
+          response.data.profile = defaultProfile;
+        }
         form.reset({ talk: "", ...response.data }); //TODO: remove talk
         toast({
           description: "AI Saved.",
