@@ -205,17 +205,20 @@ export const ChatHeader = ({
         </div>
 
         <div className="flex">
-          {ai && (canEditAi || ai.visibility === AIVisibility.PUBLIC) && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="mr-4"
-              type="button"
-              onClick={() => setShowShareModal(true)}
-            >
-              <ExternalLink />
-            </Button>
-          )}
+          {ai &&
+            (canEditAi ||
+              ai.listInPublicCatalog ||
+              ai.visibility === AIVisibility.ORGANIZATION) && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="mr-4"
+                type="button"
+                onClick={() => setShowShareModal(true)}
+              >
+                <ExternalLink />
+              </Button>
+            )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
