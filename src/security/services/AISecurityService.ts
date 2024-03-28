@@ -12,7 +12,8 @@ export class AISecurityService {
     ai: AISummaryDto,
     hasPermission: boolean | ((ai: string, userId: string) => Promise<boolean>)
   ) {
-    if (ai.listInPublicCatalog) {
+    if (ai.listInPublicCatalog || ai.visibility === AIVisibility.UNLISTED) {
+      // Public & Unlisted AIs are always readable
       return true;
     }
 
@@ -25,11 +26,8 @@ export class AISecurityService {
       return false;
     }
 
-    if (
-      highestAccessLevel === SecuredResourceAccessLevel.INSTANCE ||
-      ai.visibility === AIVisibility.UNLISTED
-    ) {
-      // Public & Unlisted AIs are always readable
+    if (highestAccessLevel === SecuredResourceAccessLevel.INSTANCE) {
+      // All AIs are visible with Instance access
       return true;
     }
 
