@@ -11,6 +11,10 @@ export class AISecurityService {
     authorizationContext: AuthorizationContext,
     ai: AISummaryDto
   ) {
+    if (ai.listInPublicCatalog) {
+      return true;
+    }
+
     const highestAccessLevel = BaseEntitySecurityService.getHighestAccessLevel(
       authorizationContext,
       SecuredResourceType.AI,
@@ -22,7 +26,6 @@ export class AISecurityService {
 
     if (
       highestAccessLevel === SecuredResourceAccessLevel.INSTANCE ||
-      ai.visibility === AIVisibility.PUBLIC ||
       ai.visibility === AIVisibility.UNLISTED
     ) {
       // Public & Unlisted AIs are always readable

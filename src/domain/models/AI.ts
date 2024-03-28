@@ -15,6 +15,8 @@ export interface AISummaryDto {
   userName: string;
   categoryId: string;
   visibility: AIVisibility;
+  listInOrgCatalog: boolean;
+  listInPublicCatalog: boolean;
 
   // Only included based on profile settings
   modelId?: string;
@@ -33,8 +35,6 @@ export interface AIDetailDto extends AISummaryDto {
   // Only included based on access and profile settings
   groups?: string[];
   options?: AIModelOptions;
-  listInOrgCatalog?: boolean;
-  listInPublicCatalog?: boolean;
 }
 
 export interface AIProfileFeature {
