@@ -180,9 +180,6 @@ export class ChatService {
     aiId: string
   ) {
     const ai = await aiService.getById(authorizationContext, aiId);
-    if (!ai) {
-      throw new EntityNotFoundError(`AI with id ${aiId} not found`);
-    }
 
     const { orgId, userId } = authorizationContext;
     const chat = await prismadb.chat.create({
