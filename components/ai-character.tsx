@@ -27,7 +27,6 @@ import { useGroupModal } from "@/hooks/use-group-modal";
 import { useTalkModal } from "@/hooks/use-talk-modal";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { getDiversityString } from "@/src/lib/diversity";
-import { Category } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { Loader, Play, Plus, Settings, Wand2 } from "lucide-react";
 import { usePathname } from "next/navigation";
