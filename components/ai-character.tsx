@@ -1,6 +1,5 @@
 "use client";
 
-import {useClerk} from "@clerk/nextjs";
 import { ImageUpload } from "@/components/image-upload";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -35,6 +34,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { imageModels, voices } from "./ai-models";
 import { TalkModal } from "./talk-modal";
+import {useClerk} from "@clerk/nextjs";
 
 const PREAMBLE =
   "ex: As a Support Specialist AI, your role is to provide solutions to user inquiries. This involves understanding the nature of the questions, interpreting their context, and yielding the correct responses. The effectiveness of your position is evaluated based on the accuracy of your responses and the satisfaction of users. Precision in answering and user satisfaction are your primary goals.";
@@ -74,6 +74,21 @@ const loadingMessages = [
   "Setting the honesty parameters...",
 ];
 
+const SUPERUSER = "Superuser";
+const USER = "User";
+
+const categoryValues = [
+  "AI models",
+  "Productivity",
+  "Learning & Development",
+  "Marketing",
+  "Sales",
+  "Information Technology",
+  "Engineering",
+  "Human Resources",
+  "Accounting & Finance"
+];
+
 interface AIFormProps {
   form: any;
   hasInstanceAccess: boolean;
@@ -93,15 +108,9 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const [imagePrompt, setImagePrompt] = useState("");
   const [imageModel, setImageModel] = useState("latent-consistency");
   const [diversityString, setDiversityString] = useState("");
-  const [categories, setCategories] = useState<Category[]>([]);
   const [generatingAll, setGeneratingAll] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0]);
   const clerk = useClerk();
-
-  let role = "User";
-  if (clerk.user?.publicMetadata && clerk.user?.publicMetadata.superuser) {
-    role = "Superuser";
-  }
 
   const isLoading = form.formState.isSubmitting;
   const voiceEnabled = false && window.location.hostname !== "appdirect.ai";
@@ -113,16 +122,8 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
     }
   };
 
-  const fetchCategories = async () => {
-    const response = await axios.get("/api/v1/categories");
-    if (response.status === 200 && Array.isArray(response.data)) {
-      setCategories(response.data);
-    }
-  };
-
   useEffect(() => {
     fetchGroups();
-    fetchCategories();
     const interval = setInterval(() => {
       setLoadingMessage((msg) => {
         const thisIndex = loadingMessages.indexOf(msg);
@@ -294,13 +295,18 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
 
   const generateAll = async () => {
     setGeneratingAll(true);
-    const defaultCat = categories[0];
-    form.setValue("categoryId", defaultCat.id, { shouldDirty: true });
+    const defaultCat = categoryValues[0];
+    form.setValue("categoryId", defaultCat, { shouldDirty: true });
     form.setValue("introduction", `How may I be of assistance today?`, {
       shouldDirty: true,
     });
     await Promise.all([generateAvatar(), generateInstruction()]);
     save();
+  };
+
+  let userRole = USER;
+  if (clerk.user?.publicMetadata && clerk.user?.publicMetadata.superuser) {
+    userRole = SUPERUSER;
   };
 
   return (
@@ -476,16 +482,13 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                 </FormItem>
               )}
             />
-            {role === "Superuser" &&
+            {userRole === SUPERUSER &&
             <FormField
               control={form.control}
-              name="categoryId"
+              name="categoryName"
               render={({ field }) => (
                 <FormItem className="col-span-2 md:col-span-1">
-                  <FormLabel>Category-Test</FormLabel>
-                  {/* change this to multiselect*/}
-                  {/*change Add Category behind SU scope*/}
-                  {/*Add Data Manually in DB*/}
+                  <FormLabel>Category</FormLabel>
                   <Select
                     disabled={isLoading}
                     onValueChange={field.onChange}
@@ -501,9 +504,9 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
+                      {categoryValues.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -514,8 +517,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                   <FormMessage />
                 </FormItem>
               )}
-            />
-            }
+            />}
             <FormField
               name="visibility"
               control={form.control}
