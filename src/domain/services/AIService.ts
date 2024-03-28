@@ -724,7 +724,12 @@ export class AIService {
   }
 
   private getPublicCriteria() {
-    return { listInPublicCatalog: true };
+    return {
+      listInPublicCatalog: true,
+      visibility: {
+        in: [AIVisibility.ANYONE_WITH_LINK],
+      },
+    };
   }
 
   private getGroupCriteria(orgId: string, groupId: string) {
