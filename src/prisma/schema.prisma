@@ -9,13 +9,6 @@ datasource db {
   relationMode = "prisma"
 }
 
-model Category {
-  id   String @id @default(uuid())
-  name String
-  ais  AI[]
-
-  @@map("categories")
-}
 
 model AI {
   id                  String       @id @default(uuid())
@@ -37,8 +30,7 @@ model AI {
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
-  category   Category @relation(fields: [categoryId], references: [id])
-  categoryId String   @map("category_id")
+  categoryName String?   @db.Text
 
   chats Chat[]
 
@@ -55,7 +47,6 @@ model AI {
   ratings      AIRating[]
   orgApprovals AIOrgApproval[]
 
-  @@index([categoryId])
   @@index([visibility])
   @@index([userId])
   @@fulltext([name, userName])
