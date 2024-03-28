@@ -1,5 +1,6 @@
 "use client";
 
+import {useAuth, useClerk} from "@clerk/nextjs";
 import { ImageUpload } from "@/components/image-upload";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -95,6 +96,12 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [generatingAll, setGeneratingAll] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0]);
+  const clerk = useClerk();
+
+  let role = "User";
+  if (clerk.user?.publicMetadata && clerk.user?.publicMetadata.superuser) {
+    role = "Superuser";
+  }
 
   const isLoading = form.formState.isSubmitting;
   const voiceEnabled = false && window.location.hostname !== "appdirect.ai";
@@ -469,12 +476,13 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                 </FormItem>
               )}
             />
+            {role === "Superuser" &&
             <FormField
               control={form.control}
               name="categoryId"
               render={({ field }) => (
                 <FormItem className="col-span-2 md:col-span-1">
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel>Category-Test</FormLabel>
                   {/* change this to multiselect*/}
                   {/*change Add Category behind SU scope*/}
                   {/*Add Data Manually in DB*/}
@@ -507,6 +515,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                 </FormItem>
               )}
             />
+            }
             <FormField
               name="visibility"
               control={form.control}
