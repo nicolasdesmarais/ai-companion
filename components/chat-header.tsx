@@ -207,7 +207,7 @@ export const ChatHeader = ({
         <div className="flex">
           {ai &&
             (canEditAi ||
-              ai.listInPublicCatalog ||
+              ai.visibility === AIVisibility.ANYONE_WITH_LINK ||
               ai.visibility === AIVisibility.ORGANIZATION) && (
               <Button
                 variant="ghost"
