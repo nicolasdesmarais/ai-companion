@@ -3,6 +3,7 @@ import BlobAnimation from "@/components/blob-animation";
 import LandingNav from "@/components/landing-nav";
 import LandingTerms from "@/components/landing-terms";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -24,6 +25,7 @@ const formSchema = z.object({
   first: z.string().min(1, "First name is required"),
   last: z.string().min(1, "Last name is required"),
   company: z.string().min(1, "Company is required"),
+  mlq: z.boolean(),
 });
 
 const Contact = () => {
@@ -69,6 +71,11 @@ const Contact = () => {
             name: "email",
             value: values.email,
           },
+          {
+            objectTypeId: "0-1",
+            name: "mql_form_flag",
+            value: values.mlq,
+          },
         ],
         context: {
           hutk,
@@ -86,6 +93,7 @@ const Contact = () => {
         form.setValue("first", "");
         form.setValue("last", "");
         form.setValue("company", "");
+        form.setValue("mlq", false);
         toast({
           description: "Thank you, we will reach out soon.",
           duration: 3000,
@@ -120,7 +128,7 @@ const Contact = () => {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="flex flex-col gap-6 mt-8 w-full md:w-80"
+              className="flex flex-col gap-6 mt-8 w-full md:w-96"
             >
               <FormField
                 name="first"
@@ -190,7 +198,29 @@ const Contact = () => {
                   </FormItem>
                 )}
               />
-
+              <FormField
+                name="mlq"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Checkbox
+                        id="mlq"
+                        checked={field.value}
+                        onCheckedChange={(val) => {
+                          field.onChange(val);
+                        }}
+                        className="bg-white focus:bg-white focus:text-navy focus:ring-navylight ring-offset-navylight"
+                      >
+                        <div className="text-sm">
+                          Check here if you wish to receive communications from
+                          AppDirect about our new features and product updates.
+                        </div>
+                      </Checkbox>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
               <Button className="bg-white rounded-md px-16 py-2 text-center text-navy">
                 Contact Us
                 {loading ? <Loader className="w-4 h-4 ml-2 spinner" /> : null}
