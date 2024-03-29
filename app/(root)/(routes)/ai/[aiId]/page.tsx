@@ -1,37 +1,51 @@
+"use client";
+
 import chatService from "@/src/domain/services/ChatService";
-import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
+import { getUserAuthorizationContext } from "@/src/security/utils/clientSecurityUtils";
+
 import { redirectToSignIn } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 interface ChatIdPageProps {
   params: {
     aiId: string;
   };
 }
-const ChatIdPage = async ({ params }: ChatIdPageProps) => {
+const ChatIdPage = ({ params }: ChatIdPageProps) => {
+  const router = useRouter();
   const authorizationContext = getUserAuthorizationContext();
 
-  if (!authorizationContext) {
-    return redirectToSignIn();
-  }
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!authorizationContext) {
+        redirectToSignIn();
+        return;
+      }
 
-  const aiChats = await chatService.getAIChats(
-    authorizationContext,
-    params.aiId
-  );
-  if (aiChats.data.length === 0) {
-    try {
-      const chat = await chatService.createChat(
+      const aiChats = await chatService.getAIChats(
         authorizationContext,
         params.aiId
       );
-      return redirect(`/chat/${chat.id}?new=true`);
-    } catch (e) {
-      return redirect("/");
-    }
-  } else {
-    return redirect(`/chat/${aiChats.data[0].id}`);
-  }
+      if (aiChats.data.length === 0) {
+        try {
+          const chat = await chatService.createChat(
+            authorizationContext,
+            params.aiId
+          );
+          router.push(`/chat/${chat.id}?new=true`);
+        } catch (e) {
+          router.push("/");
+        }
+      } else {
+        router.push(`/chat/${aiChats.data[0].id}`);
+      }
+    };
+
+    fetchData();
+  }, [authorizationContext, params.aiId, router]);
+
+  return null;
 };
 
 export default ChatIdPage;
