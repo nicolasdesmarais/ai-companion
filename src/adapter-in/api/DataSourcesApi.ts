@@ -21,13 +21,17 @@ export function getLabelFromFileType(fileType: FileType) {
     case FileType.PDF:
       return "PDF";
     case FileType.DOCX:
-      return "Document";
+      return "Word Document";
     case FileType.GOOGLE_DOC:
       return "Google Document";
     case FileType.GOOGLE_SHEETS:
       return "Google Sheet";
     case FileType.GOOGLE_SLIDES:
       return "Google Slides";
+    case FileType.MARKDOWN:
+      return "Markdown";
+    case FileType.JSON:
+      return "JSON";
     case FileType.FOLDER:
       return "Folder";
     default:
@@ -50,6 +54,8 @@ export enum FileType {
   GOOGLE_SHEETS = "application/vnd.google-apps.spreadsheet",
   GOOGLE_SLIDES = "application/vnd.google-apps.presentation",
   FOLDER = "application/vnd.google-apps.folder",
+  MARKDOWN = "text/markdown",
+  JSON = "application/json",
   UNKNOWN = "unknown",
 }
 
