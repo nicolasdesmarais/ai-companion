@@ -11,6 +11,7 @@ import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import axios from "axios";
+import mime from "mime-types";
 import msftOAuthAdapter from "../../oauth/MsftOAuthAdapter";
 import {
   ContentRetrievingDataSourceAdapter,
@@ -27,37 +28,40 @@ import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 export enum MsftEvent {
   ONEDRIVE_FOLDER_SCAN_INITIATED = "onedrive.folder.scan.initiated",
 }
+
+export enum MsftConvertibleFileType {
+  DOC = "application/msword",
+  EML = "message/rfc822",
+  MSG = "application/vnd.ms-outlook",
+  ODP = "application/vnd.oasis.opendocument.presentation",
+  ODS = "application/vnd.oasis.opendocument.spreadsheet",
+  ODT = "application/vnd.oasis.opendocument.text",
+  PPS = "application/vnd.ms-powerpoint",
+  PPSX = "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
+  PPT = "application/vnd.ms-powerpoint",
+  PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  RTF = "application/rtf",
+  TIF = "image/tiff",
+  TIFF = "image/tiff",
+  XLS = "application/vnd.ms-excel",
+  XLSM = "application/vnd.ms-excel.sheet.macroenabled.12",
+  XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+}
+
+export const isConvertible = (filename: string): boolean => {
+  const filetype = mime.lookup(filename);
+  return !!(
+    filetype &&
+    Object.values(MsftConvertibleFileType).includes(
+      filetype as MsftConvertibleFileType
+    )
+  );
+};
+
 export class MsftDataSourceAdapter
   implements ContentRetrievingDataSourceAdapter
 {
   private static readonly GraphApiUrl = "https://graph.microsoft.com/v1.0";
-  private static readonly ConvertibleExtensions = [
-    "doc",
-    "docx",
-    "eml",
-    "msg",
-    "odp",
-    "ods",
-    "odt",
-    "pps",
-    "ppsx",
-    "ppt",
-    "pptx",
-    "rtf",
-    "tif",
-    "tiff",
-    "xls",
-    "xlsm",
-    "xlsx",
-  ];
-
-  private isConvertible(filename: string): boolean {
-    const ext = filename.split(".").pop();
-    if (!ext) {
-      return false;
-    }
-    return MsftDataSourceAdapter.ConvertibleExtensions.includes(ext);
-  }
 
   private async getToken(
     userId: string,
@@ -202,7 +206,7 @@ export class MsftDataSourceAdapter
     const token = await this.getToken(userId, data.oauthTokenId);
     const item = await this.fetch(token, `/me/drive/items/${fileId}`);
     let response;
-    if (this.isConvertible(knowledge.name)) {
+    if (isConvertible(knowledge.name)) {
       response = await fetch(
         `${MsftDataSourceAdapter.GraphApiUrl}/me/drive/items/${fileId}/content?format=pdf`,
         {
@@ -371,7 +375,7 @@ export class MsftDataSourceAdapter
   ): Promise<DataSourceItem[]> {
     if (item.file) {
       const isSupported =
-        this.isConvertible(item.name) || isSupportedFileType(item.name);
+        isConvertible(item.name) || isSupportedFileType(item.name);
       if (isSupported) {
         const dataSourceItem: DataSourceItem = {
           name: item.name,
