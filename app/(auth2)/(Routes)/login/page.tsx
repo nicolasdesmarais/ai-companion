@@ -1,6 +1,7 @@
 "use client";
 import BlobAnimation from "@/components/blob-animation";
 import LandingNav from "@/components/landing-nav";
+import LandingTerms from "@/components/landing-terms";
 import { AppdirectSvg } from "@/components/svg/appdirect-svg";
 import { Button } from "@/components/ui/button";
 import { useSignIn, useUser } from "@clerk/clerk-react";
@@ -105,17 +106,7 @@ const Login = () => {
               ) : null}
             </Button>
           </div>
-          <div className="text-xs mt-14">
-            By clicking “continue”, you agree to{" "}
-            <Link href="" className="underline">
-              terms of use
-            </Link>{" "}
-            and our{" "}
-            <Link href="" className="underline">
-              privacy policy
-            </Link>
-            .
-          </div>
+          <LandingTerms />
         </div>
         <div className="w-full flex flex-col items-center gap-4 z-10 md:text-white">
           <div className="text-xs mt-8">

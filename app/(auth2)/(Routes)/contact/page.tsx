@@ -1,6 +1,7 @@
 "use client";
 import BlobAnimation from "@/components/blob-animation";
 import LandingNav from "@/components/landing-nav";
+import LandingTerms from "@/components/landing-terms";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -119,7 +120,7 @@ const Contact = () => {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="pb-10 flex flex-col gap-6 mt-8 w-full"
+              className="flex flex-col gap-6 mt-8 w-full md:w-80"
             >
               <FormField
                 name="first"
@@ -130,7 +131,7 @@ const Contact = () => {
                       <Input
                         {...field}
                         disabled={loading}
-                        className="rounded-md md:w-80 h-12 px-4 bg-white focus-visible:ring-navylight ring-offset-navylight"
+                        className="rounded-md h-12 px-4 bg-white focus-visible:ring-navylight ring-offset-navylight"
                         placeholder="First Name"
                       />
                     </FormControl>
@@ -147,7 +148,7 @@ const Contact = () => {
                       <Input
                         {...field}
                         disabled={loading}
-                        className="rounded-md md:w-80 h-12 px-4 bg-white focus-visible:ring-navylight ring-offset-navylight"
+                        className="rounded-md h-12 px-4 bg-white focus-visible:ring-navylight ring-offset-navylight"
                         placeholder="Last Name"
                       />
                     </FormControl>
@@ -164,7 +165,7 @@ const Contact = () => {
                       <Input
                         {...field}
                         disabled={loading}
-                        className="rounded-md md:w-80 h-12 px-4 bg-white focus-visible:ring-navylight ring-offset-navylight"
+                        className="rounded-md h-12 px-4 bg-white focus-visible:ring-navylight ring-offset-navylight"
                         placeholder="Company"
                       />
                     </FormControl>
@@ -181,7 +182,7 @@ const Contact = () => {
                       <Input
                         {...field}
                         disabled={loading}
-                        className="rounded-md md:w-80 h-12 px-4 bg-white focus-visible:ring-navylight ring-offset-navylight"
+                        className="rounded-md h-12 px-4 bg-white focus-visible:ring-navylight ring-offset-navylight"
                         placeholder="Work email"
                       />
                     </FormControl>
@@ -195,6 +196,7 @@ const Contact = () => {
                 {loading ? <Loader className="w-4 h-4 ml-2 spinner" /> : null}
               </Button>
             </form>
+            <LandingTerms className="mt-8" />
           </Form>
         </div>
 
