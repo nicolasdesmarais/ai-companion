@@ -1,9 +1,8 @@
 import { inngest } from "./client";
 
-export const onFunctionFailed = inngest.createFunction(
+export const onInngestFunctionFailed = inngest.createFunction(
   {
-    name: "Log Failed Function events",
-    id: "log-failed-function-events",
+    id: "on-inngest-function-failed",
   },
   { event: "inngest/function.failed" },
   async ({ event, step }) => {
