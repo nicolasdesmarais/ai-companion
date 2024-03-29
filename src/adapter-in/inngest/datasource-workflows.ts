@@ -81,6 +81,15 @@ export const onDataSourceRefreshRequested = inngest.createFunction(
       }
     );
 
+    if (dataSourceItemList.rootItemMissing) {
+      await step.run("mark-data-source-missing", async () => {
+        return await dataSourceManagementService.markDataSourceAsMissing(
+          dataSourceId
+        );
+      });
+      return;
+    }
+
     await publishDataSourceItemList(
       dataSourceId,
       dataSourceItemList,

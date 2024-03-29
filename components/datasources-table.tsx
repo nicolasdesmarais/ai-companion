@@ -18,7 +18,8 @@ const needsRefresh = (status: DataSourceIndexStatus) =>
   status !== DataSourceIndexStatus.COMPLETED &&
   status !== DataSourceIndexStatus.FAILED &&
   status !== DataSourceIndexStatus.DELETED &&
-  status !== DataSourceIndexStatus.REFRESHING;
+  status !== DataSourceIndexStatus.REFRESHING &&
+  status !== DataSourceIndexStatus.MISSING;
 
 export const DataSourcesTable = () => {
   const [dataSources, setDataSources] = useState<any[]>([]);
