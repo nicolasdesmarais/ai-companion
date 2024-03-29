@@ -333,6 +333,7 @@ model AIDataSource {
   dataSourceId String     @map(name: "data_source_id")
 
   @@id([aiId, dataSourceId])
+  @@index([dataSourceId])
   @@map("ai_data_sources")
 }
 
