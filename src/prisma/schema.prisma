@@ -18,19 +18,21 @@ model Category {
 }
 
 model AI {
-  id           String       @id @default(uuid())
-  orgId        String       @map(name: "org_id")
-  userId       String       @map("user_id")
-  userName     String       @map("user_name")
-  src          String       @db.Text
-  name         String       @db.Text
-  introduction String?      @db.Text
-  description  String       @db.Text
-  instructions String       @db.Text
-  seed         String       @db.Text
-  visibility   AIVisibility @default(PRIVATE)
-  options      Json?
-  profile      Json?
+  id                  String       @id @default(uuid())
+  orgId               String       @map(name: "org_id")
+  userId              String       @map("user_id")
+  userName            String       @map("user_name")
+  src                 String       @db.Text
+  name                String       @db.Text
+  introduction        String?      @db.Text
+  description         String       @db.Text
+  instructions        String       @db.Text
+  seed                String       @db.Text
+  visibility          AIVisibility @default(PRIVATE)
+  listInOrgCatalog    Boolean      @default(false) @map("list_in_org_catalog")
+  listInPublicCatalog Boolean      @default(false) @map("list_in_public_catalog")
+  options             Json?
+  profile             Json?
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
@@ -70,6 +72,7 @@ enum AIVisibility {
   GROUP
   ORGANIZATION
   PUBLIC
+  ANYONE_WITH_LINK
 }
 
 model Message {

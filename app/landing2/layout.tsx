@@ -1,4 +1,5 @@
 import { PublicAnalytics } from "@/components/analytics";
+import HubSpotInit from "@/components/hubspot-init";
 import LandingNav from "@/components/landing-nav";
 
 export const metadata = {
@@ -23,6 +24,7 @@ const LandingLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <LandingNav />
+      <HubSpotInit />
       <PublicAnalytics />
       <main className="h-full bg-white overflow-auto pt-[72px]">
         {children}
