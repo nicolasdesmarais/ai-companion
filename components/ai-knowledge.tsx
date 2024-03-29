@@ -53,6 +53,7 @@ import { WebUrlsForm } from "./web-urls-knowledge-form";
 
 const needsRefresh = (status: DataSourceIndexStatus) =>
   status !== DataSourceIndexStatus.COMPLETED &&
+  status !== DataSourceIndexStatus.PARTIALLY_COMPLETED &&
   status !== DataSourceIndexStatus.FAILED &&
   status !== DataSourceIndexStatus.DELETED;
 
@@ -214,6 +215,7 @@ export const AIKnowledge = ({
       dataSource.indexStatus !== "FAILED"
   );
 
+  console.log("dataSources", dataSources);
   return (
     <div className="h-full p-4 max-w-3xl mx-auto">
       {pathname.endsWith("knowledge") && (
