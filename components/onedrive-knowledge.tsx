@@ -10,18 +10,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  FileType,
+  getLabelFromFileType,
+} from "@/src/adapter-in/api/DataSourcesApi";
 import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import { UserOAuthTokenEntity } from "@/src/domain/models/OAuthTokens";
 import { DataSourceRefreshPeriod } from "@prisma/client";
 import axios from "axios";
 import { format } from "date-fns";
 import { ChevronDown, ChevronRight, Loader, Server } from "lucide-react";
-import { useEffect, useState } from "react";
-import {
-  FileType,
-  getLabelFromFileType,
-} from "@/src/adapter-in/api/DataSourcesApi";
 import mime from "mime-types";
+import { useEffect, useState } from "react";
 import { DataRefreshPeriod } from "./data-refresh-period";
 
 const ADD_ACCOUNT_OPTION = "add-account";
@@ -180,7 +180,6 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
         );
         const values = response.data.value;
         const indent = (file.indent || 0) + 1;
-        console.log("current indent", file.indent, indent);
         values.forEach((value: any) => {
           value.indent = indent;
         });

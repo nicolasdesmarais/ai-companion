@@ -1,3 +1,4 @@
+import { isSupportedFileType } from "@/src/adapter-in/api/DataSourcesApi";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
 import {
   EntityNotFoundError,
@@ -240,7 +241,7 @@ export class MsftDataSourceAdapter
 
     const msftResponseBlob = await response.blob();
     const contentBlobUrl = await FileStorageService.put(
-      fileId,
+      fileName,
       msftResponseBlob
     );
 
@@ -372,18 +373,24 @@ export class MsftDataSourceAdapter
     parentFolderId?: string
   ): Promise<DataSourceItem[]> {
     if (item.file) {
-      const dataSourceItem: DataSourceItem = {
-        name: item.name,
-        uniqueId: item.id,
-        metadata: {
-          fileId: item.id,
-          fileName: item.name,
-          mimeType: item.file.mimeType,
-          modifiedTime: item.lastModifiedDateTime,
-          parentFolderId,
-        },
-      };
-      return [dataSourceItem];
+      const isSupported =
+        this.isConvertible(item.name) || isSupportedFileType(item.name);
+      if (isSupported) {
+        const dataSourceItem: DataSourceItem = {
+          name: item.name,
+          uniqueId: item.id,
+          metadata: {
+            fileId: item.id,
+            fileName: item.name,
+            mimeType: item.file.mimeType,
+            modifiedTime: item.lastModifiedDateTime,
+            parentFolderId,
+          },
+        };
+        return [dataSourceItem];
+      } else {
+        return [];
+      }
     }
     if (item.folder) {
       await publishEvent(MsftEvent.ONEDRIVE_FOLDER_SCAN_INITIATED, {
