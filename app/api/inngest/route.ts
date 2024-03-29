@@ -20,6 +20,7 @@ import {
   onKnowledgeRetryRequested,
   refreshDataSources,
 } from "@/src/adapter-in/inngest/datasource-workflows";
+import { onFunctionFailed } from "@/src/adapter-in/inngest/error-workflows";
 import { googleDriveFolderScanInitiated } from "@/src/adapter-in/inngest/google-drive-workflows";
 import { onedriveFolderScanInitiated } from "@/src/adapter-in/inngest/onedrive-workflows";
 import { stripeWebhookReceived } from "@/src/adapter-in/inngest/stripe-workflows";
@@ -35,6 +36,7 @@ export const { GET, POST, PUT } = serve({
     onDataSourceRefreshRequested,
     onDataSourceItemListReceived,
     onDataSourceDeleteRequested,
+    onFunctionFailed,
     googleDriveFolderScanInitiated,
     onedriveFolderScanInitiated,
     onKnowledgeInitialized,
