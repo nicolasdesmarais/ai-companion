@@ -43,7 +43,6 @@ const groupFormSchema = z.object({
   visibility: z.enum([
     AIVisibility.PRIVATE,
     AIVisibility.GROUP,
-    AIVisibility.PUBLIC,
     AIVisibility.ORGANIZATION,
     AIVisibility.ANYONE_WITH_LINK,
   ]),
