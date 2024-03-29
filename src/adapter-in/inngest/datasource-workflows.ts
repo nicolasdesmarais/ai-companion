@@ -54,7 +54,6 @@ export const onDataSourceInitialized = inngest.createFunction(
 export const onDataSourceRefreshRequested = inngest.createFunction(
   {
     id: "on-datasource-refresh-requested",
-    retries: 0,
     onFailure: async ({ error, event }) => {
       const { dataSourceId } = event.data.event
         .data as DataSourceRefreshRequestedPayload;
