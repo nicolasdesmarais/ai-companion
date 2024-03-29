@@ -221,11 +221,21 @@ export class GoogleDriveDataSourceAdapter
     );
     const driveClient = googleDriveClient(oauth2Client);
 
-    const inputFile = await driveClient.files.get({
-      fileId: input.fileId,
-      fields: "id, name, mimeType, modifiedTime",
-      supportsAllDrives: true,
-    });
+    let inputFile;
+    try {
+      inputFile = await driveClient.files.get({
+        fileId: input.fileId,
+        fields: "id, name, mimeType, modifiedTime",
+        supportsAllDrives: true,
+      });
+    } catch (error) {
+      if (error.code === 404) {
+        console.log("File not found:", error);
+        throw new EntityNotFoundError("File not found");
+      }
+      console.error("Error retrieving file from Google Drive", error);
+      throw error;
+    }
 
     const fileData = inputFile.data;
     if (!fileData.id) {

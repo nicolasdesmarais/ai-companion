@@ -1,6 +1,7 @@
 import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import { ChunkLoadingResult } from "@/src/adapter-out/knowledge/types/KnowledgeChunkTypes";
 import vectorDatabaseAdapter from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
+import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import {
   DataSourceInitializedPayload,
   DataSourceItemListReceivedPayload,
@@ -70,16 +71,32 @@ export const onDataSourceRefreshRequested = inngest.createFunction(
       event.data as DataSourceRefreshRequestedPayload;
     const forRefresh = true;
 
-    const dataSourceItemList = await step.run(
-      "get-datasource-item-list",
-      async () => {
-        return await dataSourceManagementService.getDataSourceItemList(
-          dataSourceId,
-          forRefresh,
-          forceRefresh
-        );
+    let dataSourceItemList;
+    try {
+      dataSourceItemList = await step.run(
+        "get-datasource-item-list",
+        async () => {
+          return await dataSourceManagementService.getDataSourceItemList(
+            dataSourceId,
+            forRefresh,
+            forceRefresh
+          );
+        }
+      );
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        // Root item not found, mark data source as missing
+        await step.run("mark-data-source-missing", async () => {
+          return await dataSourceManagementService.markDataSourceAsMissing(
+            dataSourceId,
+            error.message
+          );
+        });
+        return;
       }
-    );
+
+      throw error;
+    }
 
     await publishDataSourceItemList(
       dataSourceId,
