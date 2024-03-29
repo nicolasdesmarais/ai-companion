@@ -71,7 +71,6 @@ enum AIVisibility {
   PRIVATE
   GROUP
   ORGANIZATION
-  PUBLIC
   ANYONE_WITH_LINK
 }
 
