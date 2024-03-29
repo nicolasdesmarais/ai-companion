@@ -231,7 +231,10 @@ export class GoogleDriveDataSourceAdapter
     } catch (error) {
       if (error.code === 404) {
         console.log("File not found:", error);
-        throw new EntityNotFoundError("File not found");
+        return {
+          rootItemMissing: true,
+          items: [],
+        };
       }
       console.error("Error retrieving file from Google Drive", error);
       throw error;

@@ -1,7 +1,6 @@
 import { DataSourceItemList } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 import { ChunkLoadingResult } from "@/src/adapter-out/knowledge/types/KnowledgeChunkTypes";
 import vectorDatabaseAdapter from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
-import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import {
   DataSourceInitializedPayload,
   DataSourceItemListReceivedPayload,
@@ -55,6 +54,7 @@ export const onDataSourceInitialized = inngest.createFunction(
 export const onDataSourceRefreshRequested = inngest.createFunction(
   {
     id: "on-datasource-refresh-requested",
+    retries: 0,
     onFailure: async ({ error, event }) => {
       const { dataSourceId } = event.data.event
         .data as DataSourceRefreshRequestedPayload;
@@ -71,31 +71,24 @@ export const onDataSourceRefreshRequested = inngest.createFunction(
       event.data as DataSourceRefreshRequestedPayload;
     const forRefresh = true;
 
-    let dataSourceItemList;
-    try {
-      dataSourceItemList = await step.run(
-        "get-datasource-item-list",
-        async () => {
-          return await dataSourceManagementService.getDataSourceItemList(
-            dataSourceId,
-            forRefresh,
-            forceRefresh
-          );
-        }
-      );
-    } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        // Root item not found, mark data source as missing
-        await step.run("mark-data-source-missing", async () => {
-          return await dataSourceManagementService.markDataSourceAsMissing(
-            dataSourceId,
-            error.message
-          );
-        });
-        return;
+    const dataSourceItemList = await step.run(
+      "get-datasource-item-list",
+      async () => {
+        return await dataSourceManagementService.getDataSourceItemList(
+          dataSourceId,
+          forRefresh,
+          forceRefresh
+        );
       }
+    );
 
-      throw error;
+    if (dataSourceItemList.rootItemMissing) {
+      await step.run("mark-data-source-missing", async () => {
+        return await dataSourceManagementService.markDataSourceAsMissing(
+          dataSourceId
+        );
+      });
+      return;
     }
 
     await publishDataSourceItemList(
