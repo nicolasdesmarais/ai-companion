@@ -63,3 +63,56 @@ export interface UpdateDataSourceRequest {
   refreshPeriod: DataSourceRefreshPeriod | null;
   ais: string[];
 }
+
+export enum MsftConvertibleFileType {
+  EML = "message/rfc822",
+  MSG = "application/vnd.ms-outlook",
+  ODP = "application/vnd.oasis.opendocument.presentation",
+  ODS = "application/vnd.oasis.opendocument.spreadsheet",
+  ODT = "application/vnd.oasis.opendocument.text",
+  PPSX = "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
+  PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  RTF = "application/rtf",
+  XLS = "application/vnd.ms-excel",
+  XLSM = "application/vnd.ms-excel.sheet.macroenabled.12",
+  XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+}
+
+export const isMsftConvertible = (filename: string): boolean => {
+  const filetype = mime.lookup(filename);
+  return !!(
+    filetype &&
+    Object.values(MsftConvertibleFileType).includes(
+      filetype as MsftConvertibleFileType
+    )
+  );
+};
+
+export const getMsftLabelFromFileType = (fileType: string) => {
+  switch (fileType) {
+    case MsftConvertibleFileType.EML:
+      return "Email";
+    case MsftConvertibleFileType.MSG:
+      return "Outlook";
+    case MsftConvertibleFileType.ODP:
+      return "Presentation";
+    case MsftConvertibleFileType.ODS:
+      return "Spreadsheet";
+    case MsftConvertibleFileType.ODT:
+      return "Open Word";
+    case MsftConvertibleFileType.PPSX:
+      return "Slide Show";
+    case MsftConvertibleFileType.PPTX:
+      return "PowerPoint";
+    case MsftConvertibleFileType.RTF:
+      return "Rich Text";
+    case MsftConvertibleFileType.XLS:
+      return "Legacy Excel";
+    case MsftConvertibleFileType.XLSM:
+      return "Excel (Macro)";
+    case MsftConvertibleFileType.XLSX:
+      return "Excel";
+    default:
+      return getLabelFromFileType(fileType as FileType);
+  }
+};

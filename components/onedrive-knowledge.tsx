@@ -12,7 +12,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import {
   FileType,
-  getLabelFromFileType,
+  getMsftLabelFromFileType,
 } from "@/src/adapter-in/api/DataSourcesApi";
 import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import { UserOAuthTokenEntity } from "@/src/domain/models/OAuthTokens";
@@ -322,7 +322,7 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
                     <td className="p-2">
                       {file.folder
                         ? "Folder"
-                        : getLabelFromFileType(
+                        : getMsftLabelFromFileType(
                             mime.lookup(file.name) as FileType
                           )}
                     </td>

@@ -1,4 +1,7 @@
-import { isSupportedFileType } from "@/src/adapter-in/api/DataSourcesApi";
+import {
+  isMsftConvertible,
+  isSupportedFileType,
+} from "@/src/adapter-in/api/DataSourcesApi";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
 import {
   EntityNotFoundError,
@@ -11,7 +14,6 @@ import { decryptFromBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import { Knowledge, KnowledgeIndexStatus } from "@prisma/client";
 import axios from "axios";
-import mime from "mime-types";
 import msftOAuthAdapter from "../../oauth/MsftOAuthAdapter";
 import {
   ContentRetrievingDataSourceAdapter,
@@ -28,30 +30,6 @@ import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 export enum MsftEvent {
   ONEDRIVE_FOLDER_SCAN_INITIATED = "onedrive.folder.scan.initiated",
 }
-
-export enum MsftConvertibleFileType {
-  EML = "message/rfc822",
-  MSG = "application/vnd.ms-outlook",
-  ODP = "application/vnd.oasis.opendocument.presentation",
-  ODS = "application/vnd.oasis.opendocument.spreadsheet",
-  ODT = "application/vnd.oasis.opendocument.text",
-  PPSX = "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
-  PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  RTF = "application/rtf",
-  XLS = "application/vnd.ms-excel",
-  XLSM = "application/vnd.ms-excel.sheet.macroenabled.12",
-  XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-}
-
-export const isConvertible = (filename: string): boolean => {
-  const filetype = mime.lookup(filename);
-  return !!(
-    filetype &&
-    Object.values(MsftConvertibleFileType).includes(
-      filetype as MsftConvertibleFileType
-    )
-  );
-};
 
 export class MsftDataSourceAdapter
   implements ContentRetrievingDataSourceAdapter
@@ -201,7 +179,7 @@ export class MsftDataSourceAdapter
     const token = await this.getToken(userId, data.oauthTokenId);
     const item = await this.fetch(token, `/me/drive/items/${fileId}`);
     let response;
-    if (isConvertible(knowledge.name)) {
+    if (isMsftConvertible(knowledge.name)) {
       response = await fetch(
         `${MsftDataSourceAdapter.GraphApiUrl}/me/drive/items/${fileId}/content?format=pdf`,
         {
@@ -370,7 +348,7 @@ export class MsftDataSourceAdapter
   ): Promise<DataSourceItem[]> {
     if (item.file) {
       const isSupported =
-        isConvertible(item.name) || isSupportedFileType(item.name);
+        isMsftConvertible(item.name) || isSupportedFileType(item.name);
       if (isSupported) {
         const dataSourceItem: DataSourceItem = {
           name: item.name,
