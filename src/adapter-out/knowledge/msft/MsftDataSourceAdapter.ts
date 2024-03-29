@@ -35,8 +35,6 @@ export class MsftDataSourceAdapter
     "doc",
     "docx",
     "eml",
-    "htm",
-    "html",
     "msg",
     "odp",
     "ods",
@@ -119,7 +117,6 @@ export class MsftDataSourceAdapter
 
   public async children(userId: string, oauthTokenId: string, id: string) {
     const token = await this.getToken(userId, oauthTokenId);
-    console.log("msft children", `/me/drive/items/${id}/children`);
     return await this.fetch(token, `/me/drive/items/${id}/children`);
   }
 

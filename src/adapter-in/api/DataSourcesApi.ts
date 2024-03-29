@@ -1,6 +1,6 @@
 import { DataSourceDto } from "@/src/domain/models/DataSources";
 import { DataSourceRefreshPeriod } from "@prisma/client";
-import mime from "mime";
+import mime from "mime-types";
 
 export interface ListDataSourcesResponse {
   data: DataSourceDto[];
