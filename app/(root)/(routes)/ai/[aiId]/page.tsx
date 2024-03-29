@@ -1,3 +1,7 @@
+import {
+  EntityNotFoundError,
+  ForbiddenError,
+} from "@/src/domain/errors/Errors";
 import chatService from "@/src/domain/services/ChatService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { redirectToSignIn } from "@clerk/nextjs";
@@ -20,14 +24,19 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
     params.aiId
   );
   if (aiChats.data.length === 0) {
+    let chat;
     try {
-      const chat = await chatService.createChat(
-        authorizationContext,
-        params.aiId
-      );
-      return redirect(`/chat/${chat.id}?new=true`);
+      chat = await chatService.createChat(authorizationContext, params.aiId);
     } catch (e) {
-      return redirect("/");
+      if (!(e instanceof ForbiddenError || e instanceof EntityNotFoundError)) {
+        console.error(e);
+      }
+    } finally {
+      if (chat) {
+        redirect(`/chat/${chat.id}`);
+      } else {
+        redirect("/");
+      }
     }
   } else {
     return redirect(`/chat/${aiChats.data[0].id}`);
