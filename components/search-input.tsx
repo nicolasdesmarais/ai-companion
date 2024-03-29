@@ -13,6 +13,8 @@ import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
 import { ChangeEventHandler, useEffect, useState } from "react";
+import {useClerk} from "@clerk/nextjs";
+import {ClerkService} from "@/src/domain/services/ClerkService";
 
 const filterOptions = [
   { id: "popularity", name: "Popularity" },
@@ -31,7 +33,16 @@ export const SearchInput = () => {
   const [value, setValue] = useState(search || "");
   const debouncedValue = useDebounce<string>(value, 500);
   const [sort, setSort] = useState<string | undefined>(sortParam || "");
+  const clerk = useClerk();
+  const clerkService = new ClerkService();
 
+  if (clerk.user) {
+    console.log("Started")
+    const user = clerk.user;
+    clerkService.updateUserMetadata(user.id, {publicMetadata: {sort: sort}});
+    console.log("Value Stored")
+    console.log("Sort Value" + clerk.user.publicMetadata.sort)
+  }
   const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setValue(e.target.value);
   };
@@ -67,7 +78,7 @@ export const SearchInput = () => {
       </div>
       <Select
         onValueChange={(val) => setSort(val)}
-        value={sort || "popularity"}
+        value={sort || "newest"}
       >
         <SelectTrigger className="bg-accent w-32 md:w-44 ml-4 flex-none">
           <span className="hidden md:inline">Sort By:</span>
