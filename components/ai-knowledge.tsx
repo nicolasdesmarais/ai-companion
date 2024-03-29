@@ -304,7 +304,8 @@ export const AIKnowledge = ({
                       )?.name
                     }
                   </td>
-                  {dataSourceTypesForRefresh.includes(dataSource.type) ? (
+                  {dataSourceTypesForRefresh.includes(dataSource.type) &&
+                  dataSource.indexStatus !== DataSourceIndexStatus.MISSING ? (
                     <td className="p-3 flex justify-between items-center">
                       {getDataSourceRefreshPeriodLabel(
                         dataSource.refreshPeriod
