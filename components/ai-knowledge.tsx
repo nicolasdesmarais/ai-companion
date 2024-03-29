@@ -51,7 +51,8 @@ const needsRefresh = (status: DataSourceIndexStatus) =>
   status !== DataSourceIndexStatus.COMPLETED &&
   status !== DataSourceIndexStatus.PARTIALLY_COMPLETED &&
   status !== DataSourceIndexStatus.FAILED &&
-  status !== DataSourceIndexStatus.DELETED;
+  status !== DataSourceIndexStatus.DELETED &&
+  status !== DataSourceIndexStatus.MISSING;
 
 interface SelectDataSourceProps {
   form: any;
