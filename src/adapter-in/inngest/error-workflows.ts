@@ -8,7 +8,7 @@ export const onFunctionFailed = inngest.createFunction(
   { event: "inngest/function.failed" },
   async ({ event, step }) => {
     console.error(
-      `The ${event.data.function_id} function failed with the error: ${event.data.error.message}`
+      `The inngest function with functionId=${event.data.function_id} failed with the error=${event.data.error.message}`
     );
   }
 );
