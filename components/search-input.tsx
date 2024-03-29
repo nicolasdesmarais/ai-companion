@@ -39,10 +39,13 @@ export const SearchInput = () => {
   if (clerk.user) {
     console.log("Started")
     const user = clerk.user;
-    clerkService.updateUserMetadata(user.id, {publicMetadata: {sort: sort}});
-    console.log("Value Stored")
-    console.log("Sort Value" + clerk.user.publicMetadata.sort)
+    clerkService.updateUserMetadata(user.id, {publicMetadata : {sort: sort}})
+    console.log("Value Stored for: ", user.id)
+    const userMetaData = clerkService.getUserMetadata(user.id);
+    console.log("User Meta Data: ", userMetaData)
+    console.log("Ended")
   }
+
   const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setValue(e.target.value);
   };

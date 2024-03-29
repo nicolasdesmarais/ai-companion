@@ -15,4 +15,9 @@ export class ClerkService {
   public async updateUserMetadata(usedId: string, params: UpdateUserMetadataParams) {
     return await clerkClient.users.updateUserMetadata(usedId, params);
   }
+
+  public async getUserMetadata(userId: string) {
+    const user = await clerkClient.users.getUser(userId);
+    return user.publicMetadata;
+  }
 }
