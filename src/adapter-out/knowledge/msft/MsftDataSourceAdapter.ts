@@ -30,19 +30,14 @@ export enum MsftEvent {
 }
 
 export enum MsftConvertibleFileType {
-  DOC = "application/msword",
   EML = "message/rfc822",
   MSG = "application/vnd.ms-outlook",
   ODP = "application/vnd.oasis.opendocument.presentation",
   ODS = "application/vnd.oasis.opendocument.spreadsheet",
   ODT = "application/vnd.oasis.opendocument.text",
-  PPS = "application/vnd.ms-powerpoint",
   PPSX = "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
-  PPT = "application/vnd.ms-powerpoint",
   PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation",
   RTF = "application/rtf",
-  TIF = "image/tiff",
-  TIFF = "image/tiff",
   XLS = "application/vnd.ms-excel",
   XLSM = "application/vnd.ms-excel.sheet.macroenabled.12",
   XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
