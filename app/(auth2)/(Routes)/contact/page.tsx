@@ -31,10 +31,18 @@ const formSchema = z.object({
 const Contact = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      first: "",
+      last: "",
+      company: "",
+      mlq: true,
+    },
   });
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
   let host = "https://appdirect.ai",
     hutk = "";
   if (typeof window !== "undefined") {
