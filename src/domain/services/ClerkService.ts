@@ -1,5 +1,8 @@
 import { clerkClient } from "@clerk/nextjs";
-import { UpdateUserMetadataParams } from "./UpdateUserMetadataParams";
+
+export interface UpdateUserMetadataParams {
+    unsafeMetadata?: Record<string, unknown>;
+}
 
 export class ClerkService {
   public async getUsersById(userIds: string[]) {
@@ -13,11 +16,14 @@ export class ClerkService {
   }
 
   public async updateUserMetadata(usedId: string, params: UpdateUserMetadataParams) {
-    return await clerkClient.users.updateUserMetadata(usedId, params);
+      return clerkClient.users.updateUserMetadata(usedId, params);
   }
 
   public async getUserMetadata(userId: string) {
-    const user = await clerkClient.users.getUser(userId);
-    return user.publicMetadata;
+      const user = await clerkClient.users.getUser(userId);
+      return user.unsafeMetadata;
   }
 }
+
+const clerkService = new ClerkService();
+export default clerkService;

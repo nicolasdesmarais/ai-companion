@@ -14,7 +14,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
 import { ChangeEventHandler, useEffect, useState } from "react";
 import {useClerk} from "@clerk/nextjs";
-import {ClerkService} from "@/src/domain/services/ClerkService";
+import clerkService from "@/src/domain/services/ClerkService";
 
 const filterOptions = [
   { id: "popularity", name: "Popularity" },
@@ -34,16 +34,11 @@ export const SearchInput = () => {
   const debouncedValue = useDebounce<string>(value, 500);
   const [sort, setSort] = useState<string | undefined>(sortParam || "");
   const clerk = useClerk();
-  const clerkService = new ClerkService();
 
   if (clerk.user) {
-    console.log("Started")
     const user = clerk.user;
-    clerkService.updateUserMetadata(user.id, {publicMetadata : {sort: sort}})
-    console.log("Value Stored for: ", user.id)
-    const userMetaData = clerkService.getUserMetadata(user.id);
-    console.log("User Meta Data: ", userMetaData)
-    console.log("Ended")
+    clerkService.updateUserMetadata(user.id, {unsafeMetadata: {"sort": "sort_value"}})
+    console.log(clerkService.getUserMetadata(user.id))
   }
 
   const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
