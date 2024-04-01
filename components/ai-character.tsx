@@ -28,13 +28,15 @@ import { useGroupModal } from "@/hooks/use-group-modal";
 import { useTalkModal } from "@/hooks/use-talk-modal";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { getDiversityString } from "@/src/lib/diversity";
-import { AIVisibility, Category } from "@prisma/client";
+import {AIVisibility, Category, DataSourceRefreshPeriod} from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { Loader, Play, Settings, Wand2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { imageModels, voices } from "./ai-models";
 import { TalkModal } from "./talk-modal";
+import {MultiSelect} from "@/components/ui/multi-select";
+import {CategoryTypes} from "@/components/category-types";
 
 const PREAMBLE =
   "ex: As a Support Specialist AI, your role is to provide solutions to user inquiries. This involves understanding the nature of the questions, interpreting their context, and yielding the correct responses. The effectiveness of your position is evaluated based on the accuracy of your responses and the satisfaction of users. Precision in answering and user satisfaction are your primary goals.";
@@ -96,6 +98,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [generatingAll, setGeneratingAll] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0]);
+  const [selectedValues, setSelectedValues] = useState<any[]>([]);
   const clerk = useClerk();
 
   let role = "User";
@@ -105,6 +108,12 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
 
   const isLoading = form.formState.isSubmitting;
   const voiceEnabled = false && window.location.hostname !== "appdirect.ai";
+
+  useEffect(() => {
+      setSelectedValues([]);
+  }, []);
+
+  const onSubmit = async (values: any) => {}
 
   const fetchGroups = async () => {
     const response = await axios.get("/api/v1/me/groups");
@@ -482,10 +491,11 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
               name="categoryId"
               render={({ field }) => (
                 <FormItem className="col-span-2 md:col-span-1">
-                  <FormLabel>Category-Test</FormLabel>
+                  <FormLabel>Category</FormLabel>
                   {/* change this to multiselect*/}
                   {/*change Add Category behind SU scope*/}
                   {/*Add Data Manually in DB*/}
+                  {false &&
                   <Select
                     disabled={isLoading}
                     onValueChange={field.onChange}
@@ -508,6 +518,17 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                       ))}
                     </SelectContent>
                   </Select>
+                  }
+                  <MultiSelect
+                      itemLabel="AI"
+                      items={CategoryTypes}
+                      values={selectedValues}
+                      onChange={(values) => {
+                        setSelectedValues(values);
+                        onSubmit({ CategoryTypes : values.map((category) => category.id) });
+                      }}
+                  />
+
                   <FormDescription>
                     Select the public category for your AI
                   </FormDescription>
