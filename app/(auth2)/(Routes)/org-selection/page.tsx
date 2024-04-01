@@ -12,8 +12,8 @@ const OrgSelect = () => {
         <div className="absolute z-10 flex flex-col items-center ">
           <div className="flex flex-col gap-8 mt-8">
             <OrganizationList
-              afterSelectOrganizationUrl="/"
-              afterCreateOrganizationUrl="/"
+              afterSelectOrganizationUrl="/index/public"
+              afterCreateOrganizationUrl="/index/public"
               hidePersonal={true}
             />
           </div>
