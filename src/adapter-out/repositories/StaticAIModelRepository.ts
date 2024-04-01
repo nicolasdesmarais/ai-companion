@@ -97,7 +97,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       contextSize: 4096,
       options: commonOptions,
       provider: AIModelProvider.REPLICATE,
-      isVisible: false,
+      isVisible: true,
       additionalData: {
         owner: "meta",
         version:
@@ -119,7 +119,7 @@ export class StaticAIModelRepository implements AIModelRepository {
         },
       },
       provider: AIModelProvider.REPLICATE,
-      isVisible: false,
+      isVisible: true,
       additionalData: {
         owner: "meta",
         version:
