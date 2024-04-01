@@ -18,6 +18,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [ssoLoading, setSsoLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -27,7 +28,9 @@ const Login = () => {
   }, [isSignedIn]);
 
   const signInWith = (strategy: OAuthStrategy) => {
+    debugger;
     if (signIn) {
+      setSsoLoading(true);
       return signIn.authenticateWithRedirect({
         strategy,
         redirectUrl: "/",
@@ -72,6 +75,7 @@ const Login = () => {
             onClick={() => signInWith("oauth_google")}
           >
             Continue with Google
+            {ssoLoading ? <Loader className="w-4 h-4 ml-2 spinner" /> : null}
           </Button>
           <div className="mt-8 flex text-white text-sm justify-stretch w-full items-center">
             <div className="border-b border-white grow h-1"></div>
