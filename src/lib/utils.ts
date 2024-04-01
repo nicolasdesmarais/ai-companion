@@ -9,6 +9,14 @@ export function absoluteUrl(path: string) {
   return `${process.env.NEXT_PUBLIC_APP_URL}${path}`;
 }
 
+export function resolveUrl(url: string): URL {
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    url = "https://" + url;
+  }
+  const resolvedUrl = new URL(url);
+  return resolvedUrl;
+}
+
 export const delay = (ms: number | undefined) =>
   new Promise((res) => setTimeout(res, ms));
 
