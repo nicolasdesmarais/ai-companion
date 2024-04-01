@@ -21,7 +21,7 @@ export const MobileNav = () => {
           <ul className="p-8 gap-8 flex flex-col">
             <li>
               <Link
-                href="/landing2/home"
+                href="/landing2/"
                 className="flex items-center md:mr-10 lg:mr-20"
               >
                 <AppdirectSvg className="h-5 w-5" />

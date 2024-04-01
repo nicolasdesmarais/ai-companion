@@ -20,7 +20,7 @@ const LandingNav = ({ transparent }: Props) => {
           <div className="flex">
             <MobileNav />
             <Link
-              href="/landing2/home"
+              href="/landing2/"
               className="flex items-center md:mr-10 lg:mr-20"
             >
               <AppdirectSvg className="h-5 w-5" />

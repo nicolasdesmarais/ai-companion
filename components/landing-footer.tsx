@@ -48,10 +48,10 @@ const LandingFooter = () => {
                 <div className="font-bold">LEGAL</div>
                 <ul className="flex flex-col justify-between gap-4 py-2 font-light">
                   <li>
-                    <Link href="/landing2/home">Privacy Notice</Link>
+                    <Link href="/landing2/">Privacy Notice</Link>
                   </li>
                   <li>
-                    <Link href="/landing2/home">Terms of Use</Link>
+                    <Link href="/landing2/">Terms of Use</Link>
                   </li>
                 </ul>
               </div>
