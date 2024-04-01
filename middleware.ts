@@ -14,6 +14,7 @@ export default authMiddleware({
     "/login",
     "/signup",
     "/contact",
+    "/forgot",
     "/api/v1/waitlist/export",
     "/api/v1/waitlist",
     "/api/v1/warm",

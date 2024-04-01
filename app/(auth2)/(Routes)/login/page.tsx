@@ -88,14 +88,22 @@ const Login = () => {
               id="email"
               name="email"
             />
-            <input
-              type="password"
-              placeholder="Password"
-              className="rounded-md w-full h-12 px-4 bg-white"
-              onChange={(e) => setPassword(e.target.value)}
-              id="password"
-              name="password"
-            />
+            <div className="w-full">
+              <input
+                type="password"
+                placeholder="Password"
+                className="rounded-md w-full h-12 px-4 bg-white"
+                onChange={(e) => setPassword(e.target.value)}
+                id="password"
+                name="password"
+              />
+              <Link
+                href="/forgot"
+                className="underline text-xs block text-right w-full pt-1"
+              >
+                Forgot your password?
+              </Link>
+            </div>
             <Button
               className="bg-white rounded-md px-16 py-2 text-center text-navy"
               onClick={handleSubmit}
