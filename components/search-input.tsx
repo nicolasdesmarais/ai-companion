@@ -37,7 +37,7 @@ export const SearchInput = () => {
 
   if (clerk.user) {
     const user = clerk.user;
-    clerkService.updateUserMetadata(user.id, {unsafeMetadata: {"sort": "sort_value"}})
+    clerkService.updateUserMetadata(user.id, {publicMetadata: {"sort": "sort_value"}})
     console.log(clerkService.getUserMetadata(user.id))
   }
 
