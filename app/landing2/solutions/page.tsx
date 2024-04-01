@@ -84,7 +84,7 @@ const Solutions = () => {
                 employees&apos; HR-related queries, regardless of time zone.
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 text-royal">
+            <Link href="/signup" className="py-2 text-royal">
               Start creating
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
@@ -440,7 +440,7 @@ const Solutions = () => {
                 message and customer.
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 text-royal mt-4">
+            <Link href="/signup" className="py-2 text-royal mt-4">
               Start creating
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
@@ -762,7 +762,7 @@ const Solutions = () => {
                 partnerships.
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 mt-2 text-royal">
+            <Link href="/signup" className="py-2 mt-2 text-royal">
               Start creating
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
@@ -823,7 +823,7 @@ const Solutions = () => {
                 ahead in a rapidly changing market.
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 text-royal">
+            <Link href="/signup" className="py-2 text-royal">
               Start creating
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>

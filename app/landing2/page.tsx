@@ -24,7 +24,7 @@ const LandingHome = () => {
               team, and your customers.
             </div>
             <div className="flex justify-evenly md:w-[440px]">
-              <Link href="/sign-up" className="px-8 py-2 bg-sky">
+              <Link href="/signup" className="px-8 py-2 bg-sky">
                 Sign up
               </Link>
               <Link href="/landing2/resources#tour" className="px-4 py-2">

@@ -82,10 +82,7 @@ const LandingFooter = () => {
           </div>
           <div className="flex justify-between w-full mt-8 items-center">
             <div>{`AppDirect ©${currentYear}`}</div>
-            <Link
-              href="/sign-up"
-              className="ml-10 px-6 py-2 bg-white text-navy"
-            >
+            <Link href="/signup" className="ml-10 px-6 py-2 bg-white text-navy">
               Sign up
             </Link>
           </div>
