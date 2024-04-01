@@ -33,6 +33,7 @@ model AI {
   listInPublicCatalog Boolean      @default(false) @map("list_in_public_catalog")
   options             Json?
   profile             Json?
+  categoryName        CategoryType       @default(AI_MODELS)
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
@@ -298,18 +299,6 @@ enum DataSourceType {
   API
 }
 
-enum CategoryType {
-  AI_MODELS
-  PRODUCTIVITY
-  LEARNING_DEVELOPMENT
-  MARKETING
-  SALES
-  INFORMATION_TECHNOLOGY
-  ENGINEERING
-  HUMAN_RESOURCES
-  ACCOUNTING_FINANCE
-}
-
 enum DataSourceIndexStatus {
   INITIALIZED
   INDEXING
@@ -429,4 +418,16 @@ enum OrgSubscriptionType {
 enum OrgSubscriptionStatus {
   ACTIVE
   CANCELLED
+}
+
+enum CategoryType {
+  AI_MODELS
+  PRODUCTIVITY
+  LEARNING_DEVELOPMENT
+  MARKETING
+  SALES
+  INFORMATION_TECHNOLOGY
+  ENGINEERING
+  HUMAN_RESOURCES
+  ACCOUNTING_FINANCE
 }
