@@ -97,7 +97,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       contextSize: 4096,
       options: commonOptions,
       provider: AIModelProvider.REPLICATE,
-      isVisible: false,
+      isVisible: true,
       additionalData: {
         owner: "meta",
         version:
@@ -119,33 +119,11 @@ export class StaticAIModelRepository implements AIModelRepository {
         },
       },
       provider: AIModelProvider.REPLICATE,
-      isVisible: false,
+      isVisible: true,
       additionalData: {
         owner: "meta",
         version:
           "02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-      },
-    },
-    {
-      id: "llava-13b",
-      name: "Llava 13b",
-      externalModelId: "llava-13b",
-      contextSize: 4096,
-      options: {
-        ...commonOptions,
-        maxTokens: {
-          default: 1000,
-          max: 3500,
-          min: 1,
-          step: 1,
-        },
-      },
-      provider: AIModelProvider.REPLICATE,
-      isVisible: false,
-      additionalData: {
-        owner: "yorickvp",
-        version:
-          "e272157381e2a3bf12df3a8edd1f38d1dbd736bbb7437277c8b34175f8fce358",
       },
     },
     {
