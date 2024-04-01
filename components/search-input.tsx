@@ -15,6 +15,7 @@ import qs from "query-string";
 import { ChangeEventHandler, useEffect, useState } from "react";
 import {useClerk} from "@clerk/nextjs";
 import clerkService from "@/src/domain/services/ClerkService";
+import axios from "axios";
 
 const filterOptions = [
   { id: "popularity", name: "Popularity" },
@@ -39,7 +40,15 @@ export const SearchInput = () => {
     const user = clerk.user;
     clerkService.updateUserMetadata(user.id, {publicMetadata: {"sort": "sort_value"}})
     console.log(clerkService.getUserMetadata(user.id))
+    console.log("DOMAIN: ", clerk.domain)
   }
+
+  // const fetchCategories = async () => {
+  //   const response = await axios.post("/api/v1/clerksdk", {});
+  //   if (response.status === 200 && Array.isArray(response.data)) {
+  //
+  //   }
+  // };
 
   const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setValue(e.target.value);
