@@ -14,7 +14,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
 import { ChangeEventHandler, useEffect, useState } from "react";
 import {useClerk} from "@clerk/nextjs";
-import clerkService from "@/src/domain/services/ClerkService";
 import {routesHref} from "@/components/sidebar";
 
 const filterOptions = [
@@ -24,9 +23,9 @@ const filterOptions = [
 ];
 
 const defaultSortValueforPath = {
-  [routesHref.sharedHref] : "Newest",
-  [routesHref.yourAIHref] : "Newest",
-  [routesHref.browseHref] : "Popularity"
+  [routesHref.sharedHref] : "newest",
+  [routesHref.yourAIHref] : "newest",
+  [routesHref.browseHref] : "popularity"
 }
 export const SearchInput = () => {
   const router = useRouter();
@@ -84,7 +83,7 @@ export const SearchInput = () => {
       </div>
       <Select
         onValueChange={(val) => setSort(val)}
-        value={sort || "Newest"}
+        value={sort || defaultSortValueforPath[window.location.pathname]}
       >
         <SelectTrigger className="bg-accent w-32 md:w-44 ml-4 flex-none">
           <span className="hidden md:inline">Sort By:</span>
