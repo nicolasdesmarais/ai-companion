@@ -1,19 +1,24 @@
-import clerkService from "@/src/domain/services/ClerkService";
 import {withErrorHandler} from "@/src/middleware/ErrorMiddleware";
-import { NextResponse } from "next/server";
-import {UserMetadataParams} from "@/src/domain/services/ClerkService";
+import { clerkClient } from "@clerk/nextjs";
+import { NextApiRequest, NextApiResponse } from "next";
 
-async function postHandler(req: Request, context: {params: {userId : string, metaDataParam: UserMetadataParams}}) {
-    const userId = context.params.userId;
-    const metaDataParam = context.params.metaDataParam;
-    const response = await clerkService.updateUserMetadata(userId, metaDataParam);
-    return NextResponse.json(response);
+async function postHandler(request: NextApiRequest, response: NextApiResponse) {
+    const { userId, sortValue } = request.body;
+    await clerkClient.users.updateUserMetadata(userId, {
+        publicMetadata: {
+            sortValue
+        }
+    })
+    const user = await clerkClient.users.getUser(userId)
+    console.log(user.publicMetadata);
+    response.status(200).json({ success: true });
 }
 
-async function getHandler(req: Request, context: {params: {userId : string}}) {
-    const userId = context.params.userId;
-    const response = await clerkService.getUserMetadata(userId);
-    return NextResponse.json(response);
+
+async function getHandler(request: NextApiRequest, response: NextApiResponse) {
+    const { userId } = await request.body.json();
+    const user = await clerkClient.users.getUser(userId)
+    response.status(200).json(user.publicMetadata);
 }
 
 export const POST = withErrorHandler(postHandler);

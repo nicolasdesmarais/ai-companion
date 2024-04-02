@@ -15,6 +15,7 @@ import qs from "query-string";
 import { ChangeEventHandler, useEffect, useState } from "react";
 import {useClerk} from "@clerk/nextjs";
 import {routesHref} from "@/components/sidebar";
+import axios from "axios";
 
 const filterOptions = [
   { id: "popularity", name: "Popularity" },
@@ -27,6 +28,7 @@ const defaultSortValueforPath = {
   [routesHref.yourAIHref] : "newest",
   [routesHref.browseHref] : "popularity"
 }
+
 export const SearchInput = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -40,11 +42,21 @@ export const SearchInput = () => {
   const [sort, setSort] = useState<string | undefined>(sortParam || "");
   const clerk = useClerk();
 
+  async function getMetadata() {
+    const request = {
+      userId : clerk.user?.id,
+      sortValue : sort
+    }
+    const response = await axios.post("/api/v1/clerksdk", request);
+    console.log(response);
+  }
+
   useEffect(() => {
+    getMetadata().then(r => console.log(r));
     if (!sort) {
       setSort(defaultSortValueforPath[window.location.pathname]);
     }
-  }, [sort]);
+  }, [sort, clerk.user?.id]);
 
   const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setValue(e.target.value);
