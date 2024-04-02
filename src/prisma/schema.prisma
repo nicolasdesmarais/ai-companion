@@ -52,6 +52,7 @@ model AI {
   permissions AIPermissions[]
 
   dataSources AIDataSource[]
+  aicategorytypes AICategoryType[]
 
   ratings      AIRating[]
   orgApprovals AIOrgApproval[]
@@ -430,4 +431,14 @@ enum CategoryType {
   ENGINEERING
   HUMAN_RESOURCES
   ACCOUNTING_FINANCE
+}
+
+model AICategoryType {
+  ai           AI         @relation(fields: [aiId], references: [id])
+  aiId         String     @map(name: "ai_id")
+  categoryName CategoryType     @map(name: "category_type")
+
+  @@id([aiId])
+  @@index([aiId])
+  @@map("ai_category_types")
 }
