@@ -67,6 +67,7 @@ const Login = () => {
     if (!isLoaded) {
       return;
     }
+    setLoading(true);
 
     try {
       const completeSignUp = await signUp.attemptEmailAddressVerification({
@@ -74,11 +75,13 @@ const Login = () => {
       });
       if (completeSignUp.status === "complete") {
         await setActive({ session: completeSignUp.createdSessionId });
-        router.push("/");
+        router.push("/org-selection");
       } else {
+        setLoading(false);
         console.error(JSON.stringify(completeSignUp, null, 2));
       }
     } catch (err: any) {
+      setLoading(false);
       console.error(JSON.stringify(err, null, 2));
     }
   };
