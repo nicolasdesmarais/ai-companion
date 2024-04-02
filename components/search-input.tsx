@@ -44,7 +44,7 @@ export const SearchInput = () => {
     if (!sort) {
       setSort(defaultSortValueforPath[window.location.pathname]);
     }
-  }, []);
+  }, [sort]);
 
   const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setValue(e.target.value);
