@@ -15,7 +15,7 @@ import qs from "query-string";
 import { ChangeEventHandler, useEffect, useState } from "react";
 import {useClerk} from "@clerk/nextjs";
 import clerkService from "@/src/domain/services/ClerkService";
-import axios from "axios";
+import {routesHref} from "@/components/sidebar";
 
 const filterOptions = [
   { id: "popularity", name: "Popularity" },
@@ -23,6 +23,11 @@ const filterOptions = [
   { id: "rating", name: "Rating" },
 ];
 
+const defaultSortValueforPath = {
+  [routesHref.sharedHref] : "Newest",
+  [routesHref.yourAIHref] : "Newest",
+  [routesHref.browseHref] : "Popularity"
+}
 export const SearchInput = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -35,13 +40,6 @@ export const SearchInput = () => {
   const debouncedValue = useDebounce<string>(value, 500);
   const [sort, setSort] = useState<string | undefined>(sortParam || "");
   const clerk = useClerk();
-
-  if (clerk.user) {
-    const user = clerk.user;
-    clerkService.updateUserMetadata(user.id, {publicMetadata: {"sort": "sort_value"}})
-    console.log(clerkService.getUserMetadata(user.id))
-    console.log("DOMAIN: ", clerk.domain)
-  }
 
   // const fetchCategories = async () => {
   //   const response = await axios.post("/api/v1/clerksdk", {});
@@ -85,7 +83,7 @@ export const SearchInput = () => {
       </div>
       <Select
         onValueChange={(val) => setSort(val)}
-        value={sort || "newest"}
+        value={sort || defaultSortValueforPath[window.location.pathname]}
       >
         <SelectTrigger className="bg-accent w-32 md:w-44 ml-4 flex-none">
           <span className="hidden md:inline">Sort By:</span>

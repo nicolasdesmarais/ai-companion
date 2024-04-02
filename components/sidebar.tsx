@@ -62,6 +62,20 @@ interface Route {
   children?: Route[];
 }
 
+export const routesHref =
+{
+  "browseHref" : "/",
+  "createHref" : "/ai/new/edit",
+  "yourAIHref" : "/index/owned",
+  "sharedHref" : "/index/shared",
+  "dataHref" : "/data-sources",
+  "adminHref" : "/index/admin/",
+  "apiDocsHref" : "/api-doc",
+  "apikeysHref" : "/api-keys",
+  "orgSettingHref" : "/organization-settings",
+  "superUserHref" : "/index/instance/"
+}
+
 const isActive = (
   route: Route,
   pathname: string,
@@ -153,7 +167,7 @@ export const Sidebar = ({
   const routes = [
     {
       icon: Store,
-      href: "/",
+      href: routesHref.browseHref,
       pathname: "/",
       regex: /\/$|\/index\/public|\/index\/organization|\/index\/private/,
       label: "Browse",
@@ -161,28 +175,28 @@ export const Sidebar = ({
     },
     {
       icon: Plus,
-      href: "/ai/new/edit",
+      href: routesHref.createHref,
       regex: /\/ai\/(.*)\/edit/,
       label: "Create",
       pro: false,
     },
     {
       icon: Atom,
-      href: "/index/owned",
+      href: routesHref.yourAIHref,
       pathname: "/index/owned",
       label: "Your AIs",
       pro: false,
     },
     {
       icon: UserPlus,
-      href: "/index/shared",
+      href: routesHref.sharedHref,
       pathname: "/index/shared",
       label: "Shared",
       pro: false,
     },
     {
       icon: FileText,
-      href: "/data-sources",
+      href: routesHref.dataHref,
       pathname: "/data-sources",
       label: "Data",
       pro: false,
@@ -190,7 +204,7 @@ export const Sidebar = ({
 
     {
       icon: Building2,
-      href: "/index/admin/",
+      href: routesHref.adminHref,
       regex: /\/index\/admin(.*)/,
       label: "Admin",
       pro: false,
@@ -206,7 +220,7 @@ export const Sidebar = ({
       children: [
         {
           icon: Eye,
-          href: "/index/instance/",
+          href: routesHref.superUserHref,
           regex: /\/index\/instance(.*)/,
           label: "Super User",
           pro: false,
@@ -218,7 +232,7 @@ export const Sidebar = ({
         },
         {
           icon: Building,
-          href: "/organization-settings",
+          href: routesHref.orgSettingHref,
           label: "Company Settings",
           requiredPermission: {
             resourceType: SecuredResourceType.ORG_SETTINGS,
@@ -229,13 +243,13 @@ export const Sidebar = ({
         },
         {
           icon: LockKeyhole,
-          href: "/api-keys",
+          href: routesHref.apikeysHref,
           label: "API Keys",
           pro: false,
         },
         {
           icon: BookText,
-          href: "/api-doc",
+          href: routesHref.apiDocsHref,
           label: "API Docs",
           pro: false,
         },
