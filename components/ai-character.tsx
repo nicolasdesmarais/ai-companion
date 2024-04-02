@@ -539,7 +539,21 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                       </SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormDescription>Control who can see your AI</FormDescription>
+                  {field.value === "PRIVATE" && (
+                    <FormDescription>
+                      Only you can access your AI
+                    </FormDescription>
+                  )}
+                  {field.value === "ORGANIZATION" && (
+                    <FormDescription>
+                      Members of your organization can access your AI
+                    </FormDescription>
+                  )}
+                  {field.value === "ANYONE_WITH_LINK" && (
+                    <FormDescription>
+                      Anyone with the link can access your AI
+                    </FormDescription>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
