@@ -3,15 +3,17 @@ import { clerkClient } from "@clerk/nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
 
 async function postHandler(request: NextApiRequest, response: NextApiResponse) {
+    console.log("Body: ", request.body)
     const { userId, sortValue } = request.body;
     await clerkClient.users.updateUserMetadata(userId, {
         publicMetadata: {
-            sortValue
+            sort: sortValue
         }
     })
+
     const user = await clerkClient.users.getUser(userId)
-    console.log(user.publicMetadata);
-    response.status(200).json({ success: true });
+    console.log("Public MetaData ",user.publicMetadata);
+    return response.status(200).json({ success: true });
 }
 
 
