@@ -1,4 +1,6 @@
 import { PublicAnalytics } from "@/components/analytics";
+import HubSpotInit from "@/components/hubspot-init";
+import LandingNav from "@/components/landing-nav";
 
 export const metadata = {
   title: `AppDirect AI`,
@@ -20,10 +22,14 @@ export const metadata = {
 
 const LandingLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <main className="h-full bg-[#111827] overflow-auto">
+    <>
+      <LandingNav />
+      <HubSpotInit />
       <PublicAnalytics />
-      {children}
-    </main>
+      <main className="h-full bg-white overflow-auto pt-[72px]">
+        {children}
+      </main>
+    </>
   );
 };
 

@@ -1,5 +1,6 @@
 import { WebUrlDataSourceInput } from "@/src/adapter-out/knowledge/web-urls/types/WebUrlDataSourceInput";
 import aiService from "@/src/domain/services/AIService";
+import { resolveUrl } from "@/src/lib/utils";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
@@ -23,7 +24,7 @@ async function postHandler(
 
   const dataSources = [];
   for (const url of urls) {
-    const resolvedUrl = new URL(url).href;
+    const resolvedUrl = resolveUrl(url).href;
 
     const input: WebUrlDataSourceInput = {
       url: resolvedUrl,

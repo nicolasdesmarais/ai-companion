@@ -11,7 +11,7 @@ const LandingCTA = () => {
             Start creating AI apps today.
           </h3>
           <Link
-            href="/sign-up"
+            href="/signup"
             className="mt-8 lg:mt-0 lg:ml-10 px-8 py-2 bg-navy text-white flex items-center"
           >
             Get Started

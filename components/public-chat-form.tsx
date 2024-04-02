@@ -16,11 +16,11 @@ export const PublicChatForm = ({ isLoading }: Props) => {
     <div className="border-t border-primary/10 py-4 flex items-center gap-x-2 pl-4">
       <Textarea
         disabled={isLoading}
-        onFocus={() => router.push("/sign-up")}
+        onFocus={() => router.push("/signup")}
         placeholder="Type a message"
         className="rounded-lg bg-primary/10 max-h-80 h-[38px] min-h-[38px]"
       />
-      <Link href="/sign-up">
+      <Link href="/signup">
         <Button disabled={isLoading} variant="ghost">
           <SendHorizonal className="w-6 h-6" />
         </Button>

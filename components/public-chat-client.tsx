@@ -1,5 +1,3 @@
-"use client";
-
 import { AIProfile } from "@/components/ai-profile";
 import { ChatMessages } from "@/components/chat-messages";
 import { ResizePanel } from "@/components/resize-panel";

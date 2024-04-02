@@ -1,4 +1,5 @@
 import { FileStorageService } from "@/src/domain/services/FileStorageService";
+import { resolveUrl } from "@/src/lib/utils";
 import { ActorRun, ActorStartOptions, ApifyClient } from "apify-client";
 
 const client = new ApifyClient({
@@ -94,7 +95,7 @@ export class ApifyWebsiteContentCrawler {
   }
 
   private getWebScraperInput(url: string) {
-    const urlObj = new URL(url);
+    const urlObj = resolveUrl(url);
     const basePath = urlObj.href.substring(0, urlObj.href.lastIndexOf("/"));
 
     return {

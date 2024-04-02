@@ -161,6 +161,7 @@ model Knowledge {
   @@index([parentUniqueId(length: 100)])
   @@index([indexStatus, isVectorStorageDeleted])
   @@index([indexStatus, isBlobStorageDeleted])
+  @@index([type, uniqueId(length: 100), indexStatus])
   @@map("knowledge")
 }
 

@@ -23,7 +23,7 @@ export const PublicSidebar = ({ className, ais, isChat = false }: Props) => {
     >
       <div className="space-y-2 flex flex-col items-center">
         <div className="w-16">
-          <Link href="/sign-up">
+          <Link href="/signup">
             <Image
               src="/appdirect-blue-gradient.jpeg"
               alt="AppDirect Logo"
@@ -35,7 +35,7 @@ export const PublicSidebar = ({ className, ais, isChat = false }: Props) => {
         </div>
         <div className={cn(itemClass, isChat && "bg-accent text-primary")}>
           <Link
-            href={ais && ais.length ? `/public/ai/${ais[0].id}` : "/sign-up"}
+            href={ais && ais.length ? `/public/ai/${ais[0].id}` : "/signup"}
           >
             <div className="flex flex-col items-center flex-1">
               <MessageSquare className="h-5 w-5 mb-1" />
@@ -52,7 +52,7 @@ export const PublicSidebar = ({ className, ais, isChat = false }: Props) => {
           </Link>
         </div>
         <div className={cn(itemClass)}>
-          <Link href="/sign-up">
+          <Link href="/signup">
             <div className="flex flex-col items-center flex-1">
               <Plus className="h-5 w-5 mb-1" />
               <span className="w-12 text-center">Create</span>

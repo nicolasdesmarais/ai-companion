@@ -21,7 +21,7 @@ export const MobileNav = () => {
           <ul className="p-8 gap-8 flex flex-col">
             <li>
               <Link
-                href="/landing2/home"
+                href="/landing/"
                 className="flex items-center md:mr-10 lg:mr-20"
               >
                 <AppdirectSvg className="h-5 w-5" />
@@ -29,19 +29,19 @@ export const MobileNav = () => {
               </Link>
             </li>
             <li>
-              <Link href="/landing2/features">How it works</Link>
+              <Link href="/landing/features">How it works</Link>
             </li>
             <li>
-              <Link href="/landing2/solutions">Solutions</Link>
+              <Link href="/landing/solutions">Solutions</Link>
             </li>
             <li>
-              <Link href="/landing2/pricing">Pricing</Link>
+              <Link href="/landing/pricing">Pricing</Link>
             </li>
             <li>
-              <Link href="/landing2/enterprise">Enterprise</Link>
+              <Link href="/landing/enterprise">Enterprise</Link>
             </li>
             <li>
-              <Link href="/landing2/resources">Resources</Link>
+              <Link href="/landing/resources">Resources</Link>
             </li>
           </ul>
         </div>

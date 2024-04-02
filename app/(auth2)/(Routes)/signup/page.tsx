@@ -1,17 +1,19 @@
 "use client";
 import BlobAnimation from "@/components/blob-animation";
+import HubSpotInit from "@/components/hubspot-init";
 import LandingNav from "@/components/landing-nav";
 import LandingTerms from "@/components/landing-terms";
 import { AppdirectSvg } from "@/components/svg/appdirect-svg";
 import { Button } from "@/components/ui/button";
 import { useSignUp, useUser } from "@clerk/clerk-react";
 import { OAuthStrategy } from "@clerk/types";
+import axios from "axios";
 import { Eye, EyeOff, Loader } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const Login = () => {
+const SignUp = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
   const { isSignedIn } = useUser();
   const [emailAddress, setEmailAddress] = useState("");
@@ -22,6 +24,16 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [type, setType] = useState("password");
   const router = useRouter();
+
+  let host = "https://appdirect.ai",
+    hutk = "";
+  if (typeof window !== "undefined") {
+    host = window.location.origin;
+    hutk = document.cookie.replace(
+      /(?:(?:^|.*;\s*)hubspotutk\s*\=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+  }
 
   useEffect(() => {
     if (isSignedIn) {
@@ -62,23 +74,72 @@ const Login = () => {
     }
   };
 
+  const hubspotTracking = async () => {
+    const data = {
+      submittedAt: Date.now(),
+      fields: [
+        {
+          objectTypeId: "0-1",
+          name: "email",
+          value: emailAddress,
+        },
+
+        {
+          objectTypeId: "0-1",
+          name: "company",
+          value: "N/A",
+        },
+        {
+          objectTypeId: "0-1",
+          name: "firstname",
+          value: "N/A",
+        },
+        {
+          objectTypeId: "0-1",
+          name: "lastname",
+          value: "N/A",
+        },
+        {
+          objectTypeId: "0-1",
+          name: "phone",
+          value: "N/A",
+        },
+      ],
+      context: {
+        hutk,
+        pageUri: `${host}/signup`,
+        pageName: "AppDirect AI Sign Up",
+      },
+    };
+    await axios.post(
+      `https://api.hsforms.com/submissions/v3/integration/submit/43634300/7f9c75d8-4880-4de7-8e7b-5771530460dd`,
+      data
+    );
+  };
+
   const onPressVerify = async (e: any) => {
     e.preventDefault();
     if (!isLoaded) {
       return;
     }
+    setLoading(true);
 
     try {
       const completeSignUp = await signUp.attemptEmailAddressVerification({
         code,
       });
       if (completeSignUp.status === "complete") {
-        await setActive({ session: completeSignUp.createdSessionId });
-        router.push("/");
+        await Promise.all([
+          setActive({ session: completeSignUp.createdSessionId }),
+          hubspotTracking(),
+        ]);
+        router.push("/org-selection");
       } else {
+        setLoading(false);
         console.error(JSON.stringify(completeSignUp, null, 2));
       }
     } catch (err: any) {
+      setLoading(false);
       console.error(JSON.stringify(err, null, 2));
     }
   };
@@ -94,7 +155,7 @@ const Login = () => {
   return (
     <div className="bg-white flex flex-col text-navy h-screen">
       <LandingNav transparent />
-
+      <HubSpotInit />
       <div className="h-full w-full flex flex-col items-center justify-center">
         <div className="bg-navylight md:bg-gradient4 z-10 rounded-lg flex flex-col items-center p-8 md:p-16 mx-2 mt-16">
           <h1 className="text-3xl mb-12 font-bold">Create your Account</h1>
@@ -190,4 +251,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignUp;
