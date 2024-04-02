@@ -7,62 +7,100 @@ const Privacy = () => {
         <div className="lg:w-[1140px] mx-4">
           <h2 className="text-5xl font-bold">Privacy Notice</h2>
           <div className="lg:w-[700px] mt-10 text-lg">
-            AppDirect AI Marketplace Privacy Notice Last Updated on March 29,
-            2024
+            AppDirect AI Marketplace Privacy Notice
+            <div className="italic">Last Updated on March 29, 2024</div>
           </div>
         </div>
       </div>
 
       <div className="py-10 mt-10 flex flex-col items-center">
-        <div className="lg:w-[1140px] mx-4">
-          Thank you for your interest in the AppDirect AI Marketplace and
-          Creation Studio (the &quot;AI Marketplace&quot;)! This Privacy Notice
-          describes how AppDirect, Inc. (together with its subsidiaries and
-          affiliates, &quot;AppDirect,&quot; &quot;we,&quot; &quot;us,&quot; or
-          &quot;our&quot;), collects, uses, discloses, and stores your
-          information on the AI Marketplace. Any terms not defined in this
-          Privacy Notice have the meanings in the AppDirect AI Marketplace and
-          Creation Studio Terms of Use. This Privacy Notice only applies to
-          information obtained through the AI Marketplace. For more information
-          on our privacy practices for our other services, please visit
-          https://www.appdirect.com/legal/privacy-notice. By using the AI
-          Marketplace, you agree to the practices described in this Privacy
-          Notice. If you do not agree to the practices described in this Privacy
-          Notice, please do not access or use the AI Marketplace. 1. The
-          Information We Collect We collect information about you as follows:
-          Personal Information You Provide: We collect information directly from
-          you as follows: Account Information: When you create an account with
-          us, we will collect information associated with your account,
-          including your name, contact information, account credentials, payment
-          card information, and transaction history, (collectively,
-          &quot;Account Information&quot;). Input and Bot Content: When you use
-          the AI Marketplace, we collect information contained in your Inputs
-          and Bot Content. Communication Information: If you communicate with
-          us, we collect your name, contact information, and the contents of any
-          messages you send (&quot;Communication Information&quot;). Social
-          Media Information: We have pages on social media sites like Instagram,
-          Facebook, Medium, Twitter, YouTube and LinkedIn. When you interact
-          with our social media pages, we will collect information that you
-          elect to provide to us, such as your contact details (collectively,
-          &quot;Social Information&quot;). In addition, the companies that host
-          our social media pages may provide us with aggregate information and
-          analytics about our social media activity. Other Information You
-          Provide: We collect other information that you may provide to us, such
-          as when you participate in our events or surveys or provide us with
-          information to establish your identity (collectively, &quot;Other
-          Information You Provide&quot;). Personal Information We Receive
-          Automatically From Your Use of the AI Marketplace: When you visit,
-          use, or interact with the AI Marketplace, we receive the following
-          information about your visit, use, or interactions (&quot;Technical
-          Information&quot;): Information we collect through automated means. We
-          and our vendors (which are third party companies that work on our
-          behalf) may collect certain information automatically when you use the
-          AI Marketplace or otherwise interact with us. Device and Usage
-          Information. When you use the AI Marketplace or open one of our HTML
-          emails, we and our third-party vendors (such as Google Analytics) may
-          automatically record certain information from your web browser by
-          using different types of technology, including standard log files,
-          cookies, clear gifs, web beacons, or tracking pixels. This
+        <div className="lg:w-[1140px] mx-4 gap-8 flex flex-col">
+          <div>
+            Thank you for your interest in the AppDirect AI Marketplace and
+            Creation Studio (the &quot;AI Marketplace&quot;)! This Privacy
+            Notice describes how AppDirect, Inc. (together with its subsidiaries
+            and affiliates, &quot;AppDirect,&quot; &quot;we,&quot;
+            &quot;us,&quot; or &quot;our&quot;), collects, uses, discloses, and
+            stores your information on the AI Marketplace. Any terms not defined
+            in this Privacy Notice have the meanings in the AppDirect AI
+            Marketplace and Creation Studio Terms of Use.
+          </div>
+          <div>
+            {" "}
+            This Privacy Notice only applies to information obtained through the
+            AI Marketplace. For more information on our privacy practices for
+            our other services, please visit
+            https://www.appdirect.com/legal/privacy-notice.{" "}
+          </div>
+          <div>
+            By using the AI Marketplace, you agree to the practices described in
+            this Privacy Notice. If you do not agree to the practices described
+            in this Privacy Notice, please do not access or use the AI
+            Marketplace.{" "}
+          </div>
+          <h3 className="text-3xl font-bold">1. The Information We Collect</h3>
+          <div>We collect information about you as follows:</div>
+          <div>
+            <span className="font-bold">Personal Information You Provide:</span>{" "}
+            We collect information directly from you as follows:
+          </div>{" "}
+          <ul className="flex flex-col list-disc gap-4 ml-6 mt-6">
+            <li>
+              Account Information: When you create an account with us, we will
+              collect information associated with your account, including your
+              name, contact information, account credentials, payment card
+              information, and transaction history, (collectively, &quot;Account
+              Information&quot;).
+            </li>
+            <li>
+              Input and Bot Content: When you use the AI Marketplace, we collect
+              information contained in your Inputs and Bot Content.
+            </li>
+            <li>
+              Communication Information: If you communicate with us, we collect
+              your name, contact information, and the contents of any messages
+              you send (&quot;Communication Information&quot;).
+            </li>
+            <li>
+              Social Media Information: We have pages on social media sites like
+              Instagram, Facebook, Medium, Twitter, YouTube and LinkedIn. When
+              you interact with our social media pages, we will collect
+              information that you elect to provide to us, such as your contact
+              details (collectively, &quot;Social Information&quot;). In
+              addition, the companies that host our social media pages may
+              provide us with aggregate information and analytics about our
+              social media activity.
+            </li>
+            <li>
+              Other Information You Provide: We collect other information that
+              you may provide to us, such as when you participate in our events
+              or surveys or provide us with information to establish your
+              identity (collectively, &quot;Other Information You
+              Provide&quot;).
+            </li>
+          </ul>{" "}
+          <div>
+            <span className="font-bold">
+              Personal Information We Receive Automatically From Your Use of the
+              AI Marketplace:
+            </span>{" "}
+            When you visit, use, or interact with the AI Marketplace, we receive
+            the following information about your visit, use, or interactions
+            (&quot;Technical Information&quot;):{" "}
+          </div>
+          <div>
+            <span className="font-bold">
+              Information we collect through automated means.
+            </span>{" "}
+            We and our vendors (which are third party companies that work on our
+            behalf) may collect certain information automatically when you use
+            the AI Marketplace or otherwise interact with us.
+          </div>{" "}
+          Device and Usage Information. When you use the AI Marketplace or open
+          one of our HTML emails, we and our third-party vendors (such as Google
+          Analytics) may automatically record certain information from your web
+          browser by using different types of technology, including standard log
+          files, cookies, clear gifs, web beacons, or tracking pixels. This
           automatically collected information may include the type of device you
           are using, your operating system, your browser type, your browser
           language, your internet service provider, your domain name, your
