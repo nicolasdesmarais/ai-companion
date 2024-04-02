@@ -36,9 +36,9 @@ import { imageModels, voices } from "./ai-models";
 import { TalkModal } from "./talk-modal";
 
 const visibilityOptions = [
-  { key: "PRIVATE", value: "PRIVATE", name: "Restricted", description: "Only you can see this AI"},
-  { key: "ORGANIZATION", value: "ORGANIZATION", name: "My Organization", description: "Only members of your organization can see this AI"},
-  { key: "ANYONE_WITH_LINK", value: "ANYONE_WITH_LINK", name: "Anyone with the link", description: "Anyone with the link can see this AI"}
+  { key: "PRIVATE", value: "PRIVATE", name: "Restricted", description: "Only you can see this AI."},
+  { key: "ORGANIZATION", value: "ORGANIZATION", name: "My Organization", description: "Only members of your organization can see this AI."},
+  { key: "ANYONE_WITH_LINK", value: "ANYONE_WITH_LINK", name: "Anyone with the link", description: "Anyone with the link can see this AI."}
 ]
 
 const PREAMBLE =
@@ -531,7 +531,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {visibilityOptions.map((option) => (
+                      { visibilityOptions.map((option) => (
                           <SelectItem key={option.key} value={option.value}>
                             {option.name}
                           </SelectItem>
