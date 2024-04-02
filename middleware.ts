@@ -18,7 +18,6 @@ export default authMiddleware({
     "/api/v1/waitlist/export",
     "/api/v1/waitlist",
     "/api/v1/warm",
-    "/api-doc",
     "/public(.*)",
   ],
   apiRoutes: [
