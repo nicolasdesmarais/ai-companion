@@ -17,11 +17,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useConfirmModal } from "@/hooks/use-confirm-modal";
 import { AIModel } from "@/src/domain/models/AIModel";
 import { cn } from "@/src/lib/utils";
-import {
-  DataSourceIndexStatus,
-  DataSourceType,
-  KnowledgeIndexStatus,
-} from "@prisma/client";
+import { DataSourceIndexStatus, DataSourceType } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { format } from "date-fns";
 import {
@@ -53,8 +49,10 @@ import { WebUrlsForm } from "./web-urls-knowledge-form";
 
 const needsRefresh = (status: DataSourceIndexStatus) =>
   status !== DataSourceIndexStatus.COMPLETED &&
+  status !== DataSourceIndexStatus.PARTIALLY_COMPLETED &&
   status !== DataSourceIndexStatus.FAILED &&
-  status !== DataSourceIndexStatus.DELETED;
+  status !== DataSourceIndexStatus.DELETED &&
+  status !== DataSourceIndexStatus.MISSING;
 
 interface SelectDataSourceProps {
   form: any;
@@ -214,6 +212,7 @@ export const AIKnowledge = ({
       dataSource.indexStatus !== "FAILED"
   );
 
+  console.log("dataSources", dataSources);
   return (
     <div className="h-full p-4 max-w-3xl mx-auto">
       {pathname.endsWith("knowledge") && (
@@ -306,7 +305,8 @@ export const AIKnowledge = ({
                       )?.name
                     }
                   </td>
-                  {dataSourceTypesForRefresh.includes(dataSource.type) ? (
+                  {dataSourceTypesForRefresh.includes(dataSource.type) &&
+                  dataSource.indexStatus !== DataSourceIndexStatus.MISSING ? (
                     <td className="p-3 flex justify-between items-center">
                       {getDataSourceRefreshPeriodLabel(
                         dataSource.refreshPeriod
@@ -345,8 +345,11 @@ export const AIKnowledge = ({
                   </td>
                   <td className="p-2">
                     <div className="flex items-center">
-                      {dataSource.indexStatus === KnowledgeIndexStatus.FAILED
+                      {dataSource.indexStatus === DataSourceIndexStatus.FAILED
                         ? "Failed"
+                        : dataSource.indexStatus ===
+                          DataSourceIndexStatus.MISSING
+                        ? "Missing"
                         : Math.round(dataSource.indexPercentage) + "%"}
                       {needsRefresh(dataSource.indexStatus) && (
                         <Loader className="w-4 h-4 spinner ml-1" />

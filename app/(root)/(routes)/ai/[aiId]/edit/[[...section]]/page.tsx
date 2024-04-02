@@ -5,6 +5,7 @@ import aiService from "@/src/domain/services/AIService";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
+import { AISecurityService } from "@/src/security/services/AISecurityService";
 import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
 import { GroupSecurityService } from "@/src/security/services/GroupSecurityService";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
@@ -29,12 +30,12 @@ const AIIdPage = async ({ params }: AIIdPageProps) => {
 
   let initialAi = null;
   if (params.aiId !== "new") {
-    initialAi = await aiService.findAIForUser(
-      authorizationContext,
-      params.aiId
-    );
-
-    if (initialAi === null) {
+    try {
+      initialAi = await aiService.getById(authorizationContext, params.aiId);
+      if (!AISecurityService.canUpdateAI(authorizationContext, initialAi)) {
+        return redirect("/");
+      }
+    } catch (e) {
       return redirect("/");
     }
   }

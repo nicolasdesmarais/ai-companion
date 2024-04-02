@@ -1092,6 +1092,12 @@ export class DataSourceManagementService {
     return dataSource;
   }
 
+  public async markDataSourceAsMissing(dataSourceId: string) {
+    await this.dataSourceRepository.updateDataSource(dataSourceId, {
+      indexStatus: DataSourceIndexStatus.MISSING,
+    });
+  }
+
   /**
    * Marks a data source as failed
    * @param dataSourceId

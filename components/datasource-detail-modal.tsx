@@ -50,7 +50,7 @@ export const DataSourceDetailModal = ({ dataSource, onClose }: Props) => {
               <>
                 <tr key={knowledge.id} className="p-2">
                   <td className="p-2 cursor-pointer hover:text-ring">
-                    <a href={knowledge.blobUrl} target="_blank">
+                    <a href={knowledge.documentsBlobUrl} target="_blank">
                       {knowledge.name}
                     </a>
                   </td>

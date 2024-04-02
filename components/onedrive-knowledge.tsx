@@ -10,18 +10,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  FileType,
+  getMsftLabelFromFileType,
+} from "@/src/adapter-in/api/DataSourcesApi";
 import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import { UserOAuthTokenEntity } from "@/src/domain/models/OAuthTokens";
 import { DataSourceRefreshPeriod } from "@prisma/client";
 import axios from "axios";
 import { format } from "date-fns";
 import { ChevronDown, ChevronRight, Loader, Server } from "lucide-react";
-import { useEffect, useState } from "react";
-import {
-  FileType,
-  getLabelFromFileType,
-} from "@/src/adapter-in/api/DataSourcesApi";
 import mime from "mime-types";
+import { useEffect, useState } from "react";
 import { DataRefreshPeriod } from "./data-refresh-period";
 
 const ADD_ACCOUNT_OPTION = "add-account";
@@ -180,7 +180,6 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
         );
         const values = response.data.value;
         const indent = (file.indent || 0) + 1;
-        console.log("current indent", file.indent, indent);
         values.forEach((value: any) => {
           value.indent = indent;
         });
@@ -288,54 +287,60 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
             >
               {!searching &&
                 searchResults &&
-                searchResults.map((file) => (
-                  <tr
-                    key={file.id}
-                    className={file.id === selectedFile?.id ? "bg-ring" : ""}
-                    onClick={() => setSelectedFile(file)}
-                  >
-                    <td className="p-2 flex truncate">
-                      {file.indent &&
-                        [...Array(file.indent)].map((_, i) => (
-                          <div className="w-2" key={`indent-${i}`}>
-                            &nbsp;
-                          </div>
-                        ))}
-                      {file.folder ? (
-                        <div
-                          onClick={(e) => toggle(file, e)}
-                          className="truncate cursor-pointer flex items-center"
-                        >
-                          {file.loading ? (
-                            <Loader className="w-4 h-4 mr-2 text-white spinner" />
-                          ) : file.expanded ? (
-                            <ChevronDown className="w-4 h-4 mr-2 text-white" />
-                          ) : (
-                            <ChevronRight className="w-4 h-4 mr-2 text-white" />
-                          )}
+                searchResults.map((file) => {
+                  const fileType = file.folder
+                    ? "Folder"
+                    : getMsftLabelFromFileType(
+                        mime.lookup(file.name) as FileType
+                      );
+                  if (fileType === "Unknown") {
+                    return null;
+                  }
+                  return (
+                    <tr
+                      key={file.id}
+                      className={file.id === selectedFile?.id ? "bg-ring" : ""}
+                      onClick={() => setSelectedFile(file)}
+                    >
+                      <td className="p-2 flex truncate">
+                        {file.indent &&
+                          [...Array(file.indent)].map((_, i) => (
+                            <div className="w-2" key={`indent-${i}`}>
+                              &nbsp;
+                            </div>
+                          ))}
+                        {file.folder ? (
+                          <div
+                            onClick={(e) => toggle(file, e)}
+                            className="truncate cursor-pointer flex items-center"
+                          >
+                            {file.loading ? (
+                              <Loader className="w-4 h-4 mr-2 text-white spinner" />
+                            ) : file.expanded ? (
+                              <ChevronDown className="w-4 h-4 mr-2 text-white" />
+                            ) : (
+                              <ChevronRight className="w-4 h-4 mr-2 text-white" />
+                            )}
 
-                          {file.name}
-                        </div>
-                      ) : (
-                        file.name
-                      )}
-                    </td>
-                    <td className="p-2">
-                      {file.folder
-                        ? "Folder"
-                        : getLabelFromFileType(
-                            mime.lookup(file.name) as FileType
-                          )}
-                    </td>
-                    <td className="p-2">{file.createdBy?.user?.displayName}</td>
-                    <td className="p-2">
-                      {format(
-                        new Date(file.lastModifiedDateTime),
-                        "h:mma M/d/yyyy "
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                            {file.name}
+                          </div>
+                        ) : (
+                          file.name
+                        )}
+                      </td>
+                      <td className="p-2">{fileType}</td>
+                      <td className="p-2">
+                        {file.createdBy?.user?.displayName}
+                      </td>
+                      <td className="p-2">
+                        {format(
+                          new Date(file.lastModifiedDateTime),
+                          "h:mma M/d/yyyy "
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
             </Table>
             {!searching && searchResults && searchResults.length === 0 ? (
               <div className="flex items-center my-2 w-full">

@@ -1,3 +1,4 @@
+import LandingCTA from "@/components/landing-cta";
 import LandingFooter from "@/components/landing-footer";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -83,7 +84,7 @@ const Solutions = () => {
                 employees&apos; HR-related queries, regardless of time zone.
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 text-royal">
+            <Link href="/signup" className="py-2 text-royal">
               Start creating
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
@@ -358,7 +359,6 @@ const Solutions = () => {
               viewBox="0 0 80 73"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="w-full"
             >
               <path
                 d="M63.205 15.571L39.7549 31.651V42.031L63.205 57.991C75.8017 46.291 75.8017 27.301 63.205 15.601V15.571Z"
@@ -440,7 +440,7 @@ const Solutions = () => {
                 message and customer.
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 text-royal">
+            <Link href="/signup" className="py-2 text-royal mt-4">
               Start creating
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
@@ -745,7 +745,7 @@ const Solutions = () => {
               AI for Legal Teams
             </div>
             <div>Go from reactive to proactive.</div>
-            <ul className="list-disc gap-4 flex flex-col ml-4 mt-6">
+            <ul className="list-disc gap-4 flex flex-col ml-4">
               <li>
                 <b>Create templates:</b> Easily create templates for commonly
                 used documents such as non-disclosure agreements or employment
@@ -762,7 +762,7 @@ const Solutions = () => {
                 partnerships.
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 mt-20 text-royal">
+            <Link href="/signup" className="py-2 mt-2 text-royal">
               Start creating
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
@@ -823,7 +823,7 @@ const Solutions = () => {
                 ahead in a rapidly changing market.
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 text-royal">
+            <Link href="/signup" className="py-2 text-royal">
               Start creating
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
@@ -959,6 +959,8 @@ const Solutions = () => {
           </div>
         </div>
       </div>
+
+      <LandingCTA />
 
       <LandingFooter />
     </div>

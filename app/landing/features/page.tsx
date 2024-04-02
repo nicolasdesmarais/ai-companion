@@ -30,7 +30,7 @@ const LandingFeatures = () => {
               <li>
                 <b>Advanced data ingestion options:</b> AppDirect AI provides
                 more built-in choices than any other solution to define your
-                app&nbsp;s data sources (files, drive folders, and websites) and
+                app&apos;s data sources (files, drive folders, and websites) and
                 schedule automated data updates.
               </li>
               <li>
@@ -42,7 +42,7 @@ const LandingFeatures = () => {
                 data sets in a secure environment without worry.
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 text-royal">
+            <Link href="/signup" className="py-2 text-royal">
               Start building
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
@@ -91,7 +91,7 @@ const LandingFeatures = () => {
                 gain new insights, or challenge your assumptions..
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 text-royal">
+            <Link href="/signup" className="py-2 text-royal">
               Start using
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
@@ -123,7 +123,7 @@ const LandingFeatures = () => {
                 publicly is easy and secure.
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 text-royal">
+            <Link href="/signup" className="py-2 text-royal">
               Start creating
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>
@@ -165,7 +165,7 @@ const LandingFeatures = () => {
                 based on keywords.
               </li>
             </ul>
-            <Link href="/sign-up" className="py-2 mt-20 text-royal">
+            <Link href="/signup" className="py-2 mt-20 text-royal">
               Browse catalog
               <ArrowRight className="inline-block w-4 h-4 ml-2" />
             </Link>

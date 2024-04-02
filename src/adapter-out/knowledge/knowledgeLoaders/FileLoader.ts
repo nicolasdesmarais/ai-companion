@@ -70,6 +70,7 @@ export class FileLoader {
         const loader = new JSONLoader(filePathOrBlob);
         docs = await loader.load();
       } else {
+        console.error(`Unsupported file type ${mimeType}`);
         throw new BadRequestError(`Unsupported file type ${mimeType}`);
       }
 

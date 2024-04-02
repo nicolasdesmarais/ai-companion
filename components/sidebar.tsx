@@ -127,6 +127,7 @@ export const Sidebar = ({
   const router = useRouter();
   const pathname = usePathname();
   const searchparams = useSearchParams();
+  const isServer = typeof window === "undefined";
 
   const showUpgrade = userPermissions.some((permission) => {
     return (
@@ -267,7 +268,7 @@ export const Sidebar = ({
     >
       <div className="space-y-2 flex flex-col items-center">
         <div className="h-16 w-16">
-          <OrgSwitcher setOpen={setOpen} />
+          {isServer ? null : <OrgSwitcher setOpen={setOpen} />}
         </div>
         <div
           onClick={() => onNavigate(`/chat/`, false)}

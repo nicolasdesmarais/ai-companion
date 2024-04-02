@@ -1,9 +1,10 @@
 "use client";
 import BlobAnimation from "@/components/blob-animation";
 import LandingNav from "@/components/landing-nav";
-import { OrganizationList } from "@clerk/nextjs";
+import { OrganizationList, useUser } from "@clerk/nextjs";
 
 const OrgSelect = () => {
+  const { user } = useUser();
   return (
     <div className="bg-white flex flex-col text-navy h-screen">
       <LandingNav transparent />
@@ -12,8 +13,8 @@ const OrgSelect = () => {
         <div className="absolute z-10 flex flex-col items-center ">
           <div className="flex flex-col gap-8 mt-8">
             <OrganizationList
-              afterSelectOrganizationUrl="/"
-              afterCreateOrganizationUrl="/"
+              afterSelectOrganizationUrl="/index/public"
+              afterCreateOrganizationUrl="/index/public"
               hidePersonal={true}
             />
           </div>

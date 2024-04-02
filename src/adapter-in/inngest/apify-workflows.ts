@@ -41,7 +41,7 @@ export interface ApifyWebhookReceivedPayload {
 }
 
 export const onApifyActorRunRequested = inngest.createFunction(
-  { id: "on-apify-actor-run-requested", concurrency: 15 },
+  { id: "on-apify-actor-run-requested", concurrency: 12 },
   { event: ApifyEvent.APIFY_ACTOR_RUN_REQUESTED },
   async ({ event, step }) => {
     const { orgId, dataSourceId, knowledgeId, url } =

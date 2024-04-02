@@ -105,21 +105,21 @@ export const PublicAiListing = async ({ searchParams, scopeParam }: Props) => {
             </div>
             <div className="w-full overflow-x-auto space-x-0.5 p-1 hidden md:flex">
               <div className="flex space-x-0.5">
-                <Link href="/sign-up" className="flex">
+                <Link href="/signup" className="flex">
                   <button className={cn(btnClassNames, "rounded-l-md")}>
                     Public
                   </button>
                 </Link>
-                <Link href="/sign-up" className="flex">
+                <Link href="/signup" className="flex">
                   <button className={cn(btnClassNames)}>Organization</button>
                 </Link>
-                <Link href="/sign-up" className="flex">
+                <Link href="/signup" className="flex">
                   <button className={cn(btnClassNames, "rounded-r-md")}>
                     Private
                   </button>
                 </Link>
               </div>
-              <Link href="/sign-up">
+              <Link href="/signup">
                 <button className={cn(btnClassNames, "flex rounded-md py-2")}>
                   <BadgeCheck className="w-6 h-6 mr-2 text-ring" />
                   Company Approved
@@ -127,7 +127,7 @@ export const PublicAiListing = async ({ searchParams, scopeParam }: Props) => {
               </Link>
             </div>
             <div className="flex">
-              <Link href="/sign-up" className="flex">
+              <Link href="/signup" className="flex">
                 <Button size="sm" variant="ring" className="my-2" type="button">
                   Invite
                   <UserPlus2 className="h-4 w-4 fill-white text-white ml-2 hidden md:inline" />

@@ -1,3 +1,7 @@
+import {
+  isMsftConvertible,
+  isSupportedFileType,
+} from "@/src/adapter-in/api/DataSourcesApi";
 import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
 import {
   EntityNotFoundError,
@@ -26,39 +30,11 @@ import { IndexKnowledgeResponse } from "../types/IndexKnowledgeResponse";
 export enum MsftEvent {
   ONEDRIVE_FOLDER_SCAN_INITIATED = "onedrive.folder.scan.initiated",
 }
+
 export class MsftDataSourceAdapter
   implements ContentRetrievingDataSourceAdapter
 {
   private static readonly GraphApiUrl = "https://graph.microsoft.com/v1.0";
-  private static readonly ConvertibleExtensions = [
-    "doc",
-    "docx",
-    "eml",
-    "htm",
-    "html",
-    "msg",
-    "odp",
-    "ods",
-    "odt",
-    "pps",
-    "ppsx",
-    "ppt",
-    "pptx",
-    "rtf",
-    "tif",
-    "tiff",
-    "xls",
-    "xlsm",
-    "xlsx",
-  ];
-
-  private isConvertible(filename: string): boolean {
-    const ext = filename.split(".").pop();
-    if (!ext) {
-      return false;
-    }
-    return MsftDataSourceAdapter.ConvertibleExtensions.includes(ext);
-  }
 
   private async getToken(
     userId: string,
@@ -118,7 +94,6 @@ export class MsftDataSourceAdapter
 
   public async children(userId: string, oauthTokenId: string, id: string) {
     const token = await this.getToken(userId, oauthTokenId);
-    console.log("msft children", `/me/drive/items/${id}/children`);
     return await this.fetch(token, `/me/drive/items/${id}/children`);
   }
 
@@ -204,7 +179,7 @@ export class MsftDataSourceAdapter
     const token = await this.getToken(userId, data.oauthTokenId);
     const item = await this.fetch(token, `/me/drive/items/${fileId}`);
     let response;
-    if (this.isConvertible(knowledge.name)) {
+    if (isMsftConvertible(knowledge.name)) {
       response = await fetch(
         `${MsftDataSourceAdapter.GraphApiUrl}/me/drive/items/${fileId}/content?format=pdf`,
         {
@@ -240,7 +215,7 @@ export class MsftDataSourceAdapter
 
     const msftResponseBlob = await response.blob();
     const contentBlobUrl = await FileStorageService.put(
-      fileId,
+      fileName,
       msftResponseBlob
     );
 
@@ -372,18 +347,24 @@ export class MsftDataSourceAdapter
     parentFolderId?: string
   ): Promise<DataSourceItem[]> {
     if (item.file) {
-      const dataSourceItem: DataSourceItem = {
-        name: item.name,
-        uniqueId: item.id,
-        metadata: {
-          fileId: item.id,
-          fileName: item.name,
-          mimeType: item.file.mimeType,
-          modifiedTime: item.lastModifiedDateTime,
-          parentFolderId,
-        },
-      };
-      return [dataSourceItem];
+      const isSupported =
+        isMsftConvertible(item.name) || isSupportedFileType(item.name);
+      if (isSupported) {
+        const dataSourceItem: DataSourceItem = {
+          name: item.name,
+          uniqueId: item.id,
+          metadata: {
+            fileId: item.id,
+            fileName: item.name,
+            mimeType: item.file.mimeType,
+            modifiedTime: item.lastModifiedDateTime,
+            parentFolderId,
+          },
+        };
+        return [dataSourceItem];
+      } else {
+        return [];
+      }
     }
     if (item.folder) {
       await publishEvent(MsftEvent.ONEDRIVE_FOLDER_SCAN_INITIATED, {

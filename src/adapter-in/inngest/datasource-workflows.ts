@@ -81,6 +81,15 @@ export const onDataSourceRefreshRequested = inngest.createFunction(
       }
     );
 
+    if (dataSourceItemList.rootItemMissing) {
+      await step.run("mark-data-source-missing", async () => {
+        return await dataSourceManagementService.markDataSourceAsMissing(
+          dataSourceId
+        );
+      });
+      return;
+    }
+
     await publishDataSourceItemList(
       dataSourceId,
       dataSourceItemList,
@@ -214,7 +223,18 @@ export const onKnowledgeInitialized = inngest.createFunction(
       }
     );
 
-    const { indexStatus, originalContent } = knowledgeWithContent;
+    const { indexStatus, originalContent, metadata } = knowledgeWithContent;
+
+    if (indexStatus === KnowledgeIndexStatus.FAILED) {
+      await dataSourceManagementService.failDataSourceKnowledge(
+        dataSourceId,
+        knowledgeId,
+        metadata?.errors?.knowledge ||
+          `Failed to retrieve knowledge content ${knowledgeId} for data source ${dataSourceId}`
+      );
+      return;
+    }
+
     if (
       indexStatus === KnowledgeIndexStatus.CONTENT_RETRIEVED &&
       originalContent

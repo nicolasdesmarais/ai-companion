@@ -81,7 +81,7 @@ export const PublicChatHeader = ({ ai, chat }: Props) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <Link href="/sign-up">
+              <Link href="/signup">
                 <DropdownMenuItem>
                   <Pin className="w-4 h-4 mr-2" />
                   Pin

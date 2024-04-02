@@ -12,7 +12,7 @@ interface Props {
 export const PublicAiChat = async ({ aiId }: Props) => {
   try {
     const ais = await aiService.findPublicAIs();
-    const ai = ais.find((ai) => ai.id === aiId);
+    const ai = await aiService.findPublicAIById(aiId);
     if (!ai) {
       throw new Error("AI not found");
     }
@@ -20,7 +20,7 @@ export const PublicAiChat = async ({ aiId }: Props) => {
     return (
       <div className="h-full">
         <div className="absolute pt-7 pl-5 md:hidden pr-4 z-50">
-          <Link href="/sign-up" className="flex">
+          <Link href="/signup" className="flex">
             <Menu />
           </Link>
         </div>

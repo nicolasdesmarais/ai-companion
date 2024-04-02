@@ -4,7 +4,7 @@ import { AppdirectSvg } from "./svg/appdirect-svg";
 const LandingFooter = () => {
   const currentYear = new Date().getFullYear();
   return (
-    <div className="flex text-white bg-navy justify-center w-full md:mt-20 py-8">
+    <div className="flex text-white bg-navy justify-center w-full py-8">
       <nav className="flex my-4 w-[1144px] justify-between">
         <div className="w-full mx-8">
           <div className="flex-col lg:flex-row flex">
@@ -17,16 +17,16 @@ const LandingFooter = () => {
                 <div className="font-bold">PRODUCT</div>
                 <ul className="flex flex-col justify-between gap-4 py-2 font-light">
                   <li>
-                    <Link href="/landing2/features">How it works</Link>
+                    <Link href="/landing/features">How it works</Link>
                   </li>
                   <li>
-                    <Link href="/landing2/solutions">Solutions</Link>
+                    <Link href="/landing/solutions">Solutions</Link>
                   </li>
                   <li>
-                    <Link href="/landing2/pricing">Pricing</Link>
+                    <Link href="/landing/pricing">Pricing</Link>
                   </li>
                   <li>
-                    <Link href="/landing2/enterprise">Enterprise</Link>
+                    <Link href="/landing/enterprise">Enterprise</Link>
                   </li>
                 </ul>
               </div>
@@ -34,13 +34,13 @@ const LandingFooter = () => {
                 <div className="font-bold">RESOURCES</div>
                 <ul className="flex flex-col justify-between gap-4 py-2 font-light">
                   <li>
-                    <Link href="/landing2/resources#tour">Tutorials</Link>
+                    <Link href="/landing/resources#tour">Tutorials</Link>
                   </li>
                   <li>
-                    <Link href="/landing2/resources#guides">References</Link>
+                    <Link href="/landing/resources#guides">References</Link>
                   </li>
                   <li>
-                    <Link href="/landing2/resources#faq">FAQ</Link>
+                    <Link href="/landing/resources#faq">FAQ</Link>
                   </li>
                 </ul>
               </div>
@@ -48,10 +48,10 @@ const LandingFooter = () => {
                 <div className="font-bold">LEGAL</div>
                 <ul className="flex flex-col justify-between gap-4 py-2 font-light">
                   <li>
-                    <Link href="/landing2/home">Privacy Notice</Link>
+                    <Link href="/landing/privacy">Privacy Notice</Link>
                   </li>
                   <li>
-                    <Link href="/landing2/home">Terms of Use</Link>
+                    <Link href="/landing/terms">Terms of Use</Link>
                   </li>
                 </ul>
               </div>
@@ -82,10 +82,7 @@ const LandingFooter = () => {
           </div>
           <div className="flex justify-between w-full mt-8 items-center">
             <div>{`AppDirect ©${currentYear}`}</div>
-            <Link
-              href="/sign-up"
-              className="ml-10 px-6 py-2 bg-white text-navy"
-            >
+            <Link href="/signup" className="ml-10 px-6 py-2 bg-white text-navy">
               Sign up
             </Link>
           </div>

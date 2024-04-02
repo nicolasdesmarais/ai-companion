@@ -1,4 +1,5 @@
 export interface DataSourceItemList {
+  rootItemMissing?: boolean;
   data?: any;
   items: DataSourceItem[];
 }

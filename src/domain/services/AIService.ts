@@ -59,6 +59,8 @@ const listAIResponseSelect = (): Prisma.AISelect => ({
   userName: true,
   categoryId: true,
   visibility: true,
+  listInOrgCatalog: true,
+  listInPublicCatalog: true,
   modelId: true,
   options: true,
   instructions: true,
@@ -191,24 +193,31 @@ export class AIService {
     }
   }
 
-  /**
-   * Returns an AI by ID, only if it's a public AI.
-   * @param aiId
-   * @returns
-   */
-  public async findPublicAI(aiId: string): Promise<AIDetailDto | null> {
-    const whereCondition = { AND: [{}] };
-    whereCondition.AND.push(this.getPublicCriteria());
-    whereCondition.AND.push({ id: aiId });
-
+  public async getById(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ): Promise<AIDetailDto> {
     const ai = await prismadb.aI.findFirst({
       select: listAIResponseSelect(),
-      where: whereCondition,
+      where: {
+        id: aiId,
+      },
     });
     if (!ai) {
-      return null;
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+    const { userId } = authorizationContext;
+
+    const isShared = await this.aiRepository.hasPermissionOnAI(aiId, userId);
+    if (
+      !(await AISecurityService.canReadAI(authorizationContext, ai, isShared))
+    ) {
+      throw new ForbiddenError(
+        `User is not authorized to read AI with id=${aiId}`
+      );
     }
 
+    const canUpdateAI = AISecurityService.canUpdateAI(authorizationContext, ai);
     const messageCountPerAi: any[] = await this.getMessageCountPerAi([ai.id]);
     const ratingPerAi: any[] = await this.getRatingPerAi([ai.id]);
 
@@ -216,58 +225,32 @@ export class AIService {
       ai,
       messageCountPerAi,
       ratingPerAi,
-      [],
-      false
+      isShared,
+      canUpdateAI
     );
     return aiDto;
   }
 
   /**
-   * Returns an AI by ID, only if it's visible to the given user and organization.
-   * @param orgId
-   * @param userId
+   * Returns an AI by id if it is public.
    * @param aiId
    * @returns
    */
-  public async findAIForUser(
-    authorizationContext: AuthorizationContext,
-    aiId: string
-  ): Promise<AIDetailDto | null> {
-    const { orgId, userId } = authorizationContext;
-
-    const highestAccessLevel = BaseEntitySecurityService.getHighestAccessLevel(
-      authorizationContext,
-      SecuredResourceType.AI,
-      SecuredAction.READ
-    );
-    if (!highestAccessLevel) {
-      throw new ForbiddenError("Forbidden");
-    }
-
-    let scope;
-    if (highestAccessLevel === SecuredResourceAccessLevel.INSTANCE) {
-      scope = ListAIsRequestScope.INSTANCE;
-    } else if (highestAccessLevel === SecuredResourceAccessLevel.ORGANIZATION) {
-      scope = ListAIsRequestScope.ADMIN;
-    } else {
-      scope = ListAIsRequestScope.ALL;
-    }
-
-    const whereCondition = { AND: [{}] };
-    whereCondition.AND.push(this.getBaseWhereCondition(orgId, userId, scope));
-    whereCondition.AND.push({ id: aiId });
-
+  public async findPublicAIById(aiId: string): Promise<AIDetailDto | null> {
     const ai = await prismadb.aI.findFirst({
       select: listAIResponseSelect(),
-      where: whereCondition,
+      where: {
+        id: aiId,
+      },
     });
     if (!ai) {
       return null;
     }
 
-    const canUpdateAI = AISecurityService.canUpdateAI(authorizationContext, ai);
+    if (!(await AISecurityService.canReadAI(null, ai, false))) {
+      return null;
+    }
 
-    const aiShare = await this.getAIShareForAIAndUser(ai.id, userId);
     const messageCountPerAi: any[] = await this.getMessageCountPerAi([ai.id]);
     const ratingPerAi: any[] = await this.getRatingPerAi([ai.id]);
 
@@ -275,8 +258,8 @@ export class AIService {
       ai,
       messageCountPerAi,
       ratingPerAi,
-      aiShare,
-      canUpdateAI
+      false,
+      false
     );
     return aiDto;
   }
@@ -322,7 +305,7 @@ export class AIService {
     const ratingPerAi: any[] = await this.getRatingPerAi(aiIds);
 
     const result = ais.map((ai) => {
-      return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi, []);
+      return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi, false);
     });
 
     if (request.sort === "newest") {
@@ -403,7 +386,8 @@ export class AIService {
     const ratingPerAi: any[] = await this.getRatingPerAi(aiIds);
 
     const result = ais.map((ai) => {
-      return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi, aiShares);
+      const isShared = !!aiShares.find((a) => a.aiId === ai.id);
+      return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi, isShared);
     });
 
     if (request.sort === "newest") {
@@ -475,7 +459,7 @@ export class AIService {
     ai: AI & { groups: GroupAI[] } & { orgApprovals: { id: number }[] },
     messageCountPerAi: any[],
     ratingPerAi: any[],
-    aiShares: any[],
+    isShared: boolean,
     forUpdate: boolean = false
   ): AIDetailDto {
     const aiCountRow = messageCountPerAi.find((m) => m.aiId === ai.id);
@@ -484,8 +468,6 @@ export class AIService {
     const ratingRow = ratingPerAi.find((r) => r.aiId === ai.id);
     const rating = ratingRow ? Number(ratingRow.averageRating) : 0;
     const ratingCount = ratingRow ? Number(ratingRow.ratingCount) : 0;
-
-    const isShared = !!aiShares.find((a) => a.aiId === ai.id);
 
     const isApprovedByOrg = ai.orgApprovals.length > 0;
 
@@ -625,7 +607,7 @@ export class AIService {
   private getUserGroupCriteria(orgId: string, userId: string) {
     return {
       visibility: {
-        in: [AIVisibility.GROUP, AIVisibility.PUBLIC],
+        in: [AIVisibility.GROUP],
       },
       groups: {
         some: {
@@ -711,8 +693,9 @@ export class AIService {
   private getOrganizationCriteria(orgId: string) {
     return {
       orgId,
+      listInOrgCatalog: true,
       visibility: {
-        in: [AIVisibility.ORGANIZATION],
+        in: [AIVisibility.ORGANIZATION, AIVisibility.ANYONE_WITH_LINK],
       },
     };
   }
@@ -741,7 +724,12 @@ export class AIService {
   }
 
   private getPublicCriteria() {
-    return { visibility: AIVisibility.PUBLIC };
+    return {
+      listInPublicCatalog: true,
+      visibility: {
+        in: [AIVisibility.ANYONE_WITH_LINK],
+      },
+    };
   }
 
   private getGroupCriteria(orgId: string, groupId: string) {
@@ -970,6 +958,8 @@ export class AIService {
       categoryId,
       modelId,
       visibility,
+      listInOrgCatalog,
+      listInPublicCatalog,
       options,
       groups,
     } = request;
@@ -994,6 +984,8 @@ export class AIService {
         seed: seed ?? "",
         modelId,
         visibility,
+        listInOrgCatalog,
+        listInPublicCatalog,
         options: options as any,
       },
       include: {
@@ -1047,6 +1039,8 @@ export class AIService {
       modelId,
       groups,
       visibility,
+      listInOrgCatalog,
+      listInPublicCatalog,
       options,
       profile,
     } = request;
@@ -1077,6 +1071,8 @@ export class AIService {
         seed,
         modelId,
         visibility,
+        listInOrgCatalog,
+        listInPublicCatalog,
         options: options as any,
         profile: profile as any,
       },

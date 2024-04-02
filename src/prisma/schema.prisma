@@ -18,19 +18,21 @@ model Category {
 }
 
 model AI {
-  id           String       @id @default(uuid())
-  orgId        String       @map(name: "org_id")
-  userId       String       @map("user_id")
-  userName     String       @map("user_name")
-  src          String       @db.Text
-  name         String       @db.Text
-  introduction String?      @db.Text
-  description  String       @db.Text
-  instructions String       @db.Text
-  seed         String       @db.Text
-  visibility   AIVisibility @default(PRIVATE)
-  options      Json?
-  profile      Json?
+  id                  String       @id @default(uuid())
+  orgId               String       @map(name: "org_id")
+  userId              String       @map("user_id")
+  userName            String       @map("user_name")
+  src                 String       @db.Text
+  name                String       @db.Text
+  introduction        String?      @db.Text
+  description         String       @db.Text
+  instructions        String       @db.Text
+  seed                String       @db.Text
+  visibility          AIVisibility @default(PRIVATE)
+  listInOrgCatalog    Boolean      @default(false) @map("list_in_org_catalog")
+  listInPublicCatalog Boolean      @default(false) @map("list_in_public_catalog")
+  options             Json?
+  profile             Json?
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
@@ -69,7 +71,7 @@ enum AIVisibility {
   PRIVATE
   GROUP
   ORGANIZATION
-  PUBLIC
+  ANYONE_WITH_LINK
 }
 
 model Message {
@@ -87,17 +89,6 @@ model Message {
 
   @@index([chatId])
   @@map("messages")
-}
-
-model UserSubscription {
-  id                     String    @id @default(cuid())
-  userId                 String    @unique @map(name: "user_id")
-  stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
-  stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
-  stripePriceId          String?   @map(name: "stripe_price_id")
-  stripeCurrentPeriodEnd DateTime? @map(name: "stripe_current_period_end")
-
-  @@map("user_subscriptions")
 }
 
 model Group {
@@ -170,6 +161,7 @@ model Knowledge {
   @@index([parentUniqueId(length: 100)])
   @@index([indexStatus, isVectorStorageDeleted])
   @@index([indexStatus, isBlobStorageDeleted])
+  @@index([type, uniqueId(length: 100), indexStatus])
   @@map("knowledge")
 }
 
@@ -293,7 +285,7 @@ model DataSource {
   @@index(type)
   @@index(createdAt)
   @@index(lastIndexedAt)
-  @@index(orgId)
+  @@index([orgId, ownerUserId])
   @@fulltext(name)
   @@map("data_sources")
 }
@@ -315,6 +307,7 @@ enum DataSourceIndexStatus {
   FAILED
   DELETION_REQUESTED
   DELETED
+  MISSING
 }
 
 enum DataSourceRefreshPeriod {
@@ -342,6 +335,7 @@ model AIDataSource {
   dataSourceId String     @map(name: "data_source_id")
 
   @@id([aiId, dataSourceId])
+  @@index([dataSourceId])
   @@map("ai_data_sources")
 }
 
