@@ -12,7 +12,7 @@ const Terms = () => {
           </div>
         </div>
       </div>
-      <div className="py-10 mt-10 flex flex-col items-center">
+      <div className="py-10 mt-10 flex flex-col items-center mb-20">
         <div className="lg:w-[1140px] mx-4 gap-8 flex flex-col">
           <div>
             Welcome and thank you for your interest in the AppDirect AI
@@ -66,53 +66,115 @@ const Terms = () => {
             AI Marketplace, you must comply with all applicable laws, our Usage
             Policies, as well as any other documentation, guidelines, or
             policies we make available to you.
-          </div>{" "}
+          </div>
           <h3 className="text-3xl font-bold">Usage Policy</h3>
           <div>
+            You may not:
+            <ul className="flex flex-col list-disc gap-4 ml-6 mt-6">
+              <li>
+                Input or use the AI Marketplace to collect any sensitive
+                personal information, such as health information (including
+                &quot;protected health information&quot; as defined in 45 C.F.R.
+                §160.103), social security numbers, financial information,
+                payment card numbers, driver&apos;s license numbers, and
+                passport numbers, unless otherwise permitted by these Terms or
+                we have consented to the collection of the information in
+                writing;
+              </li>
+              <li>
+                {" "}
+                Use the AI Marketplace to provide medical, legal, or tax advice;
+              </li>
+              <li>
+                {" "}
+                Use the AI Marketplace for any illegal, harmful, or abusive
+                activity; Use the AI Marketplace in a way that infringes,
+                misappropriates, or violates anyone&apos;s rights, including
+                intellectual property rights and rights of publicity;
+              </li>
+              <li>
+                {" "}
+                Use the AI Marketplace to impersonate any person or entity, or
+                misrepresent your affiliation with a person or entity;
+              </li>
+              <li>
+                {" "}
+                Use Content that you do not have a right to submit to the AI
+                Marketplace or to an AI bot;
+              </li>
+              <li>
+                {" "}
+                Submit Content or create an AI bot that contains software
+                viruses, or any computer code, files or programs designed to
+                interrupt, destroy or limit the functionality of any computer
+                software or hardware or telecommunications equipment;
+              </li>
+              <li>
+                {" "}
+                Submit Content or create an AI bot that poses a privacy or
+                security risk to any person;
+              </li>
+              <li>
+                {" "}
+                Interfere with or disrupt the AI Marketplace or networks
+                connected to the AI Marketplace;
+              </li>
+              <li>
+                {" "}
+                Take any action on the AI Marketplace that is threatening,
+                abusive, harassing, tortious, bullying, excessively violent,
+                defamatory, libelous, or verifiably false;
+              </li>
+              <li>
+                {" "}
+                Submit Content or create an AI bot that is obscene or
+                pornographic;
+              </li>
+              <li>
+                {" "}
+                Modify, copy, lease, sell or distribute the AI Marketplace;
+              </li>
+              <li>
+                {" "}
+                Attempt to or assist anyone to reverse engineer, decompile or
+                discover the source code or underlying components of the AI
+                Marketplace, including models, algorithms, or systems;
+              </li>
+              <li>
+                {" "}
+                Automatically or programmatically extract data or Output
+                (defined below);
+              </li>
+              <li>
+                {" "}
+                Represent that Output was human generated when it was not;
+              </li>
+              <li>
+                {" "}
+                Interfere with, overburden, or disrupt the AI Marketplace,
+                including circumventing any rate limits or restrictions or
+                bypass any protective measures or safety mitigations we put on
+                the AI Marketplace;
+              </li>
+              <li>
+                {" "}
+                Use Output to develop services that compete with AppDirect; or{" "}
+              </li>
+              <li>
+                Otherwise use or interact with the AI Marketplace in a way that,
+                in the sole judgment of AppDirect, is objectionable or that
+                restricts or inhibits any other person from using or enjoying
+                the AI Marketplace, or which may expose AppDirect or its users
+                to any harm or liability.
+              </li>
+            </ul>
+          </div>
+          <div>
             {" "}
-            You may not: Input or use the AI Marketplace to collect any
-            sensitive personal information, such as health information
-            (including &quot;protected health information&quot; as defined in 45
-            C.F.R. §160.103), social security numbers, financial information,
-            payment card numbers, driver&apos;s license numbers, and passport
-            numbers, unless otherwise permitted by these Terms or we have
-            consented to the collection of the information in writing; Use the
-            AI Marketplace to provide medical, legal, or tax advice; Use the AI
-            Marketplace for any illegal, harmful, or abusive activity; Use the
-            AI Marketplace in a way that infringes, misappropriates, or violates
-            anyone&apos;s rights, including intellectual property rights and
-            rights of publicity; Use the AI Marketplace to impersonate any
-            person or entity, or misrepresent your affiliation with a person or
-            entity; Use Content that you do not have a right to submit to the AI
-            Marketplace or to an AI bot; Submit Content or create an AI bot that
-            contains software viruses, or any computer code, files or programs
-            designed to interrupt, destroy or limit the functionality of any
-            computer software or hardware or telecommunications equipment;
-            Submit Content or create an AI bot that poses a privacy or security
-            risk to any person; Interfere with or disrupt the AI Marketplace or
-            networks connected to the AI Marketplace; Take any action on the AI
-            Marketplace that is threatening, abusive, harassing, tortious,
-            bullying, excessively violent, defamatory, libelous, or verifiably
-            false; Submit Content or create an AI bot that is obscene or
-            pornographic; Modify, copy, lease, sell or distribute the AI
-            Marketplace; Attempt to or assist anyone to reverse engineer,
-            decompile or discover the source code or underlying components of
-            the AI Marketplace, including models, algorithms, or systems;
-            Automatically or programmatically extract data or Output (defined
-            below); Represent that Output was human generated when it was not;
-            Interfere with, overburden, or disrupt the AI Marketplace, including
-            circumventing any rate limits or restrictions or bypass any
-            protective measures or safety mitigations we put on the AI
-            Marketplace; Use Output to develop services that compete with
-            AppDirect; or Otherwise use or interact with the AI Marketplace in a
-            way that, in the sole judgment of AppDirect, is objectionable or
-            that restricts or inhibits any other person from using or enjoying
-            the AI Marketplace, or which may expose AppDirect or its users to
-            any harm or liability. We reserve the right to investigate and take
-            appropriate action against anyone who we conclude, in our sole
-            discretion, has violated the provisions above. That action may
-            include suspending or terminating your account and reporting you to
-            law enforcement.
+            We reserve the right to investigate and take appropriate action
+            against anyone who we conclude, in our sole discretion, has violated
+            the provisions above. That action may include suspending or
+            terminating your account and reporting you to law enforcement.
           </div>
           <h3 className="text-3xl font-bold">Content</h3>
           <div>
@@ -131,116 +193,138 @@ const Terms = () => {
             right to submit.
           </div>
           <div>
-            Content Ownership. As between you and AppDirect, you (a) retain
-            whatever ownership rights in that Content you had to begin with and
-            (b) own the Output, subject to any agreements you have with third
-            parties.
+            <span className="font-bold">Content Ownership.</span> As between you
+            and AppDirect, you (a) retain whatever ownership rights in that
+            Content you had to begin with and (b) own the Output, subject to any
+            agreements you have with third parties.
           </div>
           <div>
-            AppDirect&apos;s Use of Content.We may use Content to provide,
-            maintain, develop, and improve the AI Marketplace, comply with
-            applicable law, enforce our terms and policies, and keep the AI
-            Marketplace safe. AppDirect will not use your Content to train its
-            artificial intelligence models without your consent. However,
-            certain providers of the third-party large language models we offer
-            may use your data to train their models. When you use those
-            third-party large-language models or an AI Bot that uses those
-            models, you consent to the model provider&apos;s use of your Content
-            for model training and other uses as described in their terms of
-            service and privacy policy. We encourage you to review these
-            providers&apos; terms of service and privacy policies before using
-            their large language models (and any AI Bot that uses such models).
+            <span className="font-bold">AppDirect&apos;s Use of Content.</span>{" "}
+            We may use Content to provide, maintain, develop, and improve the AI
+            Marketplace, comply with applicable law, enforce our terms and
+            policies, and keep the AI Marketplace safe. AppDirect will not use
+            your Content to train its artificial intelligence models without
+            your consent. However, certain providers of the third-party large
+            language models we offer may use your data to train their models.
+            When you use those third-party large-language models or an AI Bot
+            that uses those models, you consent to the model provider&apos;s use
+            of your Content for model training and other uses as described in
+            their terms of service and privacy policy. We encourage you to
+            review these providers&apos; terms of service and privacy policies
+            before using their large language models (and any AI Bot that uses
+            such models).
           </div>
           <div>
-            Limitations of Artificial Intelligence.Artificial intelligence is
-            still a developing field. Accordingly, you acknowledge and agree
-            that: Output may not be unique, and the AI Marketplace may provide
-            similar output to other users; The results you receive from the AI
-            Marketplace may not always be accurate, so you should not rely
-            solely on those results, or use results as a substitute for
-            professional advice; You must evaluate Output for accuracy and
-            appropriateness for your desired use (including reviewing the Output
-            by a human as appropriate) before using or sharing Output; You may
-            not use any Output relating to a person for any purpose that could
-            have a legal or material impact on that person, such as making
-            credit, educational, employment, housing, insurance, legal, medical,
-            or other important decisions about them; Output does not represent
-            AppDirect&apos;s views and does not constitute an endorsement of any
-            third party product or service.
+            <span className="font-bold">
+              Limitations of Artificial Intelligence.
+            </span>{" "}
+            Artificial intelligence is still a developing field. Accordingly,
+            you acknowledge and agree that:{" "}
+            <ul className="flex flex-col list-disc gap-4 ml-6 mt-6">
+              <li>
+                Output may not be unique, and the AI Marketplace may provide
+                similar output to other users;
+              </li>
+              <li>
+                The results you receive from the AI Marketplace may not always
+                be accurate, so you should not rely solely on those results, or
+                use results as a substitute for professional advice;
+              </li>
+              <li>
+                You must evaluate Output for accuracy and appropriateness for
+                your desired use (including reviewing the Output by a human as
+                appropriate) before using or sharing Output;
+              </li>
+              <li>
+                You may not use any Output relating to a person for any purpose
+                that could have a legal or material impact on that person, such
+                as making credit, educational, employment, housing, insurance,
+                legal, medical, or other important decisions about them;
+              </li>
+              <li>
+                Output does not represent AppDirect&apos;s views and does not
+                constitute an endorsement of any third party product or service.
+              </li>
+            </ul>
           </div>
           <h3 className="text-3xl font-bold">For Builders of AI Bots:</h3>
           <div>
-            AI Bot Content.The information or content that you upload to or
-            include with your AI bot (for example the bot name, instructions,
-            and description) (&quot;Bot Content&quot;) is your Content. As
-            between you and AppDirect, you are solely responsible for your Bot
-            Content and configurations that you use or enable to create your AI
-            bot as well as any Output that is based on your Bot Content and
-            configurations. You must ensure your AI bot complies with these
-            Terms and any applicable policies.
+            <span className="font-bold">AI Bot Content.</span> The information
+            or content that you upload to or include with your AI bot (for
+            example the bot name, instructions, and description) (&quot;Bot
+            Content&quot;) is your Content. As between you and AppDirect, you
+            are solely responsible for your Bot Content and configurations that
+            you use or enable to create your AI bot as well as any Output that
+            is based on your Bot Content and configurations. You must ensure
+            your AI bot complies with these Terms and any applicable policies.
           </div>
           <div>
-            Distribution and Promotion of AI bots.By sharing your AI bot with
-            others, you grant a nonexclusive, worldwide, irrevocable,
-            royalty-free license (i) to AppDirect to use, test, store, copy,
-            translate, display, modify, distribute, promote, and otherwise make
-            available to other users all or any part of your AI bot (including
-            Bot Content), subject to any access controls you have set when
-            configuring your AI bot; and (ii) to the extent Output from your AI
-            bot includes your Bot Content, to users of your AI bot to use,
-            store, copy, display, distribute, prepare derivative works of and
-            otherwise use your Bot Content. You will ensure that all information
-            that you publish about your AI bot is, at all times, complete,
-            accurate, and not misleading.
+            <span className="font-bold">
+              Distribution and Promotion of AI bots.
+            </span>{" "}
+            By sharing your AI bot with others, you grant a nonexclusive,
+            worldwide, irrevocable, royalty-free license (i) to AppDirect to
+            use, test, store, copy, translate, display, modify, distribute,
+            promote, and otherwise make available to other users all or any part
+            of your AI bot (including Bot Content), subject to any access
+            controls you have set when configuring your AI bot; and (ii) to the
+            extent Output from your AI bot includes your Bot Content, to users
+            of your AI bot to use, store, copy, display, distribute, prepare
+            derivative works of and otherwise use your Bot Content. You will
+            ensure that all information that you publish about your AI bot is,
+            at all times, complete, accurate, and not misleading.
           </div>
           <div>
-            Disclosures.Where your AI bot uses a third party large language
-            model whose developer uses Content for its own model training, you
-            are responsible for providing any disclosures and obtaining any
-            consent from your bot users for such training, as required by
-            applicable law. You are also responsible for any required
-            disclosures and consents prior to permitting your bot user to use
-            your AI Bot to take Actions (defined below).
+            <span className="font-bold">Disclosures.</span> Where your AI bot
+            uses a third party large language model whose developer uses Content
+            for its own model training, you are responsible for providing any
+            disclosures and obtaining any consent from your bot users for such
+            training, as required by applicable law. You are also responsible
+            for any required disclosures and consents prior to permitting your
+            bot user to use your AI Bot to take Actions (defined below).
           </div>{" "}
           <div>
-            Actions.The AI Marketplace may permit you to enable features
-            allowing your AI bot to access external websites or take certain
-            actions off of the AI Marketplace (&quot;Actions&quot;). You are
-            entirely responsible for your AI bot&apos;s Actions, and for
-            ensuring you have all rights and permissions for your AI bot to
-            access such websites or take such actions.
+            <span className="font-bold">Actions.</span> The AI Marketplace may
+            permit you to enable features allowing your AI bot to access
+            external websites or take certain actions off of the AI Marketplace
+            (&quot;Actions&quot;). You are entirely responsible for your AI
+            bot&apos;s Actions, and for ensuring you have all rights and
+            permissions for your AI bot to access such websites or take such
+            actions.
           </div>{" "}
           <div>
-            Removal.We may reject or remove any AI bot from the AI Marketplace
-            at any time for any reason without notice to you, such as for legal
-            or security reasons or if your AI bot violates our Terms or Usage
-            Policies.
+            <span className="font-bold">Removal.</span> We may reject or remove
+            any AI bot from the AI Marketplace at any time for any reason
+            without notice to you, such as for legal or security reasons or if
+            your AI bot violates our Terms or Usage Policies.
           </div>{" "}
           <h3 className="text-3xl font-bold">For Users of AI bots:</h3>{" "}
           <div>
-            Third Party AI bots.Except where AppDirect is identified as the
-            builder of an AI bot, AI bots are created by other users, and they
-            may rely on content or third party applications, including third
-            party large language models, that are not controlled by AppDirect.
-            AI bots may also take Actions on websites or other properties not
-            controlled by AppDirect. The presence of an AI bot on the AI
-            Marketplace does not imply that AppDirect created, supports or
-            endorses the AI bot. Only use AI bots that you know and trust. Under
-            no circumstances will AppDirect be liable for any AI bots created by
-            other users, the AI models that those AI bots employ, any Actions,
-            or any Content. This includes, but is not limited to, infringement
-            of intellectual property rights, errors or omissions in any content,
-            use of your Content for third party model training, and any loss or
-            damage of any kind incurred as a result of the use of any such
-            content.
+            <span className="font-bold">Third Party AI bots.</span> Except where
+            AppDirect is identified as the builder of an AI bot, AI bots are
+            created by other users, and they may rely on content or third party
+            applications, including third party large language models, that are
+            not controlled by AppDirect. AI bots may also take Actions on
+            websites or other properties not controlled by AppDirect. The
+            presence of an AI bot on the AI Marketplace does not imply that
+            AppDirect created, supports or endorses the AI bot. Only use AI bots
+            that you know and trust. Under no circumstances will AppDirect be
+            liable for any AI bots created by other users, the AI models that
+            those AI bots employ, any Actions, or any Content. This includes,
+            but is not limited to, infringement of intellectual property rights,
+            errors or omissions in any content, use of your Content for third
+            party model training, and any loss or damage of any kind incurred as
+            a result of the use of any such content.
           </div>{" "}
           <div>
-            Abuse Reporting.You can report AI bots that violate our Usage
-            Policies by contacting us at privacy@appdirect.com.
+            <span className="font-bold">Abuse Reporting.</span> You can report
+            AI bots that violate our Usage Policies by contacting us at
+            privacy@appdirect.com.
           </div>{" "}
           <div>
-            Changes and Removal.AppDirect and creators of AI bots can remove the
-            bots at any time for any reason without prior notice.
+            <span className="font-bold">Changes and Removal.</span> AppDirect
+            and creators of AI bots can remove the bots at any time for any
+            reason without prior notice.
           </div>{" "}
           <h3 className="text-3xl font-bold">Disputes With Other Users</h3>
           <div>
@@ -280,22 +364,23 @@ const Terms = () => {
             date.
           </div>
           <div>
-            Cancellation.You can cancel your paid subscription at any time by
-            going into your AI Marketplace account. Payments are non-refundable,
-            except where required by law. These Terms do not override any
-            mandatory local laws regarding your cancellation rights.
+            <span className="font-bold">Cancellation.</span> You can cancel your
+            paid subscription at any time by going into your AI Marketplace
+            account. Payments are non-refundable, except where required by law.
+            These Terms do not override any mandatory local laws regarding your
+            cancellation rights.
           </div>
           <div>
-            Changes.The price or term for your subscription may change from time
-            to time. If the price and term for your subscription changes, we
-            will communicate any price or term changes to you in advance and, if
-            applicable, how to accept those changes. Price or term changes will
-            apply to the next subscription term following the date of the price
-            or term change. If you do not agree with the price or term change,
-            you have the right to reject the change by cancelling your
-            subscription prior to the price or term change going into effect.
-            Please make sure you read any such notification of price or term
-            changes carefully.
+            <span className="font-bold">Changes.</span> The price or term for
+            your subscription may change from time to time. If the price and
+            term for your subscription changes, we will communicate any price or
+            term changes to you in advance and, if applicable, how to accept
+            those changes. Price or term changes will apply to the next
+            subscription term following the date of the price or term change. If
+            you do not agree with the price or term change, you have the right
+            to reject the change by cancelling your subscription prior to the
+            price or term change going into effect. Please make sure you read
+            any such notification of price or term changes carefully.
           </div>
           <h3 className="text-3xl font-bold">Intellectual Property Rights</h3>
           <div>
@@ -345,28 +430,43 @@ const Terms = () => {
             infringement. For your complaint to be valid under the DMCA, you
             must provide the following information in writing:
           </div>
-          <ol>
-            {" "}
-            An electronic or physical signature of a person authorized to act on
-            behalf of the copyright owner; Identification of the copyrighted
-            work that you claim has been infringed; Identification of the
-            material that is claimed to be infringing and where it is located on
-            the AI Marketplace; Information reasonably sufficient to permit
-            AppDirect to contact you, such as your address, telephone number,
-            and e-mail address; A statement that you have a good faith belief
-            that use of the material in the manner complained of is not
-            authorized by the copyright owner, its agent, or law; and A
-            statement, made under penalty of perjury, that the above information
-            is accurate, and that you are the copyright owner or are authorized
-            to act on behalf of the owner.
+          <ol className="flex flex-col list-decimal gap-4 ml-6 mt-6">
+            <li>
+              An electronic or physical signature of a person authorized to act
+              on behalf of the copyright owner;{" "}
+            </li>
+            <li>
+              Identification of the copyrighted work that you claim has been
+              infringed;{" "}
+            </li>
+            <li>
+              Identification of the material that is claimed to be infringing
+              and where it is located on the AI Marketplace;{" "}
+            </li>
+            <li>
+              Information reasonably sufficient to permit AppDirect to contact
+              you, such as your address, telephone number, and e-mail address;{" "}
+            </li>
+            <li>
+              A statement that you have a good faith belief that use of the
+              material in the manner complained of is not authorized by the
+              copyright owner, its agent, or law;{" "}
+            </li>
+            <li>
+              and A statement, made under penalty of perjury, that the above
+              information is accurate, and that you are the copyright owner or
+              are authorized to act on behalf of the owner.
+            </li>
           </ol>
           <div>
             The above information must be submitted to the following DMCA Agent:
           </div>
-          <div>Attn: DMCA Notice</div>
-          <div>AppDirect, Inc.</div>
-          <div> 447 Sutter St Ste 405 PMB1116 </div>
-          <div>San Francisco, CA 94108</div>
+          <div>
+            <div>Attn: DMCA Notice</div>
+            <div>AppDirect, Inc.</div>
+            <div> 447 Sutter St Ste 405 PMB1116 </div>
+            <div>San Francisco, CA 94108</div>
+          </div>
           <div>Email: privacy@appdirect.com</div>
           <div>
             {" "}
@@ -501,14 +601,17 @@ const Terms = () => {
           </div>
           <h3 className="text-3xl font-bold">General Terms</h3>
           <div>
-            Assignment. You may not assign these Terms or any of your rights or
-            obligations hereunder without the prior written consent of
-            AppDirect. AppDirect may assign its rights and duties under these
-            Terms to any third party at any time without notice to you. Any
-            purported assignment in contravention of this Section shall be null
-            and void. Subject to the foregoing, these Terms shall be binding
-            upon and inure to the benefit of the parties and their respective
-            permitted successors and assigns. Severability, Waiver. If, for
+            <span className="font-bold">Assignment.</span> You may not assign
+            these Terms or any of your rights or obligations hereunder without
+            the prior written consent of AppDirect. AppDirect may assign its
+            rights and duties under these Terms to any third party at any time
+            without notice to you. Any purported assignment in contravention of
+            this Section shall be null and void. Subject to the foregoing, these
+            Terms shall be binding upon and inure to the benefit of the parties
+            and their respective permitted successors and assigns.{" "}
+          </div>
+          <div>
+            <span className="font-bold">Severability, Waiver.</span> If, for
             whatever reason, a court of competent jurisdiction finally
             determines that any provision of these Terms is invalid, illegal or
             unenforceable, such provision shall be enforced to the maximum
@@ -518,20 +621,29 @@ const Terms = () => {
             shall constitute a waiver of any prior, concurrent, or subsequent
             breach of the same or any other provisions hereof, and no waiver
             shall be effective unless made in writing and signed by an
-            authorized representative of the waiving party. Trade Controls.You
-            must comply with all applicable trade laws, including sanctions and
-            export control laws. The AI Marketplace and AI bots may not be used
-            in or for the benefit of, or exported or re-exported to (a) any U.S.
+            authorized representative of the waiving party.{" "}
+          </div>
+          <div>
+            <span className="font-bold">Trade Controls.</span>You must comply
+            with all applicable trade laws, including sanctions and export
+            control laws. The AI Marketplace and AI bots may not be used in or
+            for the benefit of, or exported or re-exported to (a) any U.S.
             embargoed country or territory or (b) any individual or entity with
             whom dealings are prohibited or restricted under applicable trade
             laws. The AI Marketplace may not be used for any end use prohibited
             by applicable trade laws, and your Input may not include material or
             information that requires a government license for release or
-            export. Entire Agreement. These Terms contain the entire agreement
-            between you and AppDirect regarding the AI Marketplace and supersede
-            any prior or contemporaneous agreements between you and AppDirect
-            regarding the AI Marketplace. Governing Law & Venue.California law
-            will govern these Terms without regard to its conflict of laws
+            export.{" "}
+          </div>
+          <div>
+            <span className="font-bold">Entire Agreement.</span> These Terms
+            contain the entire agreement between you and AppDirect regarding the
+            AI Marketplace and supersede any prior or contemporaneous agreements
+            between you and AppDirect regarding the AI Marketplace.{" "}
+          </div>
+          <div>
+            <span className="font-bold">Governing Law & Venue.</span> California
+            law will govern these Terms without regard to its conflict of laws
             principles. All claims arising out of or relating to these Terms,
             the AI Marketplace, or an AI bot will be brought exclusively in the
             federal or state courts located in San Francisco, California.
@@ -539,8 +651,10 @@ const Terms = () => {
           <h3 className="text-3xl font-bold">Contact Us</h3>
           <div>
             If you have any questions about the AI Marketplace, or to report any
-            violations of these Terms, please contact us
-            atprivacy@appdirect.com.
+            violations of these Terms, please contact us at{" "}
+            <a className="underline" href="mailto:privacy@appdirect.com">
+              privacy@appdirect.com
+            </a>
           </div>
         </div>
       </div>
