@@ -9,11 +9,11 @@ const LandingTerms = ({ className }: Props) => {
   return (
     <div className={cn("text-xs mt-14", className)}>
       By clicking “continue”, you agree to{" "}
-      <Link href="" className="underline">
+      <Link href="/landing/terms" className="underline">
         terms of use
       </Link>{" "}
       and our{" "}
-      <Link href="" className="underline">
+      <Link href="/landing/privacy" className="underline">
         privacy policy
       </Link>
       .
