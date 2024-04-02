@@ -35,6 +35,12 @@ import { useEffect, useState } from "react";
 import { imageModels, voices } from "./ai-models";
 import { TalkModal } from "./talk-modal";
 
+const visibilityOptions = [
+  { key: "PRIVATE", value: "PRIVATE", name: "Restricted", description: "Only you can see this AI"},
+  { key: "ORGANIZATION", value: "ORGANIZATION", name: "My Organization", description: "Only members of your organization can see this AI"},
+  { key: "ANYONE_WITH_LINK", value: "ANYONE_WITH_LINK", name: "Anyone with the link", description: "Anyone with the link can see this AI"}
+]
+
 const PREAMBLE =
   "ex: As a Support Specialist AI, your role is to provide solutions to user inquiries. This involves understanding the nature of the questions, interpreting their context, and yielding the correct responses. The effectiveness of your position is evaluated based on the accuracy of your responses and the satisfaction of users. Precision in answering and user satisfaction are your primary goals.";
 
@@ -525,21 +531,19 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem key="PRIVATE" value="PRIVATE">
-                        Restricted
-                      </SelectItem>
-                      <SelectItem key="ORGANIZATION" value="ORGANIZATION">
-                        My Organization
-                      </SelectItem>
-                      <SelectItem
-                        key="ANYONE_WITH_LINK"
-                        value="ANYONE_WITH_LINK"
-                      >
-                        Anyone with the link
-                      </SelectItem>
+                      {visibilityOptions.map((option) => (
+                          <SelectItem key={option.key} value={option.value}>
+                            {option.name}
+                          </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>Control who can see your AI</FormDescription>
+                  {visibilityOptions.map((option) => {
+                    if (option.value === field.value) {
+                      return <FormDescription key={option.key}>{option.description}</FormDescription>
+                    }
+                    return null;
+                  })}
                   <FormMessage />
                 </FormItem>
               )}
