@@ -1,6 +1,10 @@
 import {withErrorHandler} from "@/src/middleware/ErrorMiddleware";
 import { clerkClient } from "@clerk/nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
+import {withAuthorization} from "@/src/middleware/AuthorizationMiddleware";
+import {SecuredResourceType} from "@/src/security/models/SecuredResourceType";
+import {SecuredAction} from "@/src/security/models/SecuredAction";
+import {SecuredResourceAccessLevel} from "@/src/security/models/SecuredResourceAccessLevel";
 
 async function postHandler(request: NextApiRequest, response: NextApiResponse) {
     console.log("Body: ", request.body)
@@ -23,5 +27,17 @@ async function getHandler(request: NextApiRequest, response: NextApiResponse) {
     response.status(200).json(user.publicMetadata);
 }
 
-export const POST = withErrorHandler(postHandler);
-export const GET = withErrorHandler(getHandler);
+export const POST = withErrorHandler(
+    withAuthorization(
+        SecuredResourceType.GROUPS,
+        SecuredAction.READ,
+        Object.values(SecuredResourceAccessLevel),
+        postHandler));
+
+export const GET = withErrorHandler(
+    withAuthorization(
+    SecuredResourceType.GROUPS,
+    SecuredAction.READ,
+    Object.values(SecuredResourceAccessLevel),
+    getHandler)
+);
