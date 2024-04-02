@@ -40,6 +40,7 @@ export const SearchInput = () => {
   const debouncedValue = useDebounce<string>(value, 500);
   const [sort, setSort] = useState<string | undefined>(sortParam || "");
   const clerk = useClerk();
+  console.log("Default Value ",defaultSortValueforPath[window.location.pathname])
 
   // const fetchCategories = async () => {
   //   const response = await axios.post("/api/v1/clerksdk", {});
@@ -83,7 +84,7 @@ export const SearchInput = () => {
       </div>
       <Select
         onValueChange={(val) => setSort(val)}
-        value={sort || defaultSortValueforPath[window.location.pathname]}
+        value={sort || "Newest"}
       >
         <SelectTrigger className="bg-accent w-32 md:w-44 ml-4 flex-none">
           <span className="hidden md:inline">Sort By:</span>
