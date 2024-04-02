@@ -172,7 +172,7 @@ export const AIEditor = ({
           src: "",
           categoryId: undefined,
           modelId: "gpt-4",
-          visibility: "ORGANIZATION",
+          visibility: "ANYONE_WITH_LINK",
           listInOrgCatalog: false,
           listInPublicCatalog: false,
           knowledge: [],
