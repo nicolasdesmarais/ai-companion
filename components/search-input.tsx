@@ -43,12 +43,13 @@ export const SearchInput = () => {
   const clerk = useClerk();
 
   async function getMetadata() {
-    const request = {
-      userId : clerk.user?.id,
-      sortValue : sort
-    }
-    const response = await axios.post("/api/v1/clerksdk", request);
-    console.log(response);
+    const response = await axios.post(
+        '/api/v1/clerk',
+        {
+            userId: clerk.user?.id,
+            sortValue: sort
+        });
+        console.log(response);
   }
 
   useEffect(() => {

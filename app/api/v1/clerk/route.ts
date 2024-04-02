@@ -5,10 +5,11 @@ import {withAuthorization} from "@/src/middleware/AuthorizationMiddleware";
 import {SecuredResourceType} from "@/src/security/models/SecuredResourceType";
 import {SecuredAction} from "@/src/security/models/SecuredAction";
 import {SecuredResourceAccessLevel} from "@/src/security/models/SecuredResourceAccessLevel";
+import {NextResponse} from "next/server";
 
-async function postHandler(request: NextApiRequest, response: NextApiResponse) {
-    console.log("Body: ", request.body)
-    const { userId, sortValue } = request.body;
+async function postHandler(request: Request) {
+    console.log("Body: ", await request.json())
+    const { userId, sortValue } = await request.json();
     await clerkClient.users.updateUserMetadata(userId, {
         publicMetadata: {
             sort: sortValue
@@ -17,7 +18,7 @@ async function postHandler(request: NextApiRequest, response: NextApiResponse) {
 
     const user = await clerkClient.users.getUser(userId)
     console.log("Public MetaData ",user.publicMetadata);
-    return response.status(200).json({ success: true });
+    return NextResponse.json({ success: true, user : user.publicMetadata });
 }
 
 
