@@ -17,6 +17,9 @@ const paths = [
   `/ai/${testAiId}`,
   `/api/v1/ai/${testAiId}/rating/all`,
   `/api/v1/ai/${testAiId}/data-sources`,
+  "/login",
+  "/signup",
+  "/org-selection",
 ];
 
 const fetchPath = async (origin: string, path: string) => {
