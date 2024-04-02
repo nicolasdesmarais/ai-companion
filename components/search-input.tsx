@@ -39,17 +39,11 @@ export const SearchInput = () => {
   const debouncedValue = useDebounce<string>(value, 500);
   const [sort, setSort] = useState<string | undefined>(sortParam || "");
   const clerk = useClerk();
-  let defaultSort;
 
-  // const fetchCategories = async () => {
-  //   const response = await axios.post("/api/v1/clerksdk", {});
-  //   if (response.status === 200 && Array.isArray(response.data)) {
-  //
-  //   }
-  // };
   useEffect(() => {
-    console.log("Default Value ",defaultSortValueforPath[window.location.pathname])
-    defaultSort = defaultSortValueforPath[window.location.pathname];
+    if (!sort) {
+      setSort(defaultSortValueforPath[window.location.pathname]);
+    }
   }, []);
 
   const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -87,7 +81,7 @@ export const SearchInput = () => {
       </div>
       <Select
         onValueChange={(val) => setSort(val)}
-        value={sort || defaultSort}
+        value={sort}
       >
         <SelectTrigger className="bg-accent w-32 md:w-44 ml-4 flex-none">
           <span className="hidden md:inline">Sort By:</span>
