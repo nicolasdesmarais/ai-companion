@@ -45,8 +45,8 @@ const SignUp = () => {
     if (signUp) {
       return signUp.authenticateWithRedirect({
         strategy,
-        redirectUrl: "/",
-        redirectUrlComplete: "/",
+        redirectUrl: "/org-selection",
+        redirectUrlComplete: "/org-selection",
       });
     }
   };

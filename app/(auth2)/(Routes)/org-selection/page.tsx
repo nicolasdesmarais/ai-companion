@@ -1,9 +1,10 @@
 "use client";
 import BlobAnimation from "@/components/blob-animation";
 import LandingNav from "@/components/landing-nav";
-import { OrganizationList } from "@clerk/nextjs";
+import { OrganizationList, useUser } from "@clerk/nextjs";
 
 const OrgSelect = () => {
+  const { user } = useUser();
   return (
     <div className="bg-white flex flex-col text-navy h-screen">
       <LandingNav transparent />
