@@ -7,7 +7,7 @@ import {SecuredAction} from "@/src/security/models/SecuredAction";
 import {SecuredResourceAccessLevel} from "@/src/security/models/SecuredResourceAccessLevel";
 import {NextResponse} from "next/server";
 
-async function postHandler(request: Request) {
+async function postHandler(request: Request)  {
     console.log("Body: ", await request.json())
     const { userId, sortValue } = await request.json();
     await clerkClient.users.updateUserMetadata(userId, {
@@ -30,15 +30,15 @@ async function getHandler(request: NextApiRequest, response: NextApiResponse) {
 
 export const POST = withErrorHandler(
     withAuthorization(
-        SecuredResourceType.GROUPS,
-        SecuredAction.READ,
+        SecuredResourceType.ORG_USAGE,
+        SecuredAction.WRITE,
         Object.values(SecuredResourceAccessLevel),
         postHandler));
 
 export const GET = withErrorHandler(
     withAuthorization(
-    SecuredResourceType.GROUPS,
-    SecuredAction.READ,
+    SecuredResourceType.ORG_USAGE,
+    SecuredAction.WRITE,
     Object.values(SecuredResourceAccessLevel),
     getHandler)
 );
