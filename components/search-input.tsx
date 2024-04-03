@@ -29,6 +29,15 @@ const defaultSortValueforPath = {
   [routesHref.browseHref] : "popularity"
 }
 
+export interface UserMetaDataInterface {
+  userId: string;
+  sortValue: string;
+}
+
+export interface ClerkUserIdInterface {
+  clerkUserId: string
+}
+
 export const SearchInput = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -41,23 +50,36 @@ export const SearchInput = () => {
   const debouncedValue = useDebounce<string>(value, 500);
   const [sort, setSort] = useState<string | undefined>(sortParam || "");
   const clerk = useClerk();
+  const [defaultSortValue, setDefaultSortValue] = useState<string | undefined>(defaultSortValueforPath[window.location.pathname]);
 
-  async function getMetadata() {
-    const response = await axios.post(
-        '/api/v1/clerk',
-        {
-            userId: clerk.user?.id,
-            sortValue: sort
-        });
-        console.log(response);
+  async function getSortValuefromPublicMetaData() {
+    if (!clerk.user?.id) { return; }
+    const request : ClerkUserIdInterface = {
+      clerkUserId: clerk.user?.id
+    }
+    const response = await axios.post("/api/v1/clerk/user", request);
+    console.log("Initial Sort Value from Public MetaData: ", response.data.user.publicMetadata.sort, " Value of Sort ", sort)
+    setSort(response.data.user.publicMetadata.sort)
+  }
+
+  async function setSortInPublicMetaData(val : string) {
+    setSort(val)
+    if (!clerk.user?.id || !sort) { return;}
+    const request : UserMetaDataInterface = {
+      sortValue: sort,
+      userId: clerk.user?.id
+    }
+    await axios.post("/api/v1/clerk", request);
+    console.log("Sort Value Updated in Public MetaData: ", sort)
   }
 
   useEffect(() => {
-    getMetadata().then(r => console.log(r));
-    if (!sort) {
-      setSort(defaultSortValueforPath[window.location.pathname]);
+    try {
+      getSortValuefromPublicMetaData();
+    } catch (e) {
+      setDefaultSortValue(defaultSortValueforPath[window.location.pathname])
     }
-  }, [sort, clerk.user?.id]);
+  }, [sort, defaultSortValue]);
 
   const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setValue(e.target.value);
@@ -93,8 +115,8 @@ export const SearchInput = () => {
         />
       </div>
       <Select
-        onValueChange={(val) => setSort(val)}
-        value={sort}
+        onValueChange={(val) => setSortInPublicMetaData(val)}
+        value={sort || defaultSortValue}
       >
         <SelectTrigger className="bg-accent w-32 md:w-44 ml-4 flex-none">
           <span className="hidden md:inline">Sort By:</span>

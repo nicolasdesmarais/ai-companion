@@ -18,9 +18,9 @@ export class ClerkService {
     });
   }
 
-  public async updateUserMetadata(usedId: string, metaDataParams: UserMetadataParams) : Promise<User> {
+  public async updateUserMetadata(usedId: string, sortValue: string) : Promise<User> {
       try {
-          return await clerkClient.users.updateUserMetadata(usedId, metaDataParams);
+          return await clerkClient.users.updateUserMetadata(usedId, {publicMetadata: {sort: sortValue}});
       } catch (error) {
           console.error("Error at MetaDataUpdate: "+error);
           throw error;
@@ -29,7 +29,7 @@ export class ClerkService {
 
   public async getUserMetadata(userId: string) {
       const user = await clerkClient.users.getUser(userId);
-      return user.unsafeMetadata;
+      return user;
   }
 }
 
