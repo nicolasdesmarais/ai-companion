@@ -79,7 +79,7 @@ export const SearchInput = () => {
     } catch (e) {
       setDefaultSortValue(defaultSortValueforPath[window.location.pathname])
     }
-  }, [sort, defaultSortValue]);
+  }, [sort, defaultSortValue, getSortValuefromPublicMetaData]);
 
   const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setValue(e.target.value);
