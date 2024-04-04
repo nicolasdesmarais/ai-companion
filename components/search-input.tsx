@@ -39,11 +39,11 @@ export const SearchInput = ({ scopeParam }: Props) => {
   const debouncedValue = useDebounce<string>(value, 500);
   const [sort, setSort] = useState<string | undefined>(sortParam || "");
 
+  const defaultSort =
+    scopeParam === "shared" || scopeParam === "owned" ? "newest" : "popularity";
+
   async function onSortChange(value: string) {
     setSort(value);
-    if (!clerk.user?.id || !sort) {
-      return;
-    }
     await axios.post("/api/v1/clerk", {
       key: `sort${scopeParam ? "-" + scopeParam : ""}`,
       value,
@@ -86,7 +86,7 @@ export const SearchInput = ({ scopeParam }: Props) => {
       </div>
       <Select
         onValueChange={(val) => onSortChange(val)}
-        value={sort || "popularity"}
+        value={sort || defaultSort}
       >
         <SelectTrigger className="bg-accent w-32 md:w-44 ml-4 flex-none">
           <span className="hidden md:inline">Sort By:</span>

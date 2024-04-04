@@ -19,6 +19,13 @@ async function postHandler(request: Request) {
   }
   const { value, key }: UserMetaDataInterface = await request.json();
 
+  if (key === "superuser") {
+    return NextResponse.json({
+      success: false,
+      message: "Cannot set superuser metadata",
+    });
+  }
+
   await clerkClient.users.updateUserMetadata(authorizationContext.userId, {
     publicMetadata: { [key]: value },
   });

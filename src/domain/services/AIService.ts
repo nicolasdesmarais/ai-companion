@@ -390,9 +390,20 @@ export class AIService {
       return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi, isShared);
     });
 
+    if (!request.sort) {
+      if (
+        scope === ListAIsRequestScope.OWNED ||
+        scope === ListAIsRequestScope.SHARED
+      ) {
+        request.sort = "newest";
+      } else {
+        request.sort = "popularity";
+      }
+    }
+
     if (request.sort === "newest") {
       return result;
-    } else if (!request.sort || request.sort === "popularity") {
+    } else if (request.sort === "popularity") {
       return result.sort((a, b) => b.messageCount - a.messageCount);
     } else if (request.sort === "rating") {
       return result.sort((a, b) => b.rating - a.rating);
