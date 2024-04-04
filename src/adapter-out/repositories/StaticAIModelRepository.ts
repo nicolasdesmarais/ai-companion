@@ -57,7 +57,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       externalModelId: "gpt-3.5-turbo",
       contextSize: 16384,
       options: commonOptions,
-      provider: AIModelProvider.OPENAI,
+      provider: AIModelProvider.AZURE_OPENAI,
       isVisible: true,
       additionalData: {
         apiKey: process.env.AZURE_GPT35_KEY,
