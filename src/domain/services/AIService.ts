@@ -316,10 +316,6 @@ export class AIService {
     ais: AIDetailDto[],
     sort: string | null | undefined
   ): AIDetailDto[] {
-    if (!sort) {
-      return ais;
-    }
-
     if (sort === "newest") {
       return ais;
     } else if (sort === "popularity") {
