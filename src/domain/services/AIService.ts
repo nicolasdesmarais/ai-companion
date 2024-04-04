@@ -320,6 +320,7 @@ export class AIService {
       return ais;
     }
 
+
     if (sort === "newest") {
       return ais;
     } else if (!sort || sort === "popularity") {
@@ -412,6 +413,11 @@ export class AIService {
         scope === ListAIsRequestScope.SHARED
       ) {
         request.sort = "newest";
+      } else if (
+        scope === ListAIsRequestScope.PUBLIC ||
+        scope === ListAIsRequestScope.ALL
+      ) {
+        request.sort = "rating";
       } else {
         request.sort = "popularity";
       }
