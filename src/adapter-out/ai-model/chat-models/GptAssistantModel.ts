@@ -1,8 +1,8 @@
 import { AIModel } from "@/src/domain/models/AIModel";
 import aiModelService from "@/src/domain/services/AIModelService";
 import { AssistantsClient, AzureKeyCredential } from "@azure/openai-assistants";
-import { AI } from "@prisma/client";
 
+import { AIRequest } from "@/src/adapter-in/api/AIApi";
 import {
   AssistantChatModel,
   CreateAssistantInput,
@@ -26,7 +26,7 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
     );
   }
 
-  private getInstructions(ai: AI) {
+  private getInstructions(ai: AIRequest) {
     return `
         Pretend you are ${ai.name}, ${ai.description}.
         Output format is markdown, including tables.
@@ -57,22 +57,16 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
   }
 
   public async updateAssistant(input: UpdateAssistantInput): Promise<void> {
-    const { ai } = input;
-    if (!ai.externalId) {
-      throw new Error("Missing AI external ID");
-    }
+    const { assistantId, ai } = input;
 
     const assistantConfiguration = await this.getAssistantConfiguration(ai);
 
     const assistantsClient = this.getAssistantsClient();
 
-    await assistantsClient.updateAssistant(
-      ai.externalId,
-      assistantConfiguration
-    );
+    await assistantsClient.updateAssistant(assistantId, assistantConfiguration);
   }
 
-  private async getAssistantConfiguration(ai: AI) {
+  private async getAssistantConfiguration(ai: AIRequest) {
     const aiModel = await aiModelService.findAIModelById(ai.modelId);
     if (!aiModel) {
       throw new Error("AI model not found");

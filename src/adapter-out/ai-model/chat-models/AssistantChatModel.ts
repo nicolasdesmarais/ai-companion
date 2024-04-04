@@ -1,5 +1,5 @@
+import { AIRequest } from "@/src/adapter-in/api/AIApi";
 import { AIModel } from "@/src/domain/models/AIModel";
-import { AI } from "@prisma/client";
 
 export interface AssistantChatModel {
   supports(model: AIModel): boolean;
@@ -12,9 +12,10 @@ export interface AssistantChatModel {
 }
 
 export interface CreateAssistantInput {
-  ai: AI;
+  ai: AIRequest;
 }
 
 export interface UpdateAssistantInput {
-  ai: AI;
+  assistantId: string;
+  ai: AIRequest;
 }
