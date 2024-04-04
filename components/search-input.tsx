@@ -9,6 +9,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useClerk } from "@clerk/nextjs";
+import axios from "axios";
 import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
@@ -20,7 +22,12 @@ const filterOptions = [
   { id: "rating", name: "Rating" },
 ];
 
-export const SearchInput = () => {
+export interface Props {
+  scopeParam?: string;
+}
+
+export const SearchInput = ({ scopeParam }: Props) => {
+  const clerk = useClerk();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -31,6 +38,18 @@ export const SearchInput = () => {
   const [value, setValue] = useState(search || "");
   const debouncedValue = useDebounce<string>(value, 500);
   const [sort, setSort] = useState<string | undefined>(sortParam || "");
+
+  const defaultSort =
+    scopeParam === "shared" || scopeParam === "owned" ? "newest" : "popularity";
+
+  async function onSortChange(value: string) {
+    setSort(value);
+    await axios.post("/api/v1/clerk", {
+      key: `sort${scopeParam ? "-" + scopeParam : ""}`,
+      value,
+      userId: clerk.user?.id,
+    });
+  }
 
   const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setValue(e.target.value);
@@ -66,8 +85,8 @@ export const SearchInput = () => {
         />
       </div>
       <Select
-        onValueChange={(val) => setSort(val)}
-        value={sort || "popularity"}
+        onValueChange={(val) => onSortChange(val)}
+        value={sort || defaultSort}
       >
         <SelectTrigger className="bg-accent w-32 md:w-44 ml-4 flex-none">
           <span className="hidden md:inline">Sort By:</span>

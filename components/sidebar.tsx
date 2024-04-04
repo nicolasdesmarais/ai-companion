@@ -14,6 +14,7 @@ import { Permission } from "@/src/security/models/Permission";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
+import { useClerk } from "@clerk/nextjs";
 import {
   Atom,
   BookText,
@@ -108,6 +109,7 @@ export const Sidebar = ({
   orgId,
   setOpen,
 }: SidebarProps) => {
+  const clerk = useClerk();
   const { chats, fetchChats, loading } = useChats();
   const proModal = useProModal();
   const router = useRouter();
@@ -154,7 +156,9 @@ export const Sidebar = ({
   const routes = [
     {
       icon: Store,
-      href: "/",
+      href: clerk.user?.publicMetadata.sort
+        ? `/?sort=${clerk.user?.publicMetadata.sort}`
+        : "/",
       pathname: "/",
       regex: /\/$|\/index\/public|\/index\/organization|\/index\/private/,
       label: "Browse",
@@ -169,14 +173,18 @@ export const Sidebar = ({
     },
     {
       icon: Atom,
-      href: "/index/owned",
+      href: clerk.user?.publicMetadata["sort-owned"]
+        ? `/index/owned?sort=${clerk.user?.publicMetadata["sort-owned"]}`
+        : "/index/owned",
       pathname: "/index/owned",
       label: "Your AIs",
       pro: false,
     },
     {
       icon: UserPlus,
-      href: "/index/shared",
+      href: clerk.user?.publicMetadata["sort-owned"]
+        ? `/index/shared?sort=${clerk.user?.publicMetadata["sort-shared"]}`
+        : "/index/shared",
       pathname: "/index/shared",
       label: "Shared",
       pro: false,
@@ -191,7 +199,9 @@ export const Sidebar = ({
 
     {
       icon: Building2,
-      href: "/index/admin/",
+      href: clerk.user?.publicMetadata["sort-admin"]
+        ? `/index/admin?sort=${clerk.user?.publicMetadata["sort-admin"]}`
+        : "/index/admin",
       regex: /\/index\/admin(.*)/,
       label: "Admin",
       pro: false,
@@ -207,7 +217,9 @@ export const Sidebar = ({
       children: [
         {
           icon: Eye,
-          href: "/index/instance/",
+          href: clerk.user?.publicMetadata["sort-instance"]
+            ? `/index/instance?sort=${clerk.user?.publicMetadata["sort-instance"]}`
+            : "/index/instance",
           regex: /\/index\/instance(.*)/,
           label: "Super User",
           pro: false,
