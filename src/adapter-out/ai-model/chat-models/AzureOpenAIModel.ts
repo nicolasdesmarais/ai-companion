@@ -1,6 +1,6 @@
 import { AIModel, AIModelProvider } from "@/src/domain/models/AIModel";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
-import { ChatOpenAI } from "@langchain/openai";
+import { AzureChatOpenAI } from "@langchain/openai";
 import { AbstractBaseChatModel } from "./AbstractBaseChatModel";
 import { ChatModel } from "./ChatModel";
 
@@ -17,11 +17,10 @@ export class AzureOpenAIModel
     options: any,
     callbacks: any
   ): BaseChatModel {
-    return new ChatOpenAI({
-      azureOpenAIApiKey: model.additionalData.apiKey,
-      azureOpenAIApiVersion: model.additionalData.apiVersion,
-      azureOpenAIApiInstanceName: model.additionalData.instanceName,
-      azureOpenAIApiDeploymentName: model.additionalData.deploymentName,
+    return new AzureChatOpenAI({
+      openAIApiKey: model.additionalData.apiKey,
+      openAIApiVersion: model.additionalData.apiVersion,
+      deploymentName: model.additionalData.deploymentName,
       modelName: model.externalModelId,
       streaming: true,
       callbacks,
