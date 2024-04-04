@@ -7,9 +7,9 @@ export const metadata = {
   openGraph: {
     images: [
       {
-        url: "/browse_screenshot.jpg",
-        width: "512",
-        height: "377",
+        url: "/social.png",
+        width: "1200",
+        height: "628",
       },
     ],
     description:
