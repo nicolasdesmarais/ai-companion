@@ -320,12 +320,11 @@ export class AIService {
       return ais;
     }
 
-
     if (sort === "newest") {
       return ais;
-    } else if (!sort || sort === "popularity") {
+    } else if (sort === "popularity") {
       return ais.sort((a, b) => b.messageCount - a.messageCount);
-    } else if (sort === "rating") {
+    } else if (!sort || sort === "rating") {
       return ais.sort((a, b) => {
         if (a.rating !== b.rating) {
           return b.rating - a.rating;
