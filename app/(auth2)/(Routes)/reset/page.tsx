@@ -73,11 +73,11 @@ const Login = () => {
   };
 
   return (
-    <div className="bg-white flex flex-col text-navy h-screen">
+    <div className="bg-coral md:bg-white flex flex-col text-navy h-screen">
       <LandingNav transparent />
 
       <div className="h-full w-full flex flex-col items-center justify-center">
-        <div className="bg-navylight md:bg-gradient4 z-10 rounded-lg flex flex-col items-center p-8 md:p-16 mx-2 mt-16">
+        <div className="bg-gradient4 z-10 rounded-lg flex flex-col items-center p-8 md:p-16 mx-2 mt-16">
           <h1 className="text-3xl mb-12 font-bold">Reset password</h1>
           {successfulCreation ? (
             <div>Check your email for a verification code</div>
@@ -124,15 +124,14 @@ const Login = () => {
             </Button>
           </div>
         </div>
-        <div className="w-full flex flex-col items-center gap-4 z-10 md:text-white">
+        <div className="w-full flex flex-col items-center gap-4 z-10 text-white">
           <div className="text-xs mt-8">
             Don&apos;t have an account?{" "}
             <Link href="/signup" className="underline">
               Sign up
             </Link>
           </div>
-          <AppdirectSvg className="h-10 w-10 hidden md:block" fill="white" />
-          <AppdirectSvg className="h-10 w-10 md:hidden" />
+          <AppdirectSvg className="h-10 w-10 block" fill="white" />
         </div>
         <BlobAnimation />
       </div>

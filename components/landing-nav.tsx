@@ -9,11 +9,11 @@ interface Props {
 
 const LandingNav = ({ transparent }: Props) => {
   return (
-    <div className="fixed w-full pr-4 z-20">
+    <div className="fixed w-full md:pr-4 z-20">
       <div
         className={cn(
-          "flex text-navy justify-center w-full",
-          transparent ? "" : "bg-white"
+          "flex text-navy justify-center w-full bg-white",
+          transparent ? "md:bg-transparent" : ""
         )}
       >
         <nav className="flex m-4 w-[1144px] justify-between">
