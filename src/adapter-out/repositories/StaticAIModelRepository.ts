@@ -54,7 +54,7 @@ export class StaticAIModelRepository implements AIModelRepository {
     {
       id: "gpt35-16k",
       name: "GPT-3.5 (16K Context)",
-      externalModelId: "gpt35-16k",
+      externalModelId: "gpt-3.5-turbo",
       contextSize: 16384,
       options: commonOptions,
       provider: AIModelProvider.OPENAI,
@@ -68,8 +68,8 @@ export class StaticAIModelRepository implements AIModelRepository {
     },
     {
       id: "gpt-4-turbo-preview",
-      name: "GPT-4 (32K Context)",
-      externalModelId: "gpt-4-turbo-preview",
+      name: "GPT-4 Turbo Preview (128K Context)",
+      externalModelId: "gpt-4-0125-preview",
       contextSize: 128000,
       options: commonOptions,
       provider: AIModelProvider.AZURE_OPENAI,
