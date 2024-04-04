@@ -67,21 +67,6 @@ export class StaticAIModelRepository implements AIModelRepository {
       },
     },
     {
-      id: "gpt-4-turbo-preview",
-      name: "GPT-4 Turbo Preview (128K Context)",
-      externalModelId: "gpt-4-0125-preview",
-      contextSize: 128000,
-      options: commonOptions,
-      provider: AIModelProvider.AZURE_OPENAI,
-      isVisible: false,
-      additionalData: {
-        apiKey: process.env.AZURE_GPT40_KEY,
-        apiVersion: "2024-02-01",
-        instanceName: "prod-appdirectai-east2",
-        deploymentName: "gpt4-32k",
-      },
-    },
-    {
       id: "gpt-4-1106-preview-assistant",
       name: "GPT-4 Turbo w/ Assistant API (Beta)",
       externalModelId: "gpt-4-1106-preview",
