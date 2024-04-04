@@ -1,6 +1,5 @@
 "use client";
 
-import {useClerk} from "@clerk/nextjs";
 import { ImageUpload } from "@/components/image-upload";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -99,13 +98,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const [generatingAll, setGeneratingAll] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0]);
   const [selectedValues, setSelectedValues] = useState<any[]>([]);
-  const clerk = useClerk();
-
-  let role = "User";
-  if (clerk.user?.publicMetadata && clerk.user?.publicMetadata.superuser) {
-    role = "Superuser";
-  }
-
   const isLoading = form.formState.isSubmitting;
   const voiceEnabled = false && window.location.hostname !== "appdirect.ai";
 
@@ -485,7 +477,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                 </FormItem>
               )}
             />
-            {role === "Superuser" &&
+            {hasInstanceAccess &&
             <FormField
               control={form.control}
               name="categoryId"
