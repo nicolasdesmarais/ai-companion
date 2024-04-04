@@ -42,8 +42,14 @@ export class StaticAIModelRepository implements AIModelRepository {
       externalModelId: "gpt-4",
       contextSize: 32768,
       options: commonOptions,
-      provider: AIModelProvider.OPENAI,
+      provider: AIModelProvider.AZURE_OPENAI,
       isVisible: true,
+      additionalData: {
+        apiKey: process.env.AZURE_GPT40_KEY,
+        apiVersion: "2024-02-01",
+        instanceName: "prod-appdirectai-east2",
+        deploymentName: "gpt4-32k",
+      },
     },
     {
       id: "gpt35-16k",
@@ -53,6 +59,27 @@ export class StaticAIModelRepository implements AIModelRepository {
       options: commonOptions,
       provider: AIModelProvider.OPENAI,
       isVisible: true,
+      additionalData: {
+        apiKey: process.env.AZURE_GPT35_KEY,
+        apiVersion: "2024-02-01",
+        instanceName: "appdirect-prod-ai-useast",
+        deploymentName: "ai-prod-16k",
+      },
+    },
+    {
+      id: "gpt-4-turbo-preview",
+      name: "GPT-4 (32K Context)",
+      externalModelId: "gpt-4-turbo-preview",
+      contextSize: 128000,
+      options: commonOptions,
+      provider: AIModelProvider.AZURE_OPENAI,
+      isVisible: true,
+      additionalData: {
+        apiKey: process.env.AZURE_GPT40_KEY,
+        apiVersion: "2024-02-01",
+        instanceName: "prod-appdirectai-east2",
+        deploymentName: "gpt4-32k",
+      },
     },
     {
       id: "gpt-4-1106-preview-assistant",

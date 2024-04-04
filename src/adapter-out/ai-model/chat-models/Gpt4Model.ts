@@ -13,7 +13,7 @@ const AZURE_OPENAI_API_DEPLOYMENT_NAME = "gpt4-32k";
 
 export class Gpt4Model extends AbstractBaseChatModel implements ChatModel {
   public supports(model: AIModel): boolean {
-    return model.id === MODEL_ID;
+    return false;
   }
 
   protected getChatModelInstance(
