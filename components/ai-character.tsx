@@ -480,9 +480,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
               render={({ field }) => (
                 <FormItem className="col-span-2 md:col-span-1">
                   <FormLabel>Category</FormLabel>
-                  {/* change this to multiselect*/}
-                  {/*change Add Category behind SU scope*/}
-                  {/*Add Data Manually in DB*/}
                   {false &&
                   <Select
                     disabled={isLoading}
