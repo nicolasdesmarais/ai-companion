@@ -1,9 +1,8 @@
 import { AnthropicModel } from "@/src/adapter-out/ai-model/chat-models/AnthropicModel";
 import { AssistantChatModel } from "@/src/adapter-out/ai-model/chat-models/AssistantChatModel";
+import { AzureOpenAIModel } from "@/src/adapter-out/ai-model/chat-models/AzureOpenAIModel";
 import { ChatModel } from "@/src/adapter-out/ai-model/chat-models/ChatModel";
 import { CohereModel } from "@/src/adapter-out/ai-model/chat-models/CohereModel";
-import { Gpt35Model } from "@/src/adapter-out/ai-model/chat-models/Gpt35Model";
-import { Gpt4Model } from "@/src/adapter-out/ai-model/chat-models/Gpt4Model";
 import { GptAssistantModel } from "@/src/adapter-out/ai-model/chat-models/GptAssistantModel";
 import { ReplicateModel } from "@/src/adapter-out/ai-model/chat-models/ReplicateModel";
 import { StaticAIModelRepository } from "@/src/adapter-out/repositories/StaticAIModelRepository";
@@ -17,8 +16,7 @@ import { AIModel } from "../models/AIModel";
 import { AIModelRepository } from "../ports/outgoing/AIModelRepository";
 
 const CHAT_MODELS = [
-  new Gpt4Model(),
-  new Gpt35Model(),
+  new AzureOpenAIModel(),
   new GptAssistantModel(),
   new ReplicateModel(),
   new AnthropicModel(),
