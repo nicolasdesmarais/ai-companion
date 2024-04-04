@@ -36,8 +36,8 @@ const formSchema = z.object({
   src: z.string().min(1, {
     message: "Image is required.",
   }),
-  categoryId: z.string().min(1, {
-    message: "Category is required",
+  categoryType: z.string().min(1, {
+    message: "Category Type is required",
   }),
   modelId: z.string().min(1, {
     message: "Model is required",
@@ -170,7 +170,7 @@ export const AIEditor = ({
           instructions: "",
           seed: "",
           src: "",
-          categoryId: undefined,
+          categoryType: [],
           modelId: "gpt-4",
           visibility: "ANYONE_WITH_LINK",
           listInOrgCatalog: false,
