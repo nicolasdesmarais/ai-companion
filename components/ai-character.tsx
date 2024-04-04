@@ -513,7 +513,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                       values={selectedValues}
                       onChange={(values) => {
                         setSelectedValues(values);
-                        onSubmit({ CategoryTypes : values.map((category) => category.id) });
+                        onSubmit({ CategoryTypes : values.map((category) => category.type) });
                       }}
                   />
                   <FormDescription>
