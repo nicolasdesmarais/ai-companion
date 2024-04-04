@@ -110,7 +110,7 @@ export const AiListing = async ({ searchParams, scopeParam }: Props) => {
         </div>
         <InviteButton className="hidden md:flex" />
       </div>
-      <SearchInput />
+      <SearchInput scopeParam={scopeParam} />
       {!(scope !== ListAIsRequestScope.PUBLIC || searchParams.groupId) && (
         <Categories data={categories} />
       )}

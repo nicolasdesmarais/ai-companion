@@ -146,7 +146,7 @@ export const PublicAiListing = async ({ searchParams, scopeParam }: Props) => {
               </Link>
             </div>
           </div>
-          <SearchInput />
+          <SearchInput scopeParam={scopeParam} />
           <Categories data={categories} />
           <Groups
             groups={groups}

@@ -14,6 +14,7 @@ import { Permission } from "@/src/security/models/Permission";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
+import { useClerk } from "@clerk/nextjs";
 import {
   Atom,
   BookText,
@@ -62,20 +63,6 @@ interface Route {
   children?: Route[];
 }
 
-export const routesHref =
-{
-  "browseHref" : "/",
-  "createHref" : "/ai/new/edit",
-  "yourAIHref" : "/index/owned",
-  "sharedHref" : "/index/shared",
-  "dataHref" : "/data-sources",
-  "adminHref" : "/index/admin/",
-  "apiDocsHref" : "/api-doc",
-  "apikeysHref" : "/api-keys",
-  "orgSettingHref" : "/organization-settings",
-  "superUserHref" : "/index/instance/"
-}
-
 const isActive = (
   route: Route,
   pathname: string,
@@ -122,6 +109,7 @@ export const Sidebar = ({
   orgId,
   setOpen,
 }: SidebarProps) => {
+  const clerk = useClerk();
   const { chats, fetchChats, loading } = useChats();
   const proModal = useProModal();
   const router = useRouter();
@@ -168,7 +156,9 @@ export const Sidebar = ({
   const routes = [
     {
       icon: Store,
-      href: routesHref.browseHref,
+      href: clerk.user?.publicMetadata.sort
+        ? `/?sort=${clerk.user?.publicMetadata.sort}`
+        : "/",
       pathname: "/",
       regex: /\/$|\/index\/public|\/index\/organization|\/index\/private/,
       label: "Browse",
@@ -176,28 +166,32 @@ export const Sidebar = ({
     },
     {
       icon: Plus,
-      href: routesHref.createHref,
+      href: "/ai/new/edit",
       regex: /\/ai\/(.*)\/edit/,
       label: "Create",
       pro: false,
     },
     {
       icon: Atom,
-      href: routesHref.yourAIHref,
+      href: clerk.user?.publicMetadata["sort-owned"]
+        ? `/index/owned?sort=${clerk.user?.publicMetadata["sort-owned"]}`
+        : "/index/owned",
       pathname: "/index/owned",
       label: "Your AIs",
       pro: false,
     },
     {
       icon: UserPlus,
-      href: routesHref.sharedHref,
+      href: clerk.user?.publicMetadata["sort-owned"]
+        ? `/index/shared?sort=${clerk.user?.publicMetadata["sort-shared"]}`
+        : "/index/shared",
       pathname: "/index/shared",
       label: "Shared",
       pro: false,
     },
     {
       icon: FileText,
-      href: routesHref.dataHref,
+      href: "/data-sources",
       pathname: "/data-sources",
       label: "Data",
       pro: false,
@@ -205,7 +199,9 @@ export const Sidebar = ({
 
     {
       icon: Building2,
-      href: routesHref.adminHref,
+      href: clerk.user?.publicMetadata["sort-admin"]
+        ? `/index/admin?sort=${clerk.user?.publicMetadata["sort-admin"]}`
+        : "/index/admin",
       regex: /\/index\/admin(.*)/,
       label: "Admin",
       pro: false,
@@ -221,7 +217,9 @@ export const Sidebar = ({
       children: [
         {
           icon: Eye,
-          href: routesHref.superUserHref,
+          href: clerk.user?.publicMetadata["sort-instance"]
+            ? `/index/instance?sort=${clerk.user?.publicMetadata["sort-instance"]}`
+            : "/index/instance",
           regex: /\/index\/instance(.*)/,
           label: "Super User",
           pro: false,
@@ -233,7 +231,7 @@ export const Sidebar = ({
         },
         {
           icon: Building,
-          href: routesHref.orgSettingHref,
+          href: "/organization-settings",
           label: "Company Settings",
           requiredPermission: {
             resourceType: SecuredResourceType.ORG_SETTINGS,
@@ -244,13 +242,13 @@ export const Sidebar = ({
         },
         {
           icon: LockKeyhole,
-          href: routesHref.apikeysHref,
+          href: "/api-keys",
           label: "API Keys",
           pro: false,
         },
         {
           icon: BookText,
-          href: routesHref.apiDocsHref,
+          href: "/api-doc",
           label: "API Docs",
           pro: false,
         },
