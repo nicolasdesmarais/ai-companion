@@ -308,15 +308,27 @@ export class AIService {
       return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi, false);
     });
 
-    if (request.sort === "newest") {
-      return result;
-    } else if (request.sort === "popularity") {
-      return result.sort((a, b) => b.messageCount - a.messageCount);
-    } else if (!request.sort || request.sort === "rating") {
-      return result.sort((a, b) => b.rating - a.rating);
-    }
+    const sortedResult = this.sortAIs(result, request.sort);
+    return sortedResult;
+  }
 
-    return result;
+  private sortAIs(
+    ais: AIDetailDto[],
+    sort: string | null | undefined
+  ): AIDetailDto[] {
+    if (sort === "newest") {
+      return ais;
+    } else if (sort === "popularity") {
+      return ais.sort((a, b) => b.messageCount - a.messageCount);
+    } else if (!sort || sort === "rating") {
+      return ais.sort((a, b) => {
+        if (a.rating !== b.rating) {
+          return b.rating - a.rating;
+        }
+        return b.ratingCount - a.ratingCount;
+      });
+    }
+    return ais;
   }
 
   /**
@@ -406,15 +418,8 @@ export class AIService {
       }
     }
 
-    if (request.sort === "newest") {
-      return result;
-    } else if (request.sort === "popularity") {
-      return result.sort((a, b) => b.messageCount - a.messageCount);
-    } else if (request.sort === "rating") {
-      return result.sort((a, b) => b.rating - a.rating);
-    }
-
-    return result;
+    const sortedResult = this.sortAIs(result, request.sort);
+    return sortedResult;
   }
 
   private determineScope(
