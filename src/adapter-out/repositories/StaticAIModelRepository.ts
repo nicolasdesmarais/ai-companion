@@ -73,7 +73,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       contextSize: 128000,
       options: commonOptions,
       provider: AIModelProvider.AZURE_OPENAI,
-      isVisible: true,
+      isVisible: false,
       additionalData: {
         apiKey: process.env.AZURE_GPT40_KEY,
         apiVersion: "2024-02-01",
