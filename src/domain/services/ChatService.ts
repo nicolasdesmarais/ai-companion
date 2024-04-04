@@ -2,11 +2,12 @@ import {
   CreateChatRequest,
   ListChatsResponse,
 } from "@/src/adapter-in/api/ChatsApi";
-import { gpt4ChatModel } from "@/src/adapter-out/ai-model/chat-models/Gpt4Model";
+
 import vectorDatabaseAdapter, {
   VectorKnowledgeResponse,
 } from "@/src/adapter-out/knowledge/vector-database/VectorDatabaseAdapter";
 
+import { gpt4ChatModel } from "@/src/adapter-out/ai-model/chat-models/AzureOpenAIModel";
 import { PostToChatInput } from "@/src/adapter-out/ai-model/chat-models/ChatModel";
 import { ChatRepositoryImpl } from "@/src/adapter-out/repositories/ChatRepositoryImpl";
 import {
