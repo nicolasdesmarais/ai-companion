@@ -303,7 +303,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const setCategory = async (values : any) => {
     console.log("Selected Values: ", values)
     setSelectedValues(values);
-    console.log("AI Value: ", form.getValues("id"))
+
   }
 
   return (
@@ -482,7 +482,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
             {hasInstanceAccess &&
             <FormField
               control={form.control}
-              name="categoryId"
+              name="categoryType"
               render={({ field }) => (
                 <FormItem className="col-span-2 md:col-span-1">
                   <FormLabel>Category</FormLabel>

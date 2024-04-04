@@ -36,7 +36,7 @@ const formSchema = z.object({
   src: z.string().min(1, {
     message: "Image is required.",
   }),
-  categoryType: z.string().min(1, {
+  categoryType: z.array(z.number()).min(1, {
     message: "Category Type is required",
   }),
   modelId: z.string().min(1, {
@@ -210,6 +210,7 @@ export const AIEditor = ({
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log("AI form Values: ", values);
     let aiId = form.getValues("id");
     if (form.formState.isDirty) {
       try {
