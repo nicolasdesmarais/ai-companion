@@ -101,10 +101,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const isLoading = form.formState.isSubmitting;
   const voiceEnabled = false && window.location.hostname !== "appdirect.ai";
 
-  useEffect(() => {
-      setSelectedValues([]);
-  }, []);
-
   const onSubmit = async (values: any) => {}
 
   const fetchGroups = async () => {
@@ -512,7 +508,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                   </Select>
                   }
                   <MultiSelect
-                      itemLabel="AI"
+                      itemLabel="Category Types"
                       items={CategoryTypes}
                       values={selectedValues}
                       onChange={(values) => {
@@ -520,7 +516,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                         onSubmit({ CategoryTypes : values.map((category) => category.id) });
                       }}
                   />
-
                   <FormDescription>
                     Select the public category for your AI
                   </FormDescription>
