@@ -516,6 +516,15 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                         onSubmit({ CategoryTypes : values.map((category) => category.type) });
                       }}
                   />
+                  <MultiSelect
+                      itemLabel="Category Types"
+                      items={CategoryTypes}
+                      values={selectedValues}
+                      onChange={(values) => {
+                        setSelectedValues(values);
+                        onSubmit({ CategoryTypes : values.map((category) => category.name) });
+                      }}
+                  />
                   <FormDescription>
                     Select the public category for your AI
                   </FormDescription>
