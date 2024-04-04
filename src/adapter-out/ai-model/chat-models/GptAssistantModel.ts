@@ -1,10 +1,8 @@
 import { AIModel } from "@/src/domain/models/AIModel";
 import aiModelService from "@/src/domain/services/AIModelService";
+import { AssistantsClient, AzureKeyCredential } from "@azure/openai-assistants";
 import { AI } from "@prisma/client";
-import { OpenAIAssistantRunnable } from "langchain/experimental/openai_assistant";
 
-import OpenAI from "openai";
-import { ThreadMessage } from "openai/resources/beta/threads/messages/messages.mjs";
 import {
   AssistantChatModel,
   CreateAssistantInput,
@@ -13,14 +11,19 @@ import {
 import { ChatModel, PostToChatInput, PostToChatResponse } from "./ChatModel";
 
 const MODEL_ID = "gpt-4-1106-preview-assistant";
-
-const OPEN_AI = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const AZURE_ENDPOINT = "https://prod-appdirectai-east2.openai.azure.com/";
+const AZURE_KEY = process.env.AZURE_GPT40_KEY!;
 
 export class GptAssistantModel implements ChatModel, AssistantChatModel {
   public supports(model: AIModel): boolean {
     return model.id === MODEL_ID;
+  }
+
+  private getAssistantsClient() {
+    return new AssistantsClient(
+      AZURE_ENDPOINT,
+      new AzureKeyCredential(AZURE_KEY)
+    );
   }
 
   private getInstructions(ai: AI) {
@@ -40,7 +43,8 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
     const { ai } = input;
     const assistantConfiguration = await this.getAssistantConfiguration(ai);
 
-    const assistant = await OPEN_AI.beta.assistants.create({
+    const assistantsClient = this.getAssistantsClient();
+    const assistant = await assistantsClient.createAssistant({
       ...assistantConfiguration,
       tools: [
         {
@@ -60,7 +64,12 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
 
     const assistantConfiguration = await this.getAssistantConfiguration(ai);
 
-    await OPEN_AI.beta.assistants.update(ai.externalId, assistantConfiguration);
+    const assistantsClient = this.getAssistantsClient();
+
+    await assistantsClient.updateAssistant(
+      ai.externalId,
+      assistantConfiguration
+    );
   }
 
   private async getAssistantConfiguration(ai: AI) {
@@ -80,11 +89,13 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
   }
 
   public async deleteAssistant(externalId: string): Promise<void> {
-    await OPEN_AI.beta.assistants.del(externalId);
+    const assistantsClient = this.getAssistantsClient();
+    await assistantsClient.deleteAssistant(externalId);
   }
 
   private async createChat(): Promise<string> {
-    const thread = await OPEN_AI.beta.threads.create();
+    const assistantsClient = this.getAssistantsClient();
+    const thread = await assistantsClient.createThread();
     return thread.id;
   }
 
@@ -116,37 +127,39 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
       `;
     }
 
-    const assistant = new OpenAIAssistantRunnable({
-      assistantId: ai.externalId,
-    });
-
     let externalChatId = chat.externalId;
     if (!externalChatId) {
       externalChatId = await this.createChat();
     }
 
-    let response = (await assistant.invoke({
-      threadId: externalChatId,
-      content: promptWithKnowledge,
-    })) as ThreadMessage[];
+    const assistantsClient = this.getAssistantsClient();
+    await assistantsClient.createMessage(
+      externalChatId,
+      "user",
+      promptWithKnowledge
+    );
 
-    if (response.length === 0) {
-      // thread expired?
-      externalChatId = await this.createChat();
-      response = (await assistant.invoke({
-        threadId: externalChatId,
-        content: promptWithKnowledge,
-      })) as ThreadMessage[];
-    }
+    let runResponse = await assistantsClient.createRun(externalChatId, {
+      assistantId: ai.externalId,
+    });
 
+    do {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      runResponse = await assistantsClient.getRun(
+        externalChatId,
+        runResponse.id
+      );
+    } while (
+      runResponse.status === "queued" ||
+      runResponse.status === "in_progress"
+    );
+
+    const runMessages = await assistantsClient.listMessages(externalChatId);
     let responseText = "";
-    if (response.length > 0) {
-      // Get content from the last message
-      const threadMessage = response[0];
-      for (const content of threadMessage.content) {
-        if (content.type === "text") {
-          responseText = content.text.value;
-          break;
+    for (const runMessageDatum of runMessages.data) {
+      for (const item of runMessageDatum.content) {
+        if (item.type === "text") {
+          responseText += item.text.value + "\n";
         }
       }
     }
