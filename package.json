@@ -16,7 +16,6 @@
     "@pinecone-database/pinecone": "2.0.1"
   },
   "dependencies": {
-    "@azure/openai": "^1.0.0-alpha.20240404.1",
     "@azure/openai-assistants": "^1.0.0-alpha.20240404.1",
     "@clerk/nextjs": "^4.29.3",
     "@clerk/themes": "^1.7.9",
