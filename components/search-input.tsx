@@ -39,8 +39,12 @@ export const SearchInput = ({ scopeParam }: Props) => {
   const debouncedValue = useDebounce<string>(value, 500);
   const [sort, setSort] = useState<string | undefined>(sortParam || "");
 
-  const defaultSort =
-    scopeParam === "shared" || scopeParam === "owned" ? "newest" : "popularity";
+  let defaultSort = "popularity";
+  if (!scopeParam || scopeParam === "public") {
+    defaultSort = "rating";
+  } else if (scopeParam === "shared" || scopeParam === "owned") {
+    defaultSort = "newest";
+  }
 
   async function onSortChange(value: string) {
     setSort(value);
