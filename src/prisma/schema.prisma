@@ -33,7 +33,6 @@ model AI {
   listInPublicCatalog Boolean      @default(false) @map("list_in_public_catalog")
   options             Json?
   profile             Json?
-  categoryName        CategoryType       @default(AI_MODELS)
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
@@ -436,7 +435,7 @@ enum CategoryType {
 model AICategoryType {
   ai           AI         @relation(fields: [aiId], references: [id])
   aiId         String     @map(name: "ai_id")
-  categoryName CategoryType     @map(name: "category_type")
+  categoryType CategoryType     @map(name: "category_type")
 
   @@id([aiId])
   @@index([aiId])
