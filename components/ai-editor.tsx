@@ -19,6 +19,7 @@ import { AIKnowledge } from "./ai-knowledge";
 import { AIPersonality } from "./ai-personality";
 import { AIProfileEditor } from "./ai-profile-editor";
 import { PaywallBanner } from "./paywall-banner";
+import {AICategoryTypeInterface} from "@/app/api/v1/aicategory/route";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -36,7 +37,7 @@ const formSchema = z.object({
   src: z.string().min(1, {
     message: "Image is required.",
   }),
-  categoryType: z.array(z.number()).min(1, {
+  categoryType: z.array(z.string()).min(1, {
     message: "Category Type is required",
   }),
   modelId: z.string().min(1, {
@@ -214,9 +215,14 @@ export const AIEditor = ({
     let aiId = form.getValues("id");
 
     // call get aicategories api
-    if (false) {
-        const response = await axios.get(`/api/v1/aicategory/${aiId}`);
-        console.log("AI Categories: ", response.data);
+    if (true) {
+      console.log("AI form Values: ", values.categoryType);
+        const userAICategories : Array<AICategoryTypeInterface> = [];
+        // add values in userAICategories from values.categoryType {aiId: aidId, categoryType: values.categoryType}
+        // values.categoryType.map((category) => {
+        //     const userAICategory : AICategoryTypeInterface = {
+        //       aiId : aiId
+        //     }});
     }
 
     if (form.formState.isDirty) {

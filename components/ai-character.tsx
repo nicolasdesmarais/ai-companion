@@ -511,7 +511,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                   </Select>
                   }
                   <MultiSelect
-                      itemLabel="Category Types"
+                      itemLabel="Category"
                       items={CategoryTypes}
                       values={selectedValues}
                       onChange={(values) => {
