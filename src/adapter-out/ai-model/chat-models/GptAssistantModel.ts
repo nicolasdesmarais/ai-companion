@@ -1,8 +1,8 @@
 import { AIModel } from "@/src/domain/models/AIModel";
 import aiModelService from "@/src/domain/services/AIModelService";
-import { AI } from "@prisma/client";
 import { OpenAIAssistantRunnable } from "langchain/experimental/openai_assistant";
 
+import { AIRequest } from "@/src/adapter-in/api/AIApi";
 import OpenAI from "openai";
 import { ThreadMessage } from "openai/resources/beta/threads/messages/messages.mjs";
 import {
@@ -23,7 +23,7 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
     return model.id === MODEL_ID;
   }
 
-  private getInstructions(ai: AI) {
+  private getInstructions(ai: AIRequest) {
     return `
         Pretend you are ${ai.name}, ${ai.description}.
         Output format is markdown, including tables.
@@ -38,7 +38,11 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
 
   public async createAssistant(input: CreateAssistantInput): Promise<string> {
     const { ai } = input;
-    const assistantConfiguration = await this.getAssistantConfiguration(ai);
+    const aiModel = await aiModelService.getAIModelById(ai.modelId);
+    const assistantConfiguration = await this.getAssistantConfiguration(
+      ai,
+      aiModel
+    );
 
     const assistant = await OPEN_AI.beta.assistants.create({
       ...assistantConfiguration,
@@ -53,22 +57,18 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
   }
 
   public async updateAssistant(input: UpdateAssistantInput): Promise<void> {
-    const { ai } = input;
-    if (!ai.externalId) {
-      throw new Error("Missing AI external ID");
-    }
+    const { assistantId, ai } = input;
+    const aiModel = await aiModelService.getAIModelById(ai.modelId);
 
-    const assistantConfiguration = await this.getAssistantConfiguration(ai);
+    const assistantConfiguration = await this.getAssistantConfiguration(
+      ai,
+      aiModel
+    );
 
-    await OPEN_AI.beta.assistants.update(ai.externalId, assistantConfiguration);
+    await OPEN_AI.beta.assistants.update(assistantId, assistantConfiguration);
   }
 
-  private async getAssistantConfiguration(ai: AI) {
-    const aiModel = await aiModelService.findAIModelById(ai.modelId);
-    if (!aiModel) {
-      throw new Error("AI model not found");
-    }
-
+  private async getAssistantConfiguration(ai: AIRequest, aiModel: AIModel) {
     const instructions = this.getInstructions(ai);
 
     return {
@@ -79,7 +79,10 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
     };
   }
 
-  public async deleteAssistant(externalId: string): Promise<void> {
+  public async deleteAssistant(
+    aiModelId: string,
+    externalId: string
+  ): Promise<void> {
     await OPEN_AI.beta.assistants.del(externalId);
   }
 
