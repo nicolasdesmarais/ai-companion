@@ -60,7 +60,7 @@ export const ChatList = ({ className }: Props) => {
             >
               <div className="">
                 <Avatar className="h-18 w-18">
-                  <AvatarImage src={chat.ai.src} crop="w_78,h_78" />
+                  <AvatarImage src={chat.ai.src} crop="w_250,h_250" />
                 </Avatar>
               </div>
               <div className="mt-2 text-xs truncate text-center @4xs:text-left">
