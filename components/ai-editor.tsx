@@ -217,11 +217,6 @@ export const AIEditor = ({
     // call get aicategories api
     if (true) {
       console.log("AI form Values: ", values.categoryType);
-        const userAICategories = [];
-        values.categoryType.map((categoryType : string) => {
-            userAICategories.push({aiId, categoryType});
-        });
-        console.log("User AI Categories: ", userAICategories);
     }
 
     if (form.formState.isDirty) {
