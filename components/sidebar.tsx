@@ -355,9 +355,9 @@ export const Sidebar = ({
             onClick={proModal.onOpen}
             size="sm"
             variant="premium"
-            className="flex flex-col items-center flex-1 text-xs group py-3 px-2"
+            className="flex flex-col items-center flex-1 text-xs group py-3 px-2 text-muted-foreground dark:text-white"
           >
-            <Sparkles className="h-4 w-4 fill-white text-white" />
+            <Sparkles className="h-4 w-4 fill-muted-foreground dark:fill-white" />
             <span className="text-center">Upgrade</span>
           </Button>
         )}
