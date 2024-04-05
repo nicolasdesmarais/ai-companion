@@ -1,4 +1,4 @@
-import { AIModel } from "@/src/domain/models/AIModel";
+import { AIModel, AIModelProvider } from "@/src/domain/models/AIModel";
 import aiModelService from "@/src/domain/services/AIModelService";
 import { AssistantsClient, AzureKeyCredential } from "@azure/openai-assistants";
 
@@ -10,19 +10,18 @@ import {
 } from "./AssistantChatModel";
 import { ChatModel, PostToChatInput, PostToChatResponse } from "./ChatModel";
 
-const MODEL_ID = "gpt-4-1106-preview-assistant";
-const AZURE_ENDPOINT = "https://prod-appdirectai-east2.openai.azure.com";
-const AZURE_KEY = process.env.AZURE_GPT40_KEY!;
-
-export class GptAssistantModel implements ChatModel, AssistantChatModel {
+export class AzureOpenAIAssistantModel
+  implements ChatModel, AssistantChatModel
+{
   public supports(model: AIModel): boolean {
-    return model.id === MODEL_ID;
+    return model.provider === AIModelProvider.AZURE_OPENAI_ASSISTANTS;
   }
 
-  private getAssistantsClient() {
+  private getAssistantsClient(aiModel: AIModel) {
+    const endpoint = `https://${aiModel.additionalData.instanceName}.openai.azure.com`;
     return new AssistantsClient(
-      AZURE_ENDPOINT,
-      new AzureKeyCredential(AZURE_KEY)
+      endpoint,
+      new AzureKeyCredential(aiModel.additionalData.apiKey)
     );
   }
 
@@ -41,9 +40,14 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
 
   public async createAssistant(input: CreateAssistantInput): Promise<string> {
     const { ai } = input;
-    const assistantConfiguration = await this.getAssistantConfiguration(ai);
+    const aiModel = await aiModelService.getAIModelById(ai.modelId);
 
-    const assistantsClient = this.getAssistantsClient();
+    const assistantConfiguration = await this.getAssistantConfiguration(
+      ai,
+      aiModel
+    );
+
+    const assistantsClient = this.getAssistantsClient(aiModel);
     const assistant = await assistantsClient.createAssistant({
       ...assistantConfiguration,
       tools: [
@@ -58,37 +62,40 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
 
   public async updateAssistant(input: UpdateAssistantInput): Promise<void> {
     const { assistantId, ai } = input;
+    const aiModel = await aiModelService.getAIModelById(ai.modelId);
 
-    const assistantConfiguration = await this.getAssistantConfiguration(ai);
+    const assistantConfiguration = await this.getAssistantConfiguration(
+      ai,
+      aiModel
+    );
 
-    const assistantsClient = this.getAssistantsClient();
+    const assistantsClient = this.getAssistantsClient(aiModel);
 
     await assistantsClient.updateAssistant(assistantId, assistantConfiguration);
   }
 
-  private async getAssistantConfiguration(ai: AIRequest) {
-    const aiModel = await aiModelService.findAIModelById(ai.modelId);
-    if (!aiModel) {
-      throw new Error("AI model not found");
-    }
-
+  private async getAssistantConfiguration(ai: AIRequest, aiModel: AIModel) {
     const instructions = this.getInstructions(ai);
 
     return {
-      model: "gpt4-32k",
+      model: aiModel.externalModelId,
       name: ai.name,
       description: ai.description,
       instructions: instructions,
     };
   }
 
-  public async deleteAssistant(externalId: string): Promise<void> {
-    const assistantsClient = this.getAssistantsClient();
+  public async deleteAssistant(
+    aiModelId: string,
+    externalId: string
+  ): Promise<void> {
+    const aiModel = await aiModelService.getAIModelById(aiModelId);
+    const assistantsClient = this.getAssistantsClient(aiModel);
     await assistantsClient.deleteAssistant(externalId);
   }
 
-  private async createChat(): Promise<string> {
-    const assistantsClient = this.getAssistantsClient();
+  private async createChat(aiModel: AIModel): Promise<string> {
+    const assistantsClient = this.getAssistantsClient(aiModel);
     const thread = await assistantsClient.createThread();
     return thread.id;
   }
@@ -108,6 +115,7 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
       throw new Error("AI does not have an external ID");
     }
 
+    const aiModel = await aiModelService.getAIModelById(ai.modelId);
     const { knowledge } = await getKnowledgeCallback(input, 0);
 
     let promptWithKnowledge;
@@ -123,10 +131,10 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
 
     let externalChatId = chat.externalId;
     if (!externalChatId) {
-      externalChatId = await this.createChat();
+      externalChatId = await this.createChat(aiModel);
     }
 
-    const assistantsClient = this.getAssistantsClient();
+    const assistantsClient = this.getAssistantsClient(aiModel);
     await assistantsClient.createMessage(
       externalChatId,
       "user",

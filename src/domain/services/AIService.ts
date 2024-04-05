@@ -1140,7 +1140,10 @@ export class AIService {
 
       // Delete the old assistant associated with the existing model
       if (existingAssistantModel) {
-        await existingAssistantModel.deleteAssistant(existingExternalId);
+        await existingAssistantModel.deleteAssistant(
+          currentAI.modelId,
+          existingExternalId
+        );
         newExternalId = null;
       }
 

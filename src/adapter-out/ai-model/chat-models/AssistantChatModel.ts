@@ -8,7 +8,7 @@ export interface AssistantChatModel {
 
   updateAssistant(input: UpdateAssistantInput): Promise<void>;
 
-  deleteAssistant(externalId: string): Promise<void>;
+  deleteAssistant(aiModelId: string, externalId: string): Promise<void>;
 }
 
 export interface CreateAssistantInput {
