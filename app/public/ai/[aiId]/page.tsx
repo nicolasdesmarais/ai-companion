@@ -33,7 +33,7 @@ export async function generateMetadata(
       openGraph: {
         images: [
           {
-            url: aspectFill(ai.src, "1.91") || ai.src,
+            url: aspectFill(ai.src.replace(".png", ".jpg"), "1.91") || ai.src,
           },
         ],
         description: ai.description,
