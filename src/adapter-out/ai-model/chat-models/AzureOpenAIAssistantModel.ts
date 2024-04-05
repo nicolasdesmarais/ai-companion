@@ -160,6 +160,7 @@ export class AzureOpenAIAssistantModel
       order: "desc",
       limit: 1,
     });
+
     let responseText = "";
     for (const runMessageDatum of runMessages.data) {
       if (runMessageDatum.role === "assistant") {
