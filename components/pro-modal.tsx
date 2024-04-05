@@ -85,7 +85,7 @@ export const ProModal = ({ orgId }: Props) => {
 
   return (
     <Dialog open={proModal.isOpen} onOpenChange={proModal.onClose}>
-      <DialogContent>
+      <DialogContent className="bg-[#1A1A18]">
         <DialogHeader className="space-y-4">
           <DialogTitle className="text-center">
             Upgrade AppDirect.ai
@@ -97,7 +97,7 @@ export const ProModal = ({ orgId }: Props) => {
             <Loader className="w-16 h-16 spinner" />
           </div>
         ) : (
-          <div className="overflow-auto h-screen">
+          <div className="overflow-auto">
             {hasActiveSubscription(subscription) ? (
               <>
                 <p>

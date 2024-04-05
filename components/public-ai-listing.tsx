@@ -133,7 +133,7 @@ export const PublicAiListing = async ({ searchParams, scopeParam }: Props) => {
                   <UserPlus2 className="h-4 w-4 fill-white text-white ml-2 hidden md:inline" />
                 </Button>
               </Link>
-              <Link href="/sign-in" className="ml-2 flex">
+              <Link href="/login" className="ml-2 flex">
                 <Button
                   size="sm"
                   variant="ring"

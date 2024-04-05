@@ -20,6 +20,10 @@ const paths = [
   "/login",
   "/signup",
   "/org-selection",
+  "/landing/resources",
+  "/landing/pricing",
+  "/landing/enterprise",
+  "/landing/features",
 ];
 
 const fetchPath = async (origin: string, path: string) => {
