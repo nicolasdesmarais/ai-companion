@@ -302,8 +302,8 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
 
   const setCategory = async (values : any) => {
     console.log("Selected Values: ", values)
-    setSelectedValues(values);
-
+    setSelectedValues(values.id);
+    console.log("Selected Values: ", selectedValues)
   }
 
   return (
@@ -515,8 +515,9 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                       items={CategoryTypes}
                       values={selectedValues}
                       onChange={(values) => {
+                        console.log(values)
                         setCategory(values);
-                        onSubmit({ CategoryTypes : values.map((category) => category.type) });
+                        onSubmit({ CategoryTypes : values.map((category) => category.name) });
                       }}
                   />
                   <FormDescription>
