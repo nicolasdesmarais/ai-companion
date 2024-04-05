@@ -34,8 +34,6 @@ export async function generateMetadata(
         images: [
           {
             url: aspectFill(ai.src, "1.91") || ai.src,
-            width: 512,
-            height: 512,
           },
         ],
         description: ai.description,
