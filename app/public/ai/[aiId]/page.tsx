@@ -32,7 +32,7 @@ export async function generateMetadata(
       openGraph: {
         images: [
           {
-            url: ai.src,
+            url: `./_next/image?url=${encodeURIComponent(ai.src)}&w=3840&q=75`,
           },
         ],
         description: ai.description,
