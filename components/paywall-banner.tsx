@@ -1,24 +1,25 @@
 "use client";
 
+import { useOrgUsage } from "@/hooks/use-org-usage";
 import { cn } from "@/src/lib/utils";
-import axios from "axios";
+import { useClerk } from "@clerk/nextjs";
 import { AlertOctagon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 interface Props {
   className?: string;
 }
 
 export const PaywallBanner = ({ className }: Props) => {
-  const [show, setShow] = useState(false);
+  const clerk = useClerk();
+  const { usage, fetchUsage, loading } = useOrgUsage();
+  const show = usage.dataUsedInGb > usage.dataUsageLimitInGb;
 
   useEffect(() => {
-    const fetchUsage = async () => {
-      const result = await axios.get(`/api/v1/usage/org`);
-      if (result.data.dataUsageLimitInGb) {
-        setShow(result.data.dataUsedInGb > result.data.dataUsageLimitInGb);
-      }
-    };
+    fetchUsage();
+  }, [clerk.organization?.id]);
+
+  useEffect(() => {
     fetchUsage();
   }, []);
 
