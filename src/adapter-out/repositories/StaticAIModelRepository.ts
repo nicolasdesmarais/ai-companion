@@ -69,7 +69,7 @@ export class StaticAIModelRepository implements AIModelRepository {
     {
       id: "gpt-4-assistant",
       name: "GPT-4 (32K Context) w/ Assistant API (Beta)",
-      externalModelId: "gpt-4-32K",
+      externalModelId: "gpt4-32K",
       contextSize: 32768,
       options: commonOptions,
       provider: AIModelProvider.AZURE_OPENAI_ASSISTANTS,
