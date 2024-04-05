@@ -9,31 +9,29 @@ import {SecuredAction} from "@/src/security/models/SecuredAction";
 import {SecuredResourceAccessLevel} from "@/src/security/models/SecuredResourceAccessLevel";
 import {getUserAuthorizationContext} from "@/src/security/utils/securityUtils";
 
-async function putHandler(req: Request) {
-    const [aiId, categoryType] = await req.json();
-    await prismadb.aICategoryType.update({where: {aiId}, data: {categoryType}});
-    const data = await prismadb.aICategoryType.findMany({where: {aiId}});
-    return NextResponse.json(data);
+export interface AICategoryTypeInterface {
+    aiId: string;
+    categoryType: CategoryType;
 }
 
-async function deleteHandler(req: Request) {
-    const aiId = await req.json();
-    await prismadb.aICategoryType.delete({where: {aiId}});
-    return NextResponse.json({aiId});
-
-}
 async function postHandler(  req: Request ) {
-    const request = await req.json();
-    const aiId = request.aiId;
-    const categoryType = request.categoryType;
+    const {aiId, categoryType} : AICategoryTypeInterface = await req.json();
     await prismadb.aICategoryType.create({data : {aiId, categoryType}});
-    const data =  await prismadb.aICategoryType.findMany({where: {aiId}});
+    const data : Array<AICategoryTypeInterface> =  await prismadb.aICategoryType.findMany({where: {aiId}});
     return NextResponse.json(data);
 }
 
-// create curl for above post method
-// curl -X POST http://localhost:3000/api/v1/aicategory/ -H "Content-Type: application/json" -d '["1", "TEXT"]'
-export const POST = withErrorHandler(postHandler);
+async function deleteHandler( req: Request ) {
+    const reqBody = await req.json();
+    const aiId = reqBody[0].aiId;
+    reqBody.map(async (item : AICategoryTypeInterface) => {
+        const {aiId, categoryType} : AICategoryTypeInterface = item;
+        await prismadb.aICategoryType.deleteMany({where : {aiId, categoryType}});
+    });
+    const data: Array<AICategoryTypeInterface> =await prismadb.aICategoryType.findMany({where: {aiId}});
+    return NextResponse.json(data);
+}
+
 // export const POST = withErrorHandler(
 //     withAuthorization(
 //         SecuredResourceType.AI,
@@ -43,5 +41,5 @@ export const POST = withErrorHandler(postHandler);
 //     )
 // );
 
+export const POST = withErrorHandler(postHandler);
 export const DELETE = withErrorHandler(deleteHandler);
-export const PUT = withErrorHandler(putHandler);

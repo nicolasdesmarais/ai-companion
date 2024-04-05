@@ -217,12 +217,11 @@ export const AIEditor = ({
     // call get aicategories api
     if (true) {
       console.log("AI form Values: ", values.categoryType);
-        const userAICategories : Array<AICategoryTypeInterface> = [];
-        // add values in userAICategories from values.categoryType {aiId: aidId, categoryType: values.categoryType}
-        // values.categoryType.map((category) => {
-        //     const userAICategory : AICategoryTypeInterface = {
-        //       aiId : aiId
-        //     }});
+        const userAICategories = [];
+        values.categoryType.map((categoryType : string) => {
+            userAICategories.push({aiId, categoryType});
+        });
+        console.log("User AI Categories: ", userAICategories);
     }
 
     if (form.formState.isDirty) {
