@@ -212,6 +212,13 @@ export const AIEditor = ({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log("AI form Values: ", values);
     let aiId = form.getValues("id");
+
+    // call get aicategories api
+    if (false) {
+        const response = await axios.get(`/api/v1/aicategory/${aiId}`);
+        console.log("AI Categories: ", response.data);
+    }
+
     if (form.formState.isDirty) {
       try {
         let response;

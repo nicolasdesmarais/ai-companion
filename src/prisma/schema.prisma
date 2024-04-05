@@ -437,7 +437,7 @@ model AICategoryType {
   aiId         String     @map(name: "ai_id")
   categoryType CategoryType     @map(name: "category_type")
 
-  @@id([aiId])
+  @@id([aiId, categoryType])
   @@index([aiId])
   @@map("ai_category_types")
 }
