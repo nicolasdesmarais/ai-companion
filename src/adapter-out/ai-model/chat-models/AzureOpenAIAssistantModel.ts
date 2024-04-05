@@ -156,12 +156,21 @@ export class AzureOpenAIAssistantModel
       runResponse.status === "in_progress"
     );
 
-    const runMessages = await assistantsClient.listMessages(externalChatId);
+    const runMessages = await assistantsClient.listMessages(externalChatId, {
+      order: "desc",
+      limit: 1,
+    });
     let responseText = "";
     for (const runMessageDatum of runMessages.data) {
-      for (const item of runMessageDatum.content) {
-        if (item.type === "text") {
-          responseText += item.text.value + "\n";
+      if (runMessageDatum.role === "assistant") {
+        for (const item of runMessageDatum.content) {
+          if (item.type === "text") {
+            responseText = item.text.value;
+            break;
+          }
+        }
+        if (responseText) {
+          break;
         }
       }
     }
