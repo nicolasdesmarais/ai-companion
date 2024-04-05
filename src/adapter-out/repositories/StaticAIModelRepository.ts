@@ -95,7 +95,7 @@ export class StaticAIModelRepository implements AIModelRepository {
     {
       id: "gpt-4-1106-preview-assistant",
       name: "GPT-4 Turbo w/ Assistant API (Beta)",
-      externalModelId: "gpt-4-32K",
+      externalModelId: "gpt-4-1106-preview",
       contextSize: 8192,
       options: commonOptions,
       provider: AIModelProvider.OPENAI,
