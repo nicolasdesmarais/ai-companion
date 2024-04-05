@@ -106,7 +106,7 @@ export const PublicChatHeader = ({ ai, chat }: Props) => {
               </Link>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Link href="/sign-in" className="ml-2 flex">
+          <Link href="/login" className="ml-2 flex">
             <Button
               size="sm"
               variant="ring"

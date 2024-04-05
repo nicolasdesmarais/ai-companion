@@ -63,7 +63,7 @@ export const PublicSidebar = ({ className, ais, isChat = false }: Props) => {
       <div className="space-y-2 flex flex-col items-center py-3 px-8">
         <ModeToggle />
         <Link
-          href="/sign-in"
+          href="/login"
           className="flex rounded-full w-8 h-8 bg-ring items-center justify-center"
         >
           <LogIn className="text-white w-4 h-4" />
