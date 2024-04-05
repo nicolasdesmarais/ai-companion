@@ -513,7 +513,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                   <MultiSelect
                       itemLabel="Category Types"
                       items={CategoryTypes}
-                      values={field.value}
+                      values={selectedValues}
                       onChange={(values) => {
                         setCategory(values);
                         onSubmit({ CategoryTypes : values.map((category) => category.type) });
