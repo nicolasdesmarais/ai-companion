@@ -1,6 +1,5 @@
 import { PublicAiChat } from "@/components/public-ai-chat";
 import aiService from "@/src/domain/services/AIService";
-import { aspectFill } from "@/src/lib/utils";
 import { auth } from "@clerk/nextjs";
 import type { Metadata, ResolvingMetadata } from "next";
 import { redirect } from "next/navigation";
@@ -33,9 +32,7 @@ export async function generateMetadata(
       openGraph: {
         images: [
           {
-            url: `./_next/image?url=${encodeURIComponent(
-              aspectFill(ai.src, "1.91") || ai.src
-            )}&w=3840&q=75`,
+            url: ai.src,
           },
         ],
         description: ai.description,
