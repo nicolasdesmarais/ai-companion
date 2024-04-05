@@ -28,7 +28,6 @@ const Login = () => {
   }, [isSignedIn]);
 
   const signInWith = (strategy: OAuthStrategy) => {
-    debugger;
     if (signIn) {
       setSsoLoading(true);
       return signIn.authenticateWithRedirect({

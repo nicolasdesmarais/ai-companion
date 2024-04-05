@@ -23,25 +23,36 @@ export const MobileNav = () => {
               <Link
                 href="/landing/"
                 className="flex items-center md:mr-10 lg:mr-20"
+                onClick={() => setOpen(false)}
               >
                 <AppdirectSvg className="h-5 w-5" />
                 AppDirect <span className="font-extrabold ml-2">AI</span>
               </Link>
             </li>
             <li>
-              <Link href="/landing/features">How it works</Link>
+              <Link href="/landing/features" onClick={() => setOpen(false)}>
+                How it works
+              </Link>
             </li>
             <li>
-              <Link href="/landing/solutions">Solutions</Link>
+              <Link href="/landing/solutions" onClick={() => setOpen(false)}>
+                Solutions
+              </Link>
             </li>
             <li>
-              <Link href="/landing/pricing">Pricing</Link>
+              <Link href="/landing/pricing" onClick={() => setOpen(false)}>
+                Pricing
+              </Link>
             </li>
             <li>
-              <Link href="/landing/enterprise">Enterprise</Link>
+              <Link href="/landing/enterprise" onClick={() => setOpen(false)}>
+                Enterprise
+              </Link>
             </li>
             <li>
-              <Link href="/landing/resources">Resources</Link>
+              <Link href="/landing/resources" onClick={() => setOpen(false)}>
+                Resources
+              </Link>
             </li>
           </ul>
         </div>
