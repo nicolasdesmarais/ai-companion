@@ -57,7 +57,7 @@ export const SearchInput = ({ scopeParam }: Props) => {
       } else if (scopeParam === "shared" || scopeParam === "owned") {
         setSort("newest");
       } else {
-        setSort("popularity");
+        setSort("rating");
       }
     }
   }
@@ -67,6 +67,12 @@ export const SearchInput = ({ scopeParam }: Props) => {
       const key = clerk.user?.id;
       if (!key) return;
       const response = await axios.get(`/api/v1/clerk?userId=`+key);
+
+      if (response.data.publicMetadata['sort-'+scopeParam] === undefined) {
+        setDefaultSort(scopeParam);
+        return;
+      }
+
       setSort(response.data.publicMetadata['sort-'+scopeParam]);
     } catch (error : any) {
       toast({
