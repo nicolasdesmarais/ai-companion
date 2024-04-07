@@ -17,10 +17,12 @@ export interface AICategoryTypeInterface {
 async function postHandler(  request: Request ) {
     const authorizationContext = getUserAuthorizationContext();
     if (!authorizationContext) { return; }
+    let aiIdGet : string = "7cce1fa-7a32-4da5-9136-eb9c5c0c9889";
     let areRecordsDeleted : boolean = false;
     const paramArray : Array<AICategoryTypeInterface> = await request.json();
     paramArray.map(async (param) => {
         const aiId : any = param.aiId;
+        aiIdGet = aiId;
         const categoryType : CategoryType = param.categoryType;
         if (!areRecordsDeleted) {
             await prismadb.aICategoryType.deleteMany({where: {aiId: aiId}});
@@ -28,7 +30,7 @@ async function postHandler(  request: Request ) {
         }
         await prismadb.aICategoryType.create({data : { aiId, categoryType }});
     });
-    const data : Array<AICategoryTypeInterface> =  await prismadb.aICategoryType.findMany({where: {aiId: aiId}});
+    const data : Array<AICategoryTypeInterface> =  await prismadb.aICategoryType.findMany({where: {aiId: aiIdGet}});
     return NextResponse.json(data);
 }
 
