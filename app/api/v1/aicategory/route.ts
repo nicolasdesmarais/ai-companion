@@ -40,8 +40,8 @@ async function getHandler(request: NextRequest) {
         return;
     }
     const { searchParams } = new URL(request.url);
-    const scopeParamaiId : string | null = searchParams.get("aiId");
-    const data : Array<AICategoryTypeInterface> = await clerkClient.aICategoryType.findMany({where: {aiId: scopeParamaiId}});
+    const scopeParamAiId : any = searchParams.get("aiId");
+    const data : Array<AICategoryTypeInterface> = await prismadb.aICategoryType.findMany({where: {aiId: scopeParamAiId}});
     return NextResponse.json(data);
 }
 
