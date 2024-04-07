@@ -34,8 +34,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { imageModels, voices } from "./ai-models";
 import { TalkModal } from "./talk-modal";
-import {MultiSelect} from "@/components/ui/multi-select";
 import {CategoryTypes} from "@/components/category-types";
+import {AICategoryTypeInterface} from "@/app/api/v1/aicategory/route";
 
 const PREAMBLE =
   "ex: As a Support Specialist AI, your role is to provide solutions to user inquiries. This involves understanding the nature of the questions, interpreting their context, and yielding the correct responses. The effectiveness of your position is evaluated based on the accuracy of your responses and the satisfaction of users. Precision in answering and user satisfaction are your primary goals.";
@@ -97,11 +97,8 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [generatingAll, setGeneratingAll] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0]);
-  const [selectedValues, setSelectedValues] = useState<any[]>([]);
   const isLoading = form.formState.isSubmitting;
   const voiceEnabled = false && window.location.hostname !== "appdirect.ai";
-
-  const onSubmit = async (values: any) => {}
 
   const fetchGroups = async () => {
     const response = await axios.get("/api/v1/me/groups");
@@ -117,9 +114,32 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
     }
   };
 
+  const fetchCategoryTypes = async() => {
+    const response = await axios.get('/api/v1/aicategory?aiId=' + form.getValues('id'));
+    console.log(response)
+
+    const data : Array<AICategoryTypeInterface> = [
+      {
+          aiId: form.getValues('id'),
+          categoryType: "ENGINEERING"
+      },
+      {
+        aiId: form.getValues('id'),
+        categoryType: "HUMAN_RESOURCES"
+      },
+      {
+        aiId: form.getValues('id'),
+        categoryType: "ACCOUNTING_FINANCE"
+      }
+    ]
+    const response_data = await axios.post('/api/v1/aicategory', data);
+    console.log(response_data)
+  }
+
   useEffect(() => {
     fetchGroups();
     fetchCategories();
+    fetchCategoryTypes();
     const interval = setInterval(() => {
       setLoadingMessage((msg) => {
         const thisIndex = loadingMessages.indexOf(msg);
@@ -300,10 +320,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
     save();
   };
 
-  const setCategory = async (values : any) => {
-    setSelectedValues(values);
-  }
-
   return (
     <div className="h-full p-4 space-y-8 max-w-3xl mx-auto">
       <div className="space-y-2 w-full">
@@ -480,11 +496,10 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
             {hasInstanceAccess &&
             <FormField
               control={form.control}
-              name="categoryType"
+              name="categoryId"
               render={({ field }) => (
                 <FormItem className="col-span-2 md:col-span-1">
                   <FormLabel>Category</FormLabel>
-                  {false &&
                   <Select
                     disabled={isLoading}
                     onValueChange={field.onChange}
@@ -507,16 +522,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                       ))}
                     </SelectContent>
                   </Select>
-                  }
-                  <MultiSelect
-                      itemLabel="Category"
-                      items={CategoryTypes}
-                      values={selectedValues}
-                      onChange={(values) => {
-                        setCategory(values);
-                        onSubmit({ CategoryTypes : values.map((category) => category.type) });
-                      }}
-                  />
                   <FormDescription>
                     Select the public category for your AI
                   </FormDescription>

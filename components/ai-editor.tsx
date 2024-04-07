@@ -19,7 +19,6 @@ import { AIKnowledge } from "./ai-knowledge";
 import { AIPersonality } from "./ai-personality";
 import { AIProfileEditor } from "./ai-profile-editor";
 import { PaywallBanner } from "./paywall-banner";
-import {AICategoryTypeInterface} from "@/app/api/v1/aicategory/route";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -37,8 +36,8 @@ const formSchema = z.object({
   src: z.string().min(1, {
     message: "Image is required.",
   }),
-  categoryType: z.array(z.string()).min(1, {
-    message: "Category Type is required",
+  categoryId: z.string().min(1, {
+    message: "Category is required",
   }),
   modelId: z.string().min(1, {
     message: "Model is required",
@@ -171,7 +170,7 @@ export const AIEditor = ({
           instructions: "",
           seed: "",
           src: "",
-          categoryType: [],
+          categoryId: undefined,
           modelId: "gpt-4",
           visibility: "ANYONE_WITH_LINK",
           listInOrgCatalog: false,
@@ -213,12 +212,6 @@ export const AIEditor = ({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log("AI form Values: ", values);
     let aiId = form.getValues("id");
-
-    // call get aicategories api
-    if (true) {
-      console.log("AI form Values: ", values.categoryType);
-    }
-
     if (form.formState.isDirty) {
       try {
         let response;

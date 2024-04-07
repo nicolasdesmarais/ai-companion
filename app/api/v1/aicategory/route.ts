@@ -1,45 +1,62 @@
 import {withErrorHandler} from "@/src/middleware/ErrorMiddleware";
 import prismadb from "@/src/lib/prismadb";
 import {CategoryType} from "@prisma/client";
-import {NextResponse} from "next/server";
-import {randomUUID} from "node:crypto";
+import {NextRequest, NextResponse} from "next/server";
 import {withAuthorization} from "@/src/middleware/AuthorizationMiddleware";
 import {SecuredResourceType} from "@/src/security/models/SecuredResourceType";
 import {SecuredAction} from "@/src/security/models/SecuredAction";
 import {SecuredResourceAccessLevel} from "@/src/security/models/SecuredResourceAccessLevel";
 import {getUserAuthorizationContext} from "@/src/security/utils/securityUtils";
+import {clerkClient} from "@clerk/nextjs";
 
 export interface AICategoryTypeInterface {
     aiId: string;
     categoryType: CategoryType;
 }
 
-async function postHandler(  req: Request ) {
-    const {aiId, categoryType} : AICategoryTypeInterface = await req.json();
-    await prismadb.aICategoryType.create({data : {aiId, categoryType}});
-    const data : Array<AICategoryTypeInterface> =  await prismadb.aICategoryType.findMany({where: {aiId}});
-    return NextResponse.json(data);
-}
-
-async function deleteHandler( req: Request ) {
-    const reqBody = await req.json();
-    const aiId = reqBody[0].aiId;
-    reqBody.map(async (item : AICategoryTypeInterface) => {
-        const {aiId, categoryType} : AICategoryTypeInterface = item;
-        await prismadb.aICategoryType.deleteMany({where : {aiId, categoryType}});
+async function postHandler(  request: Request ) {
+    const authorizationContext = getUserAuthorizationContext();
+    if (!authorizationContext) { return; }
+    let areRecordsDeleted : boolean = false;
+    const paramArray : Array<AICategoryTypeInterface> = await request.json();
+    paramArray.map(async (param) => {
+        const aiId : any = param.aiId;
+        const categoryType : CategoryType = param.categoryType;
+        if (!areRecordsDeleted) {
+            await prismadb.aICategoryType.deleteMany({where: {aiId: aiId}});
+            areRecordsDeleted = true;
+        }
+        await prismadb.aICategoryType.create({data : { aiId, categoryType }});
     });
-    const data: Array<AICategoryTypeInterface> =await prismadb.aICategoryType.findMany({where: {aiId}});
+    const data : Array<AICategoryTypeInterface> =  await prismadb.aICategoryType.findMany({where: {aiId: aiId}});
     return NextResponse.json(data);
 }
 
-// export const POST = withErrorHandler(
-//     withAuthorization(
-//         SecuredResourceType.AI,
-//         SecuredAction.WRITE,
-//         Object.values(SecuredResourceAccessLevel),
-//         postHandler
-//     )
-// );
+async function getHandler(request: NextRequest) {
+    const authorizationContext = getUserAuthorizationContext();
+    if (!authorizationContext) {
+        return;
+    }
+    const { searchParams } = new URL(request.url);
+    const scopeParamaiId : string | null = searchParams.get("aiId");
+    const data : Array<AICategoryTypeInterface> = await clerkClient.aICategoryType.findMany({where: {aiId: scopeParamaiId}});
+    return NextResponse.json(data);
+}
 
-export const POST = withErrorHandler(postHandler);
-export const DELETE = withErrorHandler(deleteHandler);
+export const POST = withErrorHandler(
+    withAuthorization(
+        SecuredResourceType.AI,
+        SecuredAction.WRITE,
+        Object.values(SecuredResourceAccessLevel),
+        postHandler
+    )
+);
+
+export const GET = withErrorHandler(
+    withAuthorization(
+        SecuredResourceType.AI,
+        SecuredAction.READ,
+        Object.values(SecuredResourceAccessLevel),
+        getHandler
+    )
+);
