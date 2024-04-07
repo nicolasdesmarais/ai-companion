@@ -5,7 +5,8 @@ import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourc
 import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { clerkClient } from "@clerk/nextjs";
-import { NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
+import {User} from "@clerk/nextjs/server";
 
 export interface UserMetaDataInterface {
   value: string;
@@ -19,17 +20,23 @@ async function postHandler(request: Request) {
   }
   const { value, key }: UserMetaDataInterface = await request.json();
 
-  if (key === "superuser") {
-    return NextResponse.json({
-      success: false,
-      message: "Cannot set superuser metadata",
-    });
-  }
-
   await clerkClient.users.updateUserMetadata(authorizationContext.userId, {
     publicMetadata: { [key]: value },
   });
-  return NextResponse.json({ success: true });
+
+  const data: User = await clerkClient.users.getUser(authorizationContext.userId);
+  return NextResponse.json({data : data, success: true});
+}
+
+async function getHandler(request: NextRequest) {
+  const authorizationContext = getUserAuthorizationContext();
+  if (!authorizationContext) {
+    return;
+  }
+  const { searchParams } = new URL(request.url);
+  const scopeParam : string = searchParams.get("userId") || authorizationContext.userId;
+  const data: User = await clerkClient.users.getUser(scopeParam);
+  return NextResponse.json(data);
 }
 
 export const POST = withErrorHandler(
@@ -39,4 +46,13 @@ export const POST = withErrorHandler(
     Object.values(SecuredResourceAccessLevel),
     postHandler
   )
+);
+
+export const GET = withErrorHandler(
+    withAuthorization(
+        SecuredResourceType.AI,
+        SecuredAction.READ,
+        Object.values(SecuredResourceAccessLevel),
+        getHandler
+    )
 );
