@@ -116,30 +116,25 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
 
   const fetchCategoryTypes = async() => {
     const response = await axios.get('/api/v1/aicategory?aiId=' + form.getValues('id'));
-    console.log(response)
-
-    const data : Array<AICategoryTypeInterface> = [
+    // add values in data from CategoryType list from user, run post api only after setValues
+    const data: Array<AICategoryTypeInterface> = [
       {
-          aiId: form.getValues('id'),
-          categoryType: "ENGINEERING"
+        aiId: form.getValues('id'),
+        categoryType: "ENGINEERING"
       },
       {
         aiId: form.getValues('id'),
-        categoryType: "HUMAN_RESOURCES"
-      },
-      {
-        aiId: form.getValues('id'),
-        categoryType: "ACCOUNTING_FINANCE"
+        categoryType: "MARKETING"
       }
     ]
-    const response_data = await axios.post('/api/v1/aicategory', data);
-    console.log(response_data)
+    await axios.post('/api/v1/aicategory', data);
   }
 
   useEffect(() => {
     fetchGroups();
     fetchCategories();
-    fetchCategoryTypes();
+    // uncomment below line after ui fix
+    // fetchCategoryTypes();
     const interval = setInterval(() => {
       setLoadingMessage((msg) => {
         const thisIndex = loadingMessages.indexOf(msg);
