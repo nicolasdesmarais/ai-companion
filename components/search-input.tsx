@@ -47,8 +47,11 @@ export const SearchInput = ({ scopeParam }: Props) => {
       scopeParam = HOME;
     }
     getSortClerkData(scopeParam);
+    setDefaultSort(scopeParam)
+  }, [scopeParam]);
+
+  function setDefaultSort(scopeParam : any) {
     if (!sort) {
-      console.log("Sort is NULL")
       if (!scopeParam || scopeParam === "/") {
         setSort("rating");
       } else if (scopeParam === "shared" || scopeParam === "owned") {
@@ -57,11 +60,12 @@ export const SearchInput = ({ scopeParam }: Props) => {
         setSort("popularity");
       }
     }
-  }, [scopeParam]);
+  }
 
   async function getSortClerkData(scopeParam : any) {
     try {
       const key = clerk.user?.id;
+      if (!key) return;
       const response = await axios.get(`/api/v1/clerk?userId=`+key);
       setSort(response.data.publicMetadata['sort-'+scopeParam]);
     } catch (error : any) {
@@ -77,7 +81,8 @@ export const SearchInput = ({ scopeParam }: Props) => {
 
   async function onSortChange(value: string) {
     setSort(value);
-    const key = `sort${scopeParam ? "-" + scopeParam : ""}`;
+    let key = `sort${scopeParam ? "-" + scopeParam : ""}`;
+    if (key == "sort") key = "sort-/";
     await axios.post("/api/v1/clerk", {
       key: key,
       value,
