@@ -15,7 +15,8 @@ export const PaywallBanner = ({ className }: Props) => {
   const proModal = useProModal();
   const clerk = useClerk();
   const { usage, fetchUsage } = useOrgUsage();
-  const show = usage.dataUsedInGb > usage.dataUsageLimitInGb;
+  const show =
+    usage.dataUsageLimitInGb && usage.dataUsedInGb > usage.dataUsageLimitInGb;
 
   const orgMembership = clerk.user?.organizationMemberships.find(
     (membership) => membership.organization.id === clerk.organization?.id
@@ -35,7 +36,6 @@ export const PaywallBanner = ({ className }: Props) => {
     return null;
   }
 
-  console.log("clerk", orgMembership);
   return (
     <div className={cn("w-full z-30", className)}>
       <div className="flex items-center text-center h-8 bg-ring mt-1 pl-4 rounded-md text-sm">
