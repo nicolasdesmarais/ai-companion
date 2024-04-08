@@ -27,7 +27,7 @@ import { useGroupModal } from "@/hooks/use-group-modal";
 import { useTalkModal } from "@/hooks/use-talk-modal";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { getDiversityString } from "@/src/lib/diversity";
-import {AIVisibility, Category, DataSourceRefreshPeriod} from "@prisma/client";
+import {AIVisibility, Category} from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { Loader, Play, Settings, Wand2 } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -36,6 +36,7 @@ import { imageModels, voices } from "./ai-models";
 import { TalkModal } from "./talk-modal";
 import {CategoryTypes} from "@/components/category-types";
 import {AICategoryTypeInterface} from "@/app/api/v1/aicategory/route";
+import {MultiSelect} from "@/components/ui/multi-select";
 
 const PREAMBLE =
   "ex: As a Support Specialist AI, your role is to provide solutions to user inquiries. This involves understanding the nature of the questions, interpreting their context, and yielding the correct responses. The effectiveness of your position is evaluated based on the accuracy of your responses and the satisfaction of users. Precision in answering and user satisfaction are your primary goals.";
@@ -97,6 +98,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [generatingAll, setGeneratingAll] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0]);
+  const [selectedSorts, setSelectedSorts] = useState<any[]>([]);
   const isLoading = form.formState.isSubmitting;
   const voiceEnabled = false && window.location.hostname !== "appdirect.ai";
 
@@ -114,21 +116,42 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
     }
   };
 
-  const fetchCategoryTypes = async() => {
-    const response = await axios.get('/api/v1/aicategory?aiId=' + form.getValues('id'));
-    // add values in data from CategoryType list from user, run post api only after setValues
-    const data: Array<AICategoryTypeInterface> = [
-      {
-        aiId: form.getValues('id'),
-        categoryType: "ENGINEERING"
-      },
-      {
-        aiId: form.getValues('id'),
-        categoryType: "MARKETING"
+  useEffect(() => {
+    const fetchCategoryTypes = async() => {
+      try {
+        const response = await axios.get('/api/v1/aicategory?aiId=' + form.getValues('id'));
+        setSelectedSorts(response.data)
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          description:
+              String((error as AxiosError).response?.data) ||
+              "Something went wrong.",
+          duration: 6000,
+        });
       }
-    ]
-    await axios.post('/api/v1/aicategory', data);
-  }
+    };
+    fetchCategoryTypes();
+  }, [toast]);
+
+  const onSubmitSorts = async (values: any) => {
+    try {
+      const aiId : any = form.getValues("id");
+      // populate values in data from values in format of AICategoryTypeInterface
+      const data: Array<AICategoryTypeInterface> = []
+      setSelectedSorts(data);
+      values.selectedSorts.map((categoryType: any) => {
+        data.push({aiId: aiId, categoryType: categoryType})
+      });
+      await axios.post('/api/v1/aicategory', data);
+    } catch (error) {
+      console.error(error);
+      toast({
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     fetchGroups();
@@ -495,28 +518,38 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
               render={({ field }) => (
                 <FormItem className="col-span-2 md:col-span-1">
                   <FormLabel>Category</FormLabel>
-                  <Select
-                    disabled={isLoading}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="bg-background">
-                        <SelectValue
-                          defaultValue={field.value}
-                          placeholder="Select a category"
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <Select
+                      disabled={isLoading}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="bg-background">
+                          <SelectValue
+                            defaultValue={field.value}
+                            placeholder="Select a category"
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  {false &&
+                      <MultiSelect
+                          itemLabel="Category Type"
+                          items={CategoryTypes}
+                          values={selectedSorts}
+                          onChange={(values) => {
+                            onSubmitSorts({ selectedSorts: values.map((category) => category.categoryType) });
+                          }}
+                      />
+                  }
                   <FormDescription>
                     Select the public category for your AI
                   </FormDescription>
