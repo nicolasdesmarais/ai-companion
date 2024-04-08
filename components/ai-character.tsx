@@ -287,8 +287,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
 
   const generateAll = async () => {
     setGeneratingAll(true);
-    const defaultCat = categories[0];
-    form.setValue("categoryId", defaultCat.id, { shouldDirty: true });
     form.setValue("introduction", `How may I be of assistance today?`, {
       shouldDirty: true,
     });
@@ -469,41 +467,43 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="categoryId"
-              render={({ field }) => (
-                <FormItem className="col-span-2 md:col-span-1">
-                  <FormLabel>Category</FormLabel>
-                  <Select
-                    disabled={isLoading}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="bg-background">
-                        <SelectValue
-                          defaultValue={field.value}
-                          placeholder="Select a category"
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    Select the public category for your AI
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {hasInstanceAccess && (
+              <FormField
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FormItem className="col-span-2 md:col-span-1">
+                    <FormLabel>Category</FormLabel>
+                    <Select
+                      disabled={isLoading}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="bg-background">
+                          <SelectValue
+                            defaultValue={field.value}
+                            placeholder="Select a category"
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Select the public category for your AI
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               name="visibility"
               control={form.control}

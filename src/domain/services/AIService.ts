@@ -976,7 +976,6 @@ export class AIService {
       description,
       instructions,
       seed,
-      categoryId,
       modelId,
       visibility,
       listInOrgCatalog,
@@ -985,9 +984,11 @@ export class AIService {
       groups,
     } = request;
 
-    if (!src || !name || !description || !instructions || !categoryId) {
+    if (!src || !name || !description || !instructions) {
       throw new BadRequestError("Missing required fields");
     }
+
+    const categoryId = request.categoryId || "NONE";
 
     const { orgId, userId } = authorizationContext;
 
