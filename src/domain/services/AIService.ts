@@ -363,11 +363,7 @@ export class AIService {
     }
 
     if (search) {
-      let searchValue = search.replace(/[^\w\s]/gi, "");
-      console.log("Search Value: ", searchValue)
-      if (searchValue.trim().length > 0) {
-        whereCondition.AND.push(this.getSearchCriteria(search.replace(/[^\w\s]/gi, "")));
-      }
+      whereCondition.AND.push(this.getSearchCriteria(search));
     }
 
     if (approvedByOrg !== null && approvedByOrg !== undefined) {
@@ -377,25 +373,21 @@ export class AIService {
     }
     
     let ais : any[] = [];
-    try {
-      ais = await prismadb.aI.findMany({
-        select: {
-          ...listAIResponseSelect(),
-          chats: {
-            where: {
-              userId,
-              isDeleted: false,
-            },
+    ais = await prismadb.aI.findMany({
+      select: {
+        ...listAIResponseSelect(),
+        chats: {
+          where: {
+            userId,
+            isDeleted: false,
           },
         },
-        where: whereCondition,
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
-    } catch (e) {
-      console.error("prismadb.aI.findMany failed with: ", e)
-    }
+      },
+      where: whereCondition,
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
 
     if (ais.length === 0) {
       return [];
