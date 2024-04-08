@@ -360,8 +360,13 @@ export class AIService {
     if (categoryId) {
       whereCondition.AND.push(this.getCategoryCriteria(categoryId));
     }
+
     if (search) {
-      whereCondition.AND.push(this.getSearchCriteria(search));
+      let searchValue = search.replace(/[^\w\s]/gi, "");
+      console.log("Search Value: ", searchValue)
+      if (searchValue.trim().length > 0) {
+        whereCondition.AND.push(this.getSearchCriteria(search.replace(/[^\w\s]/gi, "")));
+      }
     }
 
     if (approvedByOrg !== null && approvedByOrg !== undefined) {
@@ -369,22 +374,27 @@ export class AIService {
         this.getApprovedByOrgCriteria(orgId, approvedByOrg)
       );
     }
-
-    const ais = await prismadb.aI.findMany({
-      select: {
-        ...listAIResponseSelect(),
-        chats: {
-          where: {
-            userId,
-            isDeleted: false,
+    
+    let ais : any[] = [];
+    try {
+      ais = await prismadb.aI.findMany({
+        select: {
+          ...listAIResponseSelect(),
+          chats: {
+            where: {
+              userId,
+              isDeleted: false,
+            },
           },
         },
-      },
-      where: whereCondition,
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+        where: whereCondition,
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    } catch (e) {
+      console.error("prismadb.aI.findMany failed with: ", e)
+    }
 
     if (ais.length === 0) {
       return [];

@@ -438,6 +438,5 @@ model AICategoryType {
   categoryType CategoryType     @map(name: "category_type")
 
   @@id([aiId, categoryType])
-  @@index([aiId])
   @@map("ai_category_types")
 }
