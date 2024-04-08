@@ -46,8 +46,9 @@ export const SearchInput = ({ scopeParam }: Props) => {
     if (!scopeParam) {
       scopeParam = HOME;
     }
-    getSortClerkData(scopeParam);
-    setDefaultSort(scopeParam)
+    const isDefaultSortRendered : boolean = false;
+    getSortClerkData(scopeParam, isDefaultSortRendered);
+    if (isDefaultSortRendered) setDefaultSort(scopeParam);
   }, [scopeParam]);
 
   function setDefaultSort(scopeParam : any) {
@@ -62,18 +63,23 @@ export const SearchInput = ({ scopeParam }: Props) => {
     }
   }
 
-  async function getSortClerkData(scopeParam : any) {
+  async function getSortClerkData(scopeParam : any, isDefaultSortRendered : boolean) : Promise<boolean> {
     try {
       const key = clerk.user?.id;
-      if (!key) return;
+      if (!key) {
+        isDefaultSortRendered = true;
+        return isDefaultSortRendered;
+      }
       const response = await axios.get(`/api/v1/clerk?userId=`+key);
 
       if (response.data.publicMetadata['sort-'+scopeParam] === undefined) {
         setDefaultSort(scopeParam);
-        return;
+        isDefaultSortRendered = true;
+        return isDefaultSortRendered;
       }
 
       setSort(response.data.publicMetadata['sort-'+scopeParam]);
+      return false;
     } catch (error : any) {
       toast({
         variant: "destructive",
@@ -83,6 +89,7 @@ export const SearchInput = ({ scopeParam }: Props) => {
         duration: 6000,
       });
     }
+    return false;
   }
 
   async function onSortChange(value: string) {
