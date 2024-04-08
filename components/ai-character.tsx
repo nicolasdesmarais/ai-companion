@@ -156,8 +156,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   useEffect(() => {
     fetchGroups();
     fetchCategories();
-    // uncomment below line after ui fix
-    // fetchCategoryTypes();
     const interval = setInterval(() => {
       setLoadingMessage((msg) => {
         const thisIndex = loadingMessages.indexOf(msg);
