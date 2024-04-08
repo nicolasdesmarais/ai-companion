@@ -27,16 +27,13 @@ import { useGroupModal } from "@/hooks/use-group-modal";
 import { useTalkModal } from "@/hooks/use-talk-modal";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { getDiversityString } from "@/src/lib/diversity";
-import {AIVisibility, Category} from "@prisma/client";
+import { AIVisibility, Category } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { Loader, Play, Settings, Wand2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { imageModels, voices } from "./ai-models";
 import { TalkModal } from "./talk-modal";
-import {CategoryTypes} from "@/components/category-types";
-import {AICategoryTypeInterface} from "@/app/api/v1/aicategory/route";
-import {MultiSelect} from "@/components/ui/multi-select";
 
 const PREAMBLE =
   "ex: As a Support Specialist AI, your role is to provide solutions to user inquiries. This involves understanding the nature of the questions, interpreting their context, and yielding the correct responses. The effectiveness of your position is evaluated based on the accuracy of your responses and the satisfaction of users. Precision in answering and user satisfaction are your primary goals.";
@@ -98,7 +95,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [generatingAll, setGeneratingAll] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0]);
-  const [selectedSorts, setSelectedSorts] = useState<any[]>([]);
+
   const isLoading = form.formState.isSubmitting;
   const voiceEnabled = false && window.location.hostname !== "appdirect.ai";
 
@@ -113,43 +110,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
     const response = await axios.get("/api/v1/categories");
     if (response.status === 200 && Array.isArray(response.data)) {
       setCategories(response.data);
-    }
-  };
-
-  useEffect(() => {
-    const fetchCategoryTypes = async() => {
-      try {
-        const response = await axios.get('/api/v1/aicategory?aiId=' + form.getValues('id'));
-        setSelectedSorts(response.data)
-      } catch (error: any) {
-        toast({
-          variant: "destructive",
-          description:
-              String((error as AxiosError).response?.data) ||
-              "Something went wrong.",
-          duration: 6000,
-        });
-      }
-    };
-    fetchCategoryTypes();
-  }, [toast]);
-
-  const onSubmitSorts = async (values: any) => {
-    try {
-      const aiId : any = form.getValues("id");
-      // populate values in data from values in format of AICategoryTypeInterface
-      const data: Array<AICategoryTypeInterface> = []
-      setSelectedSorts(data);
-      values.selectedSorts.map((categoryType: any) => {
-        data.push({aiId: aiId, categoryType: categoryType})
-      });
-      await axios.post('/api/v1/aicategory', data);
-    } catch (error) {
-      console.error(error);
-      toast({
-        description: "Something went wrong",
-        variant: "destructive",
-      });
     }
   };
 
@@ -327,8 +287,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
 
   const generateAll = async () => {
     setGeneratingAll(true);
-    const defaultCat = categories[0];
-    form.setValue("categoryId", defaultCat.id, { shouldDirty: true });
     form.setValue("introduction", `How may I be of assistance today?`, {
       shouldDirty: true,
     });
@@ -509,13 +467,13 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                 </FormItem>
               )}
             />
-            {hasInstanceAccess &&
-            <FormField
-              control={form.control}
-              name="categoryId"
-              render={({ field }) => (
-                <FormItem className="col-span-2 md:col-span-1">
-                  <FormLabel>Category</FormLabel>
+            {hasInstanceAccess && (
+              <FormField
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FormItem className="col-span-2 md:col-span-1">
+                    <FormLabel>Category</FormLabel>
                     <Select
                       disabled={isLoading}
                       onValueChange={field.onChange}
@@ -538,24 +496,14 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                         ))}
                       </SelectContent>
                     </Select>
-                  {false &&
-                      <MultiSelect
-                          itemLabel="Category Type"
-                          items={CategoryTypes}
-                          values={selectedSorts}
-                          onChange={(values) => {
-                            onSubmitSorts({ selectedSorts: values.map((category) => category.categoryType) });
-                          }}
-                      />
-                  }
-                  <FormDescription>
-                    Select the public category for your AI
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            }
+                    <FormDescription>
+                      Select the public category for your AI
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               name="visibility"
               control={form.control}
