@@ -90,6 +90,7 @@ const formSchema = z.object({
       showCharacter: z.boolean().optional().nullable(),
       showTraining: z.boolean().optional().nullable(),
       showPersonality: z.boolean().optional().nullable(),
+      socialImage: z.string().optional().nullable(),
     })
     .optional()
     .nullable(),
@@ -104,6 +105,7 @@ const defaultProfile = {
   showPersonality: undefined,
   trainingDescription: undefined,
   conversations: undefined,
+  socialImage: undefined,
 };
 
 interface AIFormProps {

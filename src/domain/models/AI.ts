@@ -50,4 +50,5 @@ export interface AIProfile {
   showPersonality?: boolean;
   trainingDescription?: string;
   conversations?: any[];
+  socialImage?: string;
 }

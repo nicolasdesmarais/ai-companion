@@ -27,13 +27,14 @@ export async function generateMetadata(
   const ai = await aiService.findPublicAIById(params.aiId);
 
   if (ai) {
+    const social = ai?.profile?.socialImage || ai?.src;
     return {
       title: `${ai.name} | AppDirect AI`,
       metadataBase: new URL("https://appdirect.ai"),
       openGraph: {
         images: [
           {
-            url: aspectFill(ai.src.replace(".png", ".jpg"), "1.91") || ai.src,
+            url: aspectFill(social.replace(".png", ".jpg"), "1.91") || social,
           },
         ],
         description: ai.description,
