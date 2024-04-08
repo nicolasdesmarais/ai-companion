@@ -210,7 +210,6 @@ export const AIEditor = ({
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log("AI form Values: ", values);
     let aiId = form.getValues("id");
     if (form.formState.isDirty) {
       try {
