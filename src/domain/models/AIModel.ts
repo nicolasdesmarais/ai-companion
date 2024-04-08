@@ -28,6 +28,7 @@ export interface RangeOption {
 export enum AIModelProvider {
   ANTHROPIC = "anthropic",
   AZURE_OPENAI = "azure-openai",
+  AZURE_OPENAI_ASSISTANTS = "azure-openai-assistants",
   COHERE = "cohere",
   OPENAI = "openai",
   REPLICATE = "replicate",

@@ -36,9 +36,7 @@ const formSchema = z.object({
   src: z.string().min(1, {
     message: "Image is required.",
   }),
-  categoryId: z.string().min(1, {
-    message: "Category is required",
-  }),
+  categoryId: z.string().optional(),
   modelId: z.string().min(1, {
     message: "Model is required",
   }),

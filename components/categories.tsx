@@ -55,11 +55,12 @@ export const Categories = ({ data }: CategoriesProps) => {
       >
         All
       </button>
-      {data.map((item) => (
-        <button
-          onClick={() => onClick(item.id)}
-          className={cn(
-            `
+      {data.map((item) =>
+        item.id === "NONE" ? null : (
+          <button
+            onClick={() => onClick(item.id)}
+            className={cn(
+              `
             flex
             items-center
             text-center
@@ -74,13 +75,14 @@ export const Categories = ({ data }: CategoriesProps) => {
             hover:opacity-75
             transition
           `,
-            item.id === categoryId ? "bg-accent" : "bg-primary/10"
-          )}
-          key={item.id}
-        >
-          {item.name}
-        </button>
-      ))}
+              item.id === categoryId ? "bg-accent" : "bg-primary/10"
+            )}
+            key={item.id}
+          >
+            {item.name}
+          </button>
+        )
+      )}
     </div>
   );
 };
