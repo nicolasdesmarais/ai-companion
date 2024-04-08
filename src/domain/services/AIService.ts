@@ -1,4 +1,5 @@
 import {
+  AIRequest,
   CreateAIRequest,
   ListAIsRequestParams,
   ListAIsRequestScope,
@@ -991,6 +992,8 @@ export class AIService {
 
     const { orgId, userId } = authorizationContext;
 
+    const externalId = await this.createAssistant(request);
+
     const ai = await prismadb.aI.create({
       data: {
         categoryId,
@@ -1008,6 +1011,7 @@ export class AIService {
         listInOrgCatalog,
         listInPublicCatalog,
         options: options as any,
+        externalId,
       },
       include: {
         dataSources: {
@@ -1020,7 +1024,6 @@ export class AIService {
     });
 
     await this.updateAIGroups(ai, groups);
-    await this.createAssistant(ai);
 
     return ai;
   }
@@ -1070,6 +1073,8 @@ export class AIService {
       throw new BadRequestError("Missing required fields");
     }
 
+    const externalId = await this.updateAssistant(ai, request);
+
     const updatedAI = await prismadb.aI.update({
       where: {
         id: aiId,
@@ -1096,11 +1101,11 @@ export class AIService {
         listInPublicCatalog,
         options: options as any,
         profile: profile as any,
+        externalId,
       },
     });
 
     await this.updateAIGroups(updatedAI, groups);
-    await this.updateAssistant(ai, updatedAI);
     return updatedAI;
   }
 
@@ -1112,32 +1117,29 @@ export class AIService {
     }
   }
 
-  private async createAssistant(ai: AI) {
+  private async createAssistant(ai: AIRequest): Promise<string | null> {
     const assistantModel = aiModelService.getAssistantModelInstance(ai.modelId);
     if (!assistantModel) {
-      return;
+      return null;
     }
 
-    const externalId = await assistantModel.createAssistant({
+    return await assistantModel.createAssistant({
       ai,
-    });
-    await prismadb.aI.update({
-      where: { id: ai.id },
-      data: {
-        externalId,
-      },
     });
   }
 
-  private async updateAssistant(currentAI: AI, updatedAI: AI) {
+  private async updateAssistant(
+    currentAI: AI,
+    updatedAI: AIRequest
+  ): Promise<string | null> {
     const existingExternalId = currentAI.externalId;
     if (!existingExternalId) {
       // Create a new assistant if it doesn't exist externally
-      await this.createAssistant(updatedAI);
-      return;
+      return await this.createAssistant(updatedAI);
     }
 
     const shouldUpdateModel = currentAI.modelId !== updatedAI.modelId;
+    let newExternalId: string | null = existingExternalId;
     if (shouldUpdateModel) {
       const newAssistantModel = aiModelService.getAssistantModelInstance(
         updatedAI.modelId
@@ -1146,14 +1148,18 @@ export class AIService {
         currentAI.modelId
       );
 
-      // Create a new assistant with the updated model
-      if (newAssistantModel) {
-        await this.createAssistant(updatedAI);
-      }
-
       // Delete the old assistant associated with the existing model
       if (existingAssistantModel) {
-        await existingAssistantModel.deleteAssistant(existingExternalId);
+        await existingAssistantModel.deleteAssistant(
+          currentAI.modelId,
+          existingExternalId
+        );
+        newExternalId = null;
+      }
+
+      // Create a new assistant with the updated model
+      if (newAssistantModel) {
+        newExternalId = await this.createAssistant(updatedAI);
       }
     } else {
       // Update existing assistant without changing the model
@@ -1161,9 +1167,14 @@ export class AIService {
         currentAI.modelId
       );
       if (assistantModel) {
-        await assistantModel.updateAssistant({ ai: updatedAI });
+        await assistantModel.updateAssistant({
+          assistantId: existingExternalId,
+          ai: updatedAI,
+        });
       }
     }
+
+    return newExternalId;
   }
 
   public async rateAi(
