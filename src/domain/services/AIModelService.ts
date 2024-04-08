@@ -1,5 +1,6 @@
 import { AnthropicModel } from "@/src/adapter-out/ai-model/chat-models/AnthropicModel";
 import { AssistantChatModel } from "@/src/adapter-out/ai-model/chat-models/AssistantChatModel";
+import { AzureOpenAIAssistantModel } from "@/src/adapter-out/ai-model/chat-models/AzureOpenAIAssistantModel";
 import { AzureOpenAIModel } from "@/src/adapter-out/ai-model/chat-models/AzureOpenAIModel";
 import { ChatModel } from "@/src/adapter-out/ai-model/chat-models/ChatModel";
 import { CohereModel } from "@/src/adapter-out/ai-model/chat-models/CohereModel";
@@ -17,13 +18,17 @@ import { AIModelRepository } from "../ports/outgoing/AIModelRepository";
 
 const CHAT_MODELS = [
   new AzureOpenAIModel(),
+  new AzureOpenAIAssistantModel(),
   new GptAssistantModel(),
   new ReplicateModel(),
   new AnthropicModel(),
   new CohereModel(),
 ];
 
-const ASSISTANT_MODELS = [new GptAssistantModel()];
+const ASSISTANT_MODELS = [
+  new AzureOpenAIAssistantModel(),
+  new GptAssistantModel(),
+];
 
 export class AIModelService {
   constructor(private aiModelRepository: AIModelRepository) {}

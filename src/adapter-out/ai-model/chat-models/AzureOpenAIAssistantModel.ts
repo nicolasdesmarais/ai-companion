@@ -1,10 +1,8 @@
-import { AIModel } from "@/src/domain/models/AIModel";
+import { AIModel, AIModelProvider } from "@/src/domain/models/AIModel";
 import aiModelService from "@/src/domain/services/AIModelService";
-import { OpenAIAssistantRunnable } from "langchain/experimental/openai_assistant";
+import { AssistantsClient, AzureKeyCredential } from "@azure/openai-assistants";
 
 import { AIRequest } from "@/src/adapter-in/api/AIApi";
-import OpenAI from "openai";
-import { ThreadMessage } from "openai/resources/beta/threads/messages/messages.mjs";
 import {
   AssistantChatModel,
   CreateAssistantInput,
@@ -12,15 +10,19 @@ import {
 } from "./AssistantChatModel";
 import { ChatModel, PostToChatInput, PostToChatResponse } from "./ChatModel";
 
-const MODEL_ID = "gpt-4-1106-preview-assistant";
-
-const OPEN_AI = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-export class GptAssistantModel implements ChatModel, AssistantChatModel {
+export class AzureOpenAIAssistantModel
+  implements ChatModel, AssistantChatModel
+{
   public supports(model: AIModel): boolean {
-    return model.id === MODEL_ID;
+    return model.provider === AIModelProvider.AZURE_OPENAI_ASSISTANTS;
+  }
+
+  private getAssistantsClient(aiModel: AIModel) {
+    const endpoint = `https://${aiModel.additionalData.instanceName}.openai.azure.com`;
+    return new AssistantsClient(
+      endpoint,
+      new AzureKeyCredential(aiModel.additionalData.apiKey)
+    );
   }
 
   private getInstructions(ai: AIRequest) {
@@ -39,12 +41,14 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
   public async createAssistant(input: CreateAssistantInput): Promise<string> {
     const { ai } = input;
     const aiModel = await aiModelService.getAIModelById(ai.modelId);
+
     const assistantConfiguration = await this.getAssistantConfiguration(
       ai,
       aiModel
     );
 
-    const assistant = await OPEN_AI.beta.assistants.create({
+    const assistantsClient = this.getAssistantsClient(aiModel);
+    const assistant = await assistantsClient.createAssistant({
       ...assistantConfiguration,
       tools: [
         {
@@ -65,7 +69,9 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
       aiModel
     );
 
-    await OPEN_AI.beta.assistants.update(assistantId, assistantConfiguration);
+    const assistantsClient = this.getAssistantsClient(aiModel);
+
+    await assistantsClient.updateAssistant(assistantId, assistantConfiguration);
   }
 
   private async getAssistantConfiguration(ai: AIRequest, aiModel: AIModel) {
@@ -83,11 +89,14 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
     aiModelId: string,
     externalId: string
   ): Promise<void> {
-    await OPEN_AI.beta.assistants.del(externalId);
+    const aiModel = await aiModelService.getAIModelById(aiModelId);
+    const assistantsClient = this.getAssistantsClient(aiModel);
+    await assistantsClient.deleteAssistant(externalId);
   }
 
-  private async createChat(): Promise<string> {
-    const thread = await OPEN_AI.beta.threads.create();
+  private async createChat(aiModel: AIModel): Promise<string> {
+    const assistantsClient = this.getAssistantsClient(aiModel);
+    const thread = await assistantsClient.createThread();
     return thread.id;
   }
 
@@ -106,6 +115,7 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
       throw new Error("AI does not have an external ID");
     }
 
+    const aiModel = await aiModelService.getAIModelById(ai.modelId);
     const { knowledge } = await getKnowledgeCallback(input, 0);
 
     let promptWithKnowledge;
@@ -119,36 +129,48 @@ export class GptAssistantModel implements ChatModel, AssistantChatModel {
       `;
     }
 
-    const assistant = new OpenAIAssistantRunnable({
+    let externalChatId = chat.externalId;
+    if (!externalChatId) {
+      externalChatId = await this.createChat(aiModel);
+    }
+
+    const assistantsClient = this.getAssistantsClient(aiModel);
+    await assistantsClient.createMessage(
+      externalChatId,
+      "user",
+      promptWithKnowledge
+    );
+
+    let runResponse = await assistantsClient.createRun(externalChatId, {
       assistantId: ai.externalId,
     });
 
-    let externalChatId = chat.externalId;
-    if (!externalChatId) {
-      externalChatId = await this.createChat();
-    }
+    do {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      runResponse = await assistantsClient.getRun(
+        externalChatId,
+        runResponse.id
+      );
+    } while (
+      runResponse.status === "queued" ||
+      runResponse.status === "in_progress"
+    );
 
-    let response = (await assistant.invoke({
-      threadId: externalChatId,
-      content: promptWithKnowledge,
-    })) as ThreadMessage[];
-
-    if (response.length === 0) {
-      // thread expired?
-      externalChatId = await this.createChat();
-      response = (await assistant.invoke({
-        threadId: externalChatId,
-        content: promptWithKnowledge,
-      })) as ThreadMessage[];
-    }
+    const runMessages = await assistantsClient.listMessages(externalChatId, {
+      order: "desc",
+      limit: 1,
+    });
 
     let responseText = "";
-    if (response.length > 0) {
-      // Get content from the last message
-      const threadMessage = response[0];
-      for (const content of threadMessage.content) {
-        if (content.type === "text") {
-          responseText = content.text.value;
+    for (const runMessageDatum of runMessages.data) {
+      if (runMessageDatum.role === "assistant") {
+        for (const item of runMessageDatum.content) {
+          if (item.type === "text") {
+            responseText = item.text.value;
+            break;
+          }
+        }
+        if (responseText) {
           break;
         }
       }
