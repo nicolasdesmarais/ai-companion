@@ -1,7 +1,7 @@
 "use client";
 import BlobAnimation from "@/components/blob-animation";
 import LandingNav from "@/components/landing-nav";
-import { OrganizationList, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 
 const OrgSelect = () => {
   const { user } = useUser();
@@ -11,12 +11,11 @@ const OrgSelect = () => {
 
       <div className="h-full w-full flex items-center justify-center">
         <div className="absolute z-10 flex flex-col items-center ">
-          <div className="flex flex-col gap-8 mt-8">
-            <OrganizationList
-              afterSelectOrganizationUrl="/index/public"
-              afterCreateOrganizationUrl="/index/public"
-              hidePersonal={true}
-            />
+          <div className="h-full w-full flex flex-col items-center justify-center">
+            <div className="bg-gradient4 z-10 rounded-lg flex flex-col items-center p-8 md:p-16 mx-2 mt-16">
+              <h1 className="text-3xl mb-12 font-bold">Select your Company</h1>
+              <div>haha</div>
+            </div>
           </div>
         </div>
 

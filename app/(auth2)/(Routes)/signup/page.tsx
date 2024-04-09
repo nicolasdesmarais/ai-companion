@@ -177,6 +177,7 @@ const SignUp = () => {
                   onClick={onPressVerify}
                 >
                   Verify Email
+                  {loading ? <Loader className="w-4 h-4 ml-2 spinner" /> : null}
                 </Button>
               </div>
             </>
