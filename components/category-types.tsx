@@ -13,3 +13,15 @@ export const CategoryTypes = [
 export const CategoryTypesMap: Record<string, string> = {};
 CategoryTypes.forEach((category : { name: string; id: string }) => CategoryTypesMap[category.id] = category.name);
 
+export const CategoryTypesHardcoded: Record<string, string> = {
+    "ACCOUNTING" : "ACCOUNTING_FINANCE",
+    "ENG" : "ENGINEERING",
+    "HR" : "HUMAN_RESOURCES",
+    "IT" : "INFORMATION_TECHNOLOGY",
+    "LEARNING" : "LEARNING_DEVELOPMENT",
+    "MARKETING" : "MARKETING",
+    "MODELS" : "AI_MODELS",
+    "NONE" : "NONE",
+    "PRODUCTIVITY" : "PRODUCTIVITY",
+    "SALES" : "SALES"
+};

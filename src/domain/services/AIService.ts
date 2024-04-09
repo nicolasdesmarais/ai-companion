@@ -22,7 +22,7 @@ import { SystemMessage } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
 import {
   AI,
-  AIVisibility,
+  AIVisibility, CategoryType,
   DataSourceRefreshPeriod,
   DataSourceType,
   GroupAI,
@@ -38,6 +38,7 @@ import aiModelService from "./AIModelService";
 import dataSourceManagementService from "./DataSourceManagementService";
 import groupService from "./GroupService";
 import invitationService from "./InvitationService";
+import {CategoryTypesHardcoded} from "@/components/category-types";
 
 const openai = new ChatOpenAI({
   azureOpenAIApiKey: process.env.AZURE_GPT35_KEY,
@@ -358,9 +359,6 @@ export class AIService {
         whereCondition.AND.push(this.getGroupCriteria(orgId, groupId));
       }
     }
-    if (categoryId) {
-      whereCondition.AND.push(this.getCategoryCriteria(categoryId));
-    }
     if (search) {
       whereCondition.AND.push(this.getSearchCriteria(search));
     }
@@ -371,16 +369,29 @@ export class AIService {
       );
     }
 
-    const ais = await prismadb.aI.findMany({
-      select: {
-        ...listAIResponseSelect(),
-        chats: {
-          where: {
-            userId,
-            isDeleted: false,
-          },
+    let categoryType : CategoryType | undefined;
+    try {
+      // @ts-ignore
+      categoryType = CategoryTypesHardcoded[categoryId] as CategoryType
+    } catch (error) {
+      console.error("Error parsing category type", error);
+      categoryType = undefined;
+    }
+
+    let selectClause = {...listAIResponseSelect(), chats: {
+        where: {
+          userId,
+          isDeleted: false,
         },
       },
+    }
+
+    if (categoryType != undefined && categoryId != "NONE") {
+      selectClause["aicategorytypes"] = {where: {categoryType: categoryType}};
+    }
+
+    const ais = await prismadb.aI.findMany({
+      select: selectClause,
       where: whereCondition,
       orderBy: {
         createdAt: "desc",

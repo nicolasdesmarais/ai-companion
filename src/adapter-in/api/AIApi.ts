@@ -1,6 +1,6 @@
 import { AIDetailDto, AIProfile } from "@/src/domain/models/AI";
 import { AIModelOptions } from "@/src/domain/models/AIModel";
-import { AIVisibility } from "@prisma/client";
+import {AIVisibility, CategoryType} from "@prisma/client";
 
 export interface ListAIsResponse {
   data: AIDetailDto[];
@@ -9,7 +9,7 @@ export interface ListAIsResponse {
 export interface ListAIsRequestParams {
   scope?: ListAIsRequestScope | null;
   groupId?: string | null;
-  categoryId?: string | null;
+  categoryId?: CategoryType |string | null;
   approvedByOrg?: boolean | null;
   search?: string | null;
   sort?: string | null;
