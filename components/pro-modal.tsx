@@ -133,7 +133,7 @@ export const ProModal = ({ orgId }: Props) => {
                   stripePublishableKey={stripePublishableKey}
                   pricingTableId={pricingTableId}
                 />
-                <div className="flex flex-col items-center mb-8">
+                <div className="flex flex-col items-center mb-32">
                   <div className="">
                     <h2 className="text-lg font-bold mb-8">Enterprise</h2>
                     <Link
