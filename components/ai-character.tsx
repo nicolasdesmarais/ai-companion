@@ -27,13 +27,14 @@ import { useGroupModal } from "@/hooks/use-group-modal";
 import { useTalkModal } from "@/hooks/use-talk-modal";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { getDiversityString } from "@/src/lib/diversity";
-import { AIVisibility, Category } from "@prisma/client";
+import {AIVisibility, Category, CategoryType} from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { Loader, Play, Settings, Wand2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { imageModels, voices } from "./ai-models";
 import { TalkModal } from "./talk-modal";
+import {AICategoryTypeInterface} from "@/src/domain/services/AICategoryService";
 
 const PREAMBLE =
   "ex: As a Support Specialist AI, your role is to provide solutions to user inquiries. This involves understanding the nature of the questions, interpreting their context, and yielding the correct responses. The effectiveness of your position is evaluated based on the accuracy of your responses and the satisfaction of users. Precision in answering and user satisfaction are your primary goals.";
@@ -292,6 +293,58 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
     });
     await Promise.all([generateAvatar(), generateInstruction()]);
     save();
+  };
+
+  useEffect(() => {
+    const getAIsByCategoryType = async(categoryType : CategoryType) => {
+      try {
+        // require user Selected Category type from UI form
+        // like: const categoryType = CategoryTypes[0].id;
+        const response = await axios.get(`/api/v1/ai-categories/${categoryType}/ais`);
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          description:
+              String((error as AxiosError).response?.data) ||
+              "Something went wrong.",
+          duration: 6000,
+        });
+      }
+    };
+
+    const fetchCategoryTypesByAI = async() => {
+      try {
+        const aiId = form.getValues("id");
+        const response =  await axios.get(`/api/v1/ai/${aiId}/categories`);
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          description:
+              String((error as AxiosError).response?.data) ||
+              "Something went wrong.",
+          duration: 6000,
+        });
+      }
+    };
+    fetchCategoryTypesByAI();
+  }, [toast]);
+
+  const onSubmitSorts = async (values: any) => {
+    try {
+      const aiId : any = form.getValues("id");
+      // populate values in data from values in format of AICategoryTypeInterface
+      const data: Array<AICategoryTypeInterface> = []
+      values.map((categoryType: any) => {
+        data.push({aiId: aiId, categoryType: categoryType})
+      });
+      await axios.post('/api/v1/ai-category', data);
+    } catch (error) {
+      console.error(error);
+      toast({
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

@@ -51,6 +51,7 @@ model AI {
   permissions AIPermissions[]
 
   dataSources AIDataSource[]
+  aicategorytypes AICategoryType[]
 
   ratings      AIRating[]
   orgApprovals AIOrgApproval[]
@@ -417,4 +418,24 @@ enum OrgSubscriptionType {
 enum OrgSubscriptionStatus {
   ACTIVE
   CANCELLED
+}
+
+enum CategoryType {
+  AI_MODELS
+  PRODUCTIVITY
+  LEARNING_DEVELOPMENT
+  MARKETING
+  SALES
+  INFORMATION_TECHNOLOGY
+  ENGINEERING
+  HUMAN_RESOURCES
+  ACCOUNTING_FINANCE
+}
+
+model AICategoryType {
+  ai           AI         @relation(fields: [aiId], references: [id])
+  aiId         String     @map(name: "ai_id")
+  categoryType CategoryType     @map(name: "category_type")
+  @@id([aiId, categoryType])
+  @@map("ai_category_types")
 }
