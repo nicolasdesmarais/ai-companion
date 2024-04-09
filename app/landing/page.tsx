@@ -148,7 +148,7 @@ const LandingHome = () => {
           AI apps ready to use today, purpose-built to help you solve business
           problems, gain insights, and manage workloads.
         </h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:w-[1140px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:w-[1020px]">
           <Link href="/public?categoryId=ACCOUNTING">
             <div className="bg-[#F0F0F0] px-8 py-4 shadow-lg flex items-center">
               <svg
