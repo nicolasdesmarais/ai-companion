@@ -120,9 +120,11 @@ export const ProModal = ({ orgId }: Props) => {
             ) : (
               <div>
                 <div className="flex flex-col items-center">
-                  <div className="w-32">
+                  <div className="w-[180px]">
                     <h2 className="text-lg font-bold mt-2">Free Tier</h2>
-                    <div className="mb-2">200MB of Data Usage</div>
+                    <div className="mb-2 text-muted-foreground">
+                      200MB of Data Usage
+                    </div>
                     <div className="text-2xl font-bold">FREE</div>
                   </div>
                 </div>
@@ -131,12 +133,12 @@ export const ProModal = ({ orgId }: Props) => {
                   stripePublishableKey={stripePublishableKey}
                   pricingTableId={pricingTableId}
                 />
-                <div className="flex flex-col items-center">
-                  <div className="w-32">
-                    <h2 className="text-lg font-bold mb-4">Enterprise</h2>
+                <div className="flex flex-col items-center mt-14">
+                  <div className="w-[180px]">
+                    <h2 className="text-lg font-bold mb-8">Enterprise</h2>
                     <Link
                       href="/contact"
-                      className="bg-[#4d70a8] text-white rounded-xl py-2 px-4"
+                      className="bg-[#4d70a8] text-white rounded-full py-3 px-8"
                     >
                       Contact us
                     </Link>
