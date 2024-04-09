@@ -21,8 +21,6 @@ async function getHandler(
     return NextResponse.json(aiCategories);
 }
 
-
-
 async function postHandler(
     request: Request,
     context: {
