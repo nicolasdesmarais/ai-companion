@@ -118,8 +118,8 @@ export const ProModal = ({ orgId }: Props) => {
                 </Button>
               </>
             ) : (
-              <div>
-                <div className="flex flex-col items-center mb-6">
+              <>
+                <div className="flex flex-col items-center">
                   <div className="">
                     <h2 className="text-lg font-bold mt-2">Free Tier</h2>
                     <div className="mb-2 text-muted-foreground text-sm">
@@ -133,7 +133,7 @@ export const ProModal = ({ orgId }: Props) => {
                   stripePublishableKey={stripePublishableKey}
                   pricingTableId={pricingTableId}
                 />
-                <div className="flex flex-col items-center mt-14">
+                <div className="flex flex-col items-center mb-8">
                   <div className="">
                     <h2 className="text-lg font-bold mb-8">Enterprise</h2>
                     <Link
@@ -144,7 +144,7 @@ export const ProModal = ({ orgId }: Props) => {
                     </Link>
                   </div>
                 </div>
-              </div>
+              </>
             )}
           </div>
         )}
