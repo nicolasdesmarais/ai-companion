@@ -119,10 +119,10 @@ export const ProModal = ({ orgId }: Props) => {
               </>
             ) : (
               <div>
-                <div className="flex flex-col items-center">
-                  <div className="w-[180px]">
+                <div className="flex flex-col items-center mb-6">
+                  <div className="">
                     <h2 className="text-lg font-bold mt-2">Free Tier</h2>
-                    <div className="mb-2 text-muted-foreground">
+                    <div className="mb-2 text-muted-foreground text-sm">
                       200MB of Data Usage
                     </div>
                     <div className="text-2xl font-bold">FREE</div>
@@ -134,11 +134,11 @@ export const ProModal = ({ orgId }: Props) => {
                   pricingTableId={pricingTableId}
                 />
                 <div className="flex flex-col items-center mt-14">
-                  <div className="w-[180px]">
+                  <div className="">
                     <h2 className="text-lg font-bold mb-8">Enterprise</h2>
                     <Link
                       href="/contact"
-                      className="bg-[#4d70a8] text-white rounded-full py-3 px-8"
+                      className="bg-[#4d70a8] text-white rounded-full py-3 px-8 text-muted-foreground"
                     >
                       Contact us
                     </Link>
