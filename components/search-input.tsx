@@ -10,12 +10,14 @@ import {
 } from "@/components/ui/select";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useClerk } from "@clerk/nextjs";
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
 import { ChangeEventHandler, useEffect, useState } from "react";
+import {useToast} from "@/components/ui/use-toast";
 
+const HOME = "/";
 const filterOptions = [
   { id: "popularity", name: "Popularity" },
   { id: "newest", name: "Newest" },
@@ -30,6 +32,7 @@ export const SearchInput = ({ scopeParam }: Props) => {
   const clerk = useClerk();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { toast } = useToast();
 
   const categoryId = searchParams.get("categoryId");
   const search = searchParams.get("search");
@@ -39,17 +42,62 @@ export const SearchInput = ({ scopeParam }: Props) => {
   const debouncedValue = useDebounce<string>(value, 500);
   const [sort, setSort] = useState<string | undefined>(sortParam || "");
 
-  let defaultSort = "popularity";
-  if (!scopeParam || scopeParam === "public") {
-    defaultSort = "rating";
-  } else if (scopeParam === "shared" || scopeParam === "owned") {
-    defaultSort = "newest";
+  useEffect(() => {
+    if (!scopeParam) {
+      scopeParam = HOME;
+    }
+    const isDefaultSortRendered : boolean = false;
+    getSortClerkData(scopeParam, isDefaultSortRendered);
+    if (isDefaultSortRendered) setDefaultSort(scopeParam);
+  }, [scopeParam]);
+
+  function setDefaultSort(scopeParam : any) {
+    if (!sort) {
+      if (!scopeParam || scopeParam === "/") {
+        setSort("rating");
+      } else if (scopeParam === "shared" || scopeParam === "owned") {
+        setSort("newest");
+      } else {
+        setSort("rating");
+      }
+    }
+  }
+
+  async function getSortClerkData(scopeParam : any, isDefaultSortRendered : boolean) : Promise<boolean> {
+    try {
+      const key = clerk.user?.id;
+      if (!key) {
+        isDefaultSortRendered = true;
+        return isDefaultSortRendered;
+      }
+      const response = await axios.get(`/api/v1/clerk?userId=`+key);
+
+      if (response.data.publicMetadata['sort-'+scopeParam] === undefined) {
+        setDefaultSort(scopeParam);
+        isDefaultSortRendered = true;
+        return isDefaultSortRendered;
+      }
+
+      setSort(response.data.publicMetadata['sort-'+scopeParam]);
+      return false;
+    } catch (error : any) {
+      toast({
+        variant: "destructive",
+        description:
+            String((error as AxiosError).response?.data) ||
+            "Something went wrong.",
+        duration: 6000,
+      });
+    }
+    return false;
   }
 
   async function onSortChange(value: string) {
     setSort(value);
+    let key = `sort${scopeParam ? "-" + scopeParam : ""}`;
+    if (key == "sort") key = "sort-/";
     await axios.post("/api/v1/clerk", {
-      key: `sort${scopeParam ? "-" + scopeParam : ""}`,
+      key: key,
       value,
       userId: clerk.user?.id,
     });
@@ -90,7 +138,7 @@ export const SearchInput = ({ scopeParam }: Props) => {
       </div>
       <Select
         onValueChange={(val) => onSortChange(val)}
-        value={sort || defaultSort}
+        value={sort}
       >
         <SelectTrigger className="bg-accent w-32 md:w-44 ml-4 flex-none">
           <span className="hidden md:inline">Sort By:</span>

@@ -361,6 +361,7 @@ export class AIService {
     if (categoryId) {
       whereCondition.AND.push(this.getCategoryCriteria(categoryId));
     }
+
     if (search) {
       whereCondition.AND.push(this.getSearchCriteria(search));
     }
@@ -370,8 +371,9 @@ export class AIService {
         this.getApprovedByOrgCriteria(orgId, approvedByOrg)
       );
     }
-
-    const ais = await prismadb.aI.findMany({
+    
+    let ais : any[] = [];
+    ais = await prismadb.aI.findMany({
       select: {
         ...listAIResponseSelect(),
         chats: {
