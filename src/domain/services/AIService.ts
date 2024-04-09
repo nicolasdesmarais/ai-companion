@@ -784,17 +784,17 @@ export class AIService {
   }
 
   private getSearchCriteria(search: string) {
-    const wildSearch = `*${search}*`;
+    const escapedSearch = `"${search}"`;
     return {
       OR: [
         {
           name: {
-            search: wildSearch,
+            search: escapedSearch,
           },
         },
         {
           userName: {
-            search: wildSearch,
+            search: escapedSearch,
           },
         },
       ],
