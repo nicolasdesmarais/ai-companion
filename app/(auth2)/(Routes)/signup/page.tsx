@@ -136,10 +136,12 @@ const SignUp = () => {
         router.push("/org-selection");
       } else {
         setLoading(false);
+        setError("A verification error occurred");
         console.error(JSON.stringify(completeSignUp, null, 2));
       }
     } catch (err: any) {
       setLoading(false);
+      setError(err.errors[0].longMessage || "An error occurred");
       console.error(JSON.stringify(err, null, 2));
     }
   };
@@ -162,6 +164,7 @@ const SignUp = () => {
           {pendingVerification ? (
             <>
               <div>Check your email for a verification code</div>
+              <div className="text-red-500 text-sm pt-4">{error}</div>
               <div className="flex flex-col gap-8 mt-8">
                 <input
                   value={code}

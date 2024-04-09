@@ -20,6 +20,7 @@ import {
 import { OrgSubscriptionStatus } from "@prisma/client";
 import axios from "axios";
 import { Loader } from "lucide-react";
+import Link from "next/link";
 import { Button } from "./ui/button";
 
 type Props = {
@@ -85,7 +86,7 @@ export const ProModal = ({ orgId }: Props) => {
 
   return (
     <Dialog open={proModal.isOpen} onOpenChange={proModal.onClose}>
-      <DialogContent className="bg-[#1A1A18]">
+      <DialogContent className="bg-[#222020] text-white">
         <DialogHeader className="space-y-4">
           <DialogTitle className="text-center">
             Upgrade AppDirect.ai
@@ -97,7 +98,7 @@ export const ProModal = ({ orgId }: Props) => {
             <Loader className="w-16 h-16 spinner" />
           </div>
         ) : (
-          <div className="overflow-auto">
+          <div className="overflow-auto h-screen">
             {hasActiveSubscription(subscription) ? (
               <>
                 <p>
@@ -117,11 +118,33 @@ export const ProModal = ({ orgId }: Props) => {
                 </Button>
               </>
             ) : (
-              <StripePricingTable
-                orgId={orgId}
-                stripePublishableKey={stripePublishableKey}
-                pricingTableId={pricingTableId}
-              />
+              <div>
+                <div className="flex flex-col items-center mb-6">
+                  <div className="">
+                    <h2 className="text-lg font-bold mt-2">Free Tier</h2>
+                    <div className="mb-2 text-muted-foreground text-sm">
+                      200MB of Data Usage
+                    </div>
+                    <div className="text-2xl font-bold">FREE</div>
+                  </div>
+                </div>
+                <StripePricingTable
+                  orgId={orgId}
+                  stripePublishableKey={stripePublishableKey}
+                  pricingTableId={pricingTableId}
+                />
+                <div className="flex flex-col items-center mt-14">
+                  <div className="">
+                    <h2 className="text-lg font-bold mb-8">Enterprise</h2>
+                    <Link
+                      href="/contact"
+                      className="bg-[#4d70a8] text-white rounded-full py-3 px-8 text-muted-foreground"
+                    >
+                      Contact us
+                    </Link>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         )}

@@ -1,4 +1,5 @@
 "use client";
+import { ImageUpload } from "@/components/image-upload";
 import {
   FormControl,
   FormDescription,
@@ -10,6 +11,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { AIDetailDto } from "@/src/domain/models/AI";
 import { ChatMessageDto } from "@/src/domain/models/Chats";
+import { aspectFill } from "@/src/lib/utils";
 import { Loader, Plus, Trash, Wand2 } from "lucide-react";
 import { useState } from "react";
 import { Drawer } from "./drawer";
@@ -220,6 +222,31 @@ export const AIProfileEditor = ({ ai, form }: ProfileSourceProps) => {
                   Add Another Feature
                 </Button>
               </div>
+            </FormItem>
+          )}
+        />
+        <FormField
+          name="profile.socialImage"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Social Media</FormLabel>
+              <FormDescription>
+                This image will appear when sharing your AI on social media.
+              </FormDescription>
+              <FormControl>
+                <ImageUpload
+                  disabled={isLoading}
+                  onChange={field.onChange}
+                  value={
+                    field.value ||
+                    aspectFill(ai?.src.replace(".png", ".jpg"), "1.91") ||
+                    ai?.src
+                  }
+                  className="w-96"
+                />
+              </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />

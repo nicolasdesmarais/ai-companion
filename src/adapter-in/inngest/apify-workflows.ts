@@ -61,9 +61,10 @@ export const onApifyActorRunRequested = inngest.createFunction(
     }
 
     let rootItems: ActorRunItem[] = [];
+    let iteration = 0;
     while (true) {
       const webhookReceived = await step.waitForEvent(
-        "wait-for-apify-webhook",
+        `wait-for-apify-webhook-${iteration}`,
         {
           event: ApifyEvent.APIFY_WEBHOOK_RECEIVED,
           timeout: "1m",
@@ -88,6 +89,8 @@ export const onApifyActorRunRequested = inngest.createFunction(
         // We've reached a terminal state
         break;
       }
+
+      iteration++;
     }
 
     for (const item of rootItems) {

@@ -59,12 +59,18 @@ const LandingFooter = () => {
                 <div className="font-bold">SOCIAL</div>
                 <ul className="flex flex-col justify-between gap-4 py-2 font-light">
                   <li>
-                    <Link href="https://www.linkedin.com/company/appdirect">
+                    <Link
+                      href="https://www.linkedin.com/company/appdirect"
+                      target="_blank"
+                    >
                       LinkedIn
                     </Link>
                   </li>
                   <li>
-                    <Link href="https://www.instagram.com/appdirect/">
+                    <Link
+                      href="https://www.instagram.com/appdirect/"
+                      target="_blank"
+                    >
                       Instagram
                     </Link>
                   </li>
@@ -73,6 +79,7 @@ const LandingFooter = () => {
               <div className="w-32">
                 <Link
                   href="https://www.appdirect.com/about"
+                  target="_blank"
                   className="font-bold"
                 >
                   COMPANY
