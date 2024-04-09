@@ -45,3 +45,8 @@ export const aspectFill = (src: string | undefined, fill: string) => {
     );
   }
 };
+
+export function containsMySQLSpecialChars(str: string): boolean {
+  const specialCharsRegex = /[+\-><()~*"]/;
+  return specialCharsRegex.test(str);
+}
