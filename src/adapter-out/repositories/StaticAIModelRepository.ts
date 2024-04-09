@@ -73,7 +73,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       contextSize: 32768,
       options: commonOptions,
       provider: AIModelProvider.AZURE_OPENAI_ASSISTANTS,
-      isVisible: false,
+      isVisible: true,
       additionalData: {
         apiKey: process.env.AZURE_GPT40_KEY,
         instanceName: "prod-appdirectai-east2",
@@ -86,7 +86,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       contextSize: 16384,
       options: commonOptions,
       provider: AIModelProvider.AZURE_OPENAI_ASSISTANTS,
-      isVisible: false,
+      isVisible: true,
       additionalData: {
         apiKey: process.env.AZURE_GPT35_KEY,
         instanceName: "appdirect-prod-ai-useast",
