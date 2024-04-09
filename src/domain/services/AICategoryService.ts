@@ -25,20 +25,10 @@ export class AICategoryService {
         return aiCategories;
     }
 
-    public async getAIsByCategoryType(
-        authorizationContext: AuthorizationContext,
-        categoryType: CategoryType) : Promise<Array<AICategoryTypeInterface>> {
-        const hasReadPermission = AISecurityService.hasInstanceReadAccess(authorizationContext);
-        if (!hasReadPermission) {
-            throw new ForbiddenError("Forbidden");
-        }
-        const aiCategories : Array<AICategoryTypeInterface> = await prismadb.aICategoryType.findMany({where: {categoryType: categoryType}});
-        return aiCategories;
-    }
-
     public async performUpdateOrCreateAICategoryType(
         authorizationContext: AuthorizationContext,
-        aiCategoryTypes : Array<AICategoryTypeInterface>) {
+        aiId: any,
+        aiCategoryTypes : Array<CategoryType>) {
         const hasWritePermission : boolean = BaseEntitySecurityService.hasPermission(
             authorizationContext,
             SecuredResourceType.AI,
@@ -48,15 +38,21 @@ export class AICategoryService {
         if (!hasWritePermission) {
             throw new ForbiddenError("Forbidden");
         }
-        let areRecordsDeleted : boolean = false;
-        aiCategoryTypes.map(async (aiCategoryType) => {
-            const aiId : any = aiCategoryType.aiId;
-            const categoryType : CategoryType = aiCategoryType.categoryType;
-            if (!areRecordsDeleted) {
-                await prismadb.aICategoryType.deleteMany({where: {aiId: aiId}});
-                areRecordsDeleted = true;
-            }
-            await prismadb.aICategoryType.create({data : { aiId, categoryType }});
+
+        await prismadb.$transaction(async (tx) => {
+            await tx.aICategoryType.deleteMany({
+                where: { aiId },
+            });
+            let createData = aiCategoryTypes.map((categoryType) => {
+                return {
+                    aiId,
+                    categoryType,
+                };
+            });
+            await tx.aICategoryType.createMany({
+                data: createData,
+                skipDuplicates: true,
+            });
         });
     }
 }

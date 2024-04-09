@@ -9,3 +9,7 @@ export const CategoryTypes = [
     { name: "Human Resources", id: "HUMAN_RESOURCES" },
     { name: "Accounting & Finance", id: "ACCOUNTING_FINANCE" },
 ];
+
+export const CategoryTypesMap: Record<string, string> = {};
+CategoryTypes.forEach((category : { name: string; id: string }) => CategoryTypesMap[category.id] = category.name);
+

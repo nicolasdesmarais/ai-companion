@@ -6,6 +6,7 @@ import {SecuredAction} from "@/src/security/models/SecuredAction";
 import {SecuredResourceAccessLevel} from "@/src/security/models/SecuredResourceAccessLevel";
 import {AuthorizationContext} from "@/src/security/models/AuthorizationContext";
 import {aiCategoryService, AICategoryTypeInterface} from "@/src/domain/services/AICategoryService";
+import {CategoryType} from "@prisma/client";
 
 async function getHandler(
     request: NextRequest,
@@ -19,6 +20,31 @@ async function getHandler(
     const aiCategories : Array<AICategoryTypeInterface> = await aiCategoryService.getAICategoryTypes(authorizationContext, aiId);
     return NextResponse.json(aiCategories);
 }
+
+
+
+async function postHandler(
+    request: Request,
+    context: {
+        params: { aiId : string, categoryTypes : Array<CategoryType> };
+        authorizationContext: AuthorizationContext;
+    }
+) {
+    const categoryTypes : Array<CategoryType> = await request.json();
+    const { params, authorizationContext } = context;
+    const aiId = params.aiId;
+    const response = await aiCategoryService.performUpdateOrCreateAICategoryType(authorizationContext, aiId, categoryTypes);
+    return NextResponse.json({status: 'success', data: response});
+}
+
+export const POST = withErrorHandler(
+    withAuthorization(
+        SecuredResourceType.AI,
+        SecuredAction.WRITE,
+        [SecuredResourceAccessLevel.INSTANCE],
+        postHandler
+    )
+);
 
 export const GET = withErrorHandler(
     withAuthorization(
