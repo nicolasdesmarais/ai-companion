@@ -25,9 +25,9 @@ const LandingFeatures = () => {
       >
         <div className="flex flex-col-reverse lg:flex-row">
           <div className="flex justify-center items-center lg:w-[560px] lg:w-[524px] mt-8 lg:mt-0">
-            <Link href="/signup" className="px-8 py-2 bg-sky">
-              Sign up
-            </Link>
+            <video width="640" height="420" autoPlay loop muted playsInline>
+              <source src="/create-demo.mp4" type="video/mp4" />
+            </video>
           </div>
           <div className="lg:w-[460px] gap-8 flex flex-col mt-10 lg:mt-0 lg:ml-20 justify-center">
             <div className="text-3xl font-bold">Start here with a tour</div>

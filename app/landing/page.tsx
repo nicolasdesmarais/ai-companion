@@ -3,7 +3,6 @@ import LandingCTA from "@/components/landing-cta";
 import LandingFooter from "@/components/landing-footer";
 import LandingStartChat from "@/components/landing-start-chat";
 import LandingTutorials from "@/components/landing-tutorials";
-import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 const LandingHome = () => {
@@ -26,10 +25,6 @@ const LandingHome = () => {
             <div className="flex justify-evenly md:w-[440px]">
               <Link href="/signup" className="px-8 py-2 bg-sky">
                 Sign up
-              </Link>
-              <Link href="/landing/resources#tour" className="px-4 py-2">
-                Take a tour
-                <ArrowRight className="inline-block w-4 h-4 ml-2" />
               </Link>
             </div>
           </div>
