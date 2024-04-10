@@ -23,7 +23,7 @@ import { SystemMessage } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
 import {
   AI,
-  AIVisibility,
+  AIVisibility, CategoryType,
   DataSourceRefreshPeriod,
   DataSourceType,
   GroupAI,
@@ -39,6 +39,7 @@ import aiModelService from "./AIModelService";
 import dataSourceManagementService from "./DataSourceManagementService";
 import groupService from "./GroupService";
 import invitationService from "./InvitationService";
+import {CategoryTypesHardcoded} from "@/components/category-types";
 
 const openai = new ChatOpenAI({
   azureOpenAIApiKey: process.env.AZURE_GPT35_KEY,
@@ -359,13 +360,12 @@ export class AIService {
         whereCondition.AND.push(this.getGroupCriteria(orgId, groupId));
       }
     }
-    if (categoryId) {
-      whereCondition.AND.push(this.getCategoryCriteria(categoryId));
-    }
     if (search) {
       whereCondition.AND.push(this.getSearchCriteria(search));
     }
-
+    if (categoryId) {
+        whereCondition.AND.push(this.getCategoryCriteria(categoryId));
+    }
     if (approvedByOrg !== null && approvedByOrg !== undefined) {
       whereCondition.AND.push(
         this.getApprovedByOrgCriteria(orgId, approvedByOrg)
@@ -781,7 +781,13 @@ export class AIService {
   }
 
   private getCategoryCriteria(categoryId: string) {
-    return { categoryId: categoryId };
+    return {
+      aiCategoryTypes: {
+        some: {
+          categoryType: CategoryTypesHardcoded[categoryId] as CategoryType
+        }
+      }
+    };
   }
 
   private getSearchCriteria(search: string) {

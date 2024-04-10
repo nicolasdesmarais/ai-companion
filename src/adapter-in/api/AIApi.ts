@@ -1,6 +1,6 @@
 import { AIDetailDto, AIProfile } from "@/src/domain/models/AI";
 import { AIModelOptions } from "@/src/domain/models/AIModel";
-import { AIVisibility } from "@prisma/client";
+import {AIVisibility, CategoryType} from "@prisma/client";
 
 export interface ListAIsResponse {
   data: AIDetailDto[];
