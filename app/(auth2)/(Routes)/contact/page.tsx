@@ -229,7 +229,7 @@ const Contact = () => {
                   </FormItem>
                 )}
               />
-              <Button className="bg-white rounded-md px-16 py-2 text-center text-navy">
+              <Button variant="login">
                 Contact Us
                 {loading ? <Loader className="w-4 h-4 ml-2 spinner" /> : null}
               </Button>

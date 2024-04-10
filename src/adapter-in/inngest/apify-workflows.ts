@@ -1,14 +1,10 @@
-import {
-  DataSourceItem,
-  RetrieveContentResponseStatus,
-} from "@/src/adapter-out/knowledge/types/DataSourceTypes";
+import { DataSourceItem } from "@/src/adapter-out/knowledge/types/DataSourceTypes";
 
 import apifyWebsiteContentCrawler, {
   ActorRunItem,
   ActorRunResult,
   ActorRunStatus,
 } from "@/src/adapter-out/knowledge/web-urls/ApifyWebsiteContentCrawler";
-import webUrlsWebScraperAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsWebScraperAdapter";
 import { WebUrlMetadata } from "@/src/adapter-out/knowledge/web-urls/types/WebUrlMetadata";
 import {
   DataSourceItemListReceivedPayload,
@@ -18,11 +14,9 @@ import {
 import { ApifyWebhookEvent } from "@/src/domain/models/ApifyWebhookEvent";
 import dataSourceManagementService from "@/src/domain/services/DataSourceManagementService";
 import dataSourceViewingService from "@/src/domain/services/DataSourceViewingService";
-import knowledgeService from "@/src/domain/services/KnowledgeService";
 import { inngest } from "./client";
 
 const LIST_RESULTS_BATCH_SIZE = 10;
-const useCheerioAdapter = process.env.USE_CHEERIO_ADAPTER === "true";
 
 export enum ApifyEvent {
   APIFY_ACTOR_RUN_REQUESTED = "apify.actor.run.requested",
@@ -41,7 +35,12 @@ export interface ApifyWebhookReceivedPayload {
 }
 
 export const onApifyActorRunRequested = inngest.createFunction(
-  { id: "on-apify-actor-run-requested", concurrency: 12 },
+  {
+    id: "on-apify-actor-run-requested",
+    concurrency: {
+      limit: 12,
+    },
+  },
   { event: ApifyEvent.APIFY_ACTOR_RUN_REQUESTED },
   async ({ event, step }) => {
     const { orgId, dataSourceId, knowledgeId, url } =
@@ -81,7 +80,8 @@ export const onApifyActorRunRequested = inngest.createFunction(
       const { actorRunResult, rootItems: batchRootItems } = await pollActorRun(
         dataSourceId,
         actorRunId,
-        step
+        step,
+        iteration
       );
       rootItems.push(...batchRootItems);
 
@@ -106,18 +106,14 @@ export const onApifyWebhookReceived = inngest.createFunction(
     const { apifyEvent } = event.data as ApifyWebhookReceivedPayload;
     const { dataSourceId, knowledgeId, eventData } = apifyEvent;
 
-    if (useCheerioAdapter) {
-      const { rootItems } = await pollActorRun(
-        dataSourceId,
-        eventData.actorRunId,
-        step
-      );
+    const { rootItems } = await pollActorRun(
+      dataSourceId,
+      eventData.actorRunId,
+      step
+    );
 
-      for (const item of rootItems) {
-        await publishRootUrlEvent(dataSourceId, knowledgeId, item, step);
-      }
-    } else {
-      await processWebScraperWebhook(apifyEvent, step);
+    for (const item of rootItems) {
+      await publishRootUrlEvent(dataSourceId, knowledgeId, item, step);
     }
   }
 );
@@ -125,7 +121,8 @@ export const onApifyWebhookReceived = inngest.createFunction(
 const pollActorRun = async (
   dataSourceId: string,
   actorRunId: string,
-  step: any
+  step: any,
+  iteration?: number
 ) => {
   const dataSource = await dataSourceViewingService.getById(dataSourceId);
 
@@ -135,13 +132,16 @@ const pollActorRun = async (
   let actorRunResult: ActorRunResult;
   const rootItems: ActorRunItem[] = [];
   do {
-    actorRunResult = await step.run("get-actor-run-batch", async () => {
-      return await apifyWebsiteContentCrawler.getActorRunBatch(
-        actorRunId,
-        offset,
-        LIST_RESULTS_BATCH_SIZE
-      );
-    });
+    actorRunResult = await step.run(
+      `get-actor-run-batch-${iteration}`,
+      async () => {
+        return await apifyWebsiteContentCrawler.getActorRunBatch(
+          actorRunId,
+          offset,
+          LIST_RESULTS_BATCH_SIZE
+        );
+      }
+    );
 
     batchResults = actorRunResult.items.length;
     if (batchResults > 0) {
@@ -225,42 +225,4 @@ const mapActorRunItemToDataSourceItem = (
     },
     metadata,
   };
-};
-
-const processWebScraperWebhook = async (
-  apifyEvent: ApifyWebhookEvent,
-  step: any
-) => {
-  const { dataSourceId, knowledgeId } = apifyEvent;
-
-  const knowledge = await step.run("fetch-knowledge", async () => {
-    return await knowledgeService.getKnowledge(knowledgeId);
-  });
-
-  const retrieveContentResponse = await step.run(
-    "retrieve-content-from-event",
-    async () => {
-      return await webUrlsWebScraperAdapter.retrieveContentFromEvent(
-        knowledge,
-        apifyEvent
-      );
-    }
-  );
-
-  const { originalContent } = retrieveContentResponse;
-  if (
-    retrieveContentResponse.status === RetrieveContentResponseStatus.SUCCESS &&
-    originalContent
-  ) {
-    const knowledgeContentRetrievedEventPayload: KnowledgeContentReceivedPayload =
-      {
-        dataSourceId,
-        knowledgeId,
-        originalContent,
-      };
-    await step.sendEvent("knowledge-content-received-event", {
-      name: DomainEvent.KNOWLEDGE_CONTENT_RETRIEVED,
-      data: knowledgeContentRetrievedEventPayload,
-    });
-  }
 };

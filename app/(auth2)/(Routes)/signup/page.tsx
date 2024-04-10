@@ -172,10 +172,7 @@ const SignUp = () => {
                   placeholder="Verification Code"
                   onChange={(e) => setCode(e.target.value)}
                 />
-                <Button
-                  className="bg-white rounded-md px-16 py-2 text-center text-navy"
-                  onClick={onPressVerify}
-                >
+                <Button variant="login" onClick={onPressVerify}>
                   Verify Email
                   {loading ? <Loader className="w-4 h-4 ml-2 spinner" /> : null}
                 </Button>
@@ -184,7 +181,8 @@ const SignUp = () => {
           ) : (
             <>
               <Button
-                className="bg-white rounded-md px-16 py-2 text-navy"
+                variant="login"
+                size="wide"
                 onClick={() => signInWith("oauth_google")}
               >
                 Continue with Google
@@ -225,10 +223,7 @@ const SignUp = () => {
                   </span>
                 </div>
 
-                <Button
-                  className="bg-white rounded-md px-16 py-2 text-center text-navy"
-                  onClick={handleSubmit}
-                >
+                <Button variant="login" onClick={handleSubmit}>
                   Continue
                   {loading || isSignedIn ? (
                     <Loader className="w-4 h-4 ml-2 spinner" />

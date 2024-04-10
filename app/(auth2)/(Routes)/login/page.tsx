@@ -70,7 +70,8 @@ const Login = () => {
         <div className="bg-gradient4 z-10 rounded-lg flex flex-col items-center p-8 md:p-16 mx-2 mt-16">
           <h1 className="text-3xl mb-12 font-bold">Log in</h1>
           <Button
-            className="bg-white rounded-md px-16 py-2 text-navy"
+            variant="login"
+            size="wide"
             onClick={() => signInWith("oauth_google")}
           >
             Continue with Google
@@ -107,10 +108,7 @@ const Login = () => {
                 Forgot your password?
               </Link>
             </div>
-            <Button
-              className="bg-white rounded-md px-16 py-2 text-center text-navy"
-              onClick={handleSubmit}
-            >
+            <Button variant="login" onClick={handleSubmit}>
               Continue
               {loading || isSignedIn ? (
                 <Loader className="w-4 h-4 ml-2 spinner" />

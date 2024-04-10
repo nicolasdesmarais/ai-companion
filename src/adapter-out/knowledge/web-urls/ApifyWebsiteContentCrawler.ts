@@ -104,7 +104,7 @@ export class ApifyWebsiteContentCrawler {
       saveMarkdown: true,
       startUrls: [
         {
-          url,
+          url: urlObj.href,
         },
       ],
       includeUrlGlobs: [`${basePath}/**/*`],
