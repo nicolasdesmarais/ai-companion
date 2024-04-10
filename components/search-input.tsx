@@ -44,31 +44,38 @@ export const SearchInput = ({ scopeParam }: Props) => {
     scopeParam = "/";
   }
 
-  async function getClerkUserPublicMetaData(key: string) {
-    const userId: any = clerk.user?.id;
-    if (!userId) return {};
-    const getUser  = await axios.get(`/api/v1/clerk/${userId}`);
-    console.log(getUser.data)
-    return getUser.data.publicMetadata[key];
-  }
-
   useEffect(() => {
-    const userId: any = clerk.user?.id;
-    console.log(userId)
-    if (!scopeParam || scopeParam === "/" || scopeParam === "public") {
-      const key : string = `sort${scopeParam ? "-" + scopeParam : "-/"}`;
-      const sortClerkValue : any = getClerkUserPublicMetaData(key);
-      setSort( sortClerkValue || "rating");
-    } else if (scopeParam === "shared" || scopeParam === "owned") {
-      const key : string = `sort${"-" + scopeParam }`;
-      const sortClerkValue : any = getClerkUserPublicMetaData(key);
-      setSort(sortClerkValue || "newest");
-    } else {
-      const key : string = `sort${"-" + scopeParam}`;
-      const sortClerkValue : any = getClerkUserPublicMetaData(key);
-      setSort(sortClerkValue || "popularity");
+    const setDefaultSort = async () => {
+      if (!scopeParam || scopeParam === "/" || scopeParam === "public") {
+        setSort("rating");
+      } else if (scopeParam === "shared" || scopeParam === "owned") {
+        setSort("newest");
+      } else {
+        setSort("popularity");
+      }
     }
-  }, [scopeParam]);
+    const fetchMetaData = async (userId : string, key: string) => {
+        const response = await axios.get(`/api/v1/clerk/${userId}`);
+        setSort(response.data.publicMetadata[key]);
+    }
+
+    if (clerk.user?.id) {
+      if (!scopeParam || scopeParam === "/" || scopeParam === "public") {
+        const key: string = `sort${scopeParam ? "-" + scopeParam : "-/"}`;
+        fetchMetaData(clerk.user?.id, key);
+      } else if (scopeParam === "shared" || scopeParam === "owned") {
+        const key: string = `sort${"-" + scopeParam}`;
+        fetchMetaData(clerk.user?.id, key);
+      } else {
+        const key: string = `sort${"-" + scopeParam}`;
+        fetchMetaData(clerk.user?.id, key);
+      }
+    }
+
+    if (!sort) {
+      setDefaultSort();
+    }
+  }, [clerk.user?.id, scopeParam]);
 
   async function onSortChange(value: string) {
     setSort(value);
