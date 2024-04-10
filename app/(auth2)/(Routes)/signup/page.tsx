@@ -23,6 +23,7 @@ const SignUp = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [type, setType] = useState("password");
+  const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
 
   let host = "https://appdirect.ai",
@@ -41,13 +42,20 @@ const SignUp = () => {
     }
   }, [isSignedIn]);
 
-  const signInWith = (strategy: OAuthStrategy) => {
+  const signInWith = async (strategy: OAuthStrategy) => {
     if (signUp) {
-      return signUp.authenticateWithRedirect({
-        strategy,
-        redirectUrl: "/org-selection",
-        redirectUrlComplete: "/org-selection",
-      });
+      setGoogleLoading(true);
+      try {
+        await signUp.authenticateWithRedirect({
+          strategy,
+          redirectUrl: "/org-selection",
+          redirectUrlComplete: "/org-selection",
+        });
+      } catch (err: any) {
+        setGoogleLoading(false);
+        setError(err.errors[0].message || "An error occurred");
+        console.error(JSON.stringify(err, null, 2));
+      }
     }
   };
 
@@ -185,6 +193,9 @@ const SignUp = () => {
                 onClick={() => signInWith("oauth_google")}
               >
                 Continue with Google
+                {googleLoading ? (
+                  <Loader className="w-4 h-4 ml-2 spinner" />
+                ) : null}
               </Button>
               <div className="mt-8 flex text-white text-sm justify-stretch w-full items-center">
                 <div className="border-b border-white grow h-1"></div>
