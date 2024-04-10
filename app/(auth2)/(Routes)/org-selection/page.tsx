@@ -19,7 +19,6 @@ const OrgSelect = () => {
   useEffect(() => {
     const fetchInvitations = async () => {
       if (clerk.user) {
-        console.log(clerk.user, clerk.user.organizationMemberships.length);
         if (clerk.user.organizationMemberships.length > 0) {
           const organization =
             clerk.user.organizationMemberships[0].organization.id;
@@ -27,14 +26,12 @@ const OrgSelect = () => {
             session: clerk.session?.id,
             organization,
           });
-          router.push("/index/public");
+          router.push("/");
           return;
         } else {
           const result = await clerk.user.getOrganizationInvitations();
           setInvitations(result.data);
           setLoading(false);
-          console.log(result.data);
-          console.log(clerk.user);
         }
       }
     };
@@ -45,9 +42,13 @@ const OrgSelect = () => {
     setJoining(true);
     try {
       const result = await invitation.accept();
-      console.log("joined", result);
       if (result.status === "accepted") {
-        router.push("/");
+        const organization = result.publicOrganizationData.id;
+        await clerk.setActive({
+          session: clerk.session?.id,
+          organization,
+        });
+        router.push("/index/public");
       }
     } catch (e) {
       console.error(e);
