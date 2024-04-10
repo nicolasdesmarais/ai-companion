@@ -136,10 +136,12 @@ const SignUp = () => {
         router.push("/org-selection");
       } else {
         setLoading(false);
+        setError("A verification error occurred");
         console.error(JSON.stringify(completeSignUp, null, 2));
       }
     } catch (err: any) {
       setLoading(false);
+      setError(err.errors[0].longMessage || "An error occurred");
       console.error(JSON.stringify(err, null, 2));
     }
   };
@@ -162,6 +164,7 @@ const SignUp = () => {
           {pendingVerification ? (
             <>
               <div>Check your email for a verification code</div>
+              <div className="text-red-500 text-sm pt-4">{error}</div>
               <div className="flex flex-col gap-8 mt-8">
                 <input
                   value={code}
@@ -169,10 +172,7 @@ const SignUp = () => {
                   placeholder="Verification Code"
                   onChange={(e) => setCode(e.target.value)}
                 />
-                <Button
-                  className="bg-white rounded-md px-16 py-2 text-center text-navy"
-                  onClick={onPressVerify}
-                >
+                <Button variant="login" onClick={onPressVerify}>
                   Verify Email
                 </Button>
               </div>
@@ -180,7 +180,8 @@ const SignUp = () => {
           ) : (
             <>
               <Button
-                className="bg-white rounded-md px-16 py-2 text-navy"
+                variant="login"
+                size="wide"
                 onClick={() => signInWith("oauth_google")}
               >
                 Continue with Google
@@ -221,10 +222,7 @@ const SignUp = () => {
                   </span>
                 </div>
 
-                <Button
-                  className="bg-white rounded-md px-16 py-2 text-center text-navy"
-                  onClick={handleSubmit}
-                >
+                <Button variant="login" onClick={handleSubmit}>
                   Continue
                   {loading || isSignedIn ? (
                     <Loader className="w-4 h-4 ml-2 spinner" />

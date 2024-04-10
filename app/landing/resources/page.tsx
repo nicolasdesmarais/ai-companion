@@ -44,6 +44,7 @@ const LandingFeatures = () => {
           <h2 className="text-3xl font-bold text-center">References</h2>
           <div className="grid mt-16 gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             <Link
+              target="_blank"
               href="https://developer.appdirect.com/user-guides/ai/bestpractices"
               className="bg-gradient3 bg-[20%_40%] flex flex-col w-80 px-8 py-16 shadow-lg gap-4 justify-between cursor-pointer"
             >
@@ -57,6 +58,7 @@ const LandingFeatures = () => {
               </div>
             </Link>
             <Link
+              target="_blank"
               href="https://developer.appdirect.com/user-guides/ai/promptengineering"
               className="bg-gradient3 bg-[75%_35%] flex flex-col w-80 px-8 py-16 shadow-lg gap-4 justify-between cursor-pointer"
             >
@@ -70,6 +72,7 @@ const LandingFeatures = () => {
               </div>
             </Link>
             <Link
+              target="_blank"
               href="https://developer.appdirect.com/user-guides/ai/configdatasources"
               className="bg-gradient3 bg-[30%_40%] flex flex-col w-80 px-8 py-16 shadow-lg gap-4 justify-between cursor-pointer"
             >
@@ -92,6 +95,7 @@ const LandingFeatures = () => {
               </div>
             </Link>
             <Link
+              target="_blank"
               href="https://developer.appdirect.com/user-guides/ai/"
               className="bg-gradient3 bg-[30%_70%] flex flex-col w-80 px-8 py-16 shadow-lg gap-4 justify-between cursor-pointer"
             >
@@ -103,6 +107,7 @@ const LandingFeatures = () => {
               </div>
             </Link>
             <Link
+              target="_blank"
               href="https://developer.appdirect.com/user-guides/ai/"
               className="bg-gradient3 bg-[40%_50%] flex flex-col w-80 px-8 py-16 shadow-lg gap-4 justify-between cursor-pointer"
             >

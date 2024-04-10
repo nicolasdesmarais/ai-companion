@@ -3,7 +3,6 @@ import LandingCTA from "@/components/landing-cta";
 import LandingFooter from "@/components/landing-footer";
 import LandingStartChat from "@/components/landing-start-chat";
 import LandingTutorials from "@/components/landing-tutorials";
-import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 const LandingHome = () => {
@@ -26,10 +25,6 @@ const LandingHome = () => {
             <div className="flex justify-evenly md:w-[440px]">
               <Link href="/signup" className="px-8 py-2 bg-sky">
                 Sign up
-              </Link>
-              <Link href="/landing/resources#tour" className="px-4 py-2">
-                Take a tour
-                <ArrowRight className="inline-block w-4 h-4 ml-2" />
               </Link>
             </div>
           </div>
@@ -153,8 +148,8 @@ const LandingHome = () => {
           AI apps ready to use today, purpose-built to help you solve business
           problems, gain insights, and manage workloads.
         </h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:w-[1140px]">
-          <Link href="https://appdirect.ai/public/ai/836be20b-b6ca-4f3d-9191-70be800b7bea">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:w-[1020px]">
+          <Link href="/public?categoryId=ACCOUNTING">
             <div className="bg-[#F0F0F0] px-8 py-4 shadow-lg flex items-center">
               <svg
                 width="54"
@@ -172,7 +167,7 @@ const LandingHome = () => {
               <div className="ml-4">Accounting & Finance</div>
             </div>
           </Link>
-          <Link href="https://appdirect.ai/public/ai/5b9caaf0-be67-4541-ad1b-b9784c2fb0d9">
+          <Link href="/public?categoryId=ENG">
             <div className="bg-[#F0F0F0] px-8 py-4 shadow-lg flex items-center">
               <svg
                 width="54"
@@ -190,7 +185,7 @@ const LandingHome = () => {
               <div className="ml-4">Engineering</div>
             </div>
           </Link>
-          <Link href="https://appdirect.ai/public/ai/14112ef6-dd35-4b7a-b6ac-b71042a5416c">
+          <Link href="/public?categoryId=HR">
             <div className="bg-[#F0F0F0] px-8 py-4 shadow-lg flex items-center">
               <svg
                 width="55"
@@ -212,7 +207,7 @@ const LandingHome = () => {
               <div className="ml-4">Human Resources</div>
             </div>
           </Link>
-          <Link href="https://appdirect.ai/public/ai/d3f4d2d4-4dc3-4964-9d93-9d0a9703cec7">
+          <Link href="/public?categoryId=IT">
             <div className="bg-[#F0F0F0] px-8 py-4 shadow-lg flex items-center">
               <svg
                 width="55"
@@ -230,7 +225,7 @@ const LandingHome = () => {
               <div className="ml-4">Information Technology</div>
             </div>
           </Link>
-          <Link href="https://appdirect.ai/public/ai/278b08b6-947f-4253-af47-587edcfc1840">
+          <Link href="/public?categoryId=LEARNING">
             <div className="bg-[#F0F0F0] px-8 py-4 shadow-lg flex items-center">
               <svg
                 width="55"
@@ -247,7 +242,7 @@ const LandingHome = () => {
               <div className="ml-4">Learning & Development</div>
             </div>
           </Link>
-          <Link href="https://appdirect.ai/public/ai/726f6e8c-a534-4f89-9066-40ef4f5b16c6">
+          <Link href="/public?categoryId=MARKETING">
             <div className="bg-[#F0F0F0] px-8 py-4 shadow-lg flex items-center">
               <svg
                 width="54"
@@ -268,7 +263,7 @@ const LandingHome = () => {
               <div className="ml-4">Marketing</div>
             </div>
           </Link>
-          <Link href="https://appdirect.ai/public/ai/cf94a2e5-379f-4eef-9388-25d823390ea8">
+          <Link href="/public?categoryId=PRODUCTIVITY">
             <div className="bg-[#F0F0F0] px-8 py-4 shadow-lg flex items-center">
               <svg
                 width="55"
@@ -294,7 +289,7 @@ const LandingHome = () => {
               <div className="ml-4">Productivity</div>
             </div>
           </Link>
-          <Link href="https://appdirect.ai/public/ai/7f87d6a6-e9b9-4580-82df-5ff24dbf8151">
+          <Link href="/public?categoryId=SALES">
             <div className="bg-[#F0F0F0] px-8 py-4 shadow-lg flex items-center">
               <svg
                 width="55"

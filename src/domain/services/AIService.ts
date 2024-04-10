@@ -10,6 +10,7 @@ import { AIRepositoryImpl } from "@/src/adapter-out/repositories/AIRepositoryImp
 import { BadRequestError } from "@/src/domain/errors/Errors";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
+import { containsMySQLSpecialChars } from "@/src/lib/utils";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { SecuredAction } from "@/src/security/models/SecuredAction";
 import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
@@ -790,17 +791,23 @@ export class AIService {
   }
 
   private getSearchCriteria(search: string) {
-    const wildSearch = `*${search}*`;
+    let escapedSearch;
+    if (containsMySQLSpecialChars(search)) {
+      escapedSearch = `"${search}"`;
+    } else {
+      escapedSearch = `*${search}*`;
+    }
+
     return {
       OR: [
         {
           name: {
-            search: wildSearch,
+            search: escapedSearch,
           },
         },
         {
           userName: {
-            search: wildSearch,
+            search: escapedSearch,
           },
         },
       ],

@@ -36,7 +36,6 @@ const ais = [
       "Safeguarding business from lawsuits?",
       "Legal implication in hiring contractors?",
       "Legal steps before starting a new business?",
-      "Legal steps before starting a new business?",
     ],
   },
   {
