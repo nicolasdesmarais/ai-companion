@@ -53,6 +53,7 @@ const SignUp = () => {
   };
 
   const handleSubmit = async (e: any) => {
+    setError("");
     e.preventDefault();
     if (!isLoaded || !password || !emailAddress) {
       return;
@@ -119,6 +120,7 @@ const SignUp = () => {
   };
 
   const onPressVerify = async (e: any) => {
+    setError("");
     e.preventDefault();
     if (!isLoaded) {
       return;
@@ -155,10 +157,10 @@ const SignUp = () => {
     }
   };
 
-  const handleKeyDown = (event: any) => {
+  const handleEnter = (event: any, submit: (e: any) => void) => {
     switch (event.key) {
       case "Enter":
-        handleSubmit(event);
+        submit(event);
         break;
       default:
         break;
@@ -182,6 +184,7 @@ const SignUp = () => {
                   className="rounded-md w-80 h-12 px-4 bg-white"
                   placeholder="Verification Code"
                   onChange={(e) => setCode(e.target.value)}
+                  onKeyDown={(e) => handleEnter(e, onPressVerify)}
                 />
                 <Button variant="login" onClick={onPressVerify}>
                   Verify Email
@@ -221,7 +224,7 @@ const SignUp = () => {
                     placeholder="Password"
                     className="rounded-md w-full h-12 px-4 bg-white"
                     onChange={(e) => setPassword(e.target.value)}
-                    onKeyDown={handleKeyDown}
+                    onKeyDown={(e) => handleEnter(e, handleSubmit)}
                     id="password"
                     name="password"
                   />
