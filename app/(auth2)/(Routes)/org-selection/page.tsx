@@ -9,11 +9,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const OrgSelect = () => {
-  const clerk = useClerk();
   const [loading, setLoading] = useState(true);
   const [invitations, setInvitations] = useState<any[]>([]);
   const [error, setError] = useState("");
   const [joining, setJoining] = useState(false);
+  const [company, setCompany] = useState("");
+  const [creating, setCreating] = useState(false);
+  const clerk = useClerk();
   const router = useRouter();
 
   useEffect(() => {
@@ -54,6 +56,23 @@ const OrgSelect = () => {
       console.error(e);
       setJoining(false);
       setError(e.errors[0].message || "An error occurred");
+    }
+  };
+
+  const create = async (e: any) => {
+    e.preventDefault();
+    setCreating(true);
+    try {
+      const org = await clerk.createOrganization({ name: company });
+      await clerk.setActive({
+        session: clerk.session?.id,
+        organization: org.id,
+      });
+      router.push("/index/public");
+    } catch (err: any) {
+      setCreating(false);
+      setError(err.errors[0].message || "An error occurred");
+      console.error(JSON.stringify(err, null, 2));
     }
   };
 
@@ -99,25 +118,25 @@ const OrgSelect = () => {
                     ))}
                   </div>
                   {invitations.length > 0 ? (
-                    <div className="mt-8 flex text-white text-sm justify-stretch w-full items-center">
+                    <div className="mt-8 flex text-white text-sm justify-stretch w-full items-center mb-8">
                       <div className="border-b border-white grow h-1"></div>
                       <div className="grow-0 mx-2">or</div>
                       <div className="border-b border-white grow h-1"></div>
                     </div>
                   ) : null}
-                  <div className="flex flex-col gap-8 mt-8 w-full md:w-80">
+                  <div className="flex flex-col gap-8 w-full md:w-80">
                     <input
                       type="text"
                       placeholder="Company Name"
                       className="rounded-md w-full h-12 px-4 bg-white"
-                      onChange={(e) => {}}
+                      onChange={(e) => setCompany(e.target.value)}
                       id="company"
                       name="company"
                     />
 
-                    <Button variant="login" onClick={() => {}}>
+                    <Button variant="login" onClick={create}>
                       Create New Company
-                      {loading ? (
+                      {creating ? (
                         <Loader className="w-4 h-4 ml-2 spinner" />
                       ) : null}
                     </Button>
