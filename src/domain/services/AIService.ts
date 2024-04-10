@@ -372,7 +372,15 @@ export class AIService {
     }
 
     const ais = await prismadb.aI.findMany({
-      select: {...listAIResponseSelect()},
+      select: {
+        ...listAIResponseSelect(),
+        chats: {
+          where: {
+            userId,
+            isDeleted: false,
+          },
+        },
+      },
       where: whereCondition,
       orderBy: {
         createdAt: "desc",
