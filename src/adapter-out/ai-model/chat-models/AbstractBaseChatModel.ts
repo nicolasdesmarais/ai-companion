@@ -46,11 +46,11 @@ export abstract class AbstractBaseChatModel {
 
     const knowledge = await getKnowledgeCallback(input, tokensUsed);
 
-    const chatLog = [
+    const chatLog = this.ensureAlternatingMessages([
       new SystemMessage(`${engineeredPrompt}${knowledge.knowledge}\n`),
       ...historySeed,
       ...historyMessages,
-    ];
+    ]);
 
     const callbacks = this.getCallbacks(input);
     const chatModel = this.getChatModelInstance(
@@ -80,7 +80,7 @@ export abstract class AbstractBaseChatModel {
   protected createHistorySeed(
     ai: ChatAiForWriteDto
   ): (HumanMessage | AIMessage)[] {
-    return this.ensureAlternatingMessages(this.parseSeed(ai));
+    return this.parseSeed(ai);
   }
 
   private parseSeed(ai: ChatAiForWriteDto): (HumanMessage | AIMessage)[] {
@@ -102,7 +102,7 @@ export abstract class AbstractBaseChatModel {
   protected createHistoryMessages(
     messages: ChatMessageDto[]
   ): (HumanMessage | AIMessage)[] {
-    return this.ensureAlternatingMessages(this.parseMessages(messages));
+    return this.parseMessages(messages);
   }
 
   protected parseMessages(
@@ -146,7 +146,7 @@ export abstract class AbstractBaseChatModel {
     );
   }
 
-  protected ensureAlternatingMessages(
+  private ensureAlternatingMessages(
     messages: (HumanMessage | AIMessage)[]
   ): (HumanMessage | AIMessage)[] {
     const result: (HumanMessage | AIMessage)[] = [];
