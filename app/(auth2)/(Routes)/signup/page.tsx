@@ -22,6 +22,7 @@ const SignUp = () => {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [type, setType] = useState("password");
   const router = useRouter();
 
@@ -122,7 +123,7 @@ const SignUp = () => {
     if (!isLoaded) {
       return;
     }
-    setLoading(true);
+    setVerifying(true);
 
     try {
       const completeSignUp = await signUp.attemptEmailAddressVerification({
@@ -135,12 +136,12 @@ const SignUp = () => {
         ]);
         router.push("/org-selection");
       } else {
-        setLoading(false);
+        setVerifying(false);
         setError("A verification error occurred");
         console.error(JSON.stringify(completeSignUp, null, 2));
       }
     } catch (err: any) {
-      setLoading(false);
+      setVerifying(false);
       setError(err.errors[0].longMessage || "An error occurred");
       console.error(JSON.stringify(err, null, 2));
     }
@@ -174,7 +175,9 @@ const SignUp = () => {
                 />
                 <Button variant="login" onClick={onPressVerify}>
                   Verify Email
-                  {loading ? <Loader className="w-4 h-4 ml-2 spinner" /> : null}
+                  {verifying ? (
+                    <Loader className="w-4 h-4 ml-2 spinner" />
+                  ) : null}
                 </Button>
               </div>
             </>
