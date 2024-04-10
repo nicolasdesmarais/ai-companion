@@ -22,6 +22,7 @@ const SignUp = () => {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [type, setType] = useState("password");
   const router = useRouter();
 
@@ -52,6 +53,7 @@ const SignUp = () => {
   };
 
   const handleSubmit = async (e: any) => {
+    setError("");
     e.preventDefault();
     if (!isLoaded || !password || !emailAddress) {
       return;
@@ -118,11 +120,12 @@ const SignUp = () => {
   };
 
   const onPressVerify = async (e: any) => {
+    setError("");
     e.preventDefault();
     if (!isLoaded) {
       return;
     }
-    setLoading(true);
+    setVerifying(true);
 
     try {
       const completeSignUp = await signUp.attemptEmailAddressVerification({
@@ -135,12 +138,12 @@ const SignUp = () => {
         ]);
         router.push("/org-selection");
       } else {
-        setLoading(false);
+        setVerifying(false);
         setError("A verification error occurred");
         console.error(JSON.stringify(completeSignUp, null, 2));
       }
     } catch (err: any) {
-      setLoading(false);
+      setVerifying(false);
       setError(err.errors[0].longMessage || "An error occurred");
       console.error(JSON.stringify(err, null, 2));
     }
@@ -151,6 +154,16 @@ const SignUp = () => {
       setType("text");
     } else {
       setType("password");
+    }
+  };
+
+  const handleEnter = (event: any, submit: (e: any) => void) => {
+    switch (event.key) {
+      case "Enter":
+        submit(event);
+        break;
+      default:
+        break;
     }
   };
 
@@ -171,9 +184,13 @@ const SignUp = () => {
                   className="rounded-md w-80 h-12 px-4 bg-white"
                   placeholder="Verification Code"
                   onChange={(e) => setCode(e.target.value)}
+                  onKeyDown={(e) => handleEnter(e, onPressVerify)}
                 />
                 <Button variant="login" onClick={onPressVerify}>
                   Verify Email
+                  {verifying ? (
+                    <Loader className="w-4 h-4 ml-2 spinner" />
+                  ) : null}
                 </Button>
               </div>
             </>
@@ -207,6 +224,7 @@ const SignUp = () => {
                     placeholder="Password"
                     className="rounded-md w-full h-12 px-4 bg-white"
                     onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={(e) => handleEnter(e, handleSubmit)}
                     id="password"
                     name="password"
                   />
