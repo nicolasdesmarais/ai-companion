@@ -114,7 +114,7 @@ const Login = () => {
               />
             )}
             <Button
-              className="bg-white rounded-md px-16 py-2 text-center text-navy"
+              variant="login"
               onClick={!successfulCreation ? create : reset}
             >
               Continue
