@@ -15,6 +15,7 @@ import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
 import { ChangeEventHandler, useEffect, useState } from "react";
+import {UserMetaDataInterface} from "@/src/domain/services/ClerkService";
 
 const filterOptions = [
   { id: "popularity", name: "Popularity" },
@@ -43,18 +44,28 @@ export const SearchInput = ({ scopeParam }: Props) => {
     scopeParam = "/";
   }
 
+  async function getClerkUserPublicMetaData(key: string) {
+    const userId: any = clerk.user?.id;
+    if (!userId) return {};
+    const getUser  = await axios.get(`/api/v1/clerk/${userId}`);
+    console.log(getUser.data)
+    return getUser.data.publicMetadata[key];
+  }
+
   useEffect(() => {
+    const userId: any = clerk.user?.id;
+    console.log(userId)
     if (!scopeParam || scopeParam === "/" || scopeParam === "public") {
       const key : string = `sort${scopeParam ? "-" + scopeParam : "-/"}`;
-      const sortClerkValue : any = clerk.user?.publicMetadata[key];
-      setSort(sortClerkValue || "rating");
+      const sortClerkValue : any = getClerkUserPublicMetaData(key);
+      setSort( sortClerkValue || "rating");
     } else if (scopeParam === "shared" || scopeParam === "owned") {
-      const key : string = `sort${scopeParam ? "-" + scopeParam : "-/"}`;
-      const sortClerkValue : any = clerk.user?.publicMetadata[key];
+      const key : string = `sort${"-" + scopeParam }`;
+      const sortClerkValue : any = getClerkUserPublicMetaData(key);
       setSort(sortClerkValue || "newest");
     } else {
-      const key : string = `sort${scopeParam ? "-" + scopeParam : "-/"}`;
-      const sortClerkValue : any = clerk.user?.publicMetadata[key];
+      const key : string = `sort${"-" + scopeParam}`;
+      const sortClerkValue : any = getClerkUserPublicMetaData(key);
       setSort(sortClerkValue || "popularity");
     }
   }, [scopeParam]);
@@ -62,11 +73,9 @@ export const SearchInput = ({ scopeParam }: Props) => {
   async function onSortChange(value: string) {
     setSort(value);
     const key : string = `sort${scopeParam ? "-" + scopeParam : "-/"}`;
-    await axios.post("/api/v1/clerk", {
-      key: key,
-      value,
-      userId: clerk.user?.id,
-    });
+    const userId = clerk.user?.id;
+    const sortKeyValue: UserMetaDataInterface = {key, value};
+    await axios.post(`/api/v1/clerk/${userId}`, sortKeyValue);
   }
 
   const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
