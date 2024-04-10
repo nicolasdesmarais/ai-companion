@@ -35,7 +35,12 @@ export interface ApifyWebhookReceivedPayload {
 }
 
 export const onApifyActorRunRequested = inngest.createFunction(
-  { id: "on-apify-actor-run-requested", concurrency: 12 },
+  {
+    id: "on-apify-actor-run-requested",
+    concurrency: {
+      limit: 12,
+    },
+  },
   { event: ApifyEvent.APIFY_ACTOR_RUN_REQUESTED },
   async ({ event, step }) => {
     const { orgId, dataSourceId, knowledgeId, url } =
@@ -75,7 +80,8 @@ export const onApifyActorRunRequested = inngest.createFunction(
       const { actorRunResult, rootItems: batchRootItems } = await pollActorRun(
         dataSourceId,
         actorRunId,
-        step
+        step,
+        iteration
       );
       rootItems.push(...batchRootItems);
 
@@ -115,7 +121,8 @@ export const onApifyWebhookReceived = inngest.createFunction(
 const pollActorRun = async (
   dataSourceId: string,
   actorRunId: string,
-  step: any
+  step: any,
+  iteration?: number
 ) => {
   const dataSource = await dataSourceViewingService.getById(dataSourceId);
 
@@ -125,13 +132,16 @@ const pollActorRun = async (
   let actorRunResult: ActorRunResult;
   const rootItems: ActorRunItem[] = [];
   do {
-    actorRunResult = await step.run("get-actor-run-batch", async () => {
-      return await apifyWebsiteContentCrawler.getActorRunBatch(
-        actorRunId,
-        offset,
-        LIST_RESULTS_BATCH_SIZE
-      );
-    });
+    actorRunResult = await step.run(
+      `get-actor-run-batch-${iteration}`,
+      async () => {
+        return await apifyWebsiteContentCrawler.getActorRunBatch(
+          actorRunId,
+          offset,
+          LIST_RESULTS_BATCH_SIZE
+        );
+      }
+    );
 
     batchResults = actorRunResult.items.length;
     if (batchResults > 0) {
