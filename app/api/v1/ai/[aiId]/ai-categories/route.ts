@@ -24,7 +24,7 @@ async function getHandler(
 async function postHandler(
     request: Request,
     context: {
-        params: { aiId : string, categoryTypes : Array<CategoryType> };
+        params: { aiId : string };
         authorizationContext: AuthorizationContext;
     }
 ) {
