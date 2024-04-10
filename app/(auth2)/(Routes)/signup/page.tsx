@@ -155,6 +155,16 @@ const SignUp = () => {
     }
   };
 
+  const handleKeyDown = (event: any) => {
+    switch (event.key) {
+      case "Enter":
+        handleSubmit(event);
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <div className="bg-coral md:bg-white flex flex-col text-navy h-screen">
       <LandingNav transparent />
@@ -211,6 +221,7 @@ const SignUp = () => {
                     placeholder="Password"
                     className="rounded-md w-full h-12 px-4 bg-white"
                     onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     id="password"
                     name="password"
                   />
