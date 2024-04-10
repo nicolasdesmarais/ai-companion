@@ -47,16 +47,16 @@ export const POST = withErrorHandler(
   withAuthorization(
     SecuredResourceType.AI,
     SecuredAction.WRITE,
-    [SecuredResourceAccessLevel.INSTANCE],
+    Object.values(SecuredResourceAccessLevel),
     postHandler
   )
 );
 
 export const GET = withErrorHandler(
-    withAuthorization(
-      SecuredResourceType.AI,
-      SecuredAction.READ,
-      [SecuredResourceAccessLevel.INSTANCE],
-      getHandler
-    )
+  withAuthorization(
+    SecuredResourceType.AI,
+    SecuredAction.READ,
+    Object.values(SecuredResourceAccessLevel),
+    getHandler
+  )
 );

@@ -23,7 +23,7 @@ export class ClerkService {
             authorizationContext,
             SecuredResourceType.AI,
             SecuredAction.WRITE,
-            SecuredResourceAccessLevel.INSTANCE
+            SecuredResourceAccessLevel.SELF
         );
 
         if (!hasWritePermission) {
@@ -45,8 +45,7 @@ export class ClerkService {
             throw new ForbiddenError("Forbidden");
         }
 
-        const user : User = await clerkClient.users.getUser(userId);
-        return user;
+        return await clerkClient.users.getUser(userId);
     }
 }
 
