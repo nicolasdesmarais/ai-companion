@@ -39,17 +39,31 @@ export const SearchInput = ({ scopeParam }: Props) => {
   const debouncedValue = useDebounce<string>(value, 500);
   const [sort, setSort] = useState<string | undefined>(sortParam || "");
 
-  let defaultSort = "popularity";
-  if (!scopeParam || scopeParam === "public") {
-    defaultSort = "rating";
-  } else if (scopeParam === "shared" || scopeParam === "owned") {
-    defaultSort = "newest";
+  if (!scopeParam) {
+    scopeParam = "/";
   }
+
+  useEffect(() => {
+    if (!scopeParam || scopeParam === "/" || scopeParam === "public") {
+      const key : string = `sort${scopeParam ? "-" + scopeParam : "-/"}`;
+      const sortClerkValue : any = clerk.user?.publicMetadata[key];
+      setSort(sortClerkValue || "rating");
+    } else if (scopeParam === "shared" || scopeParam === "owned") {
+      const key : string = `sort${scopeParam ? "-" + scopeParam : "-/"}`;
+      const sortClerkValue : any = clerk.user?.publicMetadata[key];
+      setSort(sortClerkValue || "newest");
+    } else {
+      const key : string = `sort${scopeParam ? "-" + scopeParam : "-/"}`;
+      const sortClerkValue : any = clerk.user?.publicMetadata[key];
+      setSort(sortClerkValue || "popularity");
+    }
+  }, [scopeParam]);
 
   async function onSortChange(value: string) {
     setSort(value);
+    const key : string = `sort${scopeParam ? "-" + scopeParam : "-/"}`;
     await axios.post("/api/v1/clerk", {
-      key: `sort${scopeParam ? "-" + scopeParam : ""}`,
+      key: key,
       value,
       userId: clerk.user?.id,
     });
@@ -90,7 +104,7 @@ export const SearchInput = ({ scopeParam }: Props) => {
       </div>
       <Select
         onValueChange={(val) => onSortChange(val)}
-        value={sort || defaultSort}
+        value={sort}
       >
         <SelectTrigger className="bg-accent w-32 md:w-44 ml-4 flex-none">
           <span className="hidden md:inline">Sort By:</span>
