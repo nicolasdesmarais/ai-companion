@@ -362,36 +362,17 @@ export class AIService {
     if (search) {
       whereCondition.AND.push(this.getSearchCriteria(search));
     }
-
+    if (categoryId) {
+        whereCondition.AND.push(this.getCategoryCriteria(categoryId));
+    }
     if (approvedByOrg !== null && approvedByOrg !== undefined) {
       whereCondition.AND.push(
         this.getApprovedByOrgCriteria(orgId, approvedByOrg)
       );
     }
 
-    let categoryType : CategoryType | undefined;
-    try {
-      // @ts-ignore
-      categoryType = CategoryTypesHardcoded[categoryId] as CategoryType
-    } catch (error) {
-      console.error("Error parsing category type", error);
-      categoryType = undefined;
-    }
-
-    let selectClause = {...listAIResponseSelect(), chats: {
-        where: {
-          userId,
-          isDeleted: false,
-        },
-      },
-    }
-
-    if (categoryType != undefined && categoryId != "NONE") {
-      selectClause["aicategorytypes"] = {where: {categoryType: categoryType}};
-    }
-
     const ais = await prismadb.aI.findMany({
-      select: selectClause,
+      select: {...listAIResponseSelect()},
       where: whereCondition,
       orderBy: {
         createdAt: "desc",
@@ -791,7 +772,13 @@ export class AIService {
   }
 
   private getCategoryCriteria(categoryId: string) {
-    return { categoryId: categoryId };
+    return {
+      aiCategoryTypes: {
+        some: {
+          categoryType: CategoryTypesHardcoded[categoryId] as CategoryType
+        }
+      }
+    };
   }
 
   private getSearchCriteria(search: string) {

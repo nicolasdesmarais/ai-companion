@@ -9,7 +9,7 @@ export interface ListAIsResponse {
 export interface ListAIsRequestParams {
   scope?: ListAIsRequestScope | null;
   groupId?: string | null;
-  categoryId?: CategoryType |string | null;
+  categoryId?: string | null;
   approvedByOrg?: boolean | null;
   search?: string | null;
   sort?: string | null;

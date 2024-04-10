@@ -514,30 +514,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                 render={({ field }) => (
                   <FormItem className="col-span-2 md:col-span-1">
                     <FormLabel>Category</FormLabel>
-                    {false &&
-                        <Select
-                        disabled={isLoading}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="bg-background">
-                          <SelectValue
-                              defaultValue={field.value}
-                              placeholder="Select a category"
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.name}
-                            </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>}
-
                         <MultiSelect
                         itemLabel="Category"
                         items={CategoryTypes}
