@@ -6,13 +6,10 @@ import {
   ContentRetrievingDataSourceAdapter,
   DataSourceAdapter,
 } from "@/src/adapter-out/knowledge/types/DataSourceAdapter";
-import webUrlsWebScraperAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsWebScraperAdapter";
 import webUrlsWebsiteContentCrawlerAdapter from "@/src/adapter-out/knowledge/web-urls/WebUrlsWebsiteContentCrawlerAdapter";
 import prismadb from "@/src/lib/prismadb";
 import { DataSource, DataSourceType } from "@prisma/client";
 import { EntityNotFoundError } from "../errors/Errors";
-
-const useCheerioAdapter = process.env.USE_CHEERIO_ADAPTER === "true";
 
 export class DataSourceAdapterService {
   /**
@@ -41,9 +38,7 @@ export class DataSourceAdapterService {
       case DataSourceType.GOOGLE_DRIVE:
         return googleDriveDataSourceAdapter;
       case DataSourceType.WEB_URL:
-        return useCheerioAdapter
-          ? webUrlsWebsiteContentCrawlerAdapter
-          : webUrlsWebScraperAdapter;
+        return webUrlsWebsiteContentCrawlerAdapter;
       case DataSourceType.FILE_UPLOAD:
         return fileUploadDataSourceAdapter;
       case DataSourceType.API:
@@ -62,9 +57,7 @@ export class DataSourceAdapterService {
       case DataSourceType.GOOGLE_DRIVE:
         return googleDriveDataSourceAdapter;
       case DataSourceType.WEB_URL:
-        return useCheerioAdapter
-          ? webUrlsWebsiteContentCrawlerAdapter
-          : webUrlsWebScraperAdapter;
+        return webUrlsWebsiteContentCrawlerAdapter;
       case DataSourceType.ONEDRIVE:
         return msftDataSourceAdapter;
       default:
