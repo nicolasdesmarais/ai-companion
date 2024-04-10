@@ -69,19 +69,6 @@ const Login = () => {
       <div className="h-full w-full flex flex-col items-center justify-center">
         <div className="bg-gradient4 z-10 rounded-lg flex flex-col items-center p-8 md:p-16 mx-2 mt-16">
           <h1 className="text-3xl mb-12 font-bold">Log in</h1>
-          <Button
-            variant="login"
-            size="wide"
-            onClick={() => signInWith("oauth_google")}
-          >
-            Continue with Google
-            {ssoLoading ? <Loader className="w-4 h-4 ml-2 spinner" /> : null}
-          </Button>
-          <div className="mt-8 flex text-white text-sm justify-stretch w-full items-center">
-            <div className="border-b border-white grow h-1"></div>
-            <div className="grow-0 mx-2">or</div>
-            <div className="border-b border-white grow h-1"></div>
-          </div>
           <div className="text-red-500 text-sm pt-4">{error}</div>
           <div className="flex flex-col gap-8 mt-8 w-full md:w-80">
             <input
