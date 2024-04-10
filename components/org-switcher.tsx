@@ -83,20 +83,20 @@ export const OrgSwitcher = ({ setOpen }: Props) => {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuGroup>
-          <div className={itemClass}>
-            <DropdownMenuItem
-              onClick={() => {
-                if (isMobile) {
-                  setOpen(false);
-                }
-                clerk.openOrganizationProfile({
-                  appearance: {
-                    baseTheme: dark,
-                  },
-                });
-              }}
-              className="focus:bg-transparent"
-            >
+          <div
+            className={itemClass}
+            onClick={() => {
+              if (isMobile) {
+                setOpen(false);
+              }
+              clerk.openOrganizationProfile({
+                appearance: {
+                  baseTheme: dark,
+                },
+              });
+            }}
+          >
+            <DropdownMenuItem className="focus:bg-transparent">
               <Settings className="h-4 w-4 mr-6 ml-2" />
               Manage Organization
             </DropdownMenuItem>
@@ -141,20 +141,20 @@ export const OrgSwitcher = ({ setOpen }: Props) => {
               </div>
             )
         )}
-        <div className={itemClass}>
-          <DropdownMenuItem
-            onClick={() => {
-              if (isMobile) {
-                setOpen(false);
-              }
-              clerk.openCreateOrganization({
-                appearance: {
-                  baseTheme: dark,
-                },
-              });
-            }}
-            className="focus:bg-transparent"
-          >
+        <div
+          className={itemClass}
+          onClick={() => {
+            if (isMobile) {
+              setOpen(false);
+            }
+            clerk.openCreateOrganization({
+              appearance: {
+                baseTheme: dark,
+              },
+            });
+          }}
+        >
+          <DropdownMenuItem className="focus:bg-transparent">
             <div className="flex">
               <Plus className="h-5 w-5 mr-6 ml-2" />
               Create Organization
