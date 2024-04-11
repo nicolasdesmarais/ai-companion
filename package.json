@@ -10,7 +10,8 @@
     "postinstall": "prisma generate",
     "seed": "node ./scripts/seed.ts",
     "test": "jest",
-    "test-watch": "jest src --watch"
+    "test-watch": "jest src --watch",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build"
   },
   "overrides": {
     "@pinecone-database/pinecone": "2.0.1"
