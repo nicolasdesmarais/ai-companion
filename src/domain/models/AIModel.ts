@@ -14,6 +14,7 @@ export interface AIModelOptions {
   topP: RangeOption;
   topK?: RangeOption;
   maxTokens: RangeOption;
+  maxInputTokens: RangeOption;
   frequencyPenalty?: RangeOption;
   presencePenalty?: RangeOption;
 }
