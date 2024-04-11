@@ -1,5 +1,6 @@
 "use client";
 
+import { CategoryTypes, CategoryTypesMap } from "@/components/category-types";
 import { ImageUpload } from "@/components/image-upload";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,6 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { MultiSelect } from "@/components/ui/multi-select";
 import {
   Select,
   SelectContent,
@@ -27,15 +29,13 @@ import { useGroupModal } from "@/hooks/use-group-modal";
 import { useTalkModal } from "@/hooks/use-talk-modal";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { getDiversityString } from "@/src/lib/diversity";
-import {AIVisibility, Category, CategoryType} from "@prisma/client";
+import { AIVisibility, Category, CategoryType } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { Loader, Play, Settings, Wand2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { imageModels, voices } from "./ai-models";
 import { TalkModal } from "./talk-modal";
-import {MultiSelect} from "@/components/ui/multi-select";
-import {CategoryTypes, CategoryTypesMap} from "@/components/category-types";
 
 const PREAMBLE =
   "ex: As a Support Specialist AI, your role is to provide solutions to user inquiries. This involves understanding the nature of the questions, interpreting their context, and yielding the correct responses. The effectiveness of your position is evaluated based on the accuracy of your responses and the satisfaction of users. Precision in answering and user satisfaction are your primary goals.";
@@ -298,32 +298,40 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   };
 
   useEffect(() => {
-    const fetchCategoryTypesByAI = async() => {
+    const fetchCategoryTypesByAI = async () => {
       try {
         const aiId = form.getValues("id");
-        const response =  await axios.get(`/api/v1/ai/${aiId}/ai-categories`);
-        const data : any[] = [];
-        response.data.map((value: any) => {data.push({id: value.categoryType, name: CategoryTypesMap[value.categoryType]});});
+        const response = await axios.get(`/api/v1/ai/${aiId}/ai-categories`);
+        const data: any[] = [];
+        response.data.map((value: any) => {
+          data.push({
+            id: value.categoryType,
+            name: CategoryTypesMap[value.categoryType],
+          });
+        });
         setSelectedValues(data);
       } catch (error: any) {
         toast({
           variant: "destructive",
           description:
-              String((error as AxiosError).response?.data) ||
-              "Something went wrong.",
+            String((error as AxiosError).response?.data) ||
+            "Something went wrong.",
           duration: 6000,
         });
       }
     };
-
-    fetchCategoryTypesByAI();
+    if (hasInstanceAccess) {
+      fetchCategoryTypesByAI();
+    }
   }, [toast]);
 
   const onSubmitSorts = async (values: any) => {
     try {
-      const aiId : any = form.getValues("id");
+      const aiId: any = form.getValues("id");
       const data: Array<CategoryType> = [];
-      values.data.map((categoryType: any) => {data.push(categoryType)});
+      values.data.map((categoryType: any) => {
+        data.push(categoryType);
+      });
       await axios.post(`/api/v1/ai/${aiId}/ai-categories`, data);
     } catch (error) {
       console.error(error);
@@ -514,15 +522,39 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                 render={({ field }) => (
                   <FormItem className="col-span-2 md:col-span-1">
                     <FormLabel>Category</FormLabel>
-                        <MultiSelect
-                        itemLabel="Category"
-                        items={CategoryTypes}
-                        values={selectedValues}
-                        onChange={(values: any[]) => {
-                          setSelectedValues(values),
-                          onSubmitSorts({data : values.map((value) => value.id)})
-                        }}
-                        />
+                    <MultiSelect
+                      itemLabel="Category"
+                      items={CategoryTypes}
+                      values={selectedValues}
+                      onChange={(values: any[]) => {
+                        setSelectedValues(values),
+                          onSubmitSorts({
+                            data: values.map((value) => value.id),
+                          });
+                      }}
+                    />
+                    <Select
+                      disabled={isLoading}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="bg-background">
+                          <SelectValue
+                            defaultValue={field.value}
+                            placeholder="Select a category"
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormDescription>
                       Select the public category for your AI
                     </FormDescription>
