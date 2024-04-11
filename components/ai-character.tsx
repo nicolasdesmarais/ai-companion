@@ -1,5 +1,6 @@
 "use client";
 
+import { CategoryTypes, CategoryTypesMap } from "@/components/category-types";
 import { ImageUpload } from "@/components/image-upload";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,6 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { MultiSelect } from "@/components/ui/multi-select";
 import {
   Select,
   SelectContent,
@@ -27,7 +29,7 @@ import { useGroupModal } from "@/hooks/use-group-modal";
 import { useTalkModal } from "@/hooks/use-talk-modal";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { getDiversityString } from "@/src/lib/diversity";
-import { AIVisibility, Category } from "@prisma/client";
+import { AIVisibility, Category, CategoryType } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { Loader, Play, Settings, Wand2 } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -95,6 +97,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [generatingAll, setGeneratingAll] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0]);
+  const [selectedValues, setSelectedValues] = useState<any[]>([]);
 
   const isLoading = form.formState.isSubmitting;
   const voiceEnabled = false && window.location.hostname !== "appdirect.ai";
@@ -294,6 +297,51 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
     save();
   };
 
+  useEffect(() => {
+    const fetchCategoryTypesByAI = async () => {
+      try {
+        const aiId = form.getValues("id");
+        const response = await axios.get(`/api/v1/ai/${aiId}/ai-categories`);
+        const data: any[] = [];
+        response.data.map((value: any) => {
+          data.push({
+            id: value.categoryType,
+            name: CategoryTypesMap[value.categoryType],
+          });
+        });
+        setSelectedValues(data);
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          description:
+            String((error as AxiosError).response?.data) ||
+            "Something went wrong.",
+          duration: 6000,
+        });
+      }
+    };
+    if (hasInstanceAccess) {
+      fetchCategoryTypesByAI();
+    }
+  }, [toast]);
+
+  const onSubmitSorts = async (values: any) => {
+    try {
+      const aiId: any = form.getValues("id");
+      const data: Array<CategoryType> = [];
+      values.data.map((categoryType: any) => {
+        data.push(categoryType);
+      });
+      await axios.post(`/api/v1/ai/${aiId}/ai-categories`, data);
+    } catch (error) {
+      console.error(error);
+      toast({
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="h-full p-4 space-y-8 max-w-3xl mx-auto">
       <div className="space-y-2 w-full">
@@ -474,6 +522,17 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                 render={({ field }) => (
                   <FormItem className="col-span-2 md:col-span-1">
                     <FormLabel>Category</FormLabel>
+                    <MultiSelect
+                      itemLabel="Category"
+                      items={CategoryTypes}
+                      values={selectedValues}
+                      onChange={(values: any[]) => {
+                        setSelectedValues(values),
+                          onSubmitSorts({
+                            data: values.map((value) => value.id),
+                          });
+                      }}
+                    />
                     <Select
                       disabled={isLoading}
                       onValueChange={field.onChange}

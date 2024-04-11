@@ -56,7 +56,7 @@ export function MultiSelect({ itemLabel, items, values, onChange }: Props) {
               {values.length === 0 && `Select ${itemLabel}`}
               {values.length === 1 && values[0].name}
               {values.length === 2 && values.map(({ name }) => name).join(", ")}
-              {values.length > 2 && `${values.length} ${itemLabel}s selected`}
+              {values.length > 2 && `${values.length} ${itemLabel.endsWith('y') ? itemLabel.slice(0, -1) + 'ies': itemLabel+'s'} selected`}
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>

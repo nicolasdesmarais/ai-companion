@@ -5,6 +5,7 @@ import LandingNav from "@/components/landing-nav";
 import LandingTerms from "@/components/landing-terms";
 import { AppdirectSvg } from "@/components/svg/appdirect-svg";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import { useSignUp, useUser } from "@clerk/clerk-react";
 import { OAuthStrategy } from "@clerk/types";
 import axios from "axios";
@@ -22,9 +23,11 @@ const SignUp = () => {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [type, setType] = useState("password");
   const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
   let host = "https://appdirect.ai",
     hutk = "";
@@ -60,6 +63,7 @@ const SignUp = () => {
   };
 
   const handleSubmit = async (e: any) => {
+    setError("");
     e.preventDefault();
     if (!isLoaded || !password || !emailAddress) {
       return;
@@ -80,6 +84,14 @@ const SignUp = () => {
       setError(err.errors[0].message || "An error occurred");
       console.error(JSON.stringify(err, null, 2));
     }
+  };
+
+  const handleResendCode = async (e: any) => {
+    await handleSubmit(e);
+    toast({
+      description: "Verification Code Sent.",
+      duration: 2000,
+    });
   };
 
   const hubspotTracking = async () => {
@@ -126,11 +138,12 @@ const SignUp = () => {
   };
 
   const onPressVerify = async (e: any) => {
+    setError("");
     e.preventDefault();
     if (!isLoaded) {
       return;
     }
-    setLoading(true);
+    setVerifying(true);
 
     try {
       const completeSignUp = await signUp.attemptEmailAddressVerification({
@@ -143,12 +156,12 @@ const SignUp = () => {
         ]);
         router.push("/org-selection");
       } else {
-        setLoading(false);
+        setVerifying(false);
         setError("A verification error occurred");
         console.error(JSON.stringify(completeSignUp, null, 2));
       }
     } catch (err: any) {
-      setLoading(false);
+      setVerifying(false);
       setError(err.errors[0].longMessage || "An error occurred");
       console.error(JSON.stringify(err, null, 2));
     }
@@ -159,6 +172,16 @@ const SignUp = () => {
       setType("text");
     } else {
       setType("password");
+    }
+  };
+
+  const handleEnter = (event: any, submit: (e: any) => void) => {
+    switch (event.key) {
+      case "Enter":
+        submit(event);
+        break;
+      default:
+        break;
     }
   };
 
@@ -174,14 +197,26 @@ const SignUp = () => {
               <div>Check your email for a verification code</div>
               <div className="text-red-500 text-sm pt-4">{error}</div>
               <div className="flex flex-col gap-8 mt-8">
-                <input
-                  value={code}
-                  className="rounded-md w-80 h-12 px-4 bg-white"
-                  placeholder="Verification Code"
-                  onChange={(e) => setCode(e.target.value)}
-                />
+                <div className="w-full">
+                  <input
+                    value={code}
+                    className="rounded-md w-80 h-12 px-4 bg-white"
+                    placeholder="Verification Code"
+                    onChange={(e) => setCode(e.target.value)}
+                    onKeyDown={(e) => handleEnter(e, onPressVerify)}
+                  />
+                  <span
+                    className="underline text-xs block text-right w-full pt-1 cursor-pointer"
+                    onClick={handleResendCode}
+                  >
+                    Resend Code
+                  </span>
+                </div>
                 <Button variant="login" onClick={onPressVerify}>
                   Verify Email
+                  {verifying ? (
+                    <Loader className="w-4 h-4 ml-2 spinner" />
+                  ) : null}
                 </Button>
               </div>
             </>
@@ -218,6 +253,7 @@ const SignUp = () => {
                     placeholder="Password"
                     className="rounded-md w-full h-12 px-4 bg-white"
                     onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={(e) => handleEnter(e, handleSubmit)}
                     id="password"
                     name="password"
                   />
