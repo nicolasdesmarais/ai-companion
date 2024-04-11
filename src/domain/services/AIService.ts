@@ -1,3 +1,4 @@
+import { CategoryTypesHardcoded } from "@/components/category-types";
 import {
   AIRequest,
   CreateAIRequest,
@@ -8,6 +9,7 @@ import {
 } from "@/src/adapter-in/api/AIApi";
 import { AIRepositoryImpl } from "@/src/adapter-out/repositories/AIRepositoryImpl";
 import { BadRequestError } from "@/src/domain/errors/Errors";
+import { aiCategoryService } from "@/src/domain/services/AICategoryService";
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
 import { containsMySQLSpecialChars } from "@/src/lib/utils";
@@ -23,7 +25,8 @@ import { SystemMessage } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
 import {
   AI,
-  AIVisibility, CategoryType,
+  AIVisibility,
+  CategoryType,
   DataSourceRefreshPeriod,
   DataSourceType,
   GroupAI,
@@ -39,7 +42,6 @@ import aiModelService from "./AIModelService";
 import dataSourceManagementService from "./DataSourceManagementService";
 import groupService from "./GroupService";
 import invitationService from "./InvitationService";
-import {CategoryTypesHardcoded} from "@/components/category-types";
 
 const openai = new ChatOpenAI({
   azureOpenAIApiKey: process.env.AZURE_GPT35_KEY,
@@ -60,7 +62,7 @@ const listAIResponseSelect = (): Prisma.AISelect => ({
   orgId: true,
   userId: true,
   userName: true,
-  categoryId: true,
+  aiCategoryTypes: true,
   visibility: true,
   listInOrgCatalog: true,
   listInPublicCatalog: true,
@@ -364,7 +366,7 @@ export class AIService {
       whereCondition.AND.push(this.getSearchCriteria(search));
     }
     if (categoryId) {
-        whereCondition.AND.push(this.getCategoryCriteria(categoryId));
+      whereCondition.AND.push(this.getCategoryCriteria(categoryId));
     }
     if (approvedByOrg !== null && approvedByOrg !== undefined) {
       whereCondition.AND.push(
@@ -522,6 +524,10 @@ export class AIService {
 
     const groupIds: string[] = ai.groups.map((groupAi) => groupAi.groupId);
 
+    const categories = ai.aiCategoryTypes.map(
+      (category: any) => category.categoryType
+    );
+
     return {
       ...filteredAi,
       options: aiModelOptions,
@@ -532,6 +538,7 @@ export class AIService {
       isShared,
       isApprovedByOrg,
       groups: groupIds,
+      categories,
     };
   }
 
@@ -784,9 +791,9 @@ export class AIService {
     return {
       aiCategoryTypes: {
         some: {
-          categoryType: CategoryTypesHardcoded[categoryId] as CategoryType
-        }
-      }
+          categoryType: CategoryTypesHardcoded[categoryId] as CategoryType,
+        },
+      },
     };
   }
 
@@ -1073,7 +1080,7 @@ export class AIService {
       description,
       instructions,
       seed,
-      categoryId,
+      categories,
       modelId,
       groups,
       visibility,
@@ -1083,7 +1090,7 @@ export class AIService {
       profile,
     } = request;
 
-    if (!src || !name || !description || !instructions || !categoryId) {
+    if (!src || !name || !description || !instructions) {
       throw new BadRequestError("Missing required fields");
     }
 
@@ -1102,7 +1109,6 @@ export class AIService {
         groups: true,
       },
       data: {
-        categoryId,
         src,
         name,
         introduction,
@@ -1120,6 +1126,11 @@ export class AIService {
     });
 
     await this.updateAIGroups(updatedAI, groups);
+    await aiCategoryService.performUpdateOrCreateAICategoryType(
+      authorizationContext,
+      aiId,
+      categories
+    );
     return updatedAI;
   }
 

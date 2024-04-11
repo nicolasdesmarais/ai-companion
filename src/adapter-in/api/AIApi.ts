@@ -1,6 +1,6 @@
 import { AIDetailDto, AIProfile } from "@/src/domain/models/AI";
 import { AIModelOptions } from "@/src/domain/models/AIModel";
-import {AIVisibility, CategoryType} from "@prisma/client";
+import { AIVisibility } from "@prisma/client";
 
 export interface ListAIsResponse {
   data: AIDetailDto[];
@@ -54,7 +54,7 @@ export interface CreateAIRequest extends AIRequest {
 export interface UpdateAIRequest extends AIRequest {}
 
 export interface AIRequest {
-  categoryId: string;
+  categories: string[];
   src: string;
   name: string;
   introduction: string;

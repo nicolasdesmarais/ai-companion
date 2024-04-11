@@ -36,7 +36,7 @@ const formSchema = z.object({
   src: z.string().min(1, {
     message: "Image is required.",
   }),
-  categoryId: z.string().optional(),
+  categories: z.array(z.string()).optional(),
   modelId: z.string().min(1, {
     message: "Model is required",
   }),
@@ -117,6 +117,7 @@ export const AIEditor = ({
   initialAi,
   hasInstanceAccess,
 }: AIFormProps) => {
+  console.log("AIEditor", initialAi);
   const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
@@ -170,7 +171,7 @@ export const AIEditor = ({
           instructions: "",
           seed: "",
           src: "",
-          categoryId: undefined,
+          categories: [],
           modelId: "gpt-4",
           visibility: "ANYONE_WITH_LINK",
           listInOrgCatalog: false,

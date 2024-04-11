@@ -1,20 +1,20 @@
 "use client";
-import { Check, ChevronsUpDown, Edit2 } from "lucide-react";
-import { cn } from "@/src/lib/utils";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Command,
+  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandEmpty,
 } from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/src/lib/utils";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { useRef, useState } from "react";
 
 type Props = {
@@ -22,9 +22,16 @@ type Props = {
   items: any[];
   values: any[];
   onChange: (val: any[]) => void;
+  className?: string;
 };
 
-export function MultiSelect({ itemLabel, items, values, onChange }: Props) {
+export function MultiSelect({
+  itemLabel,
+  items,
+  values,
+  onChange,
+  className,
+}: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [openCombobox, setOpenCombobox] = useState(false);
   const [inputValue, setInputValue] = useState<string>("");
@@ -43,20 +50,28 @@ export function MultiSelect({ itemLabel, items, values, onChange }: Props) {
   };
 
   return (
-    <div className="max-w-[200px]">
+    <div>
       <Popover open={openCombobox} onOpenChange={onComboboxOpenChange}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
             aria-expanded={openCombobox}
-            className="w-[200px] justify-between text-foreground"
+            className={cn(
+              "w-[200px] justify-between text-foreground",
+              className
+            )}
           >
             <span className="truncate">
               {values.length === 0 && `Select ${itemLabel}`}
               {values.length === 1 && values[0].name}
               {values.length === 2 && values.map(({ name }) => name).join(", ")}
-              {values.length > 2 && `${values.length} ${itemLabel.endsWith('y') ? itemLabel.slice(0, -1) + 'ies': itemLabel+'s'} selected`}
+              {values.length > 2 &&
+                `${values.length} ${
+                  itemLabel.endsWith("y")
+                    ? itemLabel.slice(0, -1) + "ies"
+                    : itemLabel + "s"
+                } selected`}
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>

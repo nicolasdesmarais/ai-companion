@@ -13,7 +13,7 @@ export interface AISummaryDto {
   orgId: string;
   userId: string;
   userName: string;
-  categoryId: string;
+  categories: string[];
   visibility: AIVisibility;
   listInOrgCatalog: boolean;
   listInPublicCatalog: boolean;
