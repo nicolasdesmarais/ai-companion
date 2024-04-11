@@ -3,7 +3,6 @@ import {withErrorHandler} from "@/src/middleware/ErrorMiddleware";
 import {SecuredAction} from "@/src/security/models/SecuredAction";
 import {SecuredResourceAccessLevel} from "@/src/security/models/SecuredResourceAccessLevel";
 import {SecuredResourceType} from "@/src/security/models/SecuredResourceType";
-import {clerkClient} from "@clerk/nextjs";
 import {NextRequest, NextResponse} from "next/server";
 import {AuthorizationContext} from "@/src/security/models/AuthorizationContext";
 import {UserMetaDataInterface} from "@/src/domain/services/ClerkService";
@@ -34,14 +33,15 @@ async function getHandler(
     request: NextRequest,
     context: {
       params: { userId: string };
-      authorizationContext: AuthorizationContext;
     }
 ) {
-  const { params, authorizationContext} = context;
+  const { params} = context;
   const userId = params.userId;
-  const user: User = await clerkService.getClerkUser(authorizationContext, userId);
-    return NextResponse.json(user);
+  const user: User = await clerkService.getClerkUser(userId);
+  return NextResponse.json(user);
 }
+
+export const GET = withErrorHandler(getHandler);
 
 export const POST = withErrorHandler(
   withAuthorization(
@@ -49,14 +49,5 @@ export const POST = withErrorHandler(
     SecuredAction.WRITE,
     Object.values(SecuredResourceAccessLevel),
     postHandler
-  )
-);
-
-export const GET = withErrorHandler(
-  withAuthorization(
-    SecuredResourceType.AI,
-    SecuredAction.READ,
-    Object.values(SecuredResourceAccessLevel),
-    getHandler
   )
 );

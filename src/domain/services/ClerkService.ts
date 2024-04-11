@@ -5,7 +5,6 @@ import {SecuredAction} from "@/src/security/models/SecuredAction";
 import {SecuredResourceAccessLevel} from "@/src/security/models/SecuredResourceAccessLevel";
 import {ForbiddenError} from "cohere-ai/api";
 import {clerkClient} from "@clerk/nextjs";
-import {AISecurityService} from "@/src/security/services/AISecurityService";
 import {User} from "@clerk/nextjs/server";
 
 export interface UserMetaDataInterface {
@@ -37,14 +36,8 @@ export class ClerkService {
     }
 
     public async getClerkUser(
-        authorizationContext: AuthorizationContext,
         userId: string
     ) : Promise<User> {
-        const hasReadPermission = AISecurityService.hasInstanceReadAccess(authorizationContext);
-        if (!hasReadPermission) {
-            throw new ForbiddenError("Forbidden");
-        }
-
         return await clerkClient.users.getUser(userId);
     }
 }
