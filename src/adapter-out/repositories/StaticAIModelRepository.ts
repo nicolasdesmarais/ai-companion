@@ -50,7 +50,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       options: {
         ...commonOptions,
         maxInputTokens: {
-          default: 10000,
+          default: 30000,
           max: 30000,
           min: 1,
           step: 1,
@@ -73,7 +73,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       options: {
         ...commonOptions,
         maxInputTokens: {
-          default: 10000,
+          default: 15000,
           max: 15000,
           min: 1,
           step: 1,
@@ -96,7 +96,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       options: {
         ...commonOptions,
         maxInputTokens: {
-          default: 10000,
+          default: 30000,
           max: 30000,
           min: 1,
           step: 1,
@@ -117,7 +117,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       options: {
         ...commonOptions,
         maxInputTokens: {
-          default: 10000,
+          default: 15000,
           max: 15000,
           min: 1,
           step: 1,
