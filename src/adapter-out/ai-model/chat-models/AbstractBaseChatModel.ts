@@ -44,6 +44,7 @@ export abstract class AbstractBaseChatModel {
       historySeed,
     ]);
 
+    console.log(`chatId: ${chat.id}, tokensUsed: ${tokensUsed}`);
     const knowledge = await getKnowledgeCallback(input, tokensUsed);
 
     const chatLog = this.ensureAlternatingMessages([

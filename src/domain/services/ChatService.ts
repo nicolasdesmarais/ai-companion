@@ -442,6 +442,7 @@ export class ChatService {
 
     const remainingTokens =
       aiModel.contextSize - answerTokens - tokensUsed - BUFFER_TOKENS;
+    console.log(`chatId: ${chat.id}, remainingTokens: ${remainingTokens}`);
 
     const knowledgeSummary = await knowledgeService.getAiKnowledgeSummary(
       ai.id
@@ -458,6 +459,9 @@ export class ChatService {
     callbackContext.recordedTokensUsed = tokensUsed;
     callbackContext.knowledgeDocumentsRequested = vectorKnowledge.docsRequested;
     callbackContext.knowledgeTokensReturned = vectorKnowledge.tokensReturned;
+    console.log(
+      `chatId: ${chat.id}, knowledgeTokensReturned: ${vectorKnowledge.tokensReturned}`
+    );
     return vectorKnowledge;
   }
 
