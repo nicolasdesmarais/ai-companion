@@ -54,6 +54,7 @@ export const SearchInput = ({ scopeParam }: Props) => {
         setSort("popularity");
       }
     }
+
     const fetchMetaData = async (userId : string, key: string) => {
         const response = await axios.get(`/api/v1/clerk/${userId}`);
         setSort(response.data.publicMetadata[key]);
@@ -71,9 +72,10 @@ export const SearchInput = ({ scopeParam }: Props) => {
         fetchMetaData(clerk.user?.id, key);
       }
     }
-
+    console.log("Before Default: ", sort)
     if (!sort) {
       setDefaultSort();
+      console.log("After Default: ", sort)
     }
   }, [clerk.user?.id, scopeParam]);
 
