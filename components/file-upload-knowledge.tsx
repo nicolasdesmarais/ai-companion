@@ -8,12 +8,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { AxiosError } from "axios";
+import { delay } from "@/src/lib/utils";
+import { upload } from "@vercel/blob/client";
 import { FileText, Loader } from "lucide-react";
 import { useRef, useState } from "react";
 import { knowledgeTypes } from "./knowledge-types";
-import { upload } from "@vercel/blob/client";
-import { delay } from "@/src/lib/utils";
 
 interface FileUploadKnowledgeProps {
   goBack: () => void;
@@ -46,6 +45,7 @@ export const FileUploadKnowledge = ({
     }
     const file = inputFileRef.current.files[0];
     const fileType = file.type || "text/plain";
+    const filename = encodeURIComponent(file.name);
 
     if (
       !fileType.startsWith("text/") &&
@@ -60,7 +60,7 @@ export const FileUploadKnowledge = ({
       return;
     }
     try {
-      await upload(file.name, file, {
+      await upload(filename, file, {
         access: "public",
         handleUploadUrl: `/api/v1/ai/${aiId}/data-sources/file-blob`,
       });
