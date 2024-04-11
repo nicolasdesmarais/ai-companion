@@ -173,7 +173,7 @@ const pollActorRun = async (
       }
     }
 
-    await step.run("update-data-source", async () => {
+    await step.run(`update-data-source-${iteration}`, async () => {
       return await dataSourceManagementService.updateDataSourceData(
         dataSourceId,
         { indexingRunId: actorRunId, offset }
