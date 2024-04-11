@@ -39,7 +39,8 @@ export class FileStorageService {
       | ReadableStream<any>
       | File
   ): Promise<string> {
-    const blob = await put(filename, body, {
+    const encodedFilename = encodeURIComponent(filename);
+    const blob = await put(encodedFilename, body, {
       access: VERCEL_BLOB_ACCESS,
     });
 
