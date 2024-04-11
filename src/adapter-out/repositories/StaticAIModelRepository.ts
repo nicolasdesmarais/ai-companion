@@ -20,6 +20,12 @@ const commonOptions = {
     min: 100,
     step: 1,
   },
+  maxInputTokens: {
+    default: 10000,
+    max: 10000,
+    min: 100,
+    step: 1,
+  },
   frequencyPenalty: {
     default: 0,
     max: 1,
@@ -41,7 +47,15 @@ export class StaticAIModelRepository implements AIModelRepository {
       name: "GPT-4 (32K Context)",
       externalModelId: "gpt-4",
       contextSize: 32768,
-      options: commonOptions,
+      options: {
+        ...commonOptions,
+        maxInputTokens: {
+          default: 30000,
+          max: 30000,
+          min: 1,
+          step: 1,
+        },
+      },
       provider: AIModelProvider.AZURE_OPENAI,
       isVisible: true,
       additionalData: {
@@ -56,7 +70,15 @@ export class StaticAIModelRepository implements AIModelRepository {
       name: "GPT-3.5 (16K Context)",
       externalModelId: "gpt-3.5-turbo",
       contextSize: 16384,
-      options: commonOptions,
+      options: {
+        ...commonOptions,
+        maxInputTokens: {
+          default: 15000,
+          max: 15000,
+          min: 1,
+          step: 1,
+        },
+      },
       provider: AIModelProvider.AZURE_OPENAI,
       isVisible: true,
       additionalData: {
@@ -71,7 +93,15 @@ export class StaticAIModelRepository implements AIModelRepository {
       name: "GPT-4 (32K Context) w/ Assistant API (Beta)",
       externalModelId: "gpt4-32K",
       contextSize: 32768,
-      options: commonOptions,
+      options: {
+        ...commonOptions,
+        maxInputTokens: {
+          default: 30000,
+          max: 30000,
+          min: 1,
+          step: 1,
+        },
+      },
       provider: AIModelProvider.AZURE_OPENAI_ASSISTANTS,
       isVisible: true,
       additionalData: {
@@ -84,7 +114,15 @@ export class StaticAIModelRepository implements AIModelRepository {
       name: "GPT-3.5 (16K Context) w/ Assistant API (Beta)",
       externalModelId: "ai-prod-16k",
       contextSize: 16384,
-      options: commonOptions,
+      options: {
+        ...commonOptions,
+        maxInputTokens: {
+          default: 15000,
+          max: 15000,
+          min: 1,
+          step: 1,
+        },
+      },
       provider: AIModelProvider.AZURE_OPENAI_ASSISTANTS,
       isVisible: true,
       additionalData: {
@@ -97,7 +135,15 @@ export class StaticAIModelRepository implements AIModelRepository {
       name: "GPT-4 Turbo w/ Assistant API (Beta)",
       externalModelId: "gpt-4-1106-preview",
       contextSize: 8192,
-      options: commonOptions,
+      options: {
+        ...commonOptions,
+        maxInputTokens: {
+          default: 8000,
+          max: 8000,
+          min: 1,
+          step: 1,
+        },
+      },
       provider: AIModelProvider.OPENAI,
       isVisible: true,
     },
@@ -111,6 +157,12 @@ export class StaticAIModelRepository implements AIModelRepository {
         maxTokens: {
           default: 4000,
           max: 4096,
+          min: 1,
+          step: 1,
+        },
+        maxInputTokens: {
+          default: 100000,
+          max: 180000,
           min: 1,
           step: 1,
         },
@@ -131,6 +183,12 @@ export class StaticAIModelRepository implements AIModelRepository {
           min: 1,
           step: 1,
         },
+        maxInputTokens: {
+          default: 100000,
+          max: 180000,
+          min: 1,
+          step: 1,
+        },
       },
       provider: AIModelProvider.ANTHROPIC,
       isVisible: true,
@@ -148,6 +206,12 @@ export class StaticAIModelRepository implements AIModelRepository {
           min: 1,
           step: 1,
         },
+        maxInputTokens: {
+          default: 100000,
+          max: 180000,
+          min: 1,
+          step: 1,
+        },
       },
       provider: AIModelProvider.ANTHROPIC,
       isVisible: true,
@@ -157,7 +221,15 @@ export class StaticAIModelRepository implements AIModelRepository {
       name: "LLAMA2 13B Chat (4K Context)",
       externalModelId: "llama-2-13b-chat",
       contextSize: 4096,
-      options: commonOptions,
+      options: {
+        ...commonOptions,
+        maxInputTokens: {
+          default: 4000,
+          max: 4000,
+          min: 1,
+          step: 1,
+        },
+      },
       provider: AIModelProvider.REPLICATE,
       isVisible: true,
       additionalData: {
@@ -176,6 +248,12 @@ export class StaticAIModelRepository implements AIModelRepository {
         maxTokens: {
           default: 1000,
           max: 3500,
+          min: 1,
+          step: 1,
+        },
+        maxInputTokens: {
+          default: 4000,
+          max: 4000,
           min: 1,
           step: 1,
         },
@@ -201,6 +279,12 @@ export class StaticAIModelRepository implements AIModelRepository {
           min: 1,
           step: 1,
         },
+        maxInputTokens: {
+          default: 3000,
+          max: 4000,
+          min: 1,
+          step: 1,
+        },
       },
       provider: AIModelProvider.COHERE,
       isVisible: true,
@@ -218,6 +302,12 @@ export class StaticAIModelRepository implements AIModelRepository {
           min: 1,
           step: 1,
         },
+        maxInputTokens: {
+          default: 3000,
+          max: 4000,
+          min: 1,
+          step: 1,
+        },
       },
       provider: AIModelProvider.COHERE,
       isVisible: true,
@@ -227,7 +317,15 @@ export class StaticAIModelRepository implements AIModelRepository {
       name: "Cohere Command-R",
       externalModelId: "command-r",
       contextSize: 128000,
-      options: commonOptions,
+      options: {
+        ...commonOptions,
+        maxInputTokens: {
+          default: 10000,
+          max: 120000,
+          min: 1,
+          step: 1,
+        },
+      },
       provider: AIModelProvider.COHERE,
       isVisible: true,
     },

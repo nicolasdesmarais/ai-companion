@@ -440,9 +440,23 @@ export class ChatService {
     const answerTokens = (ai.options?.maxTokens ??
       aiModel.options.maxTokens.default) as number;
 
-    const remainingTokens =
+    const maxInputTokens = (ai.options?.maxInputTokens ??
+      aiModel.options.maxInputTokens.default) as number;
+
+    const remainingContextSizeTokens =
       aiModel.contextSize - answerTokens - tokensUsed - BUFFER_TOKENS;
-    console.log(`chatId: ${chat.id}, remainingTokens: ${remainingTokens}`);
+    const remainingMaxInputTokens = maxInputTokens - tokensUsed;
+    console.log(
+      `chatId: ${chat.id}, remainingContextSizeTokens: ${remainingContextSizeTokens}`
+    );
+    console.log(
+      `chatId: ${chat.id}, remainingMaxInputTokens: ${remainingMaxInputTokens}`
+    );
+
+    const remainingTokens = Math.min(
+      remainingContextSizeTokens,
+      remainingMaxInputTokens
+    );
 
     const knowledgeSummary = await knowledgeService.getAiKnowledgeSummary(
       ai.id
