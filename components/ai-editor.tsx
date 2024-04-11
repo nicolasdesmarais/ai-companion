@@ -48,6 +48,7 @@ const formSchema = z.object({
   options: z
     .object({
       maxTokens: z.array(z.number()).optional(),
+      maxInputTokens: z.array(z.number()).optional(),
       temperature: z.array(z.number()).optional(),
       topP: z.array(z.number()).optional(),
       frequencyPenalty: z.array(z.number()).optional(),

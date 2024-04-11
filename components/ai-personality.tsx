@@ -132,6 +132,36 @@ export const AIPersonality = ({
           )}
         />
       )}
+      {model.options.maxInputTokens && (
+        <FormField
+          name="options.maxInputTokens"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem className="col-span-2 md:col-span-1">
+              <FormLabel>
+                Max Input Tokens:{" "}
+                {field.value || model.options.maxInputTokens.default}
+              </FormLabel>
+              <FormControl>
+                <Slider
+                  {...field}
+                  disabled={isLoading}
+                  max={model.options.maxInputTokens.max}
+                  min={model.options.maxInputTokens.min}
+                  step={model.options.maxInputTokens.step}
+                  defaultValue={[model.options.maxInputTokens.default]}
+                />
+              </FormControl>
+              <FormDescription>
+                The maximum number of tokens which can be passed as input in the
+                chat completion. This can be used to limit the context that the
+                AI uses to generate the response.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
       {model.options.frequencyPenalty && (
         <FormField
           name="options.frequencyPenalty"
