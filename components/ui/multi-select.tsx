@@ -50,7 +50,7 @@ export function MultiSelect({
   };
 
   return (
-    <div>
+    <div className="max-w-[200px]">
       <Popover open={openCombobox} onOpenChange={onComboboxOpenChange}>
         <PopoverTrigger asChild>
           <Button

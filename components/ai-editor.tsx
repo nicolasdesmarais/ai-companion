@@ -117,7 +117,6 @@ export const AIEditor = ({
   initialAi,
   hasInstanceAccess,
 }: AIFormProps) => {
-  console.log("AIEditor", initialAi);
   const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
