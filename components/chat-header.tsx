@@ -3,9 +3,9 @@
 import axios from "axios";
 import {
   BadgeCheck,
-  CopyPlus,
   Edit,
   ExternalLink,
+  MessageSquarePlus,
   MessagesSquare,
   MoreVertical,
   Pin,
@@ -247,8 +247,8 @@ export const ChatHeader = ({
               )}
               {ai && (
                 <DropdownMenuItem onClick={() => duplicate()}>
-                  <CopyPlus className="w-4 h-4 mr-2" />
-                  Duplicate
+                  <MessageSquarePlus className="w-4 h-4 mr-2" />
+                  New Chat
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem onClick={() => remove()}>
