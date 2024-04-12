@@ -40,7 +40,8 @@ export class ApifyWebsiteContentCrawler {
     orgId: string,
     dataSourceId: string,
     knowledgeId: string,
-    url: string
+    url: string,
+    isFallbackAttempt = false
   ) {
     if (!actorId) {
       throw new Error("APIFY_WEBSITE_CONTENT_CRAWLER_ACTOR_ID is not set");
@@ -53,7 +54,7 @@ export class ApifyWebsiteContentCrawler {
     const actorRun = await client
       .actor(actorId)
       .start(
-        this.getWebScraperInput(url),
+        this.getWebScraperInput(url, isFallbackAttempt),
         this.getActorStartOptions(orgId, dataSourceId, knowledgeId, url)
       );
 
@@ -94,13 +95,16 @@ export class ApifyWebsiteContentCrawler {
     };
   }
 
-  private getWebScraperInput(url: string) {
+  private getWebScraperInput(url: string, isFallbackAttempt: boolean) {
     const urlObj = resolveUrl(url);
     const basePath = urlObj.href.substring(0, urlObj.href.lastIndexOf("/"));
 
+    // Use adaptive crawler for the first attempt, and cheerio (raw HTTP client) for the fallback attempt
+    const crawlerType = isFallbackAttempt ? "cheerio" : "playwright:adaptive";
+
     return {
       runMode: runMode,
-      crawlerType: "playwright:adaptive",
+      crawlerType,
       saveMarkdown: true,
       startUrls: [
         {
