@@ -26,5 +26,5 @@ export const useConfirmModal = create<useConfirmModalStore>((set) => ({
   onConfirm: () => {},
   onOpen: (title, body, onConfirm, footer) =>
     set({ isOpen: true, title, body, onConfirm, footer }),
-  onClose: () => set({ isOpen: false }),
+  onClose: () => set({ isOpen: false, loading: false }),
 }));

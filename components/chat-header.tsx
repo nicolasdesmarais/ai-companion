@@ -70,11 +70,31 @@ export const ChatHeader = ({
   };
 
   const reset = async () => {
-    const response = await axios.put(`/api/v1/chats/${chat.id}/reset`);
-    if (response.status === 200) {
-      toast({ description: "Chat reset." });
-      router.push(`/chat/${response.data.id}?new=true`);
-    }
+    confirmModal.onOpen(
+      <div className="flex items-center">Reset Chat Thread?</div>,
+      <div>
+        You can continue chatting with {ai?.name} but this thread's chat history
+        will be deleted.
+      </div>,
+      () => {},
+      <div className="flex flex-row-reverse w-full">
+        <Button
+          variant="destructive"
+          onClick={async () => {
+            confirmModal.onLoading(true);
+            const response = await axios.put(`/api/v1/chats/${chat.id}/reset`);
+            if (response.status === 200) {
+              toast({ description: "Chat reset." });
+              router.push(`/chat/${response.data.id}?new=true`);
+              confirmModal.onClose();
+            }
+          }}
+          type="button"
+        >
+          Reset
+        </Button>
+      </div>
+    );
   };
 
   const pin = async () => {
