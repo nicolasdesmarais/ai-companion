@@ -100,7 +100,7 @@ export class ApifyWebsiteContentCrawler {
 
     return {
       runMode: runMode,
-      crawlerType: "cheerio",
+      crawlerType: "playwright:adaptive",
       saveMarkdown: true,
       startUrls: [
         {
