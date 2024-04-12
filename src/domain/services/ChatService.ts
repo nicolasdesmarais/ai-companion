@@ -188,7 +188,7 @@ export class ChatService {
         aiId,
         orgId,
         userId,
-        name: ai.name,
+        name: "",
       },
     });
 
