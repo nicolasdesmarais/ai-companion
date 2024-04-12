@@ -144,11 +144,11 @@ export class ApifyWebsiteContentCrawler {
     const items: ActorRunItem[] = [];
     for (const item of listItems.items) {
       const { url, markdown } = item;
-      if (!url || !markdown) {
+      if (!url) {
         continue;
       }
       const urlString = url as string;
-      const markdownString = markdown as string;
+      const markdownString = markdown ? (markdown as string) : " ";
       const filename = `${urlString}.md`;
       const contentBlobUrl = await FileStorageService.put(
         filename,
