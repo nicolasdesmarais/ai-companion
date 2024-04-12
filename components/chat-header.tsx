@@ -103,12 +103,32 @@ export const ChatHeader = ({
   };
 
   const remove = async () => {
-    const response = await axios.delete(`/api/v1/chats/${chat.id}`);
-    if (response.status === 204) {
-      toast({ description: "Chat deleted." });
-      router.push(`/chat/`);
-      fetchChats();
-    }
+    confirmModal.onOpen(
+      <div className="flex items-center">Delete Chat Thread?</div>,
+      <div>
+        You can start a new chat with {ai?.name} at any time but this thread's
+        chat history will be lost.
+      </div>,
+      () => {},
+      <div className="flex flex-row-reverse w-full">
+        <Button
+          variant="destructive"
+          onClick={async () => {
+            confirmModal.onLoading(true);
+            const response = await axios.delete(`/api/v1/chats/${chat.id}`);
+            if (response.status === 204) {
+              toast({ description: "Chat deleted." });
+              router.push(`/chat/`);
+              fetchChats();
+              confirmModal.onClose();
+            }
+          }}
+          type="button"
+        >
+          Delete
+        </Button>
+      </div>
+    );
   };
 
   const approve = async () => {
