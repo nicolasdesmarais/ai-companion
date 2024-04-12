@@ -28,6 +28,7 @@ export interface ApifyActorRunRequestedPayload {
   dataSourceId: string;
   knowledgeId: string;
   url: string;
+  isFallbackAttempt?: boolean;
 }
 
 export interface ApifyWebhookReceivedPayload {
@@ -43,15 +44,17 @@ export const onApifyActorRunRequested = inngest.createFunction(
   },
   { event: ApifyEvent.APIFY_ACTOR_RUN_REQUESTED },
   async ({ event, step }) => {
-    const { orgId, dataSourceId, knowledgeId, url } =
-      event.data as ApifyActorRunRequestedPayload;
+    const eventPayload = event.data as ApifyActorRunRequestedPayload;
+    const { orgId, dataSourceId, knowledgeId, url, isFallbackAttempt } =
+      eventPayload;
 
     const actorRunId = await step.run("start-url-indexing", async () => {
       return await apifyWebsiteContentCrawler.startUrlIndexing(
         orgId,
         dataSourceId,
         knowledgeId,
-        url
+        url,
+        isFallbackAttempt
       );
     });
 
@@ -91,6 +94,26 @@ export const onApifyActorRunRequested = inngest.createFunction(
       }
 
       iteration++;
+    }
+
+    if (rootItems.length === 0) {
+      // No root items found
+      if (isFallbackAttempt) {
+        // This is a fallback attempt, we've already tried to process the URL
+        throw new Error("Unable to process URL");
+      } else {
+        const fallbackAttemptPayload: ApifyActorRunRequestedPayload = {
+          ...eventPayload,
+          isFallbackAttempt: true,
+        };
+
+        await step.sendEvent("apify-actor-run-failed", {
+          name: ApifyEvent.APIFY_ACTOR_RUN_REQUESTED,
+          data: fallbackAttemptPayload,
+        });
+      }
+
+      return "Fallback attempt started";
     }
 
     for (const item of rootItems) {
