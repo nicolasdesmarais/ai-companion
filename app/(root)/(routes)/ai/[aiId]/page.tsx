@@ -33,7 +33,7 @@ const ChatIdPage = async ({ params }: ChatIdPageProps) => {
       }
     } finally {
       if (chat) {
-        redirect(`/chat/${chat.id}`);
+        redirect(`/chat/${chat.id}?new=true`);
       } else {
         redirect("/");
       }
