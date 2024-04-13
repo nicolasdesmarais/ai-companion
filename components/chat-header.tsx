@@ -73,8 +73,8 @@ export const ChatHeader = ({
     confirmModal.onOpen(
       <div className="flex items-center">Reset Chat Thread?</div>,
       <div>
-        You can continue chatting with {ai?.name} but this thread's chat history
-        will be deleted.
+        You can continue chatting with {ai?.name} but this thread&apos;s chat
+        history will be deleted.
       </div>,
       () => {},
       <div className="flex flex-row-reverse w-full">
@@ -126,8 +126,8 @@ export const ChatHeader = ({
     confirmModal.onOpen(
       <div className="flex items-center">Delete Chat Thread?</div>,
       <div>
-        You can start a new chat with {ai?.name} at any time but this thread's
-        chat history will be lost.
+        You can start a new chat with {ai?.name} at any time but this
+        thread&apos;s chat history will be lost.
       </div>,
       () => {},
       <div className="flex flex-row-reverse w-full">
