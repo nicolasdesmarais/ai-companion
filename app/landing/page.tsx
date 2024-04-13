@@ -207,7 +207,7 @@ const LandingHome = () => {
               <div className="ml-4">Human Resources</div>
             </div>
           </Link>
-          <Link href="/public?categoryId=IT">
+          <Link href="/public?categoryId=ADVISOR">
             <div className="bg-[#F0F0F0] px-8 py-4 shadow-lg flex items-center">
               <svg
                 width="55"
@@ -222,7 +222,7 @@ const LandingHome = () => {
                 />
               </svg>
 
-              <div className="ml-4">Information Technology</div>
+              <div className="ml-4">AppDirect Advisor Tools</div>
             </div>
           </Link>
           <Link href="/public?categoryId=LEARNING">
