@@ -198,6 +198,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
 
   const generateAvatar = async () => {
     setGeneratingImage(true);
+    let result;
     if (imagePrompt) {
       try {
         const response = await axios.post("/api/v1/image", {
@@ -205,6 +206,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
           model: imageModel,
         });
         form.setValue("src", response.data.secure_url, { shouldDirty: true });
+        result = response.data.secure_url;
       } catch (error) {
         console.log(error);
         toast({
@@ -225,18 +227,30 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
     }
     setDiversityString(getDiversityString());
     setGeneratingImage(false);
+    return result;
   };
 
   const generateInstruction = async () => {
     setGeneratingInstruction(true);
     const name = form.getValues("name");
     const description = form.getValues("description");
+    let result;
     if (name && description) {
       try {
         const response = await axios.post("/api/v1/generate", {
           prompt: `${INSTRUCTION_PROMPT} ${name}, ${description}.`,
         });
+        if (response.data.length < 100) {
+          setGeneratingInstruction(false);
+          toast({
+            variant: "destructive",
+            description: "Something went wrong. Please adjust your prompt.",
+            duration: 6000,
+          });
+          return;
+        }
         form.setValue("instructions", response.data, { shouldDirty: true });
+        result = response.data;
       } catch (error: any) {
         toast({
           variant: "destructive",
@@ -254,6 +268,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
       });
     }
     setGeneratingInstruction(false);
+    return result;
   };
 
   const generateConversation = async () => {
@@ -293,8 +308,15 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
     form.setValue("introduction", `How may I be of assistance today?`, {
       shouldDirty: true,
     });
-    await Promise.all([generateAvatar(), generateInstruction()]);
-    save();
+    const [generatedAvatar, generatedInstructions] = await Promise.all([
+      generateAvatar(),
+      generateInstruction(),
+    ]);
+    if (generatedAvatar && generatedInstructions) {
+      save();
+    } else {
+      setGeneratingAll(false);
+    }
   };
 
   useEffect(() => {
