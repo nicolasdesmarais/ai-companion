@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useSignUp, useUser } from "@clerk/clerk-react";
 import { OAuthStrategy } from "@clerk/types";
-import axios from "axios";
 import { Eye, EyeOff, Loader } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -28,16 +27,6 @@ const SignUp = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-
-  let host = "https://appdirect.ai",
-    hutk = "";
-  if (typeof window !== "undefined") {
-    host = window.location.origin;
-    hutk = document.cookie.replace(
-      /(?:(?:^|.*;\s*)hubspotutk\s*\=\s*([^;]*).*$)|^.*$/,
-      "$1"
-    );
-  }
 
   useEffect(() => {
     if (isSignedIn) {
@@ -94,49 +83,6 @@ const SignUp = () => {
     });
   };
 
-  const hubspotTracking = async () => {
-    const data = {
-      submittedAt: Date.now(),
-      fields: [
-        {
-          objectTypeId: "0-1",
-          name: "email",
-          value: emailAddress,
-        },
-
-        {
-          objectTypeId: "0-1",
-          name: "company",
-          value: "N/A",
-        },
-        {
-          objectTypeId: "0-1",
-          name: "firstname",
-          value: "N/A",
-        },
-        {
-          objectTypeId: "0-1",
-          name: "lastname",
-          value: "N/A",
-        },
-        {
-          objectTypeId: "0-1",
-          name: "phone",
-          value: "N/A",
-        },
-      ],
-      context: {
-        hutk,
-        pageUri: `${host}/signup`,
-        pageName: "AppDirect AI Sign Up",
-      },
-    };
-    await axios.post(
-      `https://api.hsforms.com/submissions/v3/integration/submit/43634300/7f9c75d8-4880-4de7-8e7b-5771530460dd`,
-      data
-    );
-  };
-
   const onPressVerify = async (e: any) => {
     setError("");
     e.preventDefault();
@@ -152,7 +98,6 @@ const SignUp = () => {
       if (completeSignUp.status === "complete") {
         await Promise.all([
           setActive({ session: completeSignUp.createdSessionId }),
-          hubspotTracking(),
         ]);
         router.push("/org-selection");
       } else {
