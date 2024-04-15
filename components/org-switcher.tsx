@@ -47,7 +47,6 @@ export const OrgSwitcher = ({ setOpen }: Props) => {
     const fetchInvitations = async () => {
       if (clerk.user) {
         const result = await clerk.user.getOrganizationInvitations();
-        console.log(result);
         setInvitations(result.data.filter((i: any) => i.status !== "accepted"));
       }
     };
