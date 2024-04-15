@@ -9,6 +9,7 @@
     "lint": "next lint",
     "postinstall": "prisma generate",
     "seed": "node ./scripts/seed.ts",
+    "migrate-cloudinary": "node ./scripts/cloudinary.ts",
     "test": "jest",
     "test-watch": "jest src --watch"
   },
