@@ -1,37 +1,14 @@
 const nationalities: string[] = [
-  "African",
-  "Sudanese",
-  "Caribbean",
-  "Indian",
-  "Melanesian",
-  "Australian",
-  "Chinese",
-  "Guamanian",
-  "Japanese",
-  "Korean",
-  "Polynesian",
-  "European",
-  "Irish",
-  "Russian",
-  "American",
-  "Pakistani",
-  "Bangladeshi",
-  "Vietnamese",
-  "Micronesian",
-  "Hispanic",
-  "Filipino",
-  "Latin American",
-  "Puerto Rican",
-  "Mexican",
-  "African American",
-  "Native American",
-  "Caucasian",
-  "Arab",
+  "latin",
+  "indian",
+  "asian",
+  "caucasian",
+  "black",
 ];
 
 const genders: string[] = ["man", "woman"];
 
-const ages: string[] = ["young", "30 year old", "middle aged", "old"];
+const ages: string[] = ["adult", "middle aged"];
 
 export const getDiversityString = (): string => {
   const nationality: string =
