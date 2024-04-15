@@ -156,22 +156,13 @@ export const onDataSourceItemListReceived = inngest.createFunction(
       }
     );
 
-    if (forRefresh) {
-      await step.run("update-datasource-knowledge-associations", async () => {
-        await dataSourceManagementService.updateDataSourceKnowledgeAssociations(
-          dataSourceId,
-          dataSourceItemList,
-          knowledgeIdsToAssociate
-        );
-      });
-    } else {
-      await step.run("create-datasource-knowledge-associations", async () => {
-        await dataSourceManagementService.createDataSourceKnowledgeAssociations(
-          dataSourceId,
-          knowledgeIdsToAssociate
-        );
-      });
-    }
+    await step.run("update-datasource-knowledge-associations", async () => {
+      await dataSourceManagementService.updateDataSourceKnowledgeAssociations(
+        dataSourceId,
+        dataSourceItemList,
+        knowledgeIdsToAssociate
+      );
+    });
 
     await step.run("update-datasource-status", async () => {
       await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
