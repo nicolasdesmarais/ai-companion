@@ -3,10 +3,13 @@ import BlobAnimation from "@/components/blob-animation";
 import LandingNav from "@/components/landing-nav";
 import { Button } from "@/components/ui/button";
 import { useClerk } from "@clerk/nextjs";
+import axios from "axios";
 import { Loader } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+const isProd = process.env.NEXT_PUBLIC_VERCEL_ENV === "production";
 
 const OrgSelect = () => {
   const [loading, setLoading] = useState(true);
@@ -50,6 +53,7 @@ const OrgSelect = () => {
           session: clerk.session?.id,
           organization,
         });
+        hubspotTracking();
         router.push("/index/public");
       }
     } catch (e) {
@@ -68,12 +72,67 @@ const OrgSelect = () => {
         session: clerk.session?.id,
         organization: org.id,
       });
+      hubspotTracking();
       router.push("/index/public");
     } catch (err: any) {
       setCreating(false);
       setError(err.errors[0].message || "An error occurred");
       console.error(JSON.stringify(err, null, 2));
     }
+  };
+
+  let host = "https://appdirect.ai",
+    hutk = "";
+  if (typeof window !== "undefined") {
+    host = window.location.origin;
+    hutk = document.cookie.replace(
+      /(?:(?:^|.*;\s*)hubspotutk\s*\=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+  }
+  const hubspotTracking = async () => {
+    if (!isProd) return;
+
+    const emailAddress = clerk.user?.primaryEmailAddress?.emailAddress;
+    const data = {
+      submittedAt: Date.now(),
+      fields: [
+        {
+          objectTypeId: "0-1",
+          name: "email",
+          value: emailAddress,
+        },
+        {
+          objectTypeId: "0-1",
+          name: "company",
+          value: company || "N/A",
+        },
+        {
+          objectTypeId: "0-1",
+          name: "firstname",
+          value: clerk.user?.firstName || "N/A",
+        },
+        {
+          objectTypeId: "0-1",
+          name: "lastname",
+          value: clerk.user?.lastName || "N/A",
+        },
+        {
+          objectTypeId: "0-1",
+          name: "phone",
+          value: "N/A",
+        },
+      ],
+      context: {
+        hutk,
+        pageUri: `${host}/signup`,
+        pageName: "AppDirect AI Sign Up",
+      },
+    };
+    await axios.post(
+      `https://api.hsforms.com/submissions/v3/integration/submit/43634300/7f9c75d8-4880-4de7-8e7b-5771530460dd`,
+      data
+    );
   };
 
   return (
