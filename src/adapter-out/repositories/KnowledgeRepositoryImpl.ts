@@ -318,6 +318,7 @@ export class KnowledgeRepositoryImpl implements KnowledgeRepository {
         (SELECT 1
         FROM knowledge kr
         WHERE k.unique_id = kr.unique_id
+          AND k.parent_unique_id = kr.parent_unique_id
           AND k.type = kr.type
           AND k.id != kr.id
           AND kr.created_at < k.created_at
