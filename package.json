@@ -12,7 +12,9 @@
     "migrate-cloudinary": "node ./scripts/cloudinary.ts",
     "test": "jest",
     "test-watch": "jest src --watch",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build"
+    "vercel-build": "prisma generate && prisma migrate deploy && next build",
+    "generate-db-migration": "prisma migrate dev --name $npm_config_name --create-only",
+    "migrate-db": "prisma migrate deploy"
   },
   "overrides": {
     "@pinecone-database/pinecone": "2.0.1"

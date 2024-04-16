@@ -35,13 +35,28 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 ## Database Changes
 
-Database changes are managed through [Prisma Migrations](https://www.prisma.io/docs/orm/prisma-migrate/getting-started). The following steps are required to make changes to the database:
+Database changes are managed through [Prisma Migrations](https://www.prisma.io/docs/orm/prisma-migrate/getting-started). The process for making changes to the database is described below.
+
+### Initial Setup
+
+Prisma migrations require the use of a ["Shadow Database"](https://www.prisma.io/docs/orm/prisma-migrate/understanding-prisma-migrate/shadow-database#manually-configuring-the-shadow-database). This is a separate database that is used to detect problems such as schema drift or potential data loss of the generated migration.
+
+By default Prisma attempts to create and drop the shadow DB automatically but that doesn't work when using one of our hosted DB instances as the DATABASE_URL. It's therefore necessary to setup a local database (e.g through running MySQL in a docker contain) and setting the `SHADOW_DATABASE_URL` environment variable to point to it.
+
+To summarize:
+
+1. Create a local MySQL database.
+1. Add the following to your `.env` file: `SHADOW_DATABASE_URL='mysql://root:password@localhost:13306/prisma-shadow-db`
+
+### Making Changes
 
 1. Make changes to the Prisma schema in `prisma/schema.prisma`.
 1. Generate a migration file:
-   1. Run `npx prisma migrate dev  --name {migration-name} --create-only
+   1. Run the `generate-db-migration` script,`npm run generate-db-migration --name="{migration-name}"`
    1. The above will generate a new folder and file under `prisma/migrations/`
    1. Make changes to the file if needed. In most cases the file will not needed any changes (e.g. when simply adding new columns or tables). Changes to the migration file might needed if we also need to run some additional SQL commands, like inserting or update data.
 1. Commit and merge the migration file
 
 The migration file will automatically be executed on any environment where the branch is deployed.
+
+To deploy changes locally, run the `migrate-db` script, `npm run migrate-db`.
