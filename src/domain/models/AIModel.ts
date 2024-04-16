@@ -7,6 +7,7 @@ export interface AIModel {
   isVisible: boolean;
   provider: AIModelProvider;
   additionalData?: any;
+  isPrivate: boolean;
 }
 
 export interface AIModelOptions {

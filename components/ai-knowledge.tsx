@@ -29,6 +29,7 @@ import {
   MinusCircle,
   PlusCircle,
   RefreshCcw,
+  ShieldCheck,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -232,13 +233,20 @@ export const AIKnowledge = ({
               <SelectContent>
                 {aiModels.map((model) => (
                   <SelectItem key={model.id} value={model.id}>
-                    {model.name}
+                    <div className="flex items-center">
+                      {model.name}
+                      {model.isPrivate ? (
+                        <ShieldCheck className="w-4 h-4 text-green ml-2" />
+                      ) : null}
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <FormDescription>
-              Select the Large Language Model for your AI
+              Select the Large Language Model for your AI. Models marked with a
+              <ShieldCheck className="w-3 h-3 text-green inline ml-1" /> are
+              hosted on a private instance.
             </FormDescription>
             <FormMessage />
           </FormItem>
