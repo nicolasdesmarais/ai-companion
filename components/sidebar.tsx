@@ -149,7 +149,9 @@ export const Sidebar = ({
     if (pro && !isPro) {
       return proModal.onOpen();
     }
-
+    if (setOpen) {
+      setOpen(false);
+    }
     return router.push(url);
   };
 
