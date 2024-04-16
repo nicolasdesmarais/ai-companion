@@ -32,3 +32,16 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+## Database Changes
+
+Database changes are managed through [Prisma Migrations](https://www.prisma.io/docs/orm/prisma-migrate/getting-started). The following steps are required to make changes to the database:
+
+1. Make changes to the Prisma schema in `prisma/schema.prisma`.
+1. Generate a migration file:
+   1. Run `npx prisma migrate dev  --name {migration-name} --create-only
+   1. The above will generate a new folder and file under `prisma/migrations/`
+   1. Make changes to the file if needed. In most cases the file will not needed any changes (e.g. when simply adding new columns or tables). Changes to the migration file might needed if we also need to run some additional SQL commands, like inserting or update data.
+1. Commit and merge the migration file
+
+The migration file will automatically be executed on any environment where the branch is deployed.
