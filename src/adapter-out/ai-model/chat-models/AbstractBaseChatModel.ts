@@ -122,6 +122,9 @@ export abstract class AbstractBaseChatModel {
     return [
       {
         handleLLMEnd: async (_output: any, runId: string) => {
+          callbackContext.llmTotalTokens =
+            _output.llmOutput?.tokenUsage?.totalTokens | 0;
+
           await endChatCallback(
             callbackContext,
             _output.generations[0][0].text

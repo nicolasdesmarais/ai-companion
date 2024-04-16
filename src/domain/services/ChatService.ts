@@ -80,6 +80,7 @@ export interface ChatCallbackContext {
   knowledgeDocumentsRequested: number;
   knowledgeTokensReturned: number;
   knowledgeMeta?: any;
+  llmTotalTokens: number;
 }
 
 export class ChatService {
@@ -281,6 +282,7 @@ export class ChatService {
       recordedTokensUsed: 0,
       knowledgeDocumentsRequested: 0,
       knowledgeTokensReturned: 0,
+      llmTotalTokens: 0,
     };
 
     const chat = await this.retrieveChatAndAddMessage(
@@ -392,6 +394,7 @@ export class ChatService {
       knowledgeDocumentsRequested,
       knowledgeTokensReturned,
       knowledgeMeta,
+      llmTotalTokens,
     } = context;
 
     if (chatId === "test-chat") {
@@ -418,6 +421,7 @@ export class ChatService {
         tokensUsed: recordedTokensUsed,
         knowledgeDocumentsRequested: knowledgeDocumentsRequested,
         knowledgeTokensReturned: knowledgeTokensReturned,
+        llmTotalTokens,
       },
     };
 
