@@ -153,6 +153,7 @@ export class ChatRepositoryImpl implements ChatRepository {
             role: message.role,
             userId,
             metadata: message.metadata,
+            tokenCount: message.tokenCount,
           },
         },
       },
