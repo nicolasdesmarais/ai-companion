@@ -30,6 +30,7 @@ export interface ChatMessageDto {
   role: Role;
   content: string;
   metadata?: any;
+  tokenCount?: number | null;
 }
 
 export interface ChatAiDto {

@@ -405,6 +405,8 @@ export class ChatService {
     const llmTime = Math.round(end - endKnowledge);
     const totalTime = Math.round(end - start);
 
+    const tokenCount = recordedTokensUsed + knowledgeTokensReturned;
+
     const message: ChatMessageDto = {
       role: Role.system,
       content: answer,
@@ -419,6 +421,7 @@ export class ChatService {
         knowledgeDocumentsRequested: knowledgeDocumentsRequested,
         knowledgeTokensReturned: knowledgeTokensReturned,
       },
+      tokenCount,
     };
 
     await chatRepository.addMessageToChat(
