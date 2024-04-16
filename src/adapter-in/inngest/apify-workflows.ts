@@ -189,7 +189,7 @@ const pollActorRun = async (
           forRefresh: false,
           forceRefresh: false,
         };
-        await step.sendEvent("datasource-item-list-received", {
+        await step.sendEvent(`datasource-item-list-received-${iteration}`, {
           name: DomainEvent.DATASOURCE_ITEM_LIST_RECEIVED,
           data: eventPayload,
         });
