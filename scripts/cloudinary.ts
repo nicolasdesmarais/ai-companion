@@ -1,7 +1,6 @@
-const { PrismaClient } = require("@prisma/client");
-const cloudinary = require("cloudinary");
+import prismadb from "@/src/lib/prismadb";
 
-const prismadb = new PrismaClient();
+const cloudinary = require("cloudinary");
 
 async function main() {
   try {
