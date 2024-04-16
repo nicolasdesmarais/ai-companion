@@ -86,6 +86,14 @@ export const AiListing = async ({ searchParams, scopeParam }: Props) => {
   const hasElevatedWriteAccess =
     GroupSecurityService.hasElevatedWriteAccess(authorizationContext);
 
+  let title = "Browse AIs";
+  if (scope === ListAIsRequestScope.OWNED) {
+    title = "Your AIs";
+  }
+  if (scope === ListAIsRequestScope.SHARED) {
+    title = "Shared With You";
+  }
+
   return (
     <div className="h-full px-2 space-y-2 pt-2 mt-16 md:mt-0">
       <PaywallBanner />
@@ -104,7 +112,7 @@ export const AiListing = async ({ searchParams, scopeParam }: Props) => {
       <div className="flex justify-between">
         <div className="flex flex-col md:flex-row">
           <h1 className="text-4xl font-bold whitespace-nowrap pt-2 pr-2 hidden md:block">
-            Browse AIs
+            {title}
           </h1>
           <Filters />
         </div>
