@@ -277,23 +277,21 @@ export const AIKnowledge = ({
               className="w-full my-4 max-h-60"
             >
               {dataSources.map((dataSource: any) => (
-                <tr key={dataSource.id} className="items-center my-2 text-sm">
-                  <td
-                    className={cn(
-                      "p-2",
-                      (dataSource.knowledges.length > 0 ||
-                        dataSource.data.error) &&
-                        "cursor-pointer hover:text-ring"
-                    )}
-                    onClick={() => {
-                      if (
-                        dataSource.knowledges.length ||
-                        dataSource.data.error
-                      ) {
-                        setDetailDataSource(dataSource);
-                      }
-                    }}
-                  >
+                <tr
+                  key={dataSource.id}
+                  onClick={() => {
+                    if (dataSource.knowledges.length || dataSource.data.error) {
+                      setDetailDataSource(dataSource);
+                    }
+                  }}
+                  className={cn(
+                    "items-center my-2 text-sm",
+                    (dataSource.knowledges.length > 0 ||
+                      dataSource.data.error) &&
+                      "cursor-pointer hover:bg-primary/10"
+                  )}
+                >
+                  <td className={cn("p-2")}>
                     {dataSource.name.length > 30 ? (
                       <Tooltip content={dataSource.name} className="">
                         <div className="truncate max-w-[280px]">
