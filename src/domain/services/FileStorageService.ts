@@ -35,7 +35,6 @@ export class FileStorageService {
       | stream.Readable
       | Blob
       | ArrayBuffer
-      | FormData
       | ReadableStream<any>
       | File
   ): Promise<string> {
