@@ -355,14 +355,16 @@ export const AIKnowledge = ({
         />
       )}
       <ConfirmModal />
-      <DataSourceDetailModal
-        dataSource={detailDataSource}
-        onClose={() => setDetailDataSource(null)}
-        toast={toast}
-        setDataSource={setDataSource}
-        aiId={aiId}
-        fetchDataSources={fetchDataSources}
-      />
+      {detailDataSource && (
+        <DataSourceDetailModal
+          dataSource={detailDataSource}
+          onClose={() => setDetailDataSource(null)}
+          toast={toast}
+          setDataSource={setDataSource}
+          aiId={aiId}
+          fetchDataSources={fetchDataSources}
+        />
+      )}
     </div>
   );
 };

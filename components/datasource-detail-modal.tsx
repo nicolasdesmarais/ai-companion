@@ -7,12 +7,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { FormLabel } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useConfirmModal } from "@/hooks/use-confirm-modal";
+import { cn } from "@/src/lib/utils";
+import { DataSourceRefreshPeriod } from "@prisma/client";
 import axios, { AxiosError } from "axios";
 import { format } from "date-fns";
 import { Loader, MinusCircle, RefreshCcw } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
+import { getDataSourceRefreshPeriodLabel } from "./datasource-refresh-periods";
 import { Table } from "./table";
 
 type Props = {
@@ -32,11 +43,30 @@ export const DataSourceDetailModal = ({
   aiId,
   fetchDataSources,
 }: Props) => {
+  const [dataRefreshPeriod, setDataRefreshPeriod] =
+    useState<DataSourceRefreshPeriod | null>(dataSource?.refreshPeriod);
   const [removing, setRemoving] = useState(false);
   const [refreshing, setRefreshing] = useState("");
   const confirmModal = useConfirmModal();
 
   if (!dataSource) return null;
+
+  const updateDataSource = async (data: any) => {
+    try {
+      setDataRefreshPeriod(data.refreshPeriod);
+      await axios.patch(`/api/v1/data-sources/${dataSource.id}`, data);
+      toast({ description: "Data source updated." });
+      fetchDataSources();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description:
+          String((error as AxiosError).response?.data) ||
+          "Something went wrong.",
+        duration: 6000,
+      });
+    }
+  };
 
   const refreshDataSource = async (id: string) => {
     setRefreshing(id);
@@ -148,6 +178,28 @@ export const DataSourceDetailModal = ({
         </DialogHeader>
         <Separator />
         <div className="flex justify-between w-full">
+          <div className="flex items-center">
+            <FormLabel className="">Refresh Interval</FormLabel>
+            <Select
+              onValueChange={(value: DataSourceRefreshPeriod) =>
+                updateDataSource({ refreshPeriod: value })
+              }
+              value={dataRefreshPeriod ?? ""}
+            >
+              <SelectTrigger className={cn("w-32 h-8 ml-4")}>
+                <SelectValue>
+                  {getDataSourceRefreshPeriodLabel(dataRefreshPeriod)}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(DataSourceRefreshPeriod).map((period) => (
+                  <SelectItem key={period} value={period}>
+                    {getDataSourceRefreshPeriodLabel(period)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <Button
             type="button"
             variant="outline"
@@ -156,7 +208,7 @@ export const DataSourceDetailModal = ({
             onClick={() => refreshDataSource(dataSource.id)}
             className="ml-2"
           >
-            Refresh Data Source
+            Refresh Now
             {refreshing === dataSource.id ? (
               <Loader className="w-4 h-4 spinner ml-2" />
             ) : (
@@ -191,8 +243,8 @@ export const DataSourceDetailModal = ({
             className="w-full my-4 max-h-60"
           >
             {dataSource.knowledges.map(({ knowledge }: any) => (
-              <>
-                <tr key={knowledge.id} className="p-2">
+              <React.Fragment key={knowledge.id}>
+                <tr className="p-2">
                   <td className="p-2 cursor-pointer hover:text-ring">
                     <a href={knowledge.documentsBlobUrl} target="_blank">
                       {knowledge.name}
@@ -216,7 +268,7 @@ export const DataSourceDetailModal = ({
                   </td>
                 </tr>
                 {knowledge.metadata?.errors && (
-                  <tr key={`error-${knowledge.id}`} className="p-2">
+                  <tr className="p-2">
                     <td colSpan={4} className="p-2 text-destructive text-sm">
                       Error:&nbsp;
                       {(
@@ -225,7 +277,7 @@ export const DataSourceDetailModal = ({
                     </td>
                   </tr>
                 )}
-              </>
+              </React.Fragment>
             ))}
           </Table>
         ) : null}
