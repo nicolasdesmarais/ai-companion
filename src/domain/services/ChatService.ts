@@ -16,18 +16,27 @@ import {
   ChatMessageDto,
 } from "@/src/domain/models/Chats";
 import prismadb from "@/src/lib/prismadb";
+import { tokenBucketRateLimit } from "@/src/lib/rate-limit";
 import { getTokenLength } from "@/src/lib/tokenCount";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { SystemMessage } from "@langchain/core/messages";
 import { Prisma, Role } from "@prisma/client";
 import { ChatSecurityService } from "../../security/services/ChatSecurityService";
-import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
+import {
+  EntityNotFoundError,
+  ForbiddenError,
+  RateLimitError,
+} from "../errors/Errors";
 import { ChatRepository } from "../ports/outgoing/ChatRepository";
 import aiModelService from "./AIModelService";
 import aiService from "./AIService";
 import knowledgeService from "./KnowledgeService";
 
 const BUFFER_TOKENS = 200;
+
+const TOKEN_BUCKET_REFILL_RATE = 700;
+const TOKEN_BUCKET_INTERVAL = "1 m";
+const TOKEN_BUCKET_MAX_TOKENS = 1000000;
 
 const listChatsResponseSelect: Prisma.ChatSelect = {
   id: true,
@@ -460,6 +469,18 @@ export class ChatService {
       remainingContextSizeTokens,
       remainingMaxInputTokens
     );
+
+    const identifier = "chat-" + chat.orgId;
+    const isWithinRateLimit = await tokenBucketRateLimit(
+      identifier,
+      TOKEN_BUCKET_REFILL_RATE,
+      TOKEN_BUCKET_INTERVAL,
+      TOKEN_BUCKET_MAX_TOKENS,
+      tokensUsed + answerTokens + remainingTokens
+    );
+    if (!isWithinRateLimit) {
+      throw new RateLimitError(`Rate limit exceeded for orgId=${chat.orgId}`);
+    }
 
     const knowledgeSummary = await knowledgeService.getAiKnowledgeSummary(
       ai.id
