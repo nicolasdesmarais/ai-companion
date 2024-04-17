@@ -111,6 +111,16 @@ export class ChatRepositoryImpl implements ChatRepository {
     return mapToChatForWriteDto(chat);
   }
 
+  public async getChatUsageForOrg(orgId: string): Promise<number> {
+    // await prismadb.message.aggregate({
+    //   where: {
+    //     chat: {
+    //       orgId,
+    //     },
+    //   },
+    // });
+  }
+
   public async createChat(
     chat: Prisma.ChatUncheckedCreateInput
   ): Promise<ChatDetailDto> {

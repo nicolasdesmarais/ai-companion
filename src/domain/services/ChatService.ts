@@ -598,6 +598,10 @@ export class ChatService {
       pinPosition: chat.pinPosition,
     });
   }
+
+  public async getChatUsageForOrg(orgId: string): Promise<number> {
+    return await chatRepository.getChatUsageForOrg(orgId);
+  }
 }
 
 const chatRepository = new ChatRepositoryImpl();

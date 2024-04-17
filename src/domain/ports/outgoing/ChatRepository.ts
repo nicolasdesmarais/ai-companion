@@ -12,6 +12,8 @@ export interface ChatRepository {
 
   getByIdForWrite(id: string): Promise<ChatForWriteDto>;
 
+  getChatUsageForOrg(orgId: string): Promise<number>;
+
   createChat(chat: Prisma.ChatUncheckedCreateInput): Promise<ChatDetailDto>;
 
   addMessageToChat(
