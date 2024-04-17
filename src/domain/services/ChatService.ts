@@ -414,7 +414,8 @@ export class ChatService {
     const llmTime = Math.round(end - endKnowledge);
     const totalTime = Math.round(end - start);
 
-    const tokenCount = recordedTokensUsed + knowledgeTokensReturned;
+    const tokenCount =
+      Number(recordedTokensUsed) + Number(knowledgeTokensReturned);
 
     const message: ChatMessageDto = {
       role: Role.system,
@@ -471,12 +472,14 @@ export class ChatService {
     );
 
     const identifier = "chat-" + chat.orgId;
+    const estimatedTokenUsage =
+      Number(tokensUsed) + Number(answerTokens) + Number(remainingTokens);
     const isWithinRateLimit = await tokenBucketRateLimit(
       identifier,
       TOKEN_BUCKET_REFILL_RATE,
       TOKEN_BUCKET_INTERVAL,
       TOKEN_BUCKET_MAX_TOKENS,
-      tokensUsed + answerTokens + remainingTokens
+      estimatedTokenUsage
     );
     if (!isWithinRateLimit) {
       throw new RateLimitError(`Rate limit exceeded for orgId=${chat.orgId}`);
