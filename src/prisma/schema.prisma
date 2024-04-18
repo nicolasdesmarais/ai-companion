@@ -290,6 +290,7 @@ model DataSource {
   @@index(createdAt)
   @@index(lastIndexedAt)
   @@index([orgId, ownerUserId])
+  @@index(ownerUserId)
   @@fulltext(name)
   @@map("data_sources")
 }
@@ -368,6 +369,7 @@ model AIRating {
   headline  String?
   rating    Int
 
+  @@index(aiId)
   @@map("ai_ratings")
 }
 
