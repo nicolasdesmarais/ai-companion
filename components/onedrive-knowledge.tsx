@@ -16,11 +16,11 @@ import {
 } from "@/src/adapter-in/api/DataSourcesApi";
 import { EntityNotFoundError } from "@/src/domain/errors/Errors";
 import { UserOAuthTokenEntity } from "@/src/domain/models/OAuthTokens";
+import { getMime } from "@/src/lib/mime";
 import { DataSourceRefreshPeriod } from "@prisma/client";
 import axios from "axios";
 import { format } from "date-fns";
 import { ChevronDown, ChevronRight, Loader, Server } from "lucide-react";
-import mime from "mime-types";
 import { useEffect, useState } from "react";
 import { DataRefreshPeriod } from "./data-refresh-period";
 
@@ -290,9 +290,7 @@ export const OneDriveKnowledge = ({ aiId, goBack }: Props) => {
                 searchResults.map((file) => {
                   const fileType = file.folder
                     ? "Folder"
-                    : getMsftLabelFromFileType(
-                        mime.lookup(file.name) as FileType
-                      );
+                    : getMsftLabelFromFileType(getMime(file.name) as FileType);
                   if (fileType === "Unknown") {
                     return null;
                   }
