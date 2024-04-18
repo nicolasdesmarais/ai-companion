@@ -503,7 +503,9 @@ export class ChatService {
       tokenUsage
     );
     if (!isWithinRateLimit) {
-      throw new RateLimitError(`Rate limit exceeded for orgId=${chat.orgId}`);
+      throw new RateLimitError(
+        `Token usage rate limit exceeded for orgId=${chat.orgId}`
+      );
     }
 
     return vectorKnowledge;
