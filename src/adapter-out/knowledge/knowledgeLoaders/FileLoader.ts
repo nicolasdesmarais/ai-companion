@@ -14,7 +14,7 @@ import {
   RecursiveCharacterTextSplitter,
 } from "langchain/text_splitter";
 
-import mime from "mime-types";
+import { getMime } from "@/src/lib/mime";
 import { DocxLoader } from "./DocxLoader";
 
 export class FileLoader {
@@ -159,7 +159,7 @@ export class FileLoader {
     if (result) {
       return result.mime;
     }
-    return mime.lookup(filename) || "";
+    return getMime(filename) || "";
   }
 }
 

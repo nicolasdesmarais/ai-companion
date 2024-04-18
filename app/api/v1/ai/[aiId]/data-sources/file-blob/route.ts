@@ -1,5 +1,6 @@
 import { FileUploadDataSourceInput } from "@/src/adapter-out/knowledge/file-upload/types/FileUploadDataSourceInput";
 import aiService from "@/src/domain/services/AIService";
+import { getMime } from "@/src/lib/mime";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
 import { DataSourceRefreshPeriod, DataSourceType } from "@prisma/client";
@@ -31,7 +32,7 @@ async function postHandler(
       }
       const { authorizationContext } = JSON.parse(tokenPayload);
 
-      const mimetype = blob.contentType || DEFAULT_MIME_TYPE;
+      const mimetype = getMime(blob.pathname) || DEFAULT_MIME_TYPE;
 
       const input: FileUploadDataSourceInput = {
         filename: blob.pathname,
