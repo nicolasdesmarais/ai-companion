@@ -471,20 +471,6 @@ export class ChatService {
       remainingMaxInputTokens
     );
 
-    const identifier = "chat-" + chat.orgId;
-    const estimatedTokenUsage =
-      Number(tokensUsed) + Number(answerTokens) + Number(remainingTokens);
-    const isWithinRateLimit = await tokenBucketRateLimit(
-      identifier,
-      TOKEN_BUCKET_REFILL_RATE,
-      TOKEN_BUCKET_INTERVAL,
-      TOKEN_BUCKET_MAX_TOKENS,
-      estimatedTokenUsage
-    );
-    if (!isWithinRateLimit) {
-      throw new RateLimitError(`Rate limit exceeded for orgId=${chat.orgId}`);
-    }
-
     const knowledgeSummary = await knowledgeService.getAiKnowledgeSummary(
       ai.id
     );
@@ -503,6 +489,23 @@ export class ChatService {
     console.log(
       `chatId: ${chat.id}, knowledgeTokensReturned: ${vectorKnowledge.tokensReturned}`
     );
+
+    const identifier = "chat-" + chat.orgId;
+    const tokenUsage =
+      Number(tokensUsed) +
+      Number(answerTokens) +
+      Number(vectorKnowledge.tokensReturned);
+    const isWithinRateLimit = await tokenBucketRateLimit(
+      identifier,
+      TOKEN_BUCKET_REFILL_RATE,
+      TOKEN_BUCKET_INTERVAL,
+      TOKEN_BUCKET_MAX_TOKENS,
+      tokenUsage
+    );
+    if (!isWithinRateLimit) {
+      throw new RateLimitError(`Rate limit exceeded for orgId=${chat.orgId}`);
+    }
+
     return vectorKnowledge;
   }
 
