@@ -14,18 +14,18 @@
       }
     },
     "schemas": {
-      "GetChatsResponse": {
+      "ListChatsResponse": {
         "type": "object",
         "properties": {
           "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Chat"
+              "$ref": "#/components/schemas/ChatSummary"
             }
           }
         }
       },
-      "Chat": {
+      "ChatSummary": {
         "type": "object",
         "properties": {
           "id": {
@@ -46,10 +46,6 @@
             "type": "string",
             "description": "Name of the chat session."
           },
-          "aiId": {
-            "type": "string",
-            "description": "Identifier of the AI associated with the chat session."
-          },
           "userId": {
             "type": "string",
             "description": "Identifier of the user associated with the chat session."
@@ -59,6 +55,83 @@
             "format": "int32",
             "description": "The position of the chat in a pinned list or similar.",
             "nullable": true
+          },
+          "ai": {
+            "$ref": "#/components/schemas/ChatAI"
+          }
+        }
+      },
+      "ChatDetails": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChatSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "messages": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ChatMessage"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ChatMessage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the chat message."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the chat message was created."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the chat message was last updated."
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the message"
+          },
+          "role": {
+            "type": "string",
+            "description": "The role of the message sender, either user or system"
+          }
+        }
+      },
+      "ChatAI": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID of the AI."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the AI."
+          },
+          "src": {
+            "type": "string",
+            "description": "URL for the AI's image."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the AI."
+          },
+          "userId": {
+            "type": "string",
+            "description": "Identifier of the AI's owner."
+          },
+          "userName": {
+            "type": "string",
+            "description": "The user name of the AI's owner."
           }
         }
       },
@@ -70,7 +143,7 @@
           }
         }
       },
-      "GetDataSourcesResponse": {
+      "ListDataSourcesResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -111,6 +184,9 @@
           "type": {
             "$ref": "#/components/schemas/DataSourceType"
           },
+          "refreshPeriod": {
+            "$ref": "#/components/schemas/DataSourceRefreshPeriod"
+          },
           "indexStatus": {
             "$ref": "#/components/schemas/DataSourceIndexStatus"
           },
@@ -123,7 +199,12 @@
       "DataSourceType": {
         "type": "string",
         "description": "The type of the data source.",
-        "enum": ["WEB_URL", "GOOGLE_DRIVE", "FILE_UPLOAD"]
+        "enum": ["API", "FILE_UPLOAD", "GOOGLE_DRIVE", "WEB_URL"]
+      },
+      "DataSourceRefreshPeriod": {
+        "type": "string",
+        "description": "How frequently the data source should be refreshed.",
+        "enum": ["NEVER", "DAILY", "WEEKLY", "MONTHLY"]
       },
       "DataSourceIndexStatus": {
         "type": "string",
@@ -144,11 +225,318 @@
             "description": "The streaming text response from the AI."
           }
         }
+      },
+      "ListAIsRequestScope": {
+        "type": "string",
+        "enum": [
+          "PRIVATE",
+          "OWNED",
+          "GROUP",
+          "SHARED",
+          "ORGANIZATION",
+          "PUBLIC",
+          "ALL"
+        ]
+      },
+      "AIDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "src": {
+            "type": "string"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/AIProfile"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "messageCount": {
+            "type": "integer"
+          },
+          "rating": {
+            "type": "number"
+          },
+          "ratingCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "AIProfile": {
+        "type": "object",
+        "properties": {
+          "headline": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AIProfileFeature"
+            }
+          },
+          "showCharacter": {
+            "type": "boolean"
+          },
+          "showTraining": {
+            "type": "boolean"
+          },
+          "showPersonality": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AIProfileFeature": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "GroupAvailability": {
+        "type": "string",
+        "enum": ["EVERYONE", "RESTRICTED"],
+        "description": "Availability status of the group."
+      },
+      "GroupSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orgId": {
+            "type": "string"
+          },
+          "ownerUserId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "availability": {
+            "$ref": "#/components/schemas/GroupAvailability"
+          }
+        }
+      },
+      "GroupDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GroupSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "users": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/GroupUser"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "GroupUser": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "userId": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "OrgUsage": {
+        "type": "object",
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "description": "Unique identifier for the organization."
+          },
+          "dataTokensUsed": {
+            "type": "number",
+            "description": "Number of data tokens used by the organization."
+          },
+          "dataUsageTokenLimit": {
+            "type": "number",
+            "nullable": true,
+            "description": "The data token usage limit for the organization, if any."
+          },
+          "apiTokensUsed": {
+            "type": "number",
+            "description": "Number of API tokens used by the organization."
+          },
+          "apiUsageTokenLimit": {
+            "type": "number",
+            "nullable": true,
+            "description": "The API token usage limit for the organization, if any."
+          }
+        }
+      },
+      "OrgUsageByAI": {
+        "type": "object",
+        "properties": {
+          "orgUsage": {
+            "$ref": "#/components/schemas/OrgUsage"
+          },
+          "aiUsages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AIUsage"
+            }
+          }
+        }
+      },
+      "AIUsage": {
+        "type": "object",
+        "properties": {
+          "aiId": {
+            "type": "string",
+            "description": "Unique identifier for the AI instance."
+          },
+          "aiDataTokensUsed": {
+            "type": "number",
+            "nullable": true,
+            "description": "Number of data tokens used by this AI instance."
+          },
+          "aiApiTokensUsed": {
+            "type": "number",
+            "nullable": true,
+            "description": "Number of API tokens used by this AI instance."
+          }
+        }
       }
     }
   },
   "security": [],
   "paths": {
+    "/api/v1/ai/{aiId}": {
+      "get": {
+        "summary": "Get AI Details",
+        "description": "Retrieves details of the AI specified by the given identifier.",
+        "operationId": "getAIDetails",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The identifier of the AI whose details are to be retrieved.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the specified AI.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "404": {
+            "description": "AI not found with the given identifier."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ai/{aiId}/approve": {
+      "put": {
+        "summary": "Approve an AI",
+        "description": "Marks an AI as approved by the organization.",
+        "operationId": "approveAI",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The identifier of the AI to be approved.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI successfully approved."
+          },
+          "401": {
+            "description": "Missing authorization context. User must be authenticated."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "404": {
+            "description": "AI not found with the given identifier."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/ai/{aiId}/chats": {
       "get": {
         "summary": "Get all chats for the AI",
@@ -171,7 +559,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetChatsResponse"
+                  "$ref": "#/components/schemas/ListChatsResponse"
                 }
               }
             }
@@ -180,7 +568,7 @@
             "description": "AI not found with the given identifier."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -227,7 +615,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Chat"
+                  "$ref": "#/components/schemas/ChatSummary"
                 }
               }
             }
@@ -236,7 +624,206 @@
             "description": "Not found, when the specified AI ID does not exist or is not visible to the current user."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ai/{aiId}/data-sources": {
+      "get": {
+        "summary": "List data sources for the AI",
+        "description": "Retrieves a list of data sources associated with the given AI identifier.",
+        "operationId": "listAIDataSources",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The identifier of the AI whose data sources are to be retrieved.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of data sources associated with the AI.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListDataSourcesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "AI not found with the given identifier."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Add an existing data source to the specified AI",
+        "description": "Associates an existing data source with the specified AI.",
+        "operationId": "addDataSourceToAI",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier for the AI to which the data source is to be added.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dataSourceId": {
+                    "type": "string",
+                    "description": "The unique identifier of the existing data source to be added."
+                  }
+                },
+                "required": ["dataSourceId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Data source successfully added to the AI.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "aiId": {
+                      "type": "string",
+                      "description": "The AI identifier to which the data source was added."
+                    },
+                    "dataSource": {
+                      "$ref": "#/components/schemas/DataSource"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, malformed request syntax or invalid request message framing."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "404": {
+            "description": "Not Found, either of the specified AI or data source are not found."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ai/{aiId}/data-sources/api": {
+      "post": {
+        "summary": "Create a new API data source for the specified AI",
+        "description": "Adds a new API data source with a specified name and JSON payload for the given AI.",
+        "operationId": "createApiDataSource",
+        "parameters": [
+          {
+            "name": "aiId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier for the AI.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the data source."
+                  },
+                  "data": {
+                    "type": "object",
+                    "description": "The JSON payload to be used as the data source's knowledge."
+                  }
+                },
+                "required": ["name", "data"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Data source successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "aiId": {
+                      "type": "string"
+                    },
+                    "dataSourceId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "AI not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -248,7 +835,7 @@
     },
     "/api/v1/ai/{aiId}/data-sources/file": {
       "post": {
-        "summary": "Adds a file upload data source for the specified AI",
+        "summary": "Adds a file upload data source for the specified AI. Max file size: 4.5Mb.",
         "parameters": [
           {
             "in": "path",
@@ -322,17 +909,17 @@
         ]
       }
     },
-    "/api/v1/ai/{aiId}/data-sources": {
-      "get": {
-        "summary": "Get data sources for the AI",
-        "description": "Retrieves a list of data sources associated with the given AI identifier.",
-        "operationId": "getDataSources",
+    "/api/v1/ai/{aiId}/revoke": {
+      "put": {
+        "summary": "Revoke AI approval",
+        "description": "Revokes the organization approval for an AI.",
+        "operationId": "revokeAIApproval",
         "parameters": [
           {
             "name": "aiId",
             "in": "path",
             "required": true,
-            "description": "The identifier of the AI whose data sources are to be retrieved.",
+            "description": "The identifier of the AI whose approval is to be revoked.",
             "schema": {
               "type": "string"
             }
@@ -340,60 +927,19 @@
         ],
         "responses": {
           "200": {
-            "description": "A list of data sources associated with the AI.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetDataSourcesResponse"
-                }
-              }
-            }
+            "description": "AI approval successfully revoked."
+          },
+          "401": {
+            "description": "Missing authorization context. User must be authenticated."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
           },
           "404": {
             "description": "AI not found with the given identifier."
           },
           "500": {
-            "description": "Internal Server Error"
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ]
-      }
-    },
-    "/api/v1/ai/{aiId}/data-sources/{dataSourceId}": {
-      "delete": {
-        "summary": "Delete a Data Source",
-        "description": "Deletes a specific data source associated with the given AI identifier.",
-        "operationId": "deleteDataSource",
-        "parameters": [
-          {
-            "name": "aiId",
-            "in": "path",
-            "required": true,
-            "description": "The identifier of the AI associated with the data source.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "dataSourceId",
-            "in": "path",
-            "required": true,
-            "description": "The unique identifier of the data source to be deleted.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Data source successfully deleted, no content to return."
-          },
-          "404": {
-            "description": "Not Found, the specified data source ID or AI ID does not exist."
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -404,6 +950,48 @@
       }
     },
     "/api/v1/chats/{chatId}": {
+      "get": {
+        "summary": "Get a chat session",
+        "description": "Retrieves the chat session with the specified ID.",
+        "operationId": "getChat",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the chat session to retrieve.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat session successfully retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "404": {
+            "description": "Not found, when the specified chat ID does not exist."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
       "post": {
         "summary": "Start a chat session",
         "description": "Initiates a chat with the AI using the provided prompt on the specified date.",
@@ -455,11 +1043,14 @@
           "400": {
             "description": "Bad request, when the request body does not contain the required fields or contains invalid data."
           },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
           "404": {
             "description": "Not found, when the specified chat ID does not exist."
           },
           "500": {
-            "description": "Internal Server Error, any internal error."
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -494,7 +1085,7 @@
             "description": "Not Found, the specified chat ID does not exist."
           },
           "500": {
-            "description": "Internal Server Error, any internal error."
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -526,7 +1117,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Chat"
+                  "$ref": "#/components/schemas/ChatDetail"
                 }
               }
             }
@@ -538,89 +1129,7 @@
             "description": "Not found, when the specified chat ID does not exist."
           },
           "500": {
-            "description": "Internal Server Error, any internal error."
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ]
-      }
-    },
-    "/api/v1/chats/{chatId}/pin": {
-      "put": {
-        "summary": "Pin a chat session",
-        "description": "Pins the chat session with the specified ID, marking it as important or for easy access.",
-        "operationId": "pinChat",
-        "parameters": [
-          {
-            "name": "chatId",
-            "in": "path",
-            "required": true,
-            "description": "The unique identifier of the chat session to pin.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Chat session successfully pinned.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Chat"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found, when the specified chat ID does not exist."
-          },
-          "500": {
-            "description": "Internal Server Error, any internal error."
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ]
-      }
-    },
-    "/api/v1/chats/{chatId}/unpin": {
-      "put": {
-        "summary": "Unpin a chat session",
-        "description": "Unpins the chat session with the specified ID, removing it from the pinned list.",
-        "operationId": "unpinChat",
-        "parameters": [
-          {
-            "name": "chatId",
-            "in": "path",
-            "required": true,
-            "description": "The unique identifier of the chat session to unpin.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Chat session successfully unpinned.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Chat"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found, when the specified chat ID does not exist."
-          },
-          "500": {
-            "description": "Internal Server Error, any internal error."
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -652,7 +1161,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Chat"
+                  "$ref": "#/components/schemas/ChatDetail"
                 }
               }
             }
@@ -661,7 +1170,7 @@
             "description": "Not found, when the specified chat ID does not exist."
           },
           "500": {
-            "description": "Internal Server Error, any internal error."
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -671,7 +1180,410 @@
         ]
       }
     },
-    "/api/v1/chats": {
+    "/api/v1/data-sources": {
+      "get": {
+        "summary": "List all data sources",
+        "description": "Retrieves a list of data sources associated which the user has access to.",
+        "operationId": "listDataSources",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "description": "The name of the data source.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "The type of the data source. One of: WEB_URL, GOOGLE_DRIVE, ONEDRIVE, FILE_UPLOAD, API.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "WEB_URL",
+                "GOOGLE_DRIVE",
+                "ONEDRIVE",
+                "FILE_UPLOAD",
+                "API"
+              ]
+            }
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "required": false,
+            "description": "Order by field and direction. Prefix field name with '+' for ascending or '-' for descending order. Allowed fields: createdAt, lastIndexedAt, usageCount.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[+-](createdAt|lastIndexedAt|usageCount)$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of all data sources which the user has access to.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListDataSourcesResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+
+    "/api/v1/data-sources/{dataSourceId}": {
+      "delete": {
+        "summary": "Delete a Data Source",
+        "description": "Deletes a specific data source associated with the given AI identifier.",
+        "operationId": "deleteDataSource",
+        "parameters": [
+          {
+            "name": "dataSourceId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the data source to be deleted.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Data source successfully deleted, no content to return."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "404": {
+            "description": "Not Found, the specified data source ID does not exist."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/data-sources/{dataSourceId}/refresh": {
+      "put": {
+        "summary": "Refresh a Data Source",
+        "description": "This endpoint refreshes the specified data source.",
+        "operationId": "refreshDataSource",
+        "parameters": [
+          {
+            "name": "dataSourceId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the data source to be refreshed.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "forceRefresh",
+            "description": "Indicates if the data source should be refreshed even if the content has not been updated",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Request has been accepted for processing."
+          },
+          "401": {
+            "description": "Missing authorization context. User must be authenticated."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "404": {
+            "description": "Data source not found with the specified ID."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/groups": {
+      "post": {
+        "summary": "Create a new group",
+        "description": "Creates a new group with the specified details.",
+        "operationId": "createGroup",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the group."
+                  },
+                  "availability": {
+                    "$ref": "#/components/schemas/GroupAvailability"
+                  },
+                  "memberEmails": {
+                    "type": "string",
+                    "description": "A comma-separated list of emails of users who should be added to the group."
+                  }
+                },
+                "required": ["name", "availability", "memberEmails"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Group successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authorization context. User must be authenticated."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      }
+    },
+    "/api/v1/groups/{groupId}": {
+      "put": {
+        "summary": "Update a group",
+        "description": "Updates the details of a specific group and manages its member list.",
+        "operationId": "updateGroup",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the group to update.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the group."
+                  },
+                  "availability": {
+                    "$ref": "#/components/schemas/GroupAvailability"
+                  },
+                  "memberEmailsToAdd": {
+                    "type": "string",
+                    "description": "A comma-separated list of emails of users to be added to the group."
+                  },
+                  "memberEmailsToRemove": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "A comma-separated list of emails of users to be removed from the group."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Group details updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, when the input data is invalid."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "404": {
+            "description": "Not found, when the specified group ID does not exist."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a group",
+        "description": "Deletes the group with the specified identifier.",
+        "operationId": "deleteGroup",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the group to delete.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Group successfully deleted, no content to return."
+          },
+          "400": {
+            "description": "Bad request, when the request is malformed."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "404": {
+            "description": "Not found, when the specified group ID does not exist."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      }
+    },
+    "/api/v1/groups/{groupId}/leave": {
+      "put": {
+        "summary": "Leave a group",
+        "description": "Allows the current user to leave the group specified by the groupId.",
+        "operationId": "leaveGroup",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the group to leave.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully left the group, no content to return."
+          },
+          "400": {
+            "description": "Bad request, when the request is malformed."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "404": {
+            "description": "Not found, when the specified group ID does not exist."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      }
+    },
+    "/api/v1/me/ai": {
+      "get": {
+        "summary": "List AIs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "$ref": "#/components/schemas/ListAIsRequestScope"
+            },
+            "description": "The scope to filter results by"
+          },
+          {
+            "in": "query",
+            "name": "groupId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The id of a group to filter results by"
+          },
+          {
+            "in": "query",
+            "name": "categoryId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The id of a category to filter results by"
+          },
+          {
+            "in": "query",
+            "name": "approvedByOrg",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Filter results by whether the AI has been approved by the organization."
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AIDetail"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/chats": {
       "get": {
         "summary": "Get all chats for the User",
         "description": "Retrieves a list of all chat sessions associated with the current user",
@@ -682,7 +1594,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetChatsResponse"
+                  "$ref": "#/components/schemas/ListChatsResponse"
                 }
               }
             }
@@ -691,7 +1603,7 @@
             "description": "AI not found with the given identifier."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error."
           }
         },
         "security": [
@@ -699,6 +1611,90 @@
             "ApiKeyAuth": []
           }
         ]
+      }
+    },
+    "/api/v1/me/groups": {
+      "get": {
+        "summary": "Get groups of the current user",
+        "description": "Retrieves a list of groups associated with the current user.",
+        "operationId": "getUserGroups",
+        "responses": {
+          "200": {
+            "description": "A list of groups associated with the current user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GroupSummary"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authorization context. User must be authenticated."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      }
+    },
+    "/api/v1/usage/ai": {
+      "get": {
+        "summary": "Get organization usage metrics by AI",
+        "description": "Returns the usage metrics of the organization broken down by AI.",
+        "operationId": "getOrgUsageByAI",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgUsageByAI"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/usage/org": {
+      "get": {
+        "summary": "Get organization usage metrics",
+        "description": "Returns usage metrics for the organization.",
+        "operationId": "getOrgUsage",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgUsage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authorization context. User must be authenticated."
+          },
+          "403": {
+            "description": "Forbidden, the user is not authorized to perform this action."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
       }
     }
   },

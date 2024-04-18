@@ -5,12 +5,12 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { ShareAIForm } from "@/components/share-ai-form";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { AI } from "@prisma/client";
+import { AIDetailDto } from "@/src/domain/models/AI";
 
 interface InviteModalProps {
   showModal: boolean;
   setShowModal: Dispatch<SetStateAction<boolean>>;
-  ai: AI;
+  ai: AIDetailDto;
 }
 
 export const ShareModal = ({

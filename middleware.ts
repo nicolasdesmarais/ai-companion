@@ -1,4 +1,4 @@
-import { authMiddleware, redirectToSignIn } from "@clerk/nextjs";
+import { authMiddleware } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
 // This example protects all routes including api/trpc routes
@@ -10,13 +10,25 @@ export default authMiddleware({
     "/api/v1/integrations/clerkWebhooks",
     "/api/v1/integrations/apify/webhooks",
     "/api/inngest",
+    "/landing(.*)",
+    "/login",
+    "/signup",
+    "/contact",
+    "/reset",
+    "/api/v1/waitlist/export",
+    "/api/v1/waitlist",
+    "/api/v1/warm",
+    "/public(.*)",
   ],
-  apiRoutes: ["/api/(.*)"],
+  apiRoutes: [
+    "/api/((?!webhook|v1/integrations/onedrive|v1/warm|v1/integrations/clerkWebhooks|v1/integrations/apify/webhooks|inngest).*)",
+  ],
 
   afterAuth(auth, req, evt) {
     // handle users who aren't authenticated
     if (!auth.userId && !auth.isPublicRoute && !auth.isApiRoute) {
-      return redirectToSignIn({ returnBackUrl: req.url });
+      const landing = new URL("/landing", req.url);
+      return NextResponse.redirect(landing, { status: 308 });
     }
     // redirect them to organization selection page
     if (
@@ -27,7 +39,7 @@ export default authMiddleware({
       req.nextUrl.pathname !== "/org-selection"
     ) {
       const orgSelection = new URL("/org-selection", req.url);
-      return NextResponse.redirect(orgSelection);
+      return NextResponse.redirect(orgSelection, { status: 308 });
     }
   },
 });

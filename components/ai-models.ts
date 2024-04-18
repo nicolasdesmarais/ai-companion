@@ -1,148 +1,3 @@
-export const models = [
-  // {
-  //   id: "llama2-13b",
-  //   name: "LLAMA2 13B Chat (4K Context)",
-  //   contextSize: 4096,
-  //   options: {
-  //     temperature: {
-  //       default: 0.75,
-  //       max: 2,
-  //       min: 0,
-  //       step: 0.1,
-  //     },
-  //     topP: {
-  //       default: 0.9,
-  //       max: 1,
-  //       min: 0,
-  //       step: 0.01,
-  //     },
-  //     topK: {
-  //       default: 50,
-  //       max: 100,
-  //       min: 0,
-  //       step: 1,
-  //     },
-  //     maxTokens: {
-  //       default: 1275,
-  //       max: 2000,
-  //       min: 1275,
-  //       step: 1,
-  //     },
-  //   },
-  // },
-  {
-    id: "gpt-4",
-    name: "GPT-4 (32K Context)",
-    contextSize: 32768,
-    options: {
-      temperature: {
-        default: 1,
-        max: 2,
-        min: 0,
-        step: 0.1,
-      },
-      topP: {
-        default: 1,
-        max: 1,
-        min: 0,
-        step: 0.01,
-      },
-      maxTokens: {
-        default: 4000,
-        max: 6000,
-        min: 100,
-        step: 1,
-      },
-      frequencyPenalty: {
-        default: 0,
-        max: 1,
-        min: -1,
-        step: 0.1,
-      },
-      presencePenalty: {
-        default: 0,
-        max: 1,
-        min: -1,
-        step: 0.1,
-      },
-    },
-  },
-  {
-    id: "gpt35-16k",
-    name: "GPT-3.5 (16K Context)",
-    contextSize: 16384,
-    options: {
-      temperature: {
-        default: 1,
-        max: 2,
-        min: 0,
-        step: 0.1,
-      },
-      topP: {
-        default: 1,
-        max: 1,
-        min: 0,
-        step: 0.01,
-      },
-      maxTokens: {
-        default: 4000,
-        max: 6000,
-        min: 100,
-        step: 1,
-      },
-      frequencyPenalty: {
-        default: 0,
-        max: 1,
-        min: -1,
-        step: 0.1,
-      },
-      presencePenalty: {
-        default: 0,
-        max: 1,
-        min: -1,
-        step: 0.1,
-      },
-    },
-  },
-  // {
-  //   id: "text-davinci-003",
-  //   name: "DaVinci-003 (4K Context)",
-  //   contextSize: 4096,
-  //   options: {
-  //     temperature: {
-  //       default: 1,
-  //       max: 2,
-  //       min: 0,
-  //       step: 0.1,
-  //     },
-  //     topP: {
-  //       default: 1,
-  //       max: 1,
-  //       min: 0,
-  //       step: 0.01,
-  //     },
-  //     maxTokens: {
-  //       default: 600,
-  //       max: 2000,
-  //       min: 500,
-  //       step: 1,
-  //     },
-  //     frequencyPenalty: {
-  //       default: 0,
-  //       max: 2,
-  //       min: -2,
-  //       step: 0.1,
-  //     },
-  //     presencePenalty: {
-  //       default: 0,
-  //       max: 2,
-  //       min: -2,
-  //       step: 0.1,
-  //     },
-  //   },
-  // },
-];
-
 export const imageModels = [
   {
     id: "kandinsky-21",
@@ -153,12 +8,28 @@ export const imageModels = [
     name: "DALLE 2",
   },
   {
+    id: "dalle-3",
+    name: "DALLE 3",
+  },
+  {
     id: "stable-diffusion-xl",
     name: "Stable Diffusion XL",
   },
   {
     id: "latent-consistency",
     name: "Latent Consistency",
+  },
+  {
+    id: "playground-2",
+    name: "Playground v2",
+  },
+  {
+    id: "proteus",
+    name: "Proteus v0.2",
+  },
+  {
+    id: "realvisxl",
+    name: "Realvisxl v3 turbo",
   },
 ];
 

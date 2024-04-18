@@ -8,7 +8,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import axios, { AxiosError } from "axios";
+import { delay } from "@/src/lib/utils";
+import { upload } from "@vercel/blob/client";
 import { FileText, Loader } from "lucide-react";
 import { useRef, useState } from "react";
 import { knowledgeTypes } from "./knowledge-types";
@@ -44,27 +45,34 @@ export const FileUploadKnowledge = ({
     }
     const file = inputFileRef.current.files[0];
     const fileType = file.type || "text/plain";
+    const filename = encodeURIComponent(file.name);
 
-    if (knowledgeTypes.findIndex((format) => format.type === fileType) === -1) {
+    if (
+      !fileType.startsWith("text/") &&
+      knowledgeTypes.findIndex((format) => format.type === fileType) === -1
+    ) {
       toast({
         variant: "destructive",
         description: `This file format is not supported: ${fileType}.`,
         duration: 6000,
       });
+      setUploading(false);
+      return;
     }
     try {
-      const data = new FormData();
-      data.set("file", file);
-      await axios.post(`/api/v1/ai/${aiId}/data-sources/file`, data);
+      await upload(filename, file, {
+        access: "public",
+        handleUploadUrl: `/api/v1/ai/${aiId}/data-sources/file-blob`,
+      });
+      await delay(1000);
       inputFileRef.current.value = "";
       toast({ description: "File uploaded." });
       goBack();
     } catch (error: any) {
+      console.error(error);
       toast({
         variant: "destructive",
-        description:
-          String((error as AxiosError).response?.data) ||
-          "Something went wrong.",
+        description: "Something went wrong.",
         duration: 6000,
       });
     }
@@ -72,7 +80,7 @@ export const FileUploadKnowledge = ({
   };
 
   return (
-    <div className="w-full p-6 bg-gray-900 text-white">
+    <div className="w-full p-6 bg-accent/30">
       <FormItem>
         <FormLabel>Upload your file</FormLabel>
         <div>
@@ -81,7 +89,7 @@ export const FileUploadKnowledge = ({
           </div>
         </div>
         <FormDescription>
-          Add custom knowledge to your AI. Max file size: 4.5Mb. <br />
+          Add custom knowledge to your AI. Max file size: 500Mb. <br />
           The following formats are supported:{" "}
           {knowledgeTypes
             .map((format) => (format.type !== "URL" ? format.name : null))

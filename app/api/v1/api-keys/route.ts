@@ -1,9 +1,10 @@
+import { CreateApiKeyRequest } from "@/src/adapter-in/api/ApiKeysApi";
 import apiKeyService from "@/src/domain/services/ApiKeyService";
-import { CreateApiKeyRequest } from "@/src/ports/api/ApiKeysApi";
+import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+async function postHandler(req: Request) {
   const authn = await auth();
   const { orgId, userId } = authn;
 
@@ -13,10 +14,8 @@ export async function POST(req: Request) {
 
   const body: CreateApiKeyRequest = await req.json();
 
-  try {
-    const apiKey = await apiKeyService.createApiKey(orgId, userId, body);
-    return NextResponse.json(apiKey, { status: 201 });
-  } catch (e) {
-    return new NextResponse("Internal Server Error", { status: 500 });
-  }
+  const apiKey = await apiKeyService.createApiKey(orgId, userId, body);
+  return NextResponse.json(apiKey, { status: 201 });
 }
+
+export const POST = withErrorHandler(postHandler);

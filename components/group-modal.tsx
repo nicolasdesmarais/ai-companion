@@ -26,14 +26,16 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { useConfirmModal } from "@/hooks/use-confirm-modal";
 import { useGroupModal } from "@/hooks/use-group-modal";
-import { CreateGroupRequest } from "@/src/domain/types/CreateGroupRequest";
-import { UpdateGroupRequest } from "@/src/domain/types/UpdateGroupRequest";
+import {
+  CreateGroupRequest,
+  UpdateGroupRequest,
+} from "@/src/adapter-in/api/GroupsApi";
 import { useUser } from "@clerk/nextjs";
 import { GroupAvailability } from "@prisma/client";
 import { Loader, X } from "lucide-react";
 import * as z from "zod";
-import { useConfirmModal } from "@/hooks/use-confirm-modal";
 import { Banner } from "./ui/banner";
 
 const groupFormSchema = z.object({
@@ -43,14 +45,18 @@ const groupFormSchema = z.object({
   teammates: z.string(),
 });
 
-export const GroupModal = () => {
+interface GroupModalProps {
+  hasElevatedWriteAccess: boolean;
+}
+
+export const GroupModal = ({ hasElevatedWriteAccess }: GroupModalProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedOption, setSelectedOption] =
-    useState<GroupAvailability | null>(GroupAvailability.EVERYONE);
+    useState<GroupAvailability | null>(GroupAvailability.RESTRICTED);
   const [currentTeammates, setCurrentTeammates] = useState<any[]>([]);
   const [removedTeammates, setRemovedTeammates] = useState<any[]>([]);
-  const [isOwner, setIsOwner] = useState(true);
+  const [canUpdateGroup, setCanUpdateGroup] = useState(true);
   const [search, setSearch] = useState("");
   const [filteredTeammates, setFilteredTeammates] = useState<any[]>([]);
   const { toast } = useToast();
@@ -72,13 +78,17 @@ export const GroupModal = () => {
 
   const fetchGroup = async () => {
     setLoading(true);
+
     const response = await axios.get(`/api/v1/groups/${groupModal.groupId}`);
     if (response.status === 200) {
+      const canUpdateGroup = hasElevatedWriteAccess ||
+      response.data.ownerId === user?.id;
+
       form.setValue("name", response.data.name);
       setSelectedOption(response.data.availability);
       setCurrentTeammates(response.data.users);
       setFilteredTeammates(response.data.users);
-      setIsOwner(response.data.ownerUserId === user?.id);
+      setCanUpdateGroup(canUpdateGroup);
     } else {
       toast({
         description: "Something went wrong",
@@ -98,7 +108,7 @@ export const GroupModal = () => {
   const updateGroup = async (values: z.infer<typeof groupFormSchema>) => {
     const request: UpdateGroupRequest = {
       name: values.name,
-      availability: selectedOption || GroupAvailability.EVERYONE,
+      availability: selectedOption || GroupAvailability.RESTRICTED,
       memberEmailsToAdd: values.teammates,
       memberEmailsToRemove: removedTeammates,
     };
@@ -111,7 +121,9 @@ export const GroupModal = () => {
       toast({
         description: "Group updated successfully",
       });
-      groupModal.onUpdate(response.data);
+
+      groupModal.onUpdate();
+
       form.reset();
     } else {
       throw new Error(response.data.message);
@@ -121,16 +133,17 @@ export const GroupModal = () => {
   const createGroup = async (values: z.infer<typeof groupFormSchema>) => {
     const request: CreateGroupRequest = {
       name: values.name,
-      availability: selectedOption || GroupAvailability.EVERYONE,
+      availability: selectedOption || GroupAvailability.RESTRICTED,
       memberEmails: values.teammates,
     };
 
     const response = await axios.post(`/api/v1/groups`, request);
-    if (response.status === 200) {
+    if (response.status === 201) {
       toast({
         description: "Group created successfully",
       });
-      groupModal.onUpdate(response.data);
+
+      groupModal.onUpdate();
       form.reset();
     } else {
       throw new Error(response.data.message);
@@ -161,11 +174,13 @@ export const GroupModal = () => {
       const response = await axios.delete(
         `/api/v1/groups/${groupModal.groupId}`
       );
-      if (response.status === 200) {
+      if (response.status === 204) {
         toast({
           description: "Group deleted successfully",
         });
-        groupModal.onUpdate(response.data);
+
+        groupModal.onUpdate();
+
         form.reset();
       } else {
         throw new Error(response.data.message);
@@ -184,13 +199,15 @@ export const GroupModal = () => {
     setLoading(true);
     try {
       const response = await axios.put(
-        `/api/v1/me/groups/${groupModal.groupId}/leave`
+        `/api/v1/groups/${groupModal.groupId}/leave`
       );
-      if (response.status === 200) {
+      if (response.status === 204) {
         toast({
           description: "You have left the group",
         });
-        groupModal.onUpdate(response.data);
+
+        groupModal.onUpdate();
+
         form.reset();
       } else {
         throw new Error(response.data.message);
@@ -244,7 +261,7 @@ export const GroupModal = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {groupModal.groupId &&
-                !isOwner &&
+                !canUpdateGroup &&
                 selectedOption === GroupAvailability.RESTRICTED && (
                   <Banner>
                     Only the group owner can rename or delete this group.
@@ -259,7 +276,7 @@ export const GroupModal = () => {
                     <FormControl>
                       <Input
                         placeholder="Group Name"
-                        disabled={!isOwner || loading}
+                        disabled={!canUpdateGroup || loading}
                         {...field}
                       />
                     </FormControl>
@@ -271,33 +288,35 @@ export const GroupModal = () => {
               <div className="space-y-4">
                 <FormLabel>Who can join?</FormLabel>
                 <FormItem>
+                  {hasElevatedWriteAccess && (
+                    <FormControl>
+                      <div>
+                        <label>
+                          <input
+                            type="radio"
+                            disabled={!canUpdateGroup || loading}
+                            value={GroupAvailability.EVERYONE}
+                            checked={
+                              selectedOption === GroupAvailability.EVERYONE
+                            }
+                            onChange={(e) =>
+                              setSelectedOption(
+                                e.target.value as GroupAvailability
+                              )
+                            }
+                            className="mr-2"
+                          />
+                          Everyone in your company
+                        </label>
+                      </div>
+                    </FormControl>
+                  )}
                   <FormControl>
                     <div>
                       <label>
                         <input
                           type="radio"
-                          disabled={!isOwner || loading}
-                          value={GroupAvailability.EVERYONE}
-                          checked={
-                            selectedOption === GroupAvailability.EVERYONE
-                          }
-                          onChange={(e) =>
-                            setSelectedOption(
-                              e.target.value as GroupAvailability
-                            )
-                          }
-                          className="mr-2"
-                        />
-                        Everyone in your company
-                      </label>
-                    </div>
-                  </FormControl>
-                  <FormControl>
-                    <div>
-                      <label>
-                        <input
-                          type="radio"
-                          disabled={!isOwner || loading}
+                          disabled={!canUpdateGroup || loading}
                           value={GroupAvailability.RESTRICTED}
                           checked={
                             selectedOption === GroupAvailability.RESTRICTED
@@ -400,7 +419,7 @@ export const GroupModal = () => {
                     ) : null}
                   </Button>
 
-                  {groupModal.groupId && isOwner && (
+                  {groupModal.groupId && canUpdateGroup && (
                     <Button
                       size="lg"
                       variant="destructive"
@@ -428,7 +447,7 @@ export const GroupModal = () => {
                     </Button>
                   )}
                   {groupModal.groupId &&
-                    !isOwner &&
+                    !canUpdateGroup &&
                     selectedOption === GroupAvailability.RESTRICTED && (
                       <Button
                         size="lg"

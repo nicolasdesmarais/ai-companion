@@ -1,17 +1,87 @@
-import EmailUtils from "@/src/lib/emailUtils";
-import prismadb from "@/src/lib/prismadb";
-import { clerkClient } from "@clerk/nextjs";
-import { User } from "@clerk/nextjs/server";
-import { AI, AIVisibility, GroupAvailability, Prisma } from "@prisma/client";
-import { EntityNotFoundError } from "../errors/Errors";
-import { ShareAIRequest } from "../types/ShareAIRequest";
-import invitationService from "./InvitationService";
 import {
+  AIRequest,
+  CreateAIRequest,
   ListAIsRequestParams,
   ListAIsRequestScope,
-} from "./dtos/ListAIsRequestParams";
+  ShareAIRequest,
+  UpdateAIRequest,
+} from "@/src/adapter-in/api/AIApi";
+import { AIRepositoryImpl } from "@/src/adapter-out/repositories/AIRepositoryImpl";
+import { BadRequestError } from "@/src/domain/errors/Errors";
+import EmailUtils from "@/src/lib/emailUtils";
+import prismadb from "@/src/lib/prismadb";
+import { containsMySQLSpecialChars } from "@/src/lib/utils";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
+import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
+import { DataSourceSecurityService } from "@/src/security/services/DataSourceSecurityService";
+import { clerkClient } from "@clerk/nextjs";
+import { User } from "@clerk/nextjs/server";
+import { SystemMessage } from "@langchain/core/messages";
+import { ChatOpenAI } from "@langchain/openai";
+import {
+  AI,
+  AIVisibility,
+  DataSourceRefreshPeriod,
+  DataSourceType,
+  GroupAI,
+  GroupAvailability,
+  Prisma,
+} from "@prisma/client";
+import { AISecurityService } from "../../security/services/AISecurityService";
+import { EntityNotFoundError, ForbiddenError } from "../errors/Errors";
+import { AIDetailDto, AIProfile } from "../models/AI";
+import { AIModelOptions } from "../models/AIModel";
+import { AIRepository } from "../ports/outgoing/AIRepository";
+import aiModelService from "./AIModelService";
+import dataSourceManagementService from "./DataSourceManagementService";
+import groupService from "./GroupService";
+import invitationService from "./InvitationService";
+
+const openai = new ChatOpenAI({
+  azureOpenAIApiKey: process.env.AZURE_GPT35_KEY,
+  azureOpenAIApiVersion: "2023-05-15",
+  azureOpenAIApiInstanceName: "appdirect-prod-ai-useast",
+  azureOpenAIApiDeploymentName: "ai-prod-16k",
+});
+
+const listAIResponseSelect = (): Prisma.AISelect => ({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  name: true,
+  introduction: true,
+  description: true,
+  src: true,
+  profile: true,
+  orgId: true,
+  userId: true,
+  userName: true,
+  categoryId: true,
+  visibility: true,
+  listInOrgCatalog: true,
+  listInPublicCatalog: true,
+  modelId: true,
+  options: true,
+  instructions: true,
+  seed: true,
+  groups: {
+    select: {
+      groupId: true,
+    },
+  },
+  orgApprovals: {
+    select: {
+      id: true,
+    },
+  },
+});
 
 export class AIService {
+  constructor(private aiRepository: AIRepository) {}
+
   public async findAIById(id: string) {
     return prismadb.aI.findUnique({
       where: {
@@ -24,26 +94,25 @@ export class AIService {
   }
 
   public async shareAi(
-    orgId: string,
-    userId: string,
+    authorizationContext: AuthorizationContext,
     aiId: string,
     request: ShareAIRequest
   ) {
-    const ais = await prismadb.aI.findMany({
+    const { orgId, userId } = authorizationContext;
+
+    const ai = await prismadb.aI.findUnique({
       where: {
-        AND: [
-          {
-            id: aiId,
-            userId,
-            orgId,
-          },
-        ],
+        id: aiId,
       },
     });
-    if (ais.length === 0) {
+    if (!ai) {
       throw new EntityNotFoundError(`AI with id=${aiId} not found`);
     }
-    const ai = ais[0];
+
+    const canShareAI = AISecurityService.canUpdateAI(authorizationContext, ai);
+    if (!canShareAI) {
+      throw new ForbiddenError("Forbidden");
+    }
 
     const validEmails = EmailUtils.parseEmailCsv(request.emails);
     if (validEmails.length === 0) {
@@ -126,23 +195,142 @@ export class AIService {
     }
   }
 
+  public async getById(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ): Promise<AIDetailDto> {
+    const ai = await prismadb.aI.findFirst({
+      select: listAIResponseSelect(),
+      where: {
+        id: aiId,
+      },
+    });
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+    const { userId } = authorizationContext;
+
+    const isShared = await this.aiRepository.hasPermissionOnAI(aiId, userId);
+    if (
+      !(await AISecurityService.canReadAI(authorizationContext, ai, isShared))
+    ) {
+      throw new ForbiddenError(
+        `User is not authorized to read AI with id=${aiId}`
+      );
+    }
+
+    const canUpdateAI = AISecurityService.canUpdateAI(authorizationContext, ai);
+    const messageCountPerAi: any[] = await this.getMessageCountPerAi([ai.id]);
+    const ratingPerAi: any[] = await this.getRatingPerAi([ai.id]);
+
+    const aiDto = this.mapToAIDto(
+      ai,
+      messageCountPerAi,
+      ratingPerAi,
+      isShared,
+      canUpdateAI
+    );
+    return aiDto;
+  }
+
   /**
-   * Returns an AI by ID, only if it's visible to the given user and organization.
-   * @param orgId
-   * @param userId
+   * Returns an AI by id if it is public.
    * @param aiId
    * @returns
    */
-  public async findAIForUser(orgId: string, userId: string, aiId: string) {
-    const whereCondition = { AND: [{}] };
-    whereCondition.AND.push(
-      this.getBaseWhereCondition(orgId, userId, ListAIsRequestScope.ALL)
-    );
-    whereCondition.AND.push({ id: aiId });
-
-    return await prismadb.aI.findFirst({
-      where: whereCondition,
+  public async findPublicAIById(aiId: string): Promise<AIDetailDto | null> {
+    const ai = await prismadb.aI.findFirst({
+      select: listAIResponseSelect(),
+      where: {
+        id: aiId,
+      },
     });
+    if (!ai) {
+      return null;
+    }
+
+    if (!(await AISecurityService.canReadAI(null, ai, false))) {
+      return null;
+    }
+
+    const messageCountPerAi: any[] = await this.getMessageCountPerAi([ai.id]);
+    const ratingPerAi: any[] = await this.getRatingPerAi([ai.id]);
+
+    const aiDto = this.mapToAIDto(
+      ai,
+      messageCountPerAi,
+      ratingPerAi,
+      false,
+      false
+    );
+    return aiDto;
+  }
+
+  /**
+   * Returns a list AIs which are public.
+   * The list of AIs is further filtered down based on the provided scope
+   * @param request
+   * @returns
+   */
+  public async findPublicAIs(
+    request: ListAIsRequestParams = {}
+  ): Promise<AIDetailDto[]> {
+    const { categoryId, search } = request;
+    const whereCondition = { AND: [{}] };
+    whereCondition.AND.push(this.getPublicCriteria());
+
+    if (categoryId) {
+      whereCondition.AND.push(this.getCategoryCriteria(categoryId));
+    }
+
+    if (search) {
+      whereCondition.AND.push(this.getSearchCriteria(search));
+    }
+
+    const ais = await prismadb.aI.findMany({
+      select: {
+        ...listAIResponseSelect(),
+      },
+      where: whereCondition,
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    if (ais.length === 0) {
+      return [];
+    }
+
+    const aiIds = ais.map((ai) => ai.id);
+
+    const messageCountPerAi: any[] = await this.getMessageCountPerAi(aiIds);
+    const ratingPerAi: any[] = await this.getRatingPerAi(aiIds);
+
+    const result = ais.map((ai) => {
+      return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi, false);
+    });
+
+    const sortedResult = this.sortAIs(result, request.sort);
+    return sortedResult;
+  }
+
+  private sortAIs(
+    ais: AIDetailDto[],
+    sort: string | null | undefined
+  ): AIDetailDto[] {
+    if (sort === "newest") {
+      return ais;
+    } else if (sort === "popularity") {
+      return ais.sort((a, b) => b.messageCount - a.messageCount);
+    } else if (!sort || sort === "rating") {
+      return ais.sort((a, b) => {
+        if (a.rating !== b.rating) {
+          return b.rating - a.rating;
+        }
+        return b.ratingCount - a.ratingCount;
+      });
+    }
+    return ais;
   }
 
   /**
@@ -154,34 +342,111 @@ export class AIService {
    * @returns
    */
   public async findAIsForUser(
-    orgId: string,
-    userId: string,
+    authorizationContext: AuthorizationContext,
     request: ListAIsRequestParams
-  ) {
-    const scope = request.scope || ListAIsRequestScope.ALL;
+  ): Promise<AIDetailDto[]> {
+    const scope = this.determineScope(authorizationContext, request.scope);
+    const { orgId, userId } = authorizationContext;
+    const { groupId, categoryId, approvedByOrg, search } = request;
 
     const whereCondition = { AND: [{}] };
     whereCondition.AND.push(this.getBaseWhereCondition(orgId, userId, scope));
 
-    if (request.groupId) {
-      whereCondition.AND.push(this.getGroupCriteria(orgId, request.groupId));
+    if (groupId) {
+      if (scope === ListAIsRequestScope.INSTANCE_ORGANIZATION) {
+        whereCondition.AND.push(this.getInstanceGroupCriteria(groupId));
+      } else {
+        whereCondition.AND.push(this.getGroupCriteria(orgId, groupId));
+      }
     }
-    if (request.categoryId) {
-      whereCondition.AND.push(this.getCategoryCriteria(request.categoryId));
+    if (search) {
+      whereCondition.AND.push(this.getSearchCriteria(search));
     }
-    if (request.search) {
-      whereCondition.AND.push(this.getSearchCriteria(request.search));
+    if (categoryId) {
+      whereCondition.AND.push(this.getCategoryCriteria(categoryId));
+    }
+    if (approvedByOrg !== null && approvedByOrg !== undefined) {
+      whereCondition.AND.push(
+        this.getApprovedByOrgCriteria(orgId, approvedByOrg)
+      );
     }
 
     const ais = await prismadb.aI.findMany({
+      select: {
+        ...listAIResponseSelect(),
+        chats: {
+          where: {
+            userId,
+            isDeleted: false,
+          },
+        },
+      },
       where: whereCondition,
       orderBy: {
         createdAt: "desc",
       },
     });
 
+    if (ais.length === 0) {
+      return [];
+    }
+
+    const aiShares = await this.getAISharesForUser(userId);
+
     const aiIds = ais.map((ai) => ai.id);
 
+    const messageCountPerAi: any[] = await this.getMessageCountPerAi(aiIds);
+    const ratingPerAi: any[] = await this.getRatingPerAi(aiIds);
+
+    const result = ais.map((ai) => {
+      const isShared = !!aiShares.find((a) => a.aiId === ai.id);
+      return this.mapToAIDto(ai, messageCountPerAi, ratingPerAi, isShared);
+    });
+
+    if (!request.sort) {
+      if (
+        scope === ListAIsRequestScope.OWNED ||
+        scope === ListAIsRequestScope.SHARED
+      ) {
+        request.sort = "newest";
+      } else if (
+        scope === ListAIsRequestScope.PUBLIC ||
+        scope === ListAIsRequestScope.ALL
+      ) {
+        request.sort = "rating";
+      } else {
+        request.sort = "popularity";
+      }
+    }
+
+    const sortedResult = this.sortAIs(result, request.sort);
+    return sortedResult;
+  }
+
+  private determineScope(
+    authorizationContext: AuthorizationContext,
+    scope: ListAIsRequestScope | null | undefined
+  ) {
+    if (!scope) {
+      return ListAIsRequestScope.ALL;
+    }
+
+    if (scope === ListAIsRequestScope.INSTANCE) {
+      const hasInstanceAccess = BaseEntitySecurityService.hasPermission(
+        authorizationContext,
+        SecuredResourceType.AI,
+        SecuredAction.READ,
+        SecuredResourceAccessLevel.INSTANCE
+      );
+      if (!hasInstanceAccess) {
+        return ListAIsRequestScope.ALL;
+      }
+    }
+
+    return scope;
+  }
+
+  private async getMessageCountPerAi(aiIds: string[]) {
     const messageCountPerAi: any[] = await prismadb.$queryRaw`
       SELECT
         c.ai_id as aiId,
@@ -194,18 +459,79 @@ export class AIService {
       c.ai_id IN (${Prisma.join(aiIds)})
       GROUP BY
         c.ai_id`;
+    return messageCountPerAi;
+  }
 
-    const result = ais.map((ai) => {
-      const aiCountRow = messageCountPerAi.find((m) => m.aiId === ai.id);
-      const messageCount = aiCountRow ? Number(aiCountRow.messageCount) : 0;
+  private async getRatingPerAi(aiIds: string[]) {
+    const ratingPerAi: any[] = await prismadb.$queryRaw`
+      SELECT
+        r.ai_id as aiId,
+        COUNT(*) as ratingCount,
+        AVG(r.rating) as averageRating
+      FROM
+        ai_ratings as r
+      WHERE
+        r.ai_id IN (${Prisma.join(aiIds)})
+      GROUP BY
+        r.ai_id`;
+    return ratingPerAi;
+  }
 
-      return {
-        ...ai,
-        messageCount,
-      };
-    });
+  private mapToAIDto(
+    ai: AI & { groups: GroupAI[] } & { orgApprovals: { id: number }[] },
+    messageCountPerAi: any[],
+    ratingPerAi: any[],
+    isShared: boolean,
+    forUpdate: boolean = false
+  ): AIDetailDto {
+    const aiCountRow = messageCountPerAi.find((m) => m.aiId === ai.id);
+    const messageCount = aiCountRow ? Number(aiCountRow.messageCount) : 0;
 
-    return result;
+    const ratingRow = ratingPerAi.find((r) => r.aiId === ai.id);
+    const rating = ratingRow ? Number(ratingRow.averageRating) : 0;
+    const ratingCount = ratingRow ? Number(ratingRow.ratingCount) : 0;
+
+    const isApprovedByOrg = ai.orgApprovals.length > 0;
+
+    const profile = ai.profile as unknown as AIProfile;
+
+    const { options, ...aiWithoutOptions } = ai;
+    let aiModelOptions: AIModelOptions;
+    if (forUpdate || profile?.showPersonality) {
+      aiModelOptions = options as unknown as AIModelOptions;
+    } else {
+      aiModelOptions = {} as AIModelOptions;
+    }
+
+    let filteredAi;
+    const { modelId, instructions, visibility, ...aiWithoutCharacter } = ai;
+    if (forUpdate || profile?.showCharacter) {
+      filteredAi = ai;
+    } else {
+      filteredAi = { visibility, ...aiWithoutCharacter };
+    }
+
+    const { seed, ...aiWithoutSeed } = filteredAi;
+    if (!forUpdate) {
+      filteredAi = aiWithoutSeed;
+    }
+
+    const { orgApprovals, ...aiWithoutApprovals } = filteredAi;
+    filteredAi = aiWithoutApprovals;
+
+    const groupIds: string[] = ai.groups.map((groupAi) => groupAi.groupId);
+
+    return {
+      ...filteredAi,
+      options: aiModelOptions,
+      profile,
+      messageCount,
+      rating,
+      ratingCount,
+      isShared,
+      isApprovedByOrg,
+      groups: groupIds,
+    };
   }
 
   private getBaseWhereCondition(
@@ -219,44 +545,91 @@ export class AIService {
       case ListAIsRequestScope.PRIVATE:
         baseWhereCondition = { AND: [{}] };
         baseWhereCondition.AND.push({ visibility: AIVisibility.PRIVATE });
-        baseWhereCondition.AND.push(this.getOwnedByUserCriteria(userId));
+        baseWhereCondition.AND.push(this.getOwnedByUserCriteria(orgId, userId));
         break;
       case ListAIsRequestScope.OWNED:
-        baseWhereCondition = this.getOwnedByUserCriteria(userId);
+        baseWhereCondition = this.getOwnedByUserCriteria(orgId, userId);
         break;
       case ListAIsRequestScope.GROUP:
         baseWhereCondition = this.getUserGroupCriteria(orgId, userId);
         break;
       case ListAIsRequestScope.SHARED:
-        baseWhereCondition = this.getSharedWithUserCriteria(userId);
+        baseWhereCondition = this.getSharedWithUserCriteria(orgId, userId);
         break;
       case ListAIsRequestScope.ORGANIZATION:
-        baseWhereCondition = this.getOrganizationCriteria(orgId);
+        baseWhereCondition = {
+          OR: [
+            this.getOrganizationCriteria(orgId),
+            this.getUserGroupCriteria(orgId, userId),
+          ],
+        };
         break;
       case ListAIsRequestScope.PUBLIC:
         baseWhereCondition = this.getPublicCriteria();
         break;
       case ListAIsRequestScope.ALL:
         baseWhereCondition = { OR: [{}] };
-        baseWhereCondition.OR.push(this.getOwnedByUserCriteria(userId));
+        baseWhereCondition.OR.push(this.getOwnedByUserCriteria(orgId, userId));
         baseWhereCondition.OR.push(this.getUserGroupCriteria(orgId, userId));
-        baseWhereCondition.OR.push(this.getSharedWithUserCriteria(userId));
+        baseWhereCondition.OR.push(
+          this.getSharedWithUserCriteria(orgId, userId)
+        );
         baseWhereCondition.OR.push(this.getOrganizationCriteria(orgId));
         baseWhereCondition.OR.push(this.getPublicCriteria());
+        break;
+      case ListAIsRequestScope.INSTANCE:
+        baseWhereCondition = { AND: [{}] };
+        break;
+      case ListAIsRequestScope.INSTANCE_ORGANIZATION:
+        baseWhereCondition = this.getAllOrganizationCriteria();
+        break;
+      case ListAIsRequestScope.INSTANCE_NOT_VISIBLE:
+        baseWhereCondition = { OR: [{}] };
+        baseWhereCondition.OR.push(this.geOthersPrivateCriteria(orgId, userId));
+        baseWhereCondition.OR.push(this.geOthersOrganizationCriteria(orgId));
+        baseWhereCondition.OR.push(this.geOthersGroupCriteria(orgId, userId));
+        break;
+      case ListAIsRequestScope.INSTANCE_PRIVATE:
+        baseWhereCondition = { visibility: AIVisibility.PRIVATE };
+        break;
+      case ListAIsRequestScope.ADMIN:
+        baseWhereCondition = {
+          OR: [this.getAllAdminCriteria(orgId), this.getPublicCriteria()],
+        };
+        break;
+      case ListAIsRequestScope.ADMIN_ORGANIZATION:
+        baseWhereCondition = this.getAllAdminOrganizationCriteria(orgId);
+        break;
+      case ListAIsRequestScope.ADMIN_PRIVATE:
+        baseWhereCondition = { orgId, visibility: AIVisibility.PRIVATE };
+        break;
+      case ListAIsRequestScope.ADMIN_NOT_VISIBLE:
+        baseWhereCondition = {
+          AND: [
+            {
+              orgId,
+              OR: [
+                this.geOthersPrivateCriteria(orgId, userId),
+                this.geOthersOrganizationCriteria(orgId),
+                this.geOthersGroupCriteria(orgId, userId),
+              ],
+            },
+          ],
+        };
         break;
     }
 
     return baseWhereCondition;
   }
 
-  private getOwnedByUserCriteria(userId: string) {
-    return { userId: userId };
+  private getOwnedByUserCriteria(orgId: string, userId: string) {
+    return { orgId, userId };
   }
 
   private getUserGroupCriteria(orgId: string, userId: string) {
     return {
       visibility: {
-        in: [AIVisibility.GROUP, AIVisibility.PUBLIC],
+        in: [AIVisibility.GROUP],
       },
       groups: {
         some: {
@@ -271,6 +644,9 @@ export class AIService {
                   },
                 },
               },
+              {
+                ownerUserId: userId,
+              },
             ],
           },
         },
@@ -278,8 +654,9 @@ export class AIService {
     };
   }
 
-  private getSharedWithUserCriteria(userId: string) {
+  private getSharedWithUserCriteria(orgId: string, userId: string) {
     return {
+      orgId,
       permissions: {
         some: {
           userId: userId,
@@ -288,15 +665,93 @@ export class AIService {
     };
   }
 
+  private geOthersGroupCriteria(orgId: string, userId: string) {
+    return {
+      visibility: AIVisibility.GROUP,
+      groups: {
+        some: {
+          group: {
+            OR: [
+              {
+                NOT: {
+                  orgId,
+                },
+              },
+              {
+                users: {
+                  some: {
+                    NOT: {
+                      userId: userId,
+                    },
+                  },
+                },
+                NOT: {
+                  ownerUserId: userId,
+                },
+              },
+            ],
+          },
+        },
+      },
+    };
+  }
+
+  private geOthersOrganizationCriteria(orgId: string) {
+    return {
+      visibility: AIVisibility.ORGANIZATION,
+      NOT: {
+        orgId,
+      },
+    };
+  }
+
+  private geOthersPrivateCriteria(orgId: string, userId: string) {
+    return {
+      visibility: AIVisibility.PRIVATE,
+      NOT: this.getOwnedByUserCriteria(orgId, userId),
+    };
+  }
+
   private getOrganizationCriteria(orgId: string) {
     return {
       orgId,
-      visibility: AIVisibility.ORGANIZATION,
+      listInOrgCatalog: true,
+      visibility: {
+        in: [AIVisibility.ORGANIZATION, AIVisibility.ANYONE_WITH_LINK],
+      },
+    };
+  }
+
+  private getAllOrganizationCriteria() {
+    return {
+      visibility: {
+        in: [AIVisibility.ORGANIZATION, AIVisibility.GROUP],
+      },
+    };
+  }
+
+  private getAllAdminCriteria(orgId: string) {
+    return {
+      orgId,
+    };
+  }
+
+  private getAllAdminOrganizationCriteria(orgId: string) {
+    return {
+      orgId,
+      visibility: {
+        in: [AIVisibility.ORGANIZATION, AIVisibility.GROUP],
+      },
     };
   }
 
   private getPublicCriteria() {
-    return { visibility: AIVisibility.PUBLIC };
+    return {
+      listInPublicCatalog: true,
+      visibility: {
+        in: [AIVisibility.ANYONE_WITH_LINK],
+      },
+    };
   }
 
   private getGroupCriteria(orgId: string, groupId: string) {
@@ -312,29 +767,98 @@ export class AIService {
     };
   }
 
+  private getInstanceGroupCriteria(groupId: string) {
+    return {
+      groups: {
+        some: {
+          group: {
+            id: groupId,
+          },
+        },
+      },
+    };
+  }
+
   private getCategoryCriteria(categoryId: string) {
     return { categoryId: categoryId };
   }
 
   private getSearchCriteria(search: string) {
+    let escapedSearch;
+    if (containsMySQLSpecialChars(search)) {
+      escapedSearch = `"${search}"`;
+    } else {
+      escapedSearch = `*${search}*`;
+    }
+
     return {
       OR: [
         {
           name: {
-            search: search,
+            search: escapedSearch,
           },
         },
         {
           userName: {
-            search: search,
+            search: escapedSearch,
           },
         },
       ],
     };
   }
 
-  public createAIDataSource(aiId: string, dataSourceId: string) {
-    return prismadb.aIDataSource.create({
+  private getApprovedByOrgCriteria(orgId: string, isApprovedByOrg: boolean) {
+    if (isApprovedByOrg === true) {
+      return {
+        orgApprovals: {
+          some: {
+            orgId,
+          },
+        },
+      };
+    } else {
+      return {
+        orgApprovals: {
+          none: {
+            orgId,
+          },
+        },
+      };
+    }
+  }
+
+  public async createDataSourceAndAddToAI(
+    authorizationContext: AuthorizationContext,
+    aiId: string,
+    name: string,
+    type: DataSourceType,
+    refreshPeriod: DataSourceRefreshPeriod,
+    data: any
+  ) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    const canUpdateAI = AISecurityService.canUpdateAI(authorizationContext, ai);
+    if (!canUpdateAI) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const dataSourceId = await dataSourceManagementService.initializeDataSource(
+      authorizationContext,
+      name,
+      type,
+      refreshPeriod,
+      data
+    );
+
+    return await prismadb.aIDataSource.create({
       data: {
         aiId,
         dataSourceId,
@@ -342,18 +866,76 @@ export class AIService {
     });
   }
 
-  public async deleteAI(orgId: string, userId: string, aiId: string) {
+  public async addDatasourceToAI(
+    authorizationContext: AuthorizationContext,
+    aiId: string,
+    dataSourceId: string
+  ) {
     const ai = await prismadb.aI.findUnique({
       where: {
         id: aiId,
-        orgId,
-        userId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    const canUpdateAI = AISecurityService.canUpdateAI(authorizationContext, ai);
+    if (!canUpdateAI) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const dataSource = await prismadb.dataSource.findUnique({
+      where: {
+        id: dataSourceId,
+      },
+    });
+
+    if (!dataSource) {
+      throw new EntityNotFoundError(
+        `DataSource with id=${dataSourceId} not found`
+      );
+    }
+
+    const canReadDataSource = DataSourceSecurityService.canReadDataSource(
+      authorizationContext,
+      dataSource
+    );
+    if (!canReadDataSource) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    if (ai.orgId !== dataSource.orgId) {
+      throw new BadRequestError(
+        "DataSources must belong to the same org as the AI"
+      );
+    }
+
+    return await prismadb.aIDataSource.create({
+      data: {
+        aiId,
+        dataSourceId,
+      },
+    });
+  }
+
+  public async deleteAI(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
       },
     });
     if (!ai) {
-      throw new EntityNotFoundError(
-        `AI with id=${aiId} not found, for user=${userId} and org=${orgId}`
-      );
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    const canDeleteAI = AISecurityService.canDeleteAI(authorizationContext, ai);
+    if (!canDeleteAI) {
+      throw new ForbiddenError("Forbidden");
     }
 
     await prismadb.$transaction(async (tx) => {
@@ -372,7 +954,7 @@ export class AIService {
   }
 
   public async populateAiPermissionsUserId(userId: string, email: string) {
-    await prismadb.aIPermissions.updateMany({
+    return await prismadb.aIPermissions.updateMany({
       where: {
         email,
       },
@@ -381,7 +963,430 @@ export class AIService {
       },
     });
   }
+
+  /**
+   * Creates a new AI
+   * @param orgId
+   * @param userId
+   * @param request
+   * @returns
+   */
+  public async createAI(
+    authorizationContext: AuthorizationContext,
+    request: CreateAIRequest
+  ) {
+    const {
+      userName,
+      src,
+      name,
+      introduction,
+      description,
+      instructions,
+      seed,
+      modelId,
+      visibility,
+      listInOrgCatalog,
+      listInPublicCatalog,
+      options,
+      groups,
+    } = request;
+
+    if (!src || !name || !description || !instructions) {
+      throw new BadRequestError("Missing required fields");
+    }
+
+    const categoryId = request.categoryId || "NONE";
+
+    const { orgId, userId } = authorizationContext;
+
+    const externalId = await this.createAssistant(request);
+
+    const ai = await prismadb.aI.create({
+      data: {
+        categoryId,
+        orgId,
+        userId,
+        userName,
+        src,
+        name,
+        introduction,
+        description,
+        instructions,
+        seed: seed ?? "",
+        modelId,
+        visibility,
+        listInOrgCatalog,
+        listInPublicCatalog,
+        options: options as any,
+        externalId,
+      },
+      include: {
+        dataSources: {
+          include: {
+            dataSource: true,
+          },
+        },
+        groups: true,
+      },
+    });
+
+    await this.updateAIGroups(ai, groups);
+
+    return ai;
+  }
+
+  /**
+   * Updates an existing AI
+   * @param request
+   */
+  public async updateAI(
+    authorizationContext: AuthorizationContext,
+    aiId: string,
+    request: UpdateAIRequest
+  ) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    const canUpdateAI = AISecurityService.canUpdateAI(authorizationContext, ai);
+    if (!canUpdateAI) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const {
+      src,
+      name,
+      introduction,
+      description,
+      instructions,
+      seed,
+      categoryId,
+      modelId,
+      groups,
+      visibility,
+      listInOrgCatalog,
+      listInPublicCatalog,
+      options,
+      profile,
+    } = request;
+
+    if (!src || !name || !description || !instructions || !categoryId) {
+      throw new BadRequestError("Missing required fields");
+    }
+
+    const externalId = await this.updateAssistant(ai, request);
+
+    const updatedAI = await prismadb.aI.update({
+      where: {
+        id: aiId,
+      },
+      include: {
+        dataSources: {
+          include: {
+            dataSource: true,
+          },
+        },
+        groups: true,
+      },
+      data: {
+        categoryId,
+        src,
+        name,
+        introduction,
+        description,
+        instructions,
+        seed,
+        modelId,
+        visibility,
+        listInOrgCatalog,
+        listInPublicCatalog,
+        options: options as any,
+        profile: profile as any,
+        externalId,
+      },
+    });
+
+    await this.updateAIGroups(updatedAI, groups);
+    return updatedAI;
+  }
+
+  private async updateAIGroups(ai: AI, groupIds: string[]) {
+    if (ai.visibility !== "GROUP") {
+      await groupService.updateAIGroups(ai.id, []);
+    } else if (groupIds.length > 0) {
+      await groupService.updateAIGroups(ai.id, groupIds);
+    }
+  }
+
+  private async createAssistant(ai: AIRequest): Promise<string | null> {
+    const assistantModel = aiModelService.getAssistantModelInstance(ai.modelId);
+    if (!assistantModel) {
+      return null;
+    }
+
+    return await assistantModel.createAssistant({
+      ai,
+    });
+  }
+
+  private async updateAssistant(
+    currentAI: AI,
+    updatedAI: AIRequest
+  ): Promise<string | null> {
+    const existingExternalId = currentAI.externalId;
+    if (!existingExternalId) {
+      // Create a new assistant if it doesn't exist externally
+      return await this.createAssistant(updatedAI);
+    }
+
+    const shouldUpdateModel = currentAI.modelId !== updatedAI.modelId;
+    let newExternalId: string | null = existingExternalId;
+    if (shouldUpdateModel) {
+      const newAssistantModel = aiModelService.getAssistantModelInstance(
+        updatedAI.modelId
+      );
+      const existingAssistantModel = aiModelService.getAssistantModelInstance(
+        currentAI.modelId
+      );
+
+      // Delete the old assistant associated with the existing model
+      if (existingAssistantModel) {
+        await existingAssistantModel.deleteAssistant(
+          currentAI.modelId,
+          existingExternalId
+        );
+        newExternalId = null;
+      }
+
+      // Create a new assistant with the updated model
+      if (newAssistantModel) {
+        newExternalId = await this.createAssistant(updatedAI);
+      }
+    } else {
+      // Update existing assistant without changing the model
+      const assistantModel = aiModelService.getAssistantModelInstance(
+        currentAI.modelId
+      );
+      if (assistantModel) {
+        await assistantModel.updateAssistant({
+          assistantId: existingExternalId,
+          ai: updatedAI,
+        });
+      }
+    }
+
+    return newExternalId;
+  }
+
+  public async rateAi(
+    userId: string,
+    aiId: string,
+    rating: number,
+    review: string = "",
+    headline: string = ""
+  ) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    const existingRating = await prismadb.aIRating.findMany({
+      take: 1,
+      where: {
+        userId,
+        aiId,
+      },
+    });
+    if (existingRating.length > 0) {
+      await prismadb.aIRating.update({
+        where: {
+          id: existingRating[0].id,
+        },
+        data: {
+          rating,
+          review,
+          headline,
+        },
+      });
+    } else {
+      await prismadb.aIRating.create({
+        data: {
+          aiId,
+          userId,
+          rating,
+          review,
+          headline,
+        },
+      });
+    }
+  }
+
+  public async getUserAiRating(userId: string, aiId: string) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    return await prismadb.aIRating.findMany({
+      take: 1,
+      where: {
+        userId,
+        aiId,
+      },
+    });
+  }
+
+  public async getAllReviews(aiId: string) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    return await prismadb.aIRating.findMany({
+      where: {
+        aiId,
+      },
+    });
+  }
+
+  public async generate(prompt: string) {
+    const response = await openai.call([new SystemMessage(prompt)]);
+    return response.content;
+  }
+
+  public async generateAIProfile(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ) {
+    const ai = await prismadb.aI.findUnique({
+      where: {
+        id: aiId,
+      },
+    });
+
+    if (!ai) {
+      throw new EntityNotFoundError(`AI with id=${aiId} not found`);
+    }
+
+    const canUpdateAi = AISecurityService.canUpdateAI(authorizationContext, ai);
+    if (!canUpdateAi) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const intro =
+      "You are making a marketing profile for an AI chatbot. This AI will be part of many other AIs that are part of a larger AI marketplace. Call to action is to get people to try to talk to this AI.";
+
+    const background = `for the following AI chatbot:  ${ai.name}, ${ai.description}. Here are more details for this AI: ${ai.instructions}`;
+
+    const headline = await this.generate(
+      `${intro} Create a short, one sentence headline ${background}`
+    );
+
+    const description = await this.generate(
+      `${intro} Create one paragraph description ${background}`
+    );
+
+    const featureTitle = await this.generate(
+      `${intro} Create one three word feature ${background}`
+    );
+
+    const featureDescription = await this.generate(
+      `${intro} This AI has the following feature: ${featureTitle}. Give a one sentence description of this feature ${background}`
+    );
+
+    const aiProfile = {
+      headline,
+      description,
+      features: [
+        {
+          title: featureTitle,
+          description: featureDescription,
+        },
+      ],
+    };
+
+    return aiProfile;
+  }
+
+  public async getAISharesForUser(userId: string) {
+    const aiShares = await prismadb.aIPermissions.findMany({
+      where: {
+        userId,
+      },
+    });
+
+    return aiShares;
+  }
+
+  public async getAIShareForAIAndUser(aiId: string, userId: string) {
+    const aiShare = await prismadb.aIPermissions.findMany({
+      where: {
+        aiId,
+        userId,
+      },
+    });
+
+    return aiShare;
+  }
+
+  public async approveAIForOrganization(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ) {
+    const ai = await aiRepository.getById(aiId);
+
+    const canApproveAI = AISecurityService.canApproveAIForOrg(
+      authorizationContext,
+      ai
+    );
+    if (!canApproveAI) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const { orgId } = authorizationContext;
+    await aiRepository.approveAIForOrg(aiId, orgId);
+  }
+
+  public async revokeAIForOrganization(
+    authorizationContext: AuthorizationContext,
+    aiId: string
+  ) {
+    const ai = await aiRepository.getById(aiId);
+
+    const canApproveAI = AISecurityService.canApproveAIForOrg(
+      authorizationContext,
+      ai
+    );
+    if (!canApproveAI) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const { orgId } = authorizationContext;
+    await aiRepository.revokeAIForOrg(aiId, orgId);
+  }
 }
 
-const aiService = new AIService();
+const aiRepository = new AIRepositoryImpl();
+const aiService = new AIService(aiRepository);
 export default aiService;

@@ -1,62 +1,168 @@
 import EmailUtils from "@/src/lib/emailUtils";
 import prismadb from "@/src/lib/prismadb";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
 import { clerkClient } from "@clerk/nextjs";
-import { GroupAvailability } from "@prisma/client";
-import { GroupEntity } from "../entities/GroupEntity";
+import { GroupAvailability, Prisma } from "@prisma/client";
+import {
+  CreateGroupRequest,
+  UpdateGroupRequest,
+} from "../../adapter-in/api/GroupsApi";
+import { GroupSecurityService } from "../../security/services/GroupSecurityService";
 import { BadRequestError, EntityNotFoundError } from "../errors/Errors";
-import { CreateGroupRequest } from "../types/CreateGroupRequest";
-import { UpdateGroupRequest } from "../types/UpdateGroupRequest";
+import { GroupDetailDto, GroupSummaryDto } from "../models/Groups";
 import { InvitationService } from "./InvitationService";
-import { GroupSecurityService } from "./SecurityService";
+
+const groupSummarySelect: Prisma.GroupSelect = {
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  orgId: true,
+  ownerUserId: true,
+  name: true,
+  availability: true,
+};
+
+const groupDetailSelect: Prisma.GroupSelect = {
+  ...groupSummarySelect,
+  users: {
+    select: {
+      createdAt: true,
+      updatedAt: true,
+      userId: true,
+      email: true,
+    },
+  },
+};
+
+const organizationGroupCriteria = (orgId: string): Prisma.GroupWhereInput => {
+  return {
+    orgId,
+  };
+};
+
+const groupCriteria = (
+  orgId: string,
+  userId: string
+): Prisma.GroupWhereInput => {
+  return {
+    ...organizationGroupCriteria(orgId),
+    OR: [
+      { availability: GroupAvailability.EVERYONE },
+      { ownerUserId: userId },
+      {
+        users: {
+          some: { userId },
+        },
+      },
+    ],
+  };
+};
 
 export class GroupService {
-  private getGroupCriteria(orgId: string, userId: string) {
-    return {
-      orgId,
-      OR: [
-        { availability: GroupAvailability.EVERYONE },
-        { ownerUserId: userId },
-        {
-          users: {
-            some: { userId },
-          },
-        },
-      ],
-    };
-  }
-
+  /**
+   * Finds a Group by ID.
+   * Returns null if the group does not exist or is not visible to the user
+   * @param authorizationContext
+   * @param groupId
+   * @returns
+   */
   public async findGroupById(
-    orgId: string,
-    userId: string,
+    authorizationContext: AuthorizationContext,
     groupId: string
-  ): Promise<GroupEntity | null> {
-    return await prismadb.group.findUnique({
-      where: {
-        id: groupId,
-        ...this.getGroupCriteria(orgId, userId),
-      },
-      include: { users: true },
-    });
-  }
+  ): Promise<GroupDetailDto | null> {
+    const { orgId, userId } = authorizationContext;
 
-  public async findGroupsByUser(
-    orgId: string | undefined | null,
-    userId: string
-  ) {
-    if (!orgId) {
-      return [];
+    const hasInstanceGroupsAccess =
+      GroupSecurityService.hasInstanceGroupsReadAccess(authorizationContext);
+
+    let whereCondition: Prisma.GroupWhereUniqueInput = {
+      id: groupId,
+    };
+
+    if (!hasInstanceGroupsAccess) {
+      const hasAdminGroupsAccess =
+        GroupSecurityService.hasAdminGroupsReadAccess(authorizationContext);
+
+      const additionalCondition = hasAdminGroupsAccess
+        ? organizationGroupCriteria(orgId)
+        : groupCriteria(orgId, userId);
+
+      whereCondition.AND = additionalCondition;
     }
 
-    return await prismadb.group.findMany({
-      where: this.getGroupCriteria(orgId, userId),
+    return await prismadb.group.findUnique({
+      select: groupDetailSelect,
+      where: whereCondition,
     });
   }
 
+  /**
+   * Returns the list of Groups which are visible to the user
+   * @param authorizationContext
+   * @returns
+   */
+  public async findGroupsByUser(
+    authorizationContext: AuthorizationContext
+  ): Promise<GroupSummaryDto[]> {
+    const { orgId, userId } = authorizationContext;
+
+    let groups: GroupSummaryDto[] = await prismadb.group.findMany({
+      select: groupSummarySelect,
+      where: groupCriteria(orgId, userId),
+    });
+
+    const hasInstanceGroupsAccess =
+      GroupSecurityService.hasInstanceGroupsReadAccess(authorizationContext);
+    const hasAdminGroupsAccess =
+      GroupSecurityService.hasAdminGroupsReadAccess(authorizationContext);
+
+    if (hasInstanceGroupsAccess) {
+      const allGroups: GroupSummaryDto[] = await this.getInstanceGroups();
+      allGroups.forEach((group) => {
+        if (!groups.find((g) => g.id === group.id)) {
+          group.notVisibleToMe = true;
+        }
+      });
+      groups = allGroups;
+    } else if (hasAdminGroupsAccess) {
+      const allGroups: GroupSummaryDto[] = await this.getOrganizationGroups(
+        orgId
+      );
+      allGroups.forEach((group) => {
+        if (!groups.find((g) => g.id === group.id)) {
+          group.notVisibleToMe = true;
+        }
+      });
+      groups = allGroups;
+    }
+
+    return groups;
+  }
+
+  public async getInstanceGroups() {
+    return await prismadb.group.findMany({
+      select: groupSummarySelect,
+    });
+  }
+
+  public async getOrganizationGroups(orgId: string) {
+    return await prismadb.group.findMany({
+      where: organizationGroupCriteria(orgId),
+      select: groupSummarySelect,
+    });
+  }
+
+  /**
+   * Creates a new group
+   * @param authorizationContext
+   * @param createGroupRequest
+   * @returns
+   */
   public async createGroup(
-    orgId: string,
-    userId: string,
+    authorizationContext: AuthorizationContext,
     createGroupRequest: CreateGroupRequest
-  ) {
+  ): Promise<GroupDetailDto | null> {
+    const { orgId, userId } = authorizationContext;
     const group = await prismadb.group.create({
       data: {
         orgId,
@@ -76,23 +182,32 @@ export class GroupService {
       );
     }
 
-    return group;
+    const groupWithUsers = await prismadb.group.findUnique({
+      select: groupDetailSelect,
+      where: {
+        id: group.id,
+      },
+    });
+
+    return groupWithUsers;
   }
 
   public async updateGroup(
-    orgId: string,
-    userId: string,
+    authorizationContext: AuthorizationContext,
     groupId: string,
     updateGroupRequest: UpdateGroupRequest
-  ) {
-    const existingGroup = await this.findGroupById(orgId, userId, groupId);
+  ): Promise<GroupDetailDto | null> {
+    const { orgId, userId } = authorizationContext;
+    const existingGroup = await this.findGroupById(
+      authorizationContext,
+      groupId
+    );
     if (!existingGroup) {
       throw new EntityNotFoundError("Group not found");
     }
 
     const groupPermissions = GroupSecurityService.getGroupPermissions(
-      orgId,
-      userId,
+      authorizationContext,
       existingGroup
     );
 
@@ -144,14 +259,13 @@ export class GroupService {
       }
     }
 
-    return await prismadb.group.findUnique({
+    const groupWithUsers = await prismadb.group.findUnique({
+      select: groupDetailSelect,
       where: {
         id: groupId,
       },
-      include: {
-        users: true,
-      },
     });
+    return groupWithUsers;
   }
 
   private async addUsersToGroup(
@@ -230,7 +344,7 @@ export class GroupService {
   }
 
   public async populateGroupUserId(userId: string, email: string) {
-    await prismadb.groupUser.updateMany({
+    return await prismadb.groupUser.updateMany({
       where: {
         email,
       },
@@ -240,13 +354,29 @@ export class GroupService {
     });
   }
 
-  public async deleteGroup(orgId: string, userId: string, groupId: string) {
-    const existingGroup = await this.findGroupById(orgId, userId, groupId);
+  /**
+   * Deletes a group
+   * @param authorizationContext
+   * @param groupId
+   */
+  public async deleteGroup(
+    authorizationContext: AuthorizationContext,
+    groupId: string
+  ): Promise<void> {
+    const existingGroup = await this.findGroupById(
+      authorizationContext,
+      groupId
+    );
     if (!existingGroup) {
       throw new EntityNotFoundError("Group not found");
     }
 
     await prismadb.$transaction([
+      prismadb.groupAI.deleteMany({
+        where: {
+          groupId: groupId,
+        },
+      }),
       prismadb.groupUser.deleteMany({
         where: {
           groupId: groupId,
@@ -260,12 +390,19 @@ export class GroupService {
     ]);
   }
 
-  public async leaveGroup(orgId: string, userId: string, groupId: string) {
-    const existingGroup = await this.findGroupById(orgId, userId, groupId);
+  public async leaveGroup(
+    authorizationContext: AuthorizationContext,
+    groupId: string
+  ): Promise<void> {
+    const existingGroup = await this.findGroupById(
+      authorizationContext,
+      groupId
+    );
     if (!existingGroup) {
       throw new EntityNotFoundError("Group not found");
     }
 
+    const { userId } = authorizationContext;
     if (existingGroup.ownerUserId === userId) {
       throw new BadRequestError("Owner cannot leave group");
     }

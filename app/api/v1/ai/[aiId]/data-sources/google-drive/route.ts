@@ -1,60 +1,50 @@
-import { GoogleDriveDataSourceInput } from "@/src/adapters/knowledge/google-drive/types/GoogleDriveDataSourceInput";
-import {
-  BadRequestError,
-  EntityNotFoundError,
-} from "@/src/domain/errors/Errors";
+import { CreateGoogleDriveKnowledgeRequest } from "@/src/adapter-in/api/GoogleDriveApi";
+import { GoogleDriveDataSourceInput } from "@/src/adapter-out/knowledge/google-drive/types/GoogleDriveDataSourceInput";
 import aiService from "@/src/domain/services/AIService";
-import dataSourceService from "@/src/domain/services/DataSourceService";
-import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/types/CreateGoogleDriveKnowledgeRequest";
-import { auth } from "@clerk/nextjs";
-import { DataSourceType } from "@prisma/client";
+import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
+import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
+import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
+import { DataSourceRefreshPeriod, DataSourceType } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 300;
 
-export async function POST(
+async function postHandler(
   req: Request,
-  { params }: { params: { aiId: string } }
+  context: {
+    params: { aiId: string };
+    authorizationContext: AuthorizationContext;
+  }
 ) {
-  const authentication = await auth();
-  const userId = authentication?.userId;
-  const orgId = authentication?.orgId;
-  if (!userId || !orgId) {
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
-
-  const ai = await aiService.findAIById(params.aiId);
-  if (!ai) {
-    return new NextResponse("AI not found", { status: 404 });
-  }
+  const { params, authorizationContext } = context;
 
   const body: CreateGoogleDriveKnowledgeRequest = await req.json();
 
-  try {
-    const input: GoogleDriveDataSourceInput = {
-      oauthTokenId: body.oauthTokenId,
-      fileId: body.fileId,
-    };
-    const dataSourceId = await dataSourceService.createDataSource(
-      orgId,
-      userId,
-      body.filename,
-      DataSourceType.GOOGLE_DRIVE,
-      input
-    );
+  const input: GoogleDriveDataSourceInput = {
+    oauthTokenId: body.oauthTokenId,
+    fileId: body.fileId,
+  };
 
-    await aiService.createAIDataSource(ai.id, dataSourceId);
+  const dataSource = await aiService.createDataSourceAndAddToAI(
+    authorizationContext,
+    params.aiId,
+    body.filename,
+    DataSourceType.GOOGLE_DRIVE,
+    body.dataRefreshPeriod ?? DataSourceRefreshPeriod.NEVER,
+    input
+  );
 
-    return new NextResponse("", { status: 201 });
-  } catch (e) {
-    console.log(e);
-    if (e instanceof EntityNotFoundError) {
-      return new NextResponse(e.message, { status: 404 });
-    }
-    if (e instanceof BadRequestError) {
-      return new NextResponse(e.message, { status: 400 });
-    }
-
-    return new NextResponse(e.message, { status: 500 });
-  }
+  return new NextResponse("", { status: 201 });
 }
+
+export const POST = withErrorHandler(
+  withAuthorization(
+    SecuredResourceType.DATA_SOURCES,
+    SecuredAction.WRITE,
+    Object.values(SecuredResourceAccessLevel),
+    postHandler
+  )
+);

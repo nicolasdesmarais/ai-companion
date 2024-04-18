@@ -1,17 +1,20 @@
-import { Pinecone } from "@pinecone-database/pinecone";
-import { Redis } from "@upstash/redis";
-import { Document } from "langchain/document";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { PineconeStore } from "langchain/vectorstores/pinecone";
+import { Document, DocumentInterface } from "@langchain/core/documents";
+import { OpenAIEmbeddings } from "@langchain/openai";
+import { PineconeStore } from "@langchain/pinecone";
+import { Index, Pinecone, RecordMetadata } from "@pinecone-database/pinecone";
+import axios from "axios";
 
 const embeddingsConfig = {
-  azureOpenAIApiKey: process.env.AZURE_GPT40_KEY,
+  azureOpenAIApiKey: process.env.AZURE_GPT35_KEY,
   azureOpenAIApiVersion: "2023-05-15",
-  azureOpenAIApiInstanceName: "prod-appdirectai-east2",
-  azureOpenAIApiDeploymentName: "text-embedding-ada-002",
+  azureOpenAIApiInstanceName: "appdirect-prod-ai-useast",
+  azureOpenAIApiDeploymentName: "ai-prod-ada2",
   batchSize: 16,
-  maxConcurrency: 1,
+  maxConcurrency: 3,
 };
+
+const pineconeIndexName = process.env.PINECONE_INDEX!;
+const pineconeHost = process.env.PINECONE_INDEX_HOST!;
 
 export type AIKey = {
   aiName: string;
@@ -21,58 +24,77 @@ export type AIKey = {
 
 export class MemoryManager {
   private static instance: MemoryManager;
-  private history: Redis;
   private pinecone: Pinecone;
+  private pineconeIndex: Index<RecordMetadata>;
 
   public constructor() {
-    this.history = Redis.fromEnv();
     this.pinecone = new Pinecone();
+    this.pineconeIndex = this.pinecone.Index(pineconeIndexName, pineconeHost);
   }
 
-  public async vectorUpload(docs: Document[]) {
-    const pineconeIndex = this.pinecone.Index(
-      process.env.PINECONE_INDEX! || ""
-    );
+  public async vectorUpload(docs: Document[], docIds: string[]) {
+    const embeddings = new OpenAIEmbeddings(embeddingsConfig);
 
-    await PineconeStore.fromDocuments(
-      docs,
-      new OpenAIEmbeddings(embeddingsConfig),
-      {
-        pineconeIndex,
-      }
-    );
+    const pineconeStore = new PineconeStore(embeddings, {
+      pineconeIndex: this.pineconeIndex,
+    });
+    await pineconeStore.addDocuments(docs, { ids: docIds });
   }
 
   public async vectorSearch(
     query: string,
     knowledgeIds: string[],
     numDocs = 100
-  ) {
-    const pineconeIndex = this.pinecone.Index(
-      process.env.PINECONE_INDEX! || ""
-    );
-
+  ): Promise<[DocumentInterface<Record<string, any>>, number][]> {
     const vectorStore = await PineconeStore.fromExistingIndex(
       new OpenAIEmbeddings(embeddingsConfig),
-      { pineconeIndex }
+      { pineconeIndex: this.pineconeIndex }
     );
 
-    const similarDocs = await vectorStore
-      .similaritySearch(query, numDocs, {
-        knowledge: { $in: knowledgeIds },
-      })
-      .catch((err) => {
-        console.log("WARNING: failed to get vector search results.", err);
-      });
+    let similarDocs: [DocumentInterface<Record<string, any>>, number][] = [];
+    try {
+      similarDocs = await vectorStore.similaritySearchWithScore(
+        query,
+        numDocs,
+        {
+          knowledge: { $in: knowledgeIds },
+        }
+      );
+    } catch (err) {
+      console.log("WARNING: failed to get vector search results.", err);
+    }
+
     return similarDocs;
   }
 
-  public async vectorDelete(knowledgeId: string) {
-    const pineconeIndex = this.pinecone.Index(
-      process.env.PINECONE_INDEX! || ""
-    );
+  public async vectorIdList(
+    knowledgeId: string,
+    paginationToken?: string
+  ): Promise<{ vectorIds: string[]; paginationNextToken: string | undefined }> {
+    let requestUrl = `${pineconeHost}/vectors/list?prefix=${knowledgeId}#`;
+    if (paginationToken) {
+      requestUrl += `&paginationToken=${paginationToken}`;
+    }
 
-    await pineconeIndex.deleteMany({ knowledge: knowledgeId });
+    const response = await axios.get(requestUrl, {
+      headers: {
+        "Api-Key": process.env.PINECONE_API_KEY,
+      },
+    });
+    const vectorIds: string[] = response.data.vectors.map(
+      (v: any) => v.id as string
+    );
+    const paginationNextToken = response.data.pagination?.next;
+
+    return { vectorIds, paginationNextToken };
+  }
+
+  public async vectorDelete(vectorIds: string[]) {
+    if (vectorIds.length === 0) {
+      return;
+    }
+
+    await this.pineconeIndex.deleteMany(vectorIds);
   }
 
   public static getInstance(): MemoryManager {

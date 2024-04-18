@@ -1,6 +1,10 @@
-import aiService from "@/src/domain/services/AIService";
+import {
+  EntityNotFoundError,
+  ForbiddenError,
+} from "@/src/domain/errors/Errors";
 import chatService from "@/src/domain/services/ChatService";
-import { auth, redirectToSignIn } from "@clerk/nextjs";
+import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
+import { redirectToSignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
 interface ChatIdPageProps {
@@ -9,21 +13,31 @@ interface ChatIdPageProps {
   };
 }
 const ChatIdPage = async ({ params }: ChatIdPageProps) => {
-  const { orgId, userId } = auth();
+  const authorizationContext = getUserAuthorizationContext();
 
-  if (!orgId || !userId) {
+  if (!authorizationContext) {
     return redirectToSignIn();
   }
 
-  const ai = await aiService.findAIForUser(orgId, userId, params.aiId);
-  if (!ai) {
-    return redirect("/");
-  }
-
-  const aiChats = await chatService.getAIChats(params.aiId, userId);
+  const aiChats = await chatService.getAIChats(
+    authorizationContext,
+    params.aiId
+  );
   if (aiChats.data.length === 0) {
-    const chat = await chatService.createChat(orgId, userId, params.aiId);
-    return redirect(`/chat/${chat.id}`);
+    let chat;
+    try {
+      chat = await chatService.createChat(authorizationContext, params.aiId);
+    } catch (e) {
+      if (!(e instanceof ForbiddenError || e instanceof EntityNotFoundError)) {
+        console.error(e);
+      }
+    } finally {
+      if (chat) {
+        redirect(`/chat/${chat.id}?new=true`);
+      } else {
+        redirect("/");
+      }
+    }
   } else {
     return redirect(`/chat/${aiChats.data[0].id}`);
   }

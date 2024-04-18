@@ -10,17 +10,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { UserOAuthTokenEntity } from "@/src/domain/entities/OAuthTokenEntity";
-import { EntityNotFoundError } from "@/src/domain/errors/Errors";
-import { CreateGoogleDriveKnowledgeRequest } from "@/src/domain/types/CreateGoogleDriveKnowledgeRequest";
 import {
+  CreateGoogleDriveKnowledgeRequest,
   GoogleDriveFile,
-  getLabelFromFileType,
-} from "@/src/domain/types/GoogleDriveSearchResponse";
+  GoogleDriveSearchRequest,
+} from "@/src/adapter-in/api/GoogleDriveApi";
+import { getLabelFromFileType } from "@/src/adapter-in/api/DataSourcesApi";
+import { EntityNotFoundError } from "@/src/domain/errors/Errors";
+import { UserOAuthTokenEntity } from "@/src/domain/models/OAuthTokens";
+import { DataSourceRefreshPeriod } from "@prisma/client";
 import axios from "axios";
 import { format } from "date-fns";
 import { Loader, Server } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Banner } from "./ui/banner";
+import { DataRefreshPeriod } from "./data-refresh-period";
 
 const ADD_ACCOUNT_OPTION = "add-account";
 
@@ -41,6 +45,9 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [setupRequired, setSetupRequired] = useState(false);
+  const [dataRefreshPeriod, setDataRefreshPeriod] =
+    useState<DataSourceRefreshPeriod | null>(DataSourceRefreshPeriod.NEVER);
 
   const fetchAccount = async () => {
     setLoading(true);
@@ -49,7 +56,10 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
         `/api/v1/integrations/google-drive/accounts`
       );
       setAccounts(response.data);
-      if (response.data.length > 0) {
+      if (response.data === null) {
+        setSearching(false);
+        setSetupRequired(true);
+      } else if (response.data.length > 0) {
         setSelectedAccount(response.data[0]?.id);
       } else {
         setSearching(false);
@@ -146,14 +156,6 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
     setSearching(false);
   };
 
-  const handleSelectFile = (file: GoogleDriveFile | null) => {
-    if (!file) {
-      return;
-    }
-
-    setSelectedFile(file);
-  };
-
   const handleContinue = async () => {
     if (!selectedFile || !selectedAccount) {
       return;
@@ -165,6 +167,7 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
         oauthTokenId: selectedAccount,
         fileId: selectedFile.id,
         filename: selectedFile.name,
+        dataRefreshPeriod: dataRefreshPeriod ?? DataSourceRefreshPeriod.NEVER,
       };
 
       const response = await axios.post(
@@ -182,145 +185,154 @@ export const GoogleDriveForm = ({ aiId, goBack }: FilesProps) => {
   };
 
   return (
-    <div className="w-full p-6 bg-gray-900 text-white">
-      <div className="mb-4">
-        <h2 className="text-xl font-bold">Google Drive Integration</h2>
-        <p className="text-gray-400 mb-4">
-          Choose a file or folder from your Google Drive to train your AI.
-        </p>
+    <div>
+      <div className="w-full p-6 bg-accent/30">
+        <div className="mb-4">
+          <h2 className="text-xl font-bold">Google Drive Integration</h2>
+          <p className="text-gray-400 mb-4">
+            Choose a file or folder from your Google Drive to train your AI.
+          </p>
 
-        {!loading ? (
+          {!loading ? (
+            <>
+              {setupRequired ? (
+                <Banner className="my-2" variant="destructive">
+                  Google Drive integration is not set up. Please go to Settings
+                  to add the API keys or ask your company admin to set it up.
+                </Banner>
+              ) : (
+                <FormItem>
+                  <FormLabel>Account</FormLabel>
+                  {accounts.length === 0 ? (
+                    <div>
+                      <Button
+                        onClick={handleConnectClick}
+                        type="button"
+                        variant="ring"
+                      >
+                        Connect Your Google Account
+                      </Button>
+                    </div>
+                  ) : null}
+                  {accounts.length > 0 ? (
+                    <Select
+                      disabled={loading}
+                      onValueChange={handleAccountChange}
+                      value={selectedAccount}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="bg-background">
+                          <SelectValue placeholder="Select an account" />
+                        </SelectTrigger>
+                      </FormControl>
+
+                      <SelectContent>
+                        {accounts.map((token: UserOAuthTokenEntity) => (
+                          <SelectItem key={token.id} value={token.id as string}>
+                            {token.email}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value={ADD_ACCOUNT_OPTION}>
+                          + Add Account
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : null}
+                </FormItem>
+              )}
+            </>
+          ) : null}
+        </div>
+        {selectedAccount ? (
           <>
-            <FormItem>
-              <FormLabel>Account</FormLabel>
-              {accounts.length === 0 ? (
-                <div>
-                  <Button
-                    onClick={handleConnectClick}
-                    type="button"
-                    variant="ring"
-                  >
-                    Connect Your Google Account
-                  </Button>
+            <div className="mb-4">
+              <div className="flex items-center">
+                <input
+                  className="border p-2 rounded w-full mr-2" // added mr-2 for spacing
+                  type="text"
+                  placeholder="Search term"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleSearch();
+                    }
+                  }}
+                />
+                <Button onClick={handleSearch} variant="ring" type="button">
+                  Search
+                </Button>
+              </div>
+            </div>
+
+            <div className="max-h-[32rem] overflow-auto border border-ring/30 rounded-sm">
+              <Table
+                headers={["NAME", "TYPE", "OWNER", "LAST MODIFIED"]}
+                className="w-full max-h-60"
+              >
+                {!searching &&
+                  searchResults &&
+                  searchResults.map((file) => (
+                    <tr
+                      key={file.id}
+                      className={file.id === selectedFile?.id ? "bg-ring" : ""}
+                      onClick={() => setSelectedFile(file)}
+                    >
+                      <td className="p-2">{file.name}</td>
+                      <td className="p-2">{getLabelFromFileType(file.type)}</td>
+                      <td className="p-2">{file.owner}</td>
+                      <td className="p-2">
+                        {format(new Date(file.modifiedTime), "h:mma M/d/yyyy ")}
+                      </td>
+                    </tr>
+                  ))}
+              </Table>
+              {!searching && searchResults && searchResults.length === 0 ? (
+                <div className="flex items-center my-2 w-full">
+                  <div className="mx-auto flex p-4 bg-background rounded-lg">
+                    <Server className="w-6 h-6 mr-2" />
+                    <p>No results found</p>
+                  </div>
                 </div>
               ) : null}
-              {accounts.length > 0 ? (
-                <Select
-                  disabled={loading}
-                  onValueChange={handleAccountChange}
-                  value={selectedAccount}
-                >
-                  <FormControl>
-                    <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Select an account" />
-                    </SelectTrigger>
-                  </FormControl>
-
-                  <SelectContent>
-                    {accounts.map((token: UserOAuthTokenEntity) => (
-                      <SelectItem key={token.id} value={token.id as string}>
-                        {token.email}
-                      </SelectItem>
-                    ))}
-                    <SelectItem value={ADD_ACCOUNT_OPTION}>
-                      + Add Account
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              ) : null}
-            </FormItem>
+            </div>
           </>
         ) : null}
-      </div>
-      {selectedAccount ? (
-        <>
-          <div className="mb-4">
-            <div className="flex items-center">
-              <input
-                className="border p-2 rounded w-full mr-2" // added mr-2 for spacing
-                type="text"
-                placeholder="Search term"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleSearch();
-                  }
-                }}
-              />
-              <Button onClick={handleSearch} variant="ring" type="button">
-                Search
-              </Button>
+        {loading || searching ? (
+          <div className="flex items-center my-2 w-full">
+            <div className="mx-auto">
+              <Loader className="w-8 h-8 spinner" />
             </div>
           </div>
-
-          <div className="max-h-96 overflow-auto">
-            <Table
-              headers={["NAME", "TYPE", "OWNER", "LAST MODIFIED"]}
-              className="w-full my-4 max-h-60"
-            >
-              {!searching &&
-                searchResults &&
-                searchResults.map((file) => (
-                  <tr
-                    key={file.id}
-                    className={file.id === selectedFile?.id ? "bg-ring" : ""}
-                    onClick={() => setSelectedFile(file)}
-                  >
-                    <td className="p-2">{file.name}</td>
-                    <td className="p-2">{getLabelFromFileType(file.type)}</td>
-                    <td className="p-2">{file.owner}</td>
-                    <td className="p-2">
-                      {format(new Date(file.modifiedTime), "h:mma M/d/yyyy ")}
-                    </td>
-                  </tr>
-                ))}
-            </Table>
-            {!searching && searchResults && searchResults.length === 0 ? (
-              <div className="flex items-center my-2 w-full">
-                <div className="mx-auto flex p-4 bg-background rounded-lg">
-                  <Server className="w-6 h-6 mr-2" />
-                  <p>No results found</p>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </>
-      ) : null}
-      {loading || searching ? (
-        <div className="flex items-center my-2 w-full">
-          <div className="mx-auto">
-            <Loader className="w-8 h-8 spinner" />
-          </div>
-        </div>
-      ) : null}
-      {selectedFile && (
-        <>
-          <div className="flex justify-between w-full mt-4">
-            <Button
-              onClick={() => setSelectedFile(null)}
-              type="button"
-              variant="link"
-            >
-              Unselect
-            </Button>
-            <Button
-              type="button"
-              onClick={handleContinue}
-              disabled={!selectedFile || !selectedAccount}
-              variant="ring"
-            >
-              Load
-              {uploading ? (
-                <Loader className="w-4 h-4 ml-2 spinner" />
-              ) : (
-                <Server className="w-4 h-4 ml-2" />
-              )}
-            </Button>
-          </div>
-        </>
-      )}
+        ) : null}
+        {loading ||
+          (!setupRequired && (
+            <DataRefreshPeriod
+              setDataRefreshPeriod={setDataRefreshPeriod}
+              dataRefreshPeriod={dataRefreshPeriod}
+            />
+          ))}
+        {selectedFile && (
+          <>
+            <div className="flex flex-row-reverse w-full mt-4">
+              <Button
+                type="button"
+                onClick={handleContinue}
+                disabled={!selectedFile || !selectedAccount}
+                variant="ring"
+              >
+                Load
+                {uploading ? (
+                  <Loader className="w-4 h-4 ml-2 spinner" />
+                ) : (
+                  <Server className="w-4 h-4 ml-2" />
+                )}
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };

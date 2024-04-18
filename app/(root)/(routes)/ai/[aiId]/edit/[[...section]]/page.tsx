@@ -1,10 +1,20 @@
 import { AIEditor } from "@/components/ai-editor";
-import prismadb from "@/src/lib/prismadb";
-import { auth, redirectToSignIn } from "@clerk/nextjs";
-import groupService from "@/src/domain/services/GroupService";
 import { GroupModal } from "@/components/group-modal";
+import aiModelService from "@/src/domain/services/AIModelService";
+import aiService from "@/src/domain/services/AIService";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
+import { AISecurityService } from "@/src/security/services/AISecurityService";
+import { BaseEntitySecurityService } from "@/src/security/services/BaseEntitySecurityService";
+import { GroupSecurityService } from "@/src/security/services/GroupSecurityService";
+import { getUserAuthorizationContext } from "@/src/security/utils/securityUtils";
+import { redirectToSignIn } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
+import { cache } from "react";
 
 export const maxDuration = 300;
+export const revalidate = 3600;
 
 interface AIIdPageProps {
   params: {
@@ -13,39 +23,45 @@ interface AIIdPageProps {
 }
 
 const AIIdPage = async ({ params }: AIIdPageProps) => {
-  const { userId, orgId } = await auth();
-
-  if (!userId) {
+  const authorizationContext = getUserAuthorizationContext();
+  if (!authorizationContext) {
     return redirectToSignIn();
   }
 
-  const initialAi = await prismadb.aI.findUnique({
-    where: {
-      id: params.aiId,
-      userId,
-    },
-    include: {
-      dataSources: {
-        include: {
-          dataSource: true,
-        },
-      },
-      groups: true,
-    },
-  });
-
-  if (initialAi) {
-    initialAi.groups = initialAi.groups.map((g: any) => g.groupId);
+  let initialAi = null;
+  if (params.aiId !== "new") {
+    try {
+      initialAi = await aiService.getById(authorizationContext, params.aiId);
+      if (!AISecurityService.canUpdateAI(authorizationContext, initialAi)) {
+        return redirect("/");
+      }
+    } catch (e) {
+      return redirect("/");
+    }
   }
 
-  const categories = await prismadb.category.findMany();
+  const models = await cache(() =>
+    aiModelService.getAIModels(authorizationContext)
+  )();
 
-  const groups = await groupService.findGroupsByUser(orgId, userId);
+  const hasInstanceAccess = BaseEntitySecurityService.hasPermission(
+    authorizationContext,
+    SecuredResourceType.AI,
+    SecuredAction.WRITE,
+    SecuredResourceAccessLevel.INSTANCE
+  );
+
+  const hasElevatedWriteAccess =
+    GroupSecurityService.hasElevatedWriteAccess(authorizationContext);
 
   return (
     <>
-      <AIEditor initialAi={initialAi} categories={categories} groups={groups} />
-      <GroupModal />
+      <AIEditor
+        initialAi={initialAi}
+        aiModels={models}
+        hasInstanceAccess={hasInstanceAccess}
+      />
+      <GroupModal hasElevatedWriteAccess={hasElevatedWriteAccess} />
     </>
   );
 };

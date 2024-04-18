@@ -1,10 +1,15 @@
 "use client";
+import { InviteModal } from "@/components/invite-modal";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/src/lib/utils";
 import { UserPlus2 } from "lucide-react";
 import { useState } from "react";
-import { InviteModal } from "@/components/invite-modal";
 
-export const InviteButton = () => {
+interface Props {
+  className?: string;
+}
+
+export const InviteButton = ({ className }: Props) => {
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -12,7 +17,7 @@ export const InviteButton = () => {
       <Button
         size="sm"
         variant="ring"
-        className="my-2"
+        className={cn("my-2", className)}
         type="button"
         onClick={() => setShowModal(true)}
       >

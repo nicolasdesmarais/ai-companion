@@ -25,7 +25,7 @@ const Slider = React.forwardRef<
       </SliderPrimitive.Track>
       {value?.map((_, i) => (
         <SliderPrimitive.SliderThumb
-          className="block w-6 h-6 bg-white rounded-3xl shadow-lg shadow-black"
+          className="block w-6 h-6 bg-black dark:bg-white rounded-3xl shadow-lg shadow-black"
           key={i}
         />
       ))}

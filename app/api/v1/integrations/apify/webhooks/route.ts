@@ -1,9 +1,12 @@
-import dataSourceService from "@/src/domain/services/DataSourceService";
+import {
+  ApifyEvent,
+  ApifyWebhookReceivedPayload,
+} from "@/src/adapter-in/inngest/apify-workflows";
+import { publishEvent } from "@/src/adapter-in/inngest/event-publisher";
 import {
   ApifySupportedEvents,
   ApifyWebhookEvent,
-} from "@/src/domain/types/ApifyWebhookEvent";
-import { DataSourceType } from "@prisma/client";
+} from "@/src/domain/models/ApifyWebhookEvent";
 import { headers } from "next/headers";
 
 const isSupportedEvent = (
@@ -34,7 +37,13 @@ export async function POST(req: Request) {
     return new Response("", { status: 200 });
   }
 
-  await dataSourceService.knowledgeEventReceived(DataSourceType.WEB_URL, event);
+  const apifyWebhookReceivedEventPayload: ApifyWebhookReceivedPayload = {
+    apifyEvent: event,
+  };
+  await publishEvent(
+    ApifyEvent.APIFY_WEBHOOK_RECEIVED,
+    apifyWebhookReceivedEventPayload
+  );
 
   return new Response("", { status: 200 });
 }

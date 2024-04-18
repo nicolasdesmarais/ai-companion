@@ -4,9 +4,11 @@ import LeavePageBlocker from "@/components/leave-page-blocker";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
+import { AIDetailDto } from "@/src/domain/models/AI";
+import { AIModel } from "@/src/domain/models/AIModel";
 import { cn } from "@/src/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Category, Group, Knowledge, Prisma } from "@prisma/client";
+import { Knowledge } from "@prisma/client";
 import axios from "axios";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,14 +16,16 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { AICharacter } from "./ai-character";
 import { AIKnowledge } from "./ai-knowledge";
-import { models } from "./ai-models";
 import { AIPersonality } from "./ai-personality";
+import { AIProfileEditor } from "./ai-profile-editor";
+import { PaywallBanner } from "./paywall-banner";
 
 const formSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, {
     message: "Name is required.",
   }),
+  introduction: z.string().optional().nullable(),
   description: z.string().min(1, {
     message: "Description is required.",
   }),
@@ -32,15 +36,15 @@ const formSchema = z.object({
   src: z.string().min(1, {
     message: "Image is required.",
   }),
-  categoryId: z.string().min(1, {
-    message: "Category is required",
-  }),
+  categoryId: z.string().optional(),
   modelId: z.string().min(1, {
     message: "Model is required",
   }),
   visibility: z.string().min(1, {
     message: "Visibility is required",
   }),
+  listInOrgCatalog: z.boolean().optional(),
+  listInPublicCatalog: z.boolean().optional(),
   options: z
     .object({
       maxTokens: z.array(z.number()).optional(),
@@ -54,27 +58,65 @@ const formSchema = z.object({
   knowledge: z.array(z.custom<Knowledge>()).optional(),
   groups: z.array(z.string()).optional(),
   talk: z.string().optional(),
+  profile: z
+    .object({
+      headline: z.string().optional().nullable(),
+      description: z.string().optional().nullable(),
+      features: z
+        .array(
+          z.object({
+            title: z.string().optional().nullable(),
+            description: z.string().optional().nullable(),
+          })
+        )
+        .optional()
+        .nullable(),
+      conversations: z
+        .array(
+          z.object({
+            messages: z.array(
+              z.object({
+                role: z.string(),
+                content: z.string(),
+              })
+            ),
+          })
+        )
+        .optional()
+        .nullable(),
+      trainingDescription: z.string().optional().nullable(),
+      showCharacter: z.boolean().optional().nullable(),
+      showTraining: z.boolean().optional().nullable(),
+      showPersonality: z.boolean().optional().nullable(),
+      socialImage: z.string().optional().nullable(),
+    })
+    .optional()
+    .nullable(),
 });
 
-const extendedAI = Prisma.validator<Prisma.AIDefaultArgs>()({
-  include: {
-    dataSources: {
-      include: {
-        dataSource: true,
-      },
-    },
-  },
-});
-
-type ExtendedAI = Prisma.AIGetPayload<typeof extendedAI>;
+const defaultProfile = {
+  headline: undefined,
+  description: undefined,
+  features: [],
+  showCharacter: undefined,
+  showTraining: undefined,
+  showPersonality: undefined,
+  trainingDescription: undefined,
+  conversations: undefined,
+  socialImage: undefined,
+};
 
 interface AIFormProps {
-  categories: Category[];
-  initialAi: ExtendedAI | null;
-  groups: Group[];
+  aiModels: AIModel[];
+  initialAi: AIDetailDto | null;
+  hasInstanceAccess: boolean;
 }
 
-export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
+export const AIEditor = ({
+  aiModels,
+  initialAi,
+  hasInstanceAccess,
+}: AIFormProps) => {
   const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
@@ -82,42 +124,61 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
   const [dataSources, setDataSources] = useState<any[]>([]);
   const [dataSourcesLoading, setDataSourcesLoading] = useState(true);
 
+  const fetchDataSources = async () => {
+    setDataSourcesLoading(true);
+    const response = await axios.get(`/api/v1/ai/${aiId}/data-sources`);
+    setDataSources(response.data.data);
+    setDataSourcesLoading(false);
+  };
+
   useEffect(() => {
-    const fetchDataSources = async () => {
-      setDataSourcesLoading(true);
-      const response = await axios.get(`/api/v1/ai/${aiId}/data-sources`);
-      setDataSources(response.data.data);
-      setDataSourcesLoading(false);
-    };
-    fetchDataSources();
+    if (aiId) {
+      fetchDataSources();
+    }
   }, []);
 
-  if (initialAi && !initialAi.options) {
-    const model = models.find((model) => model.id === initialAi.modelId);
+  if (initialAi) {
+    const model = aiModels.find((model) => model.id === initialAi.modelId);
     if (model) {
       const options = {} as any;
       Object.entries(model.options).forEach(([key, value]) => {
-        if (value.default) {
+        if (value.default !== undefined) {
           options[key] = [value.default];
         }
       });
-      initialAi.options = options;
+      if (initialAi.options) {
+        initialAi.options = { ...options, ...(initialAi.options as any) };
+      } else {
+        initialAi.options = options;
+      }
+      if (initialAi.profile) {
+        initialAi.profile = { ...defaultProfile, ...initialAi.profile };
+      } else {
+        initialAi.profile = defaultProfile;
+      }
     }
   }
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: ({ talk: "", ...initialAi } as any) || {
-      name: "",
-      description: "",
-      instructions: "",
-      seed: "",
-      src: "",
-      categoryId: undefined,
-      modelId: "gpt-4",
-      knowledge: [],
-      options: {},
-      groups: [],
-    },
+    defaultValues: initialAi
+      ? ({ talk: "", ...initialAi } as any)
+      : {
+          name: "",
+          introduction: "",
+          description: "",
+          instructions: "",
+          seed: "",
+          src: "",
+          categoryId: undefined,
+          modelId: "gpt-4",
+          visibility: "ANYONE_WITH_LINK",
+          listInOrgCatalog: false,
+          listInPublicCatalog: false,
+          knowledge: [],
+          options: {},
+          groups: [],
+        },
   });
 
   const aiId = form.getValues("id");
@@ -136,7 +197,15 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
 
   const handleTabClick = (route: string, isDisabled: boolean) => {
     if (!isDisabled) {
-      router.push(`/ai/${aiId}/${route}` as any);
+      if (form.formState.isDirty) {
+        toast({
+          variant: "destructive",
+          description: "Changes detected. Please save to continue.",
+          duration: 3000,
+        });
+      } else {
+        router.push(`/ai/${aiId}/${route}` as any);
+      }
     }
   };
 
@@ -151,7 +220,15 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
           response = await axios.post("/api/v1/ai", values);
         }
         aiId = response.data.id;
-        form.reset(response.data);
+        if (response.data.profile) {
+          response.data.profile = {
+            ...defaultProfile,
+            ...response.data.profile,
+          };
+        } else {
+          response.data.profile = defaultProfile;
+        }
+        form.reset({ talk: "", ...response.data }); //TODO: remove talk
         toast({
           description: "AI Saved.",
           duration: 2000,
@@ -168,7 +245,11 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
       setContinueRequested("");
       router.push(`/ai/${aiId}${continueRequested}`);
     } else {
-      router.push(`/ai/${aiId}/edit`);
+      if (pathname.endsWith("/new/edit")) {
+        router.push(`/ai/${aiId}/edit`);
+      } else {
+        router.push(pathname);
+      }
     }
   };
 
@@ -226,7 +307,7 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
 
   const backButton = (route: string) => (
     <Button
-      onClick={() => router.push(`/ai/${aiId}/${route}`)}
+      onClick={() => handleTabClick(route, false)}
       variant="link"
       type="button"
     >
@@ -240,6 +321,8 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
       dataSources={dataSources}
       setDataSource={setDataSources}
       knowledgeLoading={dataSourcesLoading}
+      aiModels={aiModels}
+      fetchDataSources={fetchDataSources}
     />
   );
 
@@ -249,11 +332,15 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
       index: 1,
       route: "edit",
       content: (
-        <AICharacter categories={categories} form={form} groups={groups} />
+        <AICharacter
+          form={form}
+          hasInstanceAccess={hasInstanceAccess}
+          save={form.handleSubmit(onSubmit)}
+        />
       ),
       buttons: (
         <>
-          <div>
+          <div className="flex flex-col md:flex-row items-center">
             {aiId && (
               <Button
                 size="lg"
@@ -274,7 +361,7 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
               Back to Browse
             </Button>
           </div>
-          <div>
+          <div className="flex flex-col md:flex-row items-center">
             {saveProgressButton}
             {continueButton(
               "/edit/knowledge",
@@ -292,7 +379,25 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
       buttons: (
         <>
           <div>{backButton("edit")}</div>
-          <div>
+          <div className="flex flex-col md:flex-row items-center">
+            {saveProgressButton}
+            {continueButton(
+              "/edit/personality",
+              dataSources.length ? "Continue" : "Skip & Continue"
+            )}
+          </div>
+        </>
+      ),
+    },
+    {
+      name: "Link Existing Knowledge",
+      secondary: true,
+      route: "edit/knowledge/connect",
+      content: aiKnowledge,
+      buttons: (
+        <>
+          <div>{backButton("edit/knowledge")}</div>
+          <div className="flex flex-col md:flex-row items-center">
             {saveProgressButton}
             {continueButton(
               "/edit/personality",
@@ -310,7 +415,7 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
       buttons: (
         <>
           <div>{backButton("edit/knowledge")}</div>
-          <div>
+          <div className="flex flex-col md:flex-row items-center">
             {saveProgressButton}
             {continueButton(
               "/edit/personality",
@@ -320,7 +425,6 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
         </>
       ),
     },
-
     {
       name: "Website URL",
       secondary: true,
@@ -329,7 +433,7 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
       buttons: (
         <>
           <div>{backButton("edit/knowledge")}</div>
-          <div>
+          <div className="flex flex-col md:flex-row items-center">
             {saveProgressButton}
             {continueButton(
               "/edit/personality",
@@ -340,14 +444,32 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
       ),
     },
     {
-      name: "Cloud Storage",
+      name: "Google Drive Storage",
       secondary: true,
-      route: "edit/knowledge/cloud",
+      route: "edit/knowledge/google-drive",
       content: aiKnowledge,
       buttons: (
         <>
           <div>{backButton("edit/knowledge")}</div>
-          <div>
+          <div className="flex flex-col md:flex-row items-center">
+            {saveProgressButton}
+            {continueButton(
+              "/edit/personality",
+              dataSources.length ? "Continue" : "Skip & Continue"
+            )}
+          </div>
+        </>
+      ),
+    },
+    {
+      name: "OneDrive Storage",
+      secondary: true,
+      route: "edit/knowledge/one-drive",
+      content: aiKnowledge,
+      buttons: (
+        <>
+          <div>{backButton("edit/knowledge")}</div>
+          <div className="flex flex-col md:flex-row items-center">
             {saveProgressButton}
             {continueButton(
               "/edit/personality",
@@ -361,11 +483,31 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
       name: "Personality",
       route: "edit/personality",
       index: 3,
-      content: <AIPersonality initialAi={initialAi} form={form} />,
+      content: (
+        <AIPersonality initialAi={initialAi} form={form} aiModels={aiModels} />
+      ),
       buttons: (
         <>
           <div>{backButton("edit/knowledge")}</div>
-          <div>
+          <div className="flex flex-col md:flex-row items-center">
+            {saveProgressButton}
+            {continueButton(
+              "/edit/profile",
+              needsSave ? "Save & Continue" : "Continue"
+            )}
+          </div>
+        </>
+      ),
+    },
+    {
+      name: "Profile",
+      route: "edit/profile",
+      index: 4,
+      content: <AIProfileEditor ai={initialAi} form={form} />,
+      buttons: (
+        <>
+          <div>{backButton("edit/knowledge")}</div>
+          <div className="flex flex-col md:flex-row items-center">
             {saveProgressButton}
             {continueButton(
               "/",
@@ -382,10 +524,11 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
   const activeTab = tabs.find((tab) => pathname.endsWith(tab.route));
 
   return (
-    <div>
+    <div className="pt-14 md:pt-0">
+      <PaywallBanner className="mt-2 max-w-3xl mx-auto" />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="pb-10">
-          <div className="flex h-full p-4 space-x-1 max-w-3xl mx-auto">
+          <div className="flex h-full p-1 md:p-4 space-x-1 max-w-3xl mx-auto">
             {tabs.map((tab, index) =>
               tab.secondary ? null : (
                 <div
@@ -396,17 +539,20 @@ export const AIEditor = ({ categories, initialAi, groups }: AIFormProps) => {
                   key={index}
                   onClick={() => handleTabClick(tab.route, !aiId && index > 0)}
                 >
-                  <div className="bg-secondary rounded-lg px-2 text-ring">
+                  <div className="bg-secondary rounded-lg px-2 text-ring hidden md:block">
                     {tab.index}
                   </div>
-                  <div className="ml-2">{tab.name}</div>
+                  <div className="ml-0 md:ml-2">{tab.name}</div>
                 </div>
               )
             )}
           </div>
           <div>{activeTab?.content}</div>
-          <div className="w-full flex justify-between max-w-3xl mx-auto mt-8">
-            {activeTab?.buttons}
+          <div className="w-full flex flex-col md:flex-row items-center justify-between max-w-3xl mx-auto mt-8">
+            {form.getValues("id") ||
+            (form.getValues("instructions") && form.getValues("src"))
+              ? activeTab?.buttons
+              : null}
           </div>
         </form>
       </Form>

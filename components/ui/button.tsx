@@ -21,12 +21,15 @@ const buttonVariants = cva(
         premium:
           "bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-500 text-white border-0",
         ring: "bg-ring hover:bg-ring/90 text-white",
+        login: "bg-white rounded-md text-center text-navy hover:opacity-90",
       },
       size: {
         default: "h-10 px-4 py-2",
         sm: "h-9 rounded-md px-3",
+        xs: "h-6 rounded-md px-2 text-xs",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
+        wide: "px-16 py-2",
       },
     },
     defaultVariants: {

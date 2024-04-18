@@ -1,57 +1,66 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
-  provider = "mysql"
-  url = env("DATABASE_URL")
-  relationMode = "prisma"
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  relationMode      = "prisma"
 }
 
 model Category {
-  id            String @id @default(uuid())
-  name          String
-  ais           AI[]
+  id   String @id @default(uuid())
+  name String
+  ais  AI[]
 
   @@map("categories")
 }
 
-
 model AI {
-  id            String                          @id @default(uuid())
-  orgId         String?                         @map(name: "org_id")
-  userId        String                          @map("user_id")
-  userName      String                          @map("user_name")
-  src           String @db.Text
-  name          String @db.Text
-  description   String @db.Text
-  instructions  String @db.Text
-  seed          String @db.Text
-  visibility    AIVisibility @default(PRIVATE)
-  options       Json?
+  id                  String       @id @default(uuid())
+  orgId               String       @map(name: "org_id")
+  userId              String       @map("user_id")
+  userName            String       @map("user_name")
+  src                 String       @db.Text
+  name                String       @db.Text
+  introduction        String?      @db.Text
+  description         String       @db.Text
+  instructions        String       @db.Text
+  seed                String       @db.Text
+  visibility          AIVisibility @default(PRIVATE)
+  listInOrgCatalog    Boolean      @default(false) @map("list_in_org_catalog")
+  listInPublicCatalog Boolean      @default(false) @map("list_in_public_catalog")
+  options             Json?
+  profile             Json?
 
-  createdAt     DateTime @default(now()) @map(name: "created_at")
-  updatedAt     DateTime @updatedAt       @map(name: "updated_at")
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
 
-  category      Category @relation(fields: [categoryId], references: [id])
-  categoryId    String   @map("category_id")
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String   @map("category_id")
 
-  chats         Chat[]
+  chats Chat[]
 
-  modelId       String @default("llama2-13b")   @map("model_id")
+  modelId String @default("llama2-13b") @map("model_id")
 
-  groups        GroupAI[]
+  externalId String? @map("external_id")
 
-  permissions   AIPermissions[]
+  groups GroupAI[]
 
-  dataSources   AIDataSource[]
+  permissions AIPermissions[]
+
+  dataSources     AIDataSource[]
+  aiCategoryTypes AICategoryType[]
+
+  ratings      AIRating[]
+  orgApprovals AIOrgApproval[]
 
   @@index([categoryId])
   @@index([visibility])
   @@index([userId])
   @@fulltext([name, userName])
-
   @@map("ais")
 }
 
@@ -64,48 +73,38 @@ enum AIVisibility {
   PRIVATE
   GROUP
   ORGANIZATION
-  PUBLIC
+  ANYONE_WITH_LINK
 }
 
 model Message {
-  id              String    @id @default(uuid())
-  role            Role
-  content         String    @db.Text
-  createdAt       DateTime  @default(now()) @map(name: "created_at")
-  updatedAt       DateTime  @updatedAt @map(name: "updated_at")
+  id        String   @id @default(uuid())
+  role      Role
+  content   String   @db.Text
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
 
-  userId          String    @map("user_id")
-  metadata        Json?
+  userId   String @map("user_id")
+  metadata Json?
 
-  chat            Chat? @relation(fields: [chatId], references: [id])
-  chatId          String? @map(name: "chat_id")
+  tokenCount Int? @map(name: "token_count")
+
+  chat   Chat?   @relation(fields: [chatId], references: [id])
+  chatId String? @map(name: "chat_id")
 
   @@index([chatId])
-
   @@map("messages")
 }
 
-model UserSubscription {
-  id                        String    @id @default(cuid())
-  userId                    String    @unique @map(name: "user_id")
-  stripeCustomerId          String?   @unique @map(name: "stripe_customer_id")
-  stripeSubscriptionId      String?   @unique @map(name: "stripe_subscription_id")
-  stripePriceId             String?   @map(name: "stripe_price_id")
-  stripeCurrentPeriodEnd    DateTime? @map(name: "stripe_current_period_end")
-
-  @@map("user_subscriptions")
-}
-
 model Group {
-  id                        String    @id @default(cuid())
-  createdAt                 DateTime  @default(now()) @map(name: "created_at")
-  updatedAt                 DateTime  @updatedAt @default(now()) @map(name: "updated_at")
-  orgId                     String    @map(name: "org_id")
-  ownerUserId               String   @map(name: "owner_user_id")
-  name                      String
-  availability              GroupAvailability @default(EVERYONE)
-  users                     GroupUser[]
-  ais                       GroupAI[]
+  id           String            @id @default(cuid())
+  createdAt    DateTime          @default(now()) @map(name: "created_at")
+  updatedAt    DateTime          @default(now()) @updatedAt @map(name: "updated_at")
+  orgId        String            @map(name: "org_id")
+  ownerUserId  String            @map(name: "owner_user_id")
+  name         String
+  availability GroupAvailability @default(EVERYONE)
+  users        GroupUser[]
+  ais          GroupAI[]
 
   @@map("groups")
 }
@@ -116,169 +115,333 @@ enum GroupAvailability {
 }
 
 model GroupUser {
-  id                        Int       @id @default(autoincrement())
-  group                     Group     @relation(fields: [groupId], references: [id])
-  groupId                   String    @map(name: "group_id")
-  userId                    String?   @map(name: "user_id")
-  email                     String
-  createdAt                 DateTime  @default(now()) @map(name: "created_at")
-  updatedAt                 DateTime  @updatedAt @default(now()) @map(name: "updated_at")
+  id        Int      @id @default(autoincrement())
+  group     Group    @relation(fields: [groupId], references: [id])
+  groupId   String   @map(name: "group_id")
+  userId    String?  @map(name: "user_id")
+  email     String
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map(name: "updated_at")
 
   @@unique([groupId, email])
   @@map("group_users")
 }
 
 model GroupAI {
-  group                     Group @relation(fields: [groupId], references: [id])
-  groupId                   String    @map(name: "group_id")
-  ai                        AI @relation(fields: [aiId], references: [id])
-  aiId                      String    @map(name: "ai_id")
-  createdAt                 DateTime  @default(now()) @map(name: "created_at")
-  updatedAt                 DateTime  @updatedAt @default(now()) @map(name: "updated_at")
+  group     Group    @relation(fields: [groupId], references: [id])
+  groupId   String   @map(name: "group_id")
+  ai        AI       @relation(fields: [aiId], references: [id])
+  aiId      String   @map(name: "ai_id")
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map(name: "updated_at")
 
   @@id([groupId, aiId])
   @@map("group_ais")
 }
 
-model PublicDomain {
-  domain                   String     @id
-
-  @@map("public_domains")
-}
-
 model Knowledge {
-  id                        String                              @id @default(cuid())
-  createdAt                 DateTime @default(now())            @map(name: "created_at")
-  updatedAt                 DateTime @updatedAt @default(now()) @map(name: "updated_at")
-  lastIndexedAt             DateTime?                           @map(name: "last_indexed_at")
-  userId                    String?                             @map(name: "user_id")
-  name                      String  @db.Text
-  type                      String
-  indexStatus               KnowledgeIndexStatus?               @map(name :"index_status")
-  blobUrl                   String? @db.Text                    @map(name: "blob_url")
-  metadata                  Json?
-  dataSources               DataSourceKnowledge[]
+  id                     String                @id @default(cuid())
+  createdAt              DateTime              @default(now()) @map(name: "created_at")
+  updatedAt              DateTime              @default(now()) @updatedAt @map(name: "updated_at")
+  lastIndexedAt          DateTime?             @map(name: "last_indexed_at")
+  name                   String                @db.Text
+  type                   DataSourceType
+  uniqueId               String?               @map(name: "unique_id") @db.VarChar(1000)
+  parentUniqueId         String?               @map(name: "parent_unique_id") @db.VarChar(1000)
+  indexStatus            KnowledgeIndexStatus  @map(name: "index_status")
+  originalContent        Json?                 @map(name: "original_content")
+  documentsBlobUrl       String?               @map(name: "documents_blob_url") @db.Text
+  metadata               Json?
+  documentCount          Int?                  @map(name: "document_count")
+  tokenCount             Int?                  @map(name: "token_count")
+  dataSources            DataSourceKnowledge[]
+  isMigrated             Boolean               @default(false) @map(name: "is_migrated")
+  indexPercentage        Decimal               @default(0) @map(name: "index_percentage")
+  KnowledgeChunks        KnowledgeChunk[]
+  isBlobStorageDeleted   Boolean               @default(false) @map(name: "is_blob_storage_deleted")
+  isVectorStorageDeleted Boolean               @default(false) @map(name: "is_vector_storage_deleted")
 
+  @@index([uniqueId(length: 100)])
+  @@index([parentUniqueId(length: 100)])
+  @@index([indexStatus, isVectorStorageDeleted])
+  @@index([indexStatus, isBlobStorageDeleted])
+  @@index([type, uniqueId(length: 100), indexStatus])
   @@map("knowledge")
 }
 
 enum KnowledgeIndexStatus {
   INITIALIZED
+  RETRIEVING_CONTENT
+  CONTENT_RETRIEVED
+  DOCUMENTS_CREATED
   INDEXING
   PARTIALLY_COMPLETED
   COMPLETED
   FAILED
+  DELETED
 }
 
+model KnowledgeChunk {
+  id          Int                  @id @default(autoincrement())
+  knowledge   Knowledge            @relation(fields: [knowledgeId], references: [id])
+  knowledgeId String               @map(name: "knowledge_id")
+  chunkNumber Int                  @map(name: "chunk_number")
+  startIndex  Int?                 @map(name: "start_index")
+  endIndex    Int?                 @map(name: "end_index")
+  status      KnowledgeChunkStatus
+  eventId     String?              @map(name: "event_id")
+  error       String?              @db.Text
+
+  @@unique([knowledgeId, chunkNumber])
+  @@index([knowledgeId, status])
+  @@map("knowledge_chunks")
+}
+
+enum KnowledgeChunkStatus {
+  INDEXING
+  COMPLETED
+  FAILED
+}
 
 model AIPermissions {
-  id                        Int         @id @default(autoincrement())
-  userId                    String?     @map(name: "user_id")
-  ai                        AI          @relation(fields: [aiId], references: [id])
-  aiId                      String      @map(name: "ai_id")
-  email                     String
+  id     Int     @id @default(autoincrement())
+  userId String? @map(name: "user_id")
+  ai     AI      @relation(fields: [aiId], references: [id])
+  aiId   String  @map(name: "ai_id")
+  email  String
 
   @@unique([aiId, email])
+  @@index([userId])
   @@map("ai_permissions")
 }
 
 model OAuthToken {
-  id                        String            @id @default(cuid())
-  provider                  OAuthTokenProvider
-  userId                    String            @map(name: "user_id")
-  email                     String
-  data                      Bytes?            @db.Blob
-  createdAt                 DateTime          @default(now()) @map(name: "created_at")
-  updatedAt                 DateTime          @updatedAt @default(now()) @map(name: "updated_at")
+  id        String             @id @default(cuid())
+  provider  OAuthTokenProvider
+  userId    String             @map(name: "user_id")
+  email     String
+  data      Bytes?             @db.Blob
+  createdAt DateTime           @default(now()) @map(name: "created_at")
+  updatedAt DateTime           @default(now()) @updatedAt @map(name: "updated_at")
 
   @@unique([provider, userId, email])
   @@map("oauth_tokens")
- }
+}
 
-enum OAuthTokenProvider{
+enum OAuthTokenProvider {
   GOOGLE
+  MSFT
+}
+
+model OrgClientCredentials {
+  id        String             @id @default(cuid())
+  provider  OAuthTokenProvider
+  orgId     String             @map(name: "org_id")
+  data      Bytes?             @db.Blob
+  createdAt DateTime           @default(now()) @map(name: "created_at")
+  updatedAt DateTime           @default(now()) @updatedAt @map(name: "updated_at")
+
+  @@unique([orgId, provider])
+  @@map("org_client_credentials")
 }
 
 model Chat {
-  id                        String    @id @default(cuid())
-  createdAt                 DateTime  @default(now()) @map(name: "created_at")
-  updatedAt                 DateTime  @updatedAt @default(now()) @map(name: "updated_at")
-  name                      String
-  pinPosition               Int?      @map(name: "pin_position")
-  isDeleted                 Boolean   @default(false) @map("is_deleted")
-  userId                    String                    @map("user_id")
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now()) @map(name: "created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map(name: "updated_at")
+  messagedAt  DateTime? @map(name: "messaged_at")
+  name        String
+  pinPosition Int?      @map(name: "pin_position")
+  isDeleted   Boolean   @default(false) @map("is_deleted")
+  orgId       String    @map(name: "org_id")
+  userId      String    @map("user_id")
+  externalId  String?   @map("external_id")
+  summary     String?   @db.Text
 
-  messages                  Message[]
+  messages Message[]
 
-  ai                        AI @relation(fields: [aiId], references: [id], onDelete: Cascade)
-  aiId                      String    @map(name: "ai_id")
+  ai   AI     @relation(fields: [aiId], references: [id], onDelete: Cascade)
+  aiId String @map(name: "ai_id")
 
+  @@index([userId])
   @@map("chats")
 }
 
 model DataSource {
-  id                        String                      @id @default(cuid())
-  createdAt                 DateTime                    @default(now()) @map(name: "created_at")
-  updatedAt                 DateTime                    @updatedAt @default(now()) @map(name: "updated_at")
-  lastIndexedAt             DateTime?                   @map(name: "last_indexed_at")
-  name                      String                      @db.VarChar(500)
-  orgId                     String                      @map(name: "org_id")
-  ownerUserId               String                      @map(name: "owner_user_id")
-  type                      DataSourceType
-  indexStatus               DataSourceIndexStatus?      @map(name :"index_status")
-  indexPercentage           Decimal                     @map(name: "index_percentage")
-  knowledges                DataSourceKnowledge[]
-  ais                       AIDataSource[]
-  data                      Json?
+  id              String                   @id @default(cuid())
+  createdAt       DateTime                 @default(now()) @map(name: "created_at")
+  updatedAt       DateTime                 @default(now()) @updatedAt @map(name: "updated_at")
+  lastIndexedAt   DateTime?                @map(name: "last_indexed_at")
+  name            String                   @db.VarChar(500)
+  orgId           String                   @map(name: "org_id")
+  ownerUserId     String                   @map(name: "owner_user_id")
+  type            DataSourceType
+  indexStatus     DataSourceIndexStatus?   @map(name: "index_status")
+  indexPercentage Decimal                  @map(name: "index_percentage")
+  documentCount   Int?                     @map(name: "document_count")
+  tokenCount      Int?                     @map(name: "token_count")
+  knowledges      DataSourceKnowledge[]
+  ais             AIDataSource[]
+  data            Json?
+  refreshPeriod   DataSourceRefreshPeriod? @map(name: "refresh_period")
 
+  @@index(indexStatus)
+  @@index(type)
+  @@index(createdAt)
+  @@index(lastIndexedAt)
+  @@index([orgId, ownerUserId])
+  @@index(ownerUserId)
+  @@fulltext(name)
   @@map("data_sources")
 }
 
 enum DataSourceType {
   WEB_URL
   GOOGLE_DRIVE
+  ONEDRIVE
   FILE_UPLOAD
+  API
 }
 
 enum DataSourceIndexStatus {
   INITIALIZED
   INDEXING
+  REFRESHING
   PARTIALLY_COMPLETED
   COMPLETED
   FAILED
+  DELETION_REQUESTED
+  DELETED
+  MISSING
+}
+
+enum DataSourceRefreshPeriod {
+  NEVER
+  DAILY
+  WEEKLY
+  MONTHLY
 }
 
 model DataSourceKnowledge {
-  dataSource                 DataSource     @relation(fields: [dataSourceId], references: [id])
-  dataSourceId               String         @map(name: "data_source_id")
-  knowledge                  Knowledge      @relation(fields: [knowledgeId], references: [id])
-  knowledgeId                String         @map(name: "knowledge_id")
-
+  dataSource   DataSource @relation(fields: [dataSourceId], references: [id])
+  dataSourceId String     @map(name: "data_source_id")
+  knowledge    Knowledge  @relation(fields: [knowledgeId], references: [id])
+  knowledgeId  String     @map(name: "knowledge_id")
 
   @@id([dataSourceId, knowledgeId])
+  @@index([knowledgeId])
   @@map("data_source_knowledges")
 }
 
 model AIDataSource {
-  ai                         AI             @relation(fields: [aiId], references: [id])
-  aiId                       String         @map(name: "ai_id")
-  dataSource                 DataSource     @relation(fields: [dataSourceId], references: [id])
-  dataSourceId               String         @map(name: "data_source_id")
+  ai           AI         @relation(fields: [aiId], references: [id])
+  aiId         String     @map(name: "ai_id")
+  dataSource   DataSource @relation(fields: [dataSourceId], references: [id])
+  dataSourceId String     @map(name: "data_source_id")
 
   @@id([aiId, dataSourceId])
+  @@index([dataSourceId])
   @@map("ai_data_sources")
 }
 
 model ApiKey {
-  id                        String         @id @default(cuid())
-  createdAt                 DateTime       @default(now()) @map(name: "created_at")
-  updatedAt                 DateTime       @updatedAt       @map(name: "updated_at")
-  lastUsedAt                DateTime?      @map(name: "last_used_at")
-  orgId                     String         @map("org_id")
-  userId                    String         @map("user_id")
-  name                      String
-  key                       String         @unique
-  scopes                    Json?
+  id         String    @id @default(cuid())
+  createdAt  DateTime  @default(now()) @map(name: "created_at")
+  updatedAt  DateTime  @updatedAt @map(name: "updated_at")
+  lastUsedAt DateTime? @map(name: "last_used_at")
+  orgId      String    @map("org_id")
+  userId     String    @map("user_id")
+  name       String
+  key        String    @unique
+  scopes     Json?
 
   @@map("api_keys")
+}
+
+model AIRating {
+  id        Int      @id @default(autoincrement())
+  userId    String?  @map(name: "user_id")
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map(name: "updated_at")
+  ai        AI       @relation(fields: [aiId], references: [id])
+  aiId      String   @map(name: "ai_id")
+  review    String   @db.Text
+  headline  String?
+  rating    Int
+
+  @@index(aiId)
+  @@map("ai_ratings")
+}
+
+model WaitList {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map(name: "updated_at")
+  name      String
+  email     String   @unique
+  company   String
+
+  @@map("wait_list")
+}
+
+model AIOrgApproval {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map(name: "updated_at")
+  orgId     String   @map(name: "org_id")
+  ai        AI       @relation(fields: [aiId], references: [id])
+  aiId      String   @map(name: "ai_id")
+
+  @@unique([aiId, orgId])
+  @@map("ai_org_approvals")
+}
+
+model OrgSubscription {
+  id                     Int                   @id @default(autoincrement())
+  createdAt              DateTime              @default(now()) @map(name: "created_at")
+  updatedAt              DateTime              @default(now()) @updatedAt @map(name: "updated_at")
+  orgId                  String                @map(name: "org_id")
+  type                   OrgSubscriptionType   @default(FREE)
+  status                 OrgSubscriptionStatus @default(ACTIVE)
+  periodEndDate          DateTime?             @map(name: "period_end_date")
+  externalSubscriptionId String?               @map(name: "external_subscription_id")
+  externalCustomerId     String?               @map(name: "external_customer_id")
+  dataUsageLimitInGb     Float?                @map(name: "data_usage_limit_gb")
+  apiUsageTokenLimit     Int?                  @map(name: "api_usage_token_limit")
+  metadata               Json?
+
+  @@unique([orgId])
+  @@unique([externalSubscriptionId])
+  @@map("org_subscriptions")
+}
+
+enum OrgSubscriptionType {
+  FREE
+  PAID
+}
+
+enum OrgSubscriptionStatus {
+  ACTIVE
+  CANCELLED
+}
+
+enum CategoryType {
+  AI_MODELS
+  PRODUCTIVITY
+  LEARNING_DEVELOPMENT
+  MARKETING
+  SALES
+  INFORMATION_TECHNOLOGY
+  ENGINEERING
+  HUMAN_RESOURCES
+  ACCOUNTING_FINANCE
+}
+
+model AICategoryType {
+  ai           AI           @relation(fields: [aiId], references: [id])
+  aiId         String       @map(name: "ai_id")
+  categoryType CategoryType @map(name: "category_type")
+
+  @@id([aiId, categoryType])
+  @@map("ai_category_types")
 }

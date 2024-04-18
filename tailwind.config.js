@@ -2,11 +2,11 @@
 module.exports = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-	],
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   theme: {
     container: {
       center: true,
@@ -20,8 +20,18 @@ module.exports = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        yellow: "hsl(var(--yellow))",
+        orange: "hsl(var(--orange))",
+        green: "hsl(var(--green))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        profile: "hsl(var(--profile))",
+        navy: "hsl(var(--navy))",
+        navylight: "hsl(var(--navy-light))",
+        sky: "hsl(var(--sky))",
+        lime: "hsl(var(--lime))",
+        royal: "hsl(var(--royal))",
+        coral: "hsl(var(--coral))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -70,7 +80,33 @@ module.exports = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      containers: {
+        "2xs": "16rem",
+        "3xs": "12rem",
+        "4xs": "8rem",
+        "5xs": "4rem",
+        "6xs": "2rem",
+        "7xs": "1rem",
+      },
+      backgroundImage: {
+        gradient1: "url('/gradient1-bg.png')",
+        gradient2: "url('/gradient2-bg.png')",
+        gradient3: "url('/gradient3-bg.png')",
+        gradient4:
+          "linear-gradient(180deg, #F0F0F0 0%, rgba(240, 240, 240, 0.1) 100%)",
+      },
+    },
+    boxShadow: {
+      lg: "0px 4px 10px 0px rgba(1, 27, 88, 0.15)",
+      glow: "0 0 25px 10px rgba(255, 255, 255, 0.15)",
+    },
+    fontFamily: {
+      sans: ["Inter", "sans-serif"],
+      serif: ["Roboto", "serif"],
     },
   },
-  plugins: [require("tailwindcss-animate")],
-}
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@tailwindcss/container-queries"),
+  ],
+};

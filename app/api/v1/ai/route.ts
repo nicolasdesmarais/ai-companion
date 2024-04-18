@@ -1,74 +1,55 @@
-import { auth, currentUser } from "@clerk/nextjs";
-import { NextResponse } from "next/server";
-import groupService from "@/src/domain/services/GroupService";
+import { CreateAIRequest } from "@/src/adapter-in/api/AIApi";
+import aiService from "@/src/domain/services/AIService";
 import EmailUtils from "@/src/lib/emailUtils";
-import prismadb from "@/src/lib/prismadb";
+import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
+import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
+import {
+  AuthorizationContext,
+  AuthorizationContextType,
+} from "@/src/security/models/AuthorizationContext";
+import { SecuredAction } from "@/src/security/models/SecuredAction";
+import { SecuredResourceAccessLevel } from "@/src/security/models/SecuredResourceAccessLevel";
+import { SecuredResourceType } from "@/src/security/models/SecuredResourceType";
+import { clerkClient, currentUser } from "@clerk/nextjs";
+import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
-    const authentication = await auth();
-    const orgId = authentication.orgId;
-    const user = await currentUser();
-    const {
-      src,
-      name,
-      description,
-      instructions,
-      seed,
-      categoryId,
-      modelId,
-      visibility,
-      options,
-      groups,
-    } = body;
-
-    if (!user?.id || !orgId) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
-    if (!src || !name || !description || !instructions || !categoryId) {
-      return new NextResponse("Missing required fields", { status: 400 });
-    }
-
-    const emailAddress = EmailUtils.getUserPrimaryEmailAddress(user);
-
-    const ai = await prismadb.aI.create({
-      data: {
-        categoryId,
-        orgId,
-        userId: user.id,
-        userName: emailAddress ?? user.firstName ?? user.username ?? "user",
-        src,
-        name,
-        description,
-        instructions,
-        seed: seed ?? "",
-        modelId,
-        visibility,
-        options,
-      },
-      include: {
-        dataSources: {
-          include: {
-            dataSource: true,
-          },
-        },
-        groups: true,
-      },
-    });
-
-    if (visibility !== "GROUP") {
-      await groupService.updateAIGroups(ai.id, []);
-      ai.groups = [];
-    } else if (groups && groups.length > 0) {
-      await groupService.updateAIGroups(ai.id, groups);
-      ai.groups = groups;
-    }
-
-    return NextResponse.json(ai);
-  } catch (error) {
-    console.log("[COMPANION_POST]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+async function postHandler(
+  req: Request,
+  context: {
+    authorizationContext: AuthorizationContext;
   }
+) {
+  const { authorizationContext } = context;
+  const body: CreateAIRequest = await req.json();
+
+  let user;
+  if (authorizationContext.type === AuthorizationContextType.USER) {
+    user = await currentUser();
+  } else {
+    const { userId } = authorizationContext;
+    user = await clerkClient.users.getUser(userId);
+  }
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const emailAddress = EmailUtils.getUserPrimaryEmailAddress(user);
+  const createAiRequest = {
+    ...body,
+    userName: emailAddress ?? user.firstName ?? user.username ?? "user",
+  };
+
+  const ai = await aiService.createAI(authorizationContext, createAiRequest);
+
+  return NextResponse.json(ai);
 }
+
+export const POST = withErrorHandler(
+  withAuthorization(
+    SecuredResourceType.AI,
+    SecuredAction.WRITE,
+    Object.values(SecuredResourceAccessLevel),
+    postHandler
+  )
+);

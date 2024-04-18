@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto, { createHash } from "crypto";
 
 const ENCRYPTION_KEY = process.env.APPDIRECT_ENCRYPTION_KEY;
 const algorithm = "aes-256-gcm";
@@ -50,4 +50,8 @@ export function decrypt(encryptedData: string): string {
   decryptedData += decipher.final("utf8");
 
   return decryptedData;
+}
+
+export function createSha256Hash(data: Buffer): string {
+  return createHash("sha256").update(data).digest("hex");
 }

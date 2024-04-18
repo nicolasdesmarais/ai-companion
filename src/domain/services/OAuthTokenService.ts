@@ -1,24 +1,110 @@
-import googleDriveOAuthAdapter from "@/src/adapters/oauth/GoogleDriveOAuthAdapter";
-import { OAuthAdapter } from "@/src/adapters/oauth/OAuthAdapter";
+import googleDriveOAuthAdapter from "@/src/adapter-out/oauth/GoogleDriveOAuthAdapter";
+import { OAuthAdapter } from "@/src/adapter-out/oauth/OAuthAdapter";
 import { decryptFromBuffer, encryptAsBuffer } from "@/src/lib/encryptionUtils";
 import prismadb from "@/src/lib/prismadb";
 import { OAuthTokenProvider } from "@prisma/client";
-import { UserOAuthTokenEntity } from "../entities/OAuthTokenEntity";
+import { UserOAuthTokenEntity } from "../models/OAuthTokens";
+import orgClientCredentialsService from "./OrgClientCredentialsService";
+import msftOAuthAdapter from "@/src/adapter-out/oauth/MsftOAuthAdapter";
 
 export class OAuthTokenService {
   private getOAuthAdapter(provider: OAuthTokenProvider): OAuthAdapter {
     switch (provider) {
       case OAuthTokenProvider.GOOGLE:
         return googleDriveOAuthAdapter;
+      case OAuthTokenProvider.MSFT:
+        return msftOAuthAdapter;
       default:
         throw new Error(`No OAuthAdapter found for ${provider}`);
     }
   }
 
-  public async getOAuthTokens(
+  private async getOrgClientCredentialData(
+    orgId: string,
+    provider: OAuthTokenProvider
+  ) {
+    const orgClientCredentialData =
+      await orgClientCredentialsService.getOrgClientCredentialData(
+        orgId,
+        provider
+      );
+
+    return orgClientCredentialData;
+  }
+
+  /**
+   * Generates the redirect URL for an OAuth 2 flow, for the given org and provider.
+   * @param orgId
+   * @param provider
+   * @returns
+   */
+  public async getOAuthRedirectUrl(
+    orgId: string,
+    provider: OAuthTokenProvider
+  ) {
+    const oauthAdapter = await this.getOAuthAdapter(provider);
+    const orgClientCredentialData = await this.getOrgClientCredentialData(
+      orgId,
+      provider
+    );
+
+    return oauthAdapter.getOAuthRedirectUrl(orgClientCredentialData);
+  }
+
+  /**
+   * Handles the callback from an OAuth 2 flow, extracting and storing OAuth tokens
+   * for the given user and provider
+   * @param orgId
+   * @param userId
+   * @param provider
+   * @param searchParams
+   */
+  public async handleOAuthCallback(
+    orgId: string,
+    userId: string,
     provider: OAuthTokenProvider,
-    userId: string
-  ): Promise<UserOAuthTokenEntity[]> {
+    searchParams: URLSearchParams
+  ) {
+    const oauthAdapter = await this.getOAuthAdapter(provider);
+    const orgClientCredentialData = await this.getOrgClientCredentialData(
+      orgId,
+      provider
+    );
+
+    const { tokens, email } = await oauthAdapter.getTokensFromRedirect(
+      orgClientCredentialData,
+      searchParams
+    );
+
+    await this.upsertToken({
+      userId,
+      provider,
+      email: email,
+      data: tokens,
+    });
+  }
+
+  /**
+   * Return a list of OAuth tokens for the given user and provider.
+   * @param orgId
+   * @param userId
+   * @param provider
+   * @returns
+   */
+  public async getOAuthTokens(
+    orgId: string,
+    userId: string,
+    provider: OAuthTokenProvider
+  ): Promise<UserOAuthTokenEntity[] | null> {
+    const orgClientCredentialData = await this.getOrgClientCredentialData(
+      orgId,
+      provider
+    );
+
+    if (!orgClientCredentialData) {
+      return null;
+    }
+
     const oauthAdapter = await this.getOAuthAdapter(provider);
 
     const tokens = await prismadb.oAuthToken.findMany({
@@ -33,10 +119,12 @@ export class OAuthTokenService {
       if (!token.data) {
         continue;
       }
-      const tokenData = JSON.parse(decryptFromBuffer(token.data));
-
       try {
-        const tokenInfo = await oauthAdapter.getOAuthTokenInfo(tokenData);
+        const tokenData = JSON.parse(decryptFromBuffer(token.data));
+        const tokenInfo = await oauthAdapter.getOAuthTokenInfo(
+          orgClientCredentialData,
+          tokenData
+        );
         if (tokenInfo.isExistingTokenValid) {
           validTokens.push(token);
         } else if (tokenInfo.refreshedToken) {
@@ -47,13 +135,17 @@ export class OAuthTokenService {
           validTokens.push(token);
         }
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     }
 
     return validTokens;
   }
 
+  /**
+   * Upsert the OAuth token for the given user, email and provider
+   * @param token
+   */
   public async upsertToken(token: UserOAuthTokenEntity) {
     const encryptedData = encryptAsBuffer(JSON.stringify(token.data));
 

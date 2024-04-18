@@ -13,7 +13,7 @@ body,
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
 
-    --card: 0 0% 100%;
+    --card: 0 0% 85%;
     --card-foreground: 0 0% 3.9%;
  
     --popover: 0 0% 100%;
@@ -28,7 +28,7 @@ body,
     --muted: 0 0% 96.1%;
     --muted-foreground: 0 0% 45.1%;
  
-    --accent: 0 0% 96.1%;
+    --accent: 221 25% 85%;
     --accent-foreground: 0 0% 9%;
  
     --destructive: 0 84.2% 60.2%;
@@ -37,8 +37,24 @@ body,
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
     --ring: 217 37% 48%;
+
+    --orange: 36 91% 43%;
+    --green: 118 74% 33%;
+    --yellow: 51 96% 48%;
  
     --radius: 0.5rem;
+
+    --profile: 232, 33%, 90%;
+    --navy: 222, 98%, 17%, 1;
+    --navy-light: 222, 98%, 17%, 0.15;
+    --sky: 197, 100%, 84%, 1;
+    --lime: 135, 95%, 93%, 1;
+    --royal: 230, 94%, 43%, 1;
+    --coral: 358, 86%, 64%, 1;
+    --color1: 1, 27, 88;
+    --color2: 242, 85, 90;
+    --color3: 205, 253, 218;
+    --circle-size: 80%;
   }
  
   .dark {
@@ -67,8 +83,10 @@ body,
     --destructive-foreground: 0 0% 98%;
  
     --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
+    --input: 0 0% 34.9%;
     --ring: 217 37% 48%;
+
+    --profile: 232, 33%, 9%;
   }
 }
  
@@ -102,33 +120,13 @@ body,
   background: linear-gradient(349deg, rgba(16,16,59,1) 0%, rgba(28,39,88,1) 65%, rgba(155,217,249,1) 126%);
 }
 
-.auth-side-panel {
-  width: 500px;
-}
-
-.teaser {
-  height: 500px;
-  overflow: hidden;
-}
-
 .teaser-blur {
   width: 500px;
   height: 250px;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   -webkit-mask: linear-gradient(180deg, transparent, rgba(16,16,59,1) 70%);
-  margin-top: -200px;
-}
-
-.organizationPreviewTextContainer,
-.cl-organizationSwitcherTriggerIcon {
-  display: none;
-}
-
-.cl-organizationSwitcherTrigger,
-.cl-organizationSwitcherTrigger .cl-avatarBox {
-  width: 64px;
-  height: 64px;
+  margin-top: -400px;
 }
 
 .markdown-chat-message {
@@ -150,9 +148,16 @@ body,
   background: hsl(217 37% 68%);
   margin: 10px 0;
   border-radius: 5px;
+  padding: 0 4px;
 }
 .markdown-chat-message pre {
   padding: 0 10px;
+  /* fixes horizontal scroll blowout */
+  display: grid;
+}
+
+.markdown-chat-message pre code {
+  overflow-x: auto;
 }
 
 .markdown-chat-message table {
@@ -164,10 +169,177 @@ body,
   border: 1px solid hsl(var(--muted-foreground));
   padding: 8px;
 }
-.markdown-chat-message li {
+.markdown-chat-message ol {
+  padding: 5px;
+}
+  .markdown-chat-message li {
   list-style: auto;
   margin: 10px 15px;
+  padding: 0 5px;
 }
 .markdown-chat-message ul li {
   list-style: disc;
+}
+
+.text-nano {
+  font-size: 0.25rem;
+}
+.text-xxs {
+  font-size: 0.6rem;
+}
+
+.blinking-cursor {
+  margin-left: 5px;
+  background-color: #fff;
+  animation: blink 1s infinite;
+}
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  50.1%, 100% {
+    opacity: 0;
+  }
+}
+
+
+@keyframes moveInCircle {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes moveVertical {
+  0% {
+    transform: translateY(-50%);
+  }
+  50% {
+    transform: translateY(50%);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes moveHorizontal {
+  0% {
+    transform: translateX(-50%) translateY(-10%);
+  }
+  50% {
+    transform: translateX(50%) translateY(10%);
+  }
+  100% {
+    transform: translateX(-50%) translateY(-10%);
+  }
+}
+
+.blob1 {
+  background: radial-gradient(circle at center, rgba(var(--color1), 0.8) 0, rgba(var(--color1), 0) 50%) no-repeat;
+  mix-blend-mode: hard-light;
+
+  width: var(--circle-size);
+  height: var(--circle-size);
+  top: calc(50% - var(--circle-size) / 2);
+  left: calc(50% - var(--circle-size) / 2);
+
+  transform-origin: center center;
+  animation: moveVertical 110s ease infinite; 
+
+  opacity: 1;
+}
+
+.blob2 {
+  background: radial-gradient(circle at center, rgba(var(--color2), 0.8) 0, rgba(var(--color2), 0) 50%) no-repeat;
+  mix-blend-mode: var(--blending);
+
+  width: var(--circle-size);
+  height: var(--circle-size);
+  top: calc(50% - var(--circle-size) / 2);
+  left: calc(50% - var(--circle-size) / 2);
+
+  transform-origin: calc(50% - 400px);
+  animation: moveInCircle 60s reverse infinite;
+
+  opacity: 1;
+}
+
+.blob3 {
+  background: radial-gradient(circle at center, rgba(var(--color3), 0.8) 0, rgba(var(--color3), 0) 50%) no-repeat;
+  mix-blend-mode: var(--blending);
+
+  width: var(--circle-size);
+  height: var(--circle-size);
+  top: calc(50% - var(--circle-size) / 2 + 200px);
+  left: calc(50% - var(--circle-size) / 2 - 500px);
+
+  transform-origin: calc(50% + 400px);
+  animation: moveInCircle 80s linear infinite;
+
+  opacity: 1;
+}
+
+.blob4 {
+  background: radial-gradient(circle at center, rgba(var(--color1), 0.8) 0, rgba(var(--color1), 0) 50%) no-repeat;
+  mix-blend-mode: var(--blending);
+
+  width: var(--circle-size);
+  height: var(--circle-size);
+  top: calc(50% - var(--circle-size) / 2);
+  left: calc(50% - var(--circle-size) / 2);
+
+  transform-origin: calc(50% - 200px);
+  animation: moveHorizontal 80s ease infinite;
+
+  opacity: 1;
+}
+
+.blob5 {
+  background: radial-gradient(circle at center, rgba(var(--color2), 0.8) 0, rgba(var(--color2), 0) 50%) no-repeat;
+  mix-blend-mode: var(--blending);
+
+  width: calc(var(--circle-size) * 2);
+  height: calc(var(--circle-size) * 2);
+  top: calc(50% - var(--circle-size));
+  left: calc(50% - var(--circle-size));
+
+  transform-origin: calc(50% - 800px) calc(50% + 200px);
+  animation: moveInCircle 80s ease infinite;
+
+  opacity: 1;
+}
+
+.blob-background {
+  filter: url(#goo) blur(40px);
+}
+
+
+@media (max-width: 1024px) {
+  .blob-background {
+    display: none;
+  }
+  .blob-container {
+    background: white;
+    background: linear-gradient(60deg, rgba(8,17,64,1) 0%, rgb(251, 252, 253) 35%, rgba(250,0,48,0.8) 100%); 
+  }
+}
+
+.svg-filter {
+  display: none;
+}
+
+@-moz-document url-prefix() {
+  .svg-filter {
+      display: block;
+  }
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:focus {
+  transition: background-color 0s 600000s, color 0s 600000s !important;
 }

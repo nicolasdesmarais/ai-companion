@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -11,27 +10,51 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import useMatchMedia from "@/hooks/use-match-media";
+
+const itemClass =
+  "text-muted-foreground text-xs p-3 flex w-full font-medium cursor-pointer hover:text-primary hover:bg-primary/10 rounded-lg group";
 
 export function ModeToggle() {
+  const isMobile = useMatchMedia("(max-width: 768px)");
   const { setTheme } = useTheme();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="secondary" size="icon" id="theme-button">
-          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+        <Button
+          variant="secondary"
+          size="icon"
+          id="theme-button"
+          className="flex items-center justify-center text-muted-foreground"
+        >
+          <Sun className="h-5 w-5 dark:hidden" />
+          <Moon className="h-5 w-5 hidden dark:block" />
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+      <DropdownMenuContent
+        align="end"
+        side="right"
+        sideOffset={isMobile ? 40 : 25}
+        alignOffset={-20}
+      >
+        <DropdownMenuItem
+          onClick={() => setTheme("light")}
+          className={itemClass}
+        >
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem
+          onClick={() => setTheme("dark")}
+          className={itemClass}
+        >
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
+        <DropdownMenuItem
+          onClick={() => setTheme("system")}
+          className={itemClass}
+        >
           System
         </DropdownMenuItem>
       </DropdownMenuContent>

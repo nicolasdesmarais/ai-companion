@@ -67,7 +67,7 @@ export const InviteModal = ({ showModal, setShowModal }: InviteModalProps) => {
       });
       setShowModal(false);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast({
         description: error.response?.data || "Something went wrong",
         variant: "destructive",
