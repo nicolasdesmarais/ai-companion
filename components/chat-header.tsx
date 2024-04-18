@@ -18,7 +18,10 @@ import {
 import { useRouter } from "next/navigation";
 
 import { BotAvatar } from "@/components/bot-avatar";
+import { PaywallBanner } from "@/components/paywall-banner";
+import { RateModal } from "@/components/rate-modal";
 import { ShareModal } from "@/components/share-modal";
+import { StarRating } from "@/components/star-rating";
 import { TalkStreamModal } from "@/components/talk-stream-modal";
 import { Button } from "@/components/ui/button";
 import {
