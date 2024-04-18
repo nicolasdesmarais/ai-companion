@@ -238,12 +238,14 @@ export const AIProfileEditor = ({ ai, form }: ProfileSourceProps) => {
                 <ImageUpload
                   disabled={isLoading}
                   onChange={field.onChange}
+                  width={978}
+                  height={512}
                   value={
                     field.value ||
                     aspectFill(ai?.src.replace(".png", ".jpg"), "1.91") ||
                     ai?.src
                   }
-                  className="w-96"
+                  className="w-96 h-52 pt-2"
                 />
               </FormControl>
               <FormMessage />

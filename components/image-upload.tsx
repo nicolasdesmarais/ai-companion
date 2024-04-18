@@ -10,6 +10,8 @@ interface ImageUploadProps {
   onChange: (src: string) => void;
   disabled?: boolean;
   className?: string;
+  width?: number;
+  height?: number;
 }
 
 export const ImageUpload = ({
@@ -17,6 +19,8 @@ export const ImageUpload = ({
   onChange,
   disabled,
   className,
+  width,
+  height,
 }: ImageUploadProps) => {
   const [isMounted, setIsMounted] = useState(false);
 
@@ -53,7 +57,9 @@ export const ImageUpload = ({
         >
           <div className={cn("relative h-40 w-40", className)}>
             <Image
-              fill
+              fill={!(width || height)}
+              width={width}
+              height={height}
               alt="Upload"
               src={value || "/placeholder.svg"}
               className="rounded-lg object-cover"

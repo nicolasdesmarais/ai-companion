@@ -58,6 +58,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       },
       provider: AIModelProvider.AZURE_OPENAI,
       isVisible: true,
+      isPrivate: true,
       additionalData: {
         apiKey: process.env.AZURE_GPT40_KEY,
         apiVersion: "2024-02-01",
@@ -81,6 +82,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       },
       provider: AIModelProvider.AZURE_OPENAI,
       isVisible: true,
+      isPrivate: true,
       additionalData: {
         apiKey: process.env.AZURE_GPT35_KEY,
         apiVersion: "2024-02-01",
@@ -104,6 +106,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       },
       provider: AIModelProvider.AZURE_OPENAI_ASSISTANTS,
       isVisible: true,
+      isPrivate: true,
       additionalData: {
         apiKey: process.env.AZURE_GPT40_KEY,
         instanceName: "prod-appdirectai-east2",
@@ -125,6 +128,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       },
       provider: AIModelProvider.AZURE_OPENAI_ASSISTANTS,
       isVisible: true,
+      isPrivate: true,
       additionalData: {
         apiKey: process.env.AZURE_GPT35_KEY,
         instanceName: "appdirect-prod-ai-useast",
@@ -146,6 +150,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       },
       provider: AIModelProvider.OPENAI,
       isVisible: true,
+      isPrivate: false,
     },
     {
       id: "anthropic-claude-2.1",
@@ -169,6 +174,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       },
       provider: AIModelProvider.ANTHROPIC,
       isVisible: true,
+      isPrivate: false,
     },
     {
       id: "anthropic-claude-3-opus",
@@ -192,6 +198,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       },
       provider: AIModelProvider.ANTHROPIC,
       isVisible: true,
+      isPrivate: false,
     },
     {
       id: "anthropic-claude-3-sonnet",
@@ -215,6 +222,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       },
       provider: AIModelProvider.ANTHROPIC,
       isVisible: true,
+      isPrivate: false,
     },
     {
       id: "llama-2-13b-chat",
@@ -232,6 +240,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       },
       provider: AIModelProvider.REPLICATE,
       isVisible: true,
+      isPrivate: false,
       additionalData: {
         owner: "meta",
         version:
@@ -259,6 +268,7 @@ export class StaticAIModelRepository implements AIModelRepository {
         },
       },
       provider: AIModelProvider.REPLICATE,
+      isPrivate: false,
       isVisible: true,
       additionalData: {
         owner: "meta",
@@ -288,6 +298,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       },
       provider: AIModelProvider.COHERE,
       isVisible: true,
+      isPrivate: false,
     },
     {
       id: "cohere-command-light",
@@ -311,6 +322,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       },
       provider: AIModelProvider.COHERE,
       isVisible: true,
+      isPrivate: false,
     },
     {
       id: "cohere-command-r",
@@ -328,6 +340,7 @@ export class StaticAIModelRepository implements AIModelRepository {
       },
       provider: AIModelProvider.COHERE,
       isVisible: true,
+      isPrivate: false,
     },
   ];
 

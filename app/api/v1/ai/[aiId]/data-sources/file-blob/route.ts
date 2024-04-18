@@ -6,6 +6,8 @@ import { DataSourceRefreshPeriod, DataSourceType } from "@prisma/client";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 
+const DEFAULT_MIME_TYPE = "text/plain";
+
 async function postHandler(
   request: Request,
   { params: { aiId } }: { params: { aiId: string } }
@@ -29,9 +31,11 @@ async function postHandler(
       }
       const { authorizationContext } = JSON.parse(tokenPayload);
 
+      const mimetype = blob.contentType || DEFAULT_MIME_TYPE;
+
       const input: FileUploadDataSourceInput = {
         filename: blob.pathname,
-        mimetype: blob.contentType,
+        mimetype,
         blobUrl: blob.url,
       };
 
