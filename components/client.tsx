@@ -8,11 +8,12 @@ import { ChatForm } from "@/components/chat-form";
 import { ChatHeader } from "@/components/chat-header";
 import { ChatMessages } from "@/components/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
+import { useTalkModal } from "@/hooks/use-talk-modal";
 import { AIDetailDto } from "@/src/domain/models/AI";
 import { ChatDetailDto, ChatMessageDto } from "@/src/domain/models/Chats";
+import { getCurrentDateStr } from "@/src/lib/utils";
 import { Role } from "@prisma/client";
 import axios from "axios";
-import { getCurrentDateStr } from "@/src/lib/utils";
 
 interface ChatClientProps {
   ai: AIDetailDto | null;
@@ -31,6 +32,7 @@ export const ChatClient = ({
   const [messages, setMessages] = useState<ChatMessageDto[]>(chat.messages);
   const [streaming, setStreaming] = useState<boolean>(false);
   const { toast } = useToast();
+  const talkModal = useTalkModal();
 
   useEffect(() => {
     const touch = async () => {
@@ -68,6 +70,7 @@ export const ChatClient = ({
       });
     },
     onFinish(_prompt, completion) {
+      talkModal.onSpeak(completion);
       setStreaming(false);
       const systemMessage: ChatMessageDto = {
         createdAt: new Date(),
