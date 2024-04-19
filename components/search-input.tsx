@@ -15,6 +15,7 @@ import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
 import { ChangeEventHandler, useEffect, useState } from "react";
+import {UserMetaDataInterface} from "@/src/domain/services/ClerkService";
 
 const filterOptions = [
   { id: "popularity", name: "Popularity" },
@@ -39,20 +40,51 @@ export const SearchInput = ({ scopeParam }: Props) => {
   const debouncedValue = useDebounce<string>(value, 500);
   const [sort, setSort] = useState<string | undefined>(sortParam || "");
 
-  let defaultSort = "popularity";
-  if (!scopeParam || scopeParam === "public") {
-    defaultSort = "rating";
-  } else if (scopeParam === "shared" || scopeParam === "owned") {
-    defaultSort = "newest";
+  if (!scopeParam) {
+    scopeParam = "/";
   }
+
+  useEffect(() => {
+    const setDefaultSort = async () => {
+      if (!scopeParam || scopeParam === "/" || scopeParam === "public") {
+        setSort("rating");
+      } else if (scopeParam === "shared" || scopeParam === "owned") {
+        setSort("newest");
+      } else {
+        setSort("popularity");
+      }
+    }
+
+    const fetchMetaData = async (userId : string, key: string) => {
+        const response = await axios.get(`/api/v1/clerk/${userId}`);
+        setSort(response.data.publicMetadata[key]);
+    }
+
+    if (clerk.user?.id) {
+      if (!scopeParam || scopeParam === "/" || scopeParam === "public") {
+        const key: string = `sort${scopeParam ? "-" + scopeParam : "-/"}`;
+        fetchMetaData(clerk.user?.id, key);
+      } else if (scopeParam === "shared" || scopeParam === "owned") {
+        const key: string = `sort${"-" + scopeParam}`;
+        fetchMetaData(clerk.user?.id, key);
+      } else {
+        const key: string = `sort${"-" + scopeParam}`;
+        fetchMetaData(clerk.user?.id, key);
+      }
+    }
+    console.log("Before Default: ", sort)
+    if (!sort) {
+      setDefaultSort();
+      console.log("After Default: ", sort)
+    }
+  }, [clerk.user?.id, scopeParam]);
 
   async function onSortChange(value: string) {
     setSort(value);
-    await axios.post("/api/v1/clerk", {
-      key: `sort${scopeParam ? "-" + scopeParam : ""}`,
-      value,
-      userId: clerk.user?.id,
-    });
+    const key : string = `sort${scopeParam ? "-" + scopeParam : "-/"}`;
+    const userId = clerk.user?.id;
+    const sortKeyValue: UserMetaDataInterface = {key, value};
+    await axios.post(`/api/v1/clerk/${userId}`, sortKeyValue);
   }
 
   const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -90,7 +122,7 @@ export const SearchInput = ({ scopeParam }: Props) => {
       </div>
       <Select
         onValueChange={(val) => onSortChange(val)}
-        value={sort || defaultSort}
+        value={sort}
       >
         <SelectTrigger className="bg-accent w-32 md:w-44 ml-4 flex-none">
           <span className="hidden md:inline">Sort By:</span>
