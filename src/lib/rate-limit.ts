@@ -30,9 +30,15 @@ export async function tokenBucketRateLimit(
     prefix: "@upstash/ratelimit",
   });
 
-  const { success } = await ratelimit.limit(identifier, {
+  const result = await ratelimit.limit(identifier, {
     rate: requestedTokens,
   });
+
+  const { success } = result;
+  if (!success) {
+    console.log("Rate limit exceeded: " + result);
+  }
+
   return success;
 }
 
