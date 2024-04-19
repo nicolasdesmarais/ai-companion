@@ -36,7 +36,11 @@ export async function tokenBucketRateLimit(
 
   const { success } = result;
   if (!success) {
-    console.log(`Rate limit exceeded for identifier=${identifier}:  result`);
+    console.log(
+      `Rate limit exceeded for identifier=${identifier}:  ${JSON.stringify(
+        result
+      )}`
+    );
   }
 
   return success;
