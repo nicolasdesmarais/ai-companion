@@ -57,7 +57,6 @@ const formSchema = z.object({
     .optional(),
   knowledge: z.array(z.custom<Knowledge>()).optional(),
   groups: z.array(z.string()).optional(),
-  talk: z.string().optional(),
   profile: z
     .object({
       headline: z.string().optional().nullable(),
@@ -162,7 +161,7 @@ export const AIEditor = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialAi
-      ? ({ talk: "", ...initialAi } as any)
+      ? ({ ...initialAi } as any)
       : {
           name: "",
           introduction: "",
@@ -228,7 +227,7 @@ export const AIEditor = ({
         } else {
           response.data.profile = defaultProfile;
         }
-        form.reset({ talk: "", ...response.data }); //TODO: remove talk
+        form.reset({ ...response.data });
         toast({
           description: "AI Saved.",
           duration: 2000,

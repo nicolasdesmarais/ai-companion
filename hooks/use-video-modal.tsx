@@ -3,10 +3,9 @@ import { create } from "zustand";
 
 interface useVideoModalStore {
   isOpen: boolean;
-  src: string;
   voice: string;
+  videoId?: string;
   ai?: any;
-  onOpen: (src: string) => void;
   onOpenStream: (ai: any) => void;
   onSpeak: (text: string) => void;
   onClose: () => void;
@@ -15,9 +14,8 @@ interface useVideoModalStore {
 
 export const useVideoModal = create<useVideoModalStore>((set, get) => ({
   isOpen: false,
-  src: "",
+  videoId: "",
   voice: "en-US-JennyNeural",
-  onOpen: (src) => set({ isOpen: true, src }),
   onOpenStream: (ai) => set({ isOpen: true, ai }),
   onSpeak: (text) => speak(text, get().voice),
   onClose: () => set({ isOpen: false }),

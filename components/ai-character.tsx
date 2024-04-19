@@ -26,16 +26,14 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useGroupModal } from "@/hooks/use-group-modal";
-import { useVideoModal } from "@/hooks/use-video-modal";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { getDiversityString } from "@/src/lib/diversity";
 import { AIVisibility, Category, CategoryType } from "@prisma/client";
 import axios, { AxiosError } from "axios";
-import { Loader, Play, Settings, Wand2 } from "lucide-react";
+import { Loader, Settings, Wand2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { imageModels } from "./ai-models";
-import { VideoPreviewModal } from "./video-preview-modal";
 
 const PREAMBLE =
   "ex: As a Support Specialist AI, your role is to provide solutions to user inquiries. This involves understanding the nature of the questions, interpreting their context, and yielding the correct responses. The effectiveness of your position is evaluated based on the accuracy of your responses and the satisfaction of users. Precision in answering and user satisfaction are your primary goals.";
@@ -84,7 +82,6 @@ interface AIFormProps {
 export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const { toast } = useToast();
   const groupModal = useGroupModal();
-  const videoModal = useVideoModal();
   const pathname = usePathname();
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatingInstruction, setGeneratingInstruction] = useState(false);
@@ -160,40 +157,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
     form.getValues("description"),
     diversityString,
   ]);
-
-  useEffect(() => {
-    if (hasInstanceAccess && form.getValues("src")) {
-      setupTalk();
-    }
-  }, [form.getValues("src")]);
-
-  const setupTalk = async () => {
-    form.setValue("talk", null, {
-      shouldDirty: true,
-    });
-    const create = await axios.post("/api/v1/talk", {
-      prompt: `Hello, I am ${form.getValues("name")}`,
-      imgUrl: form.getValues("src"),
-    });
-    if (create.data.id) {
-      const talk = await axios.get(`/api/v1/talk/${create.data.id}`);
-      if (talk.data.status !== "error") {
-        form.setValue("talk", talk.data.id, {
-          shouldDirty: true,
-        });
-      }
-    }
-  };
-
-  const playTalk = async () => {
-    const talkId = form.getValues("talk");
-    if (talkId) {
-      const talk = await axios.get(`/api/v1/talk/${talkId}`);
-      if (talk.data.status === "done") {
-        videoModal.onOpen(talk.data.result_url);
-      }
-    }
-  };
 
   const generateAvatar = async () => {
     setGeneratingImage(true);
@@ -682,34 +645,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                   />
                 )}
             </div>
-            {hasInstanceAccess && (
-              <FormField
-                name="talk"
-                control={form.control}
-                render={({ field }) =>
-                  field.value && (
-                    <FormItem>
-                      <FormLabel>Voice</FormLabel>
-                      <div className="flex">
-                        <Button
-                          type="button"
-                          disabled={isLoading || generatingImage}
-                          variant="ghost"
-                          className="ml-2"
-                          onClick={() => playTalk()}
-                        >
-                          <Play className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      <FormDescription>
-                        Select a voice for your AI
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )
-                }
-              />
-            )}
           </div>
           <div className="space-y-2 w-full">
             <div>
@@ -813,8 +748,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
           <div className="ml-4 text-center">{loadingMessage}</div>
         </DialogContent>
       </Dialog>
-
-      <VideoPreviewModal />
     </div>
   );
 };
