@@ -5,9 +5,9 @@ import LandingNav from "@/components/landing-nav";
 import LandingTerms from "@/components/landing-terms";
 import { AppdirectSvg } from "@/components/svg/appdirect-svg";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import { useSignUp, useUser } from "@clerk/clerk-react";
 import { OAuthStrategy } from "@clerk/types";
-import axios from "axios";
 import { Eye, EyeOff, Loader } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,18 +22,11 @@ const SignUp = () => {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [type, setType] = useState("password");
+  const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
-
-  let host = "https://appdirect.ai",
-    hutk = "";
-  if (typeof window !== "undefined") {
-    host = window.location.origin;
-    hutk = document.cookie.replace(
-      /(?:(?:^|.*;\s*)hubspotutk\s*\=\s*([^;]*).*$)|^.*$/,
-      "$1"
-    );
-  }
+  const { toast } = useToast();
 
   useEffect(() => {
     if (isSignedIn) {
@@ -41,17 +34,25 @@ const SignUp = () => {
     }
   }, [isSignedIn]);
 
-  const signInWith = (strategy: OAuthStrategy) => {
+  const signInWith = async (strategy: OAuthStrategy) => {
     if (signUp) {
-      return signUp.authenticateWithRedirect({
-        strategy,
-        redirectUrl: "/org-selection",
-        redirectUrlComplete: "/org-selection",
-      });
+      setGoogleLoading(true);
+      try {
+        await signUp.authenticateWithRedirect({
+          strategy,
+          redirectUrl: "/org-selection",
+          redirectUrlComplete: "/org-selection",
+        });
+      } catch (err: any) {
+        setGoogleLoading(false);
+        setError(err.errors[0].message || "An error occurred");
+        console.error(JSON.stringify(err, null, 2));
+      }
     }
   };
 
   const handleSubmit = async (e: any) => {
+    setError("");
     e.preventDefault();
     if (!isLoaded || !password || !emailAddress) {
       return;
@@ -74,55 +75,21 @@ const SignUp = () => {
     }
   };
 
-  const hubspotTracking = async () => {
-    const data = {
-      submittedAt: Date.now(),
-      fields: [
-        {
-          objectTypeId: "0-1",
-          name: "email",
-          value: emailAddress,
-        },
-
-        {
-          objectTypeId: "0-1",
-          name: "company",
-          value: "N/A",
-        },
-        {
-          objectTypeId: "0-1",
-          name: "firstname",
-          value: "N/A",
-        },
-        {
-          objectTypeId: "0-1",
-          name: "lastname",
-          value: "N/A",
-        },
-        {
-          objectTypeId: "0-1",
-          name: "phone",
-          value: "N/A",
-        },
-      ],
-      context: {
-        hutk,
-        pageUri: `${host}/signup`,
-        pageName: "AppDirect AI Sign Up",
-      },
-    };
-    await axios.post(
-      `https://api.hsforms.com/submissions/v3/integration/submit/43634300/7f9c75d8-4880-4de7-8e7b-5771530460dd`,
-      data
-    );
+  const handleResendCode = async (e: any) => {
+    await handleSubmit(e);
+    toast({
+      description: "Verification Code Sent.",
+      duration: 2000,
+    });
   };
 
   const onPressVerify = async (e: any) => {
+    setError("");
     e.preventDefault();
     if (!isLoaded) {
       return;
     }
-    setLoading(true);
+    setVerifying(true);
 
     try {
       const completeSignUp = await signUp.attemptEmailAddressVerification({
@@ -131,16 +98,15 @@ const SignUp = () => {
       if (completeSignUp.status === "complete") {
         await Promise.all([
           setActive({ session: completeSignUp.createdSessionId }),
-          hubspotTracking(),
         ]);
         router.push("/org-selection");
       } else {
-        setLoading(false);
+        setVerifying(false);
         setError("A verification error occurred");
         console.error(JSON.stringify(completeSignUp, null, 2));
       }
     } catch (err: any) {
-      setLoading(false);
+      setVerifying(false);
       setError(err.errors[0].longMessage || "An error occurred");
       console.error(JSON.stringify(err, null, 2));
     }
@@ -151,6 +117,16 @@ const SignUp = () => {
       setType("text");
     } else {
       setType("password");
+    }
+  };
+
+  const handleEnter = (event: any, submit: (e: any) => void) => {
+    switch (event.key) {
+      case "Enter":
+        submit(event);
+        break;
+      default:
+        break;
     }
   };
 
@@ -166,14 +142,26 @@ const SignUp = () => {
               <div>Check your email for a verification code</div>
               <div className="text-red-500 text-sm pt-4">{error}</div>
               <div className="flex flex-col gap-8 mt-8">
-                <input
-                  value={code}
-                  className="rounded-md w-80 h-12 px-4 bg-white"
-                  placeholder="Verification Code"
-                  onChange={(e) => setCode(e.target.value)}
-                />
+                <div className="w-full">
+                  <input
+                    value={code}
+                    className="rounded-md w-80 h-12 px-4 bg-white"
+                    placeholder="Verification Code"
+                    onChange={(e) => setCode(e.target.value)}
+                    onKeyDown={(e) => handleEnter(e, onPressVerify)}
+                  />
+                  <span
+                    className="underline text-xs block text-right w-full pt-1 cursor-pointer"
+                    onClick={handleResendCode}
+                  >
+                    Resend Code
+                  </span>
+                </div>
                 <Button variant="login" onClick={onPressVerify}>
                   Verify Email
+                  {verifying ? (
+                    <Loader className="w-4 h-4 ml-2 spinner" />
+                  ) : null}
                 </Button>
               </div>
             </>
@@ -185,6 +173,9 @@ const SignUp = () => {
                 onClick={() => signInWith("oauth_google")}
               >
                 Continue with Google
+                {googleLoading ? (
+                  <Loader className="w-4 h-4 ml-2 spinner" />
+                ) : null}
               </Button>
               <div className="mt-8 flex text-white text-sm justify-stretch w-full items-center">
                 <div className="border-b border-white grow h-1"></div>
@@ -207,6 +198,7 @@ const SignUp = () => {
                     placeholder="Password"
                     className="rounded-md w-full h-12 px-4 bg-white"
                     onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={(e) => handleEnter(e, handleSubmit)}
                     id="password"
                     name="password"
                   />

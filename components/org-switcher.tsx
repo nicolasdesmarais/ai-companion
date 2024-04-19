@@ -4,6 +4,7 @@ import { useAuth, useClerk } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import Image from "next/image";
 
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,8 +14,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowLeftRight, Plus, Settings, X } from "lucide-react";
+import { ArrowLeftRight, Loader, Plus, Settings, X } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const itemClass =
   "text-muted-foreground text-xs p-3 flex w-full font-medium cursor-pointer hover:text-primary hover:bg-primary/10 rounded-lg group";
@@ -28,6 +30,9 @@ export const OrgSwitcher = ({ setOpen }: Props) => {
   const { has } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [invitations, setInvitations] = useState<any[]>([]);
+  const [joining, setJoining] = useState<any[]>([]);
+
   const isMobile = setOpen !== undefined;
 
   let role = "User";
@@ -37,6 +42,34 @@ export const OrgSwitcher = ({ setOpen }: Props) => {
   if (clerk.user?.publicMetadata && clerk.user?.publicMetadata.superuser) {
     role = "Superuser";
   }
+
+  useEffect(() => {
+    const fetchInvitations = async () => {
+      if (clerk.user) {
+        const result = await clerk.user.getOrganizationInvitations();
+        setInvitations(result.data.filter((i: any) => i.status !== "accepted"));
+      }
+    };
+    fetchInvitations();
+  }, [clerk.user]);
+
+  const join = async (invitation: any) => {
+    setJoining((prev) => ({ ...prev, [invitation.id]: true }));
+    try {
+      const result = await invitation.accept();
+      if (result.status === "accepted") {
+        const organization = result.publicOrganizationData.id;
+        await clerk.setActive({
+          session: clerk.session?.id,
+          organization,
+        });
+        setInvitations([]);
+      }
+    } catch (e) {
+      console.error(e);
+      setJoining((prev) => ({ ...prev, [invitation.id]: false }));
+    }
+  };
 
   if (!clerk.loaded) return null;
   if (!clerk.organization?.id) return null;
@@ -83,26 +116,52 @@ export const OrgSwitcher = ({ setOpen }: Props) => {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuGroup>
-          <div className={itemClass}>
-            <DropdownMenuItem
-              onClick={() => {
-                if (isMobile) {
-                  setOpen(false);
-                }
-                clerk.openOrganizationProfile({
-                  appearance: {
-                    baseTheme: dark,
-                  },
-                });
-              }}
-              className="focus:bg-transparent"
-            >
+          <div
+            className={itemClass}
+            onClick={() => {
+              if (isMobile) {
+                setOpen(false);
+              }
+              clerk.openOrganizationProfile({
+                appearance: {
+                  baseTheme: dark,
+                },
+              });
+            }}
+          >
+            <DropdownMenuItem className="focus:bg-transparent">
               <Settings className="h-4 w-4 mr-6 ml-2" />
               Manage Organization
             </DropdownMenuItem>
           </div>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
+        {invitations.map((invitation) => (
+          <div key={invitation.id}>
+            <div className="flex pl-4 pt-4 mb-1">
+              <Image
+                alt={invitation.publicOrganizationData.name}
+                src={invitation.publicOrganizationData.imageUrl}
+                width="44"
+                height="44"
+                className="rounded-lg"
+              />
+              <div className="truncate w-56 font-bold text-lg flex items-center px-6">
+                {invitation.publicOrganizationData.name}
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => join(invitation)}
+                className="mr-4"
+              >
+                Join
+                {joining[invitation.id] ? (
+                  <Loader className="w-4 h-4 ml-2 spinner" />
+                ) : null}
+              </Button>
+            </div>
+          </div>
+        ))}
         {clerk.user?.organizationMemberships?.map(
           (membership) =>
             membership.organization.id !== clerk.organization?.id && (
@@ -141,20 +200,20 @@ export const OrgSwitcher = ({ setOpen }: Props) => {
               </div>
             )
         )}
-        <div className={itemClass}>
-          <DropdownMenuItem
-            onClick={() => {
-              if (isMobile) {
-                setOpen(false);
-              }
-              clerk.openCreateOrganization({
-                appearance: {
-                  baseTheme: dark,
-                },
-              });
-            }}
-            className="focus:bg-transparent"
-          >
+        <div
+          className={itemClass}
+          onClick={() => {
+            if (isMobile) {
+              setOpen(false);
+            }
+            clerk.openCreateOrganization({
+              appearance: {
+                baseTheme: dark,
+              },
+            });
+          }}
+        >
+          <DropdownMenuItem className="focus:bg-transparent">
             <div className="flex">
               <Plus className="h-5 w-5 mr-6 ml-2" />
               Create Organization

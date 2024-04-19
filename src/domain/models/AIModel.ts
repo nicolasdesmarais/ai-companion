@@ -7,6 +7,7 @@ export interface AIModel {
   isVisible: boolean;
   provider: AIModelProvider;
   additionalData?: any;
+  isPrivate: boolean;
 }
 
 export interface AIModelOptions {
@@ -14,6 +15,7 @@ export interface AIModelOptions {
   topP: RangeOption;
   topK?: RangeOption;
   maxTokens: RangeOption;
+  maxInputTokens: RangeOption;
   frequencyPenalty?: RangeOption;
   presencePenalty?: RangeOption;
 }

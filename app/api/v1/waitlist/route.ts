@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { rateLimitRequest } from "@/src/lib/rate-limit";
 import prismadb from "@/src/lib/prismadb";
+import { rateLimitRequest } from "@/src/lib/rate-limit";
 import { Prisma } from "@prisma/client";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   const { name, email, company } = await req.json();

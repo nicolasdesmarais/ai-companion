@@ -1,7 +1,7 @@
 import { CreateChatRequest } from "@/src/adapter-in/api/ChatsApi";
 import { ChatDetailDto } from "@/src/domain/models/Chats";
 import chatService from "@/src/domain/services/ChatService";
-import { rateLimit } from "@/src/lib/rate-limit";
+import { tokenBucketRateLimit } from "@/src/lib/rate-limit";
 import { withAuthorization } from "@/src/middleware/AuthorizationMiddleware";
 import { withErrorHandler } from "@/src/middleware/ErrorMiddleware";
 import { AuthorizationContext } from "@/src/security/models/AuthorizationContext";
@@ -12,6 +12,9 @@ import { StreamingTextResponse } from "ai";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 300;
+const TOKEN_BUCKET_REFILL_RATE = 10;
+const TOKEN_BUCKET_INTERVAL = "10 s";
+const TOKEN_BUCKET_MAX_TOKENS = 100;
 
 async function getHandler(
   request: Request,
@@ -39,14 +42,20 @@ async function postHandler(
 ) {
   const { params, authorizationContext } = context;
   const chatId = params.chatId;
-  const { userId } = authorizationContext;
+  const { orgId } = authorizationContext;
 
   const chatRequest: CreateChatRequest = await request.json();
 
-  const identifier = request.url + "-" + userId;
-  const { success } = await rateLimit(identifier);
+  const identifier = request.url + "-" + orgId;
+  const isWithinRateLimit = await tokenBucketRateLimit(
+    identifier,
+    TOKEN_BUCKET_REFILL_RATE,
+    TOKEN_BUCKET_INTERVAL,
+    TOKEN_BUCKET_MAX_TOKENS,
+    1
+  );
 
-  if (!success) {
+  if (!isWithinRateLimit) {
     return new NextResponse("Rate limit exceeded", { status: 429 });
   }
 

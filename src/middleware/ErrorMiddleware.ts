@@ -4,6 +4,7 @@ import {
   BadRequestError,
   EntityNotFoundError,
   ForbiddenError,
+  RateLimitError,
 } from "../domain/errors/Errors";
 
 type Handler = (...args: any[]) => Promise<any>;
@@ -12,6 +13,7 @@ const errorStatusMap = new Map<Function, number>([
   [BadRequestError, 400],
   [EntityNotFoundError, 404],
   [ForbiddenError, 403],
+  [RateLimitError, 429],
 ]);
 
 const createApiErrorResponse = (message: string, status: number) => {

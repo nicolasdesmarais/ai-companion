@@ -1,5 +1,4 @@
 import { Table } from "@/components/table";
-import { Button } from "@/components/ui/button";
 import {
   FormControl,
   FormDescription,
@@ -14,11 +13,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { useConfirmModal } from "@/hooks/use-confirm-modal";
 import { AIModel } from "@/src/domain/models/AIModel";
 import { cn } from "@/src/lib/utils";
 import { DataSourceIndexStatus, DataSourceType } from "@prisma/client";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { format } from "date-fns";
 import {
   ChevronLeft,
@@ -26,9 +24,8 @@ import {
   FileUp,
   Globe,
   Loader,
-  MinusCircle,
   PlusCircle,
-  RefreshCcw,
+  ShieldCheck,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -79,13 +76,10 @@ export const AIKnowledge = ({
 }: SelectDataSourceProps) => {
   const { toast } = useToast();
   const [modelId, setModelId] = useState(form.getValues("modelId"));
-  const [removing, setRemoving] = useState("");
-  const [refreshing, setRefreshing] = useState("");
   const [detailDataSource, setDetailDataSource] = useState<any>(null);
   const pathname = usePathname();
   const router = useRouter();
   const aiId = form.getValues("id");
-  const confirmModal = useConfirmModal();
 
   const autoRefresh = dataSources.some((dataSource: any) =>
     needsRefresh(dataSource.indexStatus)
@@ -111,91 +105,6 @@ export const AIKnowledge = ({
     }
   };
 
-  const removeDataSource = async (id: string) => {
-    setRemoving(id);
-    try {
-      await axios.delete(`/api/v1/data-sources/${id}/`);
-
-      setDataSource((current: any) => current.filter((i: any) => i.id !== id));
-      toast({ description: "Knowledge removed." });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        description:
-          String((error as AxiosError).response?.data) ||
-          "Something went wrong.",
-        duration: 6000,
-      });
-    }
-    setRemoving("");
-  };
-
-  const disconnectDataSource = async (ds: any) => {
-    setRemoving(ds.id);
-    try {
-      const ais = ds.ais
-        .map((ai: any) => ai.ai.id)
-        .filter((id: any) => id !== aiId);
-      await axios.patch(`/api/v1/data-sources/${ds.id}`, {
-        ais,
-      });
-      setDataSource((current: any) =>
-        current.filter((i: any) => i.id !== ds.id)
-      );
-      toast({ description: "Knowledge removed." });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        description:
-          String((error as AxiosError).response?.data) ||
-          "Something went wrong.",
-        duration: 6000,
-      });
-    }
-    setRemoving("");
-  };
-
-  const refreshDataSource = async (id: string) => {
-    setRefreshing(id);
-    try {
-      await axios.put(`/api/v1/data-sources/${id}/refresh`);
-
-      toast({ description: "Data source refresh request accepted." });
-      fetchDataSources();
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        description:
-          String((error as AxiosError).response?.data) ||
-          "Something went wrong.",
-        duration: 6000,
-      });
-    }
-    setRefreshing("");
-  };
-
-  const onRemove = async (ds: any) => {
-    if (ds.ais.length > 1) {
-      confirmModal.onOpen(
-        "Remove Data Source?",
-        <div>
-          <div>Are you sure you want to remove {ds.name} from this AI?</div>
-          <div>Other AIs will continue using this data source.</div>
-        </div>,
-        () => disconnectDataSource(ds)
-      );
-    } else {
-      confirmModal.onOpen(
-        "Delete Data Source?",
-        <div>
-          <div>Are you sure you want to delete {ds.name}?</div>
-          <div>This action cannot be undone.</div>
-        </div>,
-        () => removeDataSource(ds.id)
-      );
-    }
-  };
-
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (autoRefresh && !isLoading && !detailDataSource) {
@@ -204,7 +113,7 @@ export const AIKnowledge = ({
     }, 5000);
 
     return () => clearInterval(intervalId);
-  }, [autoRefresh, refreshDataSource]);
+  }, [autoRefresh]);
 
   const inProgress = dataSources.some(
     (dataSource: any) =>
@@ -212,7 +121,6 @@ export const AIKnowledge = ({
       dataSource.indexStatus !== "FAILED"
   );
 
-  console.log("dataSources", dataSources);
   return (
     <div className="h-full p-4 max-w-3xl mx-auto">
       {pathname.endsWith("knowledge") && (
@@ -232,13 +140,20 @@ export const AIKnowledge = ({
               <SelectContent>
                 {aiModels.map((model) => (
                   <SelectItem key={model.id} value={model.id}>
-                    {model.name}
+                    <div className="flex items-center">
+                      {model.name}
+                      {model.isPrivate ? (
+                        <ShieldCheck className="w-4 h-4 text-green ml-2" />
+                      ) : null}
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <FormDescription>
-              Select the Large Language Model for your AI
+              Select the Large Language Model for your AI. Models marked with a
+              <ShieldCheck className="w-3 h-3 text-green inline ml-1" /> are
+              hosted on a private instance.
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -264,28 +179,25 @@ export const AIKnowledge = ({
                 "Refresh Period",
                 "Last Modified",
                 "Progress",
-                "Remove",
               ]}
               className="w-full my-4 max-h-60"
             >
               {dataSources.map((dataSource: any) => (
-                <tr key={dataSource.id} className="items-center my-2 text-sm">
-                  <td
-                    className={cn(
-                      "p-2",
-                      (dataSource.knowledges.length > 0 ||
-                        dataSource.data.error) &&
-                        "cursor-pointer hover:text-ring"
-                    )}
-                    onClick={() => {
-                      if (
-                        dataSource.knowledges.length ||
-                        dataSource.data.error
-                      ) {
-                        setDetailDataSource(dataSource);
-                      }
-                    }}
-                  >
+                <tr
+                  key={dataSource.id}
+                  onClick={() => {
+                    if (dataSource.knowledges.length || dataSource.data.error) {
+                      setDetailDataSource(dataSource);
+                    }
+                  }}
+                  className={cn(
+                    "items-center my-2 text-sm",
+                    (dataSource.knowledges.length > 0 ||
+                      dataSource.data.error) &&
+                      "cursor-pointer hover:bg-primary/10"
+                  )}
+                >
+                  <td className={cn("p-2")}>
                     {dataSource.name.length > 30 ? (
                       <Tooltip content={dataSource.name} className="">
                         <div className="truncate max-w-[280px]">
@@ -311,22 +223,6 @@ export const AIKnowledge = ({
                       {getDataSourceRefreshPeriodLabel(
                         dataSource.refreshPeriod
                       )}
-                      <Tooltip content="Refresh Now">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          disabled={!!removing}
-                          onClick={() => refreshDataSource(dataSource.id)}
-                          className="ml-2"
-                        >
-                          {refreshing === dataSource.id ? (
-                            <Loader className="w-4 h-4 spinner" />
-                          ) : (
-                            <RefreshCcw className="w-4 h-4 text-green" />
-                          )}
-                        </Button>
-                      </Tooltip>
                     </td>
                   ) : (
                     <td className="p-2">
@@ -355,21 +251,6 @@ export const AIKnowledge = ({
                         <Loader className="w-4 h-4 spinner ml-1" />
                       )}
                     </div>
-                  </td>
-                  <td className="p-2 text-center">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={!!removing}
-                      onClick={() => onRemove(dataSource)}
-                    >
-                      {removing === dataSource.id ? (
-                        <Loader className="w-4 h-4 spinner" />
-                      ) : (
-                        <MinusCircle className="w-4 h-4 text-destructive" />
-                      )}
-                    </Button>
                   </td>
                 </tr>
               ))}
@@ -474,10 +355,16 @@ export const AIKnowledge = ({
         />
       )}
       <ConfirmModal />
-      <DataSourceDetailModal
-        dataSource={detailDataSource}
-        onClose={() => setDetailDataSource(null)}
-      />
+      {detailDataSource && (
+        <DataSourceDetailModal
+          dataSource={detailDataSource}
+          onClose={() => setDetailDataSource(null)}
+          toast={toast}
+          setDataSource={setDataSource}
+          aiId={aiId}
+          fetchDataSources={fetchDataSources}
+        />
+      )}
     </div>
   );
 };

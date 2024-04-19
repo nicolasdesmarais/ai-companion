@@ -21,8 +21,14 @@ export const Navbar = ({ isPro, userPermissions, orgId }: NavbarProps) => {
   const isEditor = pathname.startsWith("/ai");
   const isData = pathname.startsWith("/data-sources");
   const isChat = pathname.startsWith("/chat");
+  const isOwned = pathname.startsWith("/index/owned");
+  const isShared = pathname.startsWith("/index/shared");
   let title = null;
-  if (isIndex) {
+  if (isOwned) {
+    title = "Your AIs";
+  } else if (isShared) {
+    title = "Shared AIs";
+  } else if (isIndex) {
     title = "Browse AIs";
   } else if (isData) {
     title = "Data Sources";

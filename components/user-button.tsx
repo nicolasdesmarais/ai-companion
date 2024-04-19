@@ -71,34 +71,34 @@ export const UserButton = ({ setOpen }: Props) => {
             </div>
           </div>
         </DropdownMenuLabel>
-        <div className={itemClass}>
-          <DropdownMenuItem
-            onClick={() => {
-              if (isMobile) {
-                setOpen(false);
-              }
-              clerk.openUserProfile({
-                appearance: {
-                  baseTheme: dark,
-                },
-              });
-            }}
-            className="focus:bg-transparent"
-          >
+        <div
+          className={itemClass}
+          onClick={() => {
+            if (isMobile) {
+              setOpen(false);
+            }
+            clerk.openUserProfile({
+              appearance: {
+                baseTheme: dark,
+              },
+            });
+          }}
+        >
+          <DropdownMenuItem className="focus:bg-transparent">
             <Settings className="h-4 w-4 mr-6 ml-2" />
             Manage account
           </DropdownMenuItem>
         </div>
-        <div className={itemClass}>
-          <DropdownMenuItem
-            onClick={() => {
-              if (isMobile) {
-                setOpen(false);
-              }
-              clerk.signOut(() => router.push("/"));
-            }}
-            className="focus:bg-transparent"
-          >
+        <div
+          className={itemClass}
+          onClick={() => {
+            if (isMobile) {
+              setOpen(false);
+            }
+            clerk.signOut(() => router.push("/"));
+          }}
+        >
+          <DropdownMenuItem className="focus:bg-transparent">
             <div className="flex">
               <LogOut className="h-4 w-4 mr-6 ml-2" />
               Sign Out

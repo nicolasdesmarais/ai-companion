@@ -156,22 +156,13 @@ export const onDataSourceItemListReceived = inngest.createFunction(
       }
     );
 
-    if (forRefresh) {
-      await step.run("update-datasource-knowledge-associations", async () => {
-        await dataSourceManagementService.updateDataSourceKnowledgeAssociations(
-          dataSourceId,
-          dataSourceItemList,
-          knowledgeIdsToAssociate
-        );
-      });
-    } else {
-      await step.run("create-datasource-knowledge-associations", async () => {
-        await dataSourceManagementService.createDataSourceKnowledgeAssociations(
-          dataSourceId,
-          knowledgeIdsToAssociate
-        );
-      });
-    }
+    await step.run("update-datasource-knowledge-associations", async () => {
+      await dataSourceManagementService.updateDataSourceKnowledgeAssociations(
+        dataSourceId,
+        dataSourceItemList,
+        knowledgeIdsToAssociate
+      );
+    });
 
     await step.run("update-datasource-status", async () => {
       await dataSourceManagementService.updateDataSourceStatus(dataSourceId);
@@ -598,14 +589,30 @@ export const deleteRelatedKnowledgeInstances = inngest.createFunction(
       }
     );
 
+    let events: {
+      name: string;
+      data: KnowledgeIndexingCompletedSuccessfullyPayload;
+    }[] = [];
     for (const knowledgeId of knowledgeIds) {
       const eventPayload: KnowledgeIndexingCompletedSuccessfullyPayload = {
         knowledgeId,
       };
-      await step.sendEvent("knowledge-indexing-completed-successfully", {
+      events.push({
         name: DomainEvent.KNOWLEDGE_INDEXING_COMPLETED_SUCCESSFULLY,
         data: eventPayload,
       });
+
+      if (events.length >= MAX_EVENTS_PER_STEP) {
+        await step.sendEvent(
+          "knowledge-indexing-completed-successfully",
+          events
+        );
+        events = [];
+      }
+    }
+
+    if (events.length > 0) {
+      await step.sendEvent("knowledge-indexing-completed-successfully", events);
     }
   }
 );

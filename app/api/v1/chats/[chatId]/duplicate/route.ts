@@ -35,6 +35,7 @@ async function putHandler(
     where: {
       userId: userId,
       aiId: chat.ai.id,
+      isDeleted: false,
     },
   });
 
@@ -42,7 +43,7 @@ async function putHandler(
     data: {
       orgId: orgId,
       userId: userId,
-      name: `${chat.ai.name} (${chatCount + 1})`,
+      name: chatCount > 0 ? `(${chatCount + 1})` : "",
       aiId: chat.ai.id,
     },
   });
