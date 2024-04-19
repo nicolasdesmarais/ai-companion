@@ -249,7 +249,7 @@ export const startSession = async (source_url: string, videoEl: any) => {
   }
 };
 
-export const speak = async (input: string) => {
+export const speak = async (input: string, voice_id: string) => {
   if (
     peerConnection?.signalingState === "stable" ||
     peerConnection?.iceConnectionState === "connected"
@@ -266,7 +266,7 @@ export const speak = async (input: string) => {
           script: {
             type: "text",
             subtitles: "false",
-            provider: { type: "microsoft", voice_id: "en-US-DavisNeural" },
+            provider: { type: "microsoft", voice_id },
             ssml: "false",
             input,
           },

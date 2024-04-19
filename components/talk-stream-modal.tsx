@@ -1,15 +1,24 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { X } from "lucide-react";
 import { useTalkModal } from "@/hooks/use-talk-modal";
-import Draggable from "react-draggable";
-import { ta } from "date-fns/locale";
 import { startSession } from "@/src/lib/d-id";
+import { X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import Draggable from "react-draggable";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { voices } from "./ai-models";
 
 export const TalkStreamModal = () => {
   const talkModal = useTalkModal();
   const ref = useRef<HTMLVideoElement>(null);
+  const [voice, setVoice] = useState("en-US-JennyNeural");
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -17,7 +26,6 @@ export const TalkStreamModal = () => {
   }, []);
 
   useEffect(() => {
-    console.log("talkModal.ai", talkModal.ai);
     if (talkModal.ai) {
       startSession(talkModal.ai.src, ref.current);
     }
@@ -44,6 +52,18 @@ export const TalkStreamModal = () => {
             <a href={talkModal.src}>link to the video</a> instead.
           </p>
         </video>
+        <Select value={talkModal.voice} onValueChange={talkModal.onVoiceChange}>
+          <SelectTrigger className="bg-background">
+            <SelectValue defaultValue={voice} placeholder="Select a voice" />
+          </SelectTrigger>
+          <SelectContent>
+            {voices.map((model) => (
+              <SelectItem key={model.id} value={model.id}>
+                {model.name} Voice
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </Draggable>
   );
