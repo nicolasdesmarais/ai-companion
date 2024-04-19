@@ -34,9 +34,9 @@ import knowledgeService from "./KnowledgeService";
 
 const BUFFER_TOKENS = 200;
 
-const TOKEN_BUCKET_REFILL_RATE = 700;
+const TOKEN_BUCKET_REFILL_RATE = 5000;
 const TOKEN_BUCKET_INTERVAL = "1 m";
-const TOKEN_BUCKET_MAX_TOKENS = 1000000;
+const TOKEN_BUCKET_MAX_TOKENS = 10000000;
 
 const listChatsResponseSelect: Prisma.ChatSelect = {
   id: true,
