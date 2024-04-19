@@ -1,6 +1,6 @@
 "use client";
 
-import { useTalkModal } from "@/hooks/use-talk-modal";
+import { useVideoModal } from "@/hooks/use-video-modal";
 import { startSession } from "@/src/lib/d-id";
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -16,7 +16,7 @@ import {
 import { voices } from "./ai-models";
 
 export const TalkStreamModal = () => {
-  const talkModal = useTalkModal();
+  const videoModal = useVideoModal();
   const ref = useRef<HTMLVideoElement>(null);
   const [voice, setVoice] = useState("en-US-JennyNeural");
   const [isMounted, setIsMounted] = useState(false);
@@ -26,12 +26,12 @@ export const TalkStreamModal = () => {
   }, []);
 
   useEffect(() => {
-    if (talkModal.ai) {
-      startSession(talkModal.ai.src, ref.current);
+    if (videoModal.ai) {
+      startSession(videoModal.ai.src, ref.current);
     }
-  }, [talkModal.ai]);
+  }, [videoModal.ai]);
 
-  if (!isMounted || !talkModal.isOpen) {
+  if (!isMounted || !videoModal.isOpen) {
     return null;
   }
 
@@ -40,19 +40,22 @@ export const TalkStreamModal = () => {
       <div className="fixed top-8 right-8 w-64 handle bg-ring/10">
         <X
           className="absolute top-2 right-2 h-6 w-6 cursor-pointer hover:text-ring z-20"
-          onClick={talkModal.onClose}
+          onClick={videoModal.onClose}
         />
         <video
           ref={ref}
-          src={talkModal.src}
+          src={videoModal.src}
           className="rounded-lg object-cover"
         >
           <p>
             Your browser doesn&apos;t support HTML video. Here is a
-            <a href={talkModal.src}>link to the video</a> instead.
+            <a href={videoModal.src}>link to the video</a> instead.
           </p>
         </video>
-        <Select value={talkModal.voice} onValueChange={talkModal.onVoiceChange}>
+        <Select
+          value={videoModal.voice}
+          onValueChange={videoModal.onVoiceChange}
+        >
           <SelectTrigger className="bg-background">
             <SelectValue defaultValue={voice} placeholder="Select a voice" />
           </SelectTrigger>

@@ -35,7 +35,7 @@ import { useAIProfile } from "@/hooks/use-ai-profile";
 import { useChats } from "@/hooks/use-chats";
 import { useConfirmModal } from "@/hooks/use-confirm-modal";
 import { useRateAI } from "@/hooks/use-rate-ai";
-import { useTalkModal } from "@/hooks/use-talk-modal";
+import { useVideoModal } from "@/hooks/use-video-modal";
 import { AIDetailDto } from "@/src/domain/models/AI";
 import { ChatDetailDto } from "@/src/domain/models/Chats";
 import { AIVisibility } from "@prisma/client";
@@ -56,7 +56,7 @@ export const ChatHeader = ({
 }: ChatHeaderProps) => {
   const router = useRouter();
   const { toast } = useToast();
-  const talkModal = useTalkModal();
+  const videoModal = useVideoModal();
   const { chats, fetchChats } = useChats();
   const aiProfile = useAIProfile();
   const [showShareModal, setShowShareModal] = useState(false);
@@ -254,7 +254,7 @@ export const ChatHeader = ({
             size="icon"
             className="mr-4"
             type="button"
-            onClick={() => talkModal.onOpenStream(chat.ai)}
+            onClick={() => videoModal.onOpenStream(chat.ai)}
           >
             <Video />
           </Button>

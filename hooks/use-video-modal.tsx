@@ -1,7 +1,7 @@
 import { speak } from "@/src/lib/d-id";
 import { create } from "zustand";
 
-interface useTalkModalStore {
+interface useVideoModalStore {
   isOpen: boolean;
   src: string;
   voice: string;
@@ -13,7 +13,7 @@ interface useTalkModalStore {
   onVoiceChange: (voice: string) => void;
 }
 
-export const useTalkModal = create<useTalkModalStore>((set, get) => ({
+export const useVideoModal = create<useVideoModalStore>((set, get) => ({
   isOpen: false,
   src: "",
   voice: "en-US-JennyNeural",

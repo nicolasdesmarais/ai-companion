@@ -26,7 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useGroupModal } from "@/hooks/use-group-modal";
-import { useTalkModal } from "@/hooks/use-talk-modal";
+import { useVideoModal } from "@/hooks/use-video-modal";
 import { GroupSummaryDto } from "@/src/domain/models/Groups";
 import { getDiversityString } from "@/src/lib/diversity";
 import { AIVisibility, Category, CategoryType } from "@prisma/client";
@@ -34,8 +34,8 @@ import axios, { AxiosError } from "axios";
 import { Loader, Play, Settings, Wand2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { imageModels, voices } from "./ai-models";
-import { TalkModal } from "./talk-modal";
+import { imageModels } from "./ai-models";
+import { VideoPreviewModal } from "./video-preview-modal";
 
 const PREAMBLE =
   "ex: As a Support Specialist AI, your role is to provide solutions to user inquiries. This involves understanding the nature of the questions, interpreting their context, and yielding the correct responses. The effectiveness of your position is evaluated based on the accuracy of your responses and the satisfaction of users. Precision in answering and user satisfaction are your primary goals.";
@@ -84,7 +84,7 @@ interface AIFormProps {
 export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const { toast } = useToast();
   const groupModal = useGroupModal();
-  const talkModal = useTalkModal();
+  const videoModal = useVideoModal();
   const pathname = usePathname();
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatingInstruction, setGeneratingInstruction] = useState(false);
@@ -100,7 +100,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   const [selectedValues, setSelectedValues] = useState<any[]>([]);
 
   const isLoading = form.formState.isSubmitting;
-  const voiceEnabled = false && window.location.hostname !== "appdirect.ai";
 
   const fetchGroups = async () => {
     const response = await axios.get("/api/v1/me/groups");
@@ -163,7 +162,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
   ]);
 
   useEffect(() => {
-    if (voiceEnabled && form.getValues("src")) {
+    if (hasInstanceAccess && form.getValues("src")) {
       setupTalk();
     }
   }, [form.getValues("src")]);
@@ -191,7 +190,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
     if (talkId) {
       const talk = await axios.get(`/api/v1/talk/${talkId}`);
       if (talk.data.status === "done") {
-        talkModal.onOpen(talk.data.result_url);
+        videoModal.onOpen(talk.data.result_url);
       }
     }
   };
@@ -683,7 +682,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                   />
                 )}
             </div>
-            {voiceEnabled && (
+            {hasInstanceAccess && (
               <FormField
                 name="talk"
                 control={form.control}
@@ -692,27 +691,6 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
                     <FormItem>
                       <FormLabel>Voice</FormLabel>
                       <div className="flex">
-                        <Select
-                          disabled={isLoading}
-                          value="en-US-JennyNeural"
-                          defaultValue="en-US-JennyNeural"
-                        >
-                          <FormControl>
-                            <SelectTrigger className="bg-background">
-                              <SelectValue
-                                defaultValue={field.value}
-                                placeholder="Select a voice"
-                              />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {voices.map((model) => (
-                              <SelectItem key={model.id} value={model.id}>
-                                {model.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
                         <Button
                           type="button"
                           disabled={isLoading || generatingImage}
@@ -836,7 +814,7 @@ export const AICharacter = ({ form, hasInstanceAccess, save }: AIFormProps) => {
         </DialogContent>
       </Dialog>
 
-      <TalkModal />
+      <VideoPreviewModal />
     </div>
   );
 };

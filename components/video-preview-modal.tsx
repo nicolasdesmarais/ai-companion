@@ -1,12 +1,12 @@
 "use client";
 
-import { useTalkModal } from "@/hooks/use-talk-modal";
+import { useVideoModal } from "@/hooks/use-video-modal";
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Draggable from "react-draggable";
 
-export const TalkModal = () => {
-  const talkModal = useTalkModal();
+export const VideoPreviewModal = () => {
+  const videoModal = useVideoModal();
   const [isMounted, setIsMounted] = useState(false);
   const ref = useRef<HTMLVideoElement>(null);
 
@@ -21,14 +21,14 @@ export const TalkModal = () => {
         ref.current.currentTime = 0;
       }
     });
-  }, [talkModal.src]);
+  }, [videoModal.src]);
 
   useEffect(() => {
     if (ref.current?.ended) {
     }
   }, [ref.current?.ended]);
 
-  if (!isMounted || !talkModal.isOpen) {
+  if (!isMounted || !videoModal.isOpen) {
     return null;
   }
 
@@ -37,11 +37,11 @@ export const TalkModal = () => {
       <div className="fixed top-8 right-8 w-64 handle">
         <X
           className="absolute top-2 right-2 h-6 w-6 cursor-pointer hover:text-ring z-20"
-          onClick={talkModal.onClose}
+          onClick={videoModal.onClose}
         />
         <video
           ref={ref}
-          src={talkModal.src}
+          src={videoModal.src}
           autoPlay
           playsInline
           onClick={() => ref.current?.play()}
@@ -49,7 +49,7 @@ export const TalkModal = () => {
         >
           <p>
             Your browser doesn&apos;t support HTML video. Here is a
-            <a href={talkModal.src}>link to the video</a> instead.
+            <a href={videoModal.src}>link to the video</a> instead.
           </p>
         </video>
       </div>
