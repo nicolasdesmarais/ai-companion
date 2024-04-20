@@ -12,6 +12,7 @@ interface ImageUploadProps {
   className?: string;
   width?: number;
   height?: number;
+  loader?: (props: { src: string; width: number; quality?: any }) => string;
 }
 
 export const ImageUpload = ({
@@ -21,6 +22,7 @@ export const ImageUpload = ({
   className,
   width,
   height,
+  loader,
 }: ImageUploadProps) => {
   const [isMounted, setIsMounted] = useState(false);
 
@@ -57,6 +59,7 @@ export const ImageUpload = ({
         >
           <div className={cn("relative h-40 w-40", className)}>
             <Image
+              loader={loader}
               fill={!(width || height)}
               width={width}
               height={height}

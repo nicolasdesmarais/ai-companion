@@ -1,4 +1,5 @@
 import { DataSourceDto } from "@/src/domain/models/DataSources";
+import { getMime } from "@/src/lib/mime";
 import { DataSourceRefreshPeriod } from "@prisma/client";
 import mime from "mime-types";
 
@@ -40,7 +41,7 @@ export function getLabelFromFileType(fileType: FileType) {
 }
 
 export function isSupportedFileType(fileName: string) {
-  const fileType = mime.lookup(fileName);
+  let fileType = getMime(fileName);
   return Object.values(FileType).includes(fileType as FileType);
 }
 

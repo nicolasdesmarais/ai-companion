@@ -60,3 +60,27 @@ To summarize:
 The migration file will automatically be executed on any environment where the branch is deployed.
 
 To deploy changes locally, run the `migrate-db` script, `npm run migrate-db`.
+
+## Knowledge Ingestion
+
+Knowledge ingestion is deeply asynchronous using Inngest events for queue orchestration.
+
+### Local Inngest
+
+Run the local Inngest client:
+
+```zsh
+npx inngest-cli@latest dev
+```
+
+### Local direct file upload
+
+Direct file uploads use [Vercel Blob Client Uploads](https://vercel.com/docs/storage/vercel-blob/client-upload).
+
+Make sure your `BLOB_READ_WRITE_TOKEN` variable is set and run `ngrok` to make your local instance reachable to vercel:
+
+```zsh
+ngrok http 3000
+```
+
+Now navigate to the external URL to upload the files, do not use `http://localhost:3000/`

@@ -236,6 +236,7 @@ export const AIProfileEditor = ({ ai, form }: ProfileSourceProps) => {
               </FormDescription>
               <FormControl>
                 <ImageUpload
+                  loader={({ src }) => src}
                   disabled={isLoading}
                   onChange={field.onChange}
                   width={978}
