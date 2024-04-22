@@ -208,6 +208,9 @@ export const AIProfile = ({ ai }: Props) => {
               <div>TopP: {(ai.options as any).topP[0]}</div>
               <div>Max Tokens: {(ai.options as any).maxTokens[0]}</div>
               <div>
+                Max Input Tokens: {(ai.options as any)?.maxInputTokens?.[0]}
+              </div>
+              <div>
                 Frequency Penalty: {(ai.options as any).frequencyPenalty[0]}
               </div>
               <div>
